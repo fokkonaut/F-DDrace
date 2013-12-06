@@ -68,6 +68,9 @@ public:
 	virtual void ShowTopPoints(IConsole::IResult *pResult, int ClientID, void *pUserData, int Debut=1) = 0;
 	virtual void ShowPoints(int ClientID, const char *pName, bool Search=false) = 0;
 
+	virtual void RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
+	virtual void RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int Stars) = 0;
+
 	virtual void SaveTeam(int Team, const char *pCode, int ClientID, const char *pServer) = 0;
 	virtual void LoadTeam(const char *pCode, int ClientID) = 0;
 
