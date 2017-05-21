@@ -32,8 +32,10 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/protocol_ex.h>
 #include <engine/shared/ringbuffer.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/uuid_manager.h>
 
 #include <game/version.h>
 
@@ -589,7 +591,7 @@ const void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
 	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
 	const CSnapshotItem *i = m_aSnapshots[SnapID]->m_pAltSnap->GetItem(Index);
 	pItem->m_DataSize = m_aSnapshots[SnapID]->m_pAltSnap->GetItemSize(Index);
-	pItem->m_Type = i->Type();
+	pItem->m_Type = m_aSnapshots[SnapID]->m_pAltSnap->GetItemType(Index);
 	pItem->m_ID = i->ID();
 	return i->Data();
 }
@@ -614,8 +616,7 @@ const void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
 		return 0x0;
 
 	CSnapshot* pAltSnap = m_aSnapshots[SnapID]->m_pAltSnap;
-	int Key = (Type<<16)|(ID&0xffff);
-	int Index = pAltSnap->GetItemIndex(Key);
+	int Index = pAltSnap->GetItemIndex(Type, ID);
 	if(Index != -1)
 		return pAltSnap->GetItem(Index)->Data();
 
@@ -1050,14 +1051,22 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 {
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
+	CMsgPacker Packer(NETMSG_EX);
 
 	// unpack msgid and system flag
-	int Msg = Unpacker.GetInt();
-	int Sys = Msg&1;
-	Msg >>= 1;
+	int Msg;
+	bool Sys;
+	CUuid Uuid;
 
-	if(Unpacker.Error())
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	if(Result == UNPACKMESSAGE_ERROR)
+	{
 		return;
+	}
+	else if(Result == UNPACKMESSAGE_ANSWER)
+	{
+		SendMsg(&Packer, MSGFLAG_VITAL);
+	}
 
 	if(Sys)
 	{
@@ -1861,6 +1870,11 @@ void CClient::Run()
 {
 	m_LocalStartTime = time_get();
 	m_SnapshotParts = 0;
+
+	if(g_Config.m_Debug)
+	{
+		g_UuidManager.DebugDump();
+	}
 
 	// init SDL
 	{

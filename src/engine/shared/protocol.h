@@ -33,7 +33,7 @@
 
 enum
 {
-	NETMSG_NULL=0,
+	NETMSG_EX=0,
 
 	// the first thing sent by the client
 	// contains the version info for the client
@@ -76,6 +76,8 @@ enum
 
 	NETMSG_MAPLIST_ENTRY_ADD,// todo 0.8: move up
 	NETMSG_MAPLIST_ENTRY_REM,
+
+	NUM_NETMSGS,
 };
 
 // this should be revised
