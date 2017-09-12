@@ -15,8 +15,17 @@
 #include "eventhandler.h"
 #include "gameworld.h"
 
-#include <stdint.h>
+#include "teehistorian.h"
 
+#include "score.h"
+#ifdef _MSC_VER
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+#else
+#include <stdint.h>
+#endif
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -104,6 +113,14 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
+
+	bool m_TeeHistorianActive;
+	CTeeHistorian m_TeeHistorian;
+	IOHANDLE m_TeeHistorianFile;
+	CUuid m_GameUuid;
+
+	static void CommandCallback(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult, void *pUser);
+	static void TeeHistorianWrite(const void *pData, int DataSize, void *pUser);
 
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleTuneParam(IConsole::IResult* pResult, void* pUserData);
@@ -256,8 +273,12 @@ public:
 	void OnClientTeamChange(int ClientID);
 	virtual void OnClientEnter(int ClientID);
 	virtual void OnClientDrop(int ClientID, const char *pReason);
+	virtual void OnClientAuth(int ClientID, int Level);
 	virtual void OnClientDirectInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
+
+	virtual void OnClientEngineJoin(int ClientID);
+	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
 	virtual bool IsClientReady(int ClientID) const;
 	virtual bool IsClientPlayer(int ClientID) const;

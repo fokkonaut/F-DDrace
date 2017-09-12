@@ -82,6 +82,7 @@ private:
 	void UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size);
 
 public:
+	static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
 	int GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }

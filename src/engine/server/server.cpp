@@ -451,6 +451,16 @@ int CServer::GetAuthedState(int ClientID) const
 	return m_aClients[ClientID].m_Authed;
 }
 
+const char *CServer::AuthName(int ClientID) const
+{
+	switch(m_aClients[ClientID].m_Authed)
+	{
+	case AUTHED_ADMIN: return "default_admin";
+	case AUTHED_MOD: return "default_mod";
+	}
+	return 0;
+}
+
 bool CServer::IsBanned(int ClientID)
 {
 	return m_ServerBan.IsBanned(m_NetServer.ClientAddr(ClientID), 0, 0, 0);
@@ -740,6 +750,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
 	pThis->m_aClients[ClientID].Reset();
+	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	return 0;
 }
 
@@ -771,7 +782,18 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
+
+	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+
 	return 0;
+}
+
+void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc)
+{
+	str_copy(pMapName, GetMapName(), MapNameSize);
+	*pMapSize = m_CurrentMapSize;
+	*pMapSha256 = m_CurrentMapSha256;
+	*pMapCrc = m_CurrentMapCrc;
 }
 
 void CServer::SendMap(int ClientID)
@@ -1099,6 +1121,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_ADMIN, CFGFLAG_SERVER);
 					if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
 						m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
+					GameServer()->OnClientAuth(ClientID, AUTHED_ADMIN);
 					SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
@@ -1111,6 +1134,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 					m_aClients[ClientID].m_Authed = AUTHED_MOD;
 					m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_MOD, CFGFLAG_SERVER);
+					GameServer()->OnClientAuth(ClientID, AUTHED_MOD);
 					SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
 					const IConsole::CCommandInfo *pInfo = Console()->GetCommandInfo("sv_map", CFGFLAG_SERVER, false);
 					if(pInfo && pInfo->GetAccessLevel() == IConsole::ACCESS_LEVEL_MOD && m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
@@ -1735,6 +1759,7 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 		pServer->m_aClients[pServer->m_RconClientID].m_AuthTries = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pRconCmdToSend = 0;
 		pServer->m_aClients[pServer->m_RconClientID].m_pMapListEntryToSend = 0;
+		pServer->GameServer()->OnClientAuth(pServer->m_RconClientID, AUTHED_NO);
 		pServer->SendRconLine(pServer->m_RconClientID, "Logout successful.");
 		char aBuf[32];
 		str_format(aBuf, sizeof(aBuf), "ClientID=%d logged out", pServer->m_RconClientID);

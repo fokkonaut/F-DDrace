@@ -252,13 +252,14 @@ class NetEvent(NetObject):
 		self.enum_name = "NETEVENTTYPE_%s" % self.name.upper()
 
 class NetMessage(NetObject):
-	def __init__(self, name, variables, ex=None):
+	def __init__(self, name, variables, ex=None, teehistorian=True):
 		if ex != None:
 			ex = "message-{}".format(ex)
 		NetObject.__init__(self, name, variables, ex=ex, fixup=False)
 		self.base_struct_name = "CNetMsg_%s" % self.base
 		self.struct_name = "CNetMsg_%s" % self.name
 		self.enum_name = "NETMSGTYPE_%s" % self.name.upper()
+		self.teehistorian = teehistorian
 	def emit_unpack(self):
 		lines = []
 		lines += ["case %s:" % self.enum_name]
@@ -297,7 +298,7 @@ class NetEventEx(NetEvent):
 		NetEvent.__init__(self, name, variables, ex=ex)
 
 class NetMessageEx(NetMessage):
-	def __init__(self, name, ex, variables):
+	def __init__(self, name, ex, variables, teehistorian=True):
 		NetMessage.__init__(self, name, variables, ex=ex)
 
 

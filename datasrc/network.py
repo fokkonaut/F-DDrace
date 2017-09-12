@@ -26,7 +26,7 @@ Authed = Enum("AUTHED", ["NO", "MOD", "ADMIN"])
 RawHeader = '''
 
 #include <engine/message.h>
-#include <engine/shared/protocol_ex.h>
+#include <engine/shared/teehistorian_ex.h>
 
 enum
 {
@@ -394,7 +394,7 @@ Messages = [
 		NetIntRange("m_Mode", 0, 'NUM_CHATS-1'),
 		NetIntRange("m_Target", -1, 'MAX_CLIENTS-1'),
 		NetStringStrict("m_pMessage"),
-	]),
+	], teehistorian=False),
 
 	NetMessage("Cl_SetTeam", [
 		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
@@ -424,14 +424,14 @@ Messages = [
 
 	NetMessage("Cl_Vote", [
 		NetIntRange("m_Vote", -1, 1),
-	]),
+	], teehistorian=False),
 
 	NetMessage("Cl_CallVote", [
 		NetStringStrict("m_Type"),
 		NetStringStrict("m_Value"),
 		NetStringStrict("m_Reason"),
 		NetBool("m_Force"),
-	]),
+	], teehistorian=False),
 
 	# todo 0.8: move up
 	NetMessage("Sv_SkinChange", [

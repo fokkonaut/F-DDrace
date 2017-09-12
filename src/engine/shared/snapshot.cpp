@@ -176,7 +176,7 @@ static int GetItemIndexHashed(int Key, const CItemList *pHashlist)
 	return -1;
 }
 
-static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size)
+int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size)
 {
 	int Needed = 0;
 	while(Size)
