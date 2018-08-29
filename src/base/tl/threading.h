@@ -74,6 +74,7 @@
 	public:
 		semaphore() { semaphore_init(&sem); }
 		~semaphore() { semaphore_destroy(&sem); }
+		semaphore(const semaphore&) = delete;
 		void wait() { semaphore_wait(&sem); }
 		void signal() { semaphore_signal(&sem); }
 	};
@@ -97,6 +98,8 @@ public:
 		lock_destroy(var);
 	}
 
+	lock(const lock&) = delete;
+
 	void take() { lock_wait(var); }
 	void release() { lock_unlock(var); }
 };
@@ -115,4 +118,6 @@ public:
 	{
 		var->release();
 	}
+
+	scope_lock(const scope_lock&) = delete;
 };
