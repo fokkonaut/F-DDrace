@@ -272,6 +272,9 @@ void CServer::CClient::Reset()
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = 0;
 	m_MapChunk = 0;
+
+	// DDrace
+	m_ShowIps = false;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
@@ -742,8 +745,8 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pThis->m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=<{%s}> reason='%s'", ClientID, aAddrStr, pReason);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
 	// notify the mod about the drop
 	if(pThis->m_aClients[ClientID].m_State >= CClient::STATE_READY)
@@ -811,10 +814,36 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 	if(ReentryGuard) return;
 	ReentryGuard++;
 
+	const char *pStart = str_find(pLine, "<{");
+	const char *pEnd = pStart == NULL ? NULL : str_find(pStart + 2, "}>");
+	const char *pLineWithoutIps;
+	char aLine[512];
+	char aLineWithoutIps[512];
+	aLine[0] = '\0';
+	aLineWithoutIps[0] = '\0';
+
+	if(pStart == NULL || pEnd == NULL)
+	{
+		pLineWithoutIps = pLine;
+	}
+	else
+	{
+		str_append(aLine, pLine, pStart - pLine + 1);
+		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 2);
+		str_append(aLine, pEnd + 2, sizeof(aLine));
+
+		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
+		str_append(aLineWithoutIps, "XXX", sizeof(aLineWithoutIps));
+		str_append(aLineWithoutIps, pEnd + 2, sizeof(aLineWithoutIps));
+
+		pLine = aLine;
+		pLineWithoutIps = aLineWithoutIps;
+	}
+
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
-			pThis->SendRconLine(i, pLine);
+		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
+			pThis->SendRconLine(i, pThis->m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
 	}
 
 	ReentryGuard--;
@@ -977,7 +1006,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=%s", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
 				bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
@@ -994,7 +1023,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=%s", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				SendServerInfo(ClientID);
@@ -1745,11 +1774,11 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 				}
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s client=%x name='%s' score=%d %s", i, aAddrStr,
+					str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%x name='%s' score=%d %s", i, aAddrStr,
 						pThis->m_aClients[i].m_Version, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
 			}
 			else
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 	}
@@ -2065,6 +2094,26 @@ void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientID >= 0 && pServer->m_RconClientID < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientID].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientID].m_ShowIps = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aBuf[9];
+			str_format(aBuf, sizeof(aBuf), "Value: %d", pServer->m_aClients[pServer->m_RconClientID].m_ShowIps);
+			pServer->SendRconLine(pServer->m_RconClientID, aBuf);
+		}
+	}
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -2181,6 +2230,7 @@ void CServer::RegisterCommands()
 	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players", AUTHED_MOD);
 	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon", AUTHED_HELPER);
+	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)", AUTHED_ADMIN);
 
 	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file", AUTHED_ADMIN);
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording", AUTHED_ADMIN);
