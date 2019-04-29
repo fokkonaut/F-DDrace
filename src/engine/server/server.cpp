@@ -272,9 +272,6 @@ void CServer::CClient::Reset()
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = 0;
 	m_MapChunk = 0;
-
-	// DDrace
-	m_ShowIps = false;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
@@ -445,6 +442,7 @@ int CServer::Init()
 		m_aClients[i].m_aClan[0] = 0;
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
+		m_aClients[i].m_ShowIps = false;
 	}
 
 	m_ShutdownMessage[0] = '\0';
@@ -719,7 +717,6 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
-
 int CServer::NewClientCallback(int ClientID, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
@@ -733,6 +730,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_pMapListEntryToSend = 0;
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
+	pThis->m_aClients[ClientID].m_ShowIps = false;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	return 0;
@@ -765,6 +763,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_pMapListEntryToSend = 0;
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
+	pThis->m_aClients[ClientID].m_ShowIps = false;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
