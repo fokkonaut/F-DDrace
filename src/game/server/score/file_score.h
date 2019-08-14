@@ -27,7 +27,7 @@ class CFileScore: public IScore
 		CPlayerScore(const char *pName, float Score,
 				float aCpTime[NUM_CHECKPOINTS]);
 
-		bool operator<(const CPlayerScore& other)
+		bool operator<(const CPlayerScore& other) const
 		{
 			return (this->m_Score < other.m_Score);
 		}
