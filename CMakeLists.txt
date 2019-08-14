@@ -1085,15 +1085,6 @@ file(COPY ${COPY_FILES} DESTINATION .)
 # CODE GENERATION
 ########################################################################
 
-function(chash output_file)
-  add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} scripts/cmd5.py ${ARGN}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS scripts/cmd5.py ${ARGN}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  )
-endfunction()
-
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
     COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
@@ -1130,12 +1121,6 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
   DEPENDS
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
-)
-chash("src/generated/nethash.cpp"
-  "src/engine/shared/protocol.h"
-  "src/game/tuning.h"
-  "src/game/gamecore.cpp"
-  "${PROJECT_BINARY_DIR}/src/generated/protocol.h"
 )
 generate_source("src/generated/client_data.cpp" "client_content_source")
 generate_source("src/generated/client_data.h" "client_content_header")
@@ -1258,7 +1243,6 @@ set_src(GAME_SHARED GLOB src/game
 )
 set(GAME_GENERATED_SHARED
   src/generated/git_revision.cpp
-  src/generated/nethash.cpp
   src/generated/protocol.h
 )
 
@@ -1553,7 +1537,6 @@ endif()
 
 set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
 set_src(VERSIONSRV_SRC GLOB src/versionsrv mapversions.h versionsrv.cpp versionsrv.h)
-list(APPEND VERSIONSRV_SRC ${PROJECT_BINARY_DIR}/src/generated/nethash.cpp)
 
 set(TARGET_MASTERSRV mastersrv)
 set(TARGET_VERSIONSRV versionsrv)

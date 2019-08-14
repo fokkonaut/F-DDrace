@@ -181,8 +181,6 @@ public:
 	virtual const char *GameType() const;
 	virtual const char *Version() const;
 	virtual const char *NetVersion() const;
-	virtual const char *NetVersionHashUsed() const;
-	virtual const char *NetVersionHashReal() const;
 };
 
 inline int64 CmaskAll() { return -1; }
