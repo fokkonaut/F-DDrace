@@ -414,6 +414,20 @@ void thread_yield();
 void thread_detach(void *thread);
 
 /*
+	Function: thread_init_and_detach
+		Creates a new thread and if it succeeded detaches it.
+
+	Parameters:
+		threadfunc - Entry point for the new thread.
+		user - Pointer to pass to the thread.
+		name - name describing the use of the thread
+
+	Returns:
+		Returns the thread if no error occured, 0 on error.
+*/
+void* thread_init_and_detach(void (*threadfunc)(void*), void* user);
+
+/*
 	Function: cpu_relax
 		Lets the cpu relax a bit.
 */
@@ -579,6 +593,21 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 		>0 - Address a is greater then address b
 */
 int net_addr_comp(const NETADDR *a, const NETADDR *b);
+
+/*
+	Function: net_addr_comp_noport
+		Compares two network addresses ignoring port.
+
+	Parameters:
+		a - Address to compare
+		b - Address to compare to.
+
+	Returns:
+		<0 - Address a is less than address b
+		0 - Address a is equal to address b
+		>0 - Address a is greater than address b
+*/
+int net_addr_comp_noport(const NETADDR* a, const NETADDR* b);
 
 /*
 	Function: net_addr_str

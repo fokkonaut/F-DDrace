@@ -43,6 +43,11 @@ public:
 		virtual const char *GetString(unsigned Index) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
+		int m_ClientID;
+
+		// F-DDrace
+
+		virtual int GetVictim() = 0;
 	};
 
 	class CCommandInfo
@@ -93,6 +98,11 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
+
+	// DDRace
+
+	bool m_Cheated;
+	virtual void SetFlagMask(int FlagMask) = 0;
 };
 
 extern IConsole *CreateConsole(int FlagMask);

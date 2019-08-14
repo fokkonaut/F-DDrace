@@ -1231,11 +1231,14 @@ set(ENGINE_GENERATED_SHARED src/generated/protocol.cpp src/generated/protocol.h)
 set_src(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
+  ddracecommands.h
   gamecore.cpp
   gamecore.h
   layers.cpp
   layers.h
   mapitems.h
+  teamscore.cpp
+  teamscore.h
   tuning.h
   variables.h
   version.h
@@ -1460,14 +1463,27 @@ set_src(ENGINE_SERVER GLOB src/engine/server
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
+  ddracechat.cpp
+  ddracechat.h
+  ddracecommands.cpp
   entities/character.cpp
   entities/character.h
+  entities/door.cpp
+  entities/door.h
+  entities/dragger.cpp
+  entities/dragger.h
   entities/flag.cpp
   entities/flag.h
+  entities/gun.cpp
+  entities/gun.h
   entities/laser.cpp
   entities/laser.h
+  entities/light.cpp
+  entities/light.h
   entities/pickup.cpp
   entities/pickup.h
+  entities/plasma.cpp
+  entities/plasma.h
   entities/projectile.cpp
   entities/projectile.h
   entity.cpp
@@ -1478,22 +1494,17 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/ctf.cpp
-  gamemodes/ctf.h
-  gamemodes/dm.cpp
-  gamemodes/dm.h
-  gamemodes/lms.cpp
-  gamemodes/lms.h
-  gamemodes/lts.cpp
-  gamemodes/lts.h
-  gamemodes/mod.cpp
-  gamemodes/mod.h
-  gamemodes/tdm.cpp
-  gamemodes/tdm.h
+  gamemodes/ddrace.cpp
+  gamemodes/ddrace.h
   gameworld.cpp
   gameworld.h
   player.cpp
   player.h
+  score.h
+  score/file_score.cpp
+  score/file_score.h
+  teams.cpp
+  teams.h
 )
 set(GAME_GENERATED_SERVER
   src/generated/server_data.cpp

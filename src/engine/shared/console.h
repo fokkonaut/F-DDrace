@@ -115,6 +115,20 @@ class CConsole : public IConsole
 		virtual const char *GetString(unsigned Index);
 		virtual int GetInteger(unsigned Index);
 		virtual float GetFloat(unsigned Index);
+
+		enum
+		{
+			VICTIM_NONE = -3,
+			VICTIM_ME = -2,
+			VICTIM_ALL = -1,
+		};
+
+		int m_Victim;
+		void ResetVictim();
+		bool HasVictim();
+		void SetVictim(int Victim);
+		void SetVictim(const char* pVictim);
+		virtual int GetVictim();
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);
@@ -195,6 +209,11 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_MOD)); }
+
+	// F-DDrace
+
+	static void ConUserCommandStatus(IConsole::IResult* pResult, void* pUser);
+	void SetFlagMask(int FlagMask) { m_FlagMask = FlagMask; }
 };
 
 #endif

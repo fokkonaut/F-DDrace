@@ -10,7 +10,7 @@ const int PickupPhysSize = 14;
 class CPickup : public CEntity
 {
 public:
-	CPickup(CGameWorld *pGameWorld, int Type, vec2 Pos);
+	CPickup(CGameWorld* pGameWorld, int Type, vec2 Pos, int SubType = 0, int Layer = 0, int Number = 0);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -19,7 +19,13 @@ public:
 
 private:
 	int m_Type;
-	int m_SpawnTick;
+	int m_Subtype;
+	//int m_SpawnTick;
+
+	// F-DDrace
+
+	void Move();
+	vec2 m_Core;
 };
 
 #endif

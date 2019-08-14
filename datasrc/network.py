@@ -1,5 +1,6 @@
 from datatypes import *
 
+Powerups = Enum("POWERUP", ["HEALTH", "ARMOR", "WEAPON", "NINJA"])
 Pickups = Enum("PICKUP", ["HEALTH", "ARMOR", "GRENADE", "SHOTGUN", "LASER", "NINJA"])
 Emotes = Enum("EMOTE", ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"])
 Emoticons = Enum("EMOTICON", ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"])
@@ -62,6 +63,7 @@ RawSource = '''
 '''
 
 Enums = [
+	Powerups,
 	Pickups,
 	Emotes,
 	Emoticons,

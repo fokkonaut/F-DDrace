@@ -532,6 +532,14 @@ void thread_detach(void *thread)
 #endif
 }
 
+void* thread_init_and_detach(void (*threadfunc)(void*), void* u)
+{
+	void* thread = thread_init(threadfunc, u);
+	if (thread)
+		thread_detach(thread);
+	return thread;
+}
+
 void cpu_relax()
 {
 #if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_AMD64)
@@ -715,6 +723,14 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 int net_addr_comp(const NETADDR *a, const NETADDR *b)
 {
 	return mem_comp(a, b, sizeof(NETADDR));
+}
+
+int net_addr_comp_noport(const NETADDR* a, const NETADDR* b)
+{
+	NETADDR ta = *a, tb = *b;
+	ta.port = tb.port = 0;
+
+	return net_addr_comp(&ta, &tb);
 }
 
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)

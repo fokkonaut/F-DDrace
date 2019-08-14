@@ -12,14 +12,12 @@
 #include <game/version.h>
 
 #include "entities/character.h"
-#include "gamemodes/ctf.h"
-#include "gamemodes/dm.h"
-#include "gamemodes/lms.h"
-#include "gamemodes/lts.h"
-#include "gamemodes/mod.h"
-#include "gamemodes/tdm.h"
+#include "gamemodes/ddrace.h"
 #include "gamecontext.h"
 #include "player.h"
+
+#include "score.h"
+#include "score/file_score.h"
 
 enum
 {
@@ -41,10 +39,16 @@ void CGameContext::Construct(int Resetting)
 	m_pVoteOptionFirst = 0;
 	m_pVoteOptionLast = 0;
 	m_NumVoteOptions = 0;
+	m_LastMapVote = 0;
 	m_LockTeams = 0;
 
 	if(Resetting==NO_RESET)
+	{
 		m_pVoteOptionHeap = new CHeap();
+		m_pScore = 0;
+		m_NumMutes = 0;
+		m_NumVoteMutes = 0;
+	}
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -63,6 +67,9 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+
+	if (m_pScore)
+		delete m_pScore;
 }
 
 void CGameContext::Clear()
@@ -93,10 +100,10 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
-void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self)
+void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask)
 {
 	float f = angle(Source);
-	CNetEvent_Damage *pEvent = (CNetEvent_Damage *)m_Events.Create(NETEVENTTYPE_DAMAGE, sizeof(CNetEvent_Damage));
+	CNetEvent_Damage *pEvent = (CNetEvent_Damage *)m_Events.Create(NETEVENTTYPE_DAMAGE, sizeof(CNetEvent_Damage), Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -109,10 +116,10 @@ void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount,
 	}
 }
 
-void CGameContext::CreateHammerHit(vec2 Pos)
+void CGameContext::CreateHammerHit(vec2 Pos, int64_t Mask)
 {
 	// create the event
-	CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(CNetEvent_HammerHit));
+	CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(CNetEvent_HammerHit), Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -121,10 +128,10 @@ void CGameContext::CreateHammerHit(vec2 Pos)
 }
 
 
-void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, int MaxDamage)
+void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
 {
 	// create the event
-	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion));
+	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion), Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -135,25 +142,47 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, int MaxDamag
 	CCharacter *apEnts[MAX_CLIENTS];
 	float Radius = g_pData->m_Explosion.m_Radius;
 	float InnerRadius = 48.0f;
-	float MaxForce = g_pData->m_Explosion.m_MaxForce;
-	int Num = m_World.FindEntities(Pos, Radius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-	for(int i = 0; i < Num; i++)
+	int Num = m_World.FindEntities(Pos, Radius, (CEntity * *)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int64_t TeamMask = -1;
+	for (int i = 0; i < Num; i++)
 	{
 		vec2 Diff = apEnts[i]->GetPos() - Pos;
-		vec2 Force(0, MaxForce);
+		vec2 ForceDir(0, 1);
 		float l = length(Diff);
-		if(l)
-			Force = normalize(Diff) * MaxForce;
-		float Factor = 1 - clamp((l-InnerRadius)/(Radius-InnerRadius), 0.0f, 1.0f);
-		if((int)(Factor * MaxDamage))
-			apEnts[i]->TakeDamage(Force * Factor, Diff*-1, (int)(Factor * MaxDamage), Owner, Weapon);
+		if (l)
+			ForceDir = normalize(Diff);
+		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		float Strength;
+		if (Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
+			Strength = Tuning()->m_ExplosionStrength;
+		else
+			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
+
+		float Dmg = Strength * l;
+		if (!(int)Dmg) continue;
+
+		if ((GetPlayerChar(Owner) ? !(GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : g_Config.m_SvHit || NoDamage) || Owner == apEnts[i]->GetPlayer()->GetCID())
+		{
+			if (Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner)) continue;
+			if (Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam) continue;
+
+			// Explode at most once per team
+			int PlayerTeam = ((CGameControllerDDrace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
+			if (GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
+			{
+				if (!CmaskIsSet(TeamMask, PlayerTeam)) continue;
+				TeamMask = CmaskUnset(TeamMask, PlayerTeam);
+			}
+
+			apEnts[i]->TakeDamage(ForceDir * Dmg * 2, ForceDir*-1, (int)Dmg, Owner, Weapon);
+		}
 	}
 }
 
-void CGameContext::CreatePlayerSpawn(vec2 Pos)
+void CGameContext::CreatePlayerSpawn(vec2 Pos, int64_t Mask)
 {
 	// create the event
-	CNetEvent_Spawn *ev = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
+	CNetEvent_Spawn *ev = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn), Mask);
 	if(ev)
 	{
 		ev->m_X = (int)Pos.x;
@@ -161,10 +190,10 @@ void CGameContext::CreatePlayerSpawn(vec2 Pos)
 	}
 }
 
-void CGameContext::CreateDeath(vec2 Pos, int ClientID)
+void CGameContext::CreateDeath(vec2 Pos, int ClientID, int64_t Mask)
 {
 	// create the event
-	CNetEvent_Death *pEvent = (CNetEvent_Death *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
+	CNetEvent_Death *pEvent = (CNetEvent_Death *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death), Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -173,7 +202,7 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientID)
 	}
 }
 
-void CGameContext::CreateSound(vec2 Pos, int Sound, int64 Mask)
+void CGameContext::CreateSound(vec2 Pos, int Sound, int64_t Mask)
 {
 	if (Sound < 0)
 		return;
@@ -186,6 +215,25 @@ void CGameContext::CreateSound(vec2 Pos, int Sound, int64 Mask)
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_SoundID = Sound;
 	}
+}
+
+void CGameContext::SendChatTarget(int To, const char *pText)
+{
+	CNetMsg_Sv_Chat Msg;
+	Msg.m_Mode = CHAT_ALL;
+	Msg.m_ClientID = -1;
+	Msg.m_pMessage = pText;
+	if(g_Config.m_SvDemoChat)
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+	else
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
+}
+
+void CGameContext::SendChatTeam(int Team, const char *pText)
+{
+	for(int i = 0; i<MAX_CLIENTS; i++)
+		if(((CGameControllerDDrace*)m_pController)->m_Teams.m_Core.Team(i) == Team)
+			SendChatTarget(i, pText);
 }
 
 void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
@@ -435,13 +483,39 @@ void CGameContext::CheckPureTuning()
 	}
 }
 
-void CGameContext::SendTuningParams(int ClientID)
+void CGameContext::SendTuningParams(int ClientID, int Zone)
 {
+	if (ClientID == -1)
+	{
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (m_apPlayers[i])
+			{
+				if (m_apPlayers[i]->GetCharacter())
+				{
+					if (m_apPlayers[i]->GetCharacter()->m_TuneZone == Zone)
+						SendTuningParams(i, Zone);
+				}
+				else if (m_apPlayers[i]->m_TuneZone == Zone)
+				{
+					SendTuningParams(i, Zone);
+				}
+			}
+		}
+		return;
+	}
+
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int *pParams = (int *)&m_Tuning;
-	for(unsigned i = 0; i < sizeof(m_Tuning)/sizeof(int); i++)
+	int* pParams = 0;
+	if (Zone == 0)
+		pParams = (int*)& m_Tuning;
+	else
+		pParams = (int*) & (m_aTuningList[Zone]);
+
+	unsigned int last = sizeof(m_Tuning) / sizeof(int);
+	for (unsigned i = 0; i < last; i++)
 		Msg.AddInt(pParams[i]);
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
@@ -549,6 +623,43 @@ void CGameContext::OnTick()
 			}
 		}
 	}
+
+	for (int i = 0; i < m_NumMutes; i++)
+	{
+		if (m_aMutes[i].m_Expire <= Server()->Tick())
+		{
+			m_NumMutes--;
+			m_aMutes[i] = m_aMutes[m_NumMutes];
+		}
+	}
+	for (int i = 0; i < m_NumVoteMutes; i++)
+	{
+		if (m_aVoteMutes[i].m_Expire <= Server()->Tick())
+		{
+			m_NumVoteMutes--;
+			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
+		}
+	}
+
+	if (Collision()->m_NumSwitchers > 0)
+		for (int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
+		{
+			for (int j = 0; j < MAX_CLIENTS; ++j)
+			{
+				if (Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
+				{
+					Collision()->m_pSwitchers[i].m_Status[j] = false;
+					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
+					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
+				}
+				else if (Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
+				{
+					Collision()->m_pSwitchers[i].m_Status[j] = true;
+					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
+					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
+				}
+			}
+		}
 
 
 #ifdef CONF_DEBUG
@@ -670,6 +781,22 @@ void CGameContext::OnClientEnter(int ClientID)
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
 {
+	{
+		bool Empty = true;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (m_apPlayers[i])
+			{
+				Empty = false;
+				break;
+			}
+		}
+		if (Empty)
+		{
+			m_NonEmptySince = Server()->Tick();
+		}
+	}
+
 	if(m_apPlayers[ClientID])
 	{
 		dbg_assert(m_apPlayers[ClientID]->IsDummy(), "invalid clientID");
@@ -1095,25 +1222,156 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
 }
 
-void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConToggleTuneParam(IConsole::IResult* pResult, void* pUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CTuningParams TuningParams;
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	const char* pParamName = pResult->GetString(0);
+	float OldValue;
+
+	if (!pSelf->Tuning()->Get(pParamName, &OldValue))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		return;
+	}
+
+	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001f
+		? pResult->GetFloat(2)
+		: pResult->GetFloat(1);
+
+	pSelf->Tuning()->Set(pParamName, NewValue);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	pSelf->SendTuningParams(-1);
+}
+
+void CGameContext::ConTuneReset(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	/*CTuningParams TuningParams;
 	*pSelf->Tuning() = TuningParams;
 	pSelf->SendTuningParams(-1);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");*/
+	pSelf->ResetTuning();
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Tuning reset");
 }
 
-void CGameContext::ConTuneDump(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTuneDump(IConsole::IResult* pResult, void* pUserData)
 {
-	CGameContext *pSelf = (CGameContext *)pUserData;
+	CGameContext* pSelf = (CGameContext*)pUserData;
 	char aBuf[256];
-	for(int i = 0; i < pSelf->Tuning()->Num(); i++)
+	for (int i = 0; i < pSelf->Tuning()->Num(); i++)
 	{
 		float v;
 		pSelf->Tuning()->Get(i, &v);
-		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->m_apNames[i], v);
+		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], v);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+}
+
+void CGameContext::ConTuneZone(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int List = pResult->GetInteger(0);
+	const char* pParamName = pResult->GetString(1);
+	float NewValue = pResult->GetFloat(2);
+
+	if (List >= 0 && List < NUM_TUNEZONES)
+	{
+		if (pSelf->TuningList()[List].Set(pParamName, NewValue))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->SendTuningParams(-1, List);
+		}
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+	}
+}
+
+void CGameContext::ConTuneDumpZone(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int List = pResult->GetInteger(0);
+	char aBuf[256];
+	if (List >= 0 && List < NUM_TUNEZONES)
+	{
+		for (int i = 0; i < pSelf->TuningList()[List].Num(); i++)
+		{
+			float v;
+			pSelf->TuningList()[List].Get(i, &v);
+			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+	}
+}
+
+void CGameContext::ConTuneResetZone(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CTuningParams TuningParams;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List < NUM_TUNEZONES)
+		{
+			pSelf->TuningList()[List] = TuningParams;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Tunezone %d reset", List);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->SendTuningParams(-1, List);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < NUM_TUNEZONES; i++)
+		{
+			*(pSelf->TuningList() + i) = TuningParams;
+			pSelf->SendTuningParams(-1, i);
+		}
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "All Tunezones reset");
+	}
+}
+
+void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List < NUM_TUNEZONES)
+		{
+			str_copy(pSelf->m_aaZoneEnterMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneEnterMsg[List]));
+		}
+	}
+}
+
+void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	if (pResult->NumArguments())
+	{
+		int List = pResult->GetInteger(0);
+		if (List >= 0 && List < NUM_TUNEZONES)
+		{
+			str_copy(pSelf->m_aaZoneLeaveMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneLeaveMsg[List]));
+		}
+	}
+}
+
+void CGameContext::ConSwitchOpen(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Switch = pResult->GetInteger(0);
+
+	if (pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers + 1)
+	{
+		pSelf->Collision()->m_pSwitchers[Switch].m_Initial = false;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "switch %d opened by default", Switch);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	}
 }
 
@@ -1121,10 +1379,7 @@ void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(pResult->NumArguments())
-		pSelf->m_pController->DoPause(clamp(pResult->GetInteger(0), -1, 1000));
-	else
-		pSelf->m_pController->DoPause(pSelf->m_pController->IsGamePaused() ? 0 : IGameController::TIMER_INFINITE);
+	pSelf->m_World.m_Paused ^= 1;
 }
 
 void CGameContext::ConChangeMap(IConsole::IResult *pResult, void *pUserData)
@@ -1471,33 +1726,166 @@ void CGameContext::OnInit()
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
 
-	// select gametype
-	if(str_comp_nocase(g_Config.m_SvGametype, "mod") == 0)
-		m_pController = new CGameControllerMOD(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "ctf") == 0)
-		m_pController = new CGameControllerCTF(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lms") == 0)
-		m_pController = new CGameControllerLMS(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "lts") == 0)
-		m_pController = new CGameControllerLTS(this);
-	else if(str_comp_nocase(g_Config.m_SvGametype, "tdm") == 0)
-		m_pController = new CGameControllerTDM(this);
+	// Reset Tunezones
+	CTuningParams TuningParams;
+	for (int i = 0; i < NUM_TUNEZONES; i++)
+	{
+		TuningList()[i] = TuningParams;
+		TuningList()[i].Set("gun_curvature", 0);
+		TuningList()[i].Set("gun_speed", 1400);
+	}
+
+	for (int i = 0; i < NUM_TUNEZONES; i++)
+	{
+		// Send no text by default when changing tune zones.
+		m_aaZoneEnterMsg[i][0] = 0;
+		m_aaZoneLeaveMsg[i][0] = 0;
+	}
+	// Reset Tuning
+	if (g_Config.m_SvTuneReset)
+	{
+		ResetTuning();
+	}
 	else
-		m_pController = new CGameControllerDM(this);
+	{
+		Tuning()->Set("gun_speed", 1400);
+		Tuning()->Set("gun_curvature", 0);
+	}
+
+	if (g_Config.m_SvDDRaceTuneReset)
+	{
+		g_Config.m_SvHit = 1;
+		g_Config.m_SvEndlessDrag = 0;
+		g_Config.m_SvOldLaser = 0;
+		g_Config.m_SvOldTeleportHook = 0;
+		g_Config.m_SvOldTeleportWeapons = 0;
+		g_Config.m_SvTeleportHoldHook = 0;
+		g_Config.m_SvTeam = 0;
+		g_Config.m_SvShowOthersDefault = 0;
+
+		if (Collision()->m_NumSwitchers > 0)
+			for (int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
+				Collision()->m_pSwitchers[i].m_Initial = true;
+	}
+
+	// select gametype
+	m_pController = new CGameControllerDDrace(this);
+	((CGameControllerDDrace*)m_pController)->m_Teams.Reset();
+
+	if (g_Config.m_SvSoloServer)
+	{
+		g_Config.m_SvTeam = 3;
+		g_Config.m_SvShowOthersDefault = 1;
+
+		Tuning()->Set("player_collision", 0);
+		Tuning()->Set("player_hooking", 0);
+
+		for (int i = 0; i < NUM_TUNEZONES; i++)
+		{
+			TuningList()[i].Set("player_collision", 0);
+			TuningList()[i].Set("player_hooking", 0);
+		}
+	}
+
+	// delete old score object
+	if (m_pScore)
+		delete m_pScore;
+	m_pScore = new CFileScore(this);
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
-	for(int y = 0; y < pTileMap->m_Height; y++)
-	{
-		for(int x = 0; x < pTileMap->m_Width; x++)
-		{
-			int Index = pTiles[y*pTileMap->m_Width+x].m_Index;
 
-			if(Index >= ENTITY_OFFSET)
+	CTile* pFront = 0;
+	CSwitchTile* pSwitch = 0;
+	if (m_Layers.FrontLayer())
+		pFront = (CTile*)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front);
+	if (m_Layers.SwitchLayer())
+		pSwitch = (CSwitchTile*)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch);
+
+	for (int y = 0; y < pTileMap->m_Height; y++)
+	{
+		for (int x = 0; x < pTileMap->m_Width; x++)
+		{
+			int Index = pTiles[y * pTileMap->m_Width + x].m_Index;
+
+			if (Index == TILE_OLDLASER)
 			{
-				vec2 Pos(x*32.0f+16.0f, y*32.0f+16.0f);
-				m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
+				g_Config.m_SvOldLaser = 1;
+				dbg_msg("game layer", "found old laser tile");
+			}
+			else if (Index == TILE_NPC)
+			{
+				m_Tuning.Set("player_collision", 0);
+				dbg_msg("game layer", "found no collision tile");
+			}
+			else if (Index == TILE_EHOOK)
+			{
+				g_Config.m_SvEndlessDrag = 1;
+				dbg_msg("game layer", "found unlimited hook time tile");
+			}
+			else if (Index == TILE_NOHIT)
+			{
+				g_Config.m_SvHit = 0;
+				dbg_msg("game layer", "found no weapons hitting others tile");
+			}
+			else if (Index == TILE_NPH)
+			{
+				m_Tuning.Set("player_hooking", 0);
+				dbg_msg("game layer", "found no player hooking tile");
+			}
+
+			if (Index >= ENTITY_OFFSET)
+			{
+				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+				//m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
+				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
+			}
+
+			if (pFront)
+			{
+				Index = pFront[y * pTileMap->m_Width + x].m_Index;
+				if (Index == TILE_OLDLASER)
+				{
+					g_Config.m_SvOldLaser = 1;
+					dbg_msg("front layer", "found old laser tile");
+				}
+				else if (Index == TILE_NPC)
+				{
+					m_Tuning.Set("player_collision", 0);
+					dbg_msg("front layer", "found no collision tile");
+				}
+				else if (Index == TILE_EHOOK)
+				{
+					g_Config.m_SvEndlessDrag = 1;
+					dbg_msg("front layer", "found unlimited hook time tile");
+				}
+				else if (Index == TILE_NOHIT)
+				{
+					g_Config.m_SvHit = 0;
+					dbg_msg("front layer", "found no weapons hitting others tile");
+				}
+				else if (Index == TILE_NPH)
+				{
+					m_Tuning.Set("player_hooking", 0);
+					dbg_msg("front layer", "found no player hooking tile");
+				}
+				if (Index >= ENTITY_OFFSET)
+				{
+					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
+				}
+			}
+			if (pSwitch)
+			{
+				Index = pSwitch[y * pTileMap->m_Width + x].m_Type;
+				// TODO: Add off by default door here
+				// if (Index == TILE_DOOR_OFF)
+				if (Index >= ENTITY_OFFSET)
+				{
+					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
+				}
 			}
 		}
 	}
@@ -1513,6 +1901,11 @@ void CGameContext::OnInit()
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_matches_per_map", ConchainGameinfoUpdate, this);
+
+	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include <game/ddracecommands.h>
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
+	#include "ddracechat.h"
 
 	// clamp sv_player_slots to 0..MaxClients
 	if(Server()->MaxClients() < g_Config.m_SvPlayerSlots)
@@ -1587,3 +1980,100 @@ const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
+
+bool CGameContext::PlayerCollision()
+{
+	float Temp;
+	m_Tuning.Get("player_collision", &Temp);
+	return Temp != 0.0f;
+}
+
+bool CGameContext::PlayerHooking()
+{
+	float Temp;
+	m_Tuning.Get("player_hooking", &Temp);
+	return Temp != 0.0f;
+}
+
+float CGameContext::PlayerJetpack()
+{
+	float Temp;
+	m_Tuning.Get("player_jetpack", &Temp);
+	return Temp;
+}
+
+int CGameContext::GetDDRaceTeam(int ClientID)
+{
+	CGameControllerDDrace* pController = (CGameControllerDDrace*)m_pController;
+	return pController->m_Teams.m_Core.Team(ClientID);
+}
+
+void CGameContext::ResetTuning()
+{
+	CTuningParams TuningParams;
+	m_Tuning = TuningParams;
+	Tuning()->Set("gun_speed", 1400);
+	Tuning()->Set("gun_curvature", 0);
+	Tuning()->Set("shotgun_speed", 500);
+	Tuning()->Set("shotgun_speeddiff", 0);
+	Tuning()->Set("shotgun_curvature", 0);
+	SendTuningParams(-1);
+}
+
+void CGameContext::List(int ClientID, const char* pFilter)
+{
+	int Total = 0;
+	char aBuf[256];
+	int Bufcnt = 0;
+	if (pFilter[0])
+		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
+	else
+		str_format(aBuf, sizeof(aBuf), "Listing all players:");
+	SendChatTarget(ClientID, aBuf);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_apPlayers[i])
+		{
+			Total++;
+			const char* pName = Server()->ClientName(i);
+			if (str_find_nocase(pName, pFilter) == NULL)
+				continue;
+			if (Bufcnt + str_length(pName) + 4 > 256)
+			{
+				SendChatTarget(ClientID, aBuf);
+				Bufcnt = 0;
+			}
+			if (Bufcnt != 0)
+			{
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, ", %s", pName);
+				Bufcnt += 2 + str_length(pName);
+			}
+			else
+			{
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+				Bufcnt += str_length(pName);
+			}
+		}
+	}
+	if (Bufcnt != 0)
+		SendChatTarget(ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
+	SendChatTarget(ClientID, aBuf);
+}
+
+void CGameContext::ForceVote(int EnforcerID, bool Success)
+{
+	// check if there is a vote running
+	if (!m_VoteCloseTime)
+		return;
+
+	m_VoteEnforce = Success ? CGameContext::VOTE_ENFORCE_YES_ADMIN : CGameContext::VOTE_ENFORCE_NO_ADMIN;
+	m_VoteEnforcer = EnforcerID;
+
+	char aBuf[256];
+	const char* pOption = Success ? "yes" : "no";
+	str_format(aBuf, sizeof(aBuf), "authorized player forced vote %s", pOption);
+	SendChatTarget(-1, aBuf);
+	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}

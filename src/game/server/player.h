@@ -22,10 +22,10 @@ public:
 	CPlayer(CGameContext *pGameServer, int ClientID, bool Dummy, bool AsSpec = false);
 	~CPlayer();
 
-	void Init(int CID);
+	void Reset();
 
 	void TryRespawn();
-	void Respawn();
+	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	void SetTeam(int Team, bool DoChatMsg=true);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
@@ -33,18 +33,24 @@ public:
 
 	void Tick();
 	void PostTick();
+	void PostPostTick();
 	void Snap(int SnappingClient);
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
 	void OnDisconnect();
 
+	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
 	void KillCharacter(int Weapon = WEAPON_GAME);
 	CCharacter *GetCharacter();
+
+	void SpectatePlayerName(const char* pName);
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
 	vec2 m_ViewPos;
+	int m_TuneZone;
+	int m_TuneZoneOld;
 
 	// states if the client is chatting, accessing a menu etc.
 	int m_PlayerFlags;
@@ -77,6 +83,8 @@ public:
 	int m_LastEmote;
 	int m_LastKill;
 	int m_LastReadyChange;
+
+	int m_LastInvited;
 
 	// TODO: clean this up
 	struct
@@ -121,6 +129,7 @@ private:
 
 	//
 	bool m_Spawning;
+	bool m_WeakHookSpawn;
 	int m_ClientID;
 	int m_Team;
 	bool m_Dummy;
@@ -130,6 +139,54 @@ private:
 	int m_SpectatorID;
 	class CFlag *m_pSpecFlag;
 	bool m_ActiveSpecSwitch;
+
+	int m_Paused;
+	int64 m_ForcePauseTime;
+	int64 m_LastPause;
+
+public:
+	enum
+	{
+		PAUSE_NONE = 0,
+		PAUSE_PAUSED,
+		PAUSE_SPEC
+	};
+
+	int64 m_FirstVoteTick;
+
+	void ProcessPause();
+	int Pause(int State, bool Force);
+	int ForcePause(int Time);
+	int IsPaused();
+
+	bool IsPlaying();
+	int64 m_Last_KickVote;
+	int64 m_Last_Team;
+	bool m_ShowOthers;
+	bool m_ShowAll;
+	bool m_SpecTeam;
+	bool m_NinjaJetpack;
+	bool m_Afk;
+	int m_KillMe;
+	bool m_HasFinishScore;
+
+	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
+	void AfkVoteTimer(CNetObj_PlayerInput* NewTarget);
+	int64 m_LastPlaytime;
+	int64 m_LastEyeEmote;
+	int m_LastTarget_x;
+	int m_LastTarget_y;
+	CNetObj_PlayerInput m_LastTarget;
+	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
+	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
+	char m_pAfkMsg[160];
+	bool m_EyeEmote;
+	int m_DefEmote;
+	int m_DefEmoteReset;
+	bool m_Halloween;
+	bool m_FirstPacket;
+	bool m_NotEligibleForFinish;
+	int64 m_EligibleForFinishCheck;
 };
 
 #endif

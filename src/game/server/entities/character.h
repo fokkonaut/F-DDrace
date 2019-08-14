@@ -8,6 +8,7 @@
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 
+class CGameTeams;
 
 class CCharacter : public CEntity
 {
@@ -30,11 +31,13 @@ public:
 	bool IsGrounded();
 
 	void SetWeapon(int W);
+	void SetSolo(bool Solo);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
 	void HandleWeapons();
 	void HandleNinja();
+	void HandleJetpack();
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
@@ -50,12 +53,16 @@ public:
 	bool IncreaseHealth(int Amount);
 	bool IncreaseArmor(int Amount);
 
-	bool GiveWeapon(int Weapon, int Ammo);
+	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
+	void RemoveNinja();
 
 	void SetEmote(int Emote, int Tick);
 
+	void Rescue();
+
 	bool IsAlive() const { return m_Alive; }
+	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 
 private:
@@ -63,6 +70,7 @@ private:
 	class CPlayer *m_pPlayer;
 
 	bool m_Alive;
+	bool m_Paused;
 
 	// weapon info
 	CEntity *m_apHitObjects[10];
@@ -121,6 +129,139 @@ private:
 	CCharacterCore m_SendCore; // core that we should send
 	CCharacterCore m_ReckoningCore; // the dead reckoning core
 
+	// F-DDrace
+
+
+	void HandleTiles(int Index);
+	float m_Time;
+	int m_LastBroadcast;
+	void DDraceInit();
+	void HandleSkippableTiles(int Index);
+	void DDraceTick();
+	void DDracePostCoreTick();
+	void HandleTuneLayer();
+	void SendZoneMsgs();
+
+	bool m_SetSavePos;
+	vec2 m_PrevSavePos;
+	bool m_Solo;
+
+public:
+	CGameTeams* Teams();
+	void Pause(bool Pause);
+	bool Freeze(int Time);
+	bool Freeze();
+	bool UnFreeze();
+	void GiveAllWeapons();
+	int m_DDraceState;
+	int Team();
+	bool CanCollide(int ClientID);
+	bool SameTeam(int ClientID);
+	bool m_Super;
+	bool m_SuperJump;
+	bool m_Jetpack;
+	bool m_NinjaJetpack;
+	int m_TeamBeforeSuper;
+	int m_FreezeTime;
+	int m_FreezeTick;
+	bool m_DeepFreeze;
+	bool m_EndlessHook;
+	bool m_FreezeHammer;
+	enum
+	{
+		HIT_ALL = 0,
+		DISABLE_HIT_HAMMER = 1,
+		DISABLE_HIT_SHOTGUN = 2,
+		DISABLE_HIT_GRENADE = 4,
+		DISABLE_HIT_RIFLE = 8
+	};
+	int m_Hit;
+	int m_TuneZone;
+	int m_TuneZoneOld;
+	int m_PainSoundTimer;
+	int m_LastMove;
+	int m_StartTime;
+	vec2 m_PrevPos;
+	int m_TeleCheckpoint;
+	int m_CpTick;
+	int m_CpActive;
+	int m_CpLastBroadcast;
+	float m_CpCurrent[25];
+	int m_TileIndex;
+	int m_TileFlags;
+	int m_TileFIndex;
+	int m_TileFFlags;
+	int m_TileSIndex;
+	int m_TileSFlags;
+	int m_TileIndexL;
+	int m_TileFlagsL;
+	int m_TileFIndexL;
+	int m_TileFFlagsL;
+	int m_TileSIndexL;
+	int m_TileSFlagsL;
+	int m_TileIndexR;
+	int m_TileFlagsR;
+	int m_TileFIndexR;
+	int m_TileFFlagsR;
+	int m_TileSIndexR;
+	int m_TileSFlagsR;
+	int m_TileIndexT;
+	int m_TileFlagsT;
+	int m_TileFIndexT;
+	int m_TileFFlagsT;
+	int m_TileSIndexT;
+	int m_TileSFlagsT;
+	int m_TileIndexB;
+	int m_TileFlagsB;
+	int m_TileFIndexB;
+	int m_TileFFlagsB;
+	int m_TileSIndexB;
+	int m_TileSFlagsB;
+	vec2 m_Intersection;
+	int64 m_LastStartWarning;
+	int64 m_LastRescue;
+	bool m_LastRefillJumps;
+	bool m_LastPenalty;
+	bool m_LastBonus;
+	bool m_HasTeleGun;
+	bool m_HasTeleGrenade;
+	bool m_HasTeleLaser;
+	vec2 m_TeleGunPos;
+	bool m_TeleGunTeleport;
+	bool m_IsBlueTeleGunTeleport;
+	int m_StrongWeakID;
+
+	// Setters/Getters because i don't want to modify vanilla vars access modifiers
+	int GetLastWeapon() { return m_LastWeapon; };
+	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
+	int GetActiveWeapon() { return m_ActiveWeapon; };
+	void SetActiveWeapon(int ActiveWeap) { m_ActiveWeapon = ActiveWeap; };
+	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
+	int GetArmor() { return m_Armor; };
+	void SetArmor(int Armor) { m_Armor = Armor; };
+	CCharacterCore GetCore() { return m_Core; };
+	void SetCore(CCharacterCore Core) { m_Core = Core; };
+	CCharacterCore* Core() { return &m_Core; };
+	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
+	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
+	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
+	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
+	bool IsAlive() { return m_Alive; };
+	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
+	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
+	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
+	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
+	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+
+	void SetPos(vec2 Pos) { m_Pos = Pos; };
+};
+
+enum
+{
+	DDRACE_NONE = 0,
+	DDRACE_STARTED,
+	DDRACE_CHEAT, // no time and won't start again unless ordered by a mod or death
+	DDRACE_FINISHED
 };
 
 #endif

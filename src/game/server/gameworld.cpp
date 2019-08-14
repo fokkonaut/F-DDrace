@@ -202,7 +202,7 @@ void CGameWorld::Tick()
 
 
 // TODO: should be more general
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
+CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CCharacter* pNotThis, int CollideWith, class CCharacter* pThisOnly)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -212,6 +212,9 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	for(; p; p = (CCharacter *)p->TypeNext())
  	{
 		if(p == pNotThis)
+			continue;
+
+		if (CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
@@ -256,4 +259,65 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	}
 
 	return pClosest;
+}
+
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis)
+{
+	// Find other players
+	float ClosestRange = Radius * 2;
+	CCharacter* pClosest = 0;
+
+	CCharacter* p = (CCharacter*)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
+	for (; p; p = (CCharacter*)p->TypeNext())
+	{
+		if (p == pNotThis)
+			continue;
+
+		float Len = distance(Pos, p->m_Pos);
+		if (Len < p->m_ProximityRadius + Radius)
+		{
+			if (Len < ClosestRange)
+			{
+				ClosestRange = Len;
+				pClosest = p;
+			}
+		}
+	}
+
+	return pClosest;
+}
+
+std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis)
+{
+	std::list< CCharacter* > listOfChars;
+
+	CCharacter* pChr = (CCharacter*)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
+	{
+		if (pChr == pNotThis)
+			continue;
+
+		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
+		float Len = distance(pChr->m_Pos, IntersectPos);
+		if (Len < pChr->m_ProximityRadius + Radius)
+		{
+			pChr->m_Intersection = IntersectPos;
+			listOfChars.push_back(pChr);
+		}
+	}
+	return listOfChars;
+}
+
+void CGameWorld::ReleaseHooked(int ClientID)
+{
+	CCharacter* pChr = (CCharacter*)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
+	{
+		CCharacterCore* Core = pChr->Core();
+		if (Core->m_HookedPlayer == ClientID && !pChr->m_Super)
+		{
+			Core->m_HookedPlayer = -1;
+			Core->m_HookState = HOOK_RETRACTED;
+		}
+	}
 }

@@ -139,6 +139,14 @@ public:
 	int NetworkClipped(int SnappingClient, vec2 CheckPos);
 
 	bool GameLayerClipped(vec2 CheckPos);
+
+	// F-DDrace
+
+	bool GetNearestAirPos(vec2 Pos, vec2 ColPos, vec2* pOutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos);
+
+	int m_Number;
+	int m_Layer;
 };
 
 #endif

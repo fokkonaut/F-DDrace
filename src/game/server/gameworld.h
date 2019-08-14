@@ -5,6 +5,8 @@
 
 #include <game/gamecore.h>
 
+#include <list>
+
 class CEntity;
 class CCharacter;
 
@@ -97,7 +99,21 @@ public:
 		Returns:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
 	*/
-	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
+	class CCharacter* IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, class CCharacter* pNotThis = 0, int CollideWith = -1, class CCharacter* pThisOnly = 0);
+
+	/*
+		Function: closest_CCharacter
+			Finds the closest CCharacter to a specific point.
+
+		Arguments:
+			pos - The center position.
+			radius - How far off the CCharacter is allowed to be
+			notthis - Entity to ignore
+
+		Returns:
+			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
+	*/
+	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis);
 
 	/*
 		Function: insert_entity
@@ -146,6 +162,28 @@ public:
 
 	*/
 	void Tick();
+
+	// F-DDrace
+
+	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, class CEntity* pNotThis);
+	void ReleaseHooked(int ClientID);
+
+
+	/*
+		Function: interserct_CCharacters
+			Finds all CCharacters that intersect the line.
+
+		Arguments:
+			pos0 - Start position
+			pos2 - End position
+			radius - How for from the line the CCharacter is allowed to be.
+			new_pos - Intersection position
+			notthis - Entity to ignore intersecting with
+
+		Returns:
+			Returns list with all Characters on line.
+	*/
+	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis = 0);
 };
 
 #endif

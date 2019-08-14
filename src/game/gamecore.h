@@ -6,10 +6,16 @@
 #include <base/system.h>
 #include <base/math.h>
 
+#include <map>
+#include <vector>
+
 #include <math.h>
 #include "collision.h"
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
+
+#include "teamscore.h"
+#include "mapitems.h"
 
 
 class CTuneParam
@@ -29,14 +35,14 @@ public:
 	CTuningParams()
 	{
 		const float TicksPerSecond = 50.0f;
-		#define MACRO_TUNING_PARAM(Name,ScriptName,Value) m_##Name.Set((int)(Value*100.0f));
+		#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) m_##Name.Set((int)(Value*100.0f));
 		#include "tuning.h"
 		#undef MACRO_TUNING_PARAM
 	}
 
-	static const char *m_apNames[];
+	static const char *ms_apNames[];
 
-	#define MACRO_TUNING_PARAM(Name,ScriptName,Value) CTuneParam m_##Name;
+	#define MACRO_TUNING_PARAM(Name,ScriptName,Value,Description) CTuneParam m_##Name;
 	#include "tuning.h"
 	#undef MACRO_TUNING_PARAM
 
@@ -144,30 +150,38 @@ public:
 
 class CCharacterCore
 {
+	friend class CCharacter;
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
+	std::map<int, std::vector<vec2> >* m_pTeleOuts;
 public:
 	vec2 m_Pos;
 	vec2 m_Vel;
+	bool m_Hook;
+	bool m_Collision;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;
+	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
 
+	bool m_NewHook;
+
 	int m_Jumped;
+	int m_JumpedTotal;
+	int m_Jumps;
 
 	int m_Direction;
 	int m_Angle;
-
-	bool m_Death;
 
 	CNetObj_PlayerInput m_Input;
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore *pWorld, CCollision *pCollision);
+	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams);
+	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
@@ -175,6 +189,51 @@ public:
 	void Read(const CNetObj_CharacterCore *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
+
+	// F-DDrace
+
+	int m_Id;
+	bool m_pReset;
+	class CCollision* Collision() { return m_pCollision; }
+
+	vec2 m_LastVel;
+	int m_Colliding;
+	bool m_LeftWall;
+
+private:
+
+	CTeamsCore* m_pTeams;
+	int m_TileIndex;
+	int m_TileFlags;
+	int m_TileFIndex;
+	int m_TileFFlags;
+	int m_TileSIndex;
+	int m_TileSFlags;
+	int m_TileIndexL;
+	int m_TileFlagsL;
+	int m_TileFIndexL;
+	int m_TileFFlagsL;
+	int m_TileSIndexL;
+	int m_TileSFlagsL;
+	int m_TileIndexR;
+	int m_TileFlagsR;
+	int m_TileFIndexR;
+	int m_TileFFlagsR;
+	int m_TileSIndexR;
+	int m_TileSFlagsR;
+	int m_TileIndexT;
+	int m_TileFlagsT;
+	int m_TileFIndexT;
+	int m_TileFFlagsT;
+	int m_TileSIndexT;
+	int m_TileSFlagsT;
+	int m_TileIndexB;
+	int m_TileFlagsB;
+	int m_TileFIndexB;
+	int m_TileFFlagsB;
+	int m_TileSIndexB;
+	int m_TileSFlagsB;
+	bool IsRightTeam(int MapIndex);
 };
 
 #endif

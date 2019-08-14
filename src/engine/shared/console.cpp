@@ -327,6 +327,9 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr)
 					}
 					else
 						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+
+					if (pCommand->m_Flags & CMDFLAG_CHEAT)
+						m_Cheated = true;
 				}
 			}
 			else if(Stroke)
@@ -1005,3 +1008,33 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 
 
 extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
+
+int CConsole::CResult::GetVictim()
+{
+	return m_Victim;
+}
+
+void CConsole::CResult::ResetVictim()
+{
+	m_Victim = VICTIM_NONE;
+}
+
+bool CConsole::CResult::HasVictim()
+{
+	return m_Victim != VICTIM_NONE;
+}
+
+void CConsole::CResult::SetVictim(int Victim)
+{
+	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+}
+
+void CConsole::CResult::SetVictim(const char* pVictim)
+{
+	if (!str_comp(pVictim, "me"))
+		m_Victim = VICTIM_ME;
+	else if (!str_comp(pVictim, "all"))
+		m_Victim = VICTIM_ALL;
+	else
+		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+}

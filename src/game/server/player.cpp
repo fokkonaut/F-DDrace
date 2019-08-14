@@ -6,6 +6,9 @@
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "player.h"
+#include <game/server/gamemodes/ddrace.h>
+#include <engine/shared/config.h>
+#include "score.h"
 
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
@@ -15,30 +18,105 @@ IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool Dummy, bool AsSpec)
 {
 	m_pGameServer = pGameServer;
-	m_RespawnTick = Server()->Tick();
-	m_DieTick = Server()->Tick();
-	m_ScoreStartTick = Server()->Tick();
-	m_pCharacter = 0;
 	m_ClientID = ClientID;
 	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam();
-	m_SpecMode = SPEC_FREEVIEW;
-	m_SpectatorID = -1;
-	m_pSpecFlag = 0;
-	m_ActiveSpecSwitch = 0;
-	m_LastActionTick = Server()->Tick();
-	m_TeamChangeTick = Server()->Tick();
-	m_InactivityTickCounter = 0;
 	m_Dummy = Dummy;
-	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
-	m_RespawnDisabled = GameServer()->m_pController->GetStartRespawnState();
-	m_DeadSpecMode = false;
-	m_Spawning = 0;
+	Reset();
 }
 
 CPlayer::~CPlayer()
 {
 	delete m_pCharacter;
 	m_pCharacter = 0;
+}
+
+void CPlayer::Reset()
+{
+	m_RespawnTick = Server()->Tick();
+	m_DieTick = Server()->Tick();
+	m_ScoreStartTick = Server()->Tick();
+	m_pCharacter = 0;
+	m_SpecMode = SPEC_FREEVIEW;
+	m_SpectatorID = -1;
+	m_pSpecFlag = 0;
+	m_KillMe = 0;
+	m_ActiveSpecSwitch = 0;
+	m_LastActionTick = Server()->Tick();
+	m_TeamChangeTick = Server()->Tick();
+	m_InactivityTickCounter = 0;
+	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
+	m_RespawnDisabled = GameServer()->m_pController->GetStartRespawnState();
+	m_DeadSpecMode = false;
+	m_Spawning = 0;
+	m_WeakHookSpawn = false;
+
+	// F-DDrace
+
+	m_LastPlaytime = time_get();
+	m_Sent1stAfkWarning = 0;
+	m_Sent2ndAfkWarning = 0;
+	m_EyeEmote = true;
+	m_DefEmote = EMOTE_NORMAL;
+	m_Afk = false;
+	m_LastSetSpectatorMode = 0;
+
+	m_TuneZone = 0;
+	m_TuneZoneOld = m_TuneZone;
+	m_Halloween = false;
+	m_FirstPacket = true;
+
+	if (g_Config.m_Events)
+	{
+		time_t rawtime;
+		struct tm* timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		if ((timeinfo->tm_mon == 11 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 0 && timeinfo->tm_mday == 1))
+		{ // New Year
+			m_DefEmote = EMOTE_HAPPY;
+		}
+		else if ((timeinfo->tm_mon == 9 && timeinfo->tm_mday == 31) || (timeinfo->tm_mon == 10 && timeinfo->tm_mday == 1))
+		{ // Halloween
+			m_DefEmote = EMOTE_ANGRY;
+			m_Halloween = true;
+		}
+		else
+		{
+			m_DefEmote = EMOTE_NORMAL;
+		}
+	}
+	m_DefEmoteReset = -1;
+
+	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
+
+	m_ShowOthers = g_Config.m_SvShowOthersDefault;
+	m_ShowAll = g_Config.m_SvShowAllDefault;
+	m_SpecTeam = 0;
+	m_NinjaJetpack = false;
+
+	m_Paused = PAUSE_NONE;
+
+	m_LastPause = 0;
+	m_Score = -9999;
+	m_HasFinishScore = false;
+
+	// Variable initialized:
+	m_Last_Team = 0;
+
+	int64 Now = Server()->Tick();
+	int64 TickSpeed = Server()->TickSpeed();
+	// If the player joins within ten seconds of the server becoming
+	// non-empty, allow them to vote immediately. This allows players to
+	// vote after map changes or when they join an empty server.
+	//
+	// Otherwise, block voting in the begnning after joining.
+	if (Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
+		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
+	else
+		m_FirstVoteTick = Now;
+
+	m_NotEligibleForFinish = false;
+	m_EligibleForFinishCheck = 0;
 }
 
 void CPlayer::Tick()
@@ -96,7 +174,7 @@ void CPlayer::Tick()
 			if(m_pCharacter->IsAlive())
 				m_ViewPos = m_pCharacter->GetPos();
 		}
-		else if(m_Spawning && m_RespawnTick <= Server()->Tick())
+		else if(m_Spawning && !m_WeakHookSpawn && m_RespawnTick <= Server()->Tick())
 			TryRespawn();
 
 		if(!m_DeadSpecMode && m_LastActionTick != Server()->Tick())
@@ -132,6 +210,18 @@ void CPlayer::PostTick()
 		else if (GameServer()->m_apPlayers[m_SpectatorID])
 			m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->m_ViewPos;
 	}
+}
+
+void CPlayer::PostPostTick()
+{
+#ifdef CONF_DEBUG
+	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
+#endif
+	if (!Server()->ClientIngame(m_ClientID))
+		return;
+
+	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
+		TryRespawn();
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -227,12 +317,18 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
 		return;
 
+	AfkVoteTimer(NewInput);
+
 	if(m_pCharacter)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
+	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
+		return; // we must return if kicked, as player struct is already deleted
+	AfkVoteTimer(NewInput);
+
 	if(GameServer()->m_World.m_Paused)
 	{
 		m_PlayerFlags = NewInput->m_PlayerFlags;
@@ -316,6 +412,11 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
+void CPlayer::ThreadKillCharacter(int Weapon)
+{
+	m_KillMe = Weapon;
+}
+
 void CPlayer::KillCharacter(int Weapon)
 {
 	if(m_pCharacter)
@@ -326,7 +427,7 @@ void CPlayer::KillCharacter(int Weapon)
 	}
 }
 
-void CPlayer::Respawn()
+void CPlayer::Respawn(bool WeakHook)
 {
 	if(m_RespawnDisabled && m_Team != TEAM_SPECTATORS)
 	{
@@ -341,7 +442,10 @@ void CPlayer::Respawn()
 	m_DeadSpecMode = false;
 
 	if(m_Team != TEAM_SPECTATORS)
+	{
+		m_WeakHookSpawn = WeakHook;
 		m_Spawning = true;
+	}
 }
 
 bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
@@ -465,8 +569,204 @@ void CPlayer::TryRespawn()
 	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
 		return;
 
+	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
+
+	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
-	GameServer()->CreatePlayerSpawn(SpawnPos);
+	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+
+	if (g_Config.m_SvTeam == 3)
+	{
+		int NewTeam = 0;
+		for (; NewTeam < TEAM_SUPER; NewTeam++)
+			if (Controller->m_Teams.Count(NewTeam) == 0)
+				break;
+
+		if (NewTeam == TEAM_SUPER)
+			NewTeam = 0;
+
+		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
+		m_pCharacter->SetSolo(true);
+	}
+}
+
+bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
+{
+	/*
+		afk timer (x, y = mouse coordinates)
+		Since a player has to move the mouse to play, this is a better method than checking
+		the player's position in the game world, because it can easily be bypassed by just locking a key.
+		Frozen players could be kicked as well, because they can't move.
+		It also works for spectators.
+		returns true if kicked
+	*/
+
+	if (Server()->IsAuthed(m_ClientID))
+		return false; // don't kick admins
+	if (g_Config.m_SvMaxAfkTime == 0)
+		return false; // 0 = disabled
+
+	if (NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
+	{
+		m_LastPlaytime = time_get();
+		m_LastTarget_x = NewTargetX;
+		m_LastTarget_y = NewTargetY;
+		m_Sent1stAfkWarning = 0; // afk timer's 1st warning after 50% of sv_max_afk_time
+		m_Sent2ndAfkWarning = 0;
+
+	}
+	else
+	{
+		if (!m_Paused)
+		{
+			// not playing, check how long
+			if (m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
+			{
+				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
+					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+					(int)(g_Config.m_SvMaxAfkTime * 0.5),
+					g_Config.m_SvMaxAfkTime
+				);
+				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
+				m_Sent1stAfkWarning = 1;
+			}
+			else if (m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
+			{
+				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
+					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
+					(int)(g_Config.m_SvMaxAfkTime * 0.9),
+					g_Config.m_SvMaxAfkTime
+				);
+				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
+				m_Sent2ndAfkWarning = 1;
+			}
+			else if (m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+			{
+				m_pGameServer->Server()->Kick(m_ClientID, "Away from keyboard");
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
+{
+	if (g_Config.m_SvMaxAfkVoteTime == 0)
+		return;
+
+	if (mem_comp(NewTarget, &m_LastTarget, sizeof(CNetObj_PlayerInput)) != 0)
+	{
+		m_LastPlaytime = time_get();
+		mem_copy(&m_LastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
+	}
+	else if (m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
+	{
+		m_Afk = true;
+		return;
+	}
+
+	m_Afk = false;
+}
+
+void CPlayer::ProcessPause()
+{
+	if (m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())
+	{
+		m_ForcePauseTime = 0;
+		Pause(PAUSE_NONE, true);
+	}
+
+	if (m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && m_pCharacter->IsGrounded() && m_pCharacter->GetPos() == m_pCharacter->m_PrevPos)
+	{
+		m_pCharacter->Pause(true);
+		GameServer()->CreateDeath(m_pCharacter->GetPos(), m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+		GameServer()->CreateSound(m_pCharacter->GetPos(), SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+	}
+}
+
+int CPlayer::Pause(int State, bool Force)
+{
+	if (State < PAUSE_NONE || State > PAUSE_SPEC) // Invalid pause state passed
+		return 0;
+
+	if (!m_pCharacter)
+		return 0;
+
+	char aBuf[128];
+	if (State != m_Paused)
+	{
+		// Get to wanted state
+		switch (State) {
+		case PAUSE_PAUSED:
+		case PAUSE_NONE:
+			if (m_pCharacter->IsPaused()) // First condition might be unnecessary
+			{
+				if (!Force && m_LastPause && m_LastPause + g_Config.m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
+				{
+					GameServer()->SendChatTarget(m_ClientID, "Can't /spec that quickly.");
+					return m_Paused; // Do not update state. Do not collect $200
+				}
+				m_pCharacter->Pause(false);
+				GameServer()->CreatePlayerSpawn(m_pCharacter->GetPos(), m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+			}
+			// fall-thru
+		case PAUSE_SPEC:
+			if (g_Config.m_SvPauseMessages)
+			{
+				str_format(aBuf, sizeof(aBuf), (State > PAUSE_NONE) ? "'%s' speced" : "'%s' resumed", Server()->ClientName(m_ClientID));
+				GameServer()->SendChatTarget(-1, aBuf);
+			}
+			break;
+		}
+
+		// Update state
+		m_Paused = State;
+		m_LastPause = Server()->Tick();
+	}
+
+	return m_Paused;
+}
+
+int CPlayer::ForcePause(int Time)
+{
+	m_ForcePauseTime = Server()->Tick() + Server()->TickSpeed() * Time;
+
+	if (g_Config.m_SvPauseMessages)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), Time);
+		GameServer()->SendChatTarget(-1, aBuf);
+	}
+
+	return Pause(PAUSE_SPEC, true);
+}
+
+int CPlayer::IsPaused()
+{
+	return m_ForcePauseTime ? m_ForcePauseTime : -1 * m_Paused;
+}
+
+bool CPlayer::IsPlaying()
+{
+	if (m_pCharacter && m_pCharacter->IsAlive())
+		return true;
+	return false;
+}
+
+void CPlayer::SpectatePlayerName(const char* pName)
+{
+	if (!pName)
+		return;
+
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (i != m_ClientID && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
+		{
+			m_SpectatorID = i;
+			return;
+		}
+	}
 }

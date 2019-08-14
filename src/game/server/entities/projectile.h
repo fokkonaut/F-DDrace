@@ -6,8 +6,21 @@
 class CProjectile : public CEntity
 {
 public:
-	CProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, vec2 Dir, int Span,
-		int Damage, bool Explosive, float Force, int SoundImpact, int Weapon);
+	CProjectile
+	(
+		CGameWorld* pGameWorld,
+		int Type,
+		int Owner,
+		vec2 Pos,
+		vec2 Dir,
+		int Span,
+		bool Freeeze,
+		bool Explosive,
+		float Force,
+		int SoundImpact,
+		int Layer = 0,
+		int Number = 0
+	);
 
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
@@ -19,15 +32,24 @@ public:
 
 private:
 	vec2 m_Direction;
+	int m_InitialLifeSpan;
 	int m_LifeSpan;
 	int m_Owner;
 	int m_Type;
-	int m_Damage;
 	int m_SoundImpact;
-	int m_Weapon;
 	float m_Force;
 	int m_StartTick;
 	bool m_Explosive;
+
+	// F-DDrace
+
+	int m_Bouncing;
+	bool m_Freeze;
+	int m_TuneZone;
+
+public:
+
+	void SetBouncing(int Value);
 };
 
 #endif

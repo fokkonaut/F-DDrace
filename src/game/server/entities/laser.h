@@ -8,7 +8,7 @@
 class CLaser : public CEntity
 {
 public:
-	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner);
+	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -22,10 +22,21 @@ protected:
 private:
 	vec2 m_From;
 	vec2 m_Dir;
+	vec2 m_TelePos;
+	bool m_WasTele;
 	float m_Energy;
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
+	int m_TeamMask;
+
+	// DDRace
+
+	vec2 m_PrevPos;
+	int m_Type;
+	int m_TuneZone;
+	bool m_TeleportCancelled;
+	bool m_IsBlueTeleport;
 };
 
 #endif
