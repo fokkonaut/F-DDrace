@@ -223,8 +223,6 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
-	int OldTeam = m_Core.Team(ClientID);
-
 	if (Team != m_Core.Team(ClientID))
 		ForceLeaveTeam(ClientID);
 	else
