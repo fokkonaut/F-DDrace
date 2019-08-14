@@ -7,7 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <string.h>
-#include "../gamemodes/DDRace.h"
+#include "../gamemodes/ddrace.h"
 #include "file_score.h"
 #include <engine/shared/console.h>
 

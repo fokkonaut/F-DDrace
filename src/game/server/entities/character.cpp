@@ -454,7 +454,7 @@ void CCharacter::FireWeapon()
 				else
 					Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
 
-				CProjectile *pProj = new CProjectile
+				new CProjectile
 						(
 						GameWorld(),
 						WEAPON_GUN,//Type
@@ -492,7 +492,7 @@ void CCharacter::FireWeapon()
 			else
 				Lifetime = (int)(Server()->TickSpeed()*GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
 
-			CProjectile *pProj = new CProjectile
+			new CProjectile
 					(
 					GameWorld(),
 					WEAPON_GRENADE,//Type

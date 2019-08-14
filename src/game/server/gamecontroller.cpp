@@ -498,7 +498,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 	if(Type != -1)
 	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, Pos, SubType, Layer, Number);
+		new CPickup(&GameServer()->m_World, Type, Pos, SubType, Layer, Number);
 		return true;
 	}
 
