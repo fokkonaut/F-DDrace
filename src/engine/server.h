@@ -33,6 +33,7 @@ public:
 	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
 	virtual int GetClientVersion(int ClientID) const = 0;
+	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
@@ -62,7 +63,7 @@ public:
 		RCON_CID_VOTE=-2,
 	};
 	virtual void SetRconCID(int ClientID) = 0;
-	virtual bool IsAuthed(int ClientID) const = 0;
+	virtual int IsAuthed(int ClientID) const = 0;
 	virtual bool IsBanned(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 
@@ -76,8 +77,9 @@ class IGameServer : public IInterface
 protected:
 public:
 	virtual void OnInit() = 0;
+	virtual void OnMapChange(char* pNewMapName, int MapNameSize) = 0;
 	virtual void OnConsoleInit() = 0;
-	virtual void OnShutdown() = 0;
+	virtual void OnShutdown(bool FullShutdown = false) = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;

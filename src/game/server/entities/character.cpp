@@ -49,6 +49,7 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_Health = 0;
 	m_Armor = 0;
 	m_TriggeredEvents = 0;
+	m_StrongWeakID = 0;
 }
 
 void CCharacter::Reset()
@@ -365,11 +366,16 @@ void CCharacter::FireWeapon()
 	if(!m_aWeapons[m_ActiveWeapon].m_Ammo)
 	{
 		// 125ms is a magical limit of how fast a human can click
-		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
+		/*m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
 		if(m_LastNoAmmoSound+Server()->TickSpeed() <= Server()->Tick())
 		{
 			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
 			m_LastNoAmmoSound = Server()->Tick();
+		}*/
+		if (m_FreezeTime && m_PainSoundTimer <= 0)
+		{
+			m_PainSoundTimer = 1 * Server()->TickSpeed();
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		}
 		return;
 	}
@@ -544,9 +550,9 @@ void CCharacter::FireWeapon()
 	{
 		float FireDelay;
 		if (!m_TuneZone)
-			GameServer()->Tuning()->Get(38 + m_ActiveWeapon, &FireDelay);
+			GameServer()->Tuning()->Get(37 + m_ActiveWeapon, &FireDelay);
 		else
-			GameServer()->TuningList()[m_TuneZone].Get(38 + m_ActiveWeapon, &FireDelay);
+			GameServer()->TuningList()[m_TuneZone].Get(37 + m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -730,6 +736,8 @@ void CCharacter::Tick()
 	// handle Weapons
 	HandleWeapons();
 
+	DDracePostCoreTick();
+
 	m_PrevPos = m_Core.m_Pos;
 }
 
@@ -839,9 +847,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
-	// we got to wait 0.5 secs before respawning
 	m_Alive = false;
-	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
@@ -984,7 +990,7 @@ void CCharacter::Snap(int SnappingClient)
 			&& !CanCollide(SnappingClient) && !SnapPlayer->m_ShowOthers)
 			return;
 
-		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpectatorID() == -1
+		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpecMode() == SPEC_FREEVIEW
 			&& !CanCollide(SnappingClient) && SnapPlayer->m_SpecTeam)
 			return;
 	}
@@ -1057,7 +1063,9 @@ void CCharacter::Snap(int SnappingClient)
 	{
 		pCharacter->m_Health = m_Health;
 		pCharacter->m_Armor = m_Armor;
-		if(m_ActiveWeapon == WEAPON_NINJA)
+		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+			pCharacter->m_AmmoCount = m_FreezeTick + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
+		else if(m_ActiveWeapon == WEAPON_NINJA)
 			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		else if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0)
 			pCharacter->m_AmmoCount = !m_FreezeTime ? m_aWeapons[m_ActiveWeapon].m_Ammo : 0;
@@ -1854,7 +1862,7 @@ void CCharacter::DDraceTick()
 	{
 		if (m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
 		{
-			//GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), (m_FreezeTime + 1) / Server()->TickSpeed(), 0, true, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		}
 		if (m_FreezeTime > 0)
 			m_FreezeTime--;
@@ -1961,6 +1969,7 @@ bool CCharacter::Freeze(int Seconds)
 			}
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 		return true;
 	}
 	return false;
@@ -1985,6 +1994,7 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
 		if (m_ActiveWeapon == WEAPON_HAMMER) m_ReloadTimer = 0;
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 		return true;
 	}
 	return false;
@@ -2014,6 +2024,17 @@ void CCharacter::Pause(bool Pause)
 
 void CCharacter::DDraceInit()
 {
+	m_LastRefillJumps = false;
+	m_LastPenalty = false;
+	m_LastBonus = false;
+
+	m_HasTeleGun = false;
+	m_HasTeleLaser = false;
+	m_HasTeleGrenade = false;
+	m_TeleGunTeleport = false;
+	m_IsBlueTeleGunTeleport = false;
+	m_Solo = false;
+
 	m_Paused = false;
 	m_DDraceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;

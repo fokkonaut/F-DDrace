@@ -322,7 +322,7 @@ void CDragger::Snap(int SnappingClient)
 
 		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
 					|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
-				&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != SPEC_FREEVIEW)
+				&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;

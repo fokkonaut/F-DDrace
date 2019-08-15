@@ -19,7 +19,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool Dummy, bool AsSpe
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
-	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam();
+	m_Team = AsSpec ? TEAM_SPECTATORS : TEAM_RED;
 	m_Dummy = Dummy;
 	Reset();
 }
@@ -32,8 +32,8 @@ CPlayer::~CPlayer()
 
 void CPlayer::Reset()
 {
-	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
+	m_PreviousDieTick = m_DieTick;
 	m_ScoreStartTick = Server()->Tick();
 	m_pCharacter = 0;
 	m_SpecMode = SPEC_FREEVIEW;
@@ -43,11 +43,9 @@ void CPlayer::Reset()
 	m_ActiveSpecSwitch = 0;
 	m_LastActionTick = Server()->Tick();
 	m_TeamChangeTick = Server()->Tick();
-	m_InactivityTickCounter = 0;
-	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
-	m_RespawnDisabled = GameServer()->m_pController->GetStartRespawnState();
+	m_IsReadyToPlay = 0;
 	m_DeadSpecMode = false;
-	m_Spawning = 0;
+	m_Spawning = true;
 	m_WeakHookSpawn = false;
 
 	// F-DDrace
@@ -124,6 +122,13 @@ void CPlayer::Tick()
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
+	if (m_KillMe != 0)
+	{
+		KillCharacter(m_KillMe);
+		m_KillMe = 0;
+		return;
+	}
+
 	Server()->SetClientScore(m_ClientID, m_Score);
 
 	// do latency stuff
@@ -147,19 +152,12 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(m_pCharacter && !m_pCharacter->IsAlive())
+	if (!GameServer()->m_World.m_Paused)
 	{
-		delete m_pCharacter;
-		m_pCharacter = 0;
-	}
-
-	if(!GameServer()->m_pController->IsGamePaused())
-	{
-		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_SpecMode == SPEC_FREEVIEW)
-			m_ViewPos -= vec2(clamp(m_ViewPos.x-m_LatestActivity.m_TargetX, -500.0f, 500.0f), clamp(m_ViewPos.y-m_LatestActivity.m_TargetY, -400.0f, 400.0f));
-
-		if(!m_pCharacter && m_DieTick+Server()->TickSpeed()*3 <= Server()->Tick() && !m_DeadSpecMode)
-			Respawn();
+		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
+		int RespawnTick = max(m_DieTick, EarliestRespawnTick);
+		if (!m_pCharacter && RespawnTick <= Server()->Tick())
+			m_Spawning = true;
 
 		if(!m_pCharacter && m_Team == TEAM_SPECTATORS && m_pSpecFlag)
 		{
@@ -171,23 +169,38 @@ void CPlayer::Tick()
 
 		if(m_pCharacter)
 		{
-			if(m_pCharacter->IsAlive())
-				m_ViewPos = m_pCharacter->GetPos();
+			if (m_pCharacter->IsAlive())
+			{
+				ProcessPause();
+				if (!m_Paused)
+					m_ViewPos = m_pCharacter->GetPos();
+			}
+			else if (!m_pCharacter->IsPaused())
+			{
+				delete m_pCharacter;
+				m_pCharacter = 0;
+			}
 		}
-		else if(m_Spawning && !m_WeakHookSpawn && m_RespawnTick <= Server()->Tick())
+		else if(m_Spawning && !m_WeakHookSpawn)
 			TryRespawn();
-
-		if(!m_DeadSpecMode && m_LastActionTick != Server()->Tick())
-			++m_InactivityTickCounter;
 	}
 	else
 	{
-		++m_RespawnTick;
+		++m_PreviousDieTick;
 		++m_DieTick;
 		++m_ScoreStartTick;
 		++m_LastActionTick;
 		++m_TeamChangeTick;
  	}
+
+	m_TuneZoneOld = m_TuneZone; // determine needed tunings with viewpos
+	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_ViewPos);
+	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+
+	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
+	{
+		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
+	}
 }
 
 void CPlayer::PostTick()
@@ -203,7 +216,7 @@ void CPlayer::PostTick()
 	}
 
 	// update view pos for spectators and dead players
-	if((m_Team == TEAM_SPECTATORS || m_DeadSpecMode) && m_SpecMode != SPEC_FREEVIEW)
+	if((m_Team == TEAM_SPECTATORS || m_Paused || m_DeadSpecMode) && m_SpecMode != SPEC_FREEVIEW)
 	{
 		if(m_pSpecFlag)
 			m_ViewPos = m_pSpecFlag->GetPos();
@@ -236,17 +249,17 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
 	if(Server()->IsAuthed(m_ClientID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
-	if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
+	if(m_IsReadyToPlay)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
-	if(m_RespawnDisabled && (!GetCharacter() || !GetCharacter()->IsAlive()))
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
-	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_DeadSpecMode) && (SnappingClient == m_SpectatorID))
+	/*if(!GetCharacter() || !GetCharacter()->IsAlive())
+		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;*/
+	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused || m_DeadSpecMode) && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 
 	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Score = m_Score;
 
-	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_DeadSpecMode))
+	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_DeadSpecMode))
 	{
 		CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
 		if(!pSpectatorInfo)
@@ -319,7 +332,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter)
+	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
@@ -334,6 +347,9 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_PlayerFlags = NewInput->m_PlayerFlags;
 		return;
 	}
+
+	if (((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpecMode == SPEC_FREEVIEW)
+		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
 
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -351,7 +367,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if(m_pCharacter)
+	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnDirectInput(NewInput);
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
@@ -401,7 +417,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_LatestActivity.m_TargetX = NewInput->m_TargetX;
 		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
 		m_LastActionTick = Server()->Tick();
-		m_InactivityTickCounter = 0;
 	}
 }
 
@@ -429,18 +444,6 @@ void CPlayer::KillCharacter(int Weapon)
 
 void CPlayer::Respawn(bool WeakHook)
 {
-	if(m_RespawnDisabled && m_Team != TEAM_SPECTATORS)
-	{
-		// enable spectate mode for dead players
-		m_DeadSpecMode = true;
-		m_IsReadyToPlay = true;
-		m_SpecMode = SPEC_PLAYER;
-		UpdateDeadSpecMode();
-		return;
-	}
-
-	m_DeadSpecMode = false;
-
 	if(m_Team != TEAM_SPECTATORS)
 	{
 		m_WeakHookSpawn = WeakHook;
@@ -456,7 +459,7 @@ bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
 		return false;
 	}
 
-	if(m_Team == TEAM_SPECTATORS)
+	if(m_Team == TEAM_SPECTATORS || m_Paused)
 	{
 		// check for freeview or if wanted player is playing
 		if(SpecMode != SPEC_PLAYER || (SpecMode == SPEC_PLAYER && GameServer()->m_apPlayers[SpectatorID] && GameServer()->m_apPlayers[SpectatorID]->GetTeam() != TEAM_SPECTATORS))
@@ -506,7 +509,7 @@ bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
 bool CPlayer::DeadCanFollow(CPlayer *pPlayer) const
 {
 	// check if wanted player is in the same team and alive
-	return (!pPlayer->m_RespawnDisabled || (pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsAlive())) && pPlayer->GetTeam() == m_Team;
+	return (pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsAlive()) && pPlayer->GetTeam() == m_Team;
 }
 
 void CPlayer::UpdateDeadSpecMode()
@@ -539,9 +542,6 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_SpectatorID = -1;
 	m_pSpecFlag = 0;
 	m_DeadSpecMode = false;
-
-	// we got to wait 0.5 secs before respawning
-	m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 
 	if(Team == TEAM_SPECTATORS)
 	{

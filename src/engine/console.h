@@ -4,6 +4,7 @@
 #define ENGINE_CONSOLE_H
 
 #include "kernel.h"
+#include <engine/storage.h>
 
 class IConsole : public IInterface
 {
@@ -19,6 +20,7 @@ public:
 
 		ACCESS_LEVEL_ADMIN=0,
 		ACCESS_LEVEL_MOD,
+		ACCESS_LEVEL_USER,
 
 		TEMPCMD_NAME_LENGTH=32,
 		TEMPCMD_HELP_LENGTH=96,
@@ -27,6 +29,9 @@ public:
 		TEMPMAP_NAME_LENGTH = 32,
 
 		MAX_PRINT_CB=4,
+
+		CLIENT_ID_GAME=-2,
+		CLIENT_ID_NO_GAME=-3,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
@@ -88,16 +93,18 @@ public:
 	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	virtual void ExecuteLine(const char *pStr) = 0;
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr) = 0;
-	virtual void ExecuteFile(const char *pFilename) = 0;
+	virtual void ExecuteLine(const char* Sptr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteLineFlag(const char* Sptr, int FlasgMask, int ClientID = -1, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char* pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData) = 0;
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false) = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
+
+	virtual void ResetServerGameSettings() = 0;
 
 	// DDRace
 

@@ -108,7 +108,7 @@ void CPlasma::Snap(int SnappingClient)
 		&& !SnapPlayer->m_ShowOthers)
 		return;
 
-	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpectatorID() == -1
+	if(SnapPlayer && (SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpecMode() == SPEC_FREEVIEW
 		&& SnapChar
 		&& SnapChar->Team() != m_ResponsibleTeam
 		&& SnapPlayer->m_SpecTeam)

@@ -59,6 +59,7 @@ public:
 	int m_aActLatency[MAX_CLIENTS];
 
 	// used for spectator mode
+	int GetSpecMode() { return m_SpecMode; };
 	int GetSpectatorID() const { return m_SpectatorID; }
 	bool SetSpectatorID(int SpecMode, int SpectatorID);
 	bool m_DeadSpecMode;
@@ -67,8 +68,6 @@ public:
 
 	bool m_IsReadyToEnter;
 	bool m_IsReadyToPlay;
-
-	bool m_RespawnDisabled;
 
 	//
 	int m_Vote;
@@ -94,14 +93,12 @@ public:
 		int m_aSkinPartColors[NUM_SKINPARTS];
 	} m_TeeInfos;
 
-	int m_RespawnTick;
+	int m_PreviousDieTick;
 	int m_DieTick;
 	int m_Score;
 	int m_ScoreStartTick;
 	int m_LastActionTick;
 	int m_TeamChangeTick;
-
-	int m_InactivityTickCounter;
 
 	struct
 	{

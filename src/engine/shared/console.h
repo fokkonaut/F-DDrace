@@ -56,11 +56,11 @@ class CConsole : public IConsole
 	static void Con_Exec(IResult *pResult, void *pUserData);
 	static void ConToggle(IResult *pResult, void *pUser);
 	static void ConToggleStroke(IResult *pResult, void *pUser);
-	static void ConModCommandAccess(IResult *pResult, void *pUser);
-	static void ConModCommandStatus(IResult *pResult, void *pUser);
+	static void ConCommandAccess(IResult *pResult, void *pUser);
+	static void ConCommandStatus(IResult *pResult, void *pUser);
 
 	void ExecuteFileRecurse(const char *pFilename);
-	void ExecuteLineStroked(int Stroke, const char *pStr);
+	void ExecuteLineStroked(int Stroke, const char* pStr, int ClientID = -1, bool InterpretSemicolons = true);
 
 	struct
 	{
@@ -134,6 +134,14 @@ class CConsole : public IConsole
 	int ParseStart(CResult *pResult, const char *pString, int Length);
 	int ParseArgs(CResult *pResult, const char *pFormat);
 
+	/*
+	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and
+	return the parameter; descriptions in brackets like [file] will be skipped;
+	returns '\0' if there is no next parameter; expects pFormat to point at a
+	parameter
+	*/
+	char NextParam(const char*& pFormat);
+
 	class CExecutionQueue
 	{
 		CHeap m_Queue;
@@ -200,15 +208,16 @@ public:
 	virtual void StoreCommands(bool Store);
 
 	virtual bool LineIsValid(const char *pStr);
-	virtual void ExecuteLine(const char *pStr);
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask);
-	virtual void ExecuteFile(const char *pFilename);
+	virtual void ExecuteLine(const char* pStr, int ClientID = -1, bool InterpretSemicolons = true);
+	virtual void ExecuteLineFlag(const char* pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
+	virtual void ExecuteFile(const char* pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_MOD)); }
+	void ResetServerGameSettings();
 
 	// F-DDrace
 

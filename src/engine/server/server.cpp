@@ -289,6 +289,8 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
 
+	m_RconRestrict = -1;
+
 	m_RconPasswordSet = 0;
 	m_GeneratedRconPassword = 0;
 
@@ -384,7 +386,7 @@ void CServer::SetRconCID(int ClientID)
 	m_RconClientID = ClientID;
 }
 
-bool CServer::IsAuthed(int ClientID) const
+int CServer::IsAuthed(int ClientID) const
 {
 	return m_aClients[ClientID].m_Authed;
 }
@@ -748,7 +750,7 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel)
+		if (pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
 			pThis->SendRconLine(i, pLine);
 	}
 
@@ -1234,6 +1236,7 @@ int CServer::LoadMap(const char *pMapName)
 {
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
+	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
 
 	// check for valid standard map
 	if(!m_MapChecker.ReadAndValidateMap(Storage(), aBuf, IStorage::TYPE_ALL))
@@ -1367,11 +1370,11 @@ int CServer::Run()
 				if(LoadMap(g_Config.m_SvMap))
 				{
 					// new map loaded
+					GameServer()->OnShutdown();
+
 					bool aSpecs[MAX_CLIENTS];
 					for(int c = 0; c < MAX_CLIENTS; c++)
 						aSpecs[c] = GameServer()->IsClientSpectator(c);
-
-					GameServer()->OnShutdown();
 
 					for(int c = 0; c < MAX_CLIENTS; c++)
 					{
@@ -1473,7 +1476,7 @@ int CServer::Run()
 		m_Econ.Shutdown();
 	}
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(true);
 	m_pMap->Unload();
 
 	if(m_pCurrentMapData)

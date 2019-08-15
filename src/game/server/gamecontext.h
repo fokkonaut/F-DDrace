@@ -43,6 +43,7 @@ class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
 	class IConsole *m_pConsole;
+	IStorage* m_pStorage;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -65,10 +66,6 @@ class CGameContext : public IGameServer
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
-	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
-	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
-	static void ConLockTeams(IConsole::IResult *pResult, void *pUserData);
-	static void ConForceTeamBalance(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
@@ -84,6 +81,7 @@ class CGameContext : public IGameServer
 public:
 	IServer *Server() const { return m_pServer; }
 	class IConsole *Console() { return m_pConsole; }
+	IStorage* Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams* TuningList() { return &m_aTuningList[0]; }
@@ -127,6 +125,9 @@ public:
 	int m_VoteEnforce;
 	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
+
+	char m_aDeleteTempfile[128];
+	void DeleteTempfile();
 
 	enum
 	{
@@ -172,13 +173,16 @@ public:
 	void CheckPureTuning();
 	void SendTuningParams(int ClientID, int Zone = 0);
 
+	void LoadMapSettings();
+
 	//
 	void SwapTeams();
 
 	// engine events
 	virtual void OnInit();
 	virtual void OnConsoleInit();
-	virtual void OnShutdown();
+	virtual void OnMapChange(char* pNewMapName, int MapNameSize);
+	virtual void OnShutdown(bool FullShutdown = false);
 
 	virtual void OnTick();
 	virtual void OnPreSnap();
@@ -329,11 +333,16 @@ public:
 		VOTE_ENFORCE_YES_ADMIN
 	};
 	int m_VoteEnforcer;
+	static void SendChatResponse(const char* pLine, void* pUser, bool Highlighted = false);
+	static void SendChatResponseAll(const char* pLine, void* pUser);
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
 
 	void ResetTuning();
+
+	int m_ChatResponseTargetID;
+	int m_ChatPrintCBIndex;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

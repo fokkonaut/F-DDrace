@@ -218,8 +218,11 @@ void CCharacterCore::Tick(bool UseInput)
 	// handle jumping
 	// 1 bit = to keep track if a jump has been made on this input
 	// 2 bit = to keep track if a air-jump has been made
-	if(Grounded)
+	if (Grounded)
+	{
 		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)

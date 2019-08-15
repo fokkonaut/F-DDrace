@@ -139,9 +139,6 @@ void CGameWorld::Reset()
 		}
 	RemoveEntities();
 
-	GameServer()->m_pController->OnReset();
-	RemoveEntities();
-
 	m_ResetRequested = false;
 }
 

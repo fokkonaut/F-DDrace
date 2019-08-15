@@ -4,12 +4,15 @@
 #define ENGINE_SHARED_DATAFILE_H
 
 #include <base/hash.h>
+#include <base/system.h>
 
 // raw datafile access
 class CDataFileReader
 {
 	struct CDatafile *m_pDataFile;
 	void *GetDataImpl(int Index, int Swap);
+	int GetFileDataSize(int Index);
+
 public:
 	CDataFileReader() : m_pDataFile(0) {}
 	~CDataFileReader() { Close(); }
@@ -21,7 +24,7 @@ public:
 
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
-	int GetDataSize(int Index) const;
+	int GetDataSize(int Index);
 	void ReplaceData(int Index, char *pData);
 	void UnloadData(int Index);
 	void *GetItem(int Index, int *pType, int *pID);
@@ -81,6 +84,8 @@ class CDataFileWriter
 public:
 	CDataFileWriter();
 	~CDataFileWriter();
+	void Init();
+	bool OpenFile(class IStorage* pStorage, const char* pFilename);
 	bool Open(class IStorage *pStorage, const char *Filename);
 	int AddData(int Size, void *pData);
 	int AddDataSwapped(int Size, void *pData);

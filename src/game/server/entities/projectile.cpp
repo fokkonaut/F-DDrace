@@ -34,7 +34,6 @@ CProjectile::CProjectile
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
-	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
@@ -229,7 +228,7 @@ void CProjectile::Tick()
 		}
 		else if (m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamage(m_Pos, m_Owner, m_Direction*-1, 3, 0, m_Owner == pTargetChr->GetPlayer()->GetCID(), m_Owner != -1 ? TeamMask : -1LL);
+			GameServer()->CreateDamage(CurPos, m_Owner, m_Direction, /*9*/0, 1, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
 			return;
 		}

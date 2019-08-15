@@ -241,14 +241,25 @@ int CDataFileReader::NumData() const
 	return m_pDataFile->m_Header.m_NumRawData;
 }
 
-// always returns the size in the file
-int CDataFileReader::GetDataSize(int Index) const
+// returns the size in the file
+int CDataFileReader::GetFileDataSize(int Index)
 {
-	if(!m_pDataFile) { return 0; }
+	if (!m_pDataFile) { return 0; }
 
-	if(Index == m_pDataFile->m_Header.m_NumRawData-1)
-		return m_pDataFile->m_Header.m_DataSize-m_pDataFile->m_Info.m_pDataOffsets[Index];
-	return m_pDataFile->m_Info.m_pDataOffsets[Index+1]-m_pDataFile->m_Info.m_pDataOffsets[Index];
+	if (Index == m_pDataFile->m_Header.m_NumRawData - 1)
+		return m_pDataFile->m_Header.m_DataSize - m_pDataFile->m_Info.m_pDataOffsets[Index];
+	return m_pDataFile->m_Info.m_pDataOffsets[Index + 1] - m_pDataFile->m_Info.m_pDataOffsets[Index];
+}
+
+// returns the size of the resulting data
+int CDataFileReader::GetDataSize(int Index)
+{
+	if (!m_pDataFile) { return 0; }
+
+	if (m_pDataFile->m_Header.m_Version == 4)
+		return m_pDataFile->m_Info.m_pDataSizes[Index];
+	else
+		return GetFileDataSize(Index);
 }
 
 void *CDataFileReader::GetDataImpl(int Index, int Swap)
@@ -456,25 +467,32 @@ CDataFileWriter::~CDataFileWriter()
 	m_pDatas = 0;
 }
 
-bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename)
+bool CDataFileWriter::OpenFile(class IStorage* pStorage, const char* pFilename)
 {
 	dbg_assert(!m_File, "a file already exists");
 	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(!m_File)
-		return false;
+	return m_File != 0;
+}
 
+void CDataFileWriter::Init()
+{
+	dbg_assert(!m_File, "a file already exists");
 	m_NumItems = 0;
 	m_NumDatas = 0;
 	m_NumItemTypes = 0;
 	mem_zero(m_pItemTypes, sizeof(CItemTypeInfo) * MAX_ITEM_TYPES);
 
-	for(int i = 0; i < MAX_ITEM_TYPES; i++)
+	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		m_pItemTypes[i].m_First = -1;
 		m_pItemTypes[i].m_Last = -1;
 	}
+}
 
-	return true;
+bool CDataFileWriter::Open(class IStorage* pStorage, const char* pFilename)
+{
+	Init();
+	return OpenFile(pStorage, pFilename);
 }
 
 int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)

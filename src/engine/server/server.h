@@ -158,6 +158,8 @@ public:
 
 	int64 m_Lastheartbeat;
 
+	int m_RconRestrict;
+
 	// map
 	enum
 	{
@@ -215,7 +217,7 @@ public:
 	void InitRconPasswordIfUnset();
 
 	void SetRconCID(int ClientID);
-	bool IsAuthed(int ClientID) const;
+	int IsAuthed(int ClientID) const;
 	bool IsBanned(int ClientID);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo) const;
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size) const;
@@ -281,6 +283,8 @@ public:
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int ID, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
+
+	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 };
 
 #endif

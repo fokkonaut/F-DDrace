@@ -156,7 +156,7 @@ void CPickup::Snap(int SnappingClient)
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
 				|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
-			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != SPEC_FREEVIEW)
+			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
 	int Tick = (Server()->Tick()%Server()->TickSpeed())%11;
@@ -172,7 +172,7 @@ void CPickup::Snap(int SnappingClient)
 
 	pP->m_X = (int)m_Pos.x;
 	pP->m_Y = (int)m_Pos.y;
-	pP->m_Type = m_Type;
+	pP->m_Type = GetPickupType();
 }
 
 void CPickup::Move()
@@ -187,4 +187,20 @@ void CPickup::Move()
 		}
 		m_Pos += m_Core;
 	}
+}
+
+int CPickup::GetPickupType()
+{
+	switch (m_Subtype)
+	{
+	case WEAPON_SHOTGUN:
+		return PICKUP_SHOTGUN;
+	case WEAPON_GRENADE:
+		return PICKUP_GRENADE;
+	case WEAPON_LASER:
+		return PICKUP_LASER;
+	}
+
+	// health and armor
+	return m_Type;
 }
