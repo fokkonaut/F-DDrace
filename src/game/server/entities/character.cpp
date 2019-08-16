@@ -73,7 +73,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	SetActiveWeapon(WEAPON_GUN);
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 
@@ -83,6 +82,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Core.Reset();
 	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDrace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts);
 	m_Core.m_Pos = m_Pos;
+	SetActiveWeapon(WEAPON_GUN);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
 	m_ReckoningTick = 0;

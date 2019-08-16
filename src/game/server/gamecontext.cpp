@@ -1968,6 +1968,7 @@ void CGameContext::OnInit()
 	// init everything
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
