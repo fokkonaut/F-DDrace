@@ -1312,7 +1312,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					if (pPlayer->GetTeam() == TEAM_SPECTATORS || pMsg->m_Team == TEAM_SPECTATORS)
 						m_VoteUpdate = true;
 					pPlayer->m_TeamChangeTick = Server()->Tick() + Server()->TickSpeed() * 3;
-					m_pController->DoTeamChange(pPlayer, pMsg->m_Team);
+					pPlayer->SetTeam(pMsg->m_Team);
 				}
 			}
 			else
@@ -2099,6 +2099,7 @@ void CGameContext::OnInit()
 			if (Index >= ENTITY_OFFSET)
 			{
 				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+				((CGameControllerDDrace*)m_pController)->OnEntity(Index, Pos);
 				m_pController->OnEntity(Index, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
 			}
 
@@ -2136,6 +2137,7 @@ void CGameContext::OnInit()
 				if (Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+					((CGameControllerDDrace*)m_pController)->OnEntity(Index, Pos);
 					m_pController->OnEntity(Index, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
 				}
 			}
@@ -2887,7 +2889,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		//StrToInts(pDummy->m_TeeInfos.m_aaSkinPartNames[p], 6, aaSkinPartNames[p]);
-		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 0;
+		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 1;
 		pDummy->m_TeeInfos.m_aSkinPartColors[p] = 0;
 	}
 

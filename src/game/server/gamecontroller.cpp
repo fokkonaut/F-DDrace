@@ -526,32 +526,6 @@ void IGameController::Tick()
 	}
 }
 
-void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
-{
-	Team = ClampTeam(Team);
-	if(Team == pPlayer->GetTeam())
-		return;
-
-	int OldTeam = pPlayer->GetTeam();
-	pPlayer->SetTeam(Team);
-
-	int ClientID = pPlayer->GetCID();
-
-	// notify clients
-	CNetMsg_Sv_Team Msg;
-	Msg.m_ClientID = ClientID;
-	Msg.m_Team = Team;
-	Msg.m_Silent = DoChatMsg ? 0 : 1;
-	Msg.m_CooldownTick = pPlayer->m_TeamChangeTick;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	GameServer()->OnClientTeamChange(ClientID);
-}
-
 void IGameController::UpdateGameInfo(int ClientID)
 {
 	CNetMsg_Sv_GameInfo GameInfoMsg;

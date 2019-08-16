@@ -123,7 +123,6 @@ public:
 		int m_aSkinPartColors[NUM_SKINPARTS];
 	} m_TeeInfos;
 
-	int m_RespawnTick;
 	int m_PreviousDieTick;
 	int m_DieTick;
 	int m_Score;

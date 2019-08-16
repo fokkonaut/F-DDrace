@@ -162,8 +162,7 @@ MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_
 
 // flags
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 0, 0, 1, CFGFLAG_SERVER, "Whether flags create a public sound on drop/pickup/respawn")
-MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether flags are hookable")
-MACRO_CONFIG_INT(SvFlagSpectating, sv_flag_spectating, 0, 0, 1, CFGFLAG_SERVER, "Whether you can spectate flags")
+MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable")
 
 // dummy
 MACRO_CONFIG_INT(SvHideDummies, sv_hide_dummies, 1, 0, 2, CFGFLAG_SERVER, "Whether to hide server-side dummies (0=show dummies, 1=show in scoreboard, 2=hide in browser and scoreboard)")
@@ -172,8 +171,6 @@ MACRO_CONFIG_INT(SvDefaultDummies, sv_default_dummies, 0, 0, 1, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvFakeDummyPing, sv_fake_dummy_ping, 0, 0, 1, CFGFLAG_SERVER, "Whether ping of server-side dummies are more natural or 1000")
 MACRO_CONFIG_INT(V3OffsetX, v3_offset_x, -1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy")
 MACRO_CONFIG_INT(V3OffsetY, v3_offset_y, -1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset Y for the blmapV3 dummy")
-
-MACRO_CONFIG_INT(SvHideServerInfo, sv_hide_server_info, 0, 0, 1, CFGFLAG_SERVER, "Whether to hide server info like map and gametype from the browser")
 
 // weapon indicator
 MACRO_CONFIG_INT(SvWeaponIndicatorDefault, sv_weapon_indicator_default, 0, 0, 1, CFGFLAG_SERVER, "Whether the weapon names are displayed under the health and armor bars")
@@ -204,6 +201,4 @@ MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 1, 1, 50, CFGF
 MACRO_CONFIG_INT(SvDefaultScore, sv_default_score, 0, 0, 1, CFGFLAG_SERVER, "Default score (0 = time, 1 = level)")
 
 MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 1, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound")
-
-MACRO_CONFIG_INT(SvFakeBlocks, sv_fake_blocks, 1, 0, 1, CFGFLAG_SERVER, "Whether fake blocks are activated")
 #endif

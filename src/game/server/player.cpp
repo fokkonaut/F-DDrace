@@ -32,7 +32,6 @@ CPlayer::~CPlayer()
 
 void CPlayer::Reset()
 {
-	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_ScoreStartTick = Server()->Tick();
@@ -218,12 +217,11 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning && !m_WeakHookSpawn && m_RespawnTick <= Server()->Tick())
+		else if(m_Spawning && !m_WeakHookSpawn)
 			TryRespawn();
 	}
 	else
 	{
-		++m_RespawnTick;
 		++m_PreviousDieTick;
 		++m_DieTick;
 		++m_ScoreStartTick;
@@ -328,6 +326,8 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
 	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
+	if (m_IsDummy)
+		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
 
 	// realistic ping for dummies
 	if (m_IsDummy && g_Config.m_SvFakeDummyPing)
@@ -525,9 +525,6 @@ void CPlayer::KillCharacter(int Weapon)
 {
 	if(m_pCharacter)
 	{
-		if (m_RespawnTick > Server()->Tick())
-			return;
-
 		m_pCharacter->Die(m_ClientID, Weapon);
 		delete m_pCharacter;
 		m_pCharacter = 0;
@@ -606,7 +603,6 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_SpecMode = SPEC_FREEVIEW;
 	m_SpectatorID = -1;
 	m_pSpecFlag = 0;
-	m_RespawnTick = Server()->Tick();
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
@@ -624,10 +620,23 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 			}
 		}
 	}
+
+	// notify clients
+	CNetMsg_Sv_Team Msg;
+	Msg.m_ClientID = m_ClientID;
+	Msg.m_Team = Team;
+	Msg.m_Silent = DoChatMsg ? 0 : 1;
+	Msg.m_CooldownTick = m_TeamChangeTick;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
+	GameServer()->OnClientTeamChange(m_ClientID);
 }
 
 void CPlayer::TryRespawn()
 {
+	if (m_Team == TEAM_SPECTATORS)
+		return;
+
 	vec2 SpawnPos;
 
 	int Index = ENTITY_SPAWN;

@@ -147,7 +147,6 @@ public:
 
 	// team
 	bool CanJoinTeam(int Team, int NotThisID) const;
-	void DoTeamChange(class CPlayer* pPlayer, int Team, bool DoChatMsg = true);
 	int ClampTeam(int Team) const;
 
 	void ResetGame();
