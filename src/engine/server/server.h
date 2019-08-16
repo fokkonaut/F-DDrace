@@ -6,11 +6,21 @@
 #include <engine/server.h>
 #include <engine/shared/memheap.h>
 
+
+// vvvvvv these shouldnt be here, but i cant compile otherwise anymoree...
+#include <engine/masterserver.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/econ.h>
+#include <engine/shared/mapchecker.h>
+#include <engine/shared/netban.h>
+#include "register.h"
+// ^^^^^^ these shouldnt be here, but i cant compile otherwise anymoree...
+
 class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16*1024,
+		MAX_IDS = 32*1024,
 	};
 
 	class CID

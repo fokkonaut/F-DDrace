@@ -1,9 +1,3 @@
-/*************************************************
-*                                                *
-*              B L O C K D D R A C E             *
-*                                                *
-**************************************************/
-
 #ifndef GAME_SERVER_ENTITIES_ATOM_H
 #define GAME_SERVER_ENTITIES_ATOM_H
 

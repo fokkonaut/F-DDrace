@@ -1,9 +1,3 @@
-/*************************************************
-*                                                *
-*              B L O C K D D R A C E             *
-*                                                *
-**************************************************/
-
 #include <game/server/gamecontext.h>
 #include "atom.h"
 #include "character.h"
