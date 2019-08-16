@@ -251,6 +251,7 @@ public:
 	int m_MsgModeSpecial;
 
 	//extras
+	bool m_SentSkinUpdate;
 	int m_RainbowSpeed;
 	int m_RainbowColor;
 

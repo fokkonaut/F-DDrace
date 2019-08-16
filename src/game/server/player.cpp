@@ -141,7 +141,6 @@ void CPlayer::Reset()
 	m_InfRainbow = false;
 	m_InfMeteors = 0;
 
-	m_DisplayScore = g_Config.m_SvDefaultScore;
 	m_InstagibScore = 0;
 
 	m_ForceSpawnPos = vec2(-1, -1);
@@ -150,6 +149,8 @@ void CPlayer::Reset()
 	m_Minigame = MINIGAME_NONE;
 	m_SurvivalState = SURVIVAL_OFFLINE;
 	m_ForceKilled = false;
+
+	m_SentSkinUpdate = true;
 }
 
 void CPlayer::Tick()
@@ -383,7 +384,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
-	if (m_InfRainbow || (m_pCharacter && m_pCharacter->m_Rainbow))
+	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
 	{
 		CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientID = m_ClientID;
@@ -395,6 +396,13 @@ void CPlayer::Snap(int SnappingClient)
 			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff00;
 		}
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+
+		m_SentSkinUpdate = false;
+	}
+	else if (!m_SentSkinUpdate)
+	{
+		GameServer()->SendSkinChange(m_ClientID, -1);
+		m_SentSkinUpdate = true;
 	}
 
 	// demo recording
