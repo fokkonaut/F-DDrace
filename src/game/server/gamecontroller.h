@@ -60,9 +60,6 @@ class IGameController
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos) const;
 	void EvaluateSpawnType(CSpawnEval *pEval, int Type) const;
 
-	// team
-	int ClampTeam(int Team) const;
-
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
 	IServer *Server() const { return m_pServer; }
@@ -126,7 +123,6 @@ public:
 	*/
 	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
 
-	void OnPlayerReadyChange(class CPlayer* pPlayer);
 	const char* GetTeamName(int Team);
 
 	// game
@@ -155,6 +151,7 @@ public:
 	// team
 	bool CanJoinTeam(int Team, int NotThisID) const;
 	void DoTeamChange(class CPlayer* pPlayer, int Team, bool DoChatMsg = true);
+	int ClampTeam(int Team) const;
 
 	void ResetGame();
 	void StartRound();

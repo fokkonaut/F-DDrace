@@ -704,6 +704,16 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 
 void CGameContext::OnClientEnter(int ClientID)
 {
+	m_apPlayers[ClientID]->Respawn();
+
+	// load score
+	{
+		Score()->PlayerData(ClientID)->Reset();
+		Score()->LoadScore(ClientID);
+		Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
+		m_apPlayers[ClientID]->m_Score = !Score()->PlayerData(ClientID)->m_BestTime ? -9999 : Score()->PlayerData(ClientID)->m_BestTime;
+	}
+
 	m_VoteUpdate = true;
 
 	// update client infos (others before local)
@@ -1162,7 +1172,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
 
-			if(g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode+Server()->TickSpeed() > Server()->Tick())
+			if(g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode+Server()->TickSpeed()/4 > Server()->Tick())
 				return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
@@ -1231,7 +1241,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastReadyChange = Server()->Tick();
-			m_pController->OnPlayerReadyChange(pPlayer);
+			if (g_Config.m_SvPlayerReadyMode && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			{
+				// change players ready state
+				pPlayer->m_IsReadyToPlay = !pPlayer->m_IsReadyToPlay;
+			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_SKINCHANGE)
 		{

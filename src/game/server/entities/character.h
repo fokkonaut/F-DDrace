@@ -139,6 +139,7 @@ private:
 	void HandleSkippableTiles(int Index);
 	void DDraceTick();
 	void DDracePostCoreTick();
+	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
 

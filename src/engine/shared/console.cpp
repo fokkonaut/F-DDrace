@@ -318,67 +318,88 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 		InterpretSemicolons = true;
 		pStr = pWithoutPrefix;
 	}
-
-	while(pStr && *pStr)
+	while (pStr && *pStr)
 	{
 		CResult Result;
 		Result.m_ClientID = ClientID;
-		const char *pEnd = pStr;
-		const char *pNextPart = 0;
+		const char* pEnd = pStr;
+		const char* pNextPart = 0;
 		int InString = 0;
 
-		while(*pEnd)
+		while (*pEnd)
 		{
-			if(*pEnd == '"')
+			if (*pEnd == '"')
 				InString ^= 1;
-			else if(*pEnd == '\\') // escape sequences
+			else if (*pEnd == '\\') // escape sequences
 			{
-				if(pEnd[1] == '"')
+				if (pEnd[1] == '"')
 					pEnd++;
 			}
 			else if (!InString && InterpretSemicolons)
 			{
-				if(*pEnd == ';') // command separator
+				if (*pEnd == ';') // command separator
 				{
-					pNextPart = pEnd+1;
+					pNextPart = pEnd + 1;
 					break;
 				}
-				else if(*pEnd == '#') // comment, no need to do anything more
+				else if (*pEnd == '#') // comment, no need to do anything more
 					break;
 			}
 
 			pEnd++;
 		}
 
-		if(ParseStart(&Result, pStr, (pEnd-pStr) + 1) != 0)
+		if (ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
 			return;
 
-		if(!*Result.m_pCommand)
+		if (!*Result.m_pCommand)
 			return;
 
-		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
+		CCommand* pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
-		if(pCommand)
+		if (pCommand)
 		{
-			if(pCommand->GetAccessLevel() >= m_AccessLevel)
+			if (ClientID == IConsole::CLIENT_ID_GAME
+				&& !(pCommand->m_Flags & CFGFLAG_GAME))
+			{
+				if (Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if (ClientID == IConsole::CLIENT_ID_NO_GAME
+				&& pCommand->m_Flags & CFGFLAG_GAME)
+			{
+				if (Stroke)
+				{
+					char aBuf[96];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if (pCommand->GetAccessLevel() >= m_AccessLevel)
 			{
 				int IsStrokeCommand = 0;
-				if(Result.m_pCommand[0] == '+')
+				if (Result.m_pCommand[0] == '+')
 				{
 					// insert the stroke direction token
 					Result.AddArgument(m_paStrokeStr[Stroke]);
 					IsStrokeCommand = 1;
 				}
 
-				if(Stroke || IsStrokeCommand)
+				if (Stroke || IsStrokeCommand)
 				{
-					if(ParseArgs(&Result, pCommand->m_pParams))
+					if (ParseArgs(&Result, pCommand->m_pParams))
 					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
-						Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+						Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 					}
-					else if(m_StoreCommands && pCommand->m_Flags&CFGFLAG_STORE)
+					else if (m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
 					{
 						m_ExecutionQueue.AddEntry();
 						m_ExecutionQueue.m_pLast->m_pfnCommandCallback = pCommand->m_pfnCallback;
@@ -386,24 +407,40 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 						m_ExecutionQueue.m_pLast->m_Result = Result;
 					}
 					else
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+					{
+						if (Result.GetVictim() == CResult::VICTIM_ME)
+							Result.SetVictim(ClientID);
 
-					if (pCommand->m_Flags & CMDFLAG_CHEAT)
-						m_Cheated = true;
+						if (Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						{
+							for (int i = 0; i < MAX_CLIENTS; i++)
+							{
+								Result.SetVictim(i);
+								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							}
+						}
+						else
+						{
+							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						}
+
+						if (pCommand->m_Flags & CMDFLAG_CHEAT)
+							m_Cheated = true;
+					}
 				}
 			}
-			else if(Stroke)
+			else if (Stroke)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
-				Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			}
 		}
-		else if(Stroke)
+		else if (Stroke)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-			Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 
 		pStr = pNextPart;
@@ -787,6 +824,8 @@ CConsole::CConsole(int FlagMask)
 
 	#undef MACRO_CONFIG_INT
 	#undef MACRO_CONFIG_STR
+
+	m_Cheated = false;
 }
 
 CConsole::~CConsole()
@@ -1112,8 +1151,6 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
-#define MACRO_CONFIG_COL(Name,ScriptName,Def,Save,Desc) MACRO_CONFIG_INT(Name,ScriptName,Def,0,0,Save,Desc)
-
 #define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
@@ -1135,7 +1172,6 @@ void CConsole::ResetServerGameSettings()
 #include "config_variables.h"
 
 #undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 }
 

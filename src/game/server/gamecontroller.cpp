@@ -113,15 +113,6 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type) const
 	}
 }
 
-void IGameController::OnPlayerReadyChange(CPlayer* pPlayer)
-{
-	if (g_Config.m_SvPlayerReadyMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_DeadSpecMode)
-	{
-		// change players ready state
-		pPlayer->m_IsReadyToPlay ^= 1;
-	}
-}
-
 int IGameController::OnCharacterDeath(CCharacter *pVictim, CPlayer *pKiller, int Weapon)
 {
 	return 0;

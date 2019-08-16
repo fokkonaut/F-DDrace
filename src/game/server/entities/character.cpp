@@ -12,6 +12,7 @@
 #include "projectile.h"
 
 #include <game/server/gamemodes/ddrace.h>
+#include <game/server/score.h>
 
 //input count
 struct CInputCount
@@ -1120,6 +1121,23 @@ CGameTeams* CCharacter::Teams()
 	return &((CGameControllerDDrace*)GameServer()->m_pController)->m_Teams;
 }
 
+void CCharacter::HandleBroadcast()
+{
+	CPlayerData* pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+
+	if (m_DDraceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
+		m_CpActive > -1 && m_CpTick > Server()->Tick() && pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
+	{
+		char aBroadcast[128];
+		float Diff = m_CpCurrent[m_CpActive] - pData->m_aBestCpTime[m_CpActive];
+		const char* pColor = (Diff <= 0) ? "^090" : "^900";
+		str_format(aBroadcast, sizeof(aBroadcast), "%sCheckpoint | Diff : %+5.2f", pColor, Diff);
+		GameServer()->SendBroadcast(aBroadcast, m_pPlayer->GetCID());
+		m_CpLastBroadcast = m_CpActive;
+		m_LastBroadcast = Server()->Tick();
+	}
+}
+
 void CCharacter::HandleSkippableTiles(int Index)
 {
 	// handle death-tiles and leaving gamelayer
@@ -1319,7 +1337,10 @@ void CCharacter::HandleTiles(int Index)
 
 	// finish
 	if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDraceState == DDRACE_STARTED)
+	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
+		m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
+	}
 
 	// freeze
 	if (((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Super && !m_DeepFreeze)
@@ -1954,6 +1975,8 @@ void CCharacter::DDracePostCoreTick()
 		m_TeleGunTeleport = false;
 		m_IsBlueTeleGunTeleport = false;
 	}
+
+	HandleBroadcast();
 }
 
 bool CCharacter::Freeze(int Seconds)
