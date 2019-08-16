@@ -6,6 +6,7 @@
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "gameworld.h"
+#include "player.h"
 
 
 //////////////////////////////////////////////////
@@ -195,6 +196,13 @@ void CGameWorld::Tick()
 	}
 
 	RemoveEntities();
+
+	int StrongWeakID = 0;
+	for (CCharacter* pChar = (CCharacter*)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter*)pChar->TypeNext())
+	{
+		pChar->m_StrongWeakID = StrongWeakID;
+		StrongWeakID++;
+	}
 }
 
 
@@ -258,16 +266,19 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
 	CCharacter* pClosest = 0;
 
-	CCharacter* p = (CCharacter*)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
+	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
 	for (; p; p = (CCharacter*)p->TypeNext())
 	{
 		if (p == pNotThis)
+			continue;
+
+		if (CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
@@ -284,7 +295,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 	return pClosest;
 }
 
-std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis)
+std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis, int CollideWith)
 {
 	std::list< CCharacter* > listOfChars;
 
@@ -292,6 +303,9 @@ std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 P
 	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
 	{
 		if (pChr == pNotThis)
+			continue;
+
+		if (CollideWith != -1 && !pChr->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
@@ -317,4 +331,109 @@ void CGameWorld::ReleaseHooked(int ClientID)
 			Core->m_HookState = HOOK_RETRACTED;
 		}
 	}
+}
+
+// F-DDrace
+
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith, int Mode)
+{
+	// Find other players
+	float ClosestRange = 0.f;
+	CCharacter* pClosest = 0;
+
+	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
+	for (; p; p = (CCharacter*)p->TypeNext())
+	{
+		if (p == pNotThis)
+			continue;
+
+		bool CheckPassive = !GameServer()->IsShopDummy(CollideWith);
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
+			continue;
+
+		if (Mode == 1) //BlmapChill police freeze hole
+		{
+			CGameContext::AccountInfo Account = GameServer()->m_Accounts[p->GetPlayer()->GetAccID()];
+			if ((!Account.m_aHasItem[POLICE] && !p->m_PoliceHelper) || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
+				continue;
+		}
+		if (Mode == 2) //for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 446 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		if (Mode == 3) //for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 434 * 32 || p->m_Pos.x > 441 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		if (Mode == 4) //for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 417 * 32 || p->m_Pos.x > 444 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		if (Mode == 5) //for dummy 29
+		{
+			if (p->m_Pos.y < 213 * 32 || p->m_Pos.x > 429 * 32 || p->m_Pos.x < 419 * 32 || p->m_Pos.y > 218 * 32 + 60)
+				continue;
+		}
+		if (Mode == 6) //for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 417 * 32 - 10 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		if (Mode == 7) //for dummy 23
+		{
+			if (p->m_Pos.y > 200 * 32 || p->m_Pos.x < 466 * 32)
+				continue;
+		}
+		if (Mode == 8) //for dummy 23
+		{
+			if (p->m_FreezeTime == 0)
+				continue;
+		}
+		if (Mode == 9) //for shopbot
+		{
+			if (GameServer()->IsShopDummy(p->GetPlayer()->GetCID()))
+				continue;
+		}
+
+		float Len = distance(Pos, p->m_Pos);
+		if (Len < ClosestRange || !ClosestRange)
+		{
+			ClosestRange = Len;
+			pClosest = p;
+		}
+	}
+
+	return pClosest;
+}
+
+int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith)
+{
+	// Find other players
+	float ClosestRange = 0.f;
+	CCharacter* pClosest = 0;
+
+	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
+	for (; p; p = (CCharacter*)p->TypeNext())
+	{
+		if (p == pNotThis)
+			continue;
+
+		if (!GameServer()->IsShopDummy(p->GetPlayer()->GetCID()))
+			continue;
+
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, false))
+			continue;
+
+		float Len = distance(Pos, p->m_Pos);
+		if (Len < ClosestRange || !ClosestRange)
+		{
+			ClosestRange = Len;
+			pClosest = p;
+		}
+	}
+
+	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetShopDummy();
 }

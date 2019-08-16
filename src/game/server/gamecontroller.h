@@ -50,15 +50,12 @@ class IGameController
 
 		vec2 m_Pos;
 		bool m_Got;
-		bool m_RandomSpawn;
 		int m_FriendlyTeam;
 		float m_Score;
 	};
-	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
 	
 	float EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos) const;
-	void EvaluateSpawnType(CSpawnEval *pEval, int Type) const;
+	void EvaluateSpawnType(CSpawnEval* pEval, int MapIndex) const;
 
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -146,7 +143,7 @@ public:
 	void ChangeMap(const char *pToMap);
 
 	//spawn
-	bool CanSpawn(int Team, vec2 *pPos) const;
+	bool CanSpawn(vec2* pPos, int Index) const;
 
 	// team
 	bool CanJoinTeam(int Team, int NotThisID) const;

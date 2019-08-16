@@ -19,8 +19,18 @@
 #include "gamecontext.h"
 #include "player.h"
 
+#include <game/server/entities/flag.h>
+#include <game/server/entities/lasertext.h>
+#include <fstream>
+#include <limits>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "score.h"
 #include "score/file_score.h"
+
+#include <engine/server/server.h>
 
 enum
 {
@@ -243,7 +253,7 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 			SendChatTarget(i, pText);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
+void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText, int ToClientID)
 {
 	char aBuf[256];
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
@@ -266,12 +276,22 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_Mode = Mode;
 	Msg.m_ClientID = ChatterClientID;
 	Msg.m_pMessage = pText;
-	Msg.m_TargetID = -1;
+	Msg.m_TargetID = ToClientID;
 
 	if(Mode == CHAT_ALL)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	else if (Mode == CHAT_SINGLE)
+	{
+		// pack one for the recording only
+		if (g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, ToClientID);
+
+		// send to the client
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ToClientID);
+	}
 	else if(Mode == CHAT_TEAM)
 	{
+		CTeamsCore* Teams = &((CGameControllerDDrace*)m_pController)->m_Teams.m_Core;
 		// pack one for the recording only
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
@@ -280,8 +300,17 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() == To)
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+			if(m_apPlayers[i] != 0) {
+				if(To == TEAM_SPECTATORS) {
+					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) {
+						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+					}
+				} else {
+					if(Teams->Team(i) == To && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS) {
+						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+					}
+				}
+			}
 		}
 	}
 	else // Mode == CHAT_WHISPER
@@ -293,26 +322,59 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	}
 }
 
-void CGameContext::SendBroadcast(const char* pText, int ClientID)
+void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImportant)
 {
 	CNetMsg_Sv_Broadcast Msg;
 	Msg.m_pMessage = pText;
+
+	if (ClientID == -1)
+	{
+		dbg_assert(IsImportant, "broadcast messages to all players must be important");
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (m_apPlayers[i])
+			{
+				m_apPlayers[i]->m_LastBroadcastImportance = true;
+				m_apPlayers[i]->m_LastBroadcast = Server()->Tick();
+			}
+		}
+		return;
+	}
+
+	if (!m_apPlayers[ClientID])
+		return;
+
+	if (!IsImportant && m_apPlayers[ClientID]->m_LastBroadcastImportance && m_apPlayers[ClientID]->m_LastBroadcast > Server()->Tick() - Server()->TickSpeed() * 10)
+		return;
+
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	m_apPlayers[ClientID]->m_LastBroadcast = Server()->Tick();
+	m_apPlayers[ClientID]->m_LastBroadcastImportance = IsImportant;
 }
 
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
 	CNetMsg_Sv_Emoticon Msg;
 	Msg.m_ClientID = ClientID;
-	Msg.m_Emoticon = Emoticon;
+	Msg.m_Emoticon = GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky ? EMOTICON_GHOST : Emoticon;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
-	CNetMsg_Sv_WeaponPickup Msg;
-	Msg.m_Weapon = Weapon;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if (Weapon >= NUM_VANILLA_WEAPONS)
+	{
+		if (GetPlayerChar(ClientID))
+			GetPlayerChar(ClientID)->SetWeapon(Weapon);
+	}
+	else
+	{
+		CNetMsg_Sv_WeaponPickup Msg;
+		Msg.m_Weapon = Weapon;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	}
 }
 
 void CGameContext::SendMotd(int ClientID)
@@ -812,7 +874,7 @@ void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
 		SendVoteSet(m_VoteType, ClientID);
 
 	// send motd
-	SendMotd(ClientID);
+	SendMotd(FixMotd(g_Config.m_SvMotd), ClientID);
 
 	// send settings
 	SendSettings(ClientID);
@@ -826,6 +888,20 @@ void CGameContext::OnClientTeamChange(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
+	// F-DDrace
+	if (m_apPlayers[ClientID]->GetAccID() >= ACC_START)
+		Logout(m_apPlayers[ClientID]->GetAccID());
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter* pChr = GetPlayerChar(i);
+		if (pChr && pChr->Core()->m_Killer.m_ClientID == ClientID)
+		{
+			pChr->Core()->m_Killer.m_ClientID = -1;
+			pChr->Core()->m_Killer.m_Weapon = -1;
+		}
+	}
+
 	AbortVoteOnDisconnect(ClientID);
 
 	// update clients on drop
@@ -948,6 +1024,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_ChatResponseTargetID = -1;
 				Server()->RestrictRconOutput(-1);
 			}
+			else if (!pPlayer->m_ShowName)
+			{
+				str_copy(pPlayer->m_ChatText, pMsg->m_pMessage, sizeof(pPlayer->m_ChatText));
+				pPlayer->m_ChatTeam = Mode;
+				pPlayer->FixForNoName(FIX_CHAT_MSG);
+			}
 			else if(Mode != CHAT_NONE)
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage);
 		}
@@ -1067,6 +1149,39 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						return;
 					}
 				}
+
+				if (KickID < 0 || KickID >= MAX_CLIENTS || !m_apPlayers[KickID])
+				{
+					SendChatTarget(ClientID, "Invalid client id to kick");
+					return;
+				}
+				if (KickID == ClientID)
+				{
+					SendChatTarget(ClientID, "You can't kick yourself");
+					return;
+				}
+				int KickedAuthed = Server()->IsAuthed(KickID);
+				if (KickedAuthed > Server()->IsAuthed(ClientID))
+				{
+					SendChatTarget(ClientID, "You can't kick authorized players");
+					char aBufKick[128];
+					str_format(aBufKick, sizeof(aBufKick), "'%s' called for vote to kick you", Server()->ClientName(ClientID));
+					SendChatTarget(KickID, aBufKick);
+					return;
+				}
+
+				// Don't allow kicking if a player has no character
+				if (!GetPlayerChar(ClientID) || !GetPlayerChar(KickID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(KickID))
+				{
+					SendChatTarget(ClientID, "You can kick only your team member");
+					return;
+				}
+				if (m_apPlayers[KickID]->m_IsDummy)
+				{
+					SendChatTarget(ClientID, "You can't kick dummies");
+					return;
+				}
+
 				m_VoteType = VOTE_START_KICK;
 				m_VoteClientID = KickID;
 			}
@@ -1104,12 +1219,51 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
+			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
+			CCharacter *pChr = pPlayer->GetCharacter();
+
+			if (pMsg->m_Vote == 1) //vote yes (f3)
+			{
+				if (pChr)
+				{
+					if (pChr->m_InShop)
+					{
+						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
+							pChr->PurchaseEnd(false);
+						else if (pChr->m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+						{
+							if ((pChr->m_ShopWindowPage != SHOP_PAGE_NONE) && (pChr->m_ShopWindowPage != SHOP_PAGE_MAIN))
+								pChr->ConfirmPurchase();
+						}
+					}
+					else
+						pChr->DropFlag();
+				}
+			}
+			else if (pMsg->m_Vote == -1) //vote no (f4)
+			{
+				if (pChr)
+				{
+					if (pChr->m_InShop)
+					{
+						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
+							pChr->PurchaseEnd(true);
+						else if(pChr->m_ShopWindowPage == SHOP_PAGE_NONE)
+						{
+							pChr->ShopWindow(0);
+							pChr->m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
+						}
+					}
+					else
+						pChr->DropWeapon(pChr->GetActiveWeapon());
+				}
+			}
+
 			if(!m_VoteCloseTime)
 				return;
 
 			if(pPlayer->m_Vote == 0)
 			{
-				CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 				if(!pMsg->m_Vote)
 					return;
 
@@ -1224,6 +1378,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						pChr->SetEmoteType(EMOTE_NORMAL);
 						break;
 				}
+				if (pChr->m_Spooky)
+					pChr->SetEmoteType(EMOTE_SURPRISE);
 				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 			}
 		}
@@ -1331,14 +1487,20 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	const char *pParamName = pResult->GetString(0);
-	float NewValue = pResult->GetFloat(1);
+	float NewValue = pResult->NumArguments() == 2 ? pResult->GetFloat(1) : -1;
+	char aBuf[256];
+	float Value;
 
-	if(pSelf->Tuning()->Set(pParamName, NewValue))
+	if(NewValue != -1 && pSelf->Tuning()->Set(pParamName, NewValue))
 	{
-		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		pSelf->SendTuningParams(-1);
+	}
+	else if (pSelf->Tuning()->Get(pParamName, &Value))
+	{
+		str_format(aBuf, sizeof(aBuf), "Value: %.2f", Value);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	else
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
@@ -1726,6 +1888,16 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
+void CGameContext::ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if (pResult->NumArguments())
+	{
+		if (g_Config.m_SvNumSpreadShots % 2 == 0)
+			g_Config.m_SvNumSpreadShots += 1; //no even numbers, as the spread gun would be not mirrored otherwise
+	}
+}
+
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -1885,11 +2057,17 @@ void CGameContext::OnInit()
 	if (m_Layers.SwitchLayer())
 		pSwitch = (CSwitchTile*)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch);
 
+	// F-DDrace
+	Collision()->m_vTiles.clear();
+	Collision()->m_vTiles.resize(NUM_INDICES);
+
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
 		for (int x = 0; x < pTileMap->m_Width; x++)
 		{
 			int Index = pTiles[y * pTileMap->m_Width + x].m_Index;
+
+			Collision()->m_vTiles[Index].push_back(vec2(x*32.0f+16.0f, y*32.0f+16.0f));
 
 			if (Index == TILE_OLDLASER)
 			{
@@ -1920,13 +2098,15 @@ void CGameContext::OnInit()
 			if (Index >= ENTITY_OFFSET)
 			{
 				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-				//m_pController->OnEntity(Index-ENTITY_OFFSET, Pos);
-				m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
+				m_pController->OnEntity(Index, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
 			}
 
 			if (pFront)
 			{
 				Index = pFront[y * pTileMap->m_Width + x].m_Index;
+
+				Collision()->m_vTiles[Index].push_back(vec2(x*32.0f+16.0f, y*32.0f+16.0f));
+
 				if (Index == TILE_OLDLASER)
 				{
 					g_Config.m_SvOldLaser = 1;
@@ -1955,7 +2135,7 @@ void CGameContext::OnInit()
 				if (Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
+					m_pController->OnEntity(Index, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
 				}
 			}
 			if (pSwitch)
@@ -1966,7 +2146,7 @@ void CGameContext::OnInit()
 				if (Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					m_pController->OnEntity(Index - ENTITY_OFFSET, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
+					m_pController->OnEntity(Index, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
 				}
 			}
 		}
@@ -1984,6 +2164,9 @@ void CGameContext::OnInit()
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_matches_per_map", ConchainGameinfoUpdate, this);
 
+	// F-DDrace
+	Console()->Chain("sv_num_spread_shots", ConchainNumSpreadShots, this);
+
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 	#include <game/ddracecommands.h>
 	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
@@ -1992,6 +2175,32 @@ void CGameContext::OnInit()
 	// clamp sv_player_slots to 0..MaxClients
 	if(Server()->MaxClients() < g_Config.m_SvPlayerSlots)
 		g_Config.m_SvPlayerSlots = Server()->MaxClients();
+
+
+	// F-DDrace
+
+	// check if there are minigame spawns available
+	int Index = ENTITY_SPAWN;
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+	{
+		if (i == MINIGAME_BLOCK)
+			Index = TILE_MINIGAME_BLOCK;
+
+		m_aMinigameDisabled[i] = Collision()->GetRandomTile(Index) == vec2(-1, -1);
+	}
+
+	m_SurvivalGameState = SURVIVAL_OFFLINE;
+	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+	m_SurvivalTick = 0;
+	m_SurvivalWinner = -1;
+
+	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
+	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, AccountsCallback, this);
+
+	if (g_Config.m_SvDefaultDummies)
+		ConnectDefaultDummies();
+	SetV3Offset(g_Config.m_V3OffsetX, g_Config.m_V3OffsetY);
+
 
 #ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MaxClients-1
@@ -2141,6 +2350,9 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 void CGameContext::OnShutdown(bool FullShutdown)
 {
+	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
+		Logout(i);
+
 	if (FullShutdown)
 		Score()->OnShutdown();
 
@@ -2383,4 +2595,872 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
+
+// F-DDrace
+
+int CGameContext::AccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+
+	if (!IsDir && str_endswith(pName, ".acc"))
+	{
+		char aUsername[32];
+		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
+
+		int ID = pSelf->AddAccount();
+		pSelf->ReadAccountStats(ID, aUsername);
+
+		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == g_Config.m_SvPort)
+		{
+			pSelf->Logout(ID);
+			dbg_msg("acc", "logged out account '%s'", aUsername);
+		}
+		else
+			pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+	}
+
+	return 0;
+}
+
+int CGameContext::AddAccount()
+{
+	m_Accounts.push_back(AccountInfo());
+
+	int ID = m_Accounts.size()-1;
+	m_Accounts[ID].m_Port = g_Config.m_SvPort;
+	m_Accounts[ID].m_LoggedIn = false;
+	m_Accounts[ID].m_Disabled = false;
+	m_Accounts[ID].m_Password[0] = 0;
+	m_Accounts[ID].m_Username[0] = 0;
+	m_Accounts[ID].m_ClientID = -1;
+	m_Accounts[ID].m_Level = 0;
+	m_Accounts[ID].m_XP = 0;
+	m_Accounts[ID].m_NeededXP = 0;
+	m_Accounts[ID].m_Money = 0;
+	m_Accounts[ID].m_Kills = 0;
+	m_Accounts[ID].m_Deaths = 0;
+	m_Accounts[ID].m_PoliceLevel = 0;
+	m_Accounts[ID].m_SurvivalKills = 0;
+	m_Accounts[ID].m_SurvivalWins = 0;
+	for (int i = 0; i < 5; i++)
+		m_Accounts[ID].m_aLastMoneyTransaction[i][0] = 0;
+	for (int i = 0; i < NUM_ITEMS; i++)
+		m_Accounts[ID].m_aHasItem[i] = false;
+
+	return ID;
+}
+
+void CGameContext::ReadAccountStats(int ID, char *pName)
+{
+	std::string data;
+	char aData[32];
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s/%s.acc", g_Config.m_SvAccFilePath, pName);
+	std::fstream AccFile(aBuf);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Port = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_LoggedIn = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Disabled = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	str_copy(m_Accounts[ID].m_Password, aData, sizeof(m_Accounts[ID].m_Password));
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	str_copy(m_Accounts[ID].m_Username, aData, sizeof(m_Accounts[ID].m_Username));
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_ClientID = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Level = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_XP = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_NeededXP = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Money = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Kills = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_Deaths = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_PoliceLevel = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_SurvivalKills = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_SurvivalWins = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0]));
+
+	getline(AccFile, data);
+	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1]));
+
+	getline(AccFile, data);
+	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2]));
+
+	getline(AccFile, data);
+	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3]));
+
+	getline(AccFile, data);
+	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4]));
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
+}
+
+void CGameContext::WriteAccountStats(int ID)
+{
+	std::string data;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s/%s.acc", g_Config.m_SvAccFilePath, m_Accounts[ID].m_Username);
+	std::ofstream AccFile(aBuf);
+
+	if (AccFile.is_open())
+	{
+		AccFile << g_Config.m_SvPort << "\n";
+		AccFile << m_Accounts[ID].m_LoggedIn << "\n";
+		AccFile << m_Accounts[ID].m_Disabled << "\n";
+		AccFile << m_Accounts[ID].m_Password << "\n";
+		AccFile << m_Accounts[ID].m_Username << "\n";
+		AccFile << m_Accounts[ID].m_ClientID << "\n";
+		AccFile << m_Accounts[ID].m_Level << "\n";
+		AccFile << m_Accounts[ID].m_XP << "\n";
+		AccFile << m_Accounts[ID].m_NeededXP << "\n";
+		AccFile << m_Accounts[ID].m_Money << "\n";
+		AccFile << m_Accounts[ID].m_Kills << "\n";
+		AccFile << m_Accounts[ID].m_Deaths << "\n";
+		AccFile << m_Accounts[ID].m_PoliceLevel << "\n";
+		AccFile << m_Accounts[ID].m_SurvivalKills << "\n";
+		AccFile << m_Accounts[ID].m_SurvivalWins << "\n";
+		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[0] << "\n";
+		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[1] << "\n";
+		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[2] << "\n";
+		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[3] << "\n";
+		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[4] << "\n";
+		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
+
+		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
+	}
+	AccFile.close();
+}
+
+void CGameContext::Logout(int ID)
+{
+	if (m_apPlayers[m_Accounts[ID].m_ClientID])
+		SendChatTarget(m_Accounts[ID].m_ClientID, "Successfully logged out");
+	m_Accounts[ID].m_LoggedIn = false;
+	m_Accounts[ID].m_ClientID = -1;
+	WriteAccountStats(ID);
+	m_Accounts.erase(m_Accounts.begin() + ID);
+}
+
+int CGameContext::GetNextClientID(bool Inverted)
+{
+	if (!Inverted)
+	{
+		for (int i = 0; i < g_Config.m_SvMaxClients; i++)
+			if (((CServer*)Server())->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+				return i;
+	}
+	else
+	{
+		for (int i = MAX_CLIENTS-1; i > -1; i--)
+			if (((CServer*)Server())->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+				return i;
+	}
+	return -1;
+}
+
+int CGameContext::GetCIDByName(const char *pName)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (m_apPlayers[i] && !str_comp(pName, Server()->ClientName(i)))
+			return i;
+	return -1;
+}
+
+const char *CGameContext::FixMotd(const char *pMsg)
+{
+	char aTemp[64];
+	char aTemp2[64];
+	char aMotd[900];
+	static char aRet[900];
+	str_copy(aMotd, pMsg, sizeof(aMotd));
+	str_copy(aRet, pMsg, sizeof(aRet));
+	if (aMotd[0])
+	{
+		int count = 0;
+		int MotdLen = str_length(aMotd) + 1;
+		for (int i = 0, k = 0, s = 0; i < MotdLen && k < (int)sizeof(aMotd); i++, k++)
+		{
+			s++;
+			if (aMotd[i] == '\\' && aMotd[i + 1] == 'n')
+			{
+				i++;
+				count++;
+				s = 0;
+			}
+			if (s == 35)
+			{
+				count++;
+				s = 0;
+			}
+		}
+
+		for (int i = MotdLen; i > 0; i--)
+		{
+			if ((aMotd[i - 1] == '\\' && aMotd[i] == 'n') || count > 20)
+			{
+				aMotd[i] = '\0';
+				aMotd[i - 1] = '\0';
+			}
+			else
+				break;
+		}
+
+		if (count > 20)
+			count = 20;
+
+		aTemp[0] = 0;
+		for (int i = 0; i < 22 - count; i++)
+		{
+			str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
+			str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
+		}
+		str_format(aRet, sizeof(aRet), "%s%sBlockDDrace is a mod by fokkonaut\nBlockDDrace Mod. Ver.: %s", aMotd, aTemp, GAME_VERSION);
+	}
+	return aRet;
+}
+
+void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
+{
+	int DummyID = GetNextClientID(FlagPlayer != -1);
+	if (DummyID < 0 || DummyID >= MAX_CLIENTS || m_apPlayers[DummyID])
+		return;
+
+	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, TEAM_RED);
+	Server()->DummyJoin(DummyID);
+	pDummy->m_IsDummy = true;
+	pDummy->m_Dummymode = Dummymode;
+	pDummy->m_ForceSpawnPos = Pos;
+	pDummy->m_FlagPlayer = FlagPlayer;
+
+	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER)
+		pDummy->m_Minigame = MINIGAME_BLOCK;
+	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY)
+		pDummy->m_Minigame = -1;
+
+	char* aaSkinPartNames[NUM_SKINPARTS];
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		//StrToInts(pDummy->m_TeeInfos.m_aaSkinPartNames[p], 6, aaSkinPartNames[p]);
+		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 0;
+		pDummy->m_TeeInfos.m_aSkinPartColors[p] = 0;
+	}
+
+	if (FlagPlayer != -1)
+	{
+		Server()->SetClientName(DummyID, FlagPlayer == TEAM_RED ? "Red Flag" : "Blue Flag");
+		Server()->SetClientClan(DummyID, "BlockDDrace");
+	}
+
+	OnClientEnter(DummyID);
+
+	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);
+}
+
+bool CGameContext::IsShopDummy(int ClientID)
+{
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_SHOP_DUMMY;
+}
+
+int CGameContext::GetShopDummy()
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (IsShopDummy(i))
+			return i;
+	return -1;
+}
+
+void CGameContext::ConnectDefaultDummies()
+{
+	if (GetShopDummy() == -1 && Collision()->GetRandomTile(TILE_SHOP) != vec2(-1, -1))
+		ConnectDummy(DUMMYMODE_SHOP_DUMMY);
+
+	if (!str_comp(g_Config.m_SvMap, "ChillBlock5"))
+	{
+		ConnectDummy(DUMMYMODE_CHILLBOCK5_POLICE);
+		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
+		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
+		ConnectDummy(DUMMYMODE_CHILLBLOCK5_RACER);
+	}
+	else if (!str_comp(g_Config.m_SvMap, "BlmapChill"))
+	{
+		ConnectDummy(DUMMYMODE_BLMAPCHILL_POLICE);
+	}
+
+	if (Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
+		ConnectDummy(DUMMYMODE_V3_BLOCKER);
+}
+
+void CGameContext::SetV3Offset(int X, int Y)
+{
+	if (X == -1 && Y == -1)
+	{
+		if (!str_comp(g_Config.m_SvMap, "ChillBlock5"))
+		{
+			X = 374;
+			Y = 59;
+		}
+		else if (!str_comp(g_Config.m_SvMap, "blmapV3RoyalX"))
+		{
+			X = 97;
+			Y = 19;
+		}
+		g_Config.m_V3OffsetX = X;
+		g_Config.m_V3OffsetY = Y;
+	}
+}
+
+int CGameContext::GetFlagPlayer(int Team)
+{
+	if (Team != TEAM_RED && Team != TEAM_BLUE)
+		return -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (m_apPlayers[i] && m_apPlayers[i]->m_FlagPlayer == Team)
+			return i;
+	return -1;
+}
+
+void CGameContext::SendMotd(const char *pMsg, int ClientID)
+{
+	CNetMsg_Sv_Motd Msg;
+	Msg.m_pMessage = pMsg;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText)
+{
+	Pos.y -= 40.0 * 2.5;
+	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * 3, pText, (int)(strlen(pText)));
+}
+
+const char *CGameContext::GetWeaponName(int Weapon)
+{
+	switch (Weapon)
+	{
+	case -2:
+		return "Heart";
+	case -1:
+		return "Armor";
+	case WEAPON_HAMMER:
+		return "Hammer";
+	case WEAPON_GUN:
+		return "Gun";
+	case WEAPON_SHOTGUN:
+		return "Shotgun";
+	case WEAPON_GRENADE:
+		return "Grenade";
+	case WEAPON_LASER:
+		return "Rifle";
+	case WEAPON_NINJA:
+		return "Ninja";
+	case WEAPON_PLASMA_RIFLE:
+		return "Plasma Rifle";
+	case WEAPON_HEART_GUN:
+		return "Heart Gun";
+	case WEAPON_STRAIGHT_GRENADE:
+		return "Straight Grenade";
+	case WEAPON_TELEKINESIS:
+		return "Telekinesis";
+	case WEAPON_LIGHTSABER:
+		return "Lightsaber";
+	}
+	return "Unknown";
+}
+
+int CGameContext::GetRealWeapon(int Weapon)
+{
+	switch (Weapon)
+	{
+	case WEAPON_PLASMA_RIFLE:
+		return WEAPON_LASER;
+	case WEAPON_HEART_GUN:
+		return WEAPON_GUN;
+	case WEAPON_STRAIGHT_GRENADE:
+		return WEAPON_GRENADE;
+	case WEAPON_TELEKINESIS:
+		return WEAPON_NINJA;
+	case WEAPON_LIGHTSABER:
+		return WEAPON_GUN;
+	}
+	return Weapon;
+}
+
+int CGameContext::GetRealPickupType(int Weapon)
+{
+	Weapon = GetRealWeapon(Weapon);
+	switch (Weapon)
+	{
+	case WEAPON_SHOTGUN:
+		return PICKUP_SHOTGUN;
+	case WEAPON_GRENADE:
+		return PICKUP_GRENADE;
+	case WEAPON_LASER:
+		return PICKUP_LASER;
+	}
+	return Weapon;
+}
+
+void CGameContext::SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special)
+{
+	if (Silent)
+		return;
+
+	char aMsg[128];
+	str_copy(aMsg, CreateExtraMessage(Extra, Set, FromID, ToID, Special), sizeof(aMsg));
+	SendChatTarget(ToID, aMsg);
+	if (FromID >= 0 && FromID != ToID)
+		SendChatTarget(FromID, aMsg);
+}
+
+const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, int ToID, int Special)
+{
+	char aInfinite[16];
+	char aItem[64];
+	static char aMsg[128];
+
+	// infinite
+	if (Set && (Extra == INF_RAINBOW || Extra == INF_METEOR))
+		str_format(aInfinite, sizeof(aInfinite), "Infinite ");
+	else
+		aInfinite[0] = 0;
+
+	// get item name
+	char aTemp[64];
+	str_copy(aTemp, GetExtraName(Extra, Special), sizeof(aItem));
+	str_format(aItem, sizeof(aItem), "%s%s", aInfinite, aTemp);
+
+	// message without a sender
+	if (FromID == -1 || FromID == ToID)
+	{
+		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER || Extra == SPREAD_WEAPON || Extra == FREEZE_HAMMER || Extra == ITEM)
+			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
+		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
+			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
+		else if (Extra == PASSIVE)
+			str_format(aMsg, sizeof(aMsg), "You are %s in %s", Set ? "now" : "no longer", aItem);
+		else if (Extra == POLICE_HELPER)
+			str_format(aMsg, sizeof(aMsg), "You are %s a %s", Set ? "now" : "no longer", aItem);
+		else if (Extra == ENDLESS_HOOK)
+			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
+		else if (Extra == INFINITE_JUMPS)
+			str_format(aMsg, sizeof(aMsg), "You %shave %s", Set ? "" : "don't", aItem);
+		else
+			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have" : "lost", aItem);
+	}
+
+	// message with a sender
+	else if (FromID >= 0)
+		str_format(aMsg, sizeof(aMsg), "%s was %s '%s' by '%s'", aItem, Set ? "given to" : "removed from", Server()->ClientName(ToID), Server()->ClientName(FromID));
+
+	return aMsg;
+}
+
+const char *CGameContext::GetExtraName(int Extra, int Special)
+{
+	switch (Extra)
+	{
+	case HOOK_NORMAL:
+		return "Normal";
+	case JETPACK:
+		return "Jetpack Gun";
+	case RAINBOW:
+		return "Rainbow";
+	case INF_RAINBOW:
+		return "Rainbow";
+	case ATOM:
+		return "Atom";
+	case TRAIL:
+		return "Trail";
+	case SPOOKY:
+		return "Spooky Mode";
+	case METEOR:
+		return "Meteor";
+	case INF_METEOR:
+		return "Meteor";
+	case PASSIVE:
+		return "Passive mode";
+	case VANILLA_MODE:
+		return "Vanilla mode";
+	case DDRACE_MODE:
+		return "DDrace mode";
+	case BLOODY:
+		return "Bloody";
+	case STRONG_BLOODY:
+		return "Strong Bloody";
+	case POLICE_HELPER:
+		return "Police helper";
+	case SCROLL_NINJA:
+		return "Scroll Ninja";
+	case HOOK_POWER:
+		{
+			static char aPower[64];
+			str_format(aPower, sizeof(aPower), "%s Hook", GetExtraName(Special));
+			return aPower;
+		}
+	case ENDLESS_HOOK:
+		return "Endless Hook";
+	case INFINITE_JUMPS:
+		return "Unlimited Air Jumps";
+	case SPREAD_WEAPON:
+		{
+			static char aWeapon[64];
+			str_format(aWeapon, sizeof(aWeapon), "Spread %s", GetWeaponName(Special));
+			return aWeapon;
+		}
+	case FREEZE_HAMMER:
+		return "Freeze Hammer";
+	case INVISIBLE:
+		return "Invisibility";
+	case ITEM:
+		{
+			static char aItem[64];
+			str_format(aItem, sizeof(aItem), "%s%sItem", Special > -3 ? GetWeaponName(Special) : "", Special > -3 ? " " : "");
+			return aItem;
+		}
+	}
+	return "Unknown";
+}
+
+int CGameContext::CountConnectedPlayers(bool CountSpectators, bool ExcludeDummies)
+{
+	int Count = 0;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (((CServer*)Server())->m_aClients[i].m_State != CServer::CClient::STATE_EMPTY)
+		{
+			if (m_apPlayers[i])
+			{
+				if (ExcludeDummies && m_apPlayers[i]->m_IsDummy)
+					continue;
+				if (!CountSpectators && m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+					continue;
+			}
+			Count++;
+		}
+	}
+	return Count;
+}
+
+bool CGameContext::IsValidHookPower(int HookPower)
+{
+	return HookPower == HOOK_NORMAL
+		|| HookPower == RAINBOW
+		|| HookPower == BLOODY
+		|| HookPower == ATOM
+		|| HookPower == TRAIL;
+}
+
+const char *CGameContext::GetMinigameName(int Minigame)
+{
+	switch (Minigame)
+	{
+	case MINIGAME_NONE:
+		return "None";
+	case MINIGAME_BLOCK:
+		return "Block";
+	case MINIGAME_SURVIVAL:
+		return "Survival";
+	case MINIGAME_INSTAGIB_BOOMFNG:
+		return "Instagib Boom FNG";
+	case MINIGAME_INSTAGIB_FNG:
+		return "Instagib FNG";
+	}
+	return "Unknown";
+}
+
+void CGameContext::SurvivalTick()
+{
+	// if there are no spawn tiles, we cant play the game
+	if (!m_aMinigameDisabled[MINIGAME_SURVIVAL] && (Collision()->GetRandomTile(TILE_SURVIVAL_LOBBY) == vec2(-1, -1) || Collision()->GetRandomTile(TILE_SURVIVAL_SPAWN) == vec2(-1, -1) || Collision()->GetRandomTile(TILE_SURVIVAL_DEATHMATCH) == vec2(-1, -1)))
+	{
+		m_aMinigameDisabled[MINIGAME_SURVIVAL] = true;
+		return;
+	}
+
+	// set the mode to lobby, if the game is offline and there are now players
+	if (m_SurvivalGameState == SURVIVAL_OFFLINE)
+		m_SurvivalGameState = SURVIVAL_LOBBY;
+
+	// check if we dont have any players in the current state
+	if (!CountSurvivalPlayers(m_SurvivalGameState))
+	{
+		m_SurvivalGameState = SURVIVAL_OFFLINE;
+		m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+		return;
+	}
+
+	// decrease the tick at any time if it exists (its a timer)
+	if (m_SurvivalTick)
+		m_SurvivalTick--;
+
+	int Remaining = m_SurvivalTick / Server()->TickSpeed();
+
+	// main part
+	char aBuf[128];
+
+	if (m_SurvivalGameState > SURVIVAL_LOBBY && CountSurvivalPlayers(m_SurvivalGameState) == 1)
+	{
+		// if there is only one survival player left, before the time is over, we have a winner
+		m_SurvivalWinner = GetRandomSurvivalPlayer(m_SurvivalGameState);
+		str_format(aBuf, sizeof(aBuf), "The winner is '%s'", Server()->ClientName(m_SurvivalWinner));
+		SendSurvivalBroadcast(aBuf);
+
+		// send message to winner
+		SendChatTarget(m_SurvivalWinner, "You are the winner");
+
+		// add a win to the winners' accounts
+		m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
+
+		// sending back to lobby
+		m_SurvivalGameState = SURVIVAL_LOBBY;
+		m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+		SetPlayerSurvivalState(SURVIVAL_LOBBY);
+	}
+
+
+	// checking for foreground states
+	switch (m_SurvivalGameState)
+	{
+		case SURVIVAL_LOBBY:
+		{
+			// check whether we have something running in the background
+			if (m_SurvivalBackgroundState != SURVIVAL_OFFLINE)
+				break;
+
+			// count the lobby players, if they are fewer than the minimum amount, set the waiting mode in the background
+			if (CountSurvivalPlayers(SURVIVAL_LOBBY) < g_Config.m_SvSurvivalMinPlayers)
+			{
+				m_SurvivalBackgroundState = BACKGROUND_LOBBY_WAITING;
+			}
+			// if we are more than the minimum players waiting, the countdown will start in the background (30 seconds until the game starts)
+			else
+			{
+				m_SurvivalBackgroundState = BACKGROUND_LOBBY_COUNTDOWN;
+				m_SurvivalTick = Server()->TickSpeed() * (g_Config.m_SvSurvivalLobbyCountdown + 1);
+			}
+			break;
+		}
+
+		case SURVIVAL_PLAYING:
+		{
+			// the game is running
+			break;
+		}
+
+		case SURVIVAL_DEATHMATCH:
+		{
+			if (!m_SurvivalTick)
+			{
+				// if the deathmatch is over, reset the survival game, sending players back to lobby
+				if (CountSurvivalPlayers(SURVIVAL_DEATHMATCH) > 1)
+					SendSurvivalBroadcast("There is no winner this round!");
+				m_SurvivalGameState = SURVIVAL_OFFLINE;
+				m_SurvivalBackgroundState = BACKGROUND_IDLE;
+				SetPlayerSurvivalState(SURVIVAL_LOBBY);
+			}
+			else
+			{
+				// before its over, send some broadcasts until its finally over
+				if (Server()->Tick() % 50 == 0)
+				{
+					if (Remaining % 30 == 0 || Remaining <= 10)
+					{
+						str_format(aBuf, sizeof(aBuf), "Deathmatch will end in %d seconds", Remaining);
+						SendSurvivalBroadcast(aBuf, true);
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	// checking for background states
+	switch (m_SurvivalBackgroundState)
+	{
+		case BACKGROUND_LOBBY_WAITING:
+		{
+			// send the waiting for players broadcast to all survival players
+			if (Server()->Tick() % 50 == 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "[%d/%d] players to start a round", CountSurvivalPlayers(SURVIVAL_LOBBY), g_Config.m_SvSurvivalMinPlayers);
+				SendSurvivalBroadcast(aBuf, false, false);
+			}
+			break;
+		}
+
+		case BACKGROUND_LOBBY_COUNTDOWN:
+		{
+			if (!m_SurvivalTick)
+			{
+				// timer is over, the round starts
+				str_format(aBuf, sizeof(aBuf), "Round started, you have %d minutes to kill each other", g_Config.m_SvSurvivalRoundTime);
+				SendSurvivalBroadcast(aBuf);
+
+				// set a new tick, this time for the round to end after its up
+				m_SurvivalTick = Server()->TickSpeed() * 60 * g_Config.m_SvSurvivalRoundTime;
+				// set the foreground state
+				m_SurvivalGameState = SURVIVAL_PLAYING;
+				// change background state
+				m_SurvivalBackgroundState = BACKGROUND_DEATHMATCH_COUNTDOWN;
+				// set the player's survival state
+				SetPlayerSurvivalState(SURVIVAL_PLAYING);
+			}
+			else if (CountSurvivalPlayers(SURVIVAL_LOBBY) >= g_Config.m_SvSurvivalMinPlayers)
+			{
+				// if we are more than the minimum players, the countdown will start
+				if (Server()->Tick() % 50 == 0)
+				{
+					str_format(aBuf, sizeof(aBuf), "Round will start in %d seconds", Remaining);
+					SendSurvivalBroadcast(aBuf, Remaining <= 10, false);
+				}
+			}
+			// if someone left the lobby, the countdown stops and we return to the lobby state (waiting for players again)
+			else
+			{
+				SendSurvivalBroadcast("Start failed, too few players");
+				m_SurvivalGameState = SURVIVAL_LOBBY;
+				m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+			}
+			break;
+		}
+
+		case BACKGROUND_DEATHMATCH_COUNTDOWN:
+		{
+			if (!m_SurvivalTick)
+			{
+				// deathmatch countdown is over, we will start the deathmatch now
+				SendSurvivalBroadcast("Deathmatch started, you have 2 minutes to kill the last survivors");
+
+				//sending to deathmatch arena
+				m_SurvivalGameState = SURVIVAL_DEATHMATCH;
+				SetPlayerSurvivalState(SURVIVAL_DEATHMATCH);
+				m_SurvivalBackgroundState = BACKGROUND_IDLE;
+
+				// deathmatch will be 2 minutes
+				m_SurvivalTick = Server()->TickSpeed() * 60 * g_Config.m_SvSurvivalDeathmatchTime;
+			}
+			else
+			{
+				// printing broadcast until deathmatch starts
+				if (Server()->Tick() % 50 == 0)
+				{
+					if (Remaining % 60 == 0 || Remaining == 30 || Remaining <= 10)
+					{
+						str_format(aBuf, sizeof(aBuf), "Deathmatch will start in %d %s%s", Remaining > 30 ? Remaining / 60 : Remaining, (Remaining % 60 == 0 && Remaining != 0) ? "minute" : "second", (Remaining == 1 || Remaining == 60) ? "" : "s");
+						SendSurvivalBroadcast(aBuf, true);
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
+int CGameContext::CountSurvivalPlayers(int State)
+{
+	int count = 0;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL && (m_apPlayers[i]->m_SurvivalState == State || State == -1))
+			count++;
+	return count;
+}
+
+void CGameContext::SetPlayerSurvivalState(int State)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
+		{
+			m_apPlayers[i]->m_ForceKilled = true;
+			// unset spectator mode and pause
+			m_apPlayers[i]->SetPlaying();
+			// kill the character
+			m_apPlayers[i]->KillCharacter(WEAPON_GAME);
+			// set its new survival state
+			m_apPlayers[i]->m_SurvivalState = State;
+		}
+}
+
+int CGameContext::GetRandomSurvivalPlayer(int State, int NotThis)
+{
+	std::vector<int> SurvivalPlayers;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (i != NotThis && m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL && (m_apPlayers[i]->m_SurvivalState == State || State == -1))
+			SurvivalPlayers.push_back(i);
+	if (SurvivalPlayers.size())
+	{
+		int Rand = rand() % SurvivalPlayers.size();
+		return SurvivalPlayers[Rand];
+	}
+	return -1;
+}
+
+void CGameContext::SendSurvivalBroadcast(const char *pMsg, bool Sound, bool IsImportant)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
+		{
+			SendBroadcast(pMsg, i, IsImportant);
+			//if (Sound)
+			//	CreateSound(SOUND_HOOK_NOATTACH);
+		}
+	}
+}
+
+void CGameContext::InstagibTick(int Type)
+{
+	Type = Type == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG;
+
+	// if there are no spawn tiles, we cant play the game
+	if (!m_aMinigameDisabled[Type] && Collision()->GetRandomTile(Type == MINIGAME_INSTAGIB_BOOMFNG ? ENTITY_SPAWN_RED : ENTITY_SPAWN_BLUE) == vec2(-1, -1))
+	{
+		m_aMinigameDisabled[Type] = true;
+		return;
+	}
+
+	// add instagib here
 }

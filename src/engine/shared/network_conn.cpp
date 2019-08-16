@@ -374,7 +374,8 @@ int CNetConnection::Update()
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_TOKEN &&
-		(Now-m_LastRecvTime) > time_freq()*10)
+		State() != NET_CONNSTATE_DUMMY &&
+		(Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeout)
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");
@@ -434,4 +435,17 @@ int CNetConnection::Update()
 	}
 
 	return 0;
+}
+
+// F-DDrace
+void CNetConnection::DummyConnect()
+{
+	Reset();
+	ResetStats();
+	m_State = NET_CONNSTATE_DUMMY;
+}
+
+void CNetConnection::DummyDrop()
+{
+	m_State = NET_CONNSTATE_OFFLINE;
 }

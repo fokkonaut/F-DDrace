@@ -50,3 +50,128 @@ void CGameControllerDDrace::InitTeleporter()
 		}
 	}
 }
+
+// F-DDrace
+
+bool CGameControllerDDrace::OnEntity(int Index, vec2 Pos)
+{
+	int Team = -1;
+	if (Index == ENTITY_FLAGSTAND_RED) Team = TEAM_RED;
+	if (Index == ENTITY_FLAGSTAND_BLUE) Team = TEAM_BLUE;
+	if (Team == -1 || m_apFlags[Team])
+		return false;
+
+	CFlag *F = new CFlag(&GameServer()->m_World, Team, Pos);
+	m_apFlags[Team] = F;
+	return true;
+}
+
+int CGameControllerDDrace::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+{
+	int HadFlag = 0;
+
+	// drop flags
+	for (int i = 0; i < 2; i++)
+	{
+		CFlag *F = m_apFlags[i];
+		if (!F || !pKiller || !pKiller->GetCharacter())
+			continue;
+
+		if (F->GetCarrier() == pKiller->GetCharacter())
+			HadFlag |= 2;
+		if (F->GetCarrier() == pVictim)
+		{
+			if (HasFlag(pKiller->GetCharacter()) != -1)
+				F->Drop();
+			HadFlag |= 1;
+		}
+	}
+
+	return HadFlag;
+}
+
+void CGameControllerDDrace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter *pNewCarrier)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		CFlag *F = m_apFlags[i];
+
+		if (!F || !pNewCarrier)
+			return;
+
+		if (F->GetCarrier() == pOldCarrier && HasFlag(pNewCarrier) == -1)
+			F->Grab(pNewCarrier);
+	}
+}
+
+void CGameControllerDDrace::ForceFlagOwner(int ClientID, int Team)
+{
+	CFlag *F = m_apFlags[Team];
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+	if (!F || (Team != TEAM_RED && Team != TEAM_BLUE) || (!pChr && ClientID >= 0))
+		return;
+	if (ClientID >= 0 && HasFlag(pChr) == -1)
+	{
+		if (F->GetCarrier())
+			F->SetLastCarrier(F->GetCarrier());
+		F->Grab(pChr);
+	}
+	else if (ClientID == -1)
+		F->Reset();
+}
+
+int CGameControllerDDrace::HasFlag(CCharacter *pChr)
+{
+	if (!pChr)
+		return -1;
+
+	for (int i = 0; i < 2; i++)
+	{
+		if (!m_apFlags[i])
+			continue;
+
+		if (m_apFlags[i]->GetCarrier() == pChr)
+			return i;
+	}
+	return -1;
+}
+
+void CGameControllerDDrace::Snap(int SnappingClient)
+{
+	IGameController::Snap(SnappingClient);
+
+	CNetObj_GameDataFlag* pGameDataFlag = static_cast<CNetObj_GameDataFlag*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATAFLAG, 0, sizeof(CNetObj_GameDataFlag)));
+	if (!pGameDataFlag)
+		return;
+
+	pGameDataFlag->m_FlagDropTickRed = 0;
+	if (m_apFlags[TEAM_RED])
+	{
+		if (m_apFlags[TEAM_RED]->IsAtStand())
+			pGameDataFlag->m_FlagCarrierRed = FLAG_ATSTAND;
+		else if (m_apFlags[TEAM_RED]->GetCarrier() && m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer())
+			pGameDataFlag->m_FlagCarrierRed = m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer()->GetCID();
+		else
+		{
+			pGameDataFlag->m_FlagCarrierRed = FLAG_TAKEN;
+			pGameDataFlag->m_FlagDropTickRed = m_apFlags[TEAM_RED]->GetDropTick();
+		}
+	}
+	else
+		pGameDataFlag->m_FlagCarrierRed = FLAG_MISSING;
+	pGameDataFlag->m_FlagDropTickBlue = 0;
+	if (m_apFlags[TEAM_BLUE])
+	{
+		if (m_apFlags[TEAM_BLUE]->IsAtStand())
+			pGameDataFlag->m_FlagCarrierBlue = FLAG_ATSTAND;
+		else if (m_apFlags[TEAM_BLUE]->GetCarrier() && m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer())
+			pGameDataFlag->m_FlagCarrierBlue = m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCID();
+		else
+		{
+			pGameDataFlag->m_FlagCarrierBlue = FLAG_TAKEN;
+			pGameDataFlag->m_FlagDropTickBlue = m_apFlags[TEAM_BLUE]->GetDropTick();
+		}
+	}
+	else
+		pGameDataFlag->m_FlagCarrierBlue = FLAG_MISSING;
+}

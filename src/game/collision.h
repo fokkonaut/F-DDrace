@@ -7,6 +7,7 @@
 #include <engine/shared/protocol.h>
 
 #include <list>
+#include <vector>
 
 class CCollision
 {
@@ -95,6 +96,10 @@ public:
 	class CTuneTile* TuneLayer() { return m_pTune; }
 	class CLayers* Layers() { return m_pLayers; }
 	int m_NumSwitchers;
+
+	// F-DDrace
+	vec2 GetRandomTile(int Index);
+	std::vector< std::vector<vec2> > m_vTiles;
 
 private:
 

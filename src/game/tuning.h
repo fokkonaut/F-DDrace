@@ -52,10 +52,32 @@ MACRO_TUNING_PARAM(ExplosionStrength, explosion_strength, 6.0f, "Explosion stren
 MACRO_TUNING_PARAM(HammerStrength, hammer_strength, 1.0f, "Hammer strength")
 MACRO_TUNING_PARAM(HookDuration, hook_duration, 1.25f, "Hook duration")
 
+#define OLD_TUNES 37 // BlockDDrace // above are tunes until the fire delay tunes
+
 MACRO_TUNING_PARAM(HammerFireDelay, hammer_fire_delay, 125, "Delay of hammering")
 MACRO_TUNING_PARAM(GunFireDelay, gun_fire_delay, 125, "Delay of firing gun")
 MACRO_TUNING_PARAM(ShotgunFireDelay, shotgun_fire_delay, 500, "Delay of firing shotgun")
 MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500, "Delay of firing grenade")
 MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser rifle")
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
+
+MACRO_TUNING_PARAM(PlasmaRifleFireDelay, plasma_rifle_fire_delay, 500, "Delay of firing plasma rifle")
+MACRO_TUNING_PARAM(HeartGunFireDelay, heart_gun_fire_delay, 125, "Delay of firing heart gun")
+MACRO_TUNING_PARAM(StraightGrenadeFireDelay, straight_grenade_fire_delay, 500, "Delay of firing straight grenade")
+MACRO_TUNING_PARAM(TelekinesisFireDelay, telekinesis_fire_delay, 125, "Delay of using telekinesis")
+MACRO_TUNING_PARAM(LightsaberFireDelay, lightsaber_fire_delay, 500, "Delay of using lightsaber")
+
+MACRO_TUNING_PARAM(StraightGrenadeSpeed, straight_grenade_speed, 750.0f, "Straight grenade speed")
+MACRO_TUNING_PARAM(StraightGrenadeLifetime, straight_grenade_lifetime, 5.0f, "Straight grenade lifetime")
+
+MACRO_TUNING_PARAM(DDraceShotgunCurvature, ddrace_shotgun_curvature, 0.0f, "DDrace shotgun curvature")
+MACRO_TUNING_PARAM(DDraceShotgunSpeed, ddrace_shotgun_speed, 500.0f, "DDrace shotgun speed")
+
+MACRO_TUNING_PARAM(VanillaGunCurvature, vanilla_gun_curvature, 1.25f, "Vanilla gun curvature")
+MACRO_TUNING_PARAM(VanillaGunSpeed, vanilla_gun_speed, 2200.0f, "Vanilla gun speed")
+MACRO_TUNING_PARAM(VanillaGunLifetime, vanilla_gun_lifetime, 2.0f, "Vanilla gun lifetime")
+
+MACRO_TUNING_PARAM(MeteorFriction, meteor_friction, 5000, "Meteor friction")
+MACRO_TUNING_PARAM(MeteorMaxAccel, meteor_max_accel, 2000, "Max meteor acceleration per player in pixel/tick^2")
+MACRO_TUNING_PARAM(MeteorAccelPreserve, meteor_accel_preserve, 100000, "How much acceleration is preserved with growing distance to the player")
 #endif

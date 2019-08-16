@@ -96,6 +96,9 @@ public:
 			STATE_READY,
 			STATE_INGAME,
 
+			// F-DDrace
+			STATE_DUMMY,
+
 			SNAPRATE_INIT=0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER
@@ -285,6 +288,10 @@ public:
 	void SnapSetStaticsize(int ItemType, int Size);
 
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
+
+	// F-DDrace
+	void DummyJoin(int DummyID);
+	void DummyLeave(int DummyID);
 };
 
 #endif

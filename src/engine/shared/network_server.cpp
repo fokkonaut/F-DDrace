@@ -275,6 +275,9 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token)
 	}
 	else
 	{
+		if (m_aSlots[pChunk->m_ClientID].m_Connection.State() == NET_CONNSTATE_DUMMY)
+			return -1;
+
 		if(pChunk->m_DataSize+NET_MAX_CHUNKHEADERSIZE >= NET_MAX_PAYLOAD)
 		{
 			dbg_msg("netclient", "chunk payload too big. %d. dropping chunk", pChunk->m_DataSize);
@@ -310,4 +313,15 @@ void CNetServer::SetMaxClientsPerIP(int Max)
 		Max = NET_MAX_CLIENTS;
 
 	m_MaxClientsPerIP = Max;
+}
+
+// F-DDrace
+void CNetServer::DummyInit(int DummyID)
+{
+	m_aSlots[DummyID].m_Connection.DummyConnect();
+}
+
+void CNetServer::DummyDelete(int DummyID)
+{
+	m_aSlots[DummyID].m_Connection.DummyDrop();
 }

@@ -5,6 +5,9 @@
 
 #include <base/system.h>
 
+// F-DDrace
+#include "weapons_ex.h"
+
 /*
 	Connection diagram - How the initilization works.
 

@@ -32,6 +32,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Reset()
 {
+	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_ScoreStartTick = Server()->Tick();
@@ -87,7 +88,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
-	m_SpecTeam = 0;
+	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 
 	m_Paused = PAUSE_NONE;
@@ -113,6 +114,43 @@ void CPlayer::Reset()
 
 	m_NotEligibleForFinish = false;
 	m_EligibleForFinishCheck = 0;
+
+	// F-DDrace
+
+	m_IsDummy = false;
+	m_Dummymode = DUMMYMODE_IDLE;
+	m_FakePing = 0;
+
+	m_vWeaponLimit.resize(NUM_WEAPONS);
+
+	m_Gamemode = g_Config.m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+
+	m_FixNameID = -1;
+	m_ShowName = true;
+	m_SetRealName = false;
+	m_SetRealNameTick = Now;
+	m_ChatTeam = CHAT_ALL;
+	m_ChatText[0] = '\0';
+	m_MsgKiller = -1;
+	m_MsgWeapon = -1;
+	m_MsgModeSpecial = 0;
+
+	m_ResumeMoved = false;
+
+	m_RainbowSpeed = g_Config.m_SvRainbowSpeedDefault;
+	m_RainbowColor = 0;
+	m_InfRainbow = false;
+	m_InfMeteors = 0;
+
+	m_DisplayScore = g_Config.m_SvDefaultScore;
+	m_InstagibScore = 0;
+
+	m_ForceSpawnPos = vec2(-1, -1);
+	m_WeaponIndicator = g_Config.m_SvWeaponIndicatorDefault;
+
+	m_Minigame = MINIGAME_NONE;
+	m_SurvivalState = SURVIVAL_OFFLINE;
+	m_ForceKilled = false;
 }
 
 void CPlayer::Tick()
@@ -130,6 +168,7 @@ void CPlayer::Tick()
 	Server()->SetClientScore(m_ClientID, m_Score);
 
 	// do latency stuff
+	if (!m_IsDummy)
 	{
 		IServer::CClientInfo Info;
 		if(Server()->GetClientInfo(m_ClientID, &Info))
@@ -179,11 +218,12 @@ void CPlayer::Tick()
 				m_pCharacter = 0;
 			}
 		}
-		else if(m_Spawning && !m_WeakHookSpawn)
+		else if(m_Spawning && !m_WeakHookSpawn && m_RespawnTick <= Server()->Tick())
 			TryRespawn();
 	}
 	else
 	{
+		++m_RespawnTick;
 		++m_PreviousDieTick;
 		++m_DieTick;
 		++m_ScoreStartTick;
@@ -198,6 +238,39 @@ void CPlayer::Tick()
 	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
+	}
+
+	// checking account level
+	CheckLevel();
+
+	// checking whether scoreboard is activated or not
+	if (m_pCharacter)
+	{
+		if (m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
+			m_pCharacter->m_ShopMotdTick = 0;
+	}
+
+	// fixing messages if name is hidden
+	if (m_SetRealName)
+	{
+		if (m_SetRealNameTick < Server()->Tick())
+		{
+			if (m_FixNameID == FIX_CHAT_MSG)
+				GameServer()->SendChat(m_ClientID, m_ChatTeam, -1, m_ChatText, m_ClientID);
+			else if (m_FixNameID == FIX_KILL_MSG)
+			{
+				CNetMsg_Sv_KillMsg Msg;
+				Msg.m_Killer = m_MsgKiller;
+				Msg.m_Victim = GetCID();
+				Msg.m_Weapon = m_MsgWeapon;
+				Msg.m_ModeSpecial = m_MsgModeSpecial;
+				for (int i = 0; i < MAX_CLIENTS; i++)
+					if (!g_Config.m_SvHideMinigamePlayers || (GameServer()->m_apPlayers[i] && m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
+						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+			}
+
+			m_SetRealName = false;
+		}
 	}
 }
 
@@ -244,6 +317,8 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pPlayerInfo)
 		return;
 
+	CPlayer *pSnapping = GameServer()->m_apPlayers[SnappingClient];
+
 	pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
 	if(Server()->IsAuthed(m_ClientID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
@@ -254,13 +329,39 @@ void CPlayer::Snap(int SnappingClient)
 	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 
-	pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
+	// realistic ping for dummies
+	if (m_IsDummy && g_Config.m_SvFakeDummyPing)
+	{
+		if (Server()->Tick() % 200 == 0)
+			m_FakePing = 32 + rand() % 11;
+		pPlayerInfo->m_Latency = m_FakePing;
+	}
+	else
+		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	
+	int Score = 0;
 	// send 0 if times of others are not shown
 	if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		pPlayerInfo->m_Score = -9999;
+		Score = -9999;
+	else if (pSnapping->m_Minigame == MINIGAME_BLOCK)
+		Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
+	else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
+		Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
+	else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
+		Score = m_InstagibScore;
+	else if (pSnapping->m_DisplayScore != SCORE_TIME)
+	{
+		if (pSnapping->m_DisplayScore == SCORE_LEVEL)
+			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
+	}
 	else
-		pPlayerInfo->m_Score = abs(m_Score) * -1;
+	{
+		Score = abs(m_Score) * -1;
+	}
+	if (GetAccID() < ACC_START)
+		Score = 0;
+	pPlayerInfo->m_Score = Score;
+
 
 	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
@@ -424,6 +525,9 @@ void CPlayer::KillCharacter(int Weapon)
 {
 	if(m_pCharacter)
 	{
+		if (m_RespawnTick > Server()->Tick())
+			return;
+
 		m_pCharacter->Die(m_ClientID, Weapon);
 		delete m_pCharacter;
 		m_pCharacter = 0;
@@ -502,6 +606,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_SpecMode = SPEC_FREEVIEW;
 	m_SpectatorID = -1;
 	m_pSpecFlag = 0;
+	m_RespawnTick = Server()->Tick();
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
@@ -525,7 +630,45 @@ void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
 
-	if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos))
+	int Index = ENTITY_SPAWN;
+
+	if (m_ForceSpawnPos != vec2(-1, -1))
+	{
+		SpawnPos = m_ForceSpawnPos;
+	}
+	else if (m_Dummymode == DUMMYMODE_SHOP_DUMMY)
+	{
+		if (GameServer()->Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
+			Index = ENTITY_SHOP_DUMMY_SPAWN;
+		else
+			Index = TILE_SHOP;
+	}
+	else if (m_Minigame == MINIGAME_BLOCK || m_Dummymode == DUMMYMODE_V3_BLOCKER)
+	{
+		Index = TILE_MINIGAME_BLOCK;
+	}
+	else if (m_Minigame == MINIGAME_SURVIVAL)
+	{
+		if (m_SurvivalState == SURVIVAL_LOBBY)
+			Index = TILE_SURVIVAL_LOBBY;
+		else if (m_SurvivalState == SURVIVAL_PLAYING)
+			Index = TILE_SURVIVAL_SPAWN;
+		else if (m_SurvivalState == SURVIVAL_DEATHMATCH)
+			Index = TILE_SURVIVAL_DEATHMATCH;
+	}
+	else if (m_Minigame == MINIGAME_INSTAGIB_BOOMFNG)
+	{
+		Index = ENTITY_SPAWN_RED;
+	}
+	else if (m_Minigame == MINIGAME_INSTAGIB_FNG)
+	{
+		Index = ENTITY_SPAWN_BLUE;
+	}
+
+	if (GameServer()->Collision()->GetRandomTile(Index) == vec2(-1, -1))
+		Index = ENTITY_SPAWN;
+
+	if (m_ForceSpawnPos == vec2(-1, -1) && !GameServer()->m_pController->CanSpawn(&SpawnPos, Index))
 		return;
 
 	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
@@ -735,4 +878,93 @@ void CPlayer::SpectatePlayerName(const char* pName)
 			return;
 		}
 	}
+}
+
+// F-DDrace
+
+void CPlayer::FixForNoName(int ID)
+{
+	m_FixNameID = ID;
+	m_SetRealName = true;
+	m_SetRealNameTick = Server()->Tick() + Server()->TickSpeed() / 20;
+}
+
+int CPlayer::GetAccID()
+{
+	for (unsigned int i = ACC_START; i < GameServer()->m_Accounts.size(); i++)
+		if (GameServer()->m_Accounts[i].m_ClientID == m_ClientID)
+			return i;
+	return 0;
+}
+
+void CPlayer::CheckLevel()
+{
+	if (GetAccID() < ACC_START)
+		return;
+
+	CGameContext::AccountInfo Account = GameServer()->m_Accounts[GetAccID()];
+
+	// TODO: make something here, add acc sys and stuff, this is just placeholder
+	Account.m_NeededXP = 1;
+
+	if (Account.m_XP >= Account.m_NeededXP)
+	{
+		Account.m_Level++;
+
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", Account.m_Level);
+		GameServer()->SendChatTarget(m_ClientID, aBuf);
+
+		Account.m_NeededXP += 2;
+
+		dbg_msg("acc", "Level: %d, NeededXP: %d", Account.m_Level, Account.m_NeededXP);
+	}
+}
+
+void CPlayer::MoneyTransaction(int Amount, const char *Description)
+{
+	if (GetAccID() < ACC_START)
+		return;
+
+	CGameContext::AccountInfo Account = GameServer()->m_Accounts[GetAccID()];
+
+	Account.m_Money += Amount;
+
+	str_format(Account.m_aLastMoneyTransaction[4], sizeof(Account.m_aLastMoneyTransaction[4]), "%s", Account.m_aLastMoneyTransaction[3]);
+	str_format(Account.m_aLastMoneyTransaction[3], sizeof(Account.m_aLastMoneyTransaction[3]), "%s", Account.m_aLastMoneyTransaction[2]);
+	str_format(Account.m_aLastMoneyTransaction[2], sizeof(Account.m_aLastMoneyTransaction[2]), "%s", Account.m_aLastMoneyTransaction[1]);
+	str_format(Account.m_aLastMoneyTransaction[1], sizeof(Account.m_aLastMoneyTransaction[1]), "%s", Account.m_aLastMoneyTransaction[0]);
+	str_format(Account.m_aLastMoneyTransaction[0], sizeof(Account.m_aLastMoneyTransaction[0]), "%s", Description);
+}
+
+bool CPlayer::IsHooked(int Power)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter* pChr = GameServer()->GetPlayerChar(i);
+		if (!pChr)
+			continue;
+
+		if (pChr->Core()->m_HookedPlayer == m_ClientID)
+		{
+			if (Power == -2 && m_pCharacter)
+				m_pCharacter->Core()->m_Killer.m_ClientID = i;
+			return Power >= 0 ? pChr->m_HookPower == Power : true;
+		}
+	}
+	return false;
+}
+
+bool CPlayer::IsSpectator()
+{
+	return m_Paused != PAUSE_NONE || m_Team == TEAM_SPECTATORS || (m_pCharacter && m_pCharacter->IsPaused());
+}
+
+void CPlayer::SetPlaying()
+{
+	m_SpectatorID = SPEC_FREEVIEW;
+	Pause(PAUSE_NONE, true);
+	SetTeam(TEAM_RED);
+	if (m_pCharacter && m_pCharacter->IsPaused())
+		m_pCharacter->Pause(false);
 }

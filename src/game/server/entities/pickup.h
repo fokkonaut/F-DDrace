@@ -10,24 +10,30 @@ const int PickupPhysSize = 14;
 class CPickup : public CEntity
 {
 public:
-	CPickup(CGameWorld* pGameWorld, int Type, vec2 Pos, int SubType = 0, int Layer = 0, int Number = 0);
+	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1);
 
-	virtual void Reset();
+	void Reset(bool Destroy);
+	virtual void Reset() { Reset(false); };
 	virtual void Tick();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 
-	int GetPickupType();
+	int GetType() { return m_Type; }
 
 private:
 	int m_Type;
 	int m_Subtype;
-	//int m_SpawnTick;
+	int m_SpawnTick;
 
 	// F-DDrace
 
+	vec2 m_SnapPos;
+	int m_Owner;
+
 	void Move();
 	vec2 m_Core;
+
+	int m_ID2;
 };
 
 #endif

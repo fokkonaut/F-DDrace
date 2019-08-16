@@ -20,7 +20,6 @@ CONSOLE_COMMAND("weapons", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConWeapons, this, "
 CONSOLE_COMMAND("unshotgun", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnShotgun, this, "Takes the shotgun from you")
 CONSOLE_COMMAND("ungrenade", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnGrenade, this, "Takes the grenade launcher you")
 CONSOLE_COMMAND("unrifle", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnRifle, this, "Takes the rifle from you")
-CONSOLE_COMMAND("unjetpack", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnJetpack, this, "Takes the jetpack from you")
 CONSOLE_COMMAND("unweapons", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnWeapons, this, "Takes all weapons from you")
 CONSOLE_COMMAND("ninja", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConNinja, this, "Makes you a ninja")
 CONSOLE_COMMAND("super", "", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConSuper, this, "Makes you super")
@@ -48,5 +47,66 @@ CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER, ConUnmute, this, "")
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "")
 
 CONSOLE_COMMAND("freezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConFreezeHammer, this, "Gives a player Freeze Hammer")
-CONSOLE_COMMAND("unfreezehammer", "v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnFreezeHammer, this, "Removes Freeze Hammer from a player")
+
+// F-DDrace
+//weapons
+CONSOLE_COMMAND("extraweapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConExtraWeapons, this, "Gives all extra weapons to player v, or spread extra weapons")
+CONSOLE_COMMAND("unextraweapons", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnExtraWeapons, this, "Takes all extra weapons from player v")
+
+CONSOLE_COMMAND("plasmarifle", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConPlasmaRifle, this, "Gives a plasma rifle to player v, or spread plasma rifle")
+CONSOLE_COMMAND("unplasmarifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnPlasmaRifle, this, "Takes the plasma rifle from player v")
+CONSOLE_COMMAND("heartgun", "?v[id] ?i[spread]", CFGFLAG_SERVER, ConHeartGun, this, "Gives a heart gun to player v, or spread heart gun")
+CONSOLE_COMMAND("unheartgun", "?v[id]", CFGFLAG_SERVER, ConUnHeartGun, this, "Takes the heart gun from player v")
+CONSOLE_COMMAND("straightgrenade", "?v[id] ?i[spread]", CFGFLAG_SERVER, ConStraightGrenade, this, "Gives a straight grenade to player v, or spread straight grenade")
+CONSOLE_COMMAND("unstraightgrenade", "?v[id]", CFGFLAG_SERVER, ConUnStraightGrenade, this, "Takes the straight grenade from player v")
+CONSOLE_COMMAND("telekinesis", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTelekinesis, this, "Gives telekinses power to player v")
+CONSOLE_COMMAND("untelekinesis", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnTelekinesis, this, "Takes telekinses power from player v")
+CONSOLE_COMMAND("lightsaber", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConLightsaber, this, "Gives a lightsaber to player v")
+CONSOLE_COMMAND("unlightsaber", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnLightsaber, this, "Takes the lightsaber from player v")
+
+CONSOLE_COMMAND("hammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConHammer, this, "Gives a hammer to player v")
+CONSOLE_COMMAND("gun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConGun, this, "Gives a gun to player v, or spread gun")
+CONSOLE_COMMAND("unhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnHammer, this, "Takes the hammer from player v")
+CONSOLE_COMMAND("ungun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnGun, this, "Takes the gun from player v")
+
+CONSOLE_COMMAND("scrollninja", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConScrollNinja, this, "Gives a ninja to player v")
+
+//dummy
+CONSOLE_COMMAND("connectdummy", "?i[amount] ?i[dummymode]", CFGFLAG_SERVER, ConConnectDummy, this, "Connects i dummies")
+CONSOLE_COMMAND("disconnectdummy", "v[id]", CFGFLAG_SERVER, ConDisconnectDummy, this, "Disconnects dummy v")
+CONSOLE_COMMAND("dummymode", "?v[id] ?i[dummymode]", CFGFLAG_SERVER, ConDummymode, this, "Sets or shows the dummymode of dummy v")
+CONSOLE_COMMAND("connectdefaultdummies", "", CFGFLAG_SERVER, ConConnectDefaultDummies, this, "Connects default dummies")
+
+//power
+CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConForceFlagOwner, this, "Gives flag i to player i (0 = red, 1 = blue) (to return flag, set id = -1)", AUTHED_ADMIN)
+
+//info
+CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player s")
+CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text")
+
+//extras
+CONSOLE_COMMAND("item", "v[id] i[item]", CFGFLAG_SERVER, ConItem, this, "Gives player v item i (-3=none, -2=heart, -1=armor, 0 and up=weapon id)")
+CONSOLE_COMMAND("invisible", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConInvisible, this, "Toggles invisibility for player v")
+
+CONSOLE_COMMAND("hookpower", "?s[power] ?v[id]", CFGFLAG_SERVER, ConHookPower, this, "Sets hook power for player v")
+CONSOLE_COMMAND("freezehammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConFreezeHammer, this, "Toggles freeze hammer for player v")
+
+CONSOLE_COMMAND("infinitejumps", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConInfiniteJumps, this, "Toggles infinite jumps for player v")
+CONSOLE_COMMAND("endlesshook", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConEndlessHook, this, "Toggles endlesshook for player v")
+CONSOLE_COMMAND("jetpack", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConJetpack, this, "Toggles jetpack for player v")
+CONSOLE_COMMAND("rainbowspeed", "?v[id] ?i[speed]", CFGFLAG_SERVER, ConRainbowSpeed, this, "Sets the rainbow speed i for player v")
+CONSOLE_COMMAND("rainbow", "?v[id]", CFGFLAG_SERVER, ConRainbow, this, "Toggles rainbow for player v")
+CONSOLE_COMMAND("infrainbow", "?v[id]", CFGFLAG_SERVER, ConInfRainbow, this, "Toggles infinite rainbow for player v")
+CONSOLE_COMMAND("atom", "?v[id]", CFGFLAG_SERVER, ConAtom, this, "Toggles atom for player v")
+CONSOLE_COMMAND("trail", "?v[id]", CFGFLAG_SERVER, ConTrail, this, "Toggles trail for player v")
+CONSOLE_COMMAND("spooky", "?v[id]", CFGFLAG_SERVER, ConSpooky, this, "Toggles spooky mode for player v")
+CONSOLE_COMMAND("addmeteor", "?v[id]", CFGFLAG_SERVER, ConAddMeteor, this, "Adds a meteors to player v")
+CONSOLE_COMMAND("addinfmeteor", "?v[id]", CFGFLAG_SERVER, ConAddInfMeteor, this, "Adds an infinite meteors to player v")
+CONSOLE_COMMAND("removemeteors", "?v[id]", CFGFLAG_SERVER, ConRemoveMeteors, this, "Removes all meteors from player v")
+CONSOLE_COMMAND("passive", "?v[id]", CFGFLAG_SERVER, ConPassive, this, "Toggles passive mode for player v")
+CONSOLE_COMMAND("vanillamode", "?v[id]", CFGFLAG_SERVER, ConVanillaMode, this, "Activates vanilla mode for player v")
+CONSOLE_COMMAND("ddracemode", "?v[id]", CFGFLAG_SERVER, ConDDraceMode, this, "Deactivates vanilla mode for player v")
+CONSOLE_COMMAND("bloody", "?v[id]", CFGFLAG_SERVER, ConBloody, this, "Toggles bloody for player v")
+CONSOLE_COMMAND("strongbloody", "?v[id]", CFGFLAG_SERVER, ConStrongBloody, this, "Toggles strong bloody for player v")
+CONSOLE_COMMAND("policehelper", "?v[id]", CFGFLAG_SERVER, ConPoliceHelper, this, "Toggles police helper for player v")
 #undef CONSOLE_COMMAND

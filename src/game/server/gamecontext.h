@@ -9,6 +9,9 @@
 #include <game/layers.h>
 #include <game/voting.h>
 
+#include <vector>
+#include <game/server/entities/pickup_drop.h>
+
 #include "eventhandler.h"
 #include "gameworld.h"
 
@@ -33,6 +36,47 @@
 			All players (CPlayer::snap)
 
 */
+
+enum Shop
+{
+	SHOP_PAGE_NONE = -1,
+	SHOP_PAGE_MAIN,
+
+	SHOP_STATE_NONE = 0,
+	SHOP_STATE_OPENED_WINDOW,
+	SHOP_STATE_CONFIRM,
+};
+
+enum Item
+{
+	POLICE,
+	NUM_ITEMS
+};
+
+enum Minigames
+{
+	MINIGAME_NONE = 0,
+	MINIGAME_BLOCK,
+	MINIGAME_SURVIVAL,
+	MINIGAME_INSTAGIB_BOOMFNG,
+	MINIGAME_INSTAGIB_FNG,
+	NUM_MINIGAMES
+};
+
+enum Survival
+{
+	SURVIVAL_OFFLINE = 0,
+	SURVIVAL_LOBBY,
+	SURVIVAL_PLAYING,
+	SURVIVAL_DEATHMATCH,
+
+	BACKGROUND_IDLE = -1,
+	BACKGROUND_LOBBY_WAITING,
+	BACKGROUND_LOBBY_COUNTDOWN,
+	BACKGROUND_DEATHMATCH_COUNTDOWN,
+};
+
+#define ACC_START 1 // account ids start with 1, 0 means not logged in
 
 enum
 {
@@ -73,6 +117,8 @@ class CGameContext : public IGameServer
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	static void ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
@@ -155,8 +201,8 @@ public:
 	// network
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
-	void SendChat(int ChatterClientID, int Mode, int To, const char *pText);
-	void SendBroadcast(const char *pText, int ClientID);
+	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int ToClientID = -1);
+	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendMotd(int ClientID);
@@ -212,6 +258,91 @@ public:
 	int64 m_LastMapVote;
 	void ForceVote(int EnforcerID, bool Success);
 
+	// F-DDrace
+	
+	//dummy
+	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1), int FlagPlayer = -1);
+	void ConnectDefaultDummies();
+	void SetV3Offset(int X = -1, int Y = -1);
+	int GetFlagPlayer(int Team);
+
+	bool IsShopDummy(int ClientID);
+	int GetShopDummy();
+
+	int GetNextClientID(bool Inverted = false);
+
+	//account
+	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
+	int AddAccount();
+	void ReadAccountStats(int ID, char* pName);
+	void WriteAccountStats(int ID);
+	void Logout(int ID);
+	struct AccountInfo
+	{
+		int m_Port;
+		bool m_LoggedIn;
+		bool m_Disabled;
+		char m_Password[32];
+		char m_Username[32];
+		int m_ClientID;
+		int m_Level;
+		int m_XP;
+		int m_NeededXP;
+		int m_Money;
+		int m_Kills;
+		int m_Deaths;
+		int m_PoliceLevel;
+		int m_SurvivalKills;
+		int m_SurvivalWins;
+		bool m_aHasItem[NUM_ITEMS];
+		char m_aLastMoneyTransaction[5][256];
+	};
+	std::vector<AccountInfo> m_Accounts;
+
+	//motd
+	const char* FixMotd(const char* pMsg);
+
+	//extras
+	void SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special = 0);
+	const char* CreateExtraMessage(int Extra, bool Set, int FromID, int ToID, int Special);
+	const char* GetExtraName(int Extra, int Special = 0);
+
+	bool IsValidHookPower(int HookPower);
+
+	//others
+	int GetCIDByName(const char* pName);
+	void SendMotd(const char* pMsg, int ClientID);
+
+	const char* GetWeaponName(int Weapon);
+	int GetRealWeapon(int Weapon);
+	int GetRealPickupType(int Type);
+
+	const char* GetMinigameName(int Minigame);
+
+	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
+
+	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
+
+	//pickup drops
+	std::vector<CPickupDrop*> m_vPickupDropLimit;
+
+	//minigames disabled
+	bool m_aMinigameDisabled[NUM_MINIGAMES];
+
+	//survival
+	void SurvivalTick();
+	void SetPlayerSurvivalState(int State);
+	void SendSurvivalBroadcast(const char* pMsg, bool Sound = false, bool IsImportant = true);
+	int CountSurvivalPlayers(int State);
+	int GetRandomSurvivalPlayer(int State, int NotThis = -1);
+	int m_SurvivalBackgroundState;
+	int m_SurvivalGameState;
+	int64 m_SurvivalTick;
+	int m_SurvivalWinner;
+
+	//instagib
+	void InstagibTick(int Type);
+
 private:
 
 	bool m_VoteWillPass;
@@ -229,17 +360,15 @@ private:
 	static void ConShotgun(IConsole::IResult* pResult, void* pUserData);
 	static void ConGrenade(IConsole::IResult* pResult, void* pUserData);
 	static void ConRifle(IConsole::IResult* pResult, void* pUserData);
-	static void ConJetpack(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeapons(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnShotgun(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnGrenade(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnRifle(IConsole::IResult* pResult, void* pUserData);
-	static void ConUnJetpack(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnWeapons(IConsole::IResult* pResult, void* pUserData);
 	static void ConAddWeapon(IConsole::IResult* pResult, void* pUserData);
 	static void ConRemoveWeapon(IConsole::IResult* pResult, void* pUserData);
 
-	void ModifyWeapons(IConsole::IResult* pResult, void* pUserData, int Weapon, bool Remove);
+	void ModifyWeapons(IConsole::IResult* pResult, void* pUserData, int Weapon, bool Remove, bool AddRemoveCommand = false);
 	void MoveCharacter(int ClientID, int X, int Y, bool Raw = false);
 	static void ConGoLeft(IConsole::IResult* pResult, void* pUserData);
 	static void ConGoRight(IConsole::IResult* pResult, void* pUserData);
@@ -295,8 +424,83 @@ private:
 	static void ConList(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetDDRTeam(IConsole::IResult* pResult, void* pUserData);
 	static void ConUninvite(IConsole::IResult* pResult, void* pUserData);
+
+	//chat
+	static void ConScore(IConsole::IResult* pResult, void* pUserData);
+	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConWeaponIndicator(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConLogin(IConsole::IResult* pResult, void* pUserData);
+	static void ConLogout(IConsole::IResult* pResult, void* pUserData);
+	static void ConRegister(IConsole::IResult* pResult, void* pUserData);
+
+	void SetMinigame(IConsole::IResult* pResult, void* pUserData, int Minigame);
+	static void ConMinigames(IConsole::IResult* pResult, void* pUserData);
+	static void ConLeaveMinigame(IConsole::IResult* pResult, void* pUserData);
+	static void ConJoinBlock(IConsole::IResult* pResult, void* pUserData);
+	static void ConJoinSurvival(IConsole::IResult* pResult, void* pUserData);
+	static void ConJoinBoomFNG(IConsole::IResult* pResult, void* pUserData);
+	static void ConJoinFNG(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
+
+	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
-	static void ConUnFreezeHammer(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConExtraWeapons(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnExtraWeapons(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConHeartGun(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnHeartGun(IConsole::IResult* pResult, void* pUserData);
+	static void ConStraightGrenade(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnStraightGrenade(IConsole::IResult* pResult, void* pUserData);
+	static void ConTelekinesis(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnTelekinesis(IConsole::IResult* pResult, void* pUserData);
+	static void ConLightsaber(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnLightsaber(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConPlasmaRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnPlasmaRifle(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
+	static void ConGun(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnHammer(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnGun(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConScrollNinja(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
+	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);
+	static void ConDummymode(IConsole::IResult* pResult, void* pUserData);
+	static void ConConnectDefaultDummies(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConForceFlagOwner(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConItem(IConsole::IResult* pResult, void* pUserData);
+	static void ConInvisible(IConsole::IResult* pResult, void* pUserData);
+	static void ConHookPower(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConInfiniteJumps(IConsole::IResult* pResult, void* pUserData);
+	static void ConEndlessHook(IConsole::IResult* pResult, void* pUserData);
+	static void ConJetpack(IConsole::IResult* pResult, void* pUserData);
+	static void ConSpooky(IConsole::IResult* pResult, void* pUserData);
+	static void ConRainbowSpeed(IConsole::IResult* pResult, void* pUserData);
+	static void ConRainbow(IConsole::IResult* pResult, void* pUserData);
+	static void ConInfRainbow(IConsole::IResult* pResult, void* pUserData);
+	static void ConAtom(IConsole::IResult* pResult, void* pUserData);
+	static void ConTrail(IConsole::IResult* pResult, void* pUserData);
+	static void ConAddMeteor(IConsole::IResult* pResult, void* pUserData);
+	static void ConAddInfMeteor(IConsole::IResult* pResult, void* pUserData);
+	static void ConRemoveMeteors(IConsole::IResult* pResult, void* pUserData);
+	static void ConPassive(IConsole::IResult* pResult, void* pUserData);
+	static void ConVanillaMode(IConsole::IResult* pResult, void* pUserData);
+	static void ConDDraceMode(IConsole::IResult* pResult, void* pUserData);
+	static void ConBloody(IConsole::IResult* pResult, void* pUserData);
+	static void ConStrongBloody(IConsole::IResult* pResult, void* pUserData);
+	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

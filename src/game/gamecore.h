@@ -17,6 +17,13 @@
 #include "teamscore.h"
 #include "mapitems.h"
 
+// F-DDrace
+enum
+{
+	FLAG_RED = MAX_CLIENTS,
+	FLAG_BLUE
+};
+
 
 class CTuneParam
 {
@@ -52,6 +59,16 @@ public:
 	bool Get(int Index, float *pValue) const;
 	bool Get(const char *pName, float *pValue) const;
 };
+
+inline float GetAngle(vec2 Dir)
+{
+	if (Dir.x == 0 && Dir.y == 0)
+		return 0.0f;
+	float a = atanf(Dir.y / Dir.x);
+	if (Dir.x < 0)
+		a = a + pi;
+	return a;
+} 
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
 {
@@ -166,6 +183,7 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+	int m_LastHookedTick;
 
 	bool m_NewHook;
 
@@ -191,6 +209,28 @@ public:
 	void Quantize();
 
 	// F-DDrace
+
+	void SetFlagPos(int Team, vec2 Pos, int Stand, vec2 Vel, bool Carried);
+
+	vec2 m_FlagPos[2];
+	vec2 m_FlagVel[2];
+	bool m_AtStand[2];
+	bool m_Carried[2];
+
+	int m_UpdateFlagVel;
+	vec2 m_UFlagVel;
+
+	struct KillerInfo
+	{
+		int m_ClientID;
+		int m_Weapon;
+	};
+	KillerInfo m_Killer;
+
+	int m_LastHookedPlayer;
+	int m_OldLastHookedPlayer;
+
+	bool m_Passive;
 
 	int m_Id;
 	bool m_pReset;

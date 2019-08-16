@@ -7,11 +7,24 @@
 #include <vector>
 #include <map>
 
+#include <game/server/entities/flag.h>
+
 class CGameControllerDDrace: public IGameController
 {
 public:
 
-	CGameControllerDDrace(class CGameContext *pGameServer);
+	class CFlag* m_apFlags[2];
+
+	virtual void Snap(int SnappingClient);
+
+	virtual bool OnEntity(int Index, vec2 Pos);
+	virtual int OnCharacterDeath(class CCharacter* pVictim, class CPlayer* pKiller, int Weapon);
+
+	void ForceFlagOwner(int ClientID, int Team);
+	void ChangeFlagOwner(CCharacter* pOldCarrier, CCharacter* pNewCarrier);
+	int HasFlag(CCharacter* pChr);
+
+	CGameControllerDDrace(class CGameContext* pGameServer);
 	~CGameControllerDDrace();
 
 	CGameTeams m_Teams;

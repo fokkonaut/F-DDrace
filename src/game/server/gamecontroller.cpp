@@ -16,6 +16,7 @@
 #include "entities/projectile.h"
 #include "entities/plasma.h"
 #include "entities/door.h"
+#include "entities/clock.h"
 #include <game/layers.h>
 
 
@@ -37,25 +38,16 @@ IGameController::IGameController(CGameContext *pGameServer)
 	// map
 	m_aMapWish[0] = 0;
 
-	// spawn
-	m_aNumSpawnPoints[0] = 0;
-	m_aNumSpawnPoints[1] = 0;
-	m_aNumSpawnPoints[2] = 0;
-
 	m_CurrentRecord = 0;
 }
 
-bool IGameController::CanSpawn(int Team, vec2 *pOutPos) const
+bool IGameController::CanSpawn(vec2 *pOutPos, int Index) const
 {
-	// spectators can't spawn
-	if(Team == TEAM_SPECTATORS)
+	if (Index < TILE_AIR || Index >= NUM_INDICES)
 		return false;
 
 	CSpawnEval Eval;
-	Eval.m_RandomSpawn = false;
-
-	EvaluateSpawnType(&Eval, 0);
-
+	EvaluateSpawnType(&Eval, Index);
 	*pOutPos = Eval.m_Pos;
 	return Eval.m_Got;
 }
@@ -78,22 +70,22 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos) const
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type) const
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int MapIndex) const
 {
 	// get spawn point
-	for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
+	for(unsigned int i = 0; i < GameServer()->Collision()->m_vTiles[MapIndex].size(); i++)
 	{
 		// check if the position is occupado
 		CCharacter *aEnts[MAX_CLIENTS];
-		int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		int Num = GameServer()->m_World.FindEntities(GameServer()->Collision()->m_vTiles[MapIndex][i], 64, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		vec2 Positions[5] = { vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f) };	// start, left, up, right, down
 		int Result = -1;
 		for(int Index = 0; Index < 5 && Result == -1; ++Index)
 		{
 			Result = Index;
 			for(int c = 0; c < Num; ++c)
-				if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i]+Positions[Index]) ||
-					distance(aEnts[c]->GetPos(), m_aaSpawnPoints[Type][i]+Positions[Index]) <= aEnts[c]->GetProximityRadius())
+				if(GameServer()->Collision()->CheckPoint(GameServer()->Collision()->m_vTiles[MapIndex][i] +Positions[Index]) ||
+					distance(aEnts[c]->GetPos(), GameServer()->Collision()->m_vTiles[MapIndex][i] +Positions[Index]) <= aEnts[c]->GetProximityRadius())
 				{
 					Result = -1;
 					break;
@@ -102,8 +94,8 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type) const
 		if(Result == -1)
 			continue;	// try next spawn point
 
-		vec2 P = m_aaSpawnPoints[Type][i]+Positions[Result];
-		float S = pEval->m_RandomSpawn ? random_int() : EvaluateSpawnPos(pEval, P);
+		vec2 P = GameServer()->Collision()->m_vTiles[MapIndex][i] + Positions[Result];
+		float S = EvaluateSpawnPos(pEval, P);
 		if(!pEval->m_Got || pEval->m_Score > S)
 		{
 			pEval->m_Got = true;
@@ -122,11 +114,37 @@ void IGameController::OnCharacterSpawn(CCharacter *pChr)
 {
 	// default health
 	pChr->IncreaseHealth(10);
-	pChr->IncreaseArmor(10);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_HAMMER);
-	pChr->GiveWeapon(WEAPON_GUN);
+	switch (pChr->GetPlayer()->m_Minigame)
+	{
+	case MINIGAME_SURVIVAL:
+	{
+		pChr->GiveWeapon(WEAPON_HAMMER);
+		pChr->SetActiveWeapon(WEAPON_HAMMER);
+		break;
+	}
+	case MINIGAME_INSTAGIB_BOOMFNG:
+	{
+		pChr->GiveWeapon(WEAPON_HAMMER);
+		pChr->GiveWeapon(WEAPON_GRENADE);
+		pChr->SetActiveWeapon(WEAPON_GRENADE);
+		break;
+	}
+	case MINIGAME_INSTAGIB_FNG:
+	{
+		pChr->GiveWeapon(WEAPON_HAMMER);
+		pChr->GiveWeapon(WEAPON_LASER);
+		pChr->SetActiveWeapon(WEAPON_LASER);
+		break;
+	}
+	default:
+	{
+		pChr->GiveWeapon(WEAPON_HAMMER);
+		pChr->GiveWeapon(WEAPON_GUN, false, pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA ? 10 : -1);
+		pChr->SetActiveWeapon(WEAPON_GUN);
+	}
+	}
 }
 
 bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
@@ -150,14 +168,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	sides[6]=GameServer()->Collision()->Entity(x-1,y, Layer);
 	sides[7]=GameServer()->Collision()->Entity(x-1,y+1, Layer);
 
-	if(Index == ENTITY_SPAWN)
-		m_aaSpawnPoints[0][m_aNumSpawnPoints[0]++] = Pos;
-	else if(Index == ENTITY_SPAWN_RED)
-		m_aaSpawnPoints[1][m_aNumSpawnPoints[1]++] = Pos;
-	else if(Index == ENTITY_SPAWN_BLUE)
-		m_aaSpawnPoints[2][m_aNumSpawnPoints[2]++] = Pos;
-
-	else if(Index == ENTITY_DOOR)
+	if(Index == ENTITY_DOOR)
 	{
 		for(int i = 0; i < 8;i++)
 		{
@@ -199,7 +210,9 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			0, //Force
 			(g_Config.m_SvShotgunBulletSound)?SOUND_GRENADE_EXPLODE:-1,//SoundImpact
 			Layer,
-			Number
+			Number,
+			false, //Spooky
+			true //FakeTuning
 			);
 		bullet->SetBouncing(2 - (Dir % 2));
 	}
@@ -228,7 +241,9 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			0,
 			SOUND_GRENADE_EXPLODE,
 			Layer,
-			Number
+			Number,
+			false, //Spooky
+			true //FakeTuning
 			);
 		bullet->SetBouncing(2 - (Dir % 2));
 	}
@@ -256,6 +271,53 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		Type = POWERUP_NINJA;
 		SubType = WEAPON_NINJA;
+	}
+	else if (Index == ENTITY_WEAPON_GUN)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_GUN;
+	}
+	else if (Index == ENTITY_WEAPON_HAMMER)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_HAMMER;
+	}
+	else if (Index == ENTITY_WEAPON_PLASMA_RIFLE)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_PLASMA_RIFLE;
+	}
+	else if (Index == ENTITY_WEAPON_HEART_GUN)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_HEART_GUN;
+	}
+	else if (Index == ENTITY_WEAPON_STRAIGHT_GRENADE)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_STRAIGHT_GRENADE;
+	}
+	else if (Index == ENTITY_TELEKINESIS)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_TELEKINESIS;
+	}
+	else if (Index == ENTITY_LIGHTSABER)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_LIGHTSABER;
+	}
+	else if (Index == ENTITY_PICKUP_AMMO)
+	{
+		Type = POWERUP_AMMO;
+	}
+	else if (Index == ENTITY_CLOCK)
+	{
+		new CClock(&GameServer()->m_World, Pos);
+	}
+	else if (Index == ENTITY_SHOP_DUMMY_SPAWN)
+	{
+		GameServer()->ConnectDummy(DUMMYMODE_SHOP_DUMMY, Pos);
 	}
 	else if(Index >= ENTITY_LASER_FAST_CCW && Index <= ENTITY_LASER_FAST_CW)
 	{
@@ -342,7 +404,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 	if(Type != -1)
 	{
-		new CPickup(&GameServer()->m_World, Type, Pos, SubType, Layer, Number);
+		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number);
 		return true;
 	}
 

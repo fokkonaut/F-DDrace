@@ -119,6 +119,9 @@ enum
 	NET_CONNSTATE_ONLINE=4,
 	NET_CONNSTATE_ERROR=5,
 
+	// F-DDrace
+	NET_CONNSTATE_DUMMY = 6,
+
 	NET_CHUNKFLAG_VITAL=1,
 	NET_CHUNKFLAG_RESEND=2,
 
@@ -350,6 +353,10 @@ public:
 	int64 ConnectTime() const { return m_LastUpdateTime; }
 
 	int AckSequence() const { return m_Ack; }
+
+	// F-DDrace
+	void DummyConnect();
+	void DummyDrop();
 };
 
 class CConsoleNetConnection
@@ -450,6 +457,10 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+
+	// F-DDrace
+	void DummyInit(int DummyID);
+	void DummyDelete(int DummyID);
 };
 
 class CNetConsole

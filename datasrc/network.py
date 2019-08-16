@@ -1,11 +1,11 @@
 from datatypes import *
 
-Powerups = Enum("POWERUP", ["HEALTH", "ARMOR", "WEAPON", "NINJA"])
+Powerups = Enum("POWERUP", ["HEALTH", "ARMOR", "WEAPON", "NINJA", "AMMO"])
 Pickups = Enum("PICKUP", ["HEALTH", "ARMOR", "GRENADE", "SHOTGUN", "LASER", "NINJA"])
 Emotes = Enum("EMOTE", ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"])
 Emoticons = Enum("EMOTICON", ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"])
 Votes = Enum("VOTE", ["UNKNOWN", "START_OP", "START_KICK", "START_SPEC", "END_ABORT", "END_PASS", "END_FAIL"]) # todo 0.8: add RUN_OP, RUN_KICK, RUN_SPEC; rem UNKNOWN
-ChatModes = Enum("CHAT", ["NONE", "ALL", "TEAM", "WHISPER"])
+ChatModes = Enum("CHAT", ["NONE", "ALL", "TEAM", "WHISPER", "SINGLE"])
 
 PlayerFlags = Flags("PLAYERFLAG", ["ADMIN", "CHATTING", "SCOREBOARD", "READY", "DEAD", "WATCHING", "BOT"])
 GameFlags = Flags("GAMEFLAG", ["TEAMS", "FLAGS", "SURVIVAL"])
@@ -92,7 +92,7 @@ Objects = [
 
 		NetFlag("m_PlayerFlags", PlayerFlags),
 
-		NetIntRange("m_WantedWeapon", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_WantedWeapon", 0, 'NUM_VANILLA_WEAPONS-1'),
 		NetIntAny("m_NextWeapon"),
 		NetIntAny("m_PrevWeapon"),
 	]),
@@ -103,7 +103,7 @@ Objects = [
 		NetIntAny("m_VelX"),
 		NetIntAny("m_VelY"),
 
-		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_Type", 0, 'NUM_VANILLA_WEAPONS-1'),
 		NetTick("m_StartTick"),
 	]),
 
@@ -173,7 +173,7 @@ Objects = [
 		NetIntRange("m_Health", 0, 10),
 		NetIntRange("m_Armor", 0, 10),
 		NetIntAny("m_AmmoCount"),
-		NetIntRange("m_Weapon", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_Weapon", 0, 'NUM_VANILLA_WEAPONS-1'),
 		NetEnum("m_Emote", Emotes),
 		NetTick("m_AttackTick"),
 		NetFlag("m_TriggeredEvents", CoreEventFlags),
@@ -280,7 +280,7 @@ Messages = [
 	NetMessage("Sv_KillMsg", [
 		NetIntRange("m_Killer", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Victim", 0, 'MAX_CLIENTS-1'),
-		NetIntRange("m_Weapon", -3, 'NUM_WEAPONS-1'),
+		NetIntRange("m_Weapon", -3, 'NUM_VANILLA_WEAPONS-1'),
 		NetIntAny("m_ModeSpecial"),
 	]),
 
@@ -289,7 +289,7 @@ Messages = [
 	NetMessage("Sv_ReadyToEnter", []),
 
 	NetMessage("Sv_WeaponPickup", [
-		NetIntRange("m_Weapon", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_Weapon", 0, 'NUM_VANILLA_WEAPONS-1'),
 	]),
 
 	NetMessage("Sv_Emoticon", [

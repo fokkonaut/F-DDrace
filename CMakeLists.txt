@@ -1226,6 +1226,7 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   snapshot.cpp
   snapshot.h
   storage.cpp
+  weapons_ex.h
 )
 set(ENGINE_GENERATED_SHARED src/generated/protocol.cpp src/generated/protocol.h)
 set_src(GAME_SHARED GLOB src/game
@@ -1466,26 +1467,46 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
+  entities/atom.cpp
+  entities/atom.h
   entities/character.cpp
   entities/character.h
+  entities/clock.cpp
+  entities/clock.h
+  entities/custom_projectile.cpp
+  entities/custom_projectile.h
   entities/door.cpp
   entities/door.h
   entities/dragger.cpp
   entities/dragger.h
+  entities/dummy.cpp
   entities/flag.cpp
   entities/flag.h
   entities/gun.cpp
   entities/gun.h
   entities/laser.cpp
   entities/laser.h
+  entities/lasertext.cpp
+  entities/lasertext.h
   entities/light.cpp
   entities/light.h
+  entities/lightsaber.cpp
+  entities/lightsaber.h
+  entities/meteor.cpp
+  entities/meteor.h
   entities/pickup.cpp
   entities/pickup.h
+  entities/pickup_drop.cpp
+  entities/pickup_drop.h
   entities/plasma.cpp
   entities/plasma.h
   entities/projectile.cpp
   entities/projectile.h
+  entities/shop.cpp
+  entities/stable_projectile.cpp
+  entities/stable_projectile.h
+  entities/trail.cpp
+  entities/trail.h
   entity.cpp
   entity.h
   eventhandler.cpp

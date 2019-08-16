@@ -8,6 +8,47 @@
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 
+#include "pickup.h"
+#include "lightsaber.h"
+
+enum Extra
+{
+	HOOK_NORMAL = 0,
+	JETPACK,
+	RAINBOW,
+	INF_RAINBOW,
+	ATOM,
+	TRAIL,
+	SPOOKY,
+	METEOR,
+	INF_METEOR,
+	PASSIVE,
+	VANILLA_MODE,
+	DDRACE_MODE,
+	BLOODY,
+	STRONG_BLOODY,
+	POLICE_HELPER,
+	SCROLL_NINJA,
+	HOOK_POWER,
+	ENDLESS_HOOK,
+	INFINITE_JUMPS,
+	SPREAD_WEAPON,
+	FREEZE_HAMMER,
+	INVISIBLE,
+	ITEM,
+	NUM_EXTRAS
+};
+
+enum Backup
+{
+	BACKUP_FREEZE = 0,
+	NUM_BACKUPS,
+
+	BACKUP_HEALTH = NUM_WEAPONS,
+	BACKUP_ARMOR,
+	NUM_WEAPONS_BACKUP
+};
+
 class CGameTeams;
 
 class CCharacter : public CEntity
@@ -53,7 +94,7 @@ public:
 	bool IncreaseHealth(int Amount);
 	bool IncreaseArmor(int Amount);
 
-	void GiveWeapon(int Weapon, bool Remove = false);
+	void GiveWeapon(int Weapon, bool Remove = false, int Ammo = -1);
 	void GiveNinja();
 	void RemoveNinja();
 
@@ -64,6 +105,39 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
+
+	//drops
+	void DropFlag();
+	void DropWeapon(int WeaponID, float Dir = -3, bool Forced = false);
+	void DropPickup(int Type, int Amount = 1);
+	void DropLoot();
+
+	void SetAvailableWeapon(int PreferedWeapon = WEAPON_GUN);
+	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
+
+	void PassiveCollision(bool Set);
+
+	void Jetpack(bool Set = true, int FromID = -1, bool Silent = false);
+	void Rainbow(bool Set = true, int FromID = -1, bool Silent = false);
+	void InfRainbow(bool Set = true, int FromID = -1, bool Silent = false);
+	void Atom(bool Set = true, int FromID = -1, bool Silent = false);
+	void Trail(bool Set = true, int FromID = -1, bool Silent = false);
+	void Spooky(bool Set = true, int FromID = -1, bool Silent = false);
+	void Meteor(bool Set = true, int FromID = -1, bool Infinite = false, bool Silent = false);
+	void Passive(bool Set = true, int FromID = -1, bool Silent = false);
+	void VanillaMode(int FromID = -1, bool Silent = false);
+	void DDraceMode(int FromID = -1, bool Silent = false);
+	void Bloody(bool Set = true, int FromID = -1, bool Silent = false);
+	void StrongBloody(bool Set = true, int FromID = -1, bool Silent = false);
+	void PoliceHelper(bool Set = true, int FromID = -1, bool Silent = false);
+	void ScrollNinja(bool Set = true, int FromID = -1, bool Silent = false);
+	void HookPower(int Extra, int FromID = -1, bool Silent = false);
+	void EndlessHook(bool Set = true, int FromID = -1, bool Silent = false);
+	void InfiniteJumps(bool Set = true, int FromID = -1, bool Silent = false);
+	void SpreadWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
+	void FreezeHammer(bool Set = true, int FromID = -1, bool Silent = false);
+	void Invisible(bool Set = true, int FromID = -1, bool Silent = false);
+	void Item(int Item, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -83,6 +157,8 @@ private:
 		bool m_Got;
 
 	} m_aWeapons[NUM_WEAPONS];
+
+	int m_RealActiveWeapon;
 
 	int m_ActiveWeapon;
 	int m_LastWeapon;
@@ -147,6 +223,10 @@ private:
 	vec2 m_PrevSavePos;
 	bool m_Solo;
 
+	void FDDraceTick();
+	void DummyTick();
+	void FDDraceInit();
+
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);
@@ -156,13 +236,14 @@ public:
 	void GiveAllWeapons();
 	int m_DDraceState;
 	int Team();
-	bool CanCollide(int ClientID);
+	bool CanCollide(int ClientID, bool CheckPassive = true);
 	bool SameTeam(int ClientID);
 	bool m_Super;
 	bool m_SuperJump;
 	bool m_Jetpack;
 	bool m_NinjaJetpack;
 	int m_TeamBeforeSuper;
+	int64 m_FirstFreezeTick;
 	int m_FreezeTime;
 	int m_FreezeTick;
 	bool m_DeepFreeze;
@@ -235,18 +316,18 @@ public:
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
-	int GetActiveWeapon() { return m_ActiveWeapon; };
-	void SetActiveWeapon(int ActiveWeap) { m_ActiveWeapon = ActiveWeap; };
+	int GetActiveWeapon() { return m_RealActiveWeapon; };
+	void SetActiveWeapon(int Weapon);
 	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
 	int GetArmor() { return m_Armor; };
 	void SetArmor(int Armor) { m_Armor = Armor; };
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
-	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
-	int GetWeaponAmmo(int Type) { return m_aWeapons[Type].m_Ammo; };
-	void SetWeaponAmmo(int Type, int Value) { m_aWeapons[Type].m_Ammo = Value; };
+	bool GetWeaponGot(int Type);
+	void SetWeaponGot(int Type, bool Value);
+	int GetWeaponAmmo(int Type);
+	void SetWeaponAmmo(int Type, int Value);
 	bool IsAlive() { return m_Alive; };
 	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
@@ -255,6 +336,160 @@ public:
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
+
+	//last tile
+	int m_LastIndexTile;
+	int m_LastIndexFrontTile;
+
+	//backups
+	void BackupWeapons(int Type);
+	void LoadWeaponBackup(int Type);
+	int m_aWeaponsBackup[NUM_WEAPONS_BACKUP][NUM_BACKUPS];
+	bool m_WeaponsBackupped[NUM_BACKUPS];
+	bool m_aWeaponsBackupGot[NUM_WEAPONS_BACKUP][NUM_BACKUPS];
+
+	//extras
+	bool m_Rainbow;
+	bool m_Atom;
+	bool m_Trail;
+	int m_Meteors;
+	bool m_Bloody;
+	bool m_StrongBloody;
+	bool m_Invisible;
+	bool m_ScrollNinja;
+	int m_HookPower;
+	bool m_aSpreadWeapon[NUM_WEAPONS];
+	int m_TelekinesisTee;
+	CLightsaber* m_pLightsaber;
+	bool m_Spooky;
+
+	bool m_Passive;
+	CPickup* m_pPassiveShield;
+
+	int m_Item;
+	CPickup* m_pItem;
+
+	bool m_PoliceHelper;
+
+	bool m_AtomHooked;
+	bool m_TrailHooked;
+
+	// shop
+	bool m_InShop;
+	bool m_EnteredShop;
+
+	int64 m_ShopAntiSpamTick;
+
+	void ShopWindow(int Dir);
+	int m_ShopWindowPage;
+	int64 m_ShopMotdTick;
+	void BuyItem(int ItemID);
+	void ConfirmPurchase();
+	int m_PurchaseState;
+	void PurchaseEnd(bool canceled);
+
+	//weapon indicator
+	void UpdateWeaponIndicator();
+
+	//others
+	int HasFlag();
+	void CheckMoved();
+
+	CNetObj_PlayerInput GetInput() { return m_Input; };
+
+	bool m_FakeBlockTuning;
+	int m_FakeBlockUpState;
+	float m_FakeBlockOldVelX;
+
+	//this means the character is directly on a freezetile
+	bool m_IsFrozen;
+
+
+	/////////dummymode variables
+
+	void Fire(bool Fire = true);
+
+	//dummymode 32 vars (BlmapChill police guard)
+	int m_DummyLovedX;
+	int m_DummyLovedY;
+	int m_DummyLowerPanic;
+	int m_DummySpeed;
+	int m_DummyHelpMode;
+	bool m_DummyHelpHook;
+	bool m_DummyClosestPolice;
+
+	int m_DummyGrenadeJump;
+	bool m_DummyTouchedGround;
+	bool m_DummyAlreadyBeenHere;
+	bool m_DummyStartGrenade;
+	bool m_DummyUsedDJ;
+	int m_DummySpawnTeleporter;
+	bool m_DummyReachedCinemaEntrance;
+
+
+	//dummymode 29 vars (ChillBlock5 blocker)
+	int m_DummyFreezeBlockTrick;
+	int m_DummyPanicDelay;
+	bool m_DummyStartHook;
+	bool m_DummySpeedRight;
+	bool m_DummyTrick3Check;
+	bool m_DummyTrick3Panic;
+	bool m_DummyTrick3StartCount;
+	bool m_DummyTrick3PanicLeft;
+	bool m_DummyTrick4HasStartPos;
+	bool m_DummyLockBored;
+	bool m_DummyDoBalance;
+	bool m_DummyAttackedOnSpawn;
+	bool m_DummyMovementToBlockArea;
+	bool m_DummyPlannedMovement;
+	bool m_DummyJumped;
+	bool m_DummyHooked;
+	bool m_DummyMovedLeft;
+	bool m_DummyHookDelay;
+	bool m_DummyRuled;
+	bool m_DummyEmergency;
+	bool m_DummyLeftFreezeFull;
+	bool m_DummyGetSpeed;
+	bool m_DummyBored;
+	bool m_DummySpecialDefend;
+	bool m_DummySpecialDefendAttack;
+	int m_DummyBoredCounter;
+	int m_DummyBlockMode;
+
+	//dummymode 31 vars (ChillBlock5 police guard)
+	bool m_DummySpawnAnimation;
+	int m_DummySpawnAnimationDelay;
+	bool m_DummyPoliceGetSpeed;
+	bool m_DummyGotStuck;
+	bool m_DummyChillClosestPolice;
+	int m_DummyPoliceMode;
+	int m_DummyAttackMode;
+
+	//dummymode 23 vars
+	int m_DummyHelpBeforeHammerfly;
+	bool m_DummyHelpEmergency;
+	bool m_DummyHelpNoEmergency;
+	bool m_DummyHookAfterHammer;
+	bool m_DummyHelpBeforeFly;
+	bool m_DummyPanicWhileHelping;
+	bool m_DummyPanicBalance;
+	bool m_DummyMateFailed;
+	bool m_DummyHook;
+	bool m_DummyCollectedWeapons;
+	bool m_DummyMateCollectedWeapons;
+	bool m_DummyRocketJumped;
+	bool m_DummyRaceHelpHook;
+	bool m_DummyRaceHook;
+	int m_DummyRaceState;
+	int m_DummyRaceMode;
+	int m_DummyNothingHappensCounter;
+	int m_DummyPanicWeapon;
+	int m_DummyMateHelpMode;
+	int m_DummyMovementMode;
+	bool m_DummyFreezed;
+	int m_DummyEmoteTickNext;
+
+	/////////dummymode variables
 };
 
 enum

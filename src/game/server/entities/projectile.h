@@ -19,7 +19,9 @@ public:
 		float Force,
 		int SoundImpact,
 		int Layer = 0,
-		int Number = 0
+		int Number = 0,
+		bool Spooky = false,
+		bool FakeTuning = false
 	);
 
 	vec2 GetPos(float Time);
@@ -47,9 +49,24 @@ private:
 	bool m_Freeze;
 	int m_TuneZone;
 
+	bool m_Spooky;
+
+	bool m_FakeTuning;
+	vec2 m_LastResetPos;
+	int m_LastResetTick;
+	bool m_CalculatedVel;
+	int m_VelX;
+	int m_VelY;
+
+	virtual void TickDefered();
+	void CalculateVel();
+	void GetTunings(float* Curvature, float* Speed);
+
 public:
 
 	void SetBouncing(int Value);
+
+	vec2 m_CurPos;
 };
 
 #endif

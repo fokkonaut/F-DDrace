@@ -25,6 +25,17 @@ public:
 		ENTTYPE_PICKUP,
 		ENTTYPE_CHARACTER,
 		ENTTYPE_FLAG,
+
+		// F-DDrace
+		ENTTYPE_ATOM,
+		ENTTYPE_CLOCK,
+		ENTTYPE_CUSTOM_PROJECTILE,
+		ENTTYPE_PICKUP_DROP,
+		ENTTYPE_STABLE_PROJECTILE,
+		ENTTYPE_TRAIL,
+		ENTTYPE_LIGHTSABER,
+		ENTTYPE_LASERTEXT,
+
 		NUM_ENTTYPES
 	};
 
@@ -113,7 +124,7 @@ public:
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis);
+	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1);
 
 	/*
 		Function: insert_entity
@@ -183,7 +194,10 @@ public:
 		Returns:
 			Returns list with all Characters on line.
 	*/
-	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis = 0);
+	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis = 0, int CollideWith = -1);
+
+	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
+	int GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1);
 };
 
 #endif

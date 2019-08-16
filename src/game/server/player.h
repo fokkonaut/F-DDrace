@@ -5,6 +5,39 @@
 
 #include "alloc.h"
 
+#include "entities/pickup_drop.h"
+#include <vector>
+
+enum NoNameFix
+{
+	FIX_SET_NAME_ONLY = 0,
+	FIX_CHAT_MSG,
+	FIX_KILL_MSG
+};
+
+enum Gamemode
+{
+	GAMEMODE_DDRACE = 0,
+	GAMEMODE_VANILLA
+};
+
+enum Scoreformat
+{
+	SCORE_TIME = 0,
+	SCORE_LEVEL
+};
+
+enum Dummymode
+{
+	DUMMYMODE_IDLE = 0,
+	DUMMYMODE_V3_BLOCKER = -6,
+	DUMMYMODE_CHILLBLOCK5_RACER = 23,
+	DUMMYMODE_CHILLBLOCK5_BLOCKER = 29,
+	DUMMYMODE_CHILLBOCK5_POLICE = 31,
+	DUMMYMODE_BLMAPCHILL_POLICE = 32,
+	DUMMYMODE_SHOP_DUMMY = 99,
+};
+
 
 enum
 {
@@ -90,6 +123,7 @@ public:
 		int m_aSkinPartColors[NUM_SKINPARTS];
 	} m_TeeInfos;
 
+	int m_RespawnTick;
 	int m_PreviousDieTick;
 	int m_DieTick;
 	int m_Score;
@@ -153,9 +187,8 @@ public:
 	int ForcePause(int Time);
 	int IsPaused();
 
-	bool IsPlaying();
-	int64 m_Last_KickVote;
 	int64 m_Last_Team;
+	bool IsPlaying();
 	bool m_ShowOthers;
 	bool m_ShowAll;
 	bool m_SpecTeam;
@@ -168,6 +201,8 @@ public:
 	void AfkVoteTimer(CNetObj_PlayerInput* NewTarget);
 	int64 m_LastPlaytime;
 	int64 m_LastEyeEmote;
+	int64 m_LastBroadcast;
+	bool m_LastBroadcastImportance;
 	int m_LastTarget_x;
 	int m_LastTarget_y;
 	CNetObj_PlayerInput m_LastTarget;
@@ -181,6 +216,75 @@ public:
 	bool m_FirstPacket;
 	bool m_NotEligibleForFinish;
 	int64 m_EligibleForFinishCheck;
+
+	// F-DDrace
+
+	//weapon drops
+	std::vector< std::vector<CPickupDrop*> > m_vWeaponLimit;
+
+	//dummy
+	bool m_IsDummy;
+	int m_Dummymode;
+	int m_FakePing;
+	vec2 m_ForceSpawnPos;
+
+	//snap fix for 256p support
+	bool m_SnapFixDDNet;
+
+	//gamemodes
+	int m_Gamemode;
+
+	//spooky ghost
+	bool m_SpookyGhost;
+	int m_RealUseCustomColor;
+	char m_RealSkinName[64];
+
+	//no name fix
+	void FixForNoName(int ID);
+	int m_FixNameID;
+	bool m_ShowName;
+	bool m_SetRealName;
+	int64 m_SetRealNameTick;
+	int m_ChatTeam;
+	char m_ChatText[256];
+	int m_MsgKiller;
+	int m_MsgWeapon;
+	int m_MsgModeSpecial;
+
+	//extras
+	int m_RainbowSpeed;
+	int m_RainbowColor;
+
+	bool m_InfRainbow;
+	int m_InfMeteors;
+	bool m_HasSpookyGhost;
+
+	//account
+	int GetAccID();
+	void CheckLevel();
+	void MoneyTransaction(int Amount, const char* Description);
+
+	//score
+	int m_DisplayScore;
+	int m_InstagibScore;
+
+	//weapon indicator
+	bool m_WeaponIndicator;
+
+	//others
+	bool IsHooked(int Power = -1);
+	bool IsSpectator();
+	void SetPlaying();
+	bool m_ResumeMoved;
+
+	// used for spectating flags
+	int m_SpectatorFlag;
+	int m_FlagPlayer;
+
+	//minigames
+	int m_Minigame;
+	int m_SurvivalState;
+	bool m_ForceKilled;
 };
 
 #endif
