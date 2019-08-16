@@ -2923,6 +2923,8 @@ void CCharacter::Rainbow(bool Set, int FromID, bool Silent)
 {
 	m_Rainbow = Set;
 	m_pPlayer->m_InfRainbow = false;
+	if (!m_Rainbow)
+		GameServer()->SendSkinChange(m_pPlayer->GetCID(), -1);
 	GameServer()->SendExtraMessage(RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
@@ -2930,6 +2932,8 @@ void CCharacter::InfRainbow(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_InfRainbow = Set;
 	m_Rainbow = false;
+	if (!m_pPlayer->m_InfRainbow)
+		GameServer()->SendSkinChange(m_pPlayer->GetCID(), -1);
 	GameServer()->SendExtraMessage(INF_RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 

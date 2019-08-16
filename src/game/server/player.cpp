@@ -383,6 +383,20 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
+	if (m_InfRainbow || (m_pCharacter && m_pCharacter->m_Rainbow))
+	{
+		CNetMsg_Sv_SkinChange Msg;
+		Msg.m_ClientID = m_ClientID;
+		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
+			Msg.m_aUseCustomColors[p] = 1;
+			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff00;
+		}
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+	}
+
 	// demo recording
 	if(SnappingClient == -1)
 	{
