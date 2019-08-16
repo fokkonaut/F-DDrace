@@ -1897,36 +1897,13 @@ void CServer::DummyJoin(int DummyID)
 		"<boat>", "<blocker>", "<racer>", "<hyper>", "$heeP", "b3ep", "chilluminatee", "auftragschiller", "abcJuhee", "BANANA", "POTATO", "<cucumber>", "fokkoNUT", "<_BoT__>", "NotMyName", "NotChiller", //32nd name
 		"NotChiIIer", "NotChlIer", "fuckmesoon", "DataNub", "5.196.132.14", "<hacker>", "<cheater>", "<glitcher>", "__ERROR", "404_kein_tier", "ZitrusFRUCHT", "BAUMKIND", "KELLERKIND", "KINDERKIND", "einZug-", "<bob>",  //48th name
 		"BezzyHill", "BeckySkill", "Skilli.*", "UltraVa.", "DONATE!", "SUBSCRIBE!", "SHARE!", "#like", "<#name_>", "KRISTIAN-.", ".,-,08/524", "3113pimml34", "NotAB0t", "Hurman", "xxlddnnet64", "flappy2", //64th name
-		"steeeve", "naki", "tuba", "higge", "linux_uzer3k", "hubbat.*", "Proviet-", "7h89", "1276", "SchinKKKen", "FOSSIELamKIEL", "apfelFUZ", "cron_tabur", "hinter_c_dur", "equariator", "deckztinator", //80th name
-		"intezinatoha", "defquirlibaor", "enmuhinakur", "wooknazitur", "demnatura", "intranuza", "eggspikuza", "finaluba", "denkrikator", "nihilatur", "Goethe[HUN]", "RightIsRight", "Egg_user_xd", "avucadur", "NoeeoN", "wuuuzzZZZa", //96th name
-		"JezzicaP", "Jeqqicaqua", "analyticus", "haspiclecane", "nameus", "tahdequz", "rostBEULEH", "regenwurm674", "mc_cm", "blockddrace", "BlockDDrace", "pidgin.,a", "bibubablbl", "randomNAME2", "Mircaduzla", "zer0_brain", //112th name
-		"haxxor-420", "fok-me-fok", "fok-fee-san", "denzulat", "epsilat", "destructat", "hinzuckat", "penZilin", "deszilin", "VogelFisch7", "Dont4sk", "i_fokmen_i", "noobScout24", "geneticual", "trollface", "2flappy", //128th name
-		"2Chillingo", "2Fluffy", "2MLG_PRO", "2Enzym", "2ZillyDreck", "2ciliDR[HUN]", "2fuzzle", "2Piko", "2chilliger", "2fokkonautt", "2GubbaFubba", "2fuZZle", "2<bot>", "2<noob>", "2<police>", "2<train>", //144th name
-		"2<boat>", "2<blocker>", "2<racer>", "2<hyper>", "2$heeP", "2b3ep", "2chilluminatee", "2auftragschiller", "2abcJuhee", "2BANANA", "2POTATO", "2<cucumber>", "2fokkoNUT", "2<_BoT__>", "2NotMyName", "2NotChiller", //160th name
-		"2NotChiIIer", "2NotChlIer", "2fuckmesoon", "2DataNub", "yea5.196.132.14", "2<hacker>", "2<cheater>", "2<glitcher>", "2__ERROR", "2404_kein_tier", "2ZitrusFRUCHT", "2BAUMKIND", "2KELLERKIND", "2KINDERKIND", "2einZug-", "2<bob>", //176th name
-		"2BezzyHill", "2BeckySkill", "2Skilli.*", "2UltraVa.", "2DONATE!", "2SUBSCRIBE!", "2SHARE!", "2#like", "2<#name_>", "2KRISTIAN-.", "2.,-,08/524", "23113pimml34", "2NotAB0t", "2Hurman", "2xxlddnnet64", "2flappy2", //192nd name
-		"2steeeve", "2naki", "2tuba", "2higge", "2linux_uzer3k", "2hubbat.*", "2Proviet-", "27h89", "21276", "2SchinKKKen", "2FOSSIELamKIEL", "2apfelFUZ", "2cron_tabur", "2hinter_c_dur", "2equariator", "2deckztinator", //208th name
-		"2intezinatoha", "2defquirlibaor", "2enmuhinakur", "2wooknazitur", "2demnatura", "2intranuza", "2eggspikuza", "2finaluba", "2denkrikator", "2nihilatur", "2Goethe[HUN]", "2RightIsRight", "2Egg_user_xd", "2avucadur", "2NoeeoN", "2wuuuzzZZZa", //224th name
-		"2JezzicaP", "2Jeqqicaqua", "2analyticus", "2haspiclecane", "2nameus", "2tahdequz", "2rostBEULEH", "2regenwurm674", "2mc_cm", "2blockddrace", "2BlockDDrace", "2pidgin.,a", "2bibubablbl", "2randomNAME2", "2Mircaduzla", "2zer0_brain", //240th name
-		"2haxxor-420", "2fok-me-fok", "2fok-fee-san", "2denzulat", "2epsilat", "2destructat", "2hinzuckat", "2penZilin", "2deszilin", "2VogelFisch7", "2Dont4sk", "2i_fokmen_i", "2noobScout24", "2geneticual", "2trollface" //255th name
+
 	};
 	const char* pClans[] = {
 		"1", /*0*/ "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", //16th clan
 		"18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", //32th clan
 		"34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", //48th clan
 		"50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", //64th clan
-		"66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80", "81", //80th clan
-		"82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96", "97", //96th clan
-		"98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112", "113", //112th clan
-		"114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128", "129", //128th clan
-		"130", "131", "132", "133", "134", "135", "136", "137", "138", "139", "140", "141", "142", "143", "144", "145", //144th clan
-		"146", "147", "148", "149", "150", "151", "152", "153", "154", "155", "156", "157", "158", "159", "160", "161", //160th clan
-		"162", "163", "164", "165", "166", "167", "168", "169", "170", "171", "172", "173", "174", "175", "176", "177", //176th clan
-		"178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "188", "189", "190", "191", "192", "193", //192nd clan
-		"194", "195", "196", "197", "198", "199", "200", "201", "202", "203", "204", "205", "206", "207", "208", "209", //208th clan
-		"210", "211", "212", "213", "214", "215", "216", "217", "218", "219", "220", "221", "222", "223", "224", "225", //224th clan
-		"226", "227", "228", "229", "230", "231", "232", "233", "234", "235", "236", "237", "238", "239", "240", "241", //240th clan
-		"242", "243", "244", "245", "246", "247", "248", "249", "250", "251", "252", "253", "254", "255", "256" //255th clan
 	};
 
 	m_NetServer.DummyInit(DummyID);
