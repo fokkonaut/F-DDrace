@@ -341,25 +341,26 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	
 	int Score = 0;
+	bool TimeFormat = false;
+
 	// send 0 if times of others are not shown
 	if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
+	{
 		Score = -9999;
+		TimeFormat = true;
+	}
 	else if (pSnapping->m_Minigame == MINIGAME_BLOCK)
 		Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
 	else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
 		Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
 	else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
 		Score = m_InstagibScore;
-	else if (pSnapping->m_DisplayScore != SCORE_TIME)
-	{
-		if (pSnapping->m_DisplayScore == SCORE_LEVEL)
-			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
-	}
 	else
 	{
 		Score = abs(m_Score) * -1;
+		TimeFormat = true;
 	}
-	if (GetAccID() < ACC_START)
+	if (!TimeFormat && GetAccID() < ACC_START)
 		Score = 0;
 	pPlayerInfo->m_Score = Score;
 
