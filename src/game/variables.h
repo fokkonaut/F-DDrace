@@ -166,7 +166,6 @@ MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG
 
 // dummy
 MACRO_CONFIG_INT(SvHideDummies, sv_hide_dummies, 1, 0, 2, CFGFLAG_SERVER, "Whether to hide server-side dummies (0=show dummies, 1=show in scoreboard, 2=hide in browser and scoreboard)")
-MACRO_CONFIG_INT(SvHideDummiesStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from status command")
 MACRO_CONFIG_INT(SvDefaultDummies, sv_default_dummies, 0, 0, 1, CFGFLAG_SERVER, "Whether to create default dummies for specific maps when the server starts")
 MACRO_CONFIG_INT(SvFakeDummyPing, sv_fake_dummy_ping, 0, 0, 1, CFGFLAG_SERVER, "Whether ping of server-side dummies are more natural or 1000")
 MACRO_CONFIG_INT(V3OffsetX, v3_offset_x, -1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy")
@@ -195,7 +194,6 @@ MACRO_CONFIG_INT(SvSurvivalRoundTime, sv_survival_round_time, 5, 1, 20, CFGFLAG_
 MACRO_CONFIG_INT(SvSurvivalDeathmatchTime, sv_survival_deathmatch_time, 2, 1, 5, CFGFLAG_SERVER|CFGFLAG_GAME, "Length of the deathmatch in minutes")
 
 // other
-MACRO_CONFIG_INT(SvAuthedPlayersColored, sv_authed_players_colored, 1, 0, 1, CFGFLAG_SERVER, "Whether authed players have a colored name in scoreboard")
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard")
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 1, 1, 50, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard")
 MACRO_CONFIG_INT(SvDefaultScore, sv_default_score, 0, 0, 1, CFGFLAG_SERVER, "Default score (0 = time, 1 = level)")
