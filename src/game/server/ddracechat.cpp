@@ -255,9 +255,9 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 
 	bool IsPlayerBeingVoted = pSelf->m_VoteCloseTime &&
 		(pSelf->m_VoteKick || pSelf->m_VoteSpec) &&
-		pResult->m_ClientID != pSelf->m_VoteVictim;
+		pResult->m_ClientID != pSelf->m_VoteClientID;
 	if((!IsPlayerBeingVoted && -PauseState == PauseType) ||
-		(IsPlayerBeingVoted && PauseState && pPlayer->GetSpectatorID() == pSelf->m_VoteVictim))
+		(IsPlayerBeingVoted && PauseState && pPlayer->GetSpectatorID() == pSelf->m_VoteClientID))
 	{
 		pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 	}
@@ -265,7 +265,7 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 	{
 		pPlayer->Pause(PauseType, false);
 		if(IsPlayerBeingVoted)
-			pPlayer->SetSpectatorID(SPEC_PLAYER, pSelf->m_VoteVictim);
+			pPlayer->SetSpectatorID(SPEC_PLAYER, pSelf->m_VoteClientID);
 	}
 }
 

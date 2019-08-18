@@ -327,7 +327,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
 	if(SnappingClient != -1 && m_Team == TEAM_SPECTATORS && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
-	if (m_IsDummy && g_Config.m_SvDummySkin)
+	if (m_IsDummy && g_Config.m_SvDummyBotSkin)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
 
 	// realistic ping for dummies
@@ -904,9 +904,10 @@ void CPlayer::SpectatePlayerName(const char* pName)
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
+		dbg_msg("hi", "hi");
 		if (i != m_ClientID && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
 		{
-			m_SpectatorID = i;
+			SetSpectatorID(SPEC_PLAYER, i);
 			return;
 		}
 	}

@@ -537,7 +537,6 @@ public:
 	class IScore* Score() { return m_pScore; }
 	bool m_VoteKick;
 	bool m_VoteSpec;
-	int m_VoteVictim;
 	enum
 	{
 		VOTE_ENFORCE_NO_ADMIN = VOTE_ENFORCE_YES + 1,
