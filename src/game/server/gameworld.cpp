@@ -183,7 +183,7 @@ void CGameWorld::Tick()
 				pEnt = m_pNextTraverseEntity;
 			}
 	}
-	else if(GameServer()->m_pController->IsGamePaused())
+	else
 	{
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)

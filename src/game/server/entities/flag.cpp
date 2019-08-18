@@ -26,13 +26,9 @@ void CFlag::Reset(bool Init)
 {
 	if (!Init)
 	{
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
 		if (g_Config.m_SvFlagSounds)
-		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-				if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->IsAlive())
-					GameServer()->CreateSound(GameServer()->GetPlayerChar(i)->GetPos(), SOUND_CTF_RETURN);
-		}
+			GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
 		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
 	}
 	m_pCarrier = NULL;
@@ -61,11 +57,7 @@ void CFlag::TickDefered()
 void CFlag::Drop(int Dir)
 {
 	if (g_Config.m_SvFlagSounds)
-	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->IsAlive())
-				GameServer()->CreateSound(GameServer()->GetPlayerChar(i)->GetPos(), SOUND_CTF_DROP);
-	}
+		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
 	m_DropFreezeTick = Server()->Tick();
 	m_pLastCarrier = m_pCarrier;
@@ -76,11 +68,7 @@ void CFlag::Drop(int Dir)
 void CFlag::Grab(CCharacter *pChr)
 {
 	if (g_Config.m_SvFlagSounds)
-	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->IsAlive())
-				GameServer()->CreateSound(GameServer()->GetPlayerChar(i)->GetPos(), m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
-	}
+		GameServer()->CreateSoundGlobal(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 	if (m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;

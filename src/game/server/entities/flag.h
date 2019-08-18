@@ -80,7 +80,8 @@ public:
 
 	CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos);
 
-	virtual void Reset(bool Init = false);
+	void Reset(bool Init);
+	virtual void Reset() { Reset(false); };
 	virtual void TickPaused();
 	virtual void TickDefered();
 	virtual void Snap(int SnappingClient);

@@ -77,6 +77,9 @@ CONSOLE_COMMAND("connectdefaultdummies", "", CFGFLAG_SERVER, ConConnectDefaultDu
 //power
 CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConForceFlagOwner, this, "Gives flag i to player i (0 = red, 1 = blue) (to return flag, set id = -1)")
 
+//fun
+CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i")
+
 //info
 CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player s")
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text")

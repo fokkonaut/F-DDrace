@@ -200,6 +200,9 @@ public:
 	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1LL);
 	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1LL);
 
+	void CreateSoundGlobal(int Sound);
+	void CreateSound(int Sound, int ClientID);
+
 	// network
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
@@ -469,6 +472,8 @@ private:
 	static void ConUnGun(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConScrollNinja(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConSound(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);

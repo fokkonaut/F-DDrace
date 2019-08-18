@@ -386,20 +386,22 @@ void CCharacter::FireWeapon()
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	{
 		WillFire = true;
+
+		// shop window
+		if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+		{
+			ShopWindow(GetAimDir());
+			return;
+		}
+	}
 
 	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
 	if(!WillFire)
 		return;
-
-	// shop window
-	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
-	{
-		ShopWindow(GetAimDir());
-		return;
-	}
 
 	// check for ammo
 	if(!m_aWeapons[GetActiveWeapon()].m_Ammo)

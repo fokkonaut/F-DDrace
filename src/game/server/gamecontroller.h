@@ -20,21 +20,6 @@ class IGameController
 	class IServer *m_pServer;
 
 	// game
-	enum EGameState
-	{
-		// internal game states
-		IGS_WARMUP_GAME,		// warmup started by game because there're not enough players (infinite)
-		IGS_WARMUP_USER,		// warmup started by user action via rcon or new match (infinite or timer)
-
-		IGS_START_COUNTDOWN,	// start countown to unpause the game or start match/round (tick timer)
-
-		IGS_GAME_PAUSED,		// game paused (infinite or tick timer)
-		IGS_GAME_RUNNING,		// game running (infinite)
-
-		IGS_END_MATCH,			// match is over (tick timer)
-		IGS_END_ROUND,			// round is over (tick timer)
-	};
-	EGameState m_GameState;
 	int m_GameStateTimer;
 
 	// map
@@ -80,8 +65,6 @@ protected:
 		int m_ScoreLimit;
 		int m_TimeLimit;
 	} m_GameInfo;
-
-	void UpdateGameInfo(int ClientID);
 
 public:
 	IGameController(class CGameContext *pGameServer);
@@ -136,8 +119,7 @@ public:
 	virtual void Tick();
 
 	// info
-	void CheckGameInfo();
-	bool IsGamePaused() const { return m_GameState == IGS_GAME_PAUSED || m_GameState == IGS_START_COUNTDOWN; }
+	void UpdateGameInfo(int ClientID);
 	
 	const char *GetGameType() const { return m_pGameType; }
 	

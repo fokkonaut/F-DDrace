@@ -839,6 +839,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		Msg.m_Team = NewClientInfoMsg.m_Team;
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, -1);
 	}
+
+	m_pController->UpdateGameInfo(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1934,7 +1936,7 @@ void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUse
 	{
 		CGameContext *pSelf = (CGameContext *)pUserData;
 		if(pSelf->m_pController)
-			pSelf->m_pController->CheckGameInfo();
+			pSelf->m_pController->UpdateGameInfo(-1);
 	}
 }
 
@@ -2820,6 +2822,18 @@ int CGameContext::GetCIDByName(const char *pName)
 	return -1;
 }
 
+void CGameContext::CreateSoundGlobal(int Sound)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (m_apPlayers[i])
+			CreateSound(m_apPlayers[i]->m_ViewPos, Sound, CmaskOne(i));
+}
+
+void CGameContext::CreateSound(int Sound, int ClientID)
+{
+	CreateSound(m_apPlayers[ClientID]->m_ViewPos, Sound, CmaskOne(ClientID));
+}
+
 const char *CGameContext::FixMotd(const char *pMsg)
 {
 	char aTemp[64];
@@ -3453,8 +3467,8 @@ void CGameContext::SendSurvivalBroadcast(const char *pMsg, bool Sound, bool IsIm
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
 		{
 			SendBroadcast(pMsg, i, IsImportant);
-			//if (Sound)
-			//	CreateSound(SOUND_HOOK_NOATTACH);
+			if (Sound)
+				CreateSound(SOUND_HOOK_NOATTACH, i);
 		}
 	}
 }

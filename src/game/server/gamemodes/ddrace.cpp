@@ -12,8 +12,6 @@ CGameControllerDDrace::CGameControllerDDrace(class CGameContext *pGameServer) :
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
 
-	m_GameFlags = GAMEFLAG_FLAGS;
-
 	m_pGameType = "F-DDrace";
 
 	InitTeleporter();
@@ -65,6 +63,8 @@ bool CGameControllerDDrace::OnEntity(int Index, vec2 Pos)
 	if (Index == ENTITY_FLAGSTAND_BLUE) Team = TEAM_BLUE;
 	if (Team == -1 || m_apFlags[Team])
 		return false;
+
+	m_GameFlags = GAMEFLAG_FLAGS;
 
 	CFlag *F = new CFlag(&GameServer()->m_World, Team, Pos);
 	m_apFlags[Team] = F;

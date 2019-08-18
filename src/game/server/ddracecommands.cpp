@@ -1036,3 +1036,9 @@ void CGameContext::ConConnectDefaultDummies(IConsole::IResult *pResult, void *pU
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ConnectDefaultDummies();
 }
+
+void CGameContext::ConSound(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->CreateSoundGlobal(pResult->GetInteger(0));
+}
