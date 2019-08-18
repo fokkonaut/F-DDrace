@@ -120,6 +120,8 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask)
 {
 	float f = angle(Source);
+	HealthAmount = clamp(HealthAmount, 1, 9);
+	ArmorAmount = clamp(HealthAmount+ArmorAmount, 1, 9);
 	CNetEvent_Damage *pEvent = (CNetEvent_Damage *)m_Events.Create(NETEVENTTYPE_DAMAGE, sizeof(CNetEvent_Damage), Mask);
 	if(pEvent)
 	{
