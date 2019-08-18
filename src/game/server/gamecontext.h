@@ -483,6 +483,9 @@ private:
 
 	static void ConForceFlagOwner(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConPlayerName(IConsole::IResult* pResult, void* pUserData);
+	static void ConPlayerClan(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 

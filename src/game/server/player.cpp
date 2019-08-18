@@ -1001,3 +1001,39 @@ void CPlayer::SetPlaying()
 	if (m_pCharacter && m_pCharacter->IsPaused())
 		m_pCharacter->Pause(false);
 }
+
+void CPlayer::UpdateFakeInformation()
+{
+	CNetMsg_Sv_ClientDrop ClientDropMsg;
+	ClientDropMsg.m_ClientID = m_ClientID;
+	ClientDropMsg.m_pReason = "";
+	ClientDropMsg.m_Silent = 1;
+
+	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientID = m_ClientID;
+	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Team = GetTeam();
+	NewClientInfoMsg.m_pName = m_aFakeName;
+	NewClientInfoMsg.m_pClan = m_aFakeClan;
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(m_ClientID);
+	NewClientInfoMsg.m_Silent = 1;
+
+	Server()->SetClientName(m_ClientID, m_aFakeName);
+	Server()->SetClientClan(m_ClientID, m_aFakeClan);
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		NewClientInfoMsg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+	}
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()))
+			continue;
+
+		Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+	}
+}

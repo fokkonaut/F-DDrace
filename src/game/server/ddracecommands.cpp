@@ -1043,3 +1043,21 @@ void CGameContext::ConSound(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->CreateSoundGlobal(pResult->GetInteger(0));
 }
+
+void CGameContext::ConPlayerName(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	if (!pSelf->m_apPlayers[Victim])
+		return;
+	pSelf->m_apPlayers[Victim]->SetFakeName(pResult->GetString(1));
+}
+
+void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	if (!pSelf->m_apPlayers[Victim])
+		return;
+	pSelf->m_apPlayers[Victim]->SetFakeClan(pResult->GetString(1));
+}
