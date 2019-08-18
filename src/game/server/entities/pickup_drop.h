@@ -4,6 +4,7 @@
 #define GAME_SERVER_ENTITIES_PICKUP_DROP_H
 
 #include <game/server/entity.h>
+#include <stdint.h>
 
 class CPickupDrop : public CEntity
 {

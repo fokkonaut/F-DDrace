@@ -15,6 +15,8 @@
 #include "eventhandler.h"
 #include "gameworld.h"
 
+#include <stdint.h>
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -191,12 +193,12 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask = -1);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
-	void CreateHammerHit(vec2 Pos, int64_t Mask = -1);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1);
+	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask = -1LL);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask = -1LL);
+	void CreateHammerHit(vec2 Pos, int64_t Mask = -1LL);
+	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1LL);
+	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1LL);
+	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1LL);
 
 	// network
 	void SendChatTarget(int To, const char* pText);

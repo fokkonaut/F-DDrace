@@ -31,6 +31,7 @@
 #include "score/file_score.h"
 
 #include <engine/server/server.h>
+#include <string.h>
 
 enum
 {
@@ -2883,8 +2884,6 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
 		pDummy->m_Minigame = MINIGAME_BLOCK;
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY)
 		pDummy->m_Minigame = -1;
-
-	char* aaSkinPartNames[NUM_SKINPARTS];
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{

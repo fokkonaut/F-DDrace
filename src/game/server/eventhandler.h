@@ -3,6 +3,8 @@
 #ifndef GAME_SERVER_EVENTHANDLER_H
 #define GAME_SERVER_EVENTHANDLER_H
 
+#include <stdint.h>
+
 //
 class CEventHandler
 {

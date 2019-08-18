@@ -684,9 +684,11 @@ bool CCollision::TileExists(int Index)
 	if (Index < 0)
 		return false;
 
-	if (m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= NUM_INDICES-1)
+	int MaxIndexValue = NUM_INDICES-1;
+
+	if (m_pTiles[Index].m_Index >= TILE_FREEZE && m_pTiles[Index].m_Index <= MaxIndexValue)
 		return true;
-	if (m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= NUM_INDICES-1)
+	if (m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= MaxIndexValue)
 		return true;
 	if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;

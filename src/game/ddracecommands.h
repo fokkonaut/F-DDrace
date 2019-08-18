@@ -75,7 +75,7 @@ CONSOLE_COMMAND("dummymode", "?v[id] ?i[dummymode]", CFGFLAG_SERVER, ConDummymod
 CONSOLE_COMMAND("connectdefaultdummies", "", CFGFLAG_SERVER, ConConnectDefaultDummies, this, "Connects default dummies")
 
 //power
-CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConForceFlagOwner, this, "Gives flag i to player i (0 = red, 1 = blue) (to return flag, set id = -1)", AUTHED_ADMIN)
+CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConForceFlagOwner, this, "Gives flag i to player i (0 = red, 1 = blue) (to return flag, set id = -1)")
 
 //info
 CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player s")
