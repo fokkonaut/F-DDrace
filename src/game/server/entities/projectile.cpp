@@ -256,7 +256,7 @@ void CProjectile::Tick()
 		else if (m_Type == WEAPON_GUN)
 		{
 			if (pOwnerChar && pOwnerChar->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
-				GameServer()->CreateDamage(m_CurPos, m_Owner, m_Direction, /*9*/0, 1, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : -1LL);
+				GameServer()->CreateDamage(m_CurPos, m_Owner, m_Direction, 1, 0, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : -1LL);
 			GameServer()->m_World.DestroyEntity(this);
 			return;
 		}
