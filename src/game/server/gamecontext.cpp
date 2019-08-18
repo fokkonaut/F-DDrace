@@ -909,6 +909,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		}
 	}
 
+	m_apPlayers[ClientID]->OnDisconnect();
+
 	AbortVoteOnDisconnect(ClientID);
 
 	// update clients on drop
