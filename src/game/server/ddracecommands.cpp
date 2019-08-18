@@ -673,11 +673,12 @@ void CGameContext::ConRainbowSpeed(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "Value: %d", pPlayer->m_RainbowSpeed);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
-	else if (pResult->GetInteger(1) >= 1 && pResult->GetInteger(1) <= 50)
+	else
 	{
-		str_format(aBuf, sizeof(aBuf), "Rainbow speed for '%s' changed to %d", pSelf->Server()->ClientName(Victim), pResult->GetInteger(1));
+		int Speed = clamp(pResult->GetInteger(1), 1, 20);
+		str_format(aBuf, sizeof(aBuf), "Rainbow speed for '%s' changed to %d", pSelf->Server()->ClientName(Victim), Speed);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		pPlayer->m_RainbowSpeed = pResult->GetInteger(1);
+		pPlayer->m_RainbowSpeed = Speed;
 	}
 }
 
