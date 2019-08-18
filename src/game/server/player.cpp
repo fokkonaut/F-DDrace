@@ -327,7 +327,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
 	if(SnappingClient != -1 && m_Team == TEAM_SPECTATORS && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
-	if (m_IsDummy)
+	if (m_IsDummy && g_Config.m_SvDummySkin)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
 
 	// realistic ping for dummies
