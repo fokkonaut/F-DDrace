@@ -2897,7 +2897,9 @@ void CCharacter::UpdateWeaponIndicator()
 	if (!m_pPlayer->m_WeaponIndicator || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
 
-	GameServer()->SendBroadcast(GameServer()->GetWeaponName(GetActiveWeapon()), m_pPlayer->GetCID(), false);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
+	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 }
 
 int CCharacter::HasFlag()
