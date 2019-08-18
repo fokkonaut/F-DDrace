@@ -1161,7 +1161,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 				pPacker->AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				pPacker->AddInt(m_aClients[i].m_Country); // client country
 				pPacker->AddInt(m_aClients[i].m_Score); // client score
-				pPacker->AddInt(GameServer()->IsClientPlayer(i)?0:1); // flag spectator=1, bot=2 (player=0)
+				pPacker->AddInt(m_aClients[i].m_State == CClient::STATE_DUMMY ? 2 : GameServer()->IsClientPlayer(i)?0:1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
 	}
