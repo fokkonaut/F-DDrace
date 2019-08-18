@@ -240,11 +240,11 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Msg.m_Mode = CHAT_ALL;
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
-	Msg.m_TargetID = -1;
+	Msg.m_TargetID = To;
 	if(g_Config.m_SvDemoChat)
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 	else
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
 }
 
 void CGameContext::SendChatTeam(int Team, const char *pText)

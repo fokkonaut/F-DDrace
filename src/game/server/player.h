@@ -46,7 +46,7 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, int ClientID, bool Dummy, bool AsSpec = false);
+	CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec = false);
 	~CPlayer();
 
 	void Reset();
@@ -56,7 +56,7 @@ public:
 	void SetTeam(int Team, bool DoChatMsg=true);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
-	bool IsDummy() const { return m_Dummy; }
+	bool IsDummy() const { return m_DebugDummy; }
 
 	void Tick();
 	void PostTick();
@@ -153,7 +153,7 @@ private:
 	bool m_WeakHookSpawn;
 	int m_ClientID;
 	int m_Team;
-	bool m_Dummy;
+	bool m_DebugDummy;
 
 	// used for spectator mode
 	int m_SpecMode;

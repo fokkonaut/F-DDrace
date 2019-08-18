@@ -15,12 +15,12 @@ MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
-CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool Dummy, bool AsSpec)
+CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec)
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
 	m_Team = AsSpec ? TEAM_SPECTATORS : TEAM_RED;
-	m_Dummy = Dummy;
+	m_DebugDummy = DebugDummy;
 	Reset();
 }
 
