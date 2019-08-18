@@ -1131,7 +1131,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		Msg.m_ModeSpecial = ModeSpecial;
 		// only send kill message to players in the same minigame
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (!g_Config.m_SvHideMinigamePlayers || (GameServer()->m_apPlayers[i] && m_pPlayer->m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
+			if (!g_Config.m_SvHideMinigameKillMsgs || (GameServer()->m_apPlayers[i] && m_pPlayer->m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 
@@ -1842,11 +1842,11 @@ void CCharacter::HandleTiles(int Index)
 		}
 		if (m_EnteredShop)
 		{
-			if (m_ShopAntiSpamTick <= Server()->Tick())
+			if (m_ShopAntiSpamTick < Server()->Tick())
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press f4 to start shopping.", Server()->ClientName(m_pPlayer->GetCID()));
-				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, -1, aBuf, m_pPlayer->GetCID());
+				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
 			}
 			m_EnteredShop = false;
 		}
@@ -2655,14 +2655,14 @@ void CCharacter::FDDraceTick()
 		{
 			if (m_ShopAntiSpamTick < Server()->Tick())
 			{
-				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, -1, "Bye! Come back if you need something.", m_pPlayer->GetCID());
+				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), "Bye! Come back if you need something.");
 				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
 			}
 
 			if (m_ShopWindowPage != SHOP_PAGE_NONE)
 				GameServer()->SendMotd("", GetPlayer()->GetCID());
 
-			GameServer()->SendBroadcast("", m_pPlayer->GetCID());
+			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
 
 			m_PurchaseState = SHOP_STATE_NONE;
 			m_ShopWindowPage = SHOP_PAGE_NONE;

@@ -375,7 +375,7 @@ int CNetConnection::Update()
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_TOKEN &&
 		State() != NET_CONNSTATE_DUMMY &&
-		(Now-m_LastRecvTime) > time_freq()*g_Config.m_ConnTimeout)
+		(Now-m_LastRecvTime) > time_freq()*10)
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");

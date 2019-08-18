@@ -994,7 +994,7 @@ void CGameContext::ConDisconnectDummy(IConsole::IResult *pResult, void *pUserDat
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int ID = pResult->GetVictim();
-	if (ID >= 0 && ID < MAX_CLIENTS && pSelf->m_apPlayers[ID] && pSelf->m_apPlayers[ID]->m_IsDummy && pSelf->m_apPlayers[ID]->m_FlagPlayer == -1)
+	if (ID >= 0 && ID < MAX_CLIENTS && pSelf->m_apPlayers[ID] && pSelf->m_apPlayers[ID]->m_IsDummy)
 		pSelf->Server()->DummyLeave(ID);
 }
 

@@ -37,8 +37,8 @@ IGameController::IGameController(CGameContext *pGameServer)
 
 	m_GameInfo.m_MatchCurrent = 0;
 	m_GameInfo.m_MatchNum = 0;
-	m_GameInfo.m_ScoreLimit = 0;
-	m_GameInfo.m_TimeLimit = 0;
+	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
+	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
 
 	// map
 	m_aMapWish[0] = 0;

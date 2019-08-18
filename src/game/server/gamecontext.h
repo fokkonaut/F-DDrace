@@ -121,6 +121,7 @@ class CGameContext : public IGameServer
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
+	static void ConchainHideDummies(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
@@ -206,11 +207,10 @@ public:
 	// network
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
-	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int ToClientID = -1);
+	void SendChat(int ChatterClientID, int Mode, int To, const char *pText);
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
-	void SendMotd(int ClientID);
 	void SendSettings(int ClientID);
 	void SendSkinChange(int ClientID, int TargetID);
 
@@ -266,15 +266,16 @@ public:
 	// F-DDrace
 	
 	//dummy
-	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1), int FlagPlayer = -1);
+	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1));
 	void ConnectDefaultDummies();
 	void SetV3Offset(int X = -1, int Y = -1);
-	int GetFlagPlayer(int Team);
 
 	bool IsShopDummy(int ClientID);
 	int GetShopDummy();
 
 	int GetNextClientID(bool Inverted = false);
+
+	void UpdateHideDummies(int To);
 
 	//account
 	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);

@@ -241,10 +241,7 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
 	Msg.m_TargetID = To;
-	if(g_Config.m_SvDemoChat)
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
-	else
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, To);
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 }
 
 void CGameContext::SendChatTeam(int Team, const char *pText)
@@ -254,7 +251,7 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 			SendChatTarget(i, pText);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText, int ToClientID)
+void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
 {
 	char aBuf[256];
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
@@ -277,19 +274,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_Mode = Mode;
 	Msg.m_ClientID = ChatterClientID;
 	Msg.m_pMessage = pText;
-	Msg.m_TargetID = ToClientID;
+	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-	else if (Mode == CHAT_SINGLE)
-	{
-		// pack one for the recording only
-		if (g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, ToClientID);
-
-		// send to the client
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ToClientID);
-	}
 	else if(Mode == CHAT_TEAM)
 	{
 		CTeamsCore* Teams = &((CGameControllerDDrace*)m_pController)->m_Teams.m_Core;
@@ -313,6 +301,14 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				}
 			}
 		}
+	}
+	else if (Mode == CHAT_SINGLE)
+	{
+		// send to the clients
+		Msg.m_TargetID = To;
+		Msg.m_Mode = CHAT_ALL;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 	}
 	else // Mode == CHAT_WHISPER
 	{
@@ -376,13 +372,6 @@ void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 		Msg.m_Weapon = Weapon;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
-}
-
-void CGameContext::SendMotd(int ClientID)
-{
-	CNetMsg_Sv_Motd Msg;
-	Msg.m_pMessage = g_Config.m_SvMotd;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 void CGameContext::SendSettings(int ClientID)
@@ -715,6 +704,19 @@ void CGameContext::OnTick()
 			}
 		}
 
+	// F-DDrace
+	if (Server()->Tick() % 100000 == 0) // save all accounts every ~ 30 minutes
+		for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
+			WriteAccountStats(i);
+
+	// minigames
+	if (!m_aMinigameDisabled[MINIGAME_SURVIVAL])
+		SurvivalTick();
+
+	for (int i = 0; i < 2; i++)
+		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
+			InstagibTick(i);
+
 
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -840,7 +842,9 @@ void CGameContext::OnClientEnter(int ClientID)
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, -1);
 	}
 
+	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
+	UpdateHideDummies(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1907,13 +1911,27 @@ void CGameContext::ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUse
 	}
 }
 
+void CGameContext::ConchainHideDummies(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if (pResult->NumArguments())
+	{
+		CGameContext* pSelf = (CGameContext*)pUserData;
+		pSelf->UpdateHideDummies(-1);
+	}
+}
+
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 	{
 		CGameContext *pSelf = (CGameContext *)pUserData;
-		pSelf->SendMotd(-1);
+		char aMotd[900];
+		str_copy(aMotd, pSelf->FixMotd(g_Config.m_SvMotd), sizeof(aMotd));
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+			if (pSelf->m_apPlayers[i])
+				pSelf->SendMotd(aMotd, i);
 	}
 }
 
@@ -2178,6 +2196,7 @@ void CGameContext::OnInit()
 
 	// F-DDrace
 	Console()->Chain("sv_num_spread_shots", ConchainNumSpreadShots, this);
+	Console()->Chain("sv_hide_dummies", ConchainHideDummies, this);
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 	#include <game/ddracecommands.h>
@@ -2882,14 +2901,14 @@ const char *CGameContext::FixMotd(const char *pMsg)
 			str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
 			str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
 		}
-		str_format(aRet, sizeof(aRet), "%s%sBlockDDrace is a mod by fokkonaut\nBlockDDrace Mod. Ver.: %s", aMotd, aTemp, GAME_VERSION);
+		str_format(aRet, sizeof(aRet), "%s%sF-DDrace is a mod by fokkonaut\nF-DDrace Mod. Ver.: %s", aMotd, aTemp, GAME_VERSION);
 	}
 	return aRet;
 }
 
-void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
+void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 {
-	int DummyID = GetNextClientID(FlagPlayer != -1);
+	int DummyID = GetNextClientID();
 	if (DummyID < 0 || DummyID >= MAX_CLIENTS || m_apPlayers[DummyID])
 		return;
 
@@ -2898,7 +2917,6 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
 	pDummy->m_IsDummy = true;
 	pDummy->m_Dummymode = Dummymode;
 	pDummy->m_ForceSpawnPos = Pos;
-	pDummy->m_FlagPlayer = FlagPlayer;
 
 	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER)
 		pDummy->m_Minigame = MINIGAME_BLOCK;
@@ -2910,12 +2928,6 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos, int FlagPlayer)
 		//StrToInts(pDummy->m_TeeInfos.m_aaSkinPartNames[p], 6, aaSkinPartNames[p]);
 		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 1;
 		pDummy->m_TeeInfos.m_aSkinPartColors[p] = 0;
-	}
-
-	if (FlagPlayer != -1)
-	{
-		Server()->SetClientName(DummyID, FlagPlayer == TEAM_RED ? "Red Flag" : "Blue Flag");
-		Server()->SetClientClan(DummyID, "BlockDDrace");
 	}
 
 	OnClientEnter(DummyID);
@@ -2976,14 +2988,20 @@ void CGameContext::SetV3Offset(int X, int Y)
 	}
 }
 
-int CGameContext::GetFlagPlayer(int Team)
+void CGameContext::UpdateHideDummies(int To)
 {
-	if (Team != TEAM_RED && Team != TEAM_BLUE)
-		return -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (m_apPlayers[i] && m_apPlayers[i]->m_FlagPlayer == Team)
-			return i;
-	return -1;
+	{
+		if (m_apPlayers[i] && m_apPlayers[i]->m_IsDummy)
+		{
+			CNetMsg_Sv_Team Msg;
+			Msg.m_ClientID = i;
+			Msg.m_Team = g_Config.m_SvHideDummies ? TEAM_BLUE : TEAM_RED;
+			Msg.m_Silent = 1;
+			Msg.m_CooldownTick = Server()->Tick();
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+		}
+	}
 }
 
 void CGameContext::SendMotd(const char *pMsg, int ClientID)
