@@ -290,8 +290,8 @@ void CPlayer::PostTick()
 	{
 		if(m_pSpecFlag)
 			m_ViewPos = m_pSpecFlag->GetPos();
-		else if (GameServer()->m_apPlayers[m_SpectatorID])
-			m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->m_ViewPos;
+		else if (GameServer()->GetPlayerChar(m_SpectatorID))
+			m_ViewPos = GameServer()->GetPlayerChar(m_SpectatorID)->GetPos();
 	}
 }
 
