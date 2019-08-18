@@ -275,7 +275,7 @@ public:
 
 	int GetNextClientID(bool Inverted = false);
 
-	void UpdateHideDummies(int To);
+	void UpdateHideDummies();
 
 	//account
 	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);

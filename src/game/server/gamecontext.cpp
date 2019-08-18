@@ -844,7 +844,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
-	UpdateHideDummies(ClientID);
+	UpdateHideDummies();
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1914,7 +1914,7 @@ void CGameContext::ConchainHideDummies(IConsole::IResult* pResult, void* pUserDa
 	if (pResult->NumArguments())
 	{
 		CGameContext* pSelf = (CGameContext*)pUserData;
-		pSelf->UpdateHideDummies(-1);
+		pSelf->UpdateHideDummies();
 	}
 }
 
@@ -2985,7 +2985,7 @@ void CGameContext::SetV3Offset(int X, int Y)
 	}
 }
 
-void CGameContext::UpdateHideDummies(int To)
+void CGameContext::UpdateHideDummies()
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -2996,7 +2996,7 @@ void CGameContext::UpdateHideDummies(int To)
 			Msg.m_Team = g_Config.m_SvHideDummies ? TEAM_BLUE : TEAM_RED;
 			Msg.m_Silent = 1;
 			Msg.m_CooldownTick = Server()->Tick();
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 		}
 	}
 }
