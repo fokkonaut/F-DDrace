@@ -121,7 +121,7 @@ class CGameContext : public IGameServer
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
-	static void ConchainHideDummies(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
+	static void ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
@@ -275,7 +275,7 @@ public:
 
 	int GetNextClientID(bool Inverted = false);
 
-	void UpdateHideDummies();
+	void UpdateHidePlayers();
 
 	//account
 	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);

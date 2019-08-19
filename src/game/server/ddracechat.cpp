@@ -1376,6 +1376,8 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 
 	pPlayer->KillCharacter(WEAPON_GAME);
 	pPlayer->m_Minigame = Minigame;
+
+	pSelf->UpdateHidePlayers();
 }
 
 void CGameContext::ConLeaveMinigame(IConsole::IResult *pResult, void *pUserData)

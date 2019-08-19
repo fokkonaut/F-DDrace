@@ -842,7 +842,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
-	UpdateHideDummies();
+	UpdateHidePlayers();
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1908,13 +1908,13 @@ void CGameContext::ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUse
 	}
 }
 
-void CGameContext::ConchainHideDummies(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
+void CGameContext::ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if (pResult->NumArguments())
 	{
 		CGameContext* pSelf = (CGameContext*)pUserData;
-		pSelf->UpdateHideDummies();
+		pSelf->UpdateHidePlayers();
 	}
 }
 
@@ -2193,7 +2193,8 @@ void CGameContext::OnInit()
 
 	// F-DDrace
 	Console()->Chain("sv_num_spread_shots", ConchainNumSpreadShots, this);
-	Console()->Chain("sv_hide_dummies", ConchainHideDummies, this);
+	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
+	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 	#include <game/ddracecommands.h>
@@ -2985,18 +2986,27 @@ void CGameContext::SetV3Offset(int X, int Y)
 	}
 }
 
-void CGameContext::UpdateHideDummies()
+void CGameContext::UpdateHidePlayers()
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (m_apPlayers[i] && m_apPlayers[i]->m_IsDummy)
+		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
+			if (i == j || !m_apPlayers[i] || !m_apPlayers[j])
+				continue;
+
+			int Team = TEAM_RED;
+
+			if ((g_Config.m_SvHideDummies && m_apPlayers[j]->m_IsDummy)
+				|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[j]->m_Minigame != m_apPlayers[i]->m_Minigame))
+				Team = TEAM_BLUE;
+
 			CNetMsg_Sv_Team Msg;
-			Msg.m_ClientID = i;
-			Msg.m_Team = g_Config.m_SvHideDummies ? TEAM_BLUE : TEAM_RED;
+			Msg.m_ClientID = j;
+			Msg.m_Team = Team;
 			Msg.m_Silent = 1;
 			Msg.m_CooldownTick = Server()->Tick();
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 		}
 	}
 }

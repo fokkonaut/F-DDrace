@@ -273,7 +273,7 @@ public:
 	//fake information
 	void UpdateFakeInformation();
 	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); UpdateFakeInformation(); };
-	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_NAME_LENGTH); UpdateFakeInformation(); };
+	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); UpdateFakeInformation(); };
 	char m_aFakeName[MAX_NAME_LENGTH];
 	char m_aFakeClan[MAX_CLAN_LENGTH];
 

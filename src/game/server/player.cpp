@@ -264,7 +264,7 @@ void CPlayer::Tick()
 				Msg.m_Weapon = m_MsgWeapon;
 				Msg.m_ModeSpecial = m_MsgModeSpecial;
 				for (int i = 0; i < MAX_CLIENTS; i++)
-					if (!g_Config.m_SvHideMinigameKillMsgs || (GameServer()->m_apPlayers[i] && m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
+					if (!g_Config.m_SvHideMinigamePlayers || (GameServer()->m_apPlayers[i] && m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 
@@ -396,13 +396,24 @@ void CPlayer::Snap(int SnappingClient)
 			Msg.m_aUseCustomColors[p] = 1;
 			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
 		}
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()) || Server()->GetClientVersion(i) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
+				continue;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+		}
 
 		m_SentSkinUpdate = false;
 	}
 	else if (!m_SentSkinUpdate)
 	{
-		GameServer()->SendSkinChange(m_ClientID, -1);
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()) || Server()->GetClientVersion(i) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
+				continue;
+			GameServer()->SendSkinChange(m_ClientID, i);
+		}
 		m_SentSkinUpdate = true;
 	}
 
@@ -904,7 +915,6 @@ void CPlayer::SpectatePlayerName(const char* pName)
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		dbg_msg("hi", "hi");
 		if (i != m_ClientID && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
 		{
 			SetSpectatorID(SPEC_PLAYER, i);
@@ -995,7 +1005,6 @@ bool CPlayer::IsSpectator()
 
 void CPlayer::SetPlaying()
 {
-	m_SpectatorID = SPEC_FREEVIEW;
 	Pause(PAUSE_NONE, true);
 	SetTeam(TEAM_RED);
 	if (m_pCharacter && m_pCharacter->IsPaused())

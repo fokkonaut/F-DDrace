@@ -449,6 +449,8 @@ void IGameController::Snap(int SnappingClient)
 	pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
 	if(m_SuddenDeath)
 		pGameData->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
+	if (GameServer()->m_World.m_Paused)
+		pGameData->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
 
 	// demo recording
 	if(SnappingClient == -1)

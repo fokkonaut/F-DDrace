@@ -40,14 +40,15 @@ void CCharacter::ShopWindow(int Dir)
 	{
 		str_format(aItem, sizeof(aItem), "Welcome to the shop!\n\n"
 			"By shooting to the right you go one site forward,\n"
-			"and by shooting left you go one site backwards.");
+			"and by shooting left you go one site\n"
+			"backwards.");
 	}
 	else if (m_ShopWindowPage == 1)
 	{
 		str_format(aItem, sizeof(aItem), "        ~  R A I N B O W  ~      ");
 		str_format(aLevelTmp, sizeof(aLevelTmp), "5");
 		str_format(aPriceTmp, sizeof(aPriceTmp), "1.500");
-		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item until you're dead.");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item until you die.");
 		str_format(aInfo, sizeof(aInfo), "Rainbow will make your tee change the color very fast.");
 	}
 	else if (m_ShopWindowPage == 2)
@@ -55,7 +56,7 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aItem, sizeof(aItem), "        ~  B L O O D Y  ~      ");
 		str_format(aLevelTmp, sizeof(aLevelTmp), "15");
 		str_format(aPriceTmp, sizeof(aPriceTmp), "3.500");
-		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item until you're dead.");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item until you die.");
 		str_format(aInfo, sizeof(aInfo), "Bloody will give your tee a permanent kill effect.");
 	}
 	else if (m_ShopWindowPage == 3)
@@ -188,7 +189,7 @@ void CCharacter::BuyItem(int ItemID)
 	}
 	else if (ItemID == 2)
 	{
-		if (m_Bloody)
+		if (m_Bloody || m_StrongBloody)
 		{
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already own bloody.");
 			return;

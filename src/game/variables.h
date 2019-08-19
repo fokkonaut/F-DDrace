@@ -195,7 +195,7 @@ MACRO_CONFIG_INT(SvSurvivalRoundTime, sv_survival_round_time, 5, 1, 20, CFGFLAG_
 MACRO_CONFIG_INT(SvSurvivalDeathmatchTime, sv_survival_deathmatch_time, 2, 1, 5, CFGFLAG_SERVER|CFGFLAG_GAME, "Length of the deathmatch in minutes")
 
 // other
-MACRO_CONFIG_INT(SvHideMinigameKillMsgs, sv_hide_minigame_kill_msgs, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames don't send kill messages")
+MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard")
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 1, 1, 50, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard")
 
 MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 1, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound")
