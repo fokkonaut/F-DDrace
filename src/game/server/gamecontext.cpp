@@ -777,6 +777,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		m_apPlayers[ClientID]->m_Score = !Score()->PlayerData(ClientID)->m_BestTime ? -9999 : Score()->PlayerData(ClientID)->m_BestTime;
 	}
 
+	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
+
 	m_VoteUpdate = true;
 
 	// update client infos (others before local)
