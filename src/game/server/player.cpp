@@ -397,23 +397,12 @@ void CPlayer::Snap(int SnappingClient)
 			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
 		}
 
-		for (int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()) || Server()->GetClientVersion(i) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
-				continue;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		}
-
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 		m_SentSkinUpdate = false;
 	}
 	else if (!m_SentSkinUpdate)
 	{
-		for (int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()) || Server()->GetClientVersion(i) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
-				continue;
-			GameServer()->SendSkinChange(m_ClientID, i);
-		}
+		GameServer()->SendSkinChange(m_ClientID, -1);
 		m_SentSkinUpdate = true;
 	}
 
