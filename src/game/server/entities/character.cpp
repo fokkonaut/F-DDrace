@@ -395,6 +395,22 @@ void CCharacter::FireWeapon()
 			ShopWindow(GetAimDir());
 			return;
 		}
+
+		//spooky ghost
+		if (m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+		{
+			m_NumGhostShots++;
+			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+			{
+				SetSpookyGhost();
+				m_NumGhostShots = 0;
+			}
+			else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
+			{
+				UnsetSpookyGhost();
+				m_NumGhostShots = 0;
+			}
+		}
 	}
 
 	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
@@ -806,6 +822,9 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
+
+	if (m_pPlayer->m_SpookyGhost)
+		return;
 
 	if (Weapon == WEAPON_NINJA)
 	{
@@ -1777,11 +1796,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	//spooky ghost toggle
-	if ((m_TileIndex == TILE_SPOOKY) || (m_TileFIndex == TILE_SPOOKY))
+	if ((m_TileIndex == TILE_SPOOKY_GHOST) || (m_TileFIndex == TILE_SPOOKY_GHOST))
 	{
-		if ((m_LastIndexTile == TILE_SPOOKY) || (m_LastIndexFrontTile == TILE_SPOOKY))
+		if ((m_LastIndexTile == TILE_SPOOKY_GHOST) || (m_LastIndexFrontTile == TILE_SPOOKY_GHOST))
 			return;
-		Spooky(!m_Spooky);
+		SpookyGhost(!m_Spooky);
 	}
 
 	//add meteor
@@ -2629,8 +2648,13 @@ void CCharacter::FDDraceInit()
 	m_ShopMotdTick = Now;
 	m_PurchaseState = SHOP_STATE_NONE;
 
+	UnsetSpookyGhost();
+
 	m_pPlayer->m_Gamemode = (g_Config.m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
+
+	m_NumGhostShots = 0;
+	m_SavedDefEmote = EMOTE_NORMAL;
 }
 
 void CCharacter::FDDraceTick()
@@ -2699,17 +2723,10 @@ void CCharacter::BackupWeapons(int Type)
 {
 	if (!m_WeaponsBackupped[Type])
 	{
-		for (int i = 0; i < NUM_WEAPONS_BACKUP; i++)
+		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
-			if (i == BACKUP_HEALTH)
-				m_aWeaponsBackup[i][Type] = m_Health;
-			else if (i == BACKUP_ARMOR)
-				m_aWeaponsBackup[i][Type] = m_Armor;
-			else
-			{
-				m_aWeaponsBackupGot[i][Type] = m_aWeapons[i].m_Got;
-				m_aWeaponsBackup[i][Type] = m_aWeapons[i].m_Ammo;
-			}
+			m_aWeaponsBackupGot[i][Type] = m_aWeapons[i].m_Got;
+			m_aWeaponsBackup[i][Type] = m_aWeapons[i].m_Ammo;
 		}
 		m_WeaponsBackupped[Type] = true;
 	}
@@ -2719,19 +2736,12 @@ void CCharacter::LoadWeaponBackup(int Type)
 {
 	if (m_WeaponsBackupped[Type])
 	{
-		for (int i = 0; i < NUM_WEAPONS_BACKUP; i++)
+		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
-			if (i == BACKUP_HEALTH)
-				m_Health = m_aWeaponsBackup[i][Type];
-			else if (i == BACKUP_ARMOR)
-				m_Armor = m_aWeaponsBackup[i][Type];
-			else
-			{
-				m_aWeapons[i].m_Got = m_aWeaponsBackupGot[i][Type];
-				m_aWeapons[i].m_Ammo = m_aWeaponsBackup[i][Type];
-				if (i == WEAPON_NINJA)
-					m_aWeapons[i].m_Ammo = -1;
-			}
+			m_aWeapons[i].m_Got = m_aWeaponsBackupGot[i][Type];
+			m_aWeapons[i].m_Ammo = m_aWeaponsBackup[i][Type];
+			if (i == WEAPON_NINJA)
+				m_aWeapons[i].m_Ammo = -1;
 		}
 		m_WeaponsBackupped[Type] = false;
 	}
@@ -2836,6 +2846,27 @@ void CCharacter::DropLoot()
 			DropWeapon(Weapon, Dir);
 		}
 	}
+}
+
+void CCharacter::SetSpookyGhost()
+{
+	BackupWeapons(BACKUP_SPOOKY_GHOST);
+	for (int i = 0; i < NUM_WEAPONS; i++)
+		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
+			m_aWeapons[i].m_Got = false;
+	m_pPlayer->m_SpookyGhost = true;
+	m_pPlayer->m_SentSkinUpdate = false;
+	m_pPlayer->m_ShowName = false;
+	m_SavedDefEmote = m_pPlayer->m_DefEmote;
+	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
+}
+
+void CCharacter::UnsetSpookyGhost()
+{
+	LoadWeaponBackup(BACKUP_SPOOKY_GHOST);
+	m_pPlayer->m_ShowName = true;
+	m_pPlayer->m_SpookyGhost = false;
+	m_pPlayer->m_DefEmote = m_SavedDefEmote;
 }
 
 void CCharacter::SetActiveWeapon(int Weapon)
@@ -2951,6 +2982,14 @@ void CCharacter::Trail(bool Set, int FromID, bool Silent)
 	GameServer()->SendExtraMessage(TRAIL, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
+void CCharacter::SpookyGhost(bool Set, int FromID, bool Silent)
+{
+	m_pPlayer->m_HasSpookyGhost = Set;
+	GameServer()->SendExtraMessage(EXTRA_SPOOKY_GHOST, m_pPlayer->GetCID(), Set, FromID, Silent);
+	if (!Silent && Set)
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "For more info, say '/spookyghost'");
+}
+
 void CCharacter::Spooky(bool Set, int FromID, bool Silent)
 {
 	m_Spooky = Set;
@@ -3010,13 +3049,9 @@ void CCharacter::VanillaMode(int FromID, bool Silent)
 	m_Armor = 0;
 	for (int j = 0; j < NUM_BACKUPS; j++)
 	{
-		for (int i = 0; i < NUM_WEAPONS_BACKUP; i++)
+		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
-			if (i == BACKUP_HEALTH)
-				m_aWeaponsBackup[i][j] = 10;
-			else if (i == BACKUP_ARMOR)
-				m_aWeaponsBackup[i][j] = 0;
-			else if (i != WEAPON_HAMMER)
+			if (i != WEAPON_HAMMER)
 			{
 				m_aWeaponsBackup[i][j] = 10;
 				if (!m_FreezeTime)
@@ -3037,18 +3072,11 @@ void CCharacter::DDraceMode(int FromID, bool Silent)
 	m_Armor = 10;
 	for (int j = 0; j < NUM_BACKUPS; j++)
 	{
-		for (int i = 0; i < NUM_WEAPONS_BACKUP; i++)
+		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
-			if (i == BACKUP_HEALTH)
-				m_aWeaponsBackup[i][j] = 10;
-			else if (i == BACKUP_ARMOR)
-				m_aWeaponsBackup[i][j] = 10;
-			else
-			{
-				m_aWeaponsBackup[i][j] = -1;
-				if (!m_FreezeTime)
-					m_aWeapons[i].m_Ammo = -1;
-			}
+			m_aWeaponsBackup[i][j] = -1;
+			if (!m_FreezeTime)
+				m_aWeapons[i].m_Ammo = -1;
 		}
 	}
 	GameServer()->SendExtraMessage(DDRACE_MODE, m_pPlayer->GetCID(), true, FromID, Silent);

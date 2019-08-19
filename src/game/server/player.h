@@ -229,10 +229,10 @@ public:
 
 	//spooky ghost
 	bool m_SpookyGhost;
-	int m_RealUseCustomColor;
-	char m_RealSkinName[64];
+	void SendSpookyGhostSkin(int ClientID);
 
 	//no name fix
+	bool m_RemovedName;
 	void FixForNoName(int ID);
 	int m_FixNameID;
 	bool m_ShowName;

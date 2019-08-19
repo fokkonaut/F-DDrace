@@ -714,6 +714,14 @@ void CGameContext::ConTrail(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->Trail(!pChr->m_Trail, pResult->m_ClientID);
 }
 
+void CGameContext::ConSpookyGhost(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->SpookyGhost(!pChr->GetPlayer()->m_HasSpookyGhost, pResult->m_ClientID);
+}
+
 void CGameContext::ConSpooky(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1051,6 +1059,7 @@ void CGameContext::ConPlayerName(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	pSelf->m_apPlayers[Victim]->SetFakeName(pResult->GetString(1));
+	pSelf->UpdateHidePlayers();
 }
 
 void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
@@ -1060,4 +1069,5 @@ void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	pSelf->m_apPlayers[Victim]->SetFakeClan(pResult->GetString(1));
+	pSelf->UpdateHidePlayers();
 }

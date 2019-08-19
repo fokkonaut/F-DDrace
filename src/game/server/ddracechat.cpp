@@ -992,6 +992,14 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 
 // F-DDrace
 
+void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Spooky Ghost ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "The Spooky Ghost is an extra, that can be toggled like this:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Hold TAB (or other scoreboard key) and shoot two times with your gun.");
+}
+
 void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1349,6 +1357,7 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 		{
 			pPlayer->m_Gamemode = g_Config.m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
+			pPlayer->m_ShowName = true;
 		}
 	}
 	// join minigame
@@ -1365,6 +1374,7 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 		{
 			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
 			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
+			pPlayer->m_ShowName = false;
 		}
 	}
 	else

@@ -51,6 +51,7 @@ enum Shop
 
 enum Item
 {
+	SPOOKY_GHOST,
 	POLICE,
 	NUM_ITEMS
 };
@@ -432,6 +433,7 @@ private:
 	static void ConUninvite(IConsole::IResult* pResult, void* pUserData);
 
 	//chat
+	static void ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeaponIndicator(IConsole::IResult* pResult, void* pUserData);
 
@@ -496,6 +498,7 @@ private:
 	static void ConInfiniteJumps(IConsole::IResult* pResult, void* pUserData);
 	static void ConEndlessHook(IConsole::IResult* pResult, void* pUserData);
 	static void ConJetpack(IConsole::IResult* pResult, void* pUserData);
+	static void ConSpookyGhost(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpooky(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowSpeed(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbow(IConsole::IResult* pResult, void* pUserData);

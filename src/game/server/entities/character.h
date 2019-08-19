@@ -19,6 +19,7 @@ enum Extra
 	INF_RAINBOW,
 	ATOM,
 	TRAIL,
+	EXTRA_SPOOKY_GHOST,
 	SPOOKY,
 	METEOR,
 	INF_METEOR,
@@ -42,11 +43,8 @@ enum Extra
 enum Backup
 {
 	BACKUP_FREEZE = 0,
+	BACKUP_SPOOKY_GHOST,
 	NUM_BACKUPS,
-
-	BACKUP_HEALTH = NUM_WEAPONS,
-	BACKUP_ARMOR,
-	NUM_WEAPONS_BACKUP
 };
 
 class CGameTeams;
@@ -122,6 +120,7 @@ public:
 	void InfRainbow(bool Set = true, int FromID = -1, bool Silent = false);
 	void Atom(bool Set = true, int FromID = -1, bool Silent = false);
 	void Trail(bool Set = true, int FromID = -1, bool Silent = false);
+	void SpookyGhost(bool Set = true, int FromID = -1, bool Silent = false);
 	void Spooky(bool Set = true, int FromID = -1, bool Silent = false);
 	void Meteor(bool Set = true, int FromID = -1, bool Infinite = false, bool Silent = false);
 	void Passive(bool Set = true, int FromID = -1, bool Silent = false);
@@ -344,9 +343,15 @@ public:
 	//backups
 	void BackupWeapons(int Type);
 	void LoadWeaponBackup(int Type);
-	int m_aWeaponsBackup[NUM_WEAPONS_BACKUP][NUM_BACKUPS];
+	int m_aWeaponsBackup[NUM_WEAPONS][NUM_BACKUPS];
 	bool m_WeaponsBackupped[NUM_BACKUPS];
-	bool m_aWeaponsBackupGot[NUM_WEAPONS_BACKUP][NUM_BACKUPS];
+	bool m_aWeaponsBackupGot[NUM_WEAPONS][NUM_BACKUPS];
+
+	//spooky ghost
+	void SetSpookyGhost();
+	void UnsetSpookyGhost();
+	int m_NumGhostShots;
+	int m_SavedDefEmote;
 
 	//extras
 	bool m_Rainbow;

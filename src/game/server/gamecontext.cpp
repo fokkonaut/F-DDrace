@@ -353,7 +353,7 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
 	CNetMsg_Sv_Emoticon Msg;
 	Msg.m_ClientID = ClientID;
-	Msg.m_Emoticon = GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky ? EMOTICON_GHOST : Emoticon;
+	Msg.m_Emoticon = (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_SpookyGhost) || (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky) ? EMOTICON_GHOST : Emoticon;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
@@ -767,6 +767,9 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 
 void CGameContext::OnClientEnter(int ClientID)
 {
+	// F-DDrace
+	str_copy(m_apPlayers[ClientID]->m_aFakeName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_aFakeClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->Respawn();
 
 	// load score
@@ -845,6 +848,16 @@ void CGameContext::OnClientEnter(int ClientID)
 	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
 	UpdateHidePlayers();
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_apPlayers[i])
+			continue;
+
+		m_apPlayers[i]->UpdateFakeInformation();
+		if(m_apPlayers[i]->m_SpookyGhost)
+			m_apPlayers[i]->SendSpookyGhostSkin(ClientID);
+	}
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1390,7 +1403,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						pChr->SetEmoteType(EMOTE_NORMAL);
 						break;
 				}
-				if (pChr->m_Spooky)
+				if (pPlayer->m_SpookyGhost || pChr->m_Spooky)
 					pChr->SetEmoteType(EMOTE_SURPRISE);
 				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 			}
@@ -1429,6 +1442,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
+
+			if (pPlayer->m_SpookyGhost)
+				return;
 
 			// update all clients
 			for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -2767,6 +2783,10 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 
 	getline(AccFile, data);
 	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
 	m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
 }
 
@@ -2799,6 +2819,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[2] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[3] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[4] << "\n";
+		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
 		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
@@ -2923,9 +2944,9 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
+
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		//StrToInts(pDummy->m_TeeInfos.m_aaSkinPartNames[p], 6, aaSkinPartNames[p]);
 		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 1;
 		pDummy->m_TeeInfos.m_aSkinPartColors[p] = 0;
 	}
@@ -3164,6 +3185,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Atom";
 	case TRAIL:
 		return "Trail";
+	case EXTRA_SPOOKY_GHOST:
+		return "Spooky Ghost";
 	case SPOOKY:
 		return "Spooky Mode";
 	case METEOR:
