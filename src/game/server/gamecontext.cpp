@@ -2916,9 +2916,9 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	pDummy->m_Dummymode = Dummymode;
 	pDummy->m_ForceSpawnPos = Pos;
 
-	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER)
+	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
 		pDummy->m_Minigame = MINIGAME_BLOCK;
-	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY)
+	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
