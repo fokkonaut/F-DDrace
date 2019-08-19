@@ -284,18 +284,16 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// pack one for the recording only
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
-		To = m_apPlayers[ChatterClientID]->GetTeam();
-
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_apPlayers[i] != 0) {
-				if(To == TEAM_SPECTATORS) {
+				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS) {
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) {
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				} else {
-					if(Teams->Team(i) == To && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS) {
+					if(Teams->Team(i) == GetDDRaceTeam(ChatterClientID) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS) {
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
