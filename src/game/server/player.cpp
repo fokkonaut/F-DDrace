@@ -256,25 +256,28 @@ void CPlayer::Tick()
 	}
 
 	// skin
-	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
+	if (!m_SpookyGhost)
 	{
-		CNetMsg_Sv_SkinChange Msg;
-		Msg.m_ClientID = m_ClientID;
-		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
-		for (int p = 0; p < NUM_SKINPARTS; p++)
+		if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
 		{
-			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
-			Msg.m_aUseCustomColors[p] = 1;
-			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
-		}
+			CNetMsg_Sv_SkinChange Msg;
+			Msg.m_ClientID = m_ClientID;
+			m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+			for (int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
+				Msg.m_aUseCustomColors[p] = 1;
+				Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
+			}
 
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
-		m_SentSkinUpdate = false;
-	}
-	else if (!m_SentSkinUpdate && !m_SpookyGhost)
-	{
-		GameServer()->SendSkinChange(m_ClientID, -1);
-		m_SentSkinUpdate = true;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+			m_SentSkinUpdate = false;
+		}
+		else if (!m_SentSkinUpdate)
+		{
+			GameServer()->SendSkinChange(m_ClientID, -1);
+			m_SentSkinUpdate = true;
+		}
 	}
 
 	// name
