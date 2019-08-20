@@ -1021,7 +1021,7 @@ void CPlayer::SetPlaying()
 		m_pCharacter->Pause(false);
 }
 
-void CPlayer::UpdateFakeInformation()
+void CPlayer::UpdateFakeInformation(int ClientID)
 {
 	CNetMsg_Sv_ClientDrop ClientDropMsg;
 	ClientDropMsg.m_ClientID = m_ClientID;
@@ -1044,11 +1044,13 @@ void CPlayer::UpdateFakeInformation()
 		NewClientInfoMsg.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 	}
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	if (ClientID != -1)
 	{
-		if (!GameServer()->m_apPlayers[i] || (!Server()->ClientIngame(i) && !GameServer()->m_apPlayers[i]->IsDummy()))
-			continue;
-
+		Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	}
+	else for (int i = 0; i < MAX_CLIENTS; i++)
+	{
 		Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 	}

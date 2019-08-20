@@ -847,14 +847,16 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
-	UpdateHidePlayers();
+
+	if (!m_apPlayers[ClientID]->m_IsDummy) // for dummies this will be sent once after the connect command gets executed
+		UpdateHidePlayers();
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!m_apPlayers[i])
 			continue;
 
-		m_apPlayers[i]->UpdateFakeInformation();
+		m_apPlayers[i]->UpdateFakeInformation(ClientID);
 		if(m_apPlayers[i]->m_SpookyGhost)
 			m_apPlayers[i]->SendSpookyGhostSkin(ClientID);
 	}

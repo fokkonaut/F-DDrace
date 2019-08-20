@@ -997,6 +997,8 @@ void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 
 	for (int i = 0; i < Amount; i++)
 		pSelf->ConnectDummy(Dummymode);
+
+	pSelf->UpdateHidePlayers();
 }
 
 void CGameContext::ConDisconnectDummy(IConsole::IResult *pResult, void *pUserData)
