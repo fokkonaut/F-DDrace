@@ -2863,6 +2863,9 @@ void CCharacter::SetSpookyGhost()
 
 void CCharacter::UnsetSpookyGhost()
 {
+	if (!m_pPlayer->m_SpookyGhost)
+		return;
+
 	LoadWeaponBackup(BACKUP_SPOOKY_GHOST);
 	m_pPlayer->m_ShowName = true;
 	m_pPlayer->m_SpookyGhost = false;
