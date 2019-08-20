@@ -262,7 +262,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_SHOTGUN;
 	}
-<<<<<<< HEAD
 	else if(Index == ENTITY_WEAPON_GRENADE)
 	{
 		Type = POWERUP_WEAPON;
@@ -274,30 +273,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		SubType = WEAPON_LASER;
 	}
 	else if(Index == ENTITY_POWERUP_NINJA)
-=======
-
-	return 0;
-}
-
-void IGameController::OnCharacterSpawn(CCharacter *pChr)
-{
-	// default health
-	pChr->IncreaseHealth(10);
-
-	// give default weapons
-	pChr->GiveWeapon(WEAPON_HAMMER, -1);
-	pChr->GiveWeapon(WEAPON_GUN, 10);
-}
-
-void IGameController::OnFlagReturn(CFlag *pFlag)
-{
-}
-
-bool IGameController::OnEntity(int Index, vec2 Pos)
-{
-	// don't add pickups in survival
-	if(m_GameFlags&GAMEFLAG_SURVIVAL)
->>>>>>> bf4088dce4e0cc2f1697b1475f134f6f9f096d7d
 	{
 		Type = POWERUP_NINJA;
 		SubType = WEAPON_NINJA;
