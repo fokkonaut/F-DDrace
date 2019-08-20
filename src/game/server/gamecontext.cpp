@@ -846,6 +846,11 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	// F-DDrace
+	UpdateHidePlayers(m_apPlayers[ClientID]->m_IsDummy ? ClientID : -1);
+
+	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
+		return;
+
 	m_pController->UpdateGameInfo(ClientID);
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -857,8 +862,6 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(m_apPlayers[i]->m_SpookyGhost)
 			m_apPlayers[i]->SendSpookyGhostSkin(ClientID);
 	}
-
-	UpdateHidePlayers(m_apPlayers[ClientID]->m_IsDummy ? ClientID : -1);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
