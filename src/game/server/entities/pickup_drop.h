@@ -38,6 +38,7 @@ private:
 	int m_PickupDelay;
 	bool m_SpreadWeapon;
 	vec2 m_PrevPos;
+	vec2 m_SnapPos;
 
 	// have to define a new ID variable for the bullet
 	int m_ID2;

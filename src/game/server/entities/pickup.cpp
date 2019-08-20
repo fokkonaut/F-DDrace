@@ -248,7 +248,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO)
+	if (m_Type == POWERUP_AMMO || GameServer()->GetRealWeapon(m_Subtype) == WEAPON_GUN)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)
@@ -271,17 +271,17 @@ void CPickup::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = 0;
 		pProj->m_Type = WEAPON_LASER;
-
-		return;
 	}
+	else
+	{
+		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), sizeof(CNetObj_Pickup)));
+		if (!pP)
+			return;
 
-	CNetObj_Pickup *pP = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), sizeof(CNetObj_Pickup)));
-	if(!pP)
-		return;
-
-	pP->m_X = (int)m_Pos.x;
-	pP->m_Y = (int)m_Pos.y;
-	pP->m_Type = m_Type == POWERUP_WEAPON ? GameServer()->GetRealPickupType(m_Subtype) : m_Type;
+		pP->m_X = (int)m_Pos.x;
+		pP->m_Y = (int)m_Pos.y;
+		pP->m_Type = m_Type == POWERUP_WEAPON ? GameServer()->GetRealPickupType(m_Subtype) : m_Type;
+	}
 
 	if (m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_LIGHTSABER)
 	{
@@ -289,10 +289,10 @@ void CPickup::Snap(int SnappingClient)
 		if (!pLaser)
 			return;
 
-		pLaser->m_X = pP->m_X;
-		pLaser->m_Y = pP->m_Y - 30;
-		pLaser->m_FromX = pP->m_X;
-		pLaser->m_FromY = pP->m_Y - 30;
+		pLaser->m_X = (int)m_Pos.x;
+		pLaser->m_Y = (int)m_Pos.y - 30;
+		pLaser->m_FromX = (int)m_Pos.x;
+		pLaser->m_FromY = (int)m_Pos.y - 30;
 		pLaser->m_StartTick = Server()->Tick();
 	}
 	else if (m_Subtype == WEAPON_HEART_GUN)
@@ -301,8 +301,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pPickup)
 			return;
 
-		pPickup->m_X = pP->m_X;
-		pPickup->m_Y = pP->m_Y - 30;
+		pPickup->m_X = (int)m_Pos.x;
+		pPickup->m_Y = (int)m_Pos.y - 30;
 		pPickup->m_Type = POWERUP_HEALTH;
 	}
 	else if (m_Subtype == WEAPON_STRAIGHT_GRENADE)
@@ -311,8 +311,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pProj)
 			return;
 
-		pProj->m_X = pP->m_X;
-		pProj->m_Y = pP->m_Y - 30;
+		pProj->m_X = (int)m_Pos.x;
+		pProj->m_Y = (int)m_Pos.y - 30;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_GRENADE;
 	}
