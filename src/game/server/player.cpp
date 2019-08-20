@@ -1044,16 +1044,10 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 		NewClientInfoMsg.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 	}
 
-	if (ClientID != -1)
-	{
-		Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-	}
-	else for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-	}
+	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+
+	GameServer()->UpdateHidePlayers(m_ClientID);
 }
 
 void CPlayer::SendSpookyGhostSkin(int ClientID)

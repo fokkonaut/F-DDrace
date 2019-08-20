@@ -848,9 +848,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	// F-DDrace
 	m_pController->UpdateGameInfo(ClientID);
 
-	if (!m_apPlayers[ClientID]->m_IsDummy) // for dummies this will be sent once after the connect command gets executed
-		UpdateHidePlayers();
-
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!m_apPlayers[i])
@@ -860,6 +857,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(m_apPlayers[i]->m_SpookyGhost)
 			m_apPlayers[i]->SendSpookyGhostSkin(ClientID);
 	}
+
+	UpdateHidePlayers(m_apPlayers[ClientID]->m_IsDummy ? ClientID : -1);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -2935,7 +2934,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	if (DummyID < 0 || DummyID >= MAX_CLIENTS || m_apPlayers[DummyID])
 		return;
 
-	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, TEAM_RED);
+	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, false);
 	Server()->DummyJoin(DummyID);
 	pDummy->m_IsDummy = true;
 	pDummy->m_Dummymode = Dummymode;
@@ -3011,23 +3010,50 @@ void CGameContext::SetV3Offset(int X, int Y)
 	}
 }
 
-void CGameContext::UpdateHidePlayers()
+void CGameContext::UpdateHidePlayers(int ClientID)
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	if (ClientID == -1)
 	{
-		for (int j = 0; j < MAX_CLIENTS; j++)
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (i == j || !m_apPlayers[i] || !m_apPlayers[j])
+			for (int j = 0; j < MAX_CLIENTS; j++)
+			{
+				if (i == j || !m_apPlayers[i] || !m_apPlayers[j])
+					continue;
+
+				int Team = TEAM_RED;
+
+				if ((g_Config.m_SvHideDummies && m_apPlayers[j]->m_IsDummy)
+					|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[j]->m_Minigame != m_apPlayers[i]->m_Minigame))
+					Team = TEAM_BLUE;
+
+				CNetMsg_Sv_Team Msg;
+				Msg.m_ClientID = j;
+				Msg.m_Team = Team;
+				Msg.m_Silent = 1;
+				Msg.m_CooldownTick = Server()->Tick();
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+			}
+		}
+	}
+	else
+	{
+		if (!m_apPlayers[ClientID])
+			return;
+
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (i == ClientID || !m_apPlayers[i])
 				continue;
 
 			int Team = TEAM_RED;
 
-			if ((g_Config.m_SvHideDummies && m_apPlayers[j]->m_IsDummy)
-				|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[j]->m_Minigame != m_apPlayers[i]->m_Minigame))
+			if ((g_Config.m_SvHideDummies && m_apPlayers[ClientID]->m_IsDummy)
+				|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
 				Team = TEAM_BLUE;
 
 			CNetMsg_Sv_Team Msg;
-			Msg.m_ClientID = j;
+			Msg.m_ClientID = ClientID;
 			Msg.m_Team = Team;
 			Msg.m_Silent = 1;
 			Msg.m_CooldownTick = Server()->Tick();

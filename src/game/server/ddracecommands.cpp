@@ -997,8 +997,6 @@ void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 
 	for (int i = 0; i < Amount; i++)
 		pSelf->ConnectDummy(Dummymode);
-
-	pSelf->UpdateHidePlayers();
 }
 
 void CGameContext::ConDisconnectDummy(IConsole::IResult *pResult, void *pUserData)
@@ -1061,7 +1059,6 @@ void CGameContext::ConPlayerName(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	pSelf->m_apPlayers[Victim]->SetFakeName(pResult->GetString(1));
-	pSelf->UpdateHidePlayers();
 }
 
 void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
@@ -1071,5 +1068,4 @@ void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	pSelf->m_apPlayers[Victim]->SetFakeClan(pResult->GetString(1));
-	pSelf->UpdateHidePlayers();
 }

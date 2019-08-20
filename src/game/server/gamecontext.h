@@ -276,7 +276,7 @@ public:
 
 	int GetNextClientID(bool Inverted = false);
 
-	void UpdateHidePlayers();
+	void UpdateHidePlayers(int ClientID = -1);
 
 	//account
 	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
