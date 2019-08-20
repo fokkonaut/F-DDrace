@@ -370,7 +370,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
 	if(m_Paused)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
-	if(SnappingClient != -1 && m_Team == TEAM_SPECTATORS && (SnappingClient == m_SpectatorID))
+	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 	if (m_IsDummy && g_Config.m_SvDummyBotSkin)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
