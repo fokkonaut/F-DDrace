@@ -549,7 +549,7 @@ void CCharacter::FireWeapon()
 						-1,//SoundImpact
 						0,
 						0,
-						m_Spooky,
+						(m_Spooky || m_pPlayer->m_SpookyGhost),
 						m_pPlayer->m_Gamemode == GAMEMODE_VANILLA
 					);
 
@@ -687,9 +687,9 @@ void CCharacter::FireWeapon()
 					0,						//freeze
 					0,						//explosive
 					0,						//unfreeze
-					m_Spooky,				//bloody
-					m_Spooky,				//ghost
-					m_Spooky,				//spooky
+					(m_Spooky || m_pPlayer->m_SpookyGhost),//bloody
+					(m_Spooky || m_pPlayer->m_SpookyGhost),//ghost
+					(m_Spooky || m_pPlayer->m_SpookyGhost),//spooky
 					WEAPON_HEART_GUN,		//type
 					6,						//lifetime
 					1.0f,					//accel
