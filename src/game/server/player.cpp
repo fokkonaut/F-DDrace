@@ -677,6 +677,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 	GameServer()->OnClientTeamChange(m_ClientID);
+
+	GameServer()->UpdateHidePlayers(m_ClientID);
 }
 
 void CPlayer::TryRespawn()
