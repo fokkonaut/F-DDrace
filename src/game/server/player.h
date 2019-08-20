@@ -229,7 +229,7 @@ public:
 
 	//spooky ghost
 	bool m_SpookyGhost;
-	void SendSpookyGhostSkin(int ClientID);
+	void SendSpookyGhostSkin(int ClientID = -1);
 
 	//no name fix
 	bool m_RemovedName;

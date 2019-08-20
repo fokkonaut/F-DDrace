@@ -1800,7 +1800,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if ((m_LastIndexTile == TILE_SPOOKY_GHOST) || (m_LastIndexFrontTile == TILE_SPOOKY_GHOST))
 			return;
-		SpookyGhost(!m_Spooky);
+		SpookyGhost(!m_pPlayer->m_SpookyGhost);
 	}
 
 	//add meteor
@@ -2859,6 +2859,7 @@ void CCharacter::SetSpookyGhost()
 	m_pPlayer->m_ShowName = false;
 	m_SavedDefEmote = m_pPlayer->m_DefEmote;
 	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
+	m_pPlayer->SendSpookyGhostSkin();
 }
 
 void CCharacter::UnsetSpookyGhost()

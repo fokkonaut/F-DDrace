@@ -255,11 +255,8 @@ void CPlayer::Tick()
 			m_pCharacter->m_NumGhostShots = 0;
 	}
 
-	if (m_SpookyGhost)
-	{
-		SendSpookyGhostSkin(-1);
-	}
-	else if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
+	// skin
+	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
 	{
 		CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientID = m_ClientID;
@@ -274,20 +271,23 @@ void CPlayer::Tick()
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 		m_SentSkinUpdate = false;
 	}
-	else if (!m_SentSkinUpdate)
+	else if (!m_SentSkinUpdate && !m_SpookyGhost)
 	{
 		GameServer()->SendSkinChange(m_ClientID, -1);
 		m_SentSkinUpdate = true;
 	}
 
+	// name
 	if (!m_ShowName && !m_RemovedName)
 	{
 		SetFakeName(" ");
+		SetFakeClan(Server()->ClientName(m_ClientID));
 		m_RemovedName = true;
 	}
 	if ((m_ShowName || m_SetRealName) && m_RemovedName)
 	{
 		SetFakeName(Server()->ClientName(m_ClientID));
+		SetFakeClan(Server()->ClientClan(m_ClientID));
 		m_RemovedName = false;
 	}
 
@@ -1048,6 +1048,8 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 
 	GameServer()->UpdateHidePlayers(m_ClientID);
+	if (m_SpookyGhost)
+		SendSpookyGhostSkin();
 }
 
 void CPlayer::SendSpookyGhostSkin(int ClientID)
@@ -1067,5 +1069,5 @@ void CPlayer::SendSpookyGhostSkin(int ClientID)
 		Msg.m_aSkinPartColors[p] = 255;
 	}
 
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 }
