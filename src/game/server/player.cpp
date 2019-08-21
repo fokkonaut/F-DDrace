@@ -426,6 +426,9 @@ void CPlayer::Snap(int SnappingClient)
 
 	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
 	{
+		if (!GameServer()->m_apPlayers[SnappingClient] || (!Server()->ClientIngame(SnappingClient) && !GameServer()->m_apPlayers[SnappingClient]->IsDummy()) || Server()->GetClientVersion(SnappingClient) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
+			return;
+
 		CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientID = m_ClientID;
 		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
