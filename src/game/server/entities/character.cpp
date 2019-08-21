@@ -397,7 +397,7 @@ void CCharacter::FireWeapon()
 		}
 
 		//spooky ghost
-		if (m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+		if (!m_FreezeTime && m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
 		{
 			m_NumGhostShots++;
 			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
@@ -2850,15 +2850,18 @@ void CCharacter::DropLoot()
 
 void CCharacter::SetSpookyGhost()
 {
+	if (m_pPlayer->m_SpookyGhost)
+		return;
+
 	BackupWeapons(BACKUP_SPOOKY_GHOST);
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
 			m_aWeapons[i].m_Got = false;
 	m_pPlayer->m_SpookyGhost = true;
-	m_pPlayer->m_SentSkinUpdate = false;
 	m_pPlayer->m_ShowName = false;
 	m_SavedDefEmote = m_pPlayer->m_DefEmote;
 	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
+	m_pPlayer->BackupSkin();
 	m_pPlayer->SendSpookyGhostSkin();
 }
 
@@ -2871,6 +2874,7 @@ void CCharacter::UnsetSpookyGhost()
 	m_pPlayer->m_ShowName = true;
 	m_pPlayer->m_SpookyGhost = false;
 	m_pPlayer->m_DefEmote = m_SavedDefEmote;
+	m_pPlayer->LoadSkin();
 }
 
 void CCharacter::SetActiveWeapon(int Weapon)
@@ -2960,6 +2964,12 @@ void CCharacter::Rainbow(bool Set, int FromID, bool Silent)
 {
 	m_Rainbow = Set;
 	m_pPlayer->m_InfRainbow = false;
+	if (Set && !m_pPlayer->m_SpookyGhost)
+		m_pPlayer->BackupSkin();
+	else if (!Set && m_pPlayer->m_SpookyGhost)
+		m_pPlayer->SendSpookyGhostSkin();
+	else
+		m_pPlayer->LoadSkin();
 	GameServer()->SendExtraMessage(RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
@@ -2967,6 +2977,12 @@ void CCharacter::InfRainbow(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_InfRainbow = Set;
 	m_Rainbow = false;
+	if (Set && !m_pPlayer->m_SpookyGhost)
+		m_pPlayer->BackupSkin();
+	else if (!Set && m_pPlayer->m_SpookyGhost)
+		m_pPlayer->SendSpookyGhostSkin();
+	else
+		m_pPlayer->LoadSkin();
 	GameServer()->SendExtraMessage(INF_RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 

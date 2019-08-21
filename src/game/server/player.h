@@ -110,7 +110,7 @@ public:
 	int m_LastInvited;
 
 	// TODO: clean this up
-	struct
+	struct TeeInfos
 	{
 		char m_aaSkinPartNames[NUM_SKINPARTS][24];
 		int m_aUseCustomColors[NUM_SKINPARTS];
@@ -221,15 +221,16 @@ public:
 	int m_FakePing;
 	vec2 m_ForceSpawnPos;
 
-	//snap fix for 256p support
-	bool m_SnapFixDDNet;
-
 	//gamemodes
 	int m_Gamemode;
 
 	//spooky ghost
 	bool m_SpookyGhost;
-	void SendSpookyGhostSkin(int ClientID = -1);
+	void SendSpookyGhostSkin();
+	TeeInfos m_SavedTeeInfos;
+
+	void BackupSkin();
+	void LoadSkin();
 
 	//no name fix
 	bool m_RemovedName;
@@ -245,7 +246,6 @@ public:
 	int m_MsgModeSpecial;
 
 	//extras
-	bool m_SentSkinUpdate;
 	int m_RainbowSpeed;
 	int m_RainbowColor;
 

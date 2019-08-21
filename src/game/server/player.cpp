@@ -151,8 +151,6 @@ void CPlayer::Reset()
 	m_SurvivalState = SURVIVAL_OFFLINE;
 	m_ForceKilled = false;
 
-	m_SentSkinUpdate = true;
-
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
 }
@@ -253,31 +251,6 @@ void CPlayer::Tick()
 			m_pCharacter->m_ShopMotdTick = 0;
 		else
 			m_pCharacter->m_NumGhostShots = 0;
-	}
-
-	// skin
-	if (!m_SpookyGhost)
-	{
-		if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
-		{
-			CNetMsg_Sv_SkinChange Msg;
-			Msg.m_ClientID = m_ClientID;
-			m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
-			for (int p = 0; p < NUM_SKINPARTS; p++)
-			{
-				Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
-				Msg.m_aUseCustomColors[p] = 1;
-				Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
-			}
-
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
-			m_SentSkinUpdate = false;
-		}
-		else if (!m_SentSkinUpdate)
-		{
-			GameServer()->SendSkinChange(m_ClientID, -1);
-			m_SentSkinUpdate = true;
-		}
 	}
 
 	// name
@@ -449,6 +422,20 @@ void CPlayer::Snap(int SnappingClient)
 			pClientInfo->m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
 			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 		}
+	}
+
+	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
+	{
+		CNetMsg_Sv_SkinChange Msg;
+		Msg.m_ClientID = m_ClientID;
+		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
+			Msg.m_aUseCustomColors[p] = 1;
+			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
+		}
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, SnappingClient);
 	}
 }
 
@@ -1054,26 +1041,49 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 
 	GameServer()->UpdateHidePlayers(m_ClientID);
-	if (m_SpookyGhost)
-		SendSpookyGhostSkin();
 }
 
-void CPlayer::SendSpookyGhostSkin(int ClientID)
+void CPlayer::SendSpookyGhostSkin()
 {
-	CNetMsg_Sv_SkinChange Msg;
-	Msg.m_ClientID = m_ClientID;
-	Msg.m_apSkinPartNames[SKINPART_BODY] = "default";
-	Msg.m_apSkinPartNames[SKINPART_MARKING] = "";
-	Msg.m_apSkinPartNames[SKINPART_DECORATION] = "unibop";
-	Msg.m_apSkinPartNames[SKINPART_HANDS] = "standard";
-	Msg.m_apSkinPartNames[SKINPART_FEET] = "standard";
-	Msg.m_apSkinPartNames[SKINPART_EYES] = "standard";
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "default", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "unibop", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", 24);
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		Msg.m_aUseCustomColors[p] = 1;
-		Msg.m_aSkinPartColors[p] = 255;
+		m_TeeInfos.m_aUseCustomColors[p] = 1;
+		m_TeeInfos.m_aSkinPartColors[p] = 255;
 	}
 
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
+	GameServer()->SendSkinChange(m_ClientID, -1);
+}
+
+void CPlayer::BackupSkin()
+{
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		str_copy(m_SavedTeeInfos.m_aaSkinPartNames[p], m_TeeInfos.m_aaSkinPartNames[p], 24);
+		m_SavedTeeInfos.m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
+		m_SavedTeeInfos.m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+	}
+}
+
+void CPlayer::LoadSkin()
+{
+	if (m_SpookyGhost)
+	{
+		SendSpookyGhostSkin();
+		return;
+	}
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		str_copy(m_TeeInfos.m_aaSkinPartNames[p], m_SavedTeeInfos.m_aaSkinPartNames[p], 24);
+		m_TeeInfos.m_aUseCustomColors[p] = m_SavedTeeInfos.m_aUseCustomColors[p];
+		m_TeeInfos.m_aSkinPartColors[p] = m_SavedTeeInfos.m_aSkinPartColors[p];
+	}
+	GameServer()->SendSkinChange(m_ClientID, -1);
 }
