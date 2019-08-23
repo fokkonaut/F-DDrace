@@ -3195,7 +3195,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 		else if (Extra == ENDLESS_HOOK)
 			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
 		else if (Extra == INFINITE_JUMPS)
-			str_format(aMsg, sizeof(aMsg), "You %shave %s", Set ? "" : "don't", aItem);
+			str_format(aMsg, sizeof(aMsg), "You %shave %s", Set ? "" : "don't ", aItem);
 		else
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have" : "lost", aItem);
 	}
