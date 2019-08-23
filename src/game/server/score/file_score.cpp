@@ -278,7 +278,7 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					Time - ((int)Time / 60 * 60));
 		else
 			str_format(aBuf, sizeof(aBuf),
-					"%d. %s Time: %d minute(s) %5.2f second(s), requested by (%s)", Pos,
+					"%d. %s Time: %02d:%05.2f, requested by %s", Pos,
 					pScore->m_aName, (int)Time / 60,
 					Time - ((int)Time / 60 * 60), Server()->ClientName(ClientID));
 		if (!Search)
