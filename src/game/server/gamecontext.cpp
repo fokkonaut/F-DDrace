@@ -772,6 +772,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_copy(m_apPlayers[ClientID]->m_aFakeName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	str_copy(m_apPlayers[ClientID]->m_aFakeClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->Respawn();
+	m_apPlayers[ClientID]->BackupSkin();
 
 	// load score
 	{

@@ -2964,12 +2964,8 @@ void CCharacter::Rainbow(bool Set, int FromID, bool Silent)
 {
 	m_Rainbow = Set;
 	m_pPlayer->m_InfRainbow = false;
-	if (Set && !m_pPlayer->m_SpookyGhost)
+	if (Set)
 		m_pPlayer->BackupSkin();
-	else if (!Set && m_pPlayer->m_SpookyGhost)
-		m_pPlayer->SendSpookyGhostSkin();
-	else
-		m_pPlayer->LoadSkin();
 	GameServer()->SendExtraMessage(RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
@@ -2977,12 +2973,8 @@ void CCharacter::InfRainbow(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_InfRainbow = Set;
 	m_Rainbow = false;
-	if (Set && !m_pPlayer->m_SpookyGhost)
+	if (Set)
 		m_pPlayer->BackupSkin();
-	else if (!Set && m_pPlayer->m_SpookyGhost)
-		m_pPlayer->SendSpookyGhostSkin();
-	else
-		m_pPlayer->LoadSkin();
 	GameServer()->SendExtraMessage(INF_RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 

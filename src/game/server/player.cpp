@@ -153,6 +153,8 @@ void CPlayer::Reset()
 
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
+
+	m_LoadedSkin = true;
 }
 
 void CPlayer::Tick()
@@ -439,6 +441,13 @@ void CPlayer::Snap(int SnappingClient)
 			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
 		}
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, SnappingClient);
+
+		m_LoadedSkin = false;
+	}
+	else if (!m_LoadedSkin)
+	{
+		m_LoadedSkin = true;
+		LoadSkin();
 	}
 }
 
@@ -1066,6 +1075,9 @@ void CPlayer::SendSpookyGhostSkin()
 
 void CPlayer::BackupSkin()
 {
+	if (m_SpookyGhost)
+		return;
+
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		str_copy(m_SavedTeeInfos.m_aaSkinPartNames[p], m_TeeInfos.m_aaSkinPartNames[p], 24);

@@ -232,6 +232,8 @@ public:
 	void BackupSkin();
 	void LoadSkin();
 
+	bool m_LoadedSkin;
+
 	//no name fix
 	bool m_RemovedName;
 	void FixForNoName(int ID);
