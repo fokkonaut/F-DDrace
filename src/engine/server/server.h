@@ -6,15 +6,12 @@
 #include <engine/server.h>
 #include <engine/shared/memheap.h>
 
-
-// vvvvvv these shouldnt be here, but i cant compile otherwise anymoree...
 #include <engine/masterserver.h>
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/mapchecker.h>
 #include <engine/shared/netban.h>
 #include "register.h"
-// ^^^^^^ these shouldnt be here, but i cant compile otherwise anymoree...
 
 class CSnapIDPool
 {
@@ -158,6 +155,9 @@ public:
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
 	CEcon m_Econ;
+#if defined(CONF_FAMILY_UNIX)
+	CFifo m_Fifo;
+#endif
 	CServerBan m_ServerBan;
 
 	IEngineMap *m_pMap;

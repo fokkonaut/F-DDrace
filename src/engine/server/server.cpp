@@ -24,6 +24,7 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
+#include <engine/shared/fifo.h>
 
 #include <mastersrv/mastersrv.h>
 
@@ -1346,6 +1347,10 @@ int CServer::Run()
 
 	m_Econ.Init(Console(), &m_ServerBan);
 
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Init(Console(), g_Config.m_SvInputFifo, CFGFLAG_SERVER);
+#endif
+
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", g_Config.m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -1447,6 +1452,10 @@ int CServer::Run()
 
 				UpdateClientRconCommands();
 				UpdateClientMapListEntries();
+
+#if defined(CONF_FAMILY_UNIX)
+				m_Fifo.Update();
+#endif
 			}
 
 			// master server stuff
@@ -1488,9 +1497,13 @@ int CServer::Run()
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			m_NetServer.Drop(i, "Server shutdown");
-
-		m_Econ.Shutdown();
 	}
+
+	m_Econ.Shutdown();
+
+#if defined(CONF_FAMILY_UNIX)
+	m_Fifo.Shutdown();
+#endif
 
 	GameServer()->OnShutdown(true);
 	m_pMap->Unload();
