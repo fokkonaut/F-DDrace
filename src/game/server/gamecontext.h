@@ -322,7 +322,7 @@ public:
 
 	const char* GetWeaponName(int Weapon);
 	int GetRealWeapon(int Weapon);
-	int GetRealPickupType(int Type);
+	int GetRealPickupType(int Type, int Subtype);
 
 	const char* GetMinigameName(int Minigame);
 

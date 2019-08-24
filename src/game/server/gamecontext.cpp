@@ -3141,10 +3141,15 @@ int CGameContext::GetRealWeapon(int Weapon)
 	return Weapon;
 }
 
-int CGameContext::GetRealPickupType(int Weapon)
+int CGameContext::GetRealPickupType(int Type, int Subtype)
 {
-	Weapon = GetRealWeapon(Weapon);
-	switch (Weapon)
+	if (Type == POWERUP_NINJA)
+		return PICKUP_NINJA;
+	if (Type != POWERUP_WEAPON)
+		return Type;
+
+	Subtype = GetRealWeapon(Subtype);
+	switch (Subtype)
 	{
 	case WEAPON_SHOTGUN:
 		return PICKUP_SHOTGUN;
@@ -3152,8 +3157,10 @@ int CGameContext::GetRealPickupType(int Weapon)
 		return PICKUP_GRENADE;
 	case WEAPON_LASER:
 		return PICKUP_LASER;
+	case WEAPON_NINJA:
+		return PICKUP_NINJA;
 	}
-	return Weapon;
+	return Subtype;
 }
 
 void CGameContext::SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special)

@@ -447,7 +447,7 @@ void CPickupDrop::Snap(int SnappingClient)
 
 		pP->m_X = (int)m_Pos.x;
 		pP->m_Y = (int)m_Pos.y;
-		pP->m_Type = m_Type == POWERUP_WEAPON ? GameServer()->GetRealPickupType(m_Weapon) : m_Type;
+		pP->m_Type = GameServer()->GetRealPickupType(m_Type, m_Weapon);
 	}
 
 	if (m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER)
