@@ -2776,7 +2776,7 @@ void CCharacter::DropFlag()
 void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 {
 	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode == GAMEMODE_DDRACE))
+		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA))
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
