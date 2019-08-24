@@ -1109,7 +1109,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		Weapon = m_Core.m_Killer.m_Weapon;
 
 
-	CPlayer *pKiller = (Killer >= 0 && Killer != m_pPlayer->GetCID()) ? GameServer()->m_apPlayers[Killer] : 0;
+	CPlayer *pKiller = (Killer >= 0 && Killer != m_pPlayer->GetCID() && GameServer()->m_apPlayers[Killer]) ? GameServer()->m_apPlayers[Killer] : 0;
 
 	// account kills and deaths
 	if (pKiller)
