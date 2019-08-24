@@ -2996,6 +2996,10 @@ void CGameContext::ConnectDefaultDummies()
 	{
 		ConnectDummy(DUMMYMODE_BLMAPCHILL_POLICE);
 	}
+	else if (!str_comp(g_Config.m_SvMap, "blmapV3RoyalX"))
+	{
+		ConnectDummy(DUMMYMODE_V3_BLOCKER);
+	}
 
 	if (Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
