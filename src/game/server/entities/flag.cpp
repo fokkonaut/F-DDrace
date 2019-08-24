@@ -73,6 +73,7 @@ void CFlag::Grab(CCharacter *pChr)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
 	m_pCarrier = pChr;
+	m_pCarrier->m_FirstFreezeTick = 0;
 }
 
 void CFlag::Tick()
