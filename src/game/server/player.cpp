@@ -677,8 +677,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 	GameServer()->OnClientTeamChange(m_ClientID);
 
-	if (Team != TEAM_SPECTATORS)
-		GameServer()->UpdateHidePlayers(m_ClientID);
+	GameServer()->UpdateHidePlayers(m_ClientID);
 }
 
 void CPlayer::TryRespawn()
