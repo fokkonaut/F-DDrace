@@ -12,6 +12,7 @@
 #include <engine/shared/mapchecker.h>
 #include <engine/shared/netban.h>
 #include "register.h"
+#include <engine/shared/fifo.h>
 
 class CSnapIDPool
 {
