@@ -436,9 +436,13 @@ void CPlayer::Snap(int SnappingClient)
 		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
 		for (int p = 0; p < NUM_SKINPARTS; p++)
 		{
+			int BaseColor = m_RainbowColor * 0x010000;
+			int Color = 0xff32;
+			if (p == SKINPART_MARKING)
+				Color *= -256;
 			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
 			Msg.m_aUseCustomColors[p] = 1;
-			Msg.m_aSkinPartColors[p] = m_RainbowColor * 0x010000 + 0xff32;
+			Msg.m_aSkinPartColors[p] = BaseColor + Color;
 		}
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, SnappingClient);
 
