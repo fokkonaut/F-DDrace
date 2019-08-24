@@ -597,49 +597,6 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 				"/me is disabled on this server");
 }
 
-void CGameContext::ConConverse(IConsole::IResult *pResult, void *pUserData)
-{
-	// This will never be called
-}
-
-void CGameContext::ConWhisper(IConsole::IResult *pResult, void *pUserData)
-{
-	// This will never be called
-}
-
-void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
-		void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
-		return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-	if(pResult->NumArguments() == 0) {
-		pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"emote",
-				(pPlayer->m_EyeEmote) ?
-						"You can now use the preset eye emotes." :
-						"You don't have any eye emotes, remember to bind some. (until you die)");
-		return;
-	}
-	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
-		pPlayer->m_EyeEmote = true;
-	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
-		pPlayer->m_EyeEmote = false;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
-		pPlayer->m_EyeEmote = !pPlayer->m_EyeEmote;
-	pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"emote",
-			(pPlayer->m_EyeEmote) ?
-					"You can now use the preset eye emotes." :
-					"You don't have any eye emotes, remember to bind some. (until you die)");
-}
-
 void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
