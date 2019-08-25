@@ -1500,20 +1500,6 @@ int str_utf8_comp_nocase_num(const char* a, const char* b, int num);
 const char* str_utf8_find_nocase(const char* haystack, const char* needle);
 
 /*
-	Function: str_utf8_isspace
-		Checks whether the given Unicode codepoint renders as space.
-
-	Parameters:
-		code - Unicode codepoint to check.
-
-	Returns:
-		0 if the codepoint does not render as space, != 0 if it does.
-*/
-int str_utf8_isspace(int code);
-
-static int str_utf8_isstart(char c);
-
-/*
 	Function: str_utf8_is_whitespace
 		Check if the unicode is an utf8 whitespace.
 
@@ -1540,22 +1526,6 @@ int str_utf8_is_whitespace(int code);
 		- The strings are treated as zero-terminated strings.
 */
 const char *str_utf8_skip_whitespaces(const char *str);
-
-/*
-	Function: str_utf8_rewind
-		Moves a cursor backwards in an utf8 string
-
-	Parameters:
-		str - utf8 string
-		cursor - position in the string
-
-	Returns:
-		New cursor position.
-
-	Remarks:
-		- Won't move the cursor less then 0
-*/
-int str_utf8_rewind(const char *str, int cursor);
 
 /*
 	Function: str_utf8_forward
