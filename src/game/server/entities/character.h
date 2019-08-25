@@ -400,6 +400,8 @@ public:
 	int HasFlag();
 	void CheckMoved();
 
+	int GetAliveState();
+
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
 	bool m_FakeBlockTuning;

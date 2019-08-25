@@ -370,6 +370,9 @@ void CFlag::Snap(int SnappingClient)
 
 	if (GameServer()->GetPlayerChar(SnappingClient) && m_pCarrier)
 	{
+		if (m_pCarrier->IsPaused())
+			return;
+
 		if (!CmaskIsSet(m_pCarrier->Teams()->TeamMask(m_pCarrier->Team(), -1, m_pCarrier->GetPlayer()->GetCID()), SnappingClient))
 			return;
 	}

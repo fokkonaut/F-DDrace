@@ -244,9 +244,6 @@ void CPlayer::Tick()
 		GameServer()->SendTuningParams(m_ClientID, m_TuneZone);
 	}
 
-	// checking account level
-	CheckLevel();
-
 	// checking whether scoreboard is activated or not
 	if (m_pCharacter)
 	{
@@ -964,22 +961,17 @@ void CPlayer::CheckLevel()
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo Account = GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
 
-	// TODO: make something here, add acc sys and stuff, this is just placeholder
-	Account.m_NeededXP = 1;
-
-	if (Account.m_XP >= Account.m_NeededXP)
+	if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
 	{
-		Account.m_Level++;
+		(*Account).m_Level++;
 
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", Account.m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 
-		Account.m_NeededXP += 2;
-
-		dbg_msg("acc", "Level: %d, NeededXP: %d", Account.m_Level, Account.m_NeededXP);
+		dbg_msg("acc", "Level: %d, NeededXP: %d", (*Account).m_Level, GameServer()->m_pNeededXP[(*Account).m_Level]);
 	}
 }
 

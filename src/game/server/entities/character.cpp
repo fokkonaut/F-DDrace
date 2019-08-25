@@ -1910,6 +1910,59 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
+	if ((m_TileIndex == TILE_MONEY) || (m_TileFIndex == TILE_MONEY))
+	{
+		if (Server()->Tick() % 50 == 0)
+		{
+			if (m_pPlayer->GetAccID() < ACC_START)
+			{
+				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
+				return;
+			}
+
+			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+			// money
+			(*Account).m_Money += 1;
+
+			// level check
+			if ((*Account).m_Level >= MAX_LEVEL)
+				GameServer()->SendBroadcast("You reached the maximum level.", m_pPlayer->GetCID(), false);
+
+			//flag bonus
+			if (HasFlag() != -1)
+				(*Account).m_XP += 1;
+
+			// vip bonus
+			if ((*Account).m_VIP)
+				(*Account).m_XP += 2;
+
+			// xp
+			(*Account).m_XP += GetAliveState() + 1;
+
+			// checking account level
+			m_pPlayer->CheckLevel();
+
+			// broadcast
+			{
+				char aMsg[128];
+				char aSurvival[32];
+
+				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
+				str_format(aMsg, sizeof(aMsg),
+						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
+						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+1%s%s%s\n"
+						"^666Level ^222[^444%d^222]",
+						(*Account).m_Money, (*Account).m_VIP ? " +1 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], HasFlag() != -1 ? " +1 flag" : "", (*Account).m_VIP ? " +1 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_Level
+					);
+
+				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
+			}
+		}
+	}
+
 
 	m_LastIndexTile = m_TileIndex;
 	m_LastIndexFrontTile = m_TileFIndex;
@@ -2934,7 +2987,7 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 
 void CCharacter::UpdateWeaponIndicator()
 {
-	if (!m_pPlayer->m_WeaponIndicator || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
+	if (!m_pPlayer->m_WeaponIndicator || (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY) || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
 
 	char aBuf[256];
@@ -2953,6 +3006,18 @@ void CCharacter::CheckMoved()
 		return;
 
 	m_pPlayer->Pause(CPlayer::PAUSE_NONE, false);
+}
+
+int CCharacter::GetAliveState()
+{
+	for (int i = 1; i < 5; i++)
+	{
+		int Offset=i<3?0:1;
+		int Seconds = 300*(i*(i+Offset)); // 300 (5min), 1200 (20min), 3600 (60min), 6000 (100min)
+		if (Server()->Tick() >= m_pPlayer->m_DieTick + Server()->TickSpeed() * Seconds)
+			return i;
+	}
+	return 0;
 }
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)

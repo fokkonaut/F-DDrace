@@ -353,8 +353,8 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int Col
 
 		if (Mode == 1) //BlmapChill police freeze hole
 		{
-			CGameContext::AccountInfo Account = GameServer()->m_Accounts[p->GetPlayer()->GetAccID()];
-			if ((!Account.m_aHasItem[POLICE] && !p->m_PoliceHelper) || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
+			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[p->GetPlayer()->GetAccID()];
+			if ((!(*Account).m_aHasItem[POLICE] && !p->m_PoliceHelper) || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
 				continue;
 		}
 		if (Mode == 2) //for dummy 29

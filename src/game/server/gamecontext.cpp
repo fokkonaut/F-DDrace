@@ -2252,12 +2252,23 @@ void CGameContext::OnInit()
 	m_SurvivalTick = 0;
 	m_SurvivalWinner = -1;
 
-	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
-	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, AccountsCallback, this);
-
 	if (g_Config.m_SvDefaultDummies)
 		ConnectDefaultDummies();
 	SetV3Offset(g_Config.m_V3OffsetX, g_Config.m_V3OffsetY);
+
+
+	int64 NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
+	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
+	8000000, 9000000, 10000000, 11000000, 12000000, 13000000, 14000000, 15000000, 16000000, 17000000, 18000000, 19000000, 20000000, 21000000, 22000000, 23000000, 24000000, 25000000,
+	26000000, 27000000, 28000000, 29000000, 30000000, 31000000, 32000000, 33000000, 34000000, 35000000, 36000000, 37000000, 38000000, 39000000, 40000000, 41010000, 42020000, 43030000,
+	44040000, 45050000, 46060000, 47070000, 48080000, 49090000, 50100000, 51110000, 52120000, 53130000, 54140000, 55150000, 56160000, 57170000, 58180000, 59190000, 60200000, 61300000,
+	62400000, 63500000, 64600000, 65700000, 66800000, 67900000, INT64_MAX };
+
+	for (int i = 0; i <= MAX_LEVEL; i++)
+		m_pNeededXP[i] = NeededXP[i];
+
+	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
+	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, AccountsCallback, this);
 
 
 #ifdef CONF_DEBUG
@@ -2283,6 +2294,9 @@ void CGameContext::DeleteTempfile()
 
 void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 {
+	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
+		Logout(i);
+
 	char aConfig[128];
 	char aTemp[128];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
@@ -2694,7 +2708,6 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_ClientID = -1;
 	m_Accounts[ID].m_Level = 0;
 	m_Accounts[ID].m_XP = 0;
-	m_Accounts[ID].m_NeededXP = 0;
 	m_Accounts[ID].m_Money = 0;
 	m_Accounts[ID].m_Kills = 0;
 	m_Accounts[ID].m_Deaths = 0;
@@ -2705,6 +2718,7 @@ int CGameContext::AddAccount()
 		m_Accounts[ID].m_aLastMoneyTransaction[i][0] = 0;
 	for (int i = 0; i < NUM_ITEMS; i++)
 		m_Accounts[ID].m_aHasItem[i] = false;
+	m_Accounts[ID].m_VIP = false;
 
 	return ID;
 }
@@ -2748,10 +2762,6 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 	getline(AccFile, data);
 	str_copy(aData, data.c_str(), sizeof(aData));
 	m_Accounts[ID].m_XP = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_NeededXP = atoi(aData);
 
 	getline(AccFile, data);
 	str_copy(aData, data.c_str(), sizeof(aData));
@@ -2799,6 +2809,10 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 	getline(AccFile, data);
 	str_copy(aData, data.c_str(), sizeof(aData));
 	m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_VIP = atoi(aData);
 }
 
 void CGameContext::WriteAccountStats(int ID)
@@ -2818,7 +2832,6 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_ClientID << "\n";
 		AccFile << m_Accounts[ID].m_Level << "\n";
 		AccFile << m_Accounts[ID].m_XP << "\n";
-		AccFile << m_Accounts[ID].m_NeededXP << "\n";
 		AccFile << m_Accounts[ID].m_Money << "\n";
 		AccFile << m_Accounts[ID].m_Kills << "\n";
 		AccFile << m_Accounts[ID].m_Deaths << "\n";
@@ -2832,6 +2845,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[4] << "\n";
 		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
 		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
+		AccFile << m_Accounts[ID].m_VIP << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

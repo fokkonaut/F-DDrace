@@ -80,6 +80,7 @@ enum Survival
 };
 
 #define ACC_START 1 // account ids start with 1, 0 means not logged in
+#define MAX_LEVEL 100
 
 enum
 {
@@ -293,9 +294,8 @@ public:
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
-		int m_XP;
-		int m_NeededXP;
-		int m_Money;
+		int64 m_XP;
+		int64 m_Money;
 		int m_Kills;
 		int m_Deaths;
 		int m_PoliceLevel;
@@ -303,8 +303,11 @@ public:
 		int m_SurvivalWins;
 		bool m_aHasItem[NUM_ITEMS];
 		char m_aLastMoneyTransaction[5][256];
+		bool m_VIP;
 	};
 	std::vector<AccountInfo> m_Accounts;
+
+	int64 m_pNeededXP[MAX_LEVEL+1];
 
 	//motd
 	const char* FixMotd(const char* pMsg);
