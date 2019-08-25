@@ -1938,7 +1938,10 @@ void CCharacter::HandleTiles(int Index)
 
 			// vip bonus
 			if ((*Account).m_VIP)
+			{
 				(*Account).m_XP += 2;
+				(*Account).m_Money += 2;
+			}
 
 			// xp
 			(*Account).m_XP += GetAliveState() + 1;
@@ -1956,8 +1959,8 @@ void CCharacter::HandleTiles(int Index)
 						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
 						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+1%s%s%s\n"
 						"^666Level ^222[^444%d^222]",
-						(*Account).m_Money, (*Account).m_VIP ? " +1 vip" : "", GetAliveState() ? aSurvival : "",
-						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], HasFlag() != -1 ? " +1 flag" : "", (*Account).m_VIP ? " +1 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_Money, (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], HasFlag() != -1 ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
 						(*Account).m_Level
 					);
 
