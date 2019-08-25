@@ -2222,6 +2222,76 @@ char str_uppercase(char c)
 int str_toint(const char *str) { return atoi(str); }
 float str_tofloat(const char *str) { return atof(str); }
 
+int str_utf8_comp_nocase(const char* a, const char* b)
+{
+	int code_a;
+	int code_b;
+
+	while (*a && *b)
+	{
+		code_a = str_utf8_tolower(str_utf8_decode(&a));
+		code_b = str_utf8_tolower(str_utf8_decode(&b));
+
+		if (code_a != code_b)
+			return code_a - code_b;
+	}
+	return (unsigned char)* a - (unsigned char)* b;
+}
+
+int str_utf8_comp_nocase_num(const char* a, const char* b, int num)
+{
+	int code_a;
+	int code_b;
+	const char* old_a = a;
+
+	if (num <= 0)
+		return 0;
+
+	while (*a && *b)
+	{
+		code_a = str_utf8_tolower(str_utf8_decode(&a));
+		code_b = str_utf8_tolower(str_utf8_decode(&b));
+
+		if (code_a != code_b)
+			return code_a - code_b;
+
+		if (a - old_a >= num)
+			return 0;
+	}
+
+	return (unsigned char)* a - (unsigned char)* b;
+}
+
+const char* str_utf8_find_nocase(const char* haystack, const char* needle)
+{
+	while (*haystack) /* native implementation */
+	{
+		const char* a = haystack;
+		const char* b = needle;
+		const char* a_next = a;
+		const char* b_next = b;
+		while (*a && *b && str_utf8_tolower(str_utf8_decode(&a_next)) == str_utf8_tolower(str_utf8_decode(&b_next)))
+		{
+			a = a_next;
+			b = b_next;
+		}
+		if (!(*b))
+			return haystack;
+		str_utf8_decode(&haystack);
+	}
+
+	return 0;
+}
+
+int str_utf8_isspace(int code)
+{
+	return !(code > 0x20 && code != 0xA0 && code != 0x034F && code != 0x2800 &&
+		(code < 0x2000 || code > 0x200F) && (code < 0x2028 || code > 0x202F) &&
+		(code < 0x205F || code > 0x2064) && (code < 0x206A || code > 0x206F) &&
+		(code < 0xFE00 || code > 0xFE0F) && code != 0xFEFF &&
+		(code < 0xFFF9 || code > 0xFFFC));
+}
+
 int str_utf8_is_whitespace(int code)
 {
 	// check if unicode is not empty
@@ -2251,6 +2321,31 @@ const char *str_utf8_skip_whitespaces(const char *str)
 	}
 
 	return str;
+}
+
+void str_utf8_trim_right(char* param)
+{
+	const char* str = param;
+	char* end = 0;
+	while (*str)
+	{
+		char* str_old = (char*)str;
+		int code = str_utf8_decode(&str);
+
+		// check if unicode is not empty
+		if (!str_utf8_isspace(code))
+		{
+			end = 0;
+		}
+		else if (!end)
+		{
+			end = str_old;
+		}
+	}
+	if (end)
+	{
+		*end = 0;
+	}
 }
 
 static int str_utf8_isstart(char c)
