@@ -2348,6 +2348,24 @@ void str_utf8_trim_right(char* param)
 	}
 }
 
+static int str_utf8_isstart(char c)
+{
+	if((c&0xC0) == 0x80) /* 10xxxxxx */
+		return 0;
+	return 1;
+}
+
+int str_utf8_rewind(const char *str, int cursor)
+{
+	while(cursor)
+	{
+		cursor--;
+		if(str_utf8_isstart(*(str + cursor)))
+			break;
+	}
+	return cursor;
+}
+
 int str_utf8_forward(const char *str, int cursor)
 {
 	const char *buf = str + cursor;
