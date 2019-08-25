@@ -1927,7 +1927,10 @@ void CCharacter::HandleTiles(int Index)
 
 			// level check
 			if ((*Account).m_Level >= MAX_LEVEL)
+			{
 				GameServer()->SendBroadcast("You reached the maximum level.", m_pPlayer->GetCID(), false);
+				return;
+			}
 
 			//flag bonus
 			if (HasFlag() != -1)
