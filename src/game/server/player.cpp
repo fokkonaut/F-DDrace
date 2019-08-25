@@ -971,7 +971,7 @@ void CPlayer::CheckLevel()
 		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 
-		dbg_msg("acc", "Level: %d, NeededXP: %d", (*Account).m_Level, GameServer()->m_pNeededXP[(*Account).m_Level]);
+		dbg_msg("acc", "Level: %d, NeededXP: %llu", (*Account).m_Level, GameServer()->m_pNeededXP[(*Account).m_Level]);
 	}
 }
 
