@@ -1511,7 +1511,7 @@ const char* str_utf8_find_nocase(const char* haystack, const char* needle);
 */
 int str_utf8_isspace(int code);
 
-int str_utf8_isstart(char c);
+static int str_utf8_isstart(char c);
 
 /*
 	Function: str_utf8_is_whitespace
