@@ -1951,7 +1951,7 @@ void CCharacter::HandleTiles(int Index)
 
 			// broadcast
 			{
-				char aMsg[128];
+				char aMsg[256];
 				char aSurvival[32];
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
