@@ -155,6 +155,7 @@ void CPlayer::Reset()
 	m_HasSpookyGhost = false;
 
 	m_LoadedSkin = true;
+	m_ExactDieTick = Server()->Tick();
 }
 
 void CPlayer::Tick()
