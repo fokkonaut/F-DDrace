@@ -2955,11 +2955,17 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward", 24);
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "duodonny", 24);
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "", 24);
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", 24);
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", 24);
+	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", 24);
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 1;
-		pDummy->m_TeeInfos.m_aSkinPartColors[p] = 0;
+		pDummy->m_TeeInfos.m_aSkinPartColors[p] = p == SKINPART_MARKING ? -16777146 : 50;
 	}
 
 	OnClientEnter(DummyID);
