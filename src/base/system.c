@@ -2348,7 +2348,7 @@ void str_utf8_trim_right(char* param)
 	}
 }
 
-static int str_utf8_isstart(char c)
+int str_utf8_isstart(char c)
 {
 	if((c&0xC0) == 0x80) /* 10xxxxxx */
 		return 0;
