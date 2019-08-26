@@ -956,25 +956,6 @@ int CPlayer::GetAccID()
 	return 0;
 }
 
-void CPlayer::CheckLevel()
-{
-	if (GetAccID() < ACC_START)
-		return;
-
-	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
-
-	if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
-	{
-		(*Account).m_Level++;
-
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
-		GameServer()->SendChatTarget(m_ClientID, aBuf);
-
-		dbg_msg("acc", "Level: %d, NeededXP: %llu", (*Account).m_Level, GameServer()->m_pNeededXP[(*Account).m_Level]);
-	}
-}
-
 void CPlayer::MoneyTransaction(int Amount, const char *Description)
 {
 	if (GetAccID() < ACC_START)

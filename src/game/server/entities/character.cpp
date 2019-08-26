@@ -1947,7 +1947,14 @@ void CCharacter::HandleTiles(int Index)
 			(*Account).m_XP += GetAliveState() + 1;
 
 			// checking account level
-			m_pPlayer->CheckLevel();
+			if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+			{
+				(*Account).m_Level++;
+
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			}
 
 			// broadcast
 			{

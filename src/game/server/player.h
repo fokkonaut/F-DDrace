@@ -258,7 +258,6 @@ public:
 
 	//account
 	int GetAccID();
-	void CheckLevel();
 	void MoneyTransaction(int Amount, const char* Description);
 
 	//score
