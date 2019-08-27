@@ -979,6 +979,37 @@ void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int ID = pResult->NumArguments() ? pSelf->GetCIDByName(pResult->GetString(0)) : pResult->m_ClientID;
+	CPlayer* pPlayer = pSelf->m_apPlayers[ID];
+	if (!pPlayer)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Player not found");
+		return;
+	}
+
+	char aBuf[128];
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
+
+	str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, (*Account).m_Level >= MAX_LEVEL ? " (max)" : "");
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "XP [%llu/%llu]", (*Account).m_XP, pSelf->m_pNeededXP[(*Account).m_Level]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->SendChatTarget(pResult->m_ClientID, "---- BLOCK ----");
+	str_format(aBuf, sizeof(aBuf), "Points: %d", (*Account).m_BlockPoints);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+}
+
 void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

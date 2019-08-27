@@ -304,6 +304,7 @@ public:
 		bool m_aHasItem[NUM_ITEMS];
 		char m_aLastMoneyTransaction[5][256];
 		bool m_VIP;
+		int m_BlockPoints;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -454,6 +455,8 @@ private:
 	static void ConJoinFNG(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);

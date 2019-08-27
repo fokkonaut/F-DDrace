@@ -2718,6 +2718,7 @@ int CGameContext::AddAccount()
 	for (int i = 0; i < NUM_ITEMS; i++)
 		m_Accounts[ID].m_aHasItem[i] = false;
 	m_Accounts[ID].m_VIP = false;
+	m_Accounts[ID].m_BlockPoints = 0;
 
 	return ID;
 }

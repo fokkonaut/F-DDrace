@@ -974,15 +974,15 @@ void CPlayer::MoneyTransaction(int Amount, const char *Description)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo Account = GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
 
-	Account.m_Money += Amount;
+	(*Account).m_Money += Amount;
 
-	str_format(Account.m_aLastMoneyTransaction[4], sizeof(Account.m_aLastMoneyTransaction[4]), "%s", Account.m_aLastMoneyTransaction[3]);
-	str_format(Account.m_aLastMoneyTransaction[3], sizeof(Account.m_aLastMoneyTransaction[3]), "%s", Account.m_aLastMoneyTransaction[2]);
-	str_format(Account.m_aLastMoneyTransaction[2], sizeof(Account.m_aLastMoneyTransaction[2]), "%s", Account.m_aLastMoneyTransaction[1]);
-	str_format(Account.m_aLastMoneyTransaction[1], sizeof(Account.m_aLastMoneyTransaction[1]), "%s", Account.m_aLastMoneyTransaction[0]);
-	str_format(Account.m_aLastMoneyTransaction[0], sizeof(Account.m_aLastMoneyTransaction[0]), "%s", Description);
+	str_format((*Account).m_aLastMoneyTransaction[4], sizeof((*Account).m_aLastMoneyTransaction[4]), "%s", (*Account).m_aLastMoneyTransaction[3]);
+	str_format((*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[3]), "%s", (*Account).m_aLastMoneyTransaction[2]);
+	str_format((*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[2]), "%s", (*Account).m_aLastMoneyTransaction[1]);
+	str_format((*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[1]), "%s", (*Account).m_aLastMoneyTransaction[0]);
+	str_format((*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[0]), "%s", Description);
 }
 
 bool CPlayer::IsHooked(int Power)
