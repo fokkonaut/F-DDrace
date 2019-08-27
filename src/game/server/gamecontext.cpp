@@ -2719,6 +2719,8 @@ int CGameContext::AddAccount()
 		m_Accounts[ID].m_aHasItem[i] = false;
 	m_Accounts[ID].m_VIP = false;
 	m_Accounts[ID].m_BlockPoints = 0;
+	m_Accounts[ID].m_InstagibKills = 0;
+	m_Accounts[ID].m_InstagibWins = 0;
 
 	return ID;
 }
@@ -2813,6 +2815,18 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 	getline(AccFile, data);
 	str_copy(aData, data.c_str(), sizeof(aData));
 	m_Accounts[ID].m_VIP = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_BlockPoints = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_InstagibKills = atoi(aData);
+
+	getline(AccFile, data);
+	str_copy(aData, data.c_str(), sizeof(aData));
+	m_Accounts[ID].m_InstagibWins = atoi(aData);
 }
 
 void CGameContext::WriteAccountStats(int ID)
@@ -2846,6 +2860,9 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
 		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
 		AccFile << m_Accounts[ID].m_VIP << "\n";
+		AccFile << m_Accounts[ID].m_BlockPoints << "\n";
+		AccFile << m_Accounts[ID].m_InstagibKills << "\n";
+		AccFile << m_Accounts[ID].m_InstagibWins << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

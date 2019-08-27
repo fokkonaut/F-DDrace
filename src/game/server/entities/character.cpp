@@ -1116,6 +1116,8 @@ void CCharacter::Die(int Killer, int Weapon)
 	{
 		if (pKiller->m_Minigame == MINIGAME_SURVIVAL)
 			GameServer()->m_Accounts[pKiller->GetAccID()].m_SurvivalKills++;
+		else if (pKiller->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pKiller->m_Minigame == MINIGAME_INSTAGIB_FNG)
+			GameServer()->m_Accounts[pKiller->GetAccID()].m_InstagibKills++;
 		else
 			GameServer()->m_Accounts[pKiller->GetAccID()].m_Kills++;
 

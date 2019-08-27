@@ -305,6 +305,8 @@ public:
 		char m_aLastMoneyTransaction[5][256];
 		bool m_VIP;
 		int m_BlockPoints;
+		int m_InstagibKills;
+		int m_InstagibWins;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
