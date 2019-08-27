@@ -2733,100 +2733,40 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 	str_format(aBuf, sizeof(aBuf), "%s/%s.acc", g_Config.m_SvAccFilePath, pName);
 	std::fstream AccFile(aBuf);
 
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Port = atoi(aData);
+	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
+	{
+		getline(AccFile, data);
+		str_copy(aData, data.c_str(), sizeof(aData));
 
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_LoggedIn = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Disabled = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	str_copy(m_Accounts[ID].m_Password, aData, sizeof(m_Accounts[ID].m_Password));
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	str_copy(m_Accounts[ID].m_Username, aData, sizeof(m_Accounts[ID].m_Username));
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_ClientID = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Level = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_XP = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Money = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Kills = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_Deaths = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_PoliceLevel = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_SurvivalKills = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_SurvivalWins = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0]));
-
-	getline(AccFile, data);
-	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1]));
-
-	getline(AccFile, data);
-	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2]));
-
-	getline(AccFile, data);
-	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3]));
-
-	getline(AccFile, data);
-	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4]));
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_VIP = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_BlockPoints = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_InstagibKills = atoi(aData);
-
-	getline(AccFile, data);
-	str_copy(aData, data.c_str(), sizeof(aData));
-	m_Accounts[ID].m_InstagibWins = atoi(aData);
+		switch (i)
+		{
+		case PORT:						m_Accounts[ID].m_Port = atoi(aData);
+		case LOGGED_IN:					m_Accounts[ID].m_LoggedIn = atoi(aData);
+		case DISABLED:					m_Accounts[ID].m_Disabled = atoi(aData);
+		case PASSWORD:					str_copy(m_Accounts[ID].m_Password, aData, sizeof(m_Accounts[ID].m_Password));
+		case USERNAME:					str_copy(m_Accounts[ID].m_Username, aData, sizeof(m_Accounts[ID].m_Username));
+		case CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(aData);
+		case LEVEL:						m_Accounts[ID].m_Level = atoi(aData);
+		case XP:						m_Accounts[ID].m_XP = atoi(aData);
+		case MONEY:						m_Accounts[ID].m_Money = atoi(aData);
+		case KILLS:						m_Accounts[ID].m_Kills = atoi(aData);
+		case DEATHS:					m_Accounts[ID].m_Deaths = atoi(aData);
+		case POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(aData);
+		case SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(aData);
+		case SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(aData);
+		case LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0]));
+		case LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1]));
+		case LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2]));
+		case LAST_MONEY_TRANSACTION_3:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3]));
+		case LAST_MONEY_TRANSACTION_4:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4]));
+		case ITEM_SPOOKY_GHOST:			m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(aData);
+		case ITEM_POLICE:				m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
+		case VIP:						m_Accounts[ID].m_VIP = atoi(aData);
+		case BLOCK_POINTS:				m_Accounts[ID].m_BlockPoints = atoi(aData);
+		case INSTAGIB_KILLS:			m_Accounts[ID].m_InstagibKills = atoi(aData);
+		case INSTAGIB_WINS:				m_Accounts[ID].m_InstagibWins = atoi(aData);
+		}
+	}
 }
 
 void CGameContext::WriteAccountStats(int ID)

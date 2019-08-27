@@ -310,6 +310,37 @@ public:
 	};
 	std::vector<AccountInfo> m_Accounts;
 
+	// make sure these are in the same order as the variables above
+	enum AccountVariables
+	{
+		PORT,
+		LOGGED_IN,
+		DISABLED,
+		PASSWORD,
+		USERNAME,
+		CLIENT_ID,
+		LEVEL,
+		XP,
+		MONEY,
+		KILLS,
+		DEATHS,
+		POLICE_LEVEL,
+		SURVIVAL_KILLS,
+		SURVIVAL_WINS,
+		ITEM_SPOOKY_GHOST,
+		ITEM_POLICE,
+		LAST_MONEY_TRANSACTION_0,
+		LAST_MONEY_TRANSACTION_1,
+		LAST_MONEY_TRANSACTION_2,
+		LAST_MONEY_TRANSACTION_3,
+		LAST_MONEY_TRANSACTION_4,
+		VIP,
+		BLOCK_POINTS,
+		INSTAGIB_KILLS,
+		INSTAGIB_WINS,
+		NUM_ACCOUNT_VARIABLES
+	};
+
 	int64 m_pNeededXP[MAX_LEVEL+1];
 
 	//motd
