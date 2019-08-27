@@ -180,7 +180,7 @@ void CCharacter::BuyItem(int ItemID)
 			if ((*Account).m_Money >= 1500)
 			{
 				m_pPlayer->MoneyTransaction(-1500, "-1.500 money. (bought 'rainbow')");
-				Rainbow(false, -1, true);
+				Rainbow(true, -1, true);
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought rainbow until death.");
 			}
 			else
@@ -202,7 +202,7 @@ void CCharacter::BuyItem(int ItemID)
 			if ((*Account).m_Money >= 3500)
 			{
 				m_pPlayer->MoneyTransaction(-3500, "-3.500 money. (bought 'bloody')");
-				Bloody(false, -1, true);
+				Bloody(true, -1, true);
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought bloody until death.");
 			}
 			else
