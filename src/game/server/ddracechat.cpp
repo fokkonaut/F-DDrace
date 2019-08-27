@@ -949,6 +949,36 @@ void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
 
 // F-DDrace
 
+void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	char aFormat[32];
+	str_copy(aFormat, pResult->GetString(0), sizeof(aFormat));
+	bool Changed = true;
+
+	if (!str_comp_nocase(aFormat, "time"))
+		pPlayer->m_ScoreMode = SCORE_TIME;
+	else if (!str_comp_nocase(aFormat, "level"))
+		pPlayer->m_ScoreMode = SCORE_LEVEL;
+	else
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Score Format ~~~");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Use '/score <format>' to change the displayed score.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "time, level");
+		Changed = false;
+	}
+
+	if (Changed)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Changed displayed score to '%s'.", aFormat);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+}
+
 void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

@@ -21,6 +21,12 @@ enum Gamemode
 	GAMEMODE_VANILLA
 };
 
+enum Scoreformat
+{
+	SCORE_TIME = 0,
+	SCORE_LEVEL
+};
+
 enum Dummymode
 {
 	DUMMYMODE_IDLE = 0,
@@ -261,6 +267,7 @@ public:
 	void MoneyTransaction(int Amount, const char* Description);
 
 	//score
+	int m_ScoreMode;
 	int m_InstagibScore;
 
 	//weapon indicator

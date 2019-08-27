@@ -436,6 +436,7 @@ private:
 	static void ConUninvite(IConsole::IResult* pResult, void* pUserData);
 
 	//chat
+	static void ConScore(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeaponIndicator(IConsole::IResult* pResult, void* pUserData);

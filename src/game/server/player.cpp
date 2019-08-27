@@ -156,6 +156,8 @@ void CPlayer::Reset()
 
 	m_LoadedSkin = true;
 	m_ExactDieTick = Server()->Tick();
+
+	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 }
 
 void CPlayer::Tick()
@@ -368,11 +370,22 @@ void CPlayer::Snap(int SnappingClient)
 		TimeFormat = true;
 	}
 	else if (pSnapping->m_Minigame == MINIGAME_BLOCK)
+	{
 		Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
+	}
 	else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
+	{
 		Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
+	}
 	else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
+	{
 		Score = m_InstagibScore;
+	}
+	else if (pSnapping->m_ScoreMode != SCORE_TIME)
+	{
+		if (pSnapping->m_ScoreMode == SCORE_LEVEL)
+			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
+	}
 	else
 	{
 		Score = abs(m_Score) * -1;
