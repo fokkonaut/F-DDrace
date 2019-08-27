@@ -1069,3 +1069,56 @@ void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
 		return;
 	pSelf->m_apPlayers[Victim]->SetFakeClan(pResult->GetString(1));
 }
+
+void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer)
+		return;
+	if (pPlayer->GetAccID() >= ACC_START)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username, pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->SendChatTarget(Victim, "You have been logged out by an admin");
+		pSelf->Logout(pPlayer->GetAccID());
+	}
+}
+
+void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer)
+		return;
+	if (pPlayer->GetAccID() >= ACC_START)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Disabled account '%s'", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->SendChatTarget(Victim, "You have been logged out due to account deactivation by an admin");
+		pSelf->m_Accounts[pPlayer->GetAccID()].m_Disabled = pResult->GetInteger(1);
+		pSelf->Logout(pPlayer->GetAccID());
+	}
+}
+
+void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer)
+		return;
+	if (pPlayer->GetAccID() >= ACC_START)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "VIP for account '%s' has been %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username, !pResult->GetInteger(1) ? "disabled" : "enabled");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		str_format(aBuf, sizeof(aBuf), "You %s VIP", !pResult->GetInteger(1) ? "lost" : "got");
+		pSelf->SendChatTarget(Victim, aBuf);
+		pSelf->m_Accounts[pPlayer->GetAccID()].m_VIP = pResult->GetInteger(1);
+	}
+}

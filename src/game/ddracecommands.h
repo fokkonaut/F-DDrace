@@ -114,4 +114,9 @@ CONSOLE_COMMAND("ddracemode", "?v[id]", CFGFLAG_SERVER, ConDDraceMode, this, "De
 CONSOLE_COMMAND("bloody", "?v[id]", CFGFLAG_SERVER, ConBloody, this, "Toggles bloody for player v")
 CONSOLE_COMMAND("strongbloody", "?v[id]", CFGFLAG_SERVER, ConStrongBloody, this, "Toggles strong bloody for player v")
 CONSOLE_COMMAND("policehelper", "?v[id]", CFGFLAG_SERVER, ConPoliceHelper, this, "Toggles police helper for player v")
+
+//account
+CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Account logout for player v")
+CONSOLE_COMMAND("acc_disable", "v[id] i[on/off]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account of player v")
+CONSOLE_COMMAND("acc_vip", "v[id] i[on/off]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account of player v")
 #undef CONSOLE_COMMAND
