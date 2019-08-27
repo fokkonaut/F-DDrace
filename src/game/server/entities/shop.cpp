@@ -77,7 +77,7 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
 		str_format(aInfo, sizeof(aInfo), "Using this item you can hide from other players behind bushes.\n"
 			"If your ghost is activated you will be able to shoot plasma\n"
-			"projectiles. For more information please visit '/spookyghostinfo'.");
+			"projectiles. For more information please visit '/spookyghost'.");
 	}
 	else
 	{
@@ -292,7 +292,7 @@ void CCharacter::BuyItem(int ItemID)
 			m_pPlayer->MoneyTransaction(-1000000, "bought 'spooky_ghost'");
 
 			(*Account).m_aHasItem[SPOOKY_GHOST] = true;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the spooky ghost. For more infos check '/spookyghostinfo'.");
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the spooky ghost. For more infos check '/spookyghost'.");
 		}
 		else
 		{
