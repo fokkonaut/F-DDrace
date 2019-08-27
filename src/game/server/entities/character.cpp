@@ -1114,14 +1114,18 @@ void CCharacter::Die(int Killer, int Weapon)
 	// account kills and deaths
 	if (pKiller)
 	{
-		if (pKiller->m_Minigame == MINIGAME_SURVIVAL)
-			GameServer()->m_Accounts[pKiller->GetAccID()].m_SurvivalKills++;
-		else if (pKiller->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pKiller->m_Minigame == MINIGAME_INSTAGIB_FNG)
-			GameServer()->m_Accounts[pKiller->GetAccID()].m_InstagibKills++;
-		else
-			GameServer()->m_Accounts[pKiller->GetAccID()].m_Kills++;
+		if (pKiller->GetAccID() >= ACC_START)
+		{
+			if (pKiller->m_Minigame == MINIGAME_SURVIVAL)
+				GameServer()->m_Accounts[pKiller->GetAccID()].m_SurvivalKills++;
+			else if (pKiller->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pKiller->m_Minigame == MINIGAME_INSTAGIB_FNG)
+				GameServer()->m_Accounts[pKiller->GetAccID()].m_InstagibKills++;
+			else
+				GameServer()->m_Accounts[pKiller->GetAccID()].m_Kills++;
+		}
 
-		GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Deaths++;
+		if (m_pPlayer->GetAccID() >= ACC_START)
+			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Deaths++;
 	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
