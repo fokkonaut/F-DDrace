@@ -158,6 +158,8 @@ void CPlayer::Reset()
 	m_ExactDieTick = Server()->Tick();
 
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
+
+	m_HasRoomKey = false;
 }
 
 void CPlayer::Tick()

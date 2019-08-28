@@ -230,6 +230,8 @@ public:
 	int m_LastHookedPlayer;
 	int m_OldLastHookedPlayer;
 
+	bool m_HasRoomKey;
+
 	bool m_Passive;
 
 	int m_Id;

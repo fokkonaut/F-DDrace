@@ -8,7 +8,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-#define MAX_SHOP_PAGES 4 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
+#define MAX_SHOP_PAGES 5 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
 
 void CCharacter::ShopWindow(int Dir)
 {
@@ -78,6 +78,16 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aInfo, sizeof(aInfo), "Using this item you can hide from other players behind bushes.\n"
 			"If your ghost is activated you will be able to shoot plasma\n"
 			"projectiles. For more information please visit '/spookyghost'.");
+	}
+	else if (m_ShopWindowPage == 5)
+	{
+		str_format(aItem, sizeof(aItem), "        ~  R O O M K E Y  ~      ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "16");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "5.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item until\n"
+			"you disconnect.");
+		str_format(aInfo, sizeof(aInfo), "If you have the room key you can enter the room.\n"
+			"It's under the spawn and there is a money tile.");
 	}
 	else
 	{
@@ -289,10 +299,34 @@ void CCharacter::BuyItem(int ItemID)
 		}
 		else if ((*Account).m_Money >= 1000000)
 		{
-			m_pPlayer->MoneyTransaction(-1000000, "bought 'spooky_ghost'");
+			m_pPlayer->MoneyTransaction(-1000000, "bought 'spooky ghost'");
 
 			(*Account).m_aHasItem[SPOOKY_GHOST] = true;
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the spooky ghost. For more infos check '/spookyghost'.");
+		}
+		else
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
+		}
+	}
+	else if (ItemID == 5)
+	{
+		if ((*Account).m_Level < 16)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 16 to buy the room key.");
+			return;
+		}
+		else if (m_Core.m_HasRoomKey)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the room key.");
+		}
+		else if ((*Account).m_Money >= 5000)
+		{
+			m_pPlayer->MoneyTransaction(-5000, "bought 'room key'");
+
+			m_pPlayer->m_HasRoomKey = true;
+			m_Core.m_HasRoomKey = true;
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the room key");
 		}
 		else
 		{

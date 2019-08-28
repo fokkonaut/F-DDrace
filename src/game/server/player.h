@@ -266,6 +266,9 @@ public:
 	int GetAccID();
 	void MoneyTransaction(int Amount, const char* Description);
 
+	//room key
+	bool m_HasRoomKey;
+
 	//score
 	int m_ScoreMode;
 	int m_InstagibScore;

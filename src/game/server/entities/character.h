@@ -379,6 +379,8 @@ public:
 	bool m_AtomHooked;
 	bool m_TrailHooked;
 
+	int64 m_RoomAntiSpamTick;
+
 	// shop
 	bool m_InShop;
 	bool m_EnteredShop;
