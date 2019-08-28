@@ -1018,6 +1018,19 @@ void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserDat
 	pSelf->SendChatTarget(pResult->m_ClientID, "Hold TAB (or other scoreboard key) and shoot two times with your gun.");
 }
 
+void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to extras like rainbow, atom or trail.");
+	if (g_Config.m_SvContactDiscord[0] != '\0')
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "You need to contact the admin, '%s', on Discord and pay him 5 euros as paysafecard in order to get VIP.", g_Config.m_SvContactDiscord);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+}
+
 void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

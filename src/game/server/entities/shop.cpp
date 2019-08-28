@@ -8,7 +8,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-#define MAX_SHOP_PAGES 5 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
+#define MAX_SHOP_PAGES 6 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
 
 void CCharacter::ShopWindow(int Dir)
 {
@@ -88,6 +88,14 @@ void CCharacter::ShopWindow(int Dir)
 			"you disconnect.");
 		str_format(aInfo, sizeof(aInfo), "If you have the room key you can enter the room.\n"
 			"It's under the spawn and there is a money tile.");
+	}
+	else if (m_ShopWindowPage == 6)
+	{
+		str_format(aItem, sizeof(aItem), "        ~  V I P ~      ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "0");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "5 euros");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "VIP gives you some benefits,\ncheck '/vip'.");
 	}
 	else
 	{
@@ -331,6 +339,18 @@ void CCharacter::BuyItem(int ItemID)
 		else
 		{
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
+		}
+	}
+	else if (ItemID == 6)
+	{
+		if ((*Account).m_Level < 0)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 0 to buy VIP.");
+			return;
+		}
+		else if ((*Account).m_VIP)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have VIP.");
 		}
 	}
 	else
