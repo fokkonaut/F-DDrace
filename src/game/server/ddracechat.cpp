@@ -1023,6 +1023,7 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to extras like rainbow, atom or trail.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money per second more.");
 	if (g_Config.m_SvContactDiscord[0] != '\0')
 	{
 		char aBuf[256];
