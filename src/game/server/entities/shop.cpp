@@ -220,259 +220,162 @@ void CCharacter::BuyItem(int ItemID)
 		return;
 	}
 
-	char aBuf[256];
+	if (ItemID < 1 || ItemID > MAX_SHOP_PAGES)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Invalid item");
+		return;
+	}
+
 	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-	if (ItemID == 1)
-	{
-		if (m_Rainbow || m_pPlayer->m_InfRainbow)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already own rainbow.");
-			return;
-		}
+	char aMsg[128];
+	char aItem[64];
+	int Level = -1;
+	int Price = -1;
+	int Time = -1; // 0 death, 1 disconnect, 2 forever
 
-		if ((*Account).m_Level < 5)
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 5 to buy rainbow.");
-		else
-		{
-			if ((*Account).m_Money >= 1500)
-			{
-				m_pPlayer->MoneyTransaction(-1500, "-1.500 money. (bought 'rainbow')");
-				Rainbow(true, -1, true);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought rainbow until death.");
-			}
-			else
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 2)
+	switch (ItemID)
 	{
-		if (m_Bloody || m_StrongBloody)
+		case 1:
 		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already own bloody.");
-			return;
-		}
+			str_format(aItem, sizeof(aItem), "Rainbow");
+			Level = 5;
+			Price = 1500;
+			Time = 0;
+		} break;
+		case 2:
+		{
+			str_format(aItem, sizeof(aItem), "Bloody");
+			Level = 15;
+			Price = 3500;
+			Time = 0;
+		} break;
+		case 3:
+		{
+			str_format(aItem, sizeof(aItem), "Police Level %d", (*Account).m_PoliceLevel + 1);
+			if (!(*Account).m_aHasItem[POLICE])
+				Level = 18;
+			else if ((*Account).m_PoliceLevel == 1)
+				Level = 25;
+			else if ((*Account).m_PoliceLevel == 2)
+				Level = 30;
+			else if ((*Account).m_PoliceLevel == 3)
+				Level = 40;
+			else if ((*Account).m_PoliceLevel == 4)
+				Level = 50;
+			Price = 100000;
+			Time = 2;
+		} break;
+		case 4:
+		{
+			str_format(aItem, sizeof(aItem), "Spooky Ghost");
+			Level = 1;
+			Price = 1000000;
+			Time = 2;
+		} break;
+		case 5:
+		{
+			str_format(aItem, sizeof(aItem), "Room Key");
+			Level = 16;
+			Price = 5000;
+			Time = 1;
+		} break;
+		case 6:
+		{
+			str_format(aItem, sizeof(aItem), "VIP");
+			Level = 0;
+			Price = 5;
+			Time = 2;
+		} break;
+		case 7:
+		{
+			str_format(aItem, sizeof(aItem), "Spawn Shotgun");
+			Level = 33;
+			Price = 600000;
+			Time = 2;
+		} break;
+		case 8:
+		{
+			str_format(aItem, sizeof(aItem), "Spawn Grenade");
+			Level = 33;
+			Price = 600000;
+			Time = 2;
+		} break;
+		case 9:
+		{
+			str_format(aItem, sizeof(aItem), "Spawn Rifle");
+			Level = 33;
+			Price = 600000;
+			Time = 2;
+		} break;
+	}
 
-		if ((*Account).m_Level < 15)
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 15 to buy bloody.");
-		else
-		{
-			if ((*Account).m_Money >= 3500)
-			{
-				m_pPlayer->MoneyTransaction(-3500, "-3.500 money. (bought 'bloody')");
-				Bloody(true, -1, true);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought bloody until death.");
-			}
-			else
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 3)
+	bool HasAlready = false;
+
+	switch (ItemID)
 	{
+	case 1: if (m_Rainbow || m_pPlayer->m_InfRainbow) HasAlready = true; break;
+	case 2: if (m_Bloody || m_StrongBloody) HasAlready = true; break;
+	case 3: if ((*Account).m_PoliceLevel == 5) HasAlready = true; break;
+	case 4: if ((*Account).m_aHasItem[SPOOKY_GHOST]) HasAlready = true; break;
+	case 5: if (m_pPlayer->m_HasRoomKey) HasAlready = true; break;
+	case 6: if ((*Account).m_VIP) HasAlready = true; break;
+	case 7: if ((*Account).m_SpawnWeapon[0] == 5) HasAlready = true; break;
+	case 8: if ((*Account).m_SpawnWeapon[1] == 5) HasAlready = true; break;
+	case 9: if ((*Account).m_SpawnWeapon[2] == 5) HasAlready = true; break;
+	}
+
+	if (HasAlready)
+	{
+		bool UseThe = false;
+		switch (ItemID)
+		{
+		case 3: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the highest police rank"); break;
+		case 7: case 8: case 9: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum amount of bullets"); break;
+		case 4: case 5: UseThe = true;
+		default:
+			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", aItem);
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aMsg);
+		}
+		return;
+	}
+
+	if (ItemID == 6) // vip can only be bought with real money
+		return;
+
+	if ((*Account).m_Money < Price)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money");
+		return;
+	}
+
+	if ((*Account).m_Level < Level)
+	{
+		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", Level, aItem);
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aMsg);
+		return;
+	}
+
+	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aItem, Time == 0 ? "until death" : Time == 1 ? "until disconnect" : "");
+	GameServer()->SendChatTarget(m_pPlayer->GetCID(), aMsg);
+
+	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", Price, aItem);
+	m_pPlayer->MoneyTransaction(-Price, aMsg);
+
+	int Weapon = -1;
+	switch (ItemID)
+	{
+	case 1: Rainbow(true, -1, true); break;
+	case 2: Bloody(true, -1, true); break;
+	case 3:
 		if (!(*Account).m_aHasItem[POLICE])
-		{
-			if ((*Account).m_Level < 18)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 18 to buy police.");
-				return;
-			}
-		}
-		else if ((*Account).m_PoliceLevel == 1)
-		{
-			if ((*Account).m_Level < 25)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 25 to upgrade to police rank 2.");
-				return;
-			}
-		}
-		else if ((*Account).m_PoliceLevel == 2)
-		{
-			if ((*Account).m_Level < 30)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 30 to upgrade to police rank 3.");
-				return;
-			}
-		}
-		else if ((*Account).m_PoliceLevel == 3)
-		{
-			if ((*Account).m_Level < 40)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 40 to upgrade to police rank 4.");
-				return;
-			}
-		}
-		else if ((*Account).m_PoliceLevel == 4)
-		{
-			if ((*Account).m_Level < 50)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your level is too low! You need to be level 50 to upgrade to police rank 5.");
-				return;
-			}
-		}
-		if ((*Account).m_PoliceLevel >= 5)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the highest police rank.");
-			return;
-		}
-		if ((*Account).m_Money >= 100000)
-		{
-			m_pPlayer->MoneyTransaction(-100000, "-100.000 money. (bought 'police')");
-			(*Account).m_PoliceLevel++;
-			str_format(aBuf, sizeof(aBuf), "You bought Police Level %d", (*Account).m_PoliceLevel);
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-		}
-		else
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
+			(*Account).m_aHasItem[POLICE] = true;
+		(*Account).m_PoliceLevel++; break;
+	case 4: (*Account).m_aHasItem[SPOOKY_GHOST] = true; break;
+	case 5: m_pPlayer->m_HasRoomKey = true; m_Core.m_CanEnterRoom = true; break;
+	case 7: if (Weapon == -1) Weapon = 0;
+	case 8: if (Weapon == -1) Weapon = 1;
+	case 9: if (Weapon == -1) Weapon = 2;
+		(*Account).m_SpawnWeapon[Weapon]++; break;
 	}
-	else if (ItemID == 4)
-	{
-		if ((*Account).m_Level < 1)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 1 to buy the spooky ghost.");
-			return;
-		}
-		else if ((*Account).m_aHasItem[SPOOKY_GHOST])
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the spooky ghost.");
-		}
-		else if ((*Account).m_Money >= 1000000)
-		{
-			m_pPlayer->MoneyTransaction(-1000000, "bought 'spooky ghost'");
-
-			(*Account).m_aHasItem[SPOOKY_GHOST] = true;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the spooky ghost. For more infos check '/spookyghost'.");
-		}
-		else
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 5)
-	{
-		if ((*Account).m_Level < 16)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 16 to buy the room key.");
-			return;
-		}
-		else if (m_Core.m_CanEnterRoom)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the room key.");
-		}
-		else if ((*Account).m_Money >= 5000)
-		{
-			m_pPlayer->MoneyTransaction(-5000, "bought 'room key'");
-
-			m_pPlayer->m_HasRoomKey = true;
-			m_Core.m_CanEnterRoom = true;
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the room key");
-		}
-		else
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 6)
-	{
-		if ((*Account).m_Level < 0)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 0 to buy VIP.");
-			return;
-		}
-		else if ((*Account).m_VIP)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have VIP.");
-		}
-	}
-	else if (ItemID == 7)
-	{
-		if ((*Account).m_Level < 33)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn shotgun.");
-			return;
-		}
-		else if ((*Account).m_SpawnWeapon[0] == 5)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn shotgun.");
-		}
-		else if ((*Account).m_Money >= 600000)
-		{
-			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_shotgun'");
-
-			(*Account).m_SpawnWeapon[0]++;
-			if ((*Account).m_SpawnWeapon[0] == 1)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn shotgun. For more infos check '/spawnweaponsinfo'.");
-			}
-			else
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn shotgun upgraded.");
-			}
-		}
-		else
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 8)
-	{
-		if ((*Account).m_Level < 33)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn grenade.");
-			return;
-		}
-		else if ((*Account).m_SpawnWeapon[1] == 5)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn grenade.");
-		}
-		else if ((*Account).m_Money >= 600000)
-		{
-			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_grenade'");
-
-			(*Account).m_SpawnWeapon[1]++;
-			if ((*Account).m_SpawnWeapon[1] == 1)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn grenade. For more infos check '/spawnweaponsinfo'.");
-			}
-			else
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn grenade upgraded.");
-			}
-		}
-		else
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else if (ItemID == 9)
-	{
-		if ((*Account).m_Level < 33)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn rifle.");
-			return;
-		}
-		else if ((*Account).m_SpawnWeapon[2] == 5)
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn rifle.");
-		}
-		else if ((*Account).m_Money >= 600000)
-		{
-			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_rifle'");
-
-			(*Account).m_SpawnWeapon[2]++;
-			if ((*Account).m_SpawnWeapon[2] == 1)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn rifle. For more infos check '/spawnweaponsinfo'.");
-			}
-			else
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn rifle upgraded.");
-			}
-		}
-		else
-		{
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
-		}
-	}
-	else
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Invalid shop item. Choose another one.");
 }
