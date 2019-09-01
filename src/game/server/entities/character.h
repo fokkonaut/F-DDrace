@@ -406,10 +406,6 @@ public:
 
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
-	bool m_FakeBlockTuning;
-	int m_FakeBlockUpState;
-	float m_FakeBlockOldVelX;
-
 	//this means the character is directly on a freezetile
 	bool m_IsFrozen;
 
