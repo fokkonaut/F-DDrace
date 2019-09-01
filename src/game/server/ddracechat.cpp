@@ -1310,6 +1310,35 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
+void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!g_Config.m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
+		return;
+	}
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	char aBuf[256];
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	str_format(aBuf, sizeof(aBuf), "Money: %llu", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	for (int i = 0; i < 5; i++)
+		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+}
+
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
