@@ -174,7 +174,7 @@ void CPlayer::Tick()
 		return;
 	}
 
-	Server()->SetClientScore(m_ClientID, m_Score);
+	Server()->SetClientScore(m_ClientID, g_Config.m_SvDefaultScoreMode == SCORE_TIME ? m_Score : GameServer()->m_Accounts[GetAccID()].m_Level);
 
 	// do latency stuff
 	if (!m_IsDummy)
