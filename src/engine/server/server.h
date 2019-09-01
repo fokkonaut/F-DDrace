@@ -303,6 +303,9 @@ public:
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	// F-DDrace
+	const char* GetAnnouncementLine(char const* FileName);
+	unsigned m_AnnouncementLastLine;
+
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
 };

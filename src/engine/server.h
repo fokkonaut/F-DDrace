@@ -36,6 +36,8 @@ public:
 	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	// F-DDrace
+	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
+
 	virtual void DummyJoin(int DummyID) = 0;
 	virtual void DummyLeave(int DummyID) = 0;
 

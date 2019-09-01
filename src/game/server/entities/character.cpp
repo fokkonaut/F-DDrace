@@ -2760,7 +2760,7 @@ void CCharacter::FDDraceInit()
 	m_RoomAntiSpamTick = Now;
 
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-	if (m_pPlayer->m_Gamemode == GAMEMODE_DDRACE)
+	if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 		for (int i = 0; i < 3; i++)
 			if ((*Account).m_SpawnWeapon[i])
 				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);

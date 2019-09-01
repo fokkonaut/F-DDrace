@@ -31,6 +31,10 @@
 #include "register.h"
 #include "server.h"
 
+#include <string.h>
+#include <vector>
+#include <engine/shared/linereader.h>
+
 #if defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
@@ -429,6 +433,7 @@ int CServer::Init()
 		m_aClients[i].m_Snapshots.Init();
 	}
 
+	m_AnnouncementLastLine = 0;
 	m_CurrentGameTick = 0;
 
 	return 0;
@@ -1949,6 +1954,45 @@ int main(int argc, const char **argv) // ignore_convention
 }
 
 // F-DDrace
+
+const char* CServer::GetAnnouncementLine(char const* pFileName)
+{
+	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
+	if (!File)
+		return 0;
+
+	std::vector<char*> v;
+	char* pLine;
+	CLineReader* lr = new CLineReader();
+	lr->Init(File);
+	while ((pLine = lr->Get()))
+		if (str_length(pLine))
+			if (pLine[0] != '#')
+				v.push_back(pLine);
+	if (v.size() == 1)
+	{
+		m_AnnouncementLastLine = 0;
+	}
+	else if (!g_Config.m_SvAnnouncementRandom)
+	{
+		if (++m_AnnouncementLastLine >= v.size())
+			m_AnnouncementLastLine %= v.size();
+	}
+	else
+	{
+		unsigned Rand;
+		do
+			Rand = rand() % v.size();
+		while (Rand == m_AnnouncementLastLine);
+
+		m_AnnouncementLastLine = Rand;
+	}
+
+	io_close(File);
+
+	return v[m_AnnouncementLastLine];
+}
+
 
 void CServer::DummyJoin(int DummyID)
 {
