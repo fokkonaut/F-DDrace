@@ -3286,7 +3286,7 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
-	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA)
+	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
