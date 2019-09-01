@@ -380,7 +380,7 @@ void CGameContext::SendSettings(int ClientID)
 	Msg.m_KickMin = g_Config.m_SvVoteKickMin;
 	Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
 	Msg.m_TeamLock = m_LockTeams != 0;
-	Msg.m_TeamBalance = g_Config.m_SvTeambalanceTime != 0;
+	Msg.m_TeamBalance = 0;
 	Msg.m_PlayerSlots = g_Config.m_SvPlayerSlots;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
