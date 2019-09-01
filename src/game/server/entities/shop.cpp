@@ -252,7 +252,7 @@ void CCharacter::BuyItem(int ItemID)
 		} break;
 		case 3:
 		{
-			str_format(aItem, sizeof(aItem), "Police Level %d", (*Account).m_PoliceLevel + 1);
+			str_format(aItem, sizeof(aItem), "Police Rank %d", (*Account).m_PoliceLevel + 1);
 			if (!(*Account).m_aHasItem[POLICE])
 				Level = 18;
 			else if ((*Account).m_PoliceLevel == 1)
