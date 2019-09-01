@@ -2806,6 +2806,31 @@ void CCharacter::FDDraceTick()
 
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))
 		m_pLightsaber->Retract();
+
+	//flag bonus
+	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
+	{
+		CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+		if (m_pPlayer->GetAccID() >= ACC_START && (*Account).m_Level < MAX_LEVEL)
+		{
+			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY)
+			{
+				(*Account).m_XP += 1;
+
+				if ((*Account).m_VIP)
+					(*Account).m_XP += 2;
+
+				char aSurvival[32];
+				char aMsg[128];
+				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
+				str_format(aMsg, sizeof(aMsg), "^666XP ^222[^444%llu^222/^444%llu^222] ^666+1 flag%s%s",
+					(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+
+				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
+			}
+		}
+	}
 }
 
 void CCharacter::BackupWeapons(int Type)
