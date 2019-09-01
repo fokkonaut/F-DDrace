@@ -1287,7 +1287,6 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
 		return;
 	}
-
 	if (pPlayer->GetAccID() < ACC_START)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
@@ -1300,22 +1299,24 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 		return;
 	}
-
 	if (pTo->GetCID() == pResult->m_ClientID)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay money to yourself");
 		return;
 	}
-
 	if (pTo->GetAccID() < ACC_START)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "That player is not logged in");
 		return;
 	}
-
 	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_Money < pResult->GetInteger(0))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
+		return;
+	}
+	if (pResult->GetInteger(0) <= 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay nothing.");
 		return;
 	}
 
