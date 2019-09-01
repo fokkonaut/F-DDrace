@@ -368,6 +368,8 @@ public:
 	CLightsaber* m_pLightsaber;
 	bool m_Spooky;
 
+	bool m_PassiveFakeTuning;
+	bool m_OldPassiveFakeTuning;
 	bool m_Passive;
 	CPickup* m_pPassiveShield;
 

@@ -2726,6 +2726,8 @@ void CCharacter::FDDraceInit()
 	m_HookPower = HOOK_NORMAL;
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aSpreadWeapon[i] = false;
+	m_PassiveFakeTuning = false;
+	m_OldPassiveFakeTuning = false;
 	m_Passive = false;
 	m_pPassiveShield = 0;
 	m_PoliceHelper = false;
@@ -2771,6 +2773,15 @@ void CCharacter::FDDraceTick()
 	if (m_Core.m_LastHookedPlayer != m_Core.m_OldLastHookedPlayer)
 		m_Core.m_Killer.m_Weapon = -1;
 	m_Core.m_OldLastHookedPlayer = m_Core.m_LastHookedPlayer;
+
+	CCharacter* pPas = GameWorld()->ClosestCharacter(m_Pos, 50.0f, this);
+	if (pPas && (pPas->m_Passive || m_Passive) && !(pPas->m_Super || m_Super))
+		m_PassiveFakeTuning = true;
+	else if (!m_Passive)
+		m_PassiveFakeTuning = false;
+	if (m_PassiveFakeTuning != m_OldPassiveFakeTuning)
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+	m_OldPassiveFakeTuning = m_PassiveFakeTuning;
 
 	if (m_ShopMotdTick < Server()->Tick())
 	{
@@ -3192,6 +3203,8 @@ void CCharacter::PassiveCollision(bool Set)
 	m_Core.m_Collision = !Set;
 	m_Core.m_Hook = !Set;
 	m_Hit = Set ? (DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN) : HIT_ALL;
+
+	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 }
 
 void CCharacter::VanillaMode(int FromID, bool Silent)

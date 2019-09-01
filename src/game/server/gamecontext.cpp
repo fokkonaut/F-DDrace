@@ -565,12 +565,24 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 	CheckPureTuning();
 
-	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int* pParams = 0;
+	static CTuningParams Tuning;
+
 	if (Zone == 0)
-		pParams = (int*)& m_Tuning;
+		Tuning = m_Tuning;
 	else
-		pParams = (int*) & (m_aTuningList[Zone]);
+		Tuning = m_aTuningList[Zone];
+
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	if (pChr)
+	{
+		if (pChr->m_PassiveFakeTuning)
+			Tuning.m_PlayerCollision = 0.f;
+		if (pChr->m_Passive)
+			Tuning.m_PlayerHooking = 0.f;
+	}
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
+	int* pParams = (int*)& Tuning;
 
 	unsigned int last = sizeof(m_Tuning) / sizeof(int);
 	for (unsigned i = 0; i < last; i++)
