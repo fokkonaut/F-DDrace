@@ -519,6 +519,9 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
+	if (m_pCharacter && m_Paused)
+		m_pCharacter->ResetInput();
+
 	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnDirectInput(NewInput);
 
