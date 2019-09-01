@@ -8,7 +8,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-#define MAX_SHOP_PAGES 6 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
+#define MAX_SHOP_PAGES 9 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
 
 void CCharacter::ShopWindow(int Dir)
 {
@@ -96,6 +96,36 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aPriceTmp, sizeof(aPriceTmp), "5 euros");
 		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
 		str_format(aInfo, sizeof(aInfo), "VIP gives you some benefits,\ncheck '/vip'.");
+	}
+	else if (m_ShopWindowPage == 7)
+	{
+		str_format(aItem, sizeof(aItem), "     ~  S P A W N S H O T G U N  ~   ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "33");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "600.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "You will have shotgun if you respawn.\n"
+			"For more information about spawn weapons,\n"
+			"please type '/spawnweaponsinfo'.");
+	}
+	else if (m_ShopWindowPage == 8)
+	{
+		str_format(aItem, sizeof(aItem), "      ~  S P A W N G R E N A D E  ~    ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "33");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "600.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "You will have grenade if you respawn.\n"
+			"For more information about spawn weapons,\n"
+			"please type '/spawnweaponsinfo'.");
+	}
+	else if (m_ShopWindowPage == 9)
+	{
+		str_format(aItem, sizeof(aItem), "       ~  S P A W N R I F L E  ~       ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "33");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "600.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "You will have rifle if you respawn.\n"
+			"For more information about spawn weapons,\n"
+			"please type '/spawnweaponsinfo'.");
 	}
 	else
 	{
@@ -351,6 +381,96 @@ void CCharacter::BuyItem(int ItemID)
 		else if ((*Account).m_VIP)
 		{
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have VIP.");
+		}
+	}
+	else if (ItemID == 7)
+	{
+		if ((*Account).m_Level < 33)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn shotgun.");
+			return;
+		}
+		else if ((*Account).m_SpawnWeapon[0] == 5)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn shotgun.");
+		}
+		else if ((*Account).m_Money >= 600000)
+		{
+			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_shotgun'");
+
+			(*Account).m_SpawnWeapon[0]++;
+			if ((*Account).m_SpawnWeapon[0] == 1)
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn shotgun. For more infos check '/spawnweaponsinfo'.");
+			}
+			else
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn shotgun upgraded.");
+			}
+		}
+		else
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
+		}
+	}
+	else if (ItemID == 8)
+	{
+		if ((*Account).m_Level < 33)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn grenade.");
+			return;
+		}
+		else if ((*Account).m_SpawnWeapon[1] == 5)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn grenade.");
+		}
+		else if ((*Account).m_Money >= 600000)
+		{
+			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_grenade'");
+
+			(*Account).m_SpawnWeapon[1]++;
+			if ((*Account).m_SpawnWeapon[1] == 1)
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn grenade. For more infos check '/spawnweaponsinfo'.");
+			}
+			else
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn grenade upgraded.");
+			}
+		}
+		else
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
+		}
+	}
+	else if (ItemID == 9)
+	{
+		if ((*Account).m_Level < 33)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 33 to buy spawn rifle.");
+			return;
+		}
+		else if ((*Account).m_SpawnWeapon[2] == 5)
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum level for spawn rifle.");
+		}
+		else if ((*Account).m_Money >= 600000)
+		{
+			m_pPlayer->MoneyTransaction(-600000, "bought 'spawn_rifle'");
+
+			(*Account).m_SpawnWeapon[2]++;
+			if ((*Account).m_SpawnWeapon[2] == 1)
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought spawn rifle. For more infos check '/spawnweaponsinfo'.");
+			}
+			else
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Spawn rifle upgraded.");
+			}
+		}
+		else
+		{
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money!");
 		}
 	}
 	else

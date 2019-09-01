@@ -2738,6 +2738,12 @@ void CCharacter::FDDraceInit()
 	if (m_pPlayer->m_HasRoomKey)
 		m_Core.m_HasRoomKey = true;
 	m_RoomAntiSpamTick = Now;
+
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	if (m_pPlayer->m_Gamemode == GAMEMODE_DDRACE)
+		for (int i = 0; i < 3; i++)
+			if ((*Account).m_SpawnWeapon[i])
+				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
 }
 
 void CCharacter::FDDraceTick()

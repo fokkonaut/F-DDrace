@@ -307,6 +307,7 @@ public:
 		int m_BlockPoints;
 		int m_InstagibKills;
 		int m_InstagibWins;
+		int m_SpawnWeapon[3];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -338,6 +339,9 @@ public:
 		BLOCK_POINTS,
 		INSTAGIB_KILLS,
 		INSTAGIB_WINS,
+		SPAWN_WEAPON_0,
+		SPAWN_WEAPON_1,
+		SPAWN_WEAPON_2,
 		NUM_ACCOUNT_VARIABLES
 	};
 

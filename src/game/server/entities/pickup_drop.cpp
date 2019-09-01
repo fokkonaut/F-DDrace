@@ -88,13 +88,10 @@ void CPickupDrop::Pickup()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			int Ammo = m_Bullets;
-			if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && Ammo == -1)
-				Ammo = 10;
-			if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
-				Ammo = -1;
+			if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1)
+				m_Bullets = 10;
 				
-			pChr->GiveWeapon(m_Weapon, false, Ammo);
+			pChr->GiveWeapon(m_Weapon, false, m_Bullets);
 			GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Weapon);
 
 			if (m_SpreadWeapon)
@@ -134,11 +131,12 @@ int CPickupDrop::IsCharacterNear()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
+			bool GotWeapon = pChr->GetWeaponGot(m_Weapon) && m_Bullets > 0 && pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets;
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
-				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
+				|| GotWeapon
+				|| (GotWeapon && !m_SpreadWeapon)
 				|| (m_SpreadWeapon && pChr->m_aSpreadWeapon[m_Weapon])
-				|| (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets)
 				)
 				continue;
 		}

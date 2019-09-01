@@ -2721,6 +2721,8 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_BlockPoints = 0;
 	m_Accounts[ID].m_InstagibKills = 0;
 	m_Accounts[ID].m_InstagibWins = 0;
+	for (int i = 0; i < 3; i++)
+		m_Accounts[ID].m_SpawnWeapon[i] = 0;
 
 	return ID;
 }
@@ -2765,6 +2767,9 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 		case BLOCK_POINTS:				m_Accounts[ID].m_BlockPoints = atoi(aData);
 		case INSTAGIB_KILLS:			m_Accounts[ID].m_InstagibKills = atoi(aData);
 		case INSTAGIB_WINS:				m_Accounts[ID].m_InstagibWins = atoi(aData);
+		case SPAWN_WEAPON_0:			m_Accounts[ID].m_SpawnWeapon[0] = atoi(aData);
+		case SPAWN_WEAPON_1:			m_Accounts[ID].m_SpawnWeapon[1] = atoi(aData);
+		case SPAWN_WEAPON_2:			m_Accounts[ID].m_SpawnWeapon[2] = atoi(aData);
 		}
 	}
 }
@@ -2803,6 +2808,9 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_BlockPoints << "\n";
 		AccFile << m_Accounts[ID].m_InstagibKills << "\n";
 		AccFile << m_Accounts[ID].m_InstagibWins << "\n";
+		AccFile << m_Accounts[ID].m_SpawnWeapon[0] << "\n";
+		AccFile << m_Accounts[ID].m_SpawnWeapon[1] << "\n";
+		AccFile << m_Accounts[ID].m_SpawnWeapon[2] << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
