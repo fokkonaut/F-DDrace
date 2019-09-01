@@ -1033,6 +1033,8 @@ void CCharacter::TickDefered()
 
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
+	if (m_Core.m_HookingFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{
 		m_Pos.x = m_Input.m_TargetX;

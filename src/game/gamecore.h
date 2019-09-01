@@ -220,6 +220,8 @@ public:
 	int m_UpdateFlagVel;
 	vec2 m_UFlagVel;
 
+	bool m_HookingFlag;
+
 	struct KillerInfo
 	{
 		int m_ClientID;

@@ -109,6 +109,7 @@ void CCharacterCore::Reset()
 	m_HasRoomKey = false;
 
 	m_Passive = false;
+	m_HookingFlag = false;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -162,6 +163,7 @@ void CCharacterCore::Tick(bool UseInput)
 	m_TileSIndexT = (UseInput && IsRightTeam(MapIndexT)) ? Collision()->GetDTileIndex(MapIndexT) : 0;
 	m_TileSFlagsT = (UseInput && IsRightTeam(MapIndexT)) ? Collision()->GetDTileFlags(MapIndexT) : 0;
 	m_TriggeredEvents = 0;
+	m_HookingFlag = false;
 
 	// get ground state
 	bool Grounded = false;
@@ -328,7 +330,7 @@ void CCharacterCore::Tick(bool UseInput)
 					{
 						if (m_HookedPlayer == -1)
 						{
-							m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+							m_HookingFlag = true;
 							m_HookState = HOOK_GRABBED;
 							if (i == TEAM_RED)
 								m_HookedPlayer = FLAG_RED;
