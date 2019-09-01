@@ -2847,7 +2847,7 @@ void CCharacter::FDDraceTick()
 		{
 			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY)
 			{
-				(*Account).m_XP += 1;
+				(*Account).m_XP += GetAliveState() + 1;
 
 				if ((*Account).m_VIP)
 					(*Account).m_XP += 2;
