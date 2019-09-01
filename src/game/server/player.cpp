@@ -983,11 +983,11 @@ void CPlayer::MoneyTransaction(int Amount, const char *Description)
 
 	(*Account).m_Money += Amount;
 
-	str_format((*Account).m_aLastMoneyTransaction[4], sizeof((*Account).m_aLastMoneyTransaction[4]), "%s", (*Account).m_aLastMoneyTransaction[3]);
-	str_format((*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[3]), "%s", (*Account).m_aLastMoneyTransaction[2]);
-	str_format((*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[2]), "%s", (*Account).m_aLastMoneyTransaction[1]);
-	str_format((*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[1]), "%s", (*Account).m_aLastMoneyTransaction[0]);
-	str_format((*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[0]), "%s", Description);
+	str_copy((*Account).m_aLastMoneyTransaction[4], (*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[4]));
+	str_copy((*Account).m_aLastMoneyTransaction[3], (*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[3]));
+	str_copy((*Account).m_aLastMoneyTransaction[2], (*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[2]));
+	str_copy((*Account).m_aLastMoneyTransaction[1], (*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[1]));
+	str_copy((*Account).m_aLastMoneyTransaction[0], Description, sizeof((*Account).m_aLastMoneyTransaction[0]));
 }
 
 bool CPlayer::IsHooked(int Power)

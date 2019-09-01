@@ -2726,16 +2726,20 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_PoliceLevel = 0;
 	m_Accounts[ID].m_SurvivalKills = 0;
 	m_Accounts[ID].m_SurvivalWins = 0;
-	for (int i = 0; i < 5; i++)
-		m_Accounts[ID].m_aLastMoneyTransaction[i][0] = 0;
-	for (int i = 0; i < NUM_ITEMS; i++)
-		m_Accounts[ID].m_aHasItem[i] = false;
+	m_Accounts[ID].m_aLastMoneyTransaction[0][0] = '\0';
+	m_Accounts[ID].m_aLastMoneyTransaction[1][0] = '\0';
+	m_Accounts[ID].m_aLastMoneyTransaction[2][0] = '\0';
+	m_Accounts[ID].m_aLastMoneyTransaction[3][0] = '\0';
+	m_Accounts[ID].m_aLastMoneyTransaction[4][0] = '\0';
+	m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = false;
+	m_Accounts[ID].m_aHasItem[POLICE] = false;
 	m_Accounts[ID].m_VIP = false;
 	m_Accounts[ID].m_BlockPoints = 0;
 	m_Accounts[ID].m_InstagibKills = 0;
 	m_Accounts[ID].m_InstagibWins = 0;
-	for (int i = 0; i < 3; i++)
-		m_Accounts[ID].m_SpawnWeapon[i] = 0;
+	m_Accounts[ID].m_SpawnWeapon[0] = 0;
+	m_Accounts[ID].m_SpawnWeapon[1] = 0;
+	m_Accounts[ID].m_SpawnWeapon[2] = 0;
 
 	return ID;
 }
@@ -2769,13 +2773,13 @@ void CGameContext::ReadAccountStats(int ID, char *pName)
 		case POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(aData);
 		case SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(aData);
 		case SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(aData);
+		case ITEM_SPOOKY_GHOST:			m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(aData);
+		case ITEM_POLICE:				m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
 		case LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0]));
 		case LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1]));
 		case LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2]));
 		case LAST_MONEY_TRANSACTION_3:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3]));
 		case LAST_MONEY_TRANSACTION_4:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], aData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4]));
-		case ITEM_SPOOKY_GHOST:			m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(aData);
-		case ITEM_POLICE:				m_Accounts[ID].m_aHasItem[POLICE] = atoi(aData);
 		case VIP:						m_Accounts[ID].m_VIP = atoi(aData);
 		case BLOCK_POINTS:				m_Accounts[ID].m_BlockPoints = atoi(aData);
 		case INSTAGIB_KILLS:			m_Accounts[ID].m_InstagibKills = atoi(aData);
@@ -2810,13 +2814,13 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_PoliceLevel << "\n";
 		AccFile << m_Accounts[ID].m_SurvivalKills << "\n";
 		AccFile << m_Accounts[ID].m_SurvivalWins << "\n";
+		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
+		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[0] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[1] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[2] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[3] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[4] << "\n";
-		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
-		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
 		AccFile << m_Accounts[ID].m_VIP << "\n";
 		AccFile << m_Accounts[ID].m_BlockPoints << "\n";
 		AccFile << m_Accounts[ID].m_InstagibKills << "\n";
