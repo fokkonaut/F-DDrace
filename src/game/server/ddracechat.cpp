@@ -1343,6 +1343,81 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 }
 
+void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	char aBuf[128];
+	char aCmd[64];
+	str_copy(aCmd, pResult->GetString(0), sizeof(aCmd));
+
+	if (!str_comp_nocase(aCmd, "invite"))
+	{
+		CCharacter* pChr = pSelf->GetPlayerChar(pSelf->GetCIDByName(pResult->GetString(1)));
+		if (!pChr)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
+			return;
+		}
+		else if (!pPlayer->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have a room key");
+			return;
+		}
+		else if (pChr->GetPlayer()->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player has a key already");
+			return;
+		}
+		else if (pChr->Core()->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player got invited already");
+			return;
+		}
+
+		pChr->Core()->m_HasRoomKey = true;
+		str_format(aBuf, sizeof(aBuf), "'%s' invited you to the room", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You invited '%s' to the room", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else if (!str_comp_nocase(aCmd, "kick"))
+	{
+		CCharacter* pChr = pSelf->GetPlayerChar(pSelf->GetCIDByName(pResult->GetString(1)));
+		if (!pChr)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
+			return;
+		}
+		else if (!pPlayer->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't kick others without a key");
+			return;
+		}
+		else if (pChr->GetPlayer()->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't kick a player with a key");
+			return;
+		}
+		else if (!pChr->Core()->m_HasRoomKey)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player is not invited");
+			return;
+		}
+
+		pChr->Core()->m_HasRoomKey = false;
+		str_format(aBuf, sizeof(aBuf), "'%s' kicked you out of room", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You kicked '%s' out of room", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+}
+
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
