@@ -1969,10 +1969,10 @@ void CCharacter::HandleTiles(int Index)
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aMsg, sizeof(aMsg),
-						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
+						"^666Money ^222[^444%llu^222] ^666+1%s\n"
 						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+1%s%s%s\n"
 						"^666Level ^222[^444%d^222]",
-						(*Account).m_Money, (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_Money, (*Account).m_VIP ? " +2 vip" : "",
 						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], HasFlag() != -1 ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
 						(*Account).m_Level
 					);
