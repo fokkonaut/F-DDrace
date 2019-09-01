@@ -3070,7 +3070,7 @@ void CCharacter::CheckMoved()
 
 int CCharacter::GetAliveState()
 {
-	for (int i = 1; i < 5; i++)
+	for (int i = 4; i > 0; i--)
 	{
 		int Offset=i<3?0:1;
 		int Seconds = 300*(i*(i+Offset)); // 300 (5min), 1200 (20min), 3600 (60min), 6000 (100min)
