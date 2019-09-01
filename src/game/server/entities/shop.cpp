@@ -354,7 +354,7 @@ void CCharacter::BuyItem(int ItemID)
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Level is too low! You need lvl 16 to buy the room key.");
 			return;
 		}
-		else if (m_Core.m_HasRoomKey)
+		else if (m_Core.m_CanEnterRoom)
 		{
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the room key.");
 		}
@@ -363,7 +363,7 @@ void CCharacter::BuyItem(int ItemID)
 			m_pPlayer->MoneyTransaction(-5000, "bought 'room key'");
 
 			m_pPlayer->m_HasRoomKey = true;
-			m_Core.m_HasRoomKey = true;
+			m_Core.m_CanEnterRoom = true;
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You bought the room key");
 		}
 		else

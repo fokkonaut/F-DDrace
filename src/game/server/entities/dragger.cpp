@@ -131,7 +131,7 @@ void CDragger::Drag()
 				vec2 Temp = Target->Core()->m_Vel
 						+ (normalize(m_Pos - Target->GetPos()) * m_Strength);
 				if (Temp.x > 0
-						&& (((Target->m_TileIndexL == TILE_ROOM || Target->m_TileFIndexL == TILE_ROOM) && !Target->Core()->m_HasRoomKey) ||
+						&& (((Target->m_TileIndexL == TILE_ROOM || Target->m_TileFIndexL == TILE_ROOM) && !Target->Core()->m_CanEnterRoom) ||
 								(Target->m_TileIndex == TILE_STOP
 								&& Target->m_TileFlags == ROTATION_270)
 								|| (Target->m_TileIndexL == TILE_STOP
@@ -161,7 +161,7 @@ void CDragger::Drag()
 								|| (Target->m_TileSIndexL == TILE_STOPA)))
 					Temp.x = 0;
 				if (Temp.x < 0
-						&& (((Target->m_TileIndexR == TILE_ROOM || Target->m_TileFIndexR == TILE_ROOM) && !Target->Core()->m_HasRoomKey) ||
+						&& (((Target->m_TileIndexR == TILE_ROOM || Target->m_TileFIndexR == TILE_ROOM) && !Target->Core()->m_CanEnterRoom) ||
 								(Target->m_TileIndex == TILE_STOP
 								&& Target->m_TileFlags == ROTATION_90)
 								|| (Target->m_TileIndexR == TILE_STOP
@@ -191,7 +191,7 @@ void CDragger::Drag()
 								|| (Target->m_TileSIndexR == TILE_STOPA)))
 					Temp.x = 0;
 				if (Temp.y < 0
-						&& (((Target->m_TileIndexB == TILE_ROOM || Target->m_TileFIndexB == TILE_ROOM) && !Target->Core()->m_HasRoomKey) ||
+						&& (((Target->m_TileIndexB == TILE_ROOM || Target->m_TileFIndexB == TILE_ROOM) && !Target->Core()->m_CanEnterRoom) ||
 								(Target->m_TileIndex == TILE_STOP
 								&& Target->m_TileFlags == ROTATION_180)
 								|| (Target->m_TileIndexB == TILE_STOP
@@ -221,7 +221,7 @@ void CDragger::Drag()
 								|| (Target->m_TileSIndexB == TILE_STOPA)))
 					Temp.y = 0;
 				if (Temp.y > 0
-						&& (((Target->m_TileIndexT == TILE_ROOM || Target->m_TileFIndexT == TILE_ROOM) && !Target->Core()->m_HasRoomKey) ||
+						&& (((Target->m_TileIndexT == TILE_ROOM || Target->m_TileFIndexT == TILE_ROOM) && !Target->Core()->m_CanEnterRoom) ||
 								(Target->m_TileIndex == TILE_STOP
 								&& Target->m_TileFlags == ROTATION_0)
 								|| (Target->m_TileIndexT == TILE_STOP
