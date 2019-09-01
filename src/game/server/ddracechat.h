@@ -57,6 +57,8 @@ CHAT_COMMAND("login", "s[name] s[password]", CFGFLAG_CHAT, ConLogin, this, "Log 
 CHAT_COMMAND("logout", "", CFGFLAG_CHAT, ConLogout, this, "Log out of an account")
 CHAT_COMMAND("changepassword", "s[old-pw] s[new-pw] s[new-pw]", CFGFLAG_CHAT, ConChangePassword, this, "Changes account password")
 
+CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays i money to player r")
+
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar")
 

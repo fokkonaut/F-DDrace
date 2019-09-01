@@ -1242,7 +1242,7 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 
 	if (str_comp(pResult->GetString(1), pResult->GetString(2)))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "The new password does not match with the repeated one");
+		pSelf->SendChatTarget(pResult->m_ClientID, "The passwords need to be identical");
 		return;
 	}
 
@@ -1250,6 +1250,64 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 	pSelf->WriteAccountStats(pPlayer->GetAccID());
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
+}
+
+void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!g_Config.m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
+		return;
+	}
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	CPlayer* pTo = pSelf->m_apPlayers[pSelf->GetCIDByName(pResult->GetString(1))];
+	if (!pTo)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
+		return;
+	}
+
+	if (pTo->GetCID() == pResult->m_ClientID)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay money to yourself");
+		return;
+	}
+
+	if (pTo->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "That player is not logged in");
+		return;
+	}
+
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_Money < pResult->GetInteger(0))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
+		return;
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "paid %d money to '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pTo->GetCID()));
+	pPlayer->MoneyTransaction(-pResult->GetInteger(0), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "got %d money from '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pResult->m_ClientID));
+	pTo->MoneyTransaction(pResult->GetInteger(0), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "You paid %d money to '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pTo->GetCID()));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "You got %d money from '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pResult->m_ClientID));
+	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
