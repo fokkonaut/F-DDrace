@@ -47,9 +47,10 @@ CHAT_COMMAND("score", "?s", CFGFLAG_CHAT, ConScore, this, "Changes the displayed
 CHAT_COMMAND("stats", "?r", CFGFLAG_CHAT, ConStats, this, "Shows stats of player r")
 
 //info
-CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost")
+CHAT_COMMAND("spookyghostinfo", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost")
 CHAT_COMMAND("policeinfo", "?i", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police")
-CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP")
+CHAT_COMMAND("vipinfo", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP")
+CHAT_COMMAND("spawnweaponsinfo", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons")
 
 //account
 CHAT_COMMAND("register", "s[name] s[password] s[password]", CFGFLAG_CHAT, ConRegister, this, "Register an account")

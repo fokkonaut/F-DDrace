@@ -1032,6 +1032,25 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+
+	char aBuf[256];
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Spawn Weapons ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can buy spawn weapons in the shop.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You will have the bought weapon on spawn.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can have max. 5 bullets per weapon.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Each bullet costs 600.000 money.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your Spawn Weapons ~~~");
+	str_format(aBuf, sizeof(aBuf), "Spawn shotgun bullets: %d", pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_SpawnWeapon[0]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spawn grenade bullets: %d", pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_SpawnWeapon[1]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spawn rifle bullets: %d", pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_SpawnWeapon[2]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+}
+
 void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

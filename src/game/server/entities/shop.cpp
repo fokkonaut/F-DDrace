@@ -77,7 +77,7 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
 		str_format(aInfo, sizeof(aInfo), "Using this item you can hide from other players behind bushes.\n"
 			"If your ghost is activated you will be able to shoot plasma\n"
-			"projectiles. For more information please visit '/spookyghost'.");
+			"projectiles. For more information please visit '/spookyghostinfo'.");
 	}
 	else if (m_ShopWindowPage == 5)
 	{
@@ -95,7 +95,7 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aLevelTmp, sizeof(aLevelTmp), "0");
 		str_format(aPriceTmp, sizeof(aPriceTmp), "5 euros");
 		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
-		str_format(aInfo, sizeof(aInfo), "VIP gives you some benefits,\ncheck '/vip'.");
+		str_format(aInfo, sizeof(aInfo), "VIP gives you some benefits,\ncheck '/vipinfo'.");
 	}
 	else if (m_ShopWindowPage == 7)
 	{
