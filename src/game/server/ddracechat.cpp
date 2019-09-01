@@ -1350,6 +1350,12 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 		return;
 
+	if (!pSelf->m_Accounts[pPlayer->GetAccID()].m_VIP)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+		return;
+	}
+
 	char aBuf[128];
 	char aCmd[64];
 	str_copy(aCmd, pResult->GetString(0), sizeof(aCmd));
