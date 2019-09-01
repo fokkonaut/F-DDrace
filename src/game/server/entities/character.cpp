@@ -1985,7 +1985,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// special finish
-	if (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH)
+	if (!m_HasFinishedSpecialRace && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
 	{
 		if (m_DDraceState == DDRACE_STARTED)
 		{
@@ -1996,6 +1996,8 @@ void CCharacter::HandleTiles(int Index)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
 		GameServer()->SendChatTarget(-1, aBuf);
+
+		m_HasFinishedSpecialRace = true;
 	}
 
 
@@ -2762,6 +2764,8 @@ void CCharacter::FDDraceInit()
 		for (int i = 0; i < 3; i++)
 			if ((*Account).m_SpawnWeapon[i])
 				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
+
+	m_HasFinishedSpecialRace = false;
 }
 
 void CCharacter::FDDraceTick()

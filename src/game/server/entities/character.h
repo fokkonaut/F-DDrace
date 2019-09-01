@@ -408,6 +408,9 @@ public:
 
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
+	// special race
+	bool m_HasFinishedSpecialRace;
+
 	//this means the character is directly on a freezetile
 	bool m_IsFrozen;
 
