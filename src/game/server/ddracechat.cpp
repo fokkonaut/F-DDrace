@@ -1227,6 +1227,43 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 	pSelf->Logout(pPlayer->GetAccID());
 }
 
+void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!g_Config.m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
+		return;
+	}
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	if (str_comp(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(0)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Wrong password");
+		return;
+	}
+
+	if (str_comp(pResult->GetString(1), pResult->GetString(2)))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "The new password does not match with the repeated one");
+		return;
+	}
+
+	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(1), sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password));
+	pSelf->WriteAccountStats(pPlayer->GetAccID());
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
+}
+
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
