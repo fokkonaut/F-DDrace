@@ -418,6 +418,34 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
+	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
+	{
+		if (!GameServer()->m_apPlayers[SnappingClient] || (!Server()->ClientIngame(SnappingClient) && !GameServer()->m_apPlayers[SnappingClient]->IsDummy()) || Server()->GetClientVersion(SnappingClient) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
+			return;
+
+		CNetMsg_Sv_SkinChange Msg;
+		Msg.m_ClientID = m_ClientID;
+		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			int BaseColor = m_RainbowColor * 0x010000;
+			int Color = 0xff32;
+			if (p == SKINPART_MARKING)
+				Color *= -256;
+			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
+			Msg.m_aUseCustomColors[p] = 1;
+			Msg.m_aSkinPartColors[p] = BaseColor + Color;
+		}
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, SnappingClient);
+
+		m_LoadedSkin = false;
+	}
+	else if (!m_LoadedSkin)
+	{
+		m_LoadedSkin = true;
+		LoadSkin();
+	}
+
 	// demo recording
 	if(SnappingClient == -1)
 	{
@@ -437,34 +465,6 @@ void CPlayer::Snap(int SnappingClient)
 			pClientInfo->m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
 			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 		}
-	}
-
-	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
-	{
-		if (!GameServer()->m_apPlayers[SnappingClient] || (!Server()->ClientIngame(SnappingClient) && !GameServer()->m_apPlayers[SnappingClient]->IsDummy()) || Server()->GetClientVersion(SnappingClient) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
-			return;
-
-		CNetMsg_Sv_SkinChange Msg;
-		Msg.m_ClientID = m_ClientID;
-		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
-		for (int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			int BaseColor = m_RainbowColor * 0x010000;
-			int Color = 0xff32;
-			if (p == SKINPART_MARKING)
-				Color *= -256;
-			Msg.m_apSkinPartNames[p] = m_TeeInfos.m_aaSkinPartNames[p];
-			Msg.m_aUseCustomColors[p] = 1;
-			Msg.m_aSkinPartColors[p] = BaseColor + Color;
-		}
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, SnappingClient);
-
-		m_LoadedSkin = false;
-	}
-	else if (!m_LoadedSkin)
-	{
-		m_LoadedSkin = true;
-		LoadSkin();
 	}
 }
 
