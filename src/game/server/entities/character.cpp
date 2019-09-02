@@ -436,7 +436,7 @@ void CCharacter::FireWeapon()
 			m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
 			if (m_LastNoAmmoSound + Server()->TickSpeed() <= Server()->Tick())
 			{
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				m_LastNoAmmoSound = Server()->Tick();
 			}
 			return;

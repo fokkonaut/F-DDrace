@@ -131,12 +131,11 @@ int CPickupDrop::IsCharacterNear()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			bool GotWeapon = pChr->GetWeaponGot(m_Weapon) && m_Bullets > 0 && pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets;
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
-				|| GotWeapon
-				|| (GotWeapon && !m_SpreadWeapon)
 				|| (m_SpreadWeapon && pChr->m_aSpreadWeapon[m_Weapon])
+				|| (m_Bullets == -1 && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) == -1)
+				|| (m_Bullets >= 0 && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets)
 				)
 				continue;
 		}
