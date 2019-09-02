@@ -3342,6 +3342,24 @@ const char *CGameContext::GetMinigameName(int Minigame)
 	return "Unknown";
 }
 
+const char* CGameContext::GetMinigameCommand(int Minigame)
+{
+	switch (Minigame)
+	{
+	case MINIGAME_NONE:
+		return "none";
+	case MINIGAME_BLOCK:
+		return "block";
+	case MINIGAME_SURVIVAL:
+		return "survival";
+	case MINIGAME_INSTAGIB_BOOMFNG:
+		return "boomfng";
+	case MINIGAME_INSTAGIB_FNG:
+		return "fng";
+	}
+	return "unknown";
+}
+
 void CGameContext::SurvivalTick()
 {
 	// if there are no spawn tiles, we cant play the game

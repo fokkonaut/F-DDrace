@@ -1538,7 +1538,7 @@ void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (i != MINIGAME_BLOCK)
 			str_format(aTemp2, sizeof(aTemp2), "%s, ", aMinigames);
-		str_format(aMinigames, sizeof(aMinigames), "%s%s", aTemp2, pSelf->GetMinigameName(i));
+		str_format(aMinigames, sizeof(aMinigames), "%s%s", aTemp2, pSelf->GetMinigameCommand(i));
 	}
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Minigames ~~~");

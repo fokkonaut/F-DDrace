@@ -366,6 +366,7 @@ public:
 	int GetRealPickupType(int Type, int Subtype);
 
 	const char* GetMinigameName(int Minigame);
+	const char* GetMinigameCommand(int Minigame);
 
 	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
 
