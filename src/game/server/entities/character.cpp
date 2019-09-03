@@ -3113,7 +3113,7 @@ void CCharacter::UpdateWeaponIndicator()
 		return;
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
+	str_format(aBuf, sizeof(aBuf), " \n \n> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
 	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 }
 
