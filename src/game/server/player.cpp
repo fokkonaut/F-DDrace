@@ -398,26 +398,6 @@ void CPlayer::Snap(int SnappingClient)
 	pPlayerInfo->m_Score = Score;
 
 
-	if(m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
-	{
-		CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
-		if(!pSpectatorInfo)
-			return;
-
-		pSpectatorInfo->m_SpecMode = m_SpecMode;
-		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
-		if(m_pSpecFlag)
-		{
-			pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
-			pSpectatorInfo->m_Y = m_pSpecFlag->GetPos().y;
-		}
-		else
-		{
-			pSpectatorInfo->m_X = m_ViewPos.x;
-			pSpectatorInfo->m_Y = m_ViewPos.y;
-		}
-	}
-
 	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
 	{
 		if (!GameServer()->m_apPlayers[SnappingClient] || (!Server()->ClientIngame(SnappingClient) && !GameServer()->m_apPlayers[SnappingClient]->IsDummy()) || Server()->GetClientVersion(SnappingClient) < CGameContext::MIN_SKINCHANGE_CLIENTVERSION)
@@ -444,6 +424,26 @@ void CPlayer::Snap(int SnappingClient)
 	{
 		m_LoadedSkin = true;
 		LoadSkin();
+	}
+
+	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
+	{
+		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
+		if (!pSpectatorInfo)
+			return;
+
+		pSpectatorInfo->m_SpecMode = m_SpecMode;
+		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
+		if (m_pSpecFlag)
+		{
+			pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
+			pSpectatorInfo->m_Y = m_pSpecFlag->GetPos().y;
+		}
+		else
+		{
+			pSpectatorInfo->m_X = m_ViewPos.x;
+			pSpectatorInfo->m_Y = m_ViewPos.y;
+		}
 	}
 
 	// demo recording
