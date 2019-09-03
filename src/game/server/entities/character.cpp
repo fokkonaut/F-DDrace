@@ -2866,6 +2866,15 @@ void CCharacter::FDDraceTick()
 				if ((*Account).m_VIP)
 					(*Account).m_XP += 2;
 
+				if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+				{
+					(*Account).m_Level++;
+
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+				}
+
 				char aSurvival[32];
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
