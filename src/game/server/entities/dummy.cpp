@@ -3014,7 +3014,7 @@ void CCharacter::DummyTick()
 		{
 			m_DummyChillClosestPolice = false;
 
-			if (pChr->m_PoliceHelper)
+			if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
 				m_DummyChillClosestPolice = true;
 
 			if (m_DummyChillClosestPolice) //police
@@ -3695,7 +3695,7 @@ void CCharacter::DummyTick()
 
 						m_DummyClosestPolice = false;
 
-						if (pChr->m_PoliceHelper)
+						if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
 							m_DummyClosestPolice = true;
 
 						if (pChr->m_Pos.x > 444 * 32 - 10) //police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)
