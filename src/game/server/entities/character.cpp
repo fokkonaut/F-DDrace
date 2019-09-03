@@ -1947,14 +1947,18 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			}
 
+			bool PoliceTile = false;
+			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
+				PoliceTile = true;
+
 			//flag bonus
 			bool FlagBonus = false;
-			if (m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
-				if (HasFlag() != -1)
-				{
-					(*Account).m_XP += 1;
-					FlagBonus = true;
-				}
+			
+			if (!PoliceTile && HasFlag() != -1)
+			{
+				(*Account).m_XP += 1;
+				FlagBonus = true;
+			}
 
 			// vip bonus
 			if ((*Account).m_VIP)
@@ -1965,6 +1969,10 @@ void CCharacter::HandleTiles(int Index)
 
 			// xp
 			(*Account).m_XP += GetAliveState() + 1;
+
+			if (PoliceTile)
+				(*Account).m_XP += 1;
+
 
 			// checking account level
 			if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
@@ -1986,10 +1994,10 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
 				str_format(aMsg, sizeof(aMsg),
 						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
-						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+1%s%s%s\n"
+						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+%d%s%s%s\n"
 						"^666Level ^222[^444%d^222]",
-						(*Account).m_Money, (*Account).m_aHasItem[POLICE] ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
+						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
 						(*Account).m_Level
 					);
 
