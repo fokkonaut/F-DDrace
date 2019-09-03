@@ -433,6 +433,7 @@ int CServer::Init()
 		m_aClients[i].m_Snapshots.Init();
 	}
 
+	m_ShutdownMessage[0] = '\0';
 	m_AnnouncementLastLine = 0;
 	m_CurrentGameTick = 0;
 
@@ -1546,7 +1547,7 @@ int CServer::Run()
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-			m_NetServer.Drop(i, "Server shutdown");
+			m_NetServer.Drop(i, m_ShutdownMessage[0] != '\0' ? m_ShutdownMessage : "Server shutdown");
 	}
 
 	m_Econ.Shutdown();
@@ -1653,6 +1654,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
+	str_copy(((CServer*)pUser)->m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_ShutdownMessage));
 	((CServer *)pUser)->m_RunServer = 0;
 }
 
@@ -1801,7 +1803,7 @@ void CServer::RegisterCommands()
 	// register console commands
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players");
-	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
+	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 
 	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file");

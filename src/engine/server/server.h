@@ -308,6 +308,8 @@ public:
 
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
+
+	char m_ShutdownMessage[128];
 };
 
 #endif
