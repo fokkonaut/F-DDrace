@@ -1922,7 +1922,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
-	if ((m_TileIndex == TILE_MONEY) || (m_TileFIndex == TILE_MONEY))
+	if (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY || m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
 	{
 		if (Server()->Tick() % 50 == 0)
 		{
@@ -1937,6 +1937,9 @@ void CCharacter::HandleTiles(int Index)
 			// money
 			(*Account).m_Money += 1;
 
+			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
+				(*Account).m_Money += (*Account).m_PoliceLevel;
+
 			// level check
 			if ((*Account).m_Level >= MAX_LEVEL)
 			{
@@ -1945,8 +1948,13 @@ void CCharacter::HandleTiles(int Index)
 			}
 
 			//flag bonus
-			if (HasFlag() != -1)
-				(*Account).m_XP += 1;
+			bool FlagBonus = false;
+			if (m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
+				if (HasFlag() != -1)
+				{
+					(*Account).m_XP += 1;
+					FlagBonus = true;
+				}
 
 			// vip bonus
 			if ((*Account).m_VIP)
@@ -1972,14 +1980,16 @@ void CCharacter::HandleTiles(int Index)
 			{
 				char aMsg[256];
 				char aSurvival[32];
+				char aPolice[32];
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
+				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
 				str_format(aMsg, sizeof(aMsg),
-						"^666Money ^222[^444%llu^222] ^666+1%s\n"
+						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
 						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+1%s%s%s\n"
 						"^666Level ^222[^444%d^222]",
-						(*Account).m_Money, (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], HasFlag() != -1 ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_Money, (*Account).m_aHasItem[POLICE] ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
+						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
 						(*Account).m_Level
 					);
 
@@ -2849,7 +2859,7 @@ void CCharacter::FDDraceTick()
 
 		if (m_pPlayer->GetAccID() >= ACC_START && (*Account).m_Level < MAX_LEVEL)
 		{
-			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY)
+			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
 			{
 				(*Account).m_XP += GetAliveState() + 1;
 
