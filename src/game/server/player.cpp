@@ -474,6 +474,19 @@ void CPlayer::OnDisconnect()
 
 	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
 	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
+
+	if (m_Team != TEAM_SPECTATORS)
+	{
+		// update spectator modes
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpecMode == SPEC_PLAYER && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
+			{
+				GameServer()->m_apPlayers[i]->m_SpecMode = SPEC_FREEVIEW;
+				GameServer()->m_apPlayers[i]->m_SpectatorID = -1;
+			}
+		}
+	}
 }
 
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
