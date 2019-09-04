@@ -493,6 +493,8 @@ private:
 
 	static void ConRoom(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConSmoothFreeze(IConsole::IResult* pResult, void* pUserData);
+
 	void SetMinigame(IConsole::IResult* pResult, void* pUserData, int Minigame);
 	static void ConMinigames(IConsole::IResult* pResult, void* pUserData);
 	static void ConLeaveMinigame(IConsole::IResult* pResult, void* pUserData);

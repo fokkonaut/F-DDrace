@@ -1668,3 +1668,24 @@ void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->SetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
 }
+
+void CGameContext::ConSmoothFreeze(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_FreezeTime)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while being frozen");
+		return;
+	}
+
+	pPlayer->m_SmoothFreeze = !pPlayer->m_SmoothFreeze;
+
+	if (pPlayer->m_SmoothFreeze)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze activated");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze deactivated");
+}

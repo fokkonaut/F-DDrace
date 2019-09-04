@@ -282,6 +282,8 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
+	bool m_SmoothFreeze;
+
 	//fake information
 	void UpdateFakeInformation(int ClientID = -1);
 	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); UpdateFakeInformation(); };

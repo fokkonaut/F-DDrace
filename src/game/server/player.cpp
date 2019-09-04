@@ -160,6 +160,8 @@ void CPlayer::Reset()
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 
 	m_HasRoomKey = false;
+
+	m_SmoothFreeze = g_Config.m_SvSmoothFreeze;
 }
 
 void CPlayer::Tick()

@@ -2600,6 +2600,9 @@ bool CCharacter::Freeze(int Seconds)
 			m_FirstFreezeTick = Server()->Tick();
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
+
+		if (m_pPlayer->m_SmoothFreeze)
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 		return true;
 	}
 	return false;
@@ -2624,6 +2627,9 @@ bool CCharacter::UnFreeze()
 		m_Core.m_Killer.m_ClientID = -1;
 		m_Core.m_Killer.m_Weapon = -1;
 		if (GetActiveWeapon()==WEAPON_HAMMER) m_ReloadTimer = 0;
+
+		if (m_pPlayer->m_SmoothFreeze)
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 		return true;
 	}
 	return false;
