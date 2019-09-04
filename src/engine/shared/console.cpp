@@ -577,7 +577,7 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[240];
+	char aBuf[112];
 	mem_zero(aBuf, sizeof(aBuf));
 	int Used = 0;
 
