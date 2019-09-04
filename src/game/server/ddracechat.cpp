@@ -1316,7 +1316,7 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	}
 	if (pResult->GetInteger(0) <= 0)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay nothing.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay nothing");
 		return;
 	}
 
