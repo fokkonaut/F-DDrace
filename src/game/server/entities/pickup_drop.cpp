@@ -135,7 +135,7 @@ int CPickupDrop::IsCharacterNear()
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
 				|| (m_SpreadWeapon && pChr->m_aSpreadWeapon[m_Weapon])
 				|| (!m_SpreadWeapon && m_Bullets == -1 && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) == -1)
-				|| (!m_SpreadWeapon && m_Bullets >= 0 && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets)
+				|| (!m_SpreadWeapon && m_Bullets >= 0 && pChr->GetWeaponGot(m_Weapon) && (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets || pChr->GetWeaponAmmo(m_Weapon) == -1))
 				)
 				continue;
 		}
