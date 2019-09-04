@@ -827,7 +827,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	if (m_pPlayer->m_SpookyGhost)
+	if (m_pPlayer->m_SpookyGhost && GameServer()->GetRealWeapon(Weapon) != WEAPON_GUN)
 		return;
 
 	if (Weapon == WEAPON_NINJA)
