@@ -2348,6 +2348,22 @@ void str_utf8_trim_right(char* param)
 	}
 }
 
+void str_utf8_trim_whitespaces_right(char *str)
+{
+	int cursor = str_length(str);
+	const char *last = str + cursor;
+	while(str_utf8_is_whitespace(str_utf8_decode(&last)))
+	{
+		str[cursor] = 0;
+		cursor = str_utf8_rewind(str, cursor);
+		last = str + cursor;
+		if(cursor == 0)
+		{
+			break;
+		}
+	}
+}
+
 int str_utf8_isstart(char c)
 {
 	if((c&0xC0) == 0x80) /* 10xxxxxx */
