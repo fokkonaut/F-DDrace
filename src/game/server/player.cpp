@@ -541,7 +541,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 		m_pCharacter->OnDirectInput(NewInput);
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
-		Respawn();
+		m_Spawning = true;
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && (NewInput->m_Fire&1))
 	{
