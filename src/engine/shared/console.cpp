@@ -155,7 +155,10 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				pResult->AddArgument(pStr);
 
 				if(Command == 'r') // rest of the string
+				{
+					str_utf8_trim_whitespaces_right(pStr);
 					break;
+				}
 				else if(Command == 'i') // validate int
 					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 'f') // validate float

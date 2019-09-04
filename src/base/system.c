@@ -2224,7 +2224,7 @@ const char *str_utf8_skip_whitespaces(const char *str)
 	while(*str)
 	{
 		str_old = str;
-		code = str_utf8_decode((const char **)&str);
+		code = str_utf8_decode(&str);
 
 		if(!str_utf8_is_whitespace(code))
 		{
@@ -2233,6 +2233,22 @@ const char *str_utf8_skip_whitespaces(const char *str)
 	}
 
 	return str;
+}
+
+void str_utf8_trim_whitespaces_right(char *str)
+{
+	int cursor = str_length(str);
+	const char *last = str + cursor;
+	while(str_utf8_is_whitespace(str_utf8_decode(&last)))
+	{
+		str[cursor] = 0;
+		cursor = str_utf8_rewind(str, cursor);
+		last = str + cursor;
+		if(cursor == 0)
+		{
+			break;
+		}
+	}
 }
 
 static int str_utf8_isstart(char c)
