@@ -173,13 +173,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 				if(Command == 'r') // rest of the string
 				{
-					// drop trailing whitespace
-					char *pEnd = pStr + str_length(pStr) - 1;
-					while(str_isspace(*pEnd))
-					{
-						*pEnd = 0;
-						pEnd--;
-					}
+					str_utf8_trim_whitespaces_right(pStr);
 					break;
 				}
 				else if(Command == 'v') // validate victim
