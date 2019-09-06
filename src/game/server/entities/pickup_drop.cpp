@@ -10,7 +10,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon, int Lifetime, int Bullets, bool SpreadWeapon)
+CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon, int Lifetime, int Bullets, bool SpreadWeapon, bool Jetpack)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize)
 {
 	m_Type = Type;
@@ -18,6 +18,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_Lifetime = Server()->TickSpeed() * Lifetime;
 	m_Pos = GameServer()->GetPlayerChar(Owner)->GetPos();
 	m_SpreadWeapon = SpreadWeapon;
+	m_Jetpack = Jetpack;
 	m_Bullets = Bullets;
 	m_Owner = Owner;
 	m_Vel = vec2(5*Direction, -5);
@@ -27,7 +28,8 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_SnapPos = m_Pos;
 
-	m_ID2 = Server()->SnapNewID();
+	for (int i = 0; i < 4; i++)
+		m_aID[i] = Server()->SnapNewID();
 	GameWorld()->InsertEntity(this);
 }
 
@@ -45,7 +47,8 @@ void CPickupDrop::Reset(bool Erase, bool Picked)
 	if (!Picked)
 		GameServer()->CreateDeath(m_Pos, m_pOwner ? m_Owner : -1);
 
-	Server()->SnapFreeID(m_ID2);
+	for (int i = 0; i < 4; i++)
+		Server()->SnapFreeID(m_aID[i]);
 	GameWorld()->DestroyEntity(this);
 }
 
@@ -88,12 +91,18 @@ void CPickupDrop::Pickup()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1)
-				m_Bullets = 10;
-				
-			pChr->GiveWeapon(m_Weapon, false, m_Bullets);
+			if (!m_SpreadWeapon && !m_Jetpack)
+			{
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1)
+					m_Bullets = 10;
+			
+				pChr->GiveWeapon(m_Weapon, false, m_Bullets);
+			}
+
 			GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Weapon);
 
+			if (m_Jetpack)
+				pChr->Jetpack();
 			if (m_SpreadWeapon)
 				pChr->SpreadWeapon(m_Weapon);
 
@@ -133,9 +142,9 @@ int CPickupDrop::IsCharacterNear()
 		{
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
-				|| (m_SpreadWeapon && pChr->m_aSpreadWeapon[m_Weapon])
-				|| (!m_SpreadWeapon && m_Bullets == -1 && pChr->GetWeaponGot(m_Weapon) && pChr->GetWeaponAmmo(m_Weapon) == -1)
-				|| (!m_SpreadWeapon && m_Bullets >= 0 && pChr->GetWeaponGot(m_Weapon) && (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets || pChr->GetWeaponAmmo(m_Weapon) == -1))
+				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && !m_Jetpack && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
+				|| (m_Jetpack && (pChr->m_Jetpack || !pChr->GetWeaponGot(WEAPON_GUN)))
+				|| (m_SpreadWeapon && (pChr->m_aSpreadWeapon[m_Weapon] || !pChr->GetWeaponGot(m_Weapon)))
 				)
 				continue;
 		}
@@ -448,9 +457,42 @@ void CPickupDrop::Snap(int SnappingClient)
 		pP->m_Type = GameServer()->GetRealPickupType(m_Type, m_Weapon);
 	}
 
-	if (m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER)
+	int JetpackOffset = 30;
+	int SpreadOffset = -20;
+	if (m_SpreadWeapon && m_Jetpack)
+		JetpackOffset = 50;
+
+	if (m_SpreadWeapon)
 	{
-		CNetObj_Laser* pLaser = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID2, sizeof(CNetObj_Laser)));
+		for (int i = 1; i < 4; i++)
+		{
+			CNetObj_Projectile* pSpreadIndicator = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
+			if (!pSpreadIndicator)
+				return;
+
+			pSpreadIndicator->m_X = (int)m_Pos.x + SpreadOffset;
+			pSpreadIndicator->m_Y = (int)m_Pos.y - 30;
+			pSpreadIndicator->m_Type = WEAPON_SHOTGUN;
+			pSpreadIndicator->m_StartTick = Server()->Tick();
+
+			SpreadOffset += 20;
+		}
+	}
+
+	if (m_Jetpack)
+	{
+		CNetObj_Projectile* pJetpackIndicator = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[0], sizeof(CNetObj_Projectile)));
+		if (!pJetpackIndicator)
+			return;
+
+		pJetpackIndicator->m_X = (int)m_Pos.x;
+		pJetpackIndicator->m_Y = (int)m_Pos.y - JetpackOffset;
+		pJetpackIndicator->m_Type = WEAPON_SHOTGUN;
+		pJetpackIndicator->m_StartTick = Server()->Tick();
+	}
+	else if (m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER)
+	{
+		CNetObj_Laser* pLaser = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[0], sizeof(CNetObj_Laser)));
 		if (!pLaser)
 			return;
 
@@ -462,7 +504,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 	else if (m_Weapon == WEAPON_HEART_GUN)
 	{
-		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID2, sizeof(CNetObj_Pickup)));
+		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aID[0], sizeof(CNetObj_Pickup)));
 		if (!pPickup)
 			return;
 
@@ -472,7 +514,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 	else if (m_Weapon == WEAPON_STRAIGHT_GRENADE)
 	{
-		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID2, sizeof(CNetObj_Projectile)));
+		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[0], sizeof(CNetObj_Projectile)));
 		if (!pProj)
 			return;
 

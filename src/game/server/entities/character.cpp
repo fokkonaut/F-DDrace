@@ -2976,7 +2976,7 @@ void CCharacter::DropFlag()
 void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 {
 	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA))
+		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN]))
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
@@ -2986,13 +2986,18 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID]);
+	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack));
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(Weapon);
 
-	m_aWeapons[WeaponID].m_Got = false;
-	SetWeapon(WEAPON_GUN);
+	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID])
+	{
+		m_aWeapons[WeaponID].m_Got = false;
+		SetWeapon(WEAPON_GUN);
+	}
 	if (m_aSpreadWeapon[WeaponID])
 		SpreadWeapon(WeaponID, false);
+	if (WeaponID == WEAPON_GUN && m_Jetpack)
+		Jetpack(false);
 }
 
 void CCharacter::DropPickup(int Type, int Amount)
