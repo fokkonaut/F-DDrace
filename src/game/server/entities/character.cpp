@@ -2766,8 +2766,8 @@ void CCharacter::FDDraceInit()
 	m_HookPower = HOOK_NORMAL;
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aSpreadWeapon[i] = false;
-	m_PassiveFakeTuning = false;
-	m_OldPassiveFakeTuning = false;
+	m_FakeTuneCollision = false;
+	m_OldFakeTuneCollision = false;
 	m_Passive = false;
 	m_pPassiveShield = 0;
 	m_PoliceHelper = false;
@@ -2816,14 +2816,16 @@ void CCharacter::FDDraceTick()
 		m_Core.m_Killer.m_Weapon = -1;
 	m_Core.m_OldLastHookedPlayer = m_Core.m_LastHookedPlayer;
 
-	CCharacter* pPas = GameWorld()->ClosestCharacter(m_Pos, 50.0f, this);
-	if (pPas && (pPas->m_Passive || m_Passive) && !(pPas->m_Super || m_Super))
-		m_PassiveFakeTuning = true;
-	else if (!m_Passive)
-		m_PassiveFakeTuning = false;
-	if (m_PassiveFakeTuning != m_OldPassiveFakeTuning)
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-	m_OldPassiveFakeTuning = m_PassiveFakeTuning;
+	// fake tune collision
+	{
+		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, 50.0f, this);
+		m_FakeTuneCollision = (!m_Super && (m_Solo || m_Passive)) || (pChr && !pChr->m_Super && (pChr->m_Solo || pChr->m_Passive || (Team() != pChr->Team() && m_pPlayer->m_ShowOthers)));
+
+		if (m_FakeTuneCollision != m_OldFakeTuneCollision)
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+
+		m_OldFakeTuneCollision = m_FakeTuneCollision;
+	}
 
 	if (m_ShopMotdTick < Server()->Tick())
 	{

@@ -298,9 +298,6 @@ void CCharacterCore::Tick(bool UseInput)
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if (m_Passive && !m_pTeams->CanCollide(i, m_Id))
-					break;
-
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
 				if (!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id))
 					continue;
@@ -485,9 +482,7 @@ void CCharacterCore::Tick(bool UseInput)
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-			bool CanCollide = pCharCore->m_Collision && m_Collision && m_pWorld->m_Tuning.m_PlayerCollision;
-
-			if(CanCollide && Distance < PhysSize*1.25f && Distance > 0.0f)
+			if(m_pTeams->CanCollide(m_Id, i) && Distance < PhysSize*1.25f && Distance > 0.0f)
 			{
 				float a = (PhysSize*1.45f - Distance);
 				float Velocity = 0.5f;

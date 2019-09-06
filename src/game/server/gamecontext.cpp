@@ -575,9 +575,9 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (pChr)
 	{
-		if (pChr->m_PassiveFakeTuning)
+		if (pChr->m_FakeTuneCollision)
 			Tuning.m_PlayerCollision = 0.f;
-		if (pChr->m_Passive)
+		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
 		if (pChr->GetPlayer()->m_SmoothFreeze && pChr->m_FreezeTime)
