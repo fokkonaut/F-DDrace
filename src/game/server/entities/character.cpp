@@ -1938,48 +1938,52 @@ void CCharacter::HandleTiles(int Index)
 
 			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-			// money
-			(*Account).m_Money += 1;
+			int XP = 0;
+			int Money = 0;
 
-			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
-				(*Account).m_Money += (*Account).m_PoliceLevel;
-
-			// level check
-			if ((*Account).m_Level >= MAX_LEVEL)
-			{
-				GameServer()->SendBroadcast("You reached the maximum level.", m_pPlayer->GetCID(), false);
-				return;
-			}
-
-			bool PoliceTile = false;
-			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
-				PoliceTile = true;
-
-			//flag bonus
-			bool FlagBonus = false;
-			
-			if (!PoliceTile && HasFlag() != -1)
-			{
-				(*Account).m_XP += 1;
-				FlagBonus = true;
-			}
+			// default
+			Money += 1;
+			XP += GetAliveState() + 1;
 
 			// vip bonus
 			if ((*Account).m_VIP)
 			{
-				(*Account).m_XP += 2;
-				(*Account).m_Money += 2;
+				XP += 2;
+				Money += 2;
 			}
 
-			// xp
-			(*Account).m_XP += GetAliveState() + 1;
+			// police bonus
+			bool PoliceTile = false;
+			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
+				PoliceTile = true;
 
 			if (PoliceTile)
-				(*Account).m_XP += 1;
+			{
+				XP += 1;
+				Money += (*Account).m_PoliceLevel;
+			}
 
+			//flag bonus
+			bool FlagBonus = false;
+			if (!PoliceTile && HasFlag() != -1)
+			{
+				XP += 1;
+				FlagBonus = true;
+			}
+
+			// give money and xp
+			(*Account).m_Money += Money;
+
+			// level check, we only want to give xp if we dont have max level already
+			if ((*Account).m_Level < MAX_LEVEL)
+			{
+				while ((*Account).m_XP + XP > GameServer()->m_pNeededXP[MAX_LEVEL])
+					XP--;
+				(*Account).m_XP += XP;
+			}
 
 			// checking account level
-			if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+			if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
 			{
 				(*Account).m_Level++;
 
@@ -1993,15 +1997,17 @@ void CCharacter::HandleTiles(int Index)
 				char aMsg[256];
 				char aSurvival[32];
 				char aPolice[32];
+				char aPlusXP[128];
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
+				str_format(aPlusXP, sizeof(aPlusXP), " ^666+%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
 						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
-						"^666XP ^222[^444%llu^222/^444%llu^222] ^666+%d%s%s%s\n"
+						"^666XP ^222[^444%llu^222/^444%llu^222]%s\n"
 						"^666Level ^222[^444%d^222]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "",
+						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
 						(*Account).m_Level
 					);
 
@@ -2879,12 +2885,20 @@ void CCharacter::FDDraceTick()
 		{
 			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
 			{
-				(*Account).m_XP += GetAliveState() + 1;
+				int XP = 0;
+				XP += GetAliveState() + 1;
 
 				if ((*Account).m_VIP)
-					(*Account).m_XP += 2;
+					XP += 2;
 
-				if ((*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+				if ((*Account).m_Level < MAX_LEVEL)
+				{
+					while ((*Account).m_XP + XP >= GameServer()->m_pNeededXP[MAX_LEVEL])
+						XP--;
+					(*Account).m_XP += XP;
+				}
+
+				if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
 				{
 					(*Account).m_Level++;
 
