@@ -129,7 +129,7 @@ void CCharacter::ShopWindow(int Dir)
 
 	char aLevel[128];
 	str_format(aLevel, sizeof(aLevel), "Needed level: %s", aLevelTmp);
-	char aPrice[16];
+	char aPrice[32];
 	str_format(aPrice, sizeof(aPrice), "Price: %s", aPriceTmp);
 	char aTime[256];
 	str_format(aTime, sizeof(aTime), "Time: %s", aTimeTmp);
