@@ -3406,14 +3406,18 @@ void CGameContext::SurvivalTick()
 	{
 		// if there is only one survival player left, before the time is over, we have a winner
 		m_SurvivalWinner = GetRandomSurvivalPlayer(m_SurvivalGameState);
-		str_format(aBuf, sizeof(aBuf), "The winner is '%s'", Server()->ClientName(m_SurvivalWinner));
-		SendSurvivalBroadcast(aBuf);
 
-		// send message to winner
-		SendChatTarget(m_SurvivalWinner, "You are the winner");
+		if (m_apPlayers[m_SurvivalWinner])
+		{
+			str_format(aBuf, sizeof(aBuf), "The winner is '%s'", Server()->ClientName(m_SurvivalWinner));
+			SendSurvivalBroadcast(aBuf);
 
-		// add a win to the winners' accounts
-		m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
+			// send message to winner
+			SendChatTarget(m_SurvivalWinner, "You are the winner");
+
+			// add a win to the winners' accounts
+			m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
+		}
 
 		// sending back to lobby
 		m_SurvivalGameState = SURVIVAL_LOBBY;
