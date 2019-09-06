@@ -3138,7 +3138,7 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 
 void CCharacter::UpdateWeaponIndicator()
 {
-	if (!m_pPlayer->m_WeaponIndicator || (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)  || (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY) || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
+	if (!m_pPlayer->m_WeaponIndicator || (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)  || (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY || m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE) || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
 
 	char aBuf[256];
