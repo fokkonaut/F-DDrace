@@ -200,7 +200,7 @@ void CCharacter::PurchaseEnd(bool canceled)
 	else
 	{
 		BuyItem(m_ShopWindowPage);
-		ShopWindow(0);
+		ShopWindow(SHOP_STATE_NONE);
 	}
 
 	m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
@@ -208,12 +208,6 @@ void CCharacter::PurchaseEnd(bool canceled)
 
 void CCharacter::BuyItem(int ItemID)
 {
-	if (!m_InShop)
-	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You have to be in the shop to buy some items.");
-		return;
-	}
-
 	if (ItemID < 1 || ItemID > MAX_SHOP_PAGES)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Invalid item");

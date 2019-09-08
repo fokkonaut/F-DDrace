@@ -1903,12 +1903,7 @@ void CCharacter::HandleTiles(int Index)
 	//shop
 	if (m_TileIndex == TILE_SHOP || m_TileFIndex == TILE_SHOP)
 	{
-		if (!m_InShop)
-		{
-			m_EnteredShop = true;
-			m_InShop = true;
-		}
-		if (m_EnteredShop)
+		if (m_LastIndexTile != TILE_SHOP && m_LastIndexFrontTile != TILE_SHOP)
 		{
 			if (m_ShopAntiSpamTick < Server()->Tick())
 			{
@@ -1916,10 +1911,12 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press f4 to start shopping.", Server()->ClientName(m_pPlayer->GetCID()));
 				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
 			}
-			m_EnteredShop = false;
 		}
+
 		if (Server()->Tick() % 50 == 0)
 			GameServer()->SendBroadcast("~ S H O P ~", m_pPlayer->GetCID(), false);
+
+		m_InShop = true;
 	}
 	if (m_pPlayer->m_IsDummy && (m_TileIndex == ENTITY_SHOP_DUMMY_SPAWN || m_TileFIndex == ENTITY_SHOP_DUMMY_SPAWN))
 		m_InShop = true;
@@ -2809,7 +2806,6 @@ void CCharacter::FDDraceInit()
 	m_pItem = 0;
 
 	m_InShop = false;
-	m_EnteredShop = false;
 
 	int64 Now = Server()->Tick();
 	m_ShopAntiSpamTick = Now;
@@ -2869,7 +2865,7 @@ void CCharacter::FDDraceTick()
 
 	if (m_InShop)
 	{
-		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP && m_TileIndex != ENTITY_SHOP_DUMMY_SPAWN && m_TileFIndex != ENTITY_SHOP_DUMMY_SPAWN)
+		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
 		{
 			if (m_ShopAntiSpamTick < Server()->Tick())
 			{

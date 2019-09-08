@@ -4019,12 +4019,12 @@ void CCharacter::DummyTick()
 			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
 		}
 
-		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && !m_InShop && Server()->Tick() % 400 == 0)
+		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0 && !m_InShop)
 		{
 			Die(m_pPlayer->GetCID(), WEAPON_SELF);
 			return;
 		}
 	}
-	else
-		m_pPlayer->m_Dummymode = 0;
+	else if (m_pPlayer->m_Dummymode != DUMMYMODE_IDLE)
+		m_pPlayer->m_Dummymode = DUMMYMODE_IDLE;
 }

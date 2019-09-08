@@ -385,12 +385,9 @@ public:
 	bool m_TrailHooked;
 
 	int64 m_RoomAntiSpamTick;
-
-	// shop
-	bool m_InShop;
-	bool m_EnteredShop;
-
 	int64 m_ShopAntiSpamTick;
+
+	bool m_InShop;
 
 	void ShopWindow(int Dir);
 	int m_ShopWindowPage;
