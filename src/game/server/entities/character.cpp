@@ -1123,12 +1123,23 @@ void CCharacter::Die(int Killer, int Weapon)
 	{
 		if (pKiller->GetAccID() >= ACC_START)
 		{
+			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
+
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL)
-				GameServer()->m_Accounts[pKiller->GetAccID()].m_SurvivalKills++;
+			{
+				(*KillerAcc).m_SurvivalKills++;
+			}
 			else if (pKiller->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pKiller->m_Minigame == MINIGAME_INSTAGIB_FNG)
-				GameServer()->m_Accounts[pKiller->GetAccID()].m_InstagibKills++;
+			{
+				(*KillerAcc).m_InstagibKills++;
+			}
 			else
-				GameServer()->m_Accounts[pKiller->GetAccID()].m_Kills++;
+			{
+				(*KillerAcc).m_Kills++;
+
+				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * g_Config.m_SvBlockPointsDelay)
+					(*KillerAcc).m_BlockPoints++;
+			}
 		}
 
 		if (m_pPlayer->GetAccID() >= ACC_START)
@@ -2825,6 +2836,8 @@ void CCharacter::FDDraceInit()
 				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
 
 	m_HasFinishedSpecialRace = false;
+
+	m_SpawnTick = Now;
 }
 
 void CCharacter::FDDraceTick()
@@ -3188,7 +3201,7 @@ int CCharacter::GetAliveState()
 	{
 		int Offset=i<3?0:1;
 		int Seconds = 300*(i*(i+Offset)); // 300 (5min), 1200 (20min), 3600 (60min), 6000 (100min)
-		if (Server()->Tick() >= m_pPlayer->m_DieTick + Server()->TickSpeed() * Seconds)
+		if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * Seconds)
 			return i;
 	}
 	return 0;

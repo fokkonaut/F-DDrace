@@ -191,4 +191,6 @@ MACRO_CONFIG_INT(SvSmoothFreeze, sv_smooth_freeze, 0, 0, 1, CFGFLAG_SERVER, "Fix
 MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 1, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound")
 
 MACRO_CONFIG_STR(SvContactDiscord, sv_contact_discord, 128, "", CFGFLAG_SERVER, "Name of the admin on Discord (Use \" at start and end, # will break otherwise))")
+
+MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer")
 #endif

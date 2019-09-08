@@ -411,6 +411,8 @@ public:
 
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
+	int m_SpawnTick;
+
 	// special race
 	bool m_HasFinishedSpecialRace;
 
