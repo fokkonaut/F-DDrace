@@ -264,7 +264,8 @@ public:
 
 	//account
 	int GetAccID();
-	void MoneyTransaction(int Amount, const char* Description);
+	void MoneyTransaction(int Amount, const char* Description = "");
+	void GiveXP(int Amount);
 
 	//room key
 	bool m_HasRoomKey;

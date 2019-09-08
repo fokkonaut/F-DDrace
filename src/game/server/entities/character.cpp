@@ -2002,25 +2002,8 @@ void CCharacter::HandleTiles(int Index)
 			}
 
 			// give money and xp
-			(*Account).m_Money += Money;
-
-			// level check, we only want to give xp if we dont have max level already
-			if ((*Account).m_Level < MAX_LEVEL)
-			{
-				while ((*Account).m_XP + XP > GameServer()->m_pNeededXP[MAX_LEVEL])
-					XP--;
-				(*Account).m_XP += XP;
-			}
-
-			// checking account level
-			if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
-			{
-				(*Account).m_Level++;
-
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-			}
+			m_pPlayer->MoneyTransaction(Money);
+			m_pPlayer->GiveXP(XP);
 
 			// broadcast
 			{
@@ -2903,21 +2886,7 @@ void CCharacter::FDDraceTick()
 				if ((*Account).m_VIP)
 					XP += 2;
 
-				if ((*Account).m_Level < MAX_LEVEL)
-				{
-					while ((*Account).m_XP + XP > GameServer()->m_pNeededXP[MAX_LEVEL])
-						XP--;
-					(*Account).m_XP += XP;
-				}
-
-				if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
-				{
-					(*Account).m_Level++;
-
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-				}
+				m_pPlayer->GiveXP(XP);
 
 				char aSurvival[32];
 				char aMsg[128];

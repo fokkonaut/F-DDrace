@@ -998,11 +998,38 @@ void CPlayer::MoneyTransaction(int Amount, const char *Description)
 
 	(*Account).m_Money += Amount;
 
+	if (!Description[0])
+		return;
+
 	str_copy((*Account).m_aLastMoneyTransaction[4], (*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[4]));
 	str_copy((*Account).m_aLastMoneyTransaction[3], (*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[3]));
 	str_copy((*Account).m_aLastMoneyTransaction[2], (*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[2]));
 	str_copy((*Account).m_aLastMoneyTransaction[1], (*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[1]));
 	str_copy((*Account).m_aLastMoneyTransaction[0], Description, sizeof((*Account).m_aLastMoneyTransaction[0]));
+}
+
+void CPlayer::GiveXP(int Amount)
+{
+	if (GetAccID() < ACC_START)
+		return;
+
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+
+	if ((*Account).m_Level < MAX_LEVEL)
+	{
+		while ((*Account).m_XP + Amount > GameServer()->m_pNeededXP[MAX_LEVEL])
+			Amount--;
+		(*Account).m_XP += Amount;
+	}
+
+	if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+	{
+		(*Account).m_Level++;
+
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
+		GameServer()->SendChatTarget(m_ClientID, aBuf);
+	}
 }
 
 bool CPlayer::IsHooked(int Power)
