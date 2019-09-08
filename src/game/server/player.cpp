@@ -551,7 +551,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 			if(m_SpecMode == SPEC_FREEVIEW)
 			{
 				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_CHARACTER, (m_pCharacter && m_pCharacter->IsAlive()) ? m_pCharacter : 0);
-				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, 0);
+				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, GetCharacter());
 				if(pChar || pFlag)
 				{
 					if(!pChar || (pFlag && pChar && distance(m_ViewPos, pFlag->GetPos()) < distance(m_ViewPos, pChar->GetPos())))
