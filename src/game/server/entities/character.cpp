@@ -2905,7 +2905,7 @@ void CCharacter::FDDraceTick()
 
 				if ((*Account).m_Level < MAX_LEVEL)
 				{
-					while ((*Account).m_XP + XP >= GameServer()->m_pNeededXP[MAX_LEVEL])
+					while ((*Account).m_XP + XP > GameServer()->m_pNeededXP[MAX_LEVEL])
 						XP--;
 					(*Account).m_XP += XP;
 				}
