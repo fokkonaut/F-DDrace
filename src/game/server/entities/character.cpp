@@ -953,6 +953,7 @@ void CCharacter::Tick()
 
 	// F-DDrace
 	FDDraceTick();
+	HandleLastIndexTiles();
 	DummyTick();
 
 	DDraceTick();
@@ -1918,8 +1919,6 @@ void CCharacter::HandleTiles(int Index)
 
 		m_InShop = true;
 	}
-	if (m_pPlayer->m_IsDummy && (m_TileIndex == ENTITY_SHOP_DUMMY_SPAWN || m_TileFIndex == ENTITY_SHOP_DUMMY_SPAWN))
-		m_InShop = true;
 
 
 	// helper only
@@ -1957,6 +1956,8 @@ void CCharacter::HandleTiles(int Index)
 
 	if (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY || m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
 	{
+		m_MoneyTile = true;
+
 		if (Server()->Tick() % 50 == 0)
 		{
 			if (m_pPlayer->GetAccID() < ACC_START)
@@ -2060,7 +2061,6 @@ void CCharacter::HandleTiles(int Index)
 
 		m_HasFinishedSpecialRace = true;
 	}
-
 
 	m_LastIndexTile = m_TileIndex;
 	m_LastIndexFrontTile = m_TileFIndex;
@@ -2834,6 +2834,8 @@ void CCharacter::FDDraceInit()
 	m_HasFinishedSpecialRace = false;
 
 	m_SpawnTick = Now;
+
+	m_MoneyTile = false;
 }
 
 void CCharacter::FDDraceTick()
@@ -2861,28 +2863,6 @@ void CCharacter::FDDraceTick()
 	{
 		m_ShopWindowPage = SHOP_PAGE_NONE;
 		m_PurchaseState = SHOP_STATE_NONE;
-	}
-
-	if (m_InShop)
-	{
-		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
-		{
-			if (m_ShopAntiSpamTick < Server()->Tick())
-			{
-				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), "Bye! Come back if you need something.");
-				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
-			}
-
-			if (m_ShopWindowPage != SHOP_PAGE_NONE)
-				GameServer()->SendMotd("", GetPlayer()->GetCID());
-
-			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
-
-			m_PurchaseState = SHOP_STATE_NONE;
-			m_ShopWindowPage = SHOP_PAGE_NONE;
-
-			m_InShop = false;
-		}
 	}
 
 	if (!m_AtomHooked && m_pPlayer->IsHooked(ATOM) && !m_Atom)
@@ -2915,7 +2895,7 @@ void CCharacter::FDDraceTick()
 
 		if (m_pPlayer->GetAccID() >= ACC_START && (*Account).m_Level < MAX_LEVEL)
 		{
-			if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
+			if (!m_MoneyTile)
 			{
 				int XP = 0;
 				XP += GetAliveState() + 1;
@@ -2947,6 +2927,40 @@ void CCharacter::FDDraceTick()
 
 				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
 			}
+		}
+	}
+}
+
+void CCharacter::HandleLastIndexTiles()
+{
+	if (m_InShop)
+	{
+		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
+		{
+			if (m_ShopAntiSpamTick < Server()->Tick())
+			{
+				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), "Bye! Come back if you need something.");
+				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
+			}
+
+			if (m_ShopWindowPage != SHOP_PAGE_NONE)
+				GameServer()->SendMotd("", GetPlayer()->GetCID());
+
+			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
+
+			m_PurchaseState = SHOP_STATE_NONE;
+			m_ShopWindowPage = SHOP_PAGE_NONE;
+
+			m_InShop = false;
+		}
+	}
+
+	if (m_MoneyTile)
+	{
+		if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
+		{
+			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
+			m_MoneyTile = false;
 		}
 	}
 }
@@ -3170,7 +3184,7 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 
 void CCharacter::UpdateWeaponIndicator()
 {
-	if (!m_pPlayer->m_WeaponIndicator || (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)  || (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY || m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE) || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
+	if (!m_pPlayer->m_WeaponIndicator || (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)  || m_MoneyTile || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
 
 	char aBuf[256];

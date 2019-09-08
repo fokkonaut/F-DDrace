@@ -60,6 +60,8 @@ void CFlag::Drop(int Dir)
 		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
 	m_DropFreezeTick = Server()->Tick();
+	if (m_pCarrier)
+		GameServer()->SendBroadcast("", m_pCarrier->GetPlayer()->GetCID(), false);
 	m_pLastCarrier = m_pCarrier;
 	m_pCarrier = NULL;
 	m_Vel = vec2(5 * Dir, Dir == 0 ? 0 : -5);

@@ -228,6 +228,7 @@ private:
 	void FDDraceTick();
 	void DummyTick();
 	void FDDraceInit();
+	void HandleLastIndexTiles();
 
 public:
 	CGameTeams* Teams();
@@ -383,6 +384,8 @@ public:
 
 	bool m_AtomHooked;
 	bool m_TrailHooked;
+
+	bool m_MoneyTile;
 
 	int64 m_RoomAntiSpamTick;
 	int64 m_ShopAntiSpamTick;
