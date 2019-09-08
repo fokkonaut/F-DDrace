@@ -588,8 +588,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_AirControlSpeed = 0.f;
 			Tuning.m_AirJumpImpulse = 0.f;
 			Tuning.m_AirControlAccel = 0.f;
-			Tuning.m_HookDragSpeed = 0.f;
-			Tuning.m_HookDragAccel = 0.f;
 			Tuning.m_HookFireSpeed = 0.f;
 		}
 	}
