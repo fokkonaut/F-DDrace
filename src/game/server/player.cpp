@@ -418,7 +418,7 @@ void CPlayer::Snap(int SnappingClient)
 			Msg.m_aUseCustomColors[p] = 1;
 			Msg.m_aSkinPartColors[p] = BaseColor + Color;
 		}
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, SnappingClient);
+		Server()->SendPackMsg(&Msg, MSGFLAG_NORECORD, SnappingClient);
 
 		m_LoadedSkin = false;
 	}
