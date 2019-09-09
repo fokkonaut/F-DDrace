@@ -85,7 +85,6 @@ CONSOLE_COMMAND("player_name", "v[id] r[name]", CFGFLAG_SERVER, ConPlayerName, t
 CONSOLE_COMMAND("player_clan", "v[id] r[clan]", CFGFLAG_SERVER, ConPlayerClan, this, "Sets clan of player v")
 
 //info
-CONSOLE_COMMAND("accountinfo", "r[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccountInfo, this, "Shows information about account s")
 CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player r")
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text")
 
@@ -117,7 +116,8 @@ CONSOLE_COMMAND("strongbloody", "?v[id]", CFGFLAG_SERVER, ConStrongBloody, this,
 CONSOLE_COMMAND("policehelper", "?v[id]", CFGFLAG_SERVER, ConPoliceHelper, this, "Toggles police helper for player v")
 
 //account
-CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Account logout for player v")
-CONSOLE_COMMAND("acc_disable", "v[id] i[on/off]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account of player v")
-CONSOLE_COMMAND("acc_vip", "v[id] i[on/off]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account of player v")
+CONSOLE_COMMAND("acc_logout", "r[name]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player r")
+CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s")
+CONSOLE_COMMAND("acc_vip", "s[username]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account s")
+CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccInfo, this, "Shows information about account s")
 #undef CONSOLE_COMMAND

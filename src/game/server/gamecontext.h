@@ -544,7 +544,7 @@ private:
 	static void ConPlayerName(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerClan(IConsole::IResult* pResult, void* pUserData);
 
-	static void ConAccountInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 
