@@ -85,7 +85,8 @@ CONSOLE_COMMAND("player_name", "v[id] r[name]", CFGFLAG_SERVER, ConPlayerName, t
 CONSOLE_COMMAND("player_clan", "v[id] r[clan]", CFGFLAG_SERVER, ConPlayerClan, this, "Sets clan of player v")
 
 //info
-CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player s")
+CONSOLE_COMMAND("accountinfo", "r[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccountInfo, this, "Shows information about account s")
+CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player r")
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text")
 
 //extras

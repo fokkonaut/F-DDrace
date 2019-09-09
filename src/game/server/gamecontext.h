@@ -282,7 +282,7 @@ public:
 	//account
 	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
-	void ReadAccountStats(int ID, char* pName);
+	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
 	void Logout(int ID);
 	struct AccountInfo
@@ -544,6 +544,7 @@ private:
 	static void ConPlayerName(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerClan(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAccountInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 

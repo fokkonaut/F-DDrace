@@ -1138,7 +1138,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	// we reset the account again, because we might have undefined values
+	// we reset the account again and read it again to get the correct values
 	pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 	ID = pSelf->AddAccount();
 

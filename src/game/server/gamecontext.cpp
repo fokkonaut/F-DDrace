@@ -2732,8 +2732,8 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_Port = g_Config.m_SvPort;
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_Disabled = false;
-	m_Accounts[ID].m_Password[0] = 0;
-	m_Accounts[ID].m_Username[0] = 0;
+	m_Accounts[ID].m_Password[0] = '\0';
+	m_Accounts[ID].m_Username[0] = '\0';
 	m_Accounts[ID].m_ClientID = -1;
 	m_Accounts[ID].m_Level = 0;
 	m_Accounts[ID].m_XP = 0;
@@ -2761,7 +2761,7 @@ int CGameContext::AddAccount()
 	return ID;
 }
 
-void CGameContext::ReadAccountStats(int ID, char *pName)
+void CGameContext::ReadAccountStats(int ID, const char *pName)
 {
 	std::string data;
 	char aData[32];

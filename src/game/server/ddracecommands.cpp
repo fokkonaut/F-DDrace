@@ -868,6 +868,90 @@ void CGameContext::ConForceFlagOwner(IConsole::IResult *pResult, void *pUserData
 	((CGameControllerDDrace*)pSelf->m_pController)->ForceFlagOwner(Victim, pResult->GetInteger(0));
 }
 
+void CGameContext::ConAccountInfo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if (!pSelf->Server()->IsAuthed(pResult->m_ClientID))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Missing permission");
+		return;
+	}
+
+	int ID = pSelf->AddAccount();
+	pSelf->ReadAccountStats(ID, pResult->GetString(0));
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
+
+	if ((*Account).m_Username[0] == '\0')
+	{
+		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		return;
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "==== [ACCOUNT INFO] '%s' ====", pResult->GetString(0));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Port: %d", (*Account).m_Port);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Logged in: %d", (int)(*Account).m_LoggedIn);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Disabled: %d", (int)(*Account).m_Disabled);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Password: %s", (*Account).m_Password);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Username: %s", (*Account).m_Username);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "ClientID: %d", (*Account).m_ClientID);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Level: %d", (*Account).m_Level);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "XP: %llu", (*Account).m_XP);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Money: %llu", (*Account).m_Money);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Police Level: %d", (*Account).m_PoliceLevel);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Survival Kills: %d", (*Account).m_SurvivalKills);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Survival Wins: %d", (*Account).m_SurvivalWins);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spooky Ghost: %d", (int)(*Account).m_aHasItem[SPOOKY_GHOST]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Police: %d", (int)(*Account).m_aHasItem[POLICE]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 0: %s", (*Account).m_aLastMoneyTransaction[0]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 1: %s", (*Account).m_aLastMoneyTransaction[1]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 2: %s", (*Account).m_aLastMoneyTransaction[2]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 3: %s", (*Account).m_aLastMoneyTransaction[3]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 4: %s", (*Account).m_aLastMoneyTransaction[4]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "VIP: %d", (int)(*Account).m_VIP);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Block Points: %d", (*Account).m_BlockPoints);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Instagib Kills: %d", (*Account).m_InstagibKills);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Instagib Wins: %d", (*Account).m_InstagibWins);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spawn Shotgun: %d", (*Account).m_SpawnWeapon[0]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spawn Grenade: %d", (*Account).m_SpawnWeapon[1]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Spawn Rifle: %d", (*Account).m_SpawnWeapon[2]);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+}
+
 void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
