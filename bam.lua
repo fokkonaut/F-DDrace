@@ -59,6 +59,9 @@ end
 function GenerateCommonSettings(settings, conf, arch, compiler)
 	if compiler == "gcc" or compiler == "clang" then
 		settings.cc.flags:Add("-Wall", "-fno-exceptions")
+	end	
+	if compiler == "cl" then
+		settings.cc.flags:Add("/EHsc")
 	end
 
 	-- Compile zlib if needed
@@ -313,7 +316,7 @@ function SharedManifests(compiler)
 end
 
 function BuildEngineCommon(settings)
-	settings.link.extrafiles:Merge(Compile(settings, Collect("src/engine/shared/*.cpp", "src/base/*.c")))
+	settings.link.extrafiles:Merge(Compile(settings, Collect("src/engine/shared/*.cpp", "src/base/*.c", "src/base/unicode/*.c")))
 end
 
 function BuildGameCommon(settings)
