@@ -364,6 +364,7 @@ public:
 	};
 
 	int64 m_pNeededXP[MAX_LEVEL+1];
+	int m_LastAccSaveTick;
 
 	//motd
 	const char* FixMotd(const char* pMsg);

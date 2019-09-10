@@ -734,9 +734,14 @@ void CGameContext::OnTick()
 		}
 
 	// F-DDrace
-	if (Server()->Tick() % 100000 == 0) // save all accounts every ~ 30 minutes
+	if (Server()->Tick() > m_LastAccSaveTick + Server()->TickSpeed() + g_Config.m_SvAccSaveIntervall)
+	{
+		// save all accounts
+		dbg_msg("acc", "automatic account saving...");
 		for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
 			WriteAccountStats(i);
+		m_LastAccSaveTick = Server()->Tick();
+	}
 
 	// minigames
 	if (!m_aMinigameDisabled[MINIGAME_SURVIVAL])
@@ -2298,6 +2303,8 @@ void CGameContext::OnInit()
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
+
+	m_LastAccSaveTick = Server()->Tick();
 
 
 #ifdef CONF_DEBUG
