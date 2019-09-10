@@ -45,13 +45,19 @@ void CCustomProjectile::Tick()
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
 
 	if (m_Owner >= 0 && !m_pOwner && g_Config.m_SvDestroyBulletsOnDeath)
+	{
 		Reset();
+		return;
+	}
 
 	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : -1LL;
 
 	m_LifeTime--;
 	if (m_LifeTime <= 0)
+	{
 		Reset();
+		return;
+	}
 
 	Move();
 	HitCharacter();
@@ -79,7 +85,10 @@ void CCustomProjectile::Tick()
 			m_CollisionState = COLLIDED_ONCE;
 
 		if (m_CollisionState == COLLIDED_TWICE || !m_Ghost)
+		{
 			Reset();
+			return;
+		}
 	}
 	else if(m_CollisionState == COLLIDED_ONCE)
 		m_CollisionState = COLLIDED_TWICE;
