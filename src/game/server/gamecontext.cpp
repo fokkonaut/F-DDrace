@@ -734,7 +734,7 @@ void CGameContext::OnTick()
 		}
 
 	// F-DDrace
-	if (Server()->Tick() > m_LastAccSaveTick + Server()->TickSpeed() + g_Config.m_SvAccSaveIntervall)
+	if (Server()->Tick() > m_LastAccSaveTick + Server()->TickSpeed() + g_Config.m_SvAccSaveIntervall * 60)
 	{
 		// save all accounts
 		dbg_msg("acc", "automatic account saving...");
