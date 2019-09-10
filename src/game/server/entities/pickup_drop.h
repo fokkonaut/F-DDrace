@@ -10,6 +10,7 @@ class CPickupDrop : public CEntity
 {
 public:
 	CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon = WEAPON_GUN, int Lifetime = 300, int Bullets = -1, bool SpreadWeapon = false, bool Jetpack = false);
+	virtual ~CPickupDrop();
 
 	void Reset(bool Erase, bool Picked);
 	virtual void Reset() { Reset(true, false); };
