@@ -2297,7 +2297,7 @@ void CGameContext::OnInit()
 	m_pNeededXP[MAX_LEVEL] = NeededXP[MAX_LEVEL-1];
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
-	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, AccountsCallback, this);
+	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
 
 
 #ifdef CONF_DEBUG
@@ -2700,7 +2700,45 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 
 // F-DDrace
 
-int CGameContext::AccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+void CGameContext::UpdateTopAccounts(int Type)
+{
+	m_TempTopAccounts.clear();
+	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, TopAccountsCallback, this);
+	switch (Type)
+	{
+	case TOP_LEVEL:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
+	case TOP_POINTS:	std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
+	case TOP_MONEY:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
+	}
+	m_TempTopAccounts.insert(m_TempTopAccounts.begin(), TopAccounts()); // we add an unused field so we can nicely start with 0
+}
+
+int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser)
+{
+	CGameContext* pSelf = (CGameContext*)pUser;
+
+	if (!IsDir && str_endswith(pName, ".acc"))
+	{
+		char aUsername[32];
+		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
+
+		int ID = pSelf->AddAccount();
+		pSelf->ReadAccountStats(ID, aUsername);
+
+		CGameContext::TopAccounts Account;
+		Account.m_Level = pSelf->m_Accounts[ID].m_Level;
+		Account.m_Points = pSelf->m_Accounts[ID].m_BlockPoints;
+		Account.m_Money = pSelf->m_Accounts[ID].m_Money;
+		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_Username, sizeof(Account.m_aUsername));
+		pSelf->m_TempTopAccounts.push_back(Account);
+
+		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+	}
+
+	return 0;
+}
+
+int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 

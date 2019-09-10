@@ -885,68 +885,6 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
-{
-#if defined(CONF_SQL)
-	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
-		return;
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-	if (pResult->NumArguments() > 0)
-		if (!g_Config.m_SvHideScore)
-			pSelf->Score()->ShowPoints(pResult->m_ClientID, pResult->GetString(0),
-					true);
-		else
-			pSelf->Console()->Print(
-					IConsole::OUTPUT_LEVEL_STANDARD,
-					"points",
-					"Showing the global points of other players is not allowed on this server.");
-	else
-		pSelf->Score()->ShowPoints(pResult->m_ClientID,
-				pSelf->Server()->ClientName(pResult->m_ClientID));
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
-}
-
-void CGameContext::ConTopPoints(IConsole::IResult *pResult, void *pUserData)
-{
-#if defined(CONF_SQL)
-	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
-		return;
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		if(pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
-			return;
-
-	if (g_Config.m_SvHideScore)
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "toppoints",
-				"Showing the global top points is not allowed on this server.");
-		return;
-	}
-
-	if (pResult->NumArguments() > 0)
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData,
-				pResult->GetInteger(0));
-	else
-		pSelf->Score()->ShowTopPoints(pResult, pResult->m_ClientID, pUserData);
-
-	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-#endif
-}
-
 // F-DDrace
 
 void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
@@ -1688,4 +1626,77 @@ void CGameContext::ConSmoothFreeze(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze activated");
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze deactivated");
+}
+
+void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int StartRank = pResult->NumArguments() == 1 && pResult->GetInteger(0) != 0 ? pResult->GetInteger(0) : 1;
+	int EndRank = 0;
+	char aBuf[64];
+	char aType[8];
+	char aMsg[64];
+
+	pSelf->UpdateTopAccounts(Type);
+
+	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : "Money");
+	str_format(aMsg, sizeof(aMsg), "----------- Top 5 %s -----------", aType);
+
+	if (StartRank > 0)
+	{
+		EndRank = StartRank + 5;
+
+		while (StartRank > pSelf->m_TempTopAccounts.size())
+			StartRank--;
+		while (EndRank > pSelf->m_TempTopAccounts.size())
+			EndRank--;
+
+		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+		for (int i = StartRank; i < EndRank; i++)
+		{
+			if (Type == TOP_MONEY)
+				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TempTopAccounts[i].m_aUsername, pSelf->m_TempTopAccounts[i].m_Money);
+			else
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : pSelf->m_TempTopAccounts[i].m_Points);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		}
+		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
+	}
+	else if (StartRank < 0)
+	{
+		StartRank = pSelf->m_TempTopAccounts.size() - (StartRank * -1);
+		EndRank = StartRank - 5;
+
+		while (EndRank < 0)
+			EndRank++;
+
+		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+		for (int i = StartRank; i > EndRank; i--)
+		{
+			if (Type == TOP_MONEY)
+				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TempTopAccounts[i].m_aUsername, pSelf->m_TempTopAccounts[i].m_Money);
+			else
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : pSelf->m_TempTopAccounts[i].m_Points);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		}
+		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
+	}
+}
+
+void CGameContext::ConTop5Level(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_LEVEL);
+}
+
+void CGameContext::ConTop5Points(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_POINTS);
+}
+
+void CGameContext::ConTop5Money(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_MONEY);
 }

@@ -19,8 +19,6 @@ CHAT_COMMAND("specvoted", "", CFGFLAG_CHAT, ConToggleSpecVoted, this, "Toggles s
 CHAT_COMMAND("mapinfo", "?r[map]", CFGFLAG_CHAT, ConMapInfo, this, "Show info about the map with name r gives (current map by default)")
 CHAT_COMMAND("rank", "?r[player name]", CFGFLAG_CHAT, ConRank, this, "Shows the rank of player with name r (your rank by default)")
 CHAT_COMMAND("top5", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5, this, "Shows five ranks of the ladder beginning with rank i (1 by default)")
-CHAT_COMMAND("points", "?r[player name]", CFGFLAG_CHAT, ConPoints, this, "Shows the global points of a player beginning with name r (your rank by default)")
-CHAT_COMMAND("top5points", "?i[number]", CFGFLAG_CHAT, ConTopPoints, this, "Shows five points of the global point ladder beginning with rank i (1 by default)")
 
 CHAT_COMMAND("team", "?i[id]", CFGFLAG_CHAT, ConJoinTeam, this, "Lets you join team i (shows your team if left blank)")
 CHAT_COMMAND("lock", "?i['0'|'1']", CFGFLAG_CHAT, ConLockTeam, this, "Lock team so no-one else can join it")
@@ -77,4 +75,9 @@ CHAT_COMMAND("block", "?s[enable/disable]", CFGFLAG_CHAT, ConJoinBlock, this, "J
 CHAT_COMMAND("survival", "?s[enable/disable]", CFGFLAG_CHAT, ConJoinSurvival, this, "Joins the survival minigame")
 CHAT_COMMAND("boomfng", "?s[enable/disable]", CFGFLAG_CHAT, ConJoinBoomFNG, this, "Joins the boom fng minigame")
 CHAT_COMMAND("fng", "?s[enable/disable]", CFGFLAG_CHAT, ConJoinFNG, this, "Joins the fng minigame")
+
+//account top5s
+CHAT_COMMAND("top5level", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Level, this, "Shows top5 accounts sorted by level")
+CHAT_COMMAND("top5points", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Points, this, "Shows top5 accounts sorted by block points")
+CHAT_COMMAND("top5money", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Money, this, "Shows top5 accounts sorted by money")
 #undef CHAT_COMMAND

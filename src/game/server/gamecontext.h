@@ -79,6 +79,13 @@ enum Survival
 	BACKGROUND_DEATHMATCH_COUNTDOWN,
 };
 
+enum Top5
+{
+	TOP_LEVEL,
+	TOP_POINTS,
+	TOP_MONEY,
+};
+
 #define ACC_START 1 // account ids start with 1, 0 means not logged in
 #define MAX_LEVEL 100
 
@@ -280,7 +287,18 @@ public:
 	void UpdateHidePlayers(int ClientID = -1);
 
 	//account
-	static int AccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
+	struct TopAccounts
+	{
+		int m_Level;
+		int m_Points;
+		int64 m_Money;
+		char m_aUsername[32];
+	};
+	std::vector<TopAccounts> m_TempTopAccounts;
+	static int TopAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
+	void UpdateTopAccounts(int Type);
+
+	static int LogoutAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
 	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
@@ -441,8 +459,6 @@ private:
 	static void ConToggleSpecVoted(IConsole::IResult* pResult, void* pUserData);
 	static void ConForcePause(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5(IConsole::IResult* pResult, void* pUserData);
-	static void ConPoints(IConsole::IResult* pResult, void* pUserData);
-	static void ConTopPoints(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConMapInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConRank(IConsole::IResult* pResult, void* pUserData);
@@ -506,6 +522,11 @@ private:
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
+
+	void SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type);
+	static void ConTop5Level(IConsole::IResult* pResult, void* pUserData);
+	static void ConTop5Points(IConsole::IResult* pResult, void* pUserData);
+	static void ConTop5Money(IConsole::IResult* pResult, void* pUserData);
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
