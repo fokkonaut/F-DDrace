@@ -1671,14 +1671,14 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 	}
 	else if (StartRank < 0)
 	{
-		StartRank = pSelf->m_TempTopAccounts.size() - (StartRank * -1);
-		EndRank = StartRank - 5;
+		EndRank = pSelf->m_TempTopAccounts.size() - (StartRank*-1-1);
+		StartRank = EndRank - 5;
 
-		while (EndRank < 0)
-			EndRank++;
+		while (StartRank <= 0)
+			StartRank++;
 
 		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
-		for (int i = StartRank; i > EndRank; i--)
+		for (int i = StartRank; i < EndRank; i++)
 		{
 			if (Type == TOP_MONEY)
 				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TempTopAccounts[i].m_aUsername, pSelf->m_TempTopAccounts[i].m_Money);
