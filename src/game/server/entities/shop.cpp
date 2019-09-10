@@ -121,6 +121,15 @@ void CCharacter::ShopWindow(int Dir)
 			"For more information about spawn weapons,\n"
 			"please type '/spawnweaponsinfo'.");
 	}
+	else if (m_ShopWindowPage == 10)
+	{
+		str_format(aItem, sizeof(aItem), "       ~  N I N J A J E T P A C K  ~     ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "21");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "10.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "It will make your jetpack gun be a ninja.\n"
+			"Toggle it using '/ninjajetpack'.");
+	}
 	else
 	{
 		aItem[0] = 0;
@@ -296,6 +305,13 @@ void CCharacter::BuyItem(int ItemID)
 			Price = 600000;
 			Time = 2;
 		} break;
+		case 10:
+		{
+			str_format(aItem, sizeof(aItem), "Ninjajetpack");
+			Level = 21;
+			Price = 10000;
+			Time = 2;
+		} break;
 	}
 
 	bool HasAlready = false;
@@ -311,6 +327,7 @@ void CCharacter::BuyItem(int ItemID)
 	case 7: if ((*Account).m_SpawnWeapon[0] == 5) HasAlready = true; break;
 	case 8: if ((*Account).m_SpawnWeapon[1] == 5) HasAlready = true; break;
 	case 9: if ((*Account).m_SpawnWeapon[2] == 5) HasAlready = true; break;
+	case 10: if ((*Account).m_Ninjajetpack) HasAlready = true; break;
 	}
 
 	if (HasAlready)
@@ -365,5 +382,6 @@ void CCharacter::BuyItem(int ItemID)
 	case 8: if (Weapon == -1) Weapon = 1;
 	case 9: if (Weapon == -1) Weapon = 2;
 		(*Account).m_SpawnWeapon[Weapon]++; break;
+	case 10: (*Account).m_Ninjajetpack = true; break;
 	}
 }

@@ -2802,6 +2802,7 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_SpawnWeapon[0] = 0;
 	m_Accounts[ID].m_SpawnWeapon[1] = 0;
 	m_Accounts[ID].m_SpawnWeapon[2] = 0;
+	m_Accounts[ID].m_Ninjajetpack = false;
 
 	return ID;
 }
@@ -2849,6 +2850,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case SPAWN_WEAPON_0:			m_Accounts[ID].m_SpawnWeapon[0] = atoi(aData); break;
 		case SPAWN_WEAPON_1:			m_Accounts[ID].m_SpawnWeapon[1] = atoi(aData); break;
 		case SPAWN_WEAPON_2:			m_Accounts[ID].m_SpawnWeapon[2] = atoi(aData); break;
+		case NINJAJETPACK:				m_Accounts[ID].m_Ninjajetpack = atoi(aData); break;
 		}
 	}
 }
@@ -2890,6 +2892,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_SpawnWeapon[0] << "\n";
 		AccFile << m_Accounts[ID].m_SpawnWeapon[1] << "\n";
 		AccFile << m_Accounts[ID].m_SpawnWeapon[2] << "\n";
+		AccFile << m_Accounts[ID].m_Ninjajetpack << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

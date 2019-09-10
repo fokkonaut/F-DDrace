@@ -2122,7 +2122,7 @@ void CCharacter::HandleTiles(int Index)
 
 	if (!m_Core.m_CanEnterRoom && m_RoomAntiSpamTick < Server()->Tick() && (m_TileIndexL == TILE_ROOM || m_TileIndexR == TILE_ROOM || m_TileIndexB == TILE_ROOM || m_TileIndexT == TILE_ROOM || m_TileFIndexL == TILE_ROOM || m_TileFIndexR == TILE_ROOM || m_TileFIndexB == TILE_ROOM || m_TileFIndexT == TILE_ROOM))
 	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You need a key to enter this room. Buy one in the shop");
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You need a key to enter this room, buy one in the shop");
 		m_RoomAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
 	}
 

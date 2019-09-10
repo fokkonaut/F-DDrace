@@ -326,6 +326,7 @@ public:
 		int m_InstagibKills;
 		int m_InstagibWins;
 		int m_SpawnWeapon[3];
+		bool m_Ninjajetpack;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -360,6 +361,7 @@ public:
 		SPAWN_WEAPON_0,
 		SPAWN_WEAPON_1,
 		SPAWN_WEAPON_2,
+		NINJAJETPACK,
 		NUM_ACCOUNT_VARIABLES
 	};
 

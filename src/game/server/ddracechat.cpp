@@ -667,6 +667,13 @@ void CGameContext::ConNinjaJetpack(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
+
+	if (!pSelf->m_Accounts[pPlayer->GetAccID()].m_Ninjajetpack)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have ninjajetpack, buy it in the shop");
+		return;
+	}
+
 	if (pResult->NumArguments())
 		pPlayer->m_NinjaJetpack = pResult->GetInteger(0);
 	else
