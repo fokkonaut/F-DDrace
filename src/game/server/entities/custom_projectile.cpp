@@ -139,7 +139,12 @@ void CCustomProjectile::HitCharacter()
 	else
 		pHit->TakeDamage(vec2(0, 0), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetRealWeapon(m_Type)].m_Damage, m_Owner, m_Type);
 
-	if (m_Spooky)
+	if (m_Type == WEAPON_HEART_GUN)
+	{
+		pHit->SetEmote(EMOTE_HAPPY, Server()->Tick() + 2 * Server()->TickSpeed());
+		GameServer()->SendEmoticon(pHit->GetPlayer()->GetCID(), EMOTICON_HEARTS);
+	}
+	else if (m_Spooky)
 	{
 		pHit->SetEmote(EMOTE_SURPRISE, Server()->Tick() + 2 * Server()->TickSpeed());
 		GameServer()->SendEmoticon(pHit->GetPlayer()->GetCID(), EMOTICON_GHOST);

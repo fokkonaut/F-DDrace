@@ -354,7 +354,14 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
 	CNetMsg_Sv_Emoticon Msg;
 	Msg.m_ClientID = ClientID;
-	Msg.m_Emoticon = (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_SpookyGhost) || (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky) ? EMOTICON_GHOST : Emoticon;
+	Msg.m_Emoticon = Emoticon;
+	if (m_apPlayers[ClientID])
+	{
+		if (m_apPlayers[ClientID]->m_SpookyGhost || (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky))
+			Msg.m_Emoticon = EMOTICON_GHOST;
+		else if (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->GetActiveWeapon() == WEAPON_HEART_GUN)
+			Msg.m_Emoticon = EMOTICON_HEARTS;
+	}
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
@@ -1442,6 +1449,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				if (pPlayer->m_SpookyGhost || pChr->m_Spooky)
 					pChr->SetEmoteType(EMOTE_SURPRISE);
+				else if (pChr->GetActiveWeapon() == WEAPON_HEART_GUN)
+					pChr->SetEmoteType(EMOTE_HAPPY);
 				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 			}
 		}
