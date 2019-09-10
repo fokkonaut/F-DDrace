@@ -258,6 +258,14 @@ void CDragger::Drag()
 
 void CDragger::Reset()
 {
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_SoloIDs[i] == -1)
+			break;
+
+		Server()->SnapFreeID(m_SoloIDs[i]);
+		m_SoloIDs[i] = -1;
+	}
 	GameServer()->m_World.DestroyEntity(this);
 }
 
