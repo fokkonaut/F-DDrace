@@ -2710,7 +2710,7 @@ void CGameContext::UpdateTopAccounts(int Type)
 	case TOP_POINTS:	std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
 	case TOP_MONEY:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
 	}
-	m_TempTopAccounts.insert(m_TempTopAccounts.begin(), TopAccounts()); // we add an unused field so we can nicely start with 0
+	m_TempTopAccounts.insert(m_TempTopAccounts.begin(), TopAccounts()); // we add an unused field so we can nicely start with 1
 }
 
 int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser)

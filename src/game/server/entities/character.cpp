@@ -175,6 +175,9 @@ void CCharacter::HandleJetpack()
 	if (FullAuto && (m_LatestInput.m_Fire & 1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
+	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+		return;
+
 	if (!WillFire)
 		return;
 
@@ -389,13 +392,6 @@ void CCharacter::FireWeapon()
 	{
 		WillFire = true;
 
-		// shop window
-		if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
-		{
-			ShopWindow(GetAimDir());
-			return;
-		}
-
 		//spooky ghost
 		if (!m_FreezeTime && m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
 		{
@@ -411,6 +407,14 @@ void CCharacter::FireWeapon()
 				m_NumGhostShots = 0;
 			}
 		}
+	}
+
+	// shop window
+	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+	{
+		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+			ShopWindow(GetAimDir());
+		return;
 	}
 
 	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
