@@ -33,12 +33,6 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	GameWorld()->InsertEntity(this);
 }
 
-CPickupDrop::~CPickupDrop()
-{
-	for (int i = 0; i < 4; i++)
-		Server()->SnapFreeID(m_aID[i]);
-}
-
 void CPickupDrop::Reset(bool Erase, bool Picked)
 {
 	if (Erase && m_Type == POWERUP_WEAPON)
@@ -53,28 +47,38 @@ void CPickupDrop::Reset(bool Erase, bool Picked)
 	if (!Picked)
 		GameServer()->CreateDeath(m_Pos, m_pOwner ? m_Owner : -1);
 
+	for (int i = 0; i < 4; i++)
+		Server()->SnapFreeID(m_aID[i]);
 	GameWorld()->DestroyEntity(this);
 }
 
 void CPickupDrop::Tick()
 {
-	bool DoReset = false;
 	m_pOwner = 0;
 	if (m_Owner != -1 && GameServer()->GetPlayerChar(m_Owner))
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
 
 	if (m_Owner >= 0 && !GameServer()->m_apPlayers[m_Owner] && g_Config.m_SvDestroyDropsOnLeave)
-		DoReset = true;
+	{
+		Reset();
+		return;
+	}
 
 	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : -1LL;
 
 	// weapon hits death-tile or left the game layer, reset it
 	if (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameLayerClipped(m_Pos))
-		DoReset = true;
+	{
+		Reset();
+		return;
+	}
 
 	m_Lifetime--;
 	if (m_Lifetime <= 0)
-		DoReset = true;
+	{
+		Reset();
+		return;
+	}
 
 	if (m_PickupDelay > 0)
 		m_PickupDelay--;
@@ -85,8 +89,6 @@ void CPickupDrop::Tick()
 	HandleDropped();
 
 	m_PrevPos = m_Pos;
-	if(DoReset) // only reset once
-		Reset();
 }
 
 void CPickupDrop::Pickup()
