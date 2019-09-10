@@ -763,7 +763,13 @@ void CCharacter::FireWeapon()
 		m_AttackTick = Server()->Tick();
 
 	if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0) // -1 == unlimited
+	{
 		m_aWeapons[GetActiveWeapon()].m_Ammo--;
+
+		int W = GetActiveWeapon() == WEAPON_SHOTGUN ? 0 : GetActiveWeapon() == WEAPON_GRENADE ? 1 : GetActiveWeapon() == WEAPON_LASER ? 2 : -1;
+		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
+			GiveWeapon(GetActiveWeapon(), true);
+	}
 
 	if (!m_ReloadTimer)
 	{
@@ -830,6 +836,10 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
+
+	int W = Weapon == WEAPON_SHOTGUN ? 0 : Weapon == WEAPON_GRENADE ? 1 : Weapon == WEAPON_LASER ? 2 : -1;
+	if (W != -1)
+		m_aSpawnWeaponActive[W] = false;
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetRealWeapon(Weapon) != WEAPON_GUN)
 		return;
@@ -2812,11 +2822,17 @@ void CCharacter::FDDraceInit()
 		m_Core.m_CanEnterRoom = true;
 	m_RoomAntiSpamTick = Now;
 
+	for (int i = 0; i < 3; i++)
+		m_aSpawnWeaponActive[i] = false;
+
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 	if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 		for (int i = 0; i < 3; i++)
 			if ((*Account).m_SpawnWeapon[i])
+			{
 				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
+				m_aSpawnWeaponActive[i] = true;
+			}
 
 	m_HasFinishedSpecialRace = false;
 
@@ -2994,6 +3010,11 @@ void CCharacter::DropFlag()
 
 void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 {
+	// Do not drop spawnweapons
+	int W = WeaponID == WEAPON_SHOTGUN ? 0 : WeaponID == WEAPON_GRENADE ? 1 : WeaponID == WEAPON_LASER ? 2 : -1;
+	if (W != -1 && m_aSpawnWeaponActive[W])
+		return;
+
 	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
 		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN]))
 		return;

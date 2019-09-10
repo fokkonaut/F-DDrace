@@ -413,6 +413,8 @@ public:
 
 	int m_SpawnTick;
 
+	bool m_aSpawnWeaponActive[3];
+
 	// special race
 	bool m_HasFinishedSpecialRace;
 
