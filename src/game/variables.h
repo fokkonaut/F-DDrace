@@ -147,7 +147,7 @@ MACRO_CONFIG_INT(SvSpectatorSlots, sv_spectator_slots, 0, 0, 64, CFGFLAG_SERVER,
 // account
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 0, 0, 1, CFGFLAG_SERVER, "Whether accounts are activated or deactivated")
 MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path were the server searches the .acc files")
-MACRO_CONFIG_INT(SvAccSaveIntervall, sv_acc_save_intervall, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between account saves")
+MACRO_CONFIG_INT(SvAccSaveInterval, sv_acc_save_interval, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between account saves")
 
 // flags
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 0, 0, 1, CFGFLAG_SERVER, "Whether flags create a public sound on drop/pickup/respawn")
