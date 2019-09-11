@@ -2,7 +2,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-#define MAX_SHOP_PAGES 9 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
+#define MAX_SHOP_PAGES 10 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
 
 void CCharacter::ShopWindow(int Dir)
 {
