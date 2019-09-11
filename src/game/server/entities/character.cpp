@@ -377,6 +377,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_LASER
 		|| GetActiveWeapon() == WEAPON_PLASMA_RIFLE
 		|| GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE
+		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
 	)
 		FullAuto = true;
 	if (m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -447,6 +448,8 @@ void CCharacter::FireWeapon()
 		}
 		return;
 	}
+
+	vec2 CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
 
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
@@ -713,7 +716,6 @@ void CCharacter::FireWeapon()
 
 				if (m_TelekinesisTee == -1)
 				{
-					vec2 CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
 					CCharacter* pChr = GameWorld()->ClosestCharacter(CursorPos, 20.f, this, m_pPlayer->GetCID());
 					if (pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_TelekinesisTee != m_pPlayer->GetCID())
 					{
@@ -753,6 +755,15 @@ void CCharacter::FireWeapon()
 				{
 					m_pLightsaber->Retract();
 				}
+			} break;
+
+			case WEAPON_TELE_RIFLE:
+			{
+				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+				m_Core.m_Pos = CursorPos;
+				GameServer()->CreatePlayerSpawn(CursorPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+				if (Sound)
+					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
 		}
 
@@ -3140,20 +3151,7 @@ void CCharacter::UnsetSpookyGhost()
 void CCharacter::SetActiveWeapon(int Weapon)
 {
 	m_RealActiveWeapon = Weapon;
-
-	if (Weapon == WEAPON_PLASMA_RIFLE)
-		m_ActiveWeapon = WEAPON_LASER;
-	else if (Weapon == WEAPON_HEART_GUN)
-		m_ActiveWeapon = WEAPON_GUN;
-	else if (Weapon == WEAPON_STRAIGHT_GRENADE)
-		m_ActiveWeapon = WEAPON_GRENADE;
-	else if (Weapon == WEAPON_TELEKINESIS)
-		m_ActiveWeapon = WEAPON_NINJA;
-	else if (Weapon == WEAPON_LIGHTSABER)
-		m_ActiveWeapon = WEAPON_GUN;
-	else
-		m_ActiveWeapon = Weapon;
-
+	m_ActiveWeapon = GameServer()->GetRealWeapon(Weapon);
 	UpdateWeaponIndicator();
 }
 

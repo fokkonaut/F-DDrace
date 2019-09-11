@@ -60,6 +60,8 @@ CONSOLE_COMMAND("telekinesis", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleki
 CONSOLE_COMMAND("untelekinesis", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnTelekinesis, this, "Takes telekinses power from player v")
 CONSOLE_COMMAND("lightsaber", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConLightsaber, this, "Gives a lightsaber to player v")
 CONSOLE_COMMAND("unlightsaber", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnLightsaber, this, "Takes the lightsaber from player v")
+CONSOLE_COMMAND("telerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleRifle, this, "Gives a tele rifle to player v")
+CONSOLE_COMMAND("untelerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnTeleRifle, this, "Takes the tele rifle from player v")
 
 CONSOLE_COMMAND("hammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConHammer, this, "Gives a hammer to player v")
 CONSOLE_COMMAND("gun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConGun, this, "Gives a gun to player v, or spread gun")
