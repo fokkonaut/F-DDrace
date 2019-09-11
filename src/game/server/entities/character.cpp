@@ -1158,7 +1158,22 @@ void CCharacter::Die(int Killer, int Weapon)
 		}
 
 		if (m_pPlayer->GetAccID() >= ACC_START)
-			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Deaths++;
+		{
+			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL)
+			{
+				(*Account).m_SurvivalDeaths++;
+			}
+			else if (m_pPlayer->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || m_pPlayer->m_Minigame == MINIGAME_INSTAGIB_FNG)
+			{
+				(*Account).m_InstagibDeaths++;
+			}
+			else
+			{
+				(*Account).m_Deaths++;
+			}
+		}
 	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
