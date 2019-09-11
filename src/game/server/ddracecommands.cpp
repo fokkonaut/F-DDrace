@@ -1261,6 +1261,8 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Ninjajetpack: %d", (*Account).m_Ninjajetpack);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Last Player Name: %s", (*Account).m_aLastPlayerName);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 	pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 }

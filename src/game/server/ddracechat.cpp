@@ -1156,6 +1156,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	pSelf->m_Accounts[ID].m_Port = g_Config.m_SvPort;
 	pSelf->m_Accounts[ID].m_LoggedIn = true;
 	pSelf->m_Accounts[ID].m_ClientID = pResult->m_ClientID;
+	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
 	pSelf->WriteAccountStats(ID);
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully logged in");

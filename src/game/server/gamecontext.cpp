@@ -2765,8 +2765,14 @@ int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageT
 		Account.m_Level = pSelf->m_Accounts[ID].m_Level;
 		Account.m_Points = pSelf->m_Accounts[ID].m_BlockPoints;
 		Account.m_Money = pSelf->m_Accounts[ID].m_Money;
-		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_Username, sizeof(Account.m_aUsername));
+		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 		pSelf->m_TempTopAccounts.push_back(Account);
+
+		if (pSelf->m_Accounts[ID].m_aLastPlayerName[0] == '\0')
+		{
+			str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->m_Accounts[ID].m_Username, sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
+			pSelf->WriteAccountStats(ID);
+		}
 
 		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 	}
@@ -2832,6 +2838,7 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_SpawnWeapon[1] = 0;
 	m_Accounts[ID].m_SpawnWeapon[2] = 0;
 	m_Accounts[ID].m_Ninjajetpack = false;
+	m_Accounts[ID].m_aLastPlayerName[0] = '\0';
 
 	return ID;
 }
@@ -2880,6 +2887,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case SPAWN_WEAPON_1:			m_Accounts[ID].m_SpawnWeapon[1] = atoi(aData); break;
 		case SPAWN_WEAPON_2:			m_Accounts[ID].m_SpawnWeapon[2] = atoi(aData); break;
 		case NINJAJETPACK:				m_Accounts[ID].m_Ninjajetpack = atoi(aData); break;
+		case LAST_PLAYER_NAME:			str_copy(m_Accounts[ID].m_aLastPlayerName, aData, sizeof(m_Accounts[ID].m_aLastPlayerName)); break;
 		}
 	}
 }
@@ -2922,6 +2930,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_SpawnWeapon[1] << "\n";
 		AccFile << m_Accounts[ID].m_SpawnWeapon[2] << "\n";
 		AccFile << m_Accounts[ID].m_Ninjajetpack << "\n";
+		AccFile << m_Accounts[ID].m_aLastPlayerName << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
