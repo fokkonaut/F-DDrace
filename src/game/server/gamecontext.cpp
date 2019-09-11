@@ -2768,12 +2768,6 @@ int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageT
 		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 		pSelf->m_TempTopAccounts.push_back(Account);
 
-		if (pSelf->m_Accounts[ID].m_aLastPlayerName[0] == '\0')
-		{
-			str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->m_Accounts[ID].m_Username, sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
-			pSelf->WriteAccountStats(ID);
-		}
-
 		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 	}
 
