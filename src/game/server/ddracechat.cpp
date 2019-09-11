@@ -1653,9 +1653,9 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 	{
 		EndRank = StartRank + 5;
 
-		while (StartRank > pSelf->m_TempTopAccounts.size())
+		while ((unsigned)StartRank > pSelf->m_TempTopAccounts.size())
 			StartRank--;
-		while (EndRank > pSelf->m_TempTopAccounts.size())
+		while ((unsigned)EndRank > pSelf->m_TempTopAccounts.size())
 			EndRank--;
 
 		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
