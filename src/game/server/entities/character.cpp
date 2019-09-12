@@ -3063,7 +3063,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 	{
 		if (GameServer()->m_vPickupDropLimit.size() == (unsigned)g_Config.m_SvMaxPickupDrops)
 		{
-			GameServer()->m_vPickupDropLimit[0]->Reset();
+			GameServer()->m_vPickupDropLimit[0]->Reset(false, false);
 			GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin());
 		}
 		float Dir = ((rand() % 50 - 25) * 0.1); // in a range of -2.5 to +2.5

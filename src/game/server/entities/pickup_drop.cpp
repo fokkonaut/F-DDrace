@@ -35,13 +35,22 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 
 void CPickupDrop::Reset(bool Erase, bool Picked)
 {
-	if (Erase && m_Type == POWERUP_WEAPON)
+	if (Erase)
 	{
-		CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
-		if (pOwner)
-			for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
-				if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
-					pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
+		if (m_Type == POWERUP_WEAPON)
+		{
+			CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
+			if (pOwner)
+				for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
+					if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
+						pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
+		}
+		else
+		{
+			for (unsigned i = 0; i < GameServer()->m_vPickupDropLimit.size(); i++)
+				if (GameServer()->m_vPickupDropLimit[i] == this)
+					GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin() + i);
+		}
 	}
 
 	if (!Picked)
