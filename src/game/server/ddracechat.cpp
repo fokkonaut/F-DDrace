@@ -1504,7 +1504,7 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	char aMsg[64];
 
 	// admins can enable or disable minigames with /<minigame> <enable/disable>
-	if (pResult->NumArguments() && pSelf->Server()->IsAuthed(pResult->m_ClientID) && Minigame != MINIGAME_NONE)
+	if (pResult->NumArguments() && pSelf->Server()->GetAuthedState(pResult->m_ClientID) && Minigame != MINIGAME_NONE)
 	{
 		bool Disable;
 		if (!str_comp_nocase(pResult->GetString(0), "enable"))

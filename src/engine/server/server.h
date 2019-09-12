@@ -79,10 +79,6 @@ public:
 
 	enum
 	{
-		AUTHED_NO=0,
-		AUTHED_MOD,
-		AUTHED_ADMIN,
-
 		MAX_RCONCMD_SEND=16,
 		MAX_MAPLISTENTRY_SEND = 32,
 		MIN_MAPLIST_CLIENTVERSION=0x0703,	// todo 0.8: remove me
@@ -233,7 +229,7 @@ public:
 	void InitRconPasswordIfUnset();
 
 	void SetRconCID(int ClientID);
-	int IsAuthed(int ClientID) const;
+	int GetAuthedState(int ClientID) const;
 	bool IsBanned(int ClientID);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo) const;
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size) const;

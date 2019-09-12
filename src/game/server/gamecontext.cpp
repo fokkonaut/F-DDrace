@@ -1055,7 +1055,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			int Mode = pMsg->m_Mode;
 			if((g_Config.m_SvTournamentMode == 2) &&
 				pPlayer->GetTeam() == TEAM_SPECTATORS &&
-				!Server()->IsAuthed(ClientID))
+				!Server()->GetAuthedState(ClientID))
 			{
 				if(Mode != CHAT_WHISPER)
 					Mode = CHAT_TEAM;
@@ -1069,9 +1069,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Server()->RestrictRconOutput(ClientID);
 				Console()->SetFlagMask(CFGFLAG_CHAT);
 
-				int Authed = Server()->IsAuthed(ClientID);
+				int Authed = Server()->GetAuthedState(ClientID);
 				if (Authed)
-					Console()->SetAccessLevel(Authed == 2 ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+					Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
 				else
 					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 				Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
@@ -1104,7 +1104,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if(pMsg->m_Force)
 			{
-				if(!Server()->IsAuthed(ClientID))
+				if(!Server()->GetAuthedState(ClientID))
 					return;
 			}
 			else
@@ -1156,7 +1156,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					return;
 
 				int KickID = str_toint(pMsg->m_Value);
-				if(KickID < 0 || KickID >= MAX_CLIENTS || !m_apPlayers[KickID] || KickID == ClientID || Server()->IsAuthed(KickID))
+				if(KickID < 0 || KickID >= MAX_CLIENTS || !m_apPlayers[KickID] || KickID == ClientID || Server()->GetAuthedState(KickID))
 					return;
 
 				str_format(aDesc, sizeof(aDesc), "%2d: %s", KickID, Server()->ClientName(KickID));
@@ -1224,8 +1224,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, "You can't kick yourself");
 					return;
 				}
-				int KickedAuthed = Server()->IsAuthed(KickID);
-				if (KickedAuthed > Server()->IsAuthed(ClientID))
+				int KickedAuthed = Server()->GetAuthedState(KickID);
+				if (KickedAuthed > Server()->GetAuthedState(ClientID))
 				{
 					SendChatTarget(ClientID, "You can't kick authorized players");
 					char aBufKick[128];

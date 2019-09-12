@@ -885,7 +885,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if (!pSelf->Server()->IsAuthed(pResult->m_ClientID))
+	if (!pSelf->Server()->GetAuthedState(pResult->m_ClientID))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Missing permission");
 		return;
@@ -904,9 +904,9 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pResult->GetString(0));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	if (pSelf->Server()->IsAuthed(ID))
+	if (pSelf->Server()->GetAuthedState(ID))
 	{
-		str_format(aBuf, sizeof(aBuf), "Authed: %d", pSelf->Server()->IsAuthed(ID));
+		str_format(aBuf, sizeof(aBuf), "Authed: %d", pSelf->Server()->GetAuthedState(ID));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "ClientID: %d", ID);
@@ -1196,7 +1196,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if (!pSelf->Server()->IsAuthed(pResult->m_ClientID))
+	if (!pSelf->Server()->GetAuthedState(pResult->m_ClientID))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Missing permission");
 		return;

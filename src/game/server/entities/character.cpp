@@ -1388,7 +1388,7 @@ void CCharacter::Snap(int SnappingClient)
 
 		// F-DDrace
 		if (m_Invisible && SnappingClient != m_pPlayer->GetCID())
-			if (!Server()->IsAuthed(SnappingClient) || Server()->Tick() % 200 == 0)
+			if (!Server()->GetAuthedState(SnappingClient) || Server()->Tick() % 200 == 0)
 				return;
 	}
 
@@ -1960,22 +1960,10 @@ void CCharacter::HandleTiles(int Index)
 		m_InShop = true;
 	}
 
-
-	// helper only
-	/*if ((m_TileIndex == TILE_HELPERS_ONLY) || (m_TileFIndex == TILE_HELPERS_ONLY))
-	{
-		if (Server()->IsAuthed(m_pPlayer->GetCID()) < AUTHED_HELPER)
-		{
-			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for helpers only");
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
-			return;
-		}
-	}*/
-
 	// moderator only
 	if ((m_TileIndex == TILE_MODERATORS_ONLY) || (m_TileFIndex == TILE_MODERATORS_ONLY))
 	{
-		if (Server()->IsAuthed(m_pPlayer->GetCID()) < 1)
+		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_MOD)
 		{
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for moderators only");
 			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
@@ -1986,7 +1974,7 @@ void CCharacter::HandleTiles(int Index)
 	// admin only
 	if ((m_TileIndex == TILE_ADMINS_ONLY) || (m_TileFIndex == TILE_ADMINS_ONLY))
 	{
-		if (Server()->IsAuthed(m_pPlayer->GetCID()) < 2)
+		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_ADMIN)
 		{
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for admins only");
 			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
