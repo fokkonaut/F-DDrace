@@ -49,6 +49,7 @@ CHAT_COMMAND("spookyghostinfo", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Sho
 CHAT_COMMAND("policeinfo", "?i", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police")
 CHAT_COMMAND("vipinfo", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP")
 CHAT_COMMAND("spawnweaponsinfo", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons")
+CHAT_COMMAND("accountinfo", "", CFGFLAG_CHAT, ConAccountInfo, this, "Shows information about accounts")
 
 //account
 CHAT_COMMAND("register", "s[name] s[password] s[password]", CFGFLAG_CHAT, ConRegister, this, "Register an account")

@@ -996,6 +996,16 @@ void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserDa
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
+void CGameContext::ConAccountInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Accounts ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are used to save your stats.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can farm money and buy things in the shop, kill tees and get points.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "These stats will be saved inside of your account.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can create an account using '/register'.");
+}
+
 void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
