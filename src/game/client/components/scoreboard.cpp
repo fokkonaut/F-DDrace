@@ -31,12 +31,15 @@ CScoreboard::CScoreboard()
 
 void CScoreboard::ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData)
 {
+	CScoreboard *pScoreboard = (CScoreboard *)pUserData;
 	int Result = pResult->GetInteger(0);
 	if(!Result)
-		((CScoreboard *)pUserData)->m_Activate = false;
-	else
-		((CScoreboard *)pUserData)->m_Activate = true;
-	((CScoreboard *)pUserData)->m_Active = false;
+	{
+		pScoreboard->m_Activate = false;
+		pScoreboard->m_Active = false;
+	}
+	else if(!pScoreboard->m_Active)
+		pScoreboard->m_Activate = true;	
 }
 
 void CScoreboard::OnReset()
@@ -206,7 +209,10 @@ float CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const c
 	// count players
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Unknown team id");
 	int NumPlayers = m_pClient->m_GameInfo.m_aTeamSize[Team];
-	m_PlayerLines = max(m_PlayerLines, NumPlayers);
+	if(m_pClient->m_GameInfo.m_GameFlags&GAMEFLAG_TEAMS)
+		m_PlayerLines = max(m_pClient->m_GameInfo.m_aTeamSize[Team^1], NumPlayers);
+	else
+		m_PlayerLines = NumPlayers;
 
 	// clamp to 16
 	if(m_PlayerLines > 16)
@@ -499,7 +505,7 @@ float CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const c
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GAME].m_Id);
 				Graphics()->QuadsBegin();
 
-				RenderTools()->SelectSprite(m_pClient->m_aClients[pInfo->m_ClientID].m_Team==TEAM_RED ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
+				RenderTools()->SelectSprite(pInfo->m_ClientID == m_pClient->m_Snap.m_pGameDataFlag->m_FlagCarrierBlue ? SPRITE_FLAG_BLUE : SPRITE_FLAG_RED, SPRITE_FLAG_FLIP_X);
 
 				float Size = LineHeight;
 				IGraphics::CQuadItem QuadItem(TeeOffset+4.0f, y-2.0f-Spacing/2.0f, Size/2.0f, Size);
