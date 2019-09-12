@@ -4,6 +4,8 @@
 #include "econ.h"
 #include "netban.h"
 
+#include "protocol.h"
+
 
 int CEcon::NewClientCallback(int ClientID, void *pUser)
 {
@@ -98,7 +100,7 @@ void CEcon::Init(IConsole *pConsole, CNetBan *pNetBan)
 		Console()->Chain("ec_output_level", ConchainEconOutputLevelUpdate, this);
 		m_PrintCBIndex = Console()->RegisterPrintCallback(g_Config.m_EcOutputLevel, SendLineCB, this);
 
-		Console()->Register("logout", "", CFGFLAG_ECON, ConLogout, this, "Logout of econ");
+		Console()->Register("logout", "", CFGFLAG_ECON, ConLogout, this, "Logout of econ", AUTHED_NO);
 	}
 	else
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD,"econ", "couldn't open socket. port might already be in use");

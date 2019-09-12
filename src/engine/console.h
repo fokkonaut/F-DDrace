@@ -82,7 +82,7 @@ public:
 	virtual void PossibleMaps(const char *pStr, FPossibleCallback pfnCallback, void *pUser) = 0;
 	virtual void ParseArguments(int NumArgs, const char **ppArguments) = 0;
 
-	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) = 0;
+	virtual void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, int AccessLevel) = 0;
 	virtual void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) = 0;
 	virtual void DeregisterTemp(const char *pName) = 0;
 	virtual void DeregisterTempAll() = 0;

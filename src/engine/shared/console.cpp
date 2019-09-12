@@ -618,7 +618,7 @@ void CConsole::ConUserCommandStatus(IResult* pResult, void* pUser)
 	CResult Result;
 	Result.m_pCommand = "access_status";
 	char aBuf[4];
-	str_format(aBuf, sizeof(aBuf), "%d", IConsole::ACCESS_LEVEL_USER);
+	str_format(aBuf, sizeof(aBuf), "%d", pConsole->m_AccessLevel);
 	Result.AddArgument(aBuf);
 
 	pConsole->ConCommandStatus(&Result, pConsole);
@@ -799,28 +799,28 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
+	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_MOD);
+	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", AUTHED_ADMIN);
 
-	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
-	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
+	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", AUTHED_MOD);
+	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", AUTHED_NO);
 
-	Register("access_command", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility for moderators");
-	Register("access_status", "", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for moderators");
-	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
+	Register("access_command", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility for moderators", AUTHED_ADMIN);
+	Register("access_status", "", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for moderators", AUTHED_MOD);
+	Register("cmdlist", "", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users", AUTHED_NO);
 
 	// TODO: this should disappear
-	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
 	{ \
 		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc); \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc, AccessLevel); \
 	}
 
-	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,AccessLevel) \
 	{ \
 		static char OldValue[Len] = Def; \
 		static CStrVariableData Data = { this, g_Config.m_##Name, Len, OldValue }; \
-		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc); \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, AccessLevel); \
 	}
 
 	#include "config_variables.h"
@@ -896,7 +896,7 @@ void CConsole::AddCommandSorted(CCommand *pCommand)
 }
 
 void CConsole::Register(const char *pName, const char *pParams,
-	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp)
+	int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp, int AccessLevel)
 {
 	CCommand *pCommand = FindCommand(pName, Flags);
 	bool DoAdd = false;
@@ -918,8 +918,22 @@ void CConsole::Register(const char *pName, const char *pParams,
 	if(DoAdd)
 		AddCommandSorted(pCommand);
 
-	if (pCommand->m_Flags & CFGFLAG_CHAT)
-		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
+	//if (pCommand->m_Flags & CFGFLAG_CHAT)
+	//	pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
+
+	switch (AccessLevel)
+	{
+	case AUTHED_NO:
+		AccessLevel = ACCESS_LEVEL_USER;
+		break;
+	case AUTHED_MOD:
+		AccessLevel = ACCESS_LEVEL_MOD;
+		break;
+	case AUTHED_ADMIN:
+		AccessLevel = ACCESS_LEVEL_ADMIN;
+		break;
+	}
+	pCommand->SetAccessLevel(AccessLevel);
 }
 
 void CConsole::RegisterTemp(const char *pName, const char *pParams,	int Flags, const char *pHelp)
@@ -1136,7 +1150,7 @@ extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
 
 void CConsole::ResetServerGameSettings()
 {
-#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc) \
+#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \
@@ -1154,7 +1168,7 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
-#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc) \
+#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,AccessLevel) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \

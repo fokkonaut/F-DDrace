@@ -156,7 +156,7 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* 
 	m_pServer = pServer;
 
 	// overwrites base command, todo: improve this
-	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason");
+	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with ip/client id for x minutes for any reason", AUTHED_ADMIN);
 }
 
 template<class T>
@@ -1801,15 +1801,15 @@ void CServer::RegisterCommands()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	// register console commands
-	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players");
-	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
-	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
+	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason", AUTHED_ADMIN);
+	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players", AUTHED_MOD);
+	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
+	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon", AUTHED_MOD);
 
-	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file");
-	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
+	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file", AUTHED_ADMIN);
+	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording", AUTHED_ADMIN);
 
-	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
+	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map", AUTHED_ADMIN);
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);

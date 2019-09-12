@@ -5,6 +5,8 @@
 #include <engine/storage.h>
 #include <engine/shared/config.h>
 
+#include "protocol.h"
+
 
 CConfiguration g_Config;
 
@@ -73,13 +75,13 @@ public:
 		Reset();
 
 		if(m_pConsole)
-			m_pConsole->Register("save_config", "?s", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file");
+			m_pConsole->Register("save_config", "?s", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file", AUTHED_ADMIN);
 	}
 
 	virtual void Reset()
 	{
-		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc) g_Config.m_##Name = def;
-		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) str_copy(g_Config.m_##Name, def, len);
+		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc,accesslevel) g_Config.m_##Name = def;
+		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc,accesslevel) str_copy(g_Config.m_##Name, def, len);
 
 		#include "config_variables.h"
 
@@ -89,8 +91,8 @@ public:
 
 	virtual void RestoreStrings()
 	{
-		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc)	// nop
-		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc) if(!g_Config.m_##Name[0] && def[0]) str_copy(g_Config.m_##Name, def, len);
+		#define MACRO_CONFIG_INT(Name,ScriptName,def,min,max,flags,desc,accesslevel)	// nop
+		#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc,accesslevel) if(!g_Config.m_##Name[0] && def[0]) str_copy(g_Config.m_##Name, def, len);
 
 		#include "config_variables.h"
 
