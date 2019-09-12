@@ -919,7 +919,7 @@ void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 	if (Changed)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Changed displayed score to '%s'.", aFormat);
+		str_format(aBuf, sizeof(aBuf), "Changed displayed score to '%s'", aFormat);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }

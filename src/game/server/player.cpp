@@ -158,10 +158,9 @@ void CPlayer::Reset()
 	m_ExactDieTick = Server()->Tick();
 
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
-
 	m_HasRoomKey = false;
-
 	m_SmoothFreeze = g_Config.m_SvSmoothFreeze;
+	m_UnsavedBlockPoints = 0;
 }
 
 void CPlayer::Tick()
@@ -1027,6 +1026,24 @@ void CPlayer::GiveXP(int Amount)
 		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
+}
+
+void CPlayer::GiveBlockPoints(int Amount)
+{
+	if (GetAccID() < ACC_START)
+	{
+		m_UnsavedBlockPoints++;
+		if (m_UnsavedBlockPoints % 5 == 0)
+			GameServer()->SendChatTarget(m_ClientID, "You made unsaved block points. Save your stats using an account. Check '/accountinfo'");
+		return;
+	}
+
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+
+	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
+		Amount += 1;
+
+	(*Account).m_BlockPoints += Amount;
 }
 
 bool CPlayer::IsHooked(int Power)

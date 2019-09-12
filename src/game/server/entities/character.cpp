@@ -1164,7 +1164,7 @@ void CCharacter::Die(int Killer, int Weapon)
 				(*KillerAcc).m_Kills++;
 
 				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * g_Config.m_SvBlockPointsDelay)
-					(*KillerAcc).m_BlockPoints++;
+					pKiller->GiveBlockPoints(1);
 			}
 		}
 
