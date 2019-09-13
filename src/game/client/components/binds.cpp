@@ -243,10 +243,10 @@ void CBinds::OnConsoleInit()
 	if(pConfig)
 		pConfig->RegisterCallback(ConfigSaveCallback, this);
 
-	Console()->Register("bind", "sr", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
-	Console()->Register("unbind", "s", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
-	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
-	Console()->Register("dump_binds", "", CFGFLAG_CLIENT, ConDumpBinds, this, "Dump binds");
+	Console()->Register("bind", "sr", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command", AUTHED_NO);
+	Console()->Register("unbind", "s", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key", AUTHED_NO);
+	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys", AUTHED_NO);
+	Console()->Register("dump_binds", "", CFGFLAG_CLIENT, ConDumpBinds, this, "Dump binds", AUTHED_NO);
 
 	// default bindings
 	SetDefaults();

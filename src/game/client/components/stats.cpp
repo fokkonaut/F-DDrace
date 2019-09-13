@@ -60,7 +60,7 @@ void CStats::ConKeyStats(IConsole::IResult *pResult, void *pUserData)
 
 void CStats::OnConsoleInit()
 {
-	Console()->Register("+stats", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
+	Console()->Register("+stats", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats", AUTHED_NO);
 }
 
 void CStats::OnMessage(int MsgType, void *pRawMsg)

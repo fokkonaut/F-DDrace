@@ -138,7 +138,7 @@ void CCamera::ConSetPosition(IConsole::IResult *pResult, void *pUserData)
 
 void CCamera::OnConsoleInit()
 {
-	Console()->Register("set_position", "iii", CFGFLAG_CLIENT, ConSetPosition, this, "Sets the rotation position");
+	Console()->Register("set_position", "iii", CFGFLAG_CLIENT, ConSetPosition, this, "Sets the rotation position", AUTHED_NO);
 }
 
 void CCamera::OnStateChange(int NewState, int OldState)

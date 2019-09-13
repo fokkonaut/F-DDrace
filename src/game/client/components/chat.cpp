@@ -200,11 +200,11 @@ void CChat::OnInit()
 
 void CChat::OnConsoleInit()
 {
-	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
-	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
-	Console()->Register("whisper", "ir", CFGFLAG_CLIENT, ConWhisper, this, "Whisper to a client in chat");
-	Console()->Register("chat", "s?i", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team/whisper mode");
-	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
+	Console()->Register("say", "r", CFGFLAG_CLIENT, ConSay, this, "Say in chat", AUTHED_NO);
+	Console()->Register("say_team", "r", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat", AUTHED_NO);
+	Console()->Register("whisper", "ir", CFGFLAG_CLIENT, ConWhisper, this, "Whisper to a client in chat", AUTHED_NO);
+	Console()->Register("chat", "s?i", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team/whisper mode", AUTHED_NO);
+	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat", AUTHED_NO);
 }
 
 void CChat::ClearChatBuffer()

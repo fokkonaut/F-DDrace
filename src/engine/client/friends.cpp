@@ -36,8 +36,8 @@ void CFriends::Init()
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
-		pConsole->Register("remove_friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
+		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend", AUTHED_NO);
+		pConsole->Register("remove_friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend", AUTHED_NO);
 	}
 }
 

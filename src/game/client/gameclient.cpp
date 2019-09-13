@@ -254,9 +254,9 @@ void CGameClient::OnConsoleInit()
 	m_Input.Add(m_pBinds);
 
 	// add the some console commands
-	Console()->Register("team", "i", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
-	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself");
-	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange, this, "Change ready state");
+	Console()->Register("team", "i", CFGFLAG_CLIENT, ConTeam, this, "Switch team", AUTHED_NO);
+	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself", AUTHED_NO);
+	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange, this, "Change ready state", AUTHED_NO);
 
 	Console()->Chain("add_friend", ConchainFriendUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendUpdate, this);

@@ -19,7 +19,7 @@ void CNotifications::OnConsoleInit()
 {
 	IConsole* pConsole = Kernel()->RequestInterface<IConsole>();
 
-	pConsole->Register("snd_toggle", "", CFGFLAG_CLIENT, Con_SndToggle, this, "Toggle sounds on and off");
+	pConsole->Register("snd_toggle", "", CFGFLAG_CLIENT, Con_SndToggle, this, "Toggle sounds on and off", AUTHED_NO);
 }
 
 void CNotifications::Con_SndToggle(IConsole::IResult *pResult, void *pUserData)
