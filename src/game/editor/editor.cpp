@@ -4584,7 +4584,7 @@ void CEditor::Init()
 	m_Map.m_Modified = false;
 
 #ifdef CONF_DEBUG
-	m_pConsole->Register("map_magic", "i", CFGFLAG_CLIENT, ConMapMagic, this, "1-grass_doodads, 2-winter_main, 3-both");
+	m_pConsole->Register("map_magic", "i", CFGFLAG_CLIENT, ConMapMagic, this, "1-grass_doodads, 2-winter_main, 3-both", AUTHED_NO);
 #endif
 }
 
