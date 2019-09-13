@@ -33,6 +33,12 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	GameWorld()->InsertEntity(this);
 }
 
+CPickupDrop::~CPickupDrop()
+{
+	for (int i = 0; i < 4; i++)
+		Server()->SnapFreeID(m_aID[i]);
+}
+
 void CPickupDrop::Reset(bool Erase, bool Picked)
 {
 	if (Erase)
@@ -56,8 +62,6 @@ void CPickupDrop::Reset(bool Erase, bool Picked)
 	if (!Picked)
 		GameServer()->CreateDeath(m_Pos, m_pOwner ? m_Owner : -1);
 
-	for (int i = 0; i < 4; i++)
-		Server()->SnapFreeID(m_aID[i]);
 	GameWorld()->DestroyEntity(this);
 }
 
