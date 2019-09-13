@@ -19,7 +19,7 @@ class CConsole : public IConsole
 
 		virtual const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const;
 
-		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_MOD)); }
+		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	};
 
 

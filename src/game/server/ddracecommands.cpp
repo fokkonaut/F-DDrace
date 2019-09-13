@@ -885,12 +885,6 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if (!pSelf->Server()->GetAuthedState(pResult->m_ClientID))
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Missing permission");
-		return;
-	}
-
 	int ID = pSelf->GetCIDByName(pResult->GetString(0));
 	if (ID < 0)
 	{
@@ -1195,12 +1189,6 @@ void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	if (!pSelf->Server()->GetAuthedState(pResult->m_ClientID))
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Missing permission");
-		return;
-	}
 
 	int ID = pSelf->AddAccount();
 	pSelf->ReadAccountStats(ID, pResult->GetString(0));
