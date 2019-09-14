@@ -1632,13 +1632,10 @@ void CGameContext::ConSmoothFreeze(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 		return;
 
-	if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_FreezeTime)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while being frozen");
-		return;
-	}
-
 	pPlayer->m_SmoothFreeze = !pPlayer->m_SmoothFreeze;
+
+	if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_FreezeTime)
+		pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
 
 	if (pPlayer->m_SmoothFreeze)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze activated");
