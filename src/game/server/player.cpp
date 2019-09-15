@@ -994,7 +994,7 @@ void CPlayer::MoneyTransaction(int Amount, const char *Description)
 
 	(*Account).m_Money += Amount;
 
-	if (!Description)
+	if (!Description[0])
 		return;
 
 	str_copy((*Account).m_aLastMoneyTransaction[4], (*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[4]));
