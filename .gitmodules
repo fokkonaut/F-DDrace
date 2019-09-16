@@ -2,6 +2,9 @@
 	path = datasrc/languages
 	url = git://github.com/teeworlds/teeworlds-translation.git
 	branch = master
+<<<<<<< HEAD
 [submodule "ddnet-libs"]
 	path = ddnet-libs
 	url = https://github.com/ddnet/ddnet-libs
+=======
+>>>>>>> 54211d069... Fix circleci map error
