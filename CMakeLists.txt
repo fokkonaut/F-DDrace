@@ -1765,9 +1765,7 @@ set(CPACK_ARCHIVE_PORTABLE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
 set(CPACK_SOURCE_FILES
   CMakeLists.txt
-  bam.lua
   cmake/
-  configure.lua
   datasrc/
   license.txt
   other/
