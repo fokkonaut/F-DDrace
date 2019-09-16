@@ -954,7 +954,7 @@ set(EXPECTED_DATA
   mapres/winter_mountains.png
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
-  maps/Kobra 4.map
+  "maps/Kobra 4.map"
   particles.png
   skins/bluekitty.json
   skins/bluestripe.json
@@ -1050,7 +1050,7 @@ if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/languages/index.json)
   endforeach()
 endif()
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/maps/Kobra 4.map)
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/datasrc/maps/Kobra 4.map")
   message(WARNING "Missing datasrc/maps submodule. Please download a source release or update your git submodules with `git submodule update --init`")
   foreach(item ${EXPECTED_DATA})
     if(item MATCHES "^maps/")
