@@ -19,9 +19,6 @@ class IGameController
 	class CGameContext *m_pGameServer;
 	class IServer *m_pServer;
 
-	// game
-	int m_GameStateTimer;
-
 	// map
 	char m_aMapWish[128];
 
