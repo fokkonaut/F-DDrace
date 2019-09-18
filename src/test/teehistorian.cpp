@@ -30,9 +30,9 @@ protected:
 	TeeHistorian()
 	{
 		mem_zero(&m_Config, sizeof(m_Config));
-		#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc) \
+		#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc,Accesslevel) \
 			m_Config.m_##Name = (Def);
-		#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc) \
+		#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc,Accesslevel) \
 			str_copy(m_Config.m_##Name, (Def), sizeof(m_Config.m_##Name));
 		#include <engine/shared/config_variables.h>
 		#undef MACRO_CONFIG_STR
