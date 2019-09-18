@@ -244,7 +244,9 @@ public:
 	int m_Colliding;
 	bool m_LeftWall;
 
-	void LimitVel(vec2 *pVel);
+	// Caps the given velocity according to the current set of stoppers
+	// that the character is affected by.
+	vec2 LimitVel(vec2 Vel);
 	void ApplyForce(vec2 Force);
 
 private:
