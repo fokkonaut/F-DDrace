@@ -333,7 +333,7 @@ public:
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
-		int64 m_XP;
+		int m_XP;
 		int64 m_Money;
 		int m_Kills;
 		int m_Deaths;

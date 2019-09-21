@@ -1218,7 +1218,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Level: %d", (*Account).m_Level);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "XP: %llu", (*Account).m_XP);
+	str_format(aBuf, sizeof(aBuf), "XP: %d", (*Account).m_XP);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Money: %llu", (*Account).m_Money);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);

@@ -2045,7 +2045,7 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aPlusXP, sizeof(aPlusXP), " ^666+%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
 						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
-						"^666XP ^222[^444%llu^222/^444%llu^222]%s\n"
+						"^666XP ^222[^444%d^222/^444%d^222]%s\n"
 						"^666Level ^222[^444%d^222]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
 						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
@@ -2925,7 +2925,7 @@ void CCharacter::FDDraceTick()
 				char aSurvival[32];
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
-				str_format(aMsg, sizeof(aMsg), " \n \n^666XP ^222[^444%llu^222/^444%llu^222] ^666+1 flag%s%s",
+				str_format(aMsg, sizeof(aMsg), " \n \n^666XP ^222[^444%d^222/^444%d^222] ^666+1 flag%s%s",
 					(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
 				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
