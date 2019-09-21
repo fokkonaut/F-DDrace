@@ -7,8 +7,6 @@
 
 #include <generated/protocol.h>
 
-#include <stdint.h>
-
 /*
 	Class: Game Controller
 		Controls the main game logic. Keeping track of team and player score,

@@ -4,7 +4,6 @@
 #define GAME_SERVER_ENTITIES_LIGHTSABER_H
 
 #include <game/server/entity.h>
-#include <stdint.h>
 
 #define SPEED 15
 #define RETRACTED_LENGTH 0
