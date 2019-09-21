@@ -392,7 +392,7 @@ public:
 		NUM_ACCOUNT_VARIABLES
 	};
 
-	int64 m_pNeededXP[MAX_LEVEL+1];
+	int m_pNeededXP[MAX_LEVEL+1];
 	int m_LastAccSaveTick;
 
 	//motd
