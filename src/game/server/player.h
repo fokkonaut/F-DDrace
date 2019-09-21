@@ -24,7 +24,8 @@ enum Gamemode
 enum Scoreformat
 {
 	SCORE_TIME = 0,
-	SCORE_LEVEL
+	SCORE_LEVEL,
+	SCORE_BLOCK_POINTS
 };
 
 enum Dummymode
