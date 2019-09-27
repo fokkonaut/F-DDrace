@@ -3031,8 +3031,8 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA || (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN]))
+	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA
+		|| (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN] && !m_HasTeleGun))
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
@@ -3041,11 +3041,13 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		m_pPlayer->m_vWeaponLimit[WeaponID].erase(m_pPlayer->m_vWeaponLimit[WeaponID].begin());
 	}
 
+	bool IsTeleWeapon = (WeaponID == WEAPON_GUN && m_HasTeleGun) || (WeaponID == WEAPON_GRENADE && m_HasTeleGrenade) || (WeaponID == WEAPON_LASER && m_HasTeleLaser);
+
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack));
+	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(Weapon);
 
-	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID])
+	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon)
 	{
 		m_aWeapons[WeaponID].m_Got = false;
 		SetWeapon(WEAPON_GUN);
@@ -3054,6 +3056,8 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		SpreadWeapon(WeaponID, false);
 	if (WeaponID == WEAPON_GUN && m_Jetpack)
 		Jetpack(false);
+	if (IsTeleWeapon)
+		TeleWeapon(WeaponID, false);
 }
 
 void CCharacter::DropPickup(int Type, int Amount)
