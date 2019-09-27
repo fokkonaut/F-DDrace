@@ -23,7 +23,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_Owner = Owner;
 	m_Vel = vec2(5*Direction, -5);
 	m_PickupDelay = Server()->TickSpeed() * 2;
-	m_TeleCheckpoint = 0;
+	m_TeleCheckpoint = GameServer()->GetPlayerChar(Owner)->m_TeleCheckpoint;
 	m_PrevPos = m_Pos;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_SnapPos = m_Pos;
