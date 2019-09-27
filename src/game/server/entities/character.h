@@ -37,6 +37,7 @@ enum Extra
 	FREEZE_HAMMER,
 	INVISIBLE,
 	ITEM,
+	TELE_WEAPON,
 	NUM_EXTRAS
 };
 
@@ -140,6 +141,7 @@ public:
 	void FreezeHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void Invisible(bool Set = true, int FromID = -1, bool Silent = false);
 	void Item(int Item, int FromID = -1, bool Silent = false);
+	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -381,6 +383,8 @@ public:
 	CPickup* m_pItem;
 
 	bool m_PoliceHelper;
+
+	bool m_AlwaysTeleWeapon;
 
 	bool m_AtomHooked;
 	bool m_TrailHooked;

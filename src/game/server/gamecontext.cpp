@@ -3460,7 +3460,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 	// message without a sender
 	if (FromID == -1 || FromID == ToID)
 	{
-		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER || Extra == SPREAD_WEAPON || Extra == FREEZE_HAMMER || Extra == ITEM)
+		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER || Extra == SPREAD_WEAPON || Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON)
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
 		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
@@ -3546,6 +3546,12 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 			static char aItem[64];
 			str_format(aItem, sizeof(aItem), "%s%sItem", Special > -3 ? GetWeaponName(Special) : "", Special > -3 ? " " : "");
 			return aItem;
+		}
+	case TELE_WEAPON:
+		{
+			static char aWeapon[64];
+			str_format(aWeapon, sizeof(aWeapon), "Tele %s", GetWeaponName(Special));
+			return aWeapon;
 		}
 	}
 	return "Unknown";

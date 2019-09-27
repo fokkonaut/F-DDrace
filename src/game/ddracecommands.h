@@ -117,6 +117,11 @@ CONSOLE_COMMAND("bloody", "?v[id]", CFGFLAG_SERVER, ConBloody, this, "Toggles bl
 CONSOLE_COMMAND("strongbloody", "?v[id]", CFGFLAG_SERVER, ConStrongBloody, this, "Toggles strong bloody for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("policehelper", "?v[id]", CFGFLAG_SERVER, ConPoliceHelper, this, "Toggles police helper for player v", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("alwaysteleweapon", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConAlwaysTeleWeapon, this, "Lets player v always use tele weapons", AUTHED_ADMIN)
+CONSOLE_COMMAND("telegun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleGun, this, "Gives a tele gun to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("telegrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleGrenade, this, "Gives a tele grenade to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleLaser, this, "Gives a tele laser to player v", AUTHED_ADMIN)
+
 //account
 CONSOLE_COMMAND("acc_logout", "r[name]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player r", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)

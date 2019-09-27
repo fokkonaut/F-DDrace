@@ -1269,3 +1269,35 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 }
+
+void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->m_AlwaysTeleWeapon = !pChr->m_AlwaysTeleWeapon;
+}
+
+void CGameContext::ConTeleGun(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->TeleWeapon(WEAPON_GUN, !pChr->m_HasTeleGun, pResult->m_ClientID);
+}
+
+void CGameContext::ConTeleGrenade(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->TeleWeapon(WEAPON_GRENADE, !pChr->m_HasTeleGrenade, pResult->m_ClientID);
+}
+
+void CGameContext::ConTeleLaser(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->TeleWeapon(WEAPON_LASER, !pChr->m_HasTeleLaser, pResult->m_ClientID);
+}

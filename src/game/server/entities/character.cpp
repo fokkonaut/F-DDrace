@@ -2816,6 +2816,8 @@ void CCharacter::FDDraceInit()
 	m_Item = -3;
 	m_pItem = 0;
 
+	m_AlwaysTeleWeapon = false;
+
 	m_InShop = false;
 
 	int64 Now = Server()->Tick();
@@ -3436,4 +3438,17 @@ void CCharacter::Item(int Item, int FromID, bool Silent)
 	m_Item = Item;
 	m_pItem = Item == -3 ? 0 : new CPickup(GameWorld(), m_Pos, Type, SubType, 0, 0, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(ITEM, m_pPlayer->GetCID(), Item == -3 ? false : true, FromID, Silent, Item);
+}
+
+void CCharacter::TeleWeapon(int Type, bool Set, int FromID, bool Silent)
+{
+	if (Type != WEAPON_GUN && Type != WEAPON_GRENADE && Type != WEAPON_LASER)
+		return;
+	switch (Type)
+	{
+	case WEAPON_GUN: m_HasTeleGun = Set; break;
+	case WEAPON_GRENADE: m_HasTeleGrenade = Set; break;
+	case WEAPON_LASER: m_HasTeleLaser = Set; break;
+	}
+	GameServer()->SendExtraMessage(TELE_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
 }

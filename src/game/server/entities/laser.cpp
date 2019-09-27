@@ -201,7 +201,7 @@ void CLaser::DoBounce()
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
+		bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN || (pOwnerChar && pOwnerChar->m_AlwaysTeleWeapon);
 		bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 		int IsTeleInWeapon = GameServer()->Collision()->IsTeleportWeapon(MapIndex);
 

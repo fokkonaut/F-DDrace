@@ -625,6 +625,11 @@ private:
 	static void ConStrongBloody(IConsole::IResult* pResult, void* pUserData);
 	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeleGun(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeleGrenade(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeleLaser(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);

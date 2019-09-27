@@ -200,7 +200,7 @@ void CProjectile::Tick()
 		{
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->GetPos() : ColPos);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN;
+			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN || pOwnerChar->m_AlwaysTeleWeapon;
 			bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
 
 			if (IsSwitchTeleGun || IsBlueSwitchTeleGun) {
