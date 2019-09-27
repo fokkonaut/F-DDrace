@@ -3181,7 +3181,8 @@ void CCharacter::UpdateWeaponIndicator()
 {
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
 		|| (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Level < MAX_LEVEL)
-		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
+		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN)
+		|| (m_TileIndex == TILE_SHOP || m_TileFIndex == TILE_SHOP))
 		return;
 
 	char aBuf[256];
