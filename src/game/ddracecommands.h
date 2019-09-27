@@ -123,7 +123,7 @@ CONSOLE_COMMAND("telegrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleGr
 CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleLaser, this, "Gives a tele laser to player v", AUTHED_ADMIN)
 
 //account
-CONSOLE_COMMAND("acc_logout", "r[name]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player r", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_vip", "s[username]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
