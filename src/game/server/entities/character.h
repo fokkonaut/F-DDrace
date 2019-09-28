@@ -419,6 +419,8 @@ public:
 
 	bool m_aSpawnWeaponActive[3];
 
+	bool m_WasPausedLastTick;
+
 	// special race
 	bool m_HasFinishedSpecialRace;
 

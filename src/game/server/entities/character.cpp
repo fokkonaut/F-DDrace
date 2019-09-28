@@ -950,7 +950,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !m_WasPausedLastTick)
 	{
 		HandleWeaponSwitch();
 		FireWeapon();
@@ -2851,10 +2851,9 @@ void CCharacter::FDDraceInit()
 			}
 
 	m_HasFinishedSpecialRace = false;
-
 	m_SpawnTick = Now;
-
 	m_MoneyTile = false;
+	m_WasPausedLastTick = false;
 }
 
 void CCharacter::FDDraceTick()
@@ -2934,6 +2933,8 @@ void CCharacter::FDDraceTick()
 			}
 		}
 	}
+
+	m_WasPausedLastTick = m_pPlayer->IsSpectator();
 }
 
 void CCharacter::HandleLastIndexTiles()
