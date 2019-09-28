@@ -308,6 +308,9 @@ public:
 	void UpdateHidePlayers(int ClientID = -1);
 
 	//account
+	int GetAccount(const char* pUsername);
+	void FreeAccount(int ID);
+
 	struct TopAccounts
 	{
 		int m_Level;
@@ -324,6 +327,10 @@ public:
 	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
 	void Logout(int ID);
+
+	int m_pNeededXP[MAX_LEVEL + 1];
+	int m_LastAccSaveTick;
+
 	struct AccountInfo
 	{
 		int m_Port;
@@ -391,9 +398,6 @@ public:
 		INSTAGIB_DEATHS,
 		NUM_ACCOUNT_VARIABLES
 	};
-
-	int m_pNeededXP[MAX_LEVEL+1];
-	int m_LastAccSaveTick;
 
 	//motd
 	const char* FixMotd(const char* pMsg);

@@ -2924,7 +2924,7 @@ int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageT
 		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 		pSelf->m_TempTopAccounts.push_back(Account);
 
-		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+		pSelf->FreeAccount(ID);
 	}
 
 	return 0;
@@ -2948,7 +2948,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 			dbg_msg("acc", "logged out account '%s'", aUsername);
 		}
 		else
-			pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+			pSelf->FreeAccount(ID);
 	}
 
 	return 0;
@@ -3100,6 +3100,42 @@ void CGameContext::Logout(int ID)
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
 	WriteAccountStats(ID);
+	FreeAccount(ID);
+}
+
+int CGameContext::GetAccount(const char* pUsername)
+{
+	bool AccountLoggedIn = false;
+	int ID = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_apPlayers[i] && !str_comp(m_Accounts[m_apPlayers[i]->GetAccID()].m_Username, pUsername))
+		{
+			ID = m_apPlayers[i]->GetAccID();
+			AccountLoggedIn = true;
+			break;
+		}
+	}
+
+	if (!AccountLoggedIn)
+	{
+		ID = AddAccount();
+		ReadAccountStats(ID, pUsername);
+	}
+
+	if (m_Accounts[ID].m_Username[0] == '\0')
+	{
+		FreeAccount(ID);
+		return 0;
+	}
+
+	return ID;
+}
+
+void CGameContext::FreeAccount(int ID)
+{
+	dbg_msg("acc", "freed account %d", ID);
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 

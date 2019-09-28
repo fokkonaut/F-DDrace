@@ -1099,31 +1099,10 @@ void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	
-	bool AccountLoggedIn = false;
-	int ID = 0;
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
 	{
-		if (pSelf->m_apPlayers[i] && !str_comp(pSelf->m_Accounts[pSelf->m_apPlayers[i]->GetAccID()].m_Username, pResult->GetString(0)))
-		{
-			ID = pSelf->m_apPlayers[i]->GetAccID();
-			AccountLoggedIn = true;
-			break;
-		}
-	}
-
-	if (!AccountLoggedIn)
-	{
-		ID = pSelf->AddAccount();
-		pSelf->ReadAccountStats(ID, pResult->GetString(0));
-	}
-
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
-
-	if ((*Account).m_Username[0] == '\0')
-	{
-		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
 		return;
 	}
@@ -1144,30 +1123,9 @@ void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	
-	bool AccountLoggedIn = false;
-	int ID = 0;
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
 	{
-		if (pSelf->m_apPlayers[i] && !str_comp(pSelf->m_Accounts[pSelf->m_apPlayers[i]->GetAccID()].m_Username, pResult->GetString(0)))
-		{
-			ID = pSelf->m_apPlayers[i]->GetAccID();
-			AccountLoggedIn = true;
-			break;
-		}
-	}
-
-	if (!AccountLoggedIn)
-	{
-		ID = pSelf->AddAccount();
-		pSelf->ReadAccountStats(ID, pResult->GetString(0));
-	}
-
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
-
-	if ((*Account).m_Username[0] == '\0')
-	{
-		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
 		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
 		return;
 	}
@@ -1184,7 +1142,7 @@ void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "VIP for account '%s' has been %s", pSelf->m_Accounts[ID].m_Username, pSelf->m_Accounts[ID].m_VIP ? "enabled" : "disabled");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-	if (!AccountLoggedIn)
+	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->Logout(ID);
 }
 
@@ -1198,7 +1156,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	if ((*Account).m_Username[0] == '\0')
 	{
-		pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+		pSelf->FreeAccount(ID);
 		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
 		return;
 	}
@@ -1267,7 +1225,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "Last Player Name: %s", (*Account).m_aLastPlayerName);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	pSelf->m_Accounts.erase(pSelf->m_Accounts.begin() + ID);
+	pSelf->FreeAccount(ID);
 }
 
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)
