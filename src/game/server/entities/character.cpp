@@ -1439,7 +1439,7 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_Armor = 0;
 	pCharacter->m_TriggeredEvents = m_TriggeredEvents;
 
-	pCharacter->m_Weapon = m_ActiveWeapon;
+	pCharacter->m_Weapon = GameServer()->GetRealWeapon(m_ActiveWeapon);;
 	pCharacter->m_AttackTick = m_AttackTick;
 
 	pCharacter->m_Direction = m_Input.m_Direction;
@@ -3144,8 +3144,7 @@ void CCharacter::UnsetSpookyGhost()
 
 void CCharacter::SetActiveWeapon(int Weapon)
 {
-	m_RealActiveWeapon = Weapon;
-	m_ActiveWeapon = GameServer()->GetRealWeapon(Weapon);
+	m_ActiveWeapon = Weapon;
 	UpdateWeaponIndicator();
 }
 

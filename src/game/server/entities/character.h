@@ -162,8 +162,6 @@ private:
 
 	} m_aWeapons[NUM_WEAPONS];
 
-	int m_RealActiveWeapon;
-
 	int m_ActiveWeapon;
 	int m_LastWeapon;
 	int m_QueuedWeapon;
@@ -321,7 +319,7 @@ public:
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; };
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; };
-	int GetActiveWeapon() { return m_RealActiveWeapon; };
+	int GetActiveWeapon() { return m_ActiveWeapon; };
 	void SetActiveWeapon(int Weapon);
 	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
 	int GetArmor() { return m_Armor; };
