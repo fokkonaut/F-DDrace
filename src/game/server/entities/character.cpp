@@ -3377,12 +3377,6 @@ void CCharacter::StrongBloody(bool Set, int FromID, bool Silent)
 	GameServer()->SendExtraMessage(STRONG_BLOODY, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
-void CCharacter::PoliceHelper(bool Set, int FromID, bool Silent)
-{
-	m_PoliceHelper = Set;
-	GameServer()->SendExtraMessage(POLICE_HELPER, m_pPlayer->GetCID(), Set, FromID, Silent);
-}
-
 void CCharacter::ScrollNinja(bool Set, int FromID, bool Silent)
 {
 	m_ScrollNinja = Set;

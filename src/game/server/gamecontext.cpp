@@ -3502,8 +3502,6 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
 		else if (Extra == PASSIVE)
 			str_format(aMsg, sizeof(aMsg), "You are %s in %s", Set ? "now" : "no longer", aItem);
-		else if (Extra == POLICE_HELPER)
-			str_format(aMsg, sizeof(aMsg), "You are %s a %s", Set ? "now" : "no longer", aItem);
 		else if (Extra == ENDLESS_HOOK)
 			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
 		else if (Extra == INFINITE_JUMPS)
@@ -3553,8 +3551,6 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Bloody";
 	case STRONG_BLOODY:
 		return "Strong Bloody";
-	case POLICE_HELPER:
-		return "Police Helper";
 	case SCROLL_NINJA:
 		return "Scroll Ninja";
 	case HOOK_POWER:

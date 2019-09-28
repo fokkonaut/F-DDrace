@@ -823,14 +823,6 @@ void CGameContext::ConStrongBloody(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->StrongBloody(!pChr->m_StrongBloody, pResult->m_ClientID);
 }
 
-void CGameContext::ConPoliceHelper(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->PoliceHelper(!pChr->m_PoliceHelper, pResult->m_ClientID);
-}
-
 void CGameContext::ConHookPower(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

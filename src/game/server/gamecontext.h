@@ -563,6 +563,8 @@ private:
 	static void ConTop5Points(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5Money(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
+
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
 
@@ -627,7 +629,6 @@ private:
 	static void ConDDraceMode(IConsole::IResult* pResult, void* pUserData);
 	static void ConBloody(IConsole::IResult* pResult, void* pUserData);
 	static void ConStrongBloody(IConsole::IResult* pResult, void* pUserData);
-	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeleGun(IConsole::IResult* pResult, void* pUserData);

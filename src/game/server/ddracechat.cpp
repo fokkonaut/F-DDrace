@@ -1717,3 +1717,75 @@ void CGameContext::ConTop5Money(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_MONEY);
 }
+
+void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_PoliceLevel < 2)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need to be police level 2 to use this command");
+		return;
+	}
+
+	int ID = pSelf->GetCIDByName(pResult->GetString(1));
+	CCharacter* pChr = pSelf->GetPlayerChar(ID);
+
+	char aBuf[128];
+	char aCmd[64];
+	str_copy(aCmd, pResult->GetString(0), sizeof(aCmd));
+
+	if (!str_comp_nocase(aCmd, "add"))
+	{
+		if (!pChr)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
+			return;
+		}
+		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player is a police officer");
+			return;
+		}
+		else if (pChr->m_PoliceHelper)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player is a police helper already");
+			return;
+		}
+
+		pChr->m_PoliceHelper = true;
+		str_format(aBuf, sizeof(aBuf), "'%s' added you to the police helpers", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You added '%s' to the police helpers", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else if (!str_comp_nocase(aCmd, "remove"))
+	{
+		if (!pChr)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
+			return;
+		}
+		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player is a police officer");
+			return;
+		}
+		else if (!pChr->m_PoliceHelper)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player is not a police helper");
+			return;
+		}
+
+		pChr->m_PoliceHelper = false;
+		str_format(aBuf, sizeof(aBuf), "'%s' removed you from the police helpers", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You removed '%s' from the police helpers", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+}
