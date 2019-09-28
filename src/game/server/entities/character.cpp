@@ -2652,7 +2652,7 @@ void CCharacter::DDracePostCoreTick()
 		m_FirstFreezeTick = 0;
 }
 
-bool CCharacter::Freeze(int Seconds)
+bool CCharacter::Freeze(float Seconds)
 {
 	m_IsFrozen = true;
 

@@ -234,7 +234,7 @@ private:
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);
-	bool Freeze(int Time);
+	bool Freeze(float Time);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
