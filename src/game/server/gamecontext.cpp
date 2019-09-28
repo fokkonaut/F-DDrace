@@ -3544,17 +3544,17 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 	case INF_METEOR:
 		return "Meteor";
 	case PASSIVE:
-		return "Passive mode";
+		return "Passive Mode";
 	case VANILLA_MODE:
-		return "Vanilla mode";
+		return "Vanilla Mode";
 	case DDRACE_MODE:
-		return "DDrace mode";
+		return "DDrace Mode";
 	case BLOODY:
 		return "Bloody";
 	case STRONG_BLOODY:
 		return "Strong Bloody";
 	case POLICE_HELPER:
-		return "Police helper";
+		return "Police Helper";
 	case SCROLL_NINJA:
 		return "Scroll Ninja";
 	case HOOK_POWER:
