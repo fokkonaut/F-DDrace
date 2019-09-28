@@ -944,7 +944,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : (*Account).m_Level >= MAX_LEVEL ? " (max)" : "");
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->m_pNeededXP[(*Account).m_Level]);
+	str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->m_aNeededXP[(*Account).m_Level]);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -960,6 +960,10 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Spooky Ghost ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The Spooky Ghost is an extra, that can be toggled like this:");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Hold TAB (or other scoreboard key) and shoot two times with your gun.");
@@ -968,6 +972,10 @@ void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserDat
 void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to extras like rainbow, atom or trail.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money per second more.");
@@ -982,6 +990,9 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
 
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Spawn Weapons ~~~");
@@ -1001,6 +1012,10 @@ void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserDa
 void CGameContext::ConAccountInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Accounts ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are used to save your stats.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "You can farm money and buy things in the shop, kill tees and get points.");
@@ -1026,6 +1041,10 @@ void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserD
 void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
 	if (!g_Config.m_SvAccounts)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
@@ -1442,7 +1461,7 @@ void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 		else if (Policelevel == 2)
 			pSelf->SendChatTarget(pResult->m_ClientID, "- '/policehelper'");
 		else if (Policelevel == 3)
-			pSelf->SendChatTarget(pResult->m_ClientID, "- taser license ('/taser')");
+			pSelf->SendChatTarget(pResult->m_ClientID, "- taser license ('/taserinfo')");
 	}
 	else
 	{
@@ -1788,4 +1807,29 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 		str_format(aBuf, sizeof(aBuf), "You removed '%s' from the police helpers", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
+}
+
+void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	char aBuf[128];
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Taser ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Police officers with level 3 or higher get a taser license.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "The taser is a rifle that freezes players for a short time.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your taser stats ~~~");
+	str_format(aBuf, sizeof(aBuf), "Taser level: %d/7", (*Account).m_TaserLevel);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	if ((*Account).m_TaserLevel < 7)
+	{
+		str_format(aBuf, sizeof(aBuf), "Price for the next level: %d", pSelf->m_aTaserPrice[(*Account).m_TaserLevel]);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", (*Account).m_TaserLevel * 5);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }

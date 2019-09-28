@@ -328,7 +328,8 @@ public:
 	void WriteAccountStats(int ID);
 	void Logout(int ID);
 
-	int m_pNeededXP[MAX_LEVEL + 1];
+	int m_aTaserPrice[7];
+	int m_aNeededXP[MAX_LEVEL + 1];
 	int m_LastAccSaveTick;
 
 	struct AccountInfo
@@ -358,6 +359,7 @@ public:
 		char m_aLastPlayerName[32];
 		int m_SurvivalDeaths;
 		int m_InstagibDeaths;
+		int m_TaserLevel;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -396,6 +398,7 @@ public:
 		LAST_PLAYER_NAME,
 		SURVIVAL_DEATHS,
 		INSTAGIB_DEATHS,
+		TASER_LEVEL,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -533,6 +536,7 @@ private:
 	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccountInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConTaserInfo(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConLogin(IConsole::IResult* pResult, void* pUserData);
 	static void ConLogout(IConsole::IResult* pResult, void* pUserData);

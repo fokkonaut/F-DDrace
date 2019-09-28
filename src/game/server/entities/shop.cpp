@@ -2,7 +2,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-#define MAX_SHOP_PAGES 10 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
+#define MAX_SHOP_PAGES 11 // UPDATE THIS WITH EVERY PAGE YOU ADD!!!!!
 
 void CCharacter::ShopWindow(int Dir)
 {
@@ -129,6 +129,16 @@ void CCharacter::ShopWindow(int Dir)
 		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
 		str_format(aInfo, sizeof(aInfo), "It will make your jetpack gun be a ninja.\n"
 			"Toggle it using '/ninjajetpack'.");
+	}
+	else if (m_ShopWindowPage == 11)
+	{
+		str_format(aItem, sizeof(aItem), "        ~  T A S E R  ~      ");
+		str_format(aLevelTmp, sizeof(aLevelTmp), "30");
+		str_format(aPriceTmp, sizeof(aPriceTmp), "50.000");
+		str_format(aTimeTmp, sizeof(aTimeTmp), "You own this item forever.");
+		str_format(aInfo, sizeof(aInfo), "Taser is a rifle that freezes a player\n"
+			"For more information about the taser and your taser stats,\n"
+			"plase visit '/taserinfo'.");
 	}
 	else
 	{
@@ -312,6 +322,13 @@ void CCharacter::BuyItem(int ItemID)
 			Price = 10000;
 			Time = 2;
 		} break;
+		case 11:
+		{
+			str_format(aItem, sizeof(aItem), "Taser Level %d", (*Account).m_TaserLevel + 1);
+			Level = 30;
+			Price = GameServer()->m_aTaserPrice[(*Account).m_TaserLevel];
+			Time = 2;
+		}
 	}
 
 	bool HasAlready = false;
@@ -328,6 +345,7 @@ void CCharacter::BuyItem(int ItemID)
 	case 8: if ((*Account).m_SpawnWeapon[1] == 5) HasAlready = true; break;
 	case 9: if ((*Account).m_SpawnWeapon[2] == 5) HasAlready = true; break;
 	case 10: if ((*Account).m_Ninjajetpack) HasAlready = true; break;
+	case 11: if ((*Account).m_TaserLevel == 7) HasAlready = true; break;
 	}
 
 	if (HasAlready)
@@ -337,6 +355,7 @@ void CCharacter::BuyItem(int ItemID)
 		{
 		case 3: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the highest police rank"); break;
 		case 7: case 8: case 9: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum amount of bullets"); break;
+		case 11: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum taser level"); break;
 		case 4: case 5: UseThe = true;
 		default:
 			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", aItem);
@@ -383,5 +402,6 @@ void CCharacter::BuyItem(int ItemID)
 	case 9: if (Weapon == -1) Weapon = 2;
 		(*Account).m_SpawnWeapon[Weapon]++; break;
 	case 10: (*Account).m_Ninjajetpack = true; break;
+	case 11: (*Account).m_TaserLevel++; break;
 	}
 }

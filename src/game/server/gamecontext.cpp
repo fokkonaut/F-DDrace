@@ -2477,8 +2477,12 @@ void CGameContext::OnInit()
 	62400000, 63500000, 64600000, 65700000, 66800000, 67900000 };
 
 	for (int i = 0; i < MAX_LEVEL; i++)
-		m_pNeededXP[i] = NeededXP[i];
-	m_pNeededXP[MAX_LEVEL] = NeededXP[MAX_LEVEL-1];
+		m_aNeededXP[i] = NeededXP[i];
+	m_aNeededXP[MAX_LEVEL] = NeededXP[MAX_LEVEL-1];
+
+	int TaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000 };
+	for (int i = 0; i < 7; i++)
+		m_aTaserPrice[i] = TaserPrice[i];
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
@@ -2991,6 +2995,7 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_aLastPlayerName[0] = '\0';
 	m_Accounts[ID].m_SurvivalDeaths = 0;
 	m_Accounts[ID].m_InstagibDeaths = 0;
+	m_Accounts[ID].m_TaserLevel = 0;
 
 	return ID;
 }
@@ -3042,6 +3047,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case LAST_PLAYER_NAME:			str_copy(m_Accounts[ID].m_aLastPlayerName, aData, sizeof(m_Accounts[ID].m_aLastPlayerName)); break;
 		case SURVIVAL_DEATHS:			m_Accounts[ID].m_SurvivalDeaths = atoi(aData); break;
 		case INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(aData); break;
+		case TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(aData); break;
 		}
 	}
 }
@@ -3087,6 +3093,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_aLastPlayerName << "\n";
 		AccFile << m_Accounts[ID].m_SurvivalDeaths << "\n";
 		AccFile << m_Accounts[ID].m_InstagibDeaths << "\n";
+		AccFile << m_Accounts[ID].m_TaserLevel << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -3418,6 +3425,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Lightsaber";
 	case WEAPON_TELE_RIFLE:
 		return "Tele Rifle";
+	case WEAPON_TASER:
+		return "Taser";
 	}
 	return "Unknown";
 }
@@ -3437,6 +3446,8 @@ int CGameContext::GetRealWeapon(int Weapon)
 	case WEAPON_LIGHTSABER:
 		return WEAPON_GUN;
 	case WEAPON_TELE_RIFLE:
+		return WEAPON_LASER;
+	case WEAPON_TASER:
 		return WEAPON_LASER;
 	}
 	return Weapon;

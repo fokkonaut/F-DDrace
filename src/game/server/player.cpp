@@ -1014,12 +1014,12 @@ void CPlayer::GiveXP(int Amount)
 
 	if ((*Account).m_Level < MAX_LEVEL)
 	{
-		while ((*Account).m_XP + Amount > GameServer()->m_pNeededXP[MAX_LEVEL])
+		while ((*Account).m_XP + Amount > GameServer()->m_aNeededXP[MAX_LEVEL])
 			Amount--;
 		(*Account).m_XP += Amount;
 	}
 
-	if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_pNeededXP[(*Account).m_Level])
+	if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_aNeededXP[(*Account).m_Level])
 	{
 		(*Account).m_Level++;
 

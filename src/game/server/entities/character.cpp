@@ -378,6 +378,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_PLASMA_RIFLE
 		|| GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE
 		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
+		|| GetActiveWeapon() ==	WEAPON_TASER
 	)
 		FullAuto = true;
 	if (m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -638,6 +639,7 @@ void CCharacter::FireWeapon()
 					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
 
+			case WEAPON_TASER:
 			case WEAPON_LASER:
 			{
 				float LaserReach;
@@ -646,7 +648,7 @@ void CCharacter::FireWeapon()
 				else
 					LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 
-				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_LASER);
+				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), GetActiveWeapon());
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
@@ -1343,7 +1345,13 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
 	}
 
-	if ((Dmg && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) || Weapon == WEAPON_HAMMER || Weapon == WEAPON_GRENADE || Weapon == WEAPON_STRAIGHT_GRENADE || Weapon == WEAPON_PLASMA_RIFLE || Weapon == WEAPON_LIGHTSABER)
+	if ((Dmg && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
+		|| Weapon == WEAPON_HAMMER
+		|| Weapon == WEAPON_GRENADE
+		|| Weapon == WEAPON_STRAIGHT_GRENADE
+		|| Weapon == WEAPON_PLASMA_RIFLE
+		|| Weapon == WEAPON_LIGHTSABER
+		|| Weapon == WEAPON_TASER)
 	{
 		m_EmoteType = EMOTE_PAIN;
 		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
@@ -2048,7 +2056,7 @@ void CCharacter::HandleTiles(int Index)
 						"^666XP ^222[^444%d^222/^444%d^222]%s\n"
 						"^666Level ^222[^444%d^222]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
+						(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
 						(*Account).m_Level
 					);
 
@@ -2674,12 +2682,16 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
 		m_FirstFreezeTick = 0;
-		m_Core.m_Killer.m_ClientID = -1;
-		m_Core.m_Killer.m_Weapon = -1;
 		if (GetActiveWeapon()==WEAPON_HAMMER) m_ReloadTimer = 0;
 
 		if (m_pPlayer->m_SmoothFreeze)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+
+		m_Core.m_Killer.m_ClientID = -1;
+		if (!m_GotTasered)
+			m_Core.m_Killer.m_Weapon = -1;
+		else
+			m_GotTasered = false;
 		return true;
 	}
 	return false;
@@ -2854,6 +2866,7 @@ void CCharacter::FDDraceInit()
 	m_SpawnTick = Now;
 	m_MoneyTile = false;
 	m_WasPausedLastTick = false;
+	m_GotTasered = false;
 }
 
 void CCharacter::FDDraceTick()
@@ -2927,7 +2940,7 @@ void CCharacter::FDDraceTick()
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aMsg, sizeof(aMsg), " \n \n^666XP ^222[^444%d^222/^444%d^222] ^666+1 flag%s%s",
-					(*Account).m_XP, GameServer()->m_pNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+					(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
 				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
 			}
@@ -2935,6 +2948,12 @@ void CCharacter::FDDraceTick()
 	}
 
 	m_WasPausedLastTick = m_pPlayer->IsSpectator();
+
+	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1
+		&& GetWeaponGot(WEAPON_LASER) && !GetWeaponGot(WEAPON_TASER))
+		GiveWeapon(WEAPON_TASER);
+	else if (GetWeaponGot(WEAPON_TASER) && (!GetWeaponGot(WEAPON_LASER) || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1))
+		GiveWeapon(WEAPON_TASER, true);
 }
 
 void CCharacter::HandleLastIndexTiles()
@@ -3033,7 +3052,7 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		return;
 
 	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA
-		|| (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN] && !m_HasTeleGun))
+		|| (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN] && !m_HasTeleGun) || WeaponID == WEAPON_TASER)
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
