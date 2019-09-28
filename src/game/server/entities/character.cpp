@@ -2697,11 +2697,14 @@ bool CCharacter::UnFreeze()
 		if (m_pPlayer->m_SmoothFreeze)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
-		m_Core.m_Killer.m_ClientID = -1;
 		if (!m_GotTasered)
+		{
+			m_Core.m_Killer.m_ClientID = -1;
 			m_Core.m_Killer.m_Weapon = -1;
+		}
 		else
 			m_GotTasered = false;
+
 		return true;
 	}
 	return false;
