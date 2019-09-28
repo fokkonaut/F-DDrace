@@ -38,6 +38,7 @@ enum Extra
 	INVISIBLE,
 	ITEM,
 	TELE_WEAPON,
+	ALWAYS_TELE_WEAPON,
 	NUM_EXTRAS
 };
 
@@ -142,6 +143,7 @@ public:
 	void Invisible(bool Set = true, int FromID = -1, bool Silent = false);
 	void Item(int Item, int FromID = -1, bool Silent = false);
 	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
+	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character

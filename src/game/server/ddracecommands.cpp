@@ -1275,7 +1275,7 @@ void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserDa
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->m_AlwaysTeleWeapon = !pChr->m_AlwaysTeleWeapon;
+	if (pChr) pChr->AlwaysTeleWeapon(!pChr->m_AlwaysTeleWeapon, pResult->m_ClientID);
 }
 
 void CGameContext::ConTeleGun(IConsole::IResult* pResult, void* pUserData)

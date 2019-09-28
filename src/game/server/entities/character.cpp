@@ -3455,3 +3455,9 @@ void CCharacter::TeleWeapon(int Type, bool Set, int FromID, bool Silent)
 	}
 	GameServer()->SendExtraMessage(TELE_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
 }
+
+void CCharacter::AlwaysTeleWeapon(bool Set, int FromID, bool Silent)
+{
+	m_AlwaysTeleWeapon = Set;
+	GameServer()->SendExtraMessage(ALWAYS_TELE_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent);
+}

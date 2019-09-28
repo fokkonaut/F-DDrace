@@ -3553,6 +3553,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 			str_format(aWeapon, sizeof(aWeapon), "Tele %s", GetWeaponName(Special));
 			return aWeapon;
 		}
+	case ALWAYS_TELE_WEAPON:
+		return "Always Tele Weapon";
 	}
 	return "Unknown";
 }
