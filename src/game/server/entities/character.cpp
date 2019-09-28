@@ -851,6 +851,9 @@ void CCharacter::HandleWeapons()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
+	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1)
+		GiveWeapon(WEAPON_TASER, Remove, Ammo);
+
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
@@ -2956,10 +2959,7 @@ void CCharacter::FDDraceTick()
 
 	m_WasPausedLastTick = m_pPlayer->IsSpectator();
 
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1
-		&& GetWeaponGot(WEAPON_LASER) && !GetWeaponGot(WEAPON_TASER))
-		GiveWeapon(WEAPON_TASER, false, GetWeaponAmmo(WEAPON_LASER));
-	else if (GetWeaponGot(WEAPON_TASER) && (!GetWeaponGot(WEAPON_LASER) || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1))
+	if (GetWeaponGot(WEAPON_TASER) && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1)
 		GiveWeapon(WEAPON_TASER, true);
 }
 
@@ -3076,7 +3076,7 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 
 	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon)
 	{
-		m_aWeapons[WeaponID].m_Got = false;
+		GiveWeapon(WeaponID, true);
 		SetWeapon(WEAPON_GUN);
 	}
 	if (m_aSpreadWeapon[WeaponID])
