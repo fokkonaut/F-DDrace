@@ -779,9 +779,16 @@ void CCharacter::FireWeapon()
 	{
 		m_aWeapons[GetActiveWeapon()].m_Ammo--;
 
-		int W = GetActiveWeapon() == WEAPON_SHOTGUN ? 0 : GetActiveWeapon() == WEAPON_GRENADE ? 1 : GetActiveWeapon() == WEAPON_LASER ? 2 : -1;
-		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
-			GiveWeapon(GetActiveWeapon(), true);
+		// keeping laser and taser ammo equal
+		if (GetActiveWeapon() == WEAPON_LASER)
+			m_aWeapons[WEAPON_TASER].m_Ammo--;
+		else if (GetActiveWeapon() == WEAPON_TASER)
+			m_aWeapons[WEAPON_LASER].m_Ammo--;
+
+		int Weapon = GetActiveWeapon() == WEAPON_TASER ? WEAPON_LASER : GetActiveWeapon();
+		int W = Weapon == WEAPON_SHOTGUN ? 0 : Weapon == WEAPON_GRENADE ? 1 : Weapon == WEAPON_LASER ? 2 : -1;
+		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[Weapon].m_Ammo == 0)
+			GiveWeapon(Weapon, true);
 	}
 
 	if (!m_ReloadTimer)
@@ -2951,7 +2958,7 @@ void CCharacter::FDDraceTick()
 
 	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1
 		&& GetWeaponGot(WEAPON_LASER) && !GetWeaponGot(WEAPON_TASER))
-		GiveWeapon(WEAPON_TASER);
+		GiveWeapon(WEAPON_TASER, false, GetWeaponAmmo(WEAPON_LASER));
 	else if (GetWeaponGot(WEAPON_TASER) && (!GetWeaponGot(WEAPON_LASER) || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1))
 		GiveWeapon(WEAPON_TASER, true);
 }
