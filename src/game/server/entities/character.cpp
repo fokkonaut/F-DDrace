@@ -851,7 +851,7 @@ void CCharacter::HandleWeapons()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
-	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1)
+	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1 && m_pPlayer->m_Minigame == MINIGAME_NONE)
 		GiveWeapon(WEAPON_TASER, Remove, Ammo);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
