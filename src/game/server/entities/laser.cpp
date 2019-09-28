@@ -81,7 +81,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		if (pOwnerChar)
 		{
-			pHit->Freeze(5.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
+			pHit->Freeze(10.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
 			pHit->m_GotTasered = true;
 		}
 	}
