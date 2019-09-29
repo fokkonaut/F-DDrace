@@ -1644,7 +1644,6 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 		{
 			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
 			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
-			pPlayer->m_ShowName = false;
 		}
 	}
 	else

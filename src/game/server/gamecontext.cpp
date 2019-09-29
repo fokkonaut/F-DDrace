@@ -3964,6 +3964,8 @@ void CGameContext::SetPlayerSurvivalState(int State)
 			m_apPlayers[i]->KillCharacter(WEAPON_GAME);
 			// set its new survival state
 			m_apPlayers[i]->m_SurvivalState = State;
+			// hide name in every state except lobby
+			m_apPlayers[i]->m_ShowName = State == SURVIVAL_LOBBY;
 		}
 }
 
