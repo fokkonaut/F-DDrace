@@ -938,23 +938,67 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
+	int Minigame = pSelf->m_apPlayers[pResult->m_ClientID]->m_Minigame;
 	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
-	str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : (*Account).m_Level >= MAX_LEVEL ? " (max)" : "");
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->m_aNeededXP[(*Account).m_Level]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	pSelf->SendChatTarget(pResult->m_ClientID, "---- BLOCK ----");
-	str_format(aBuf, sizeof(aBuf), "Points: %d", (*Account).m_BlockPoints);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	switch (Minigame)
+	{
+		case MINIGAME_NONE:
+		{
+			str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : (*Account).m_Level >= MAX_LEVEL ? " (max)" : "");
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->m_aNeededXP[(*Account).m_Level]);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		} //fallthrough
+
+		case MINIGAME_BLOCK:
+		{
+			if (Minigame == MINIGAME_NONE)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "---- BLOCK ----");
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "--- %s's Block Stats ---", pSelf->Server()->ClientName(ID));
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			}
+			str_format(aBuf, sizeof(aBuf), "Points: %d", (*Account).m_BlockPoints);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		} break;
+
+		case MINIGAME_SURVIVAL:
+		{
+			str_format(aBuf, sizeof(aBuf), "--- %s's Survival Stats ---", pSelf->Server()->ClientName(ID));
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Wins: %d", (*Account).m_SurvivalWins);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_SurvivalKills);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_SurvivalDeaths);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		} break;
+
+		case MINIGAME_INSTAGIB_BOOMFNG: // fallthrough
+		case MINIGAME_INSTAGIB_FNG:
+		{
+			str_format(aBuf, sizeof(aBuf), "--- %s's Instagib Stats ---", pSelf->Server()->ClientName(ID));
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Wins: %d", (*Account).m_InstagibWins);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_InstagibKills);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_InstagibDeaths);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		} break;
+	}
 }
 
 void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
