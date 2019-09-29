@@ -2841,7 +2841,7 @@ void CCharacter::FDDraceInit()
 	m_Item = -3;
 	m_pItem = 0;
 
-	m_AlwaysTeleWeapon = false;
+	m_AlwaysTeleWeapon = g_Config.m_SvAlwaysTeleWeapon;
 
 	m_InShop = false;
 
