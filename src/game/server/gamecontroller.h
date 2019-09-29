@@ -115,9 +115,8 @@ public:
 
 	// info
 	void UpdateGameInfo(int ClientID);
-	
 	const char *GetGameType() const { return m_pGameType; }
-	
+
 	// map
 	void ChangeMap(const char *pToMap);
 
