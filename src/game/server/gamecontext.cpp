@@ -3987,9 +3987,13 @@ void CGameContext::SendSurvivalBroadcast(const char *pMsg, bool Sound, bool IsIm
 	{
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
 		{
-			SendBroadcast(pMsg, i, IsImportant);
 			if (Sound)
 				CreateSound(SOUND_HOOK_NOATTACH, i);
+
+			// show money broadcast instead of the wanted one if we are on a money tile
+			if (m_apPlayers[i]->GetCharacter() && m_apPlayers[i]->GetCharacter()->m_MoneyTile)
+				continue;
+			SendBroadcast(pMsg, i, IsImportant);
 		}
 	}
 }
