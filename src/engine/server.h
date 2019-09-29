@@ -41,6 +41,7 @@ public:
 	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	// F-DDrace
+	virtual void GetClientAddr(int ClientID, NETADDR* pAddr) = 0;
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
 
 	virtual void DummyJoin(int DummyID) = 0;

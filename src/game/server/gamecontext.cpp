@@ -269,6 +269,10 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 
 void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
 {
+	if (ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
+		if (ProcessSpamProtection(ChatterClientID))
+			return;
+
 	char aBuf[256];
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), pText);
@@ -1140,8 +1144,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// drop empty and autocreated spam messages (more than 32 characters per second)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
-
-			pPlayer->m_LastChat = Server()->Tick();
 
 			// don't allow spectators to disturb players during a running game in tournament mode
 			int Mode = pMsg->m_Mode;
@@ -2819,6 +2821,43 @@ float CGameContext::PlayerJetpack()
 	float Temp;
 	m_Tuning.Get("player_jetpack", &Temp);
 	return Temp;
+}
+
+int CGameContext::ProcessSpamProtection(int ClientID)
+{
+	if(!m_apPlayers[ClientID])
+		return 0;
+	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat
+		&& m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
+		return 1;
+	else
+		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int Muted = 0;
+
+	for(int i = 0; i < m_NumMutes && !Muted; i++)
+	{
+		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+			Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+	}
+
+	if (Muted > 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	if ((m_apPlayers[ClientID]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
+	{
+		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientID));
+		m_apPlayers[ClientID]->m_ChatScore = 0;
+		return 1;
+	}
+
+	return 0;
 }
 
 int CGameContext::GetDDRaceTeam(int ClientID)

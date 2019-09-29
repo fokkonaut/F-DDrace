@@ -1999,6 +1999,14 @@ int main(int argc, const char **argv) // ignore_convention
 
 // F-DDrace
 
+void CServer::GetClientAddr(int ClientID, NETADDR* pAddr)
+{
+	if (ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	{
+		*pAddr = *m_NetServer.ClientAddr(ClientID);
+	}
+}
+
 const char* CServer::GetAnnouncementLine(char const* pFileName)
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);

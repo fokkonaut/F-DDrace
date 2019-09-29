@@ -302,6 +302,7 @@ public:
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	// F-DDrace
+	void GetClientAddr(int ClientID, NETADDR* pAddr);
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 

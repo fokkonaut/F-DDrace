@@ -198,6 +198,8 @@ public:
 	int m_KillMe;
 	bool m_HasFinishScore;
 
+	int m_ChatScore;
+
 	bool AfkTimer(int new_target_x, int new_target_y); //returns true if kicked
 	void AfkVoteTimer(CNetObj_PlayerInput* NewTarget);
 	int64 m_LastPlaytime;

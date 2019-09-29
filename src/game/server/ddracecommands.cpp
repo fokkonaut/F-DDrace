@@ -364,14 +364,12 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-bool CGameContext::TryMute(const char *pAddr, int Secs)
+bool CGameContext::TryMute(const NETADDR *pAddr, int Secs)
 {
-	NETADDR Addr;
-	net_addr_from_str(&Addr, pAddr);
 	// find a matching mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumMutes; i++)
 	{
-		if(net_addr_comp_noport(&m_aMutes[i].m_Addr, &Addr) == 0)
+		if(net_addr_comp_noport(&m_aMutes[i].m_Addr, pAddr) == 0)
 		{
 			m_aMutes[i].m_Expire = Server()->Tick()
 							+ Secs * Server()->TickSpeed();
@@ -382,7 +380,7 @@ bool CGameContext::TryMute(const char *pAddr, int Secs)
 	// nothing to update create new one
 	if(m_NumMutes < MAX_MUTES)
 	{
-		m_aMutes[m_NumMutes].m_Addr = Addr;
+		m_aMutes[m_NumMutes].m_Addr = *pAddr;
 		m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
 						+ Secs * Server()->TickSpeed();
 		m_NumMutes++;
@@ -393,7 +391,7 @@ bool CGameContext::TryMute(const char *pAddr, int Secs)
 	return false;
 }
 
-void CGameContext::Mute(const char *pAddr, int Secs, const char *pDisplayName)
+void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName)
 {
 	if (!TryMute(pAddr, Secs))
 		return;
@@ -428,10 +426,10 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
-	pSelf->Server()->GetClientAddr(Victim, aAddrStr, sizeof(aAddrStr));
+	NETADDR Addr;
+	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
-	pSelf->Mute(aAddrStr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
 			pSelf->Server()->ClientName(Victim));
 }
 
@@ -445,7 +443,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 				"Invalid network address to mute");
 	}
-	pSelf->Mute(pResult->GetString(0), clamp(pResult->GetInteger(1), 1, 86400), NULL);
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL);
 }
 
 // unmute by mute list index

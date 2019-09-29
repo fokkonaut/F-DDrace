@@ -288,6 +288,7 @@ public:
 	virtual const char *Version() const;
 	virtual const char *NetVersion() const;
 
+	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
@@ -663,8 +664,8 @@ private:
 	int m_NumMutes;
 	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
-	bool TryMute(const char* pAddr, int Secs);
-	void Mute(const char* pAddr, int Secs, const char* pDisplayName);
+	bool TryMute(const NETADDR *pAddr, int Secs);
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
 
 public:
 	CLayers* Layers() { return &m_Layers; }
