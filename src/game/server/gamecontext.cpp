@@ -1193,29 +1193,78 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
-			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
 			int64 Now = Server()->Tick();
+			int64 TickSpeed = Server()->TickSpeed();
 
-			if(pMsg->m_Force)
+			if (g_Config.m_SvRconVote && !Server()->GetAuthedState(ClientID))
 			{
-				if(!Server()->GetAuthedState(ClientID))
-					return;
+				SendChatTarget(ClientID, "You can only vote after logging in.");
+				return;
 			}
-			else
-			{
-				if((g_Config.m_SvSpamprotection && ((pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry+Server()->TickSpeed()*3 > Now) ||
-					(pPlayer->m_LastVoteCall && pPlayer->m_LastVoteCall+Server()->TickSpeed()*VOTE_COOLDOWN > Now))) ||
-					pPlayer->GetTeam() == TEAM_SPECTATORS || m_VoteCloseTime)
-					return;
 
-				pPlayer->m_LastVoteTry = Now;
+			if (g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + TickSpeed * 3 > Now)
+				return;
+
+			pPlayer->m_LastVoteTry = Now;
+			if (g_Config.m_SvSpectatorVotes == 0 && pPlayer->GetTeam() == TEAM_SPECTATORS)
+			{
+				SendChatTarget(ClientID, "Spectators aren't allowed to start a vote.");
+				return;
+			}
+
+			if (m_VoteCloseTime)
+			{
+				SendChatTarget(ClientID, "Wait for current vote to end before calling a new one.");
+				return;
+			}
+
+			if (Now < pPlayer->m_FirstVoteTick)
+			{
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "You must wait %d seconds before making your first vote.", (int)((pPlayer->m_FirstVoteTick - Now) / TickSpeed) + 1);
+				SendChatTarget(ClientID, aBuf);
+				return;
+			}
+
+			int TimeLeft = pPlayer->m_LastVoteCall + TickSpeed * g_Config.m_SvVoteDelay - Now;
+			if (pPlayer->m_LastVoteCall && TimeLeft > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You must wait %d seconds before making another vote.", (int)(TimeLeft / TickSpeed) + 1);
+				SendChatTarget(ClientID, aChatmsg);
+				return;
+			}
+
+			NETADDR Addr;
+			Server()->GetClientAddr(ClientID, &Addr);
+			int VoteMuted = 0;
+			for (int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
+				if (!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
+					VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			if (VoteMuted > 0)
+			{
+				char aChatmsg[64];
+				str_format(aChatmsg, sizeof(aChatmsg), "You are not permitted to vote for the next %d seconds.", VoteMuted);
+				SendChatTarget(ClientID, aChatmsg);
+				return;
 			}
 
 			char aChatmsg[512] = {0};
 			m_VoteType = VOTE_UNKNOWN;
 			char aDesc[VOTE_DESC_LENGTH] = {0};
 			char aCmd[VOTE_CMD_LENGTH] = {0};
-			const char *pReason = pMsg->m_Reason[0] ? pMsg->m_Reason : "No reason given";
+			char aReason[VOTE_REASON_LENGTH] = "No reason given";
+			CNetMsg_Cl_CallVote* pMsg = (CNetMsg_Cl_CallVote*)pRawMsg;
+			if (!str_utf8_check(pMsg->m_Type)
+				|| !str_utf8_check(pMsg->m_Reason)
+				|| !str_utf8_check(pMsg->m_Value))
+			{
+				return;
+			}
+			if (pMsg->m_Reason[0])
+			{
+				str_copy(aReason, pMsg->m_Reason, sizeof(aReason));
+			}
 
 			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
@@ -1231,7 +1280,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							Server()->SetRconCID(ClientID);
 							Console()->ExecuteLine(aCmd);
 							Server()->SetRconCID(IServer::RCON_CID_SERV);
-							ForceVote(VOTE_START_OP, aDesc, pReason);
+							ForceVote(VOTE_START_OP, aDesc, aReason);
 							return;
 						}
 						m_VoteType = VOTE_START_OP;
@@ -1365,7 +1414,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Server()->SetRconCID(ClientID);
 					Console()->ExecuteLine(aCmd);
 					Server()->SetRconCID(IServer::RCON_CID_SERV);
-					ForceVote(VOTE_START_SPEC, aDesc, pReason);
+					ForceVote(VOTE_START_SPEC, aDesc, aReason);
 					return;
 				}
 				m_VoteType = VOTE_START_SPEC;
@@ -1375,7 +1424,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(m_VoteType != VOTE_UNKNOWN)
 			{
 				m_VoteCreator = ClientID;
-				StartVote(aDesc, aCmd, pReason);
+				StartVote(aDesc, aCmd, aReason);
 				pPlayer->m_Vote = 1;
 				pPlayer->m_VotePos = m_VotePos = 1;
 				pPlayer->m_LastVoteCall = Now;

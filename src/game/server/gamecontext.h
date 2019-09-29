@@ -518,6 +518,9 @@ private:
 	static void ConRescue(IConsole::IResult* pResult, void* pUserData);
 	static void ConProtectedKill(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConVoteMute(IConsole::IResult* pResult, void* pUserData);
+	static void ConVoteUnmute(IConsole::IResult* pResult, void* pUserData);
+	static void ConVoteMutes(IConsole::IResult* pResult, void* pUserData);
 	static void ConMute(IConsole::IResult* pResult, void* pUserData);
 	static void ConMuteID(IConsole::IResult* pResult, void* pUserData);
 	static void ConMuteIP(IConsole::IResult* pResult, void* pUserData);
@@ -666,6 +669,9 @@ private:
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName);
+	bool TryVoteMute(const NETADDR* pAddr, int Secs);
+	bool VoteMute(const NETADDR* pAddr, int Secs, const char* pDisplayName, int AuthedID);
+	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);
 
 public:
 	CLayers* Layers() { return &m_Layers; }
