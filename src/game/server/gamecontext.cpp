@@ -2870,7 +2870,7 @@ float CGameContext::PlayerJetpack()
 
 int CGameContext::ProcessSpamProtection(int ClientID)
 {
-	if(!m_apPlayers[ClientID])
+	if(!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
 		return 0;
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat
 		&& m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())
