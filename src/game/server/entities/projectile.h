@@ -3,12 +3,6 @@
 #ifndef GAME_SERVER_ENTITIES_PROJECTILE_H
 #define GAME_SERVER_ENTITIES_PROJECTILE_H
 
-enum
-{
-	PLAYER_TEAM_BLUE = -2,
-	PLAYER_TEAM_RED = -1
-};
-
 class CProjectile : public CEntity
 {
 public:
@@ -33,9 +27,6 @@ public:
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
 
-	int GetOwner() const { return m_Owner; }
-	void LoseOwner();
-
 	virtual void Reset();
 	virtual void Tick();
 	virtual void TickPaused();
@@ -46,7 +37,6 @@ private:
 	int m_InitialLifeSpan;
 	int m_LifeSpan;
 	int m_Owner;
-	int m_OwnerTeam;
 	int m_Type;
 	int m_SoundImpact;
 	float m_Force;

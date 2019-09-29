@@ -36,7 +36,6 @@ CProjectile::CProjectile
 	m_InitialLifeSpan = Span;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
-	m_OwnerTeam = GameServer()->m_apPlayers[Owner]->GetTeam();
 	m_Force = Force;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();
@@ -64,14 +63,6 @@ void CProjectile::Reset()
 {
 	if (m_LifeSpan > -2)
 		GameServer()->m_World.DestroyEntity(this);
-}
-
-void CProjectile::LoseOwner()
-{
-	if(m_OwnerTeam == TEAM_BLUE)
-		m_Owner = PLAYER_TEAM_BLUE;
-	else
-		m_Owner = PLAYER_TEAM_RED;
 }
 
 vec2 CProjectile::GetPos(float Time)

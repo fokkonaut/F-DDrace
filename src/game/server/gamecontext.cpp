@@ -21,7 +21,6 @@
 
 #include <game/server/entities/flag.h>
 #include <game/server/entities/lasertext.h>
-#include <game/server/entities/projectile.h>
 #include <fstream>
 #include <limits>
 #include <string>
@@ -1007,14 +1006,6 @@ void CGameContext::OnClientTeamChange(int ClientID)
 {
 	if(m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
 		AbortVoteOnTeamChange(ClientID);
-
-	// mark client's projectile has team projectile
-	CProjectile *p = (CProjectile *)m_World.FindFirst(CGameWorld::ENTTYPE_PROJECTILE);
-	for(; p; p = (CProjectile *)p->TypeNext())
-	{
-		if(p->GetOwner() == ClientID)
-			p->LoseOwner();
-	}
 }
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
@@ -1055,14 +1046,6 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(g_Config.m_SvSilentSpectatorMode && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
 			Msg.m_Silent = true;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
-	}
-
-	// mark client's projectile has team projectile
-	CProjectile *p = (CProjectile *)m_World.FindFirst(CGameWorld::ENTTYPE_PROJECTILE);
-	for(; p; p = (CProjectile *)p->TypeNext())
-	{
-		if(p->GetOwner() == ClientID)
-			p->LoseOwner();
 	}
 
 	delete m_apPlayers[ClientID];
