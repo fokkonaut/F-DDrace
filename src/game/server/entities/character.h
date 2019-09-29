@@ -182,6 +182,7 @@ private:
 	CNetObj_PlayerInput m_LatestInput;
 
 	// input
+	CNetObj_PlayerInput m_SavedInput;
 	CNetObj_PlayerInput m_Input;
 	int m_NumInputs;
 	int m_Jumped;
