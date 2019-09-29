@@ -3146,7 +3146,7 @@ void CCharacter::DropLoot()
 
 void CCharacter::SetSpookyGhost()
 {
-	if (m_pPlayer->m_SpookyGhost)
+	if (m_pPlayer->m_SpookyGhost || m_pPlayer->m_Minigame != MINIGAME_NONE)
 		return;
 
 	BackupWeapons(BACKUP_SPOOKY_GHOST);
