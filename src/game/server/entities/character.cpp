@@ -1164,7 +1164,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		{
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
-			if (pKiller->m_Minigame == MINIGAME_SURVIVAL)
+			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
 			{
 				(*KillerAcc).m_SurvivalKills++;
 			}
@@ -1185,7 +1185,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		{
 			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL)
+			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
 			{
 				(*Account).m_SurvivalDeaths++;
 			}
@@ -1253,7 +1253,7 @@ void CCharacter::Die(int Killer, int Weapon)
 			// printing a message that you died and informing about remaining players
 			char aKillMsg[128];
 			str_format(aKillMsg, sizeof(aKillMsg), "'%s' died\nAlive players: %d", Server()->ClientName(m_pPlayer->GetCID()), GameServer()->CountSurvivalPlayers(GameServer()->m_SurvivalGameState) -1 /* -1 because we have to exclude the currently dying*/);
-			GameServer()->SendSurvivalBroadcast(aKillMsg);
+			GameServer()->SendSurvivalBroadcast(aKillMsg, true);
 		}
 		// sending you back to lobby
 		m_pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
