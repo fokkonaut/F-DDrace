@@ -1576,7 +1576,7 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	if (!pPlayer)
 		return;
 
-	char aMsg[64];
+	char aMsg[128];
 
 	// admins can enable or disable minigames with /<minigame> <enable/disable>
 	if (pResult->NumArguments() && pSelf->Server()->GetAuthedState(pResult->m_ClientID) && Minigame != MINIGAME_NONE)
@@ -1619,8 +1619,8 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	// leave minigame
 	if (Minigame == MINIGAME_NONE)
 	{
-		str_format(aMsg, sizeof(aMsg), "You left the minigame '%s'", pSelf->GetMinigameName(pPlayer->m_Minigame));
-		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+		str_format(aMsg, sizeof(aMsg), "'%s' left the minigame '%s'", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->GetMinigameName(pPlayer->m_Minigame));
+		pSelf->SendChatTarget(-1, aMsg);
 
 		//reset everything
 		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
@@ -1633,8 +1633,8 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	// join minigame
 	else if (pPlayer->m_Minigame == MINIGAME_NONE)
 	{
-		str_format(aMsg, sizeof(aMsg), "You joined the minigame '%s'", pSelf->GetMinigameName(Minigame));
-		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
+		str_format(aMsg, sizeof(aMsg), "'%s' joined the minigame '%s', use '/%s' to join aswell", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->GetMinigameName(Minigame), pSelf->GetMinigameCommand(Minigame));
+		pSelf->SendChatTarget(-1, aMsg);
 		pSelf->SendChatTarget(pResult->m_ClientID, "Say '/leave' to join the normal area again");
 
 		//set minigame required stuff
