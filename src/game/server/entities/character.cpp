@@ -762,8 +762,18 @@ void CCharacter::FireWeapon()
 			case WEAPON_TELE_RIFLE:
 			{
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-				m_Core.m_Pos = CursorPos;
-				GameServer()->CreatePlayerSpawn(CursorPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+
+				vec2 NewPos = CursorPos;
+				if (!g_Config.m_SvTeleRifleAllowBlocks)
+				{
+					vec2 PossiblePos;
+					bool Found = GetNearestAirPos(CursorPos, m_Pos, &PossiblePos);
+					if (Found && PossiblePos)
+						NewPos = PossiblePos;
+				}
+				m_Core.m_Pos = NewPos;
+
+				GameServer()->CreatePlayerSpawn(NewPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
