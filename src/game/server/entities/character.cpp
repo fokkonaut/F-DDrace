@@ -1257,6 +1257,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		}
 		// sending you back to lobby
 		m_pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
+		m_pPlayer->m_ShowName = true;
 	}
 
 	// a nice sound
