@@ -232,7 +232,7 @@ public:
 	int m_LastHookedPlayer;
 	int m_OldLastHookedPlayer;
 
-	bool m_CanEnterRoom;
+	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
 	bool m_Passive;
 

@@ -162,7 +162,7 @@ enum
 	NUM_MR_DIRS
 };
 
-static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
+static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags, CCollision::MoveRestrictionExtra Extra)
 {
 	switch(Tile)
 	{
@@ -188,27 +188,36 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		break;
 	case TILE_STOPA:
 		return CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN;
+	// F-DDrace
+	case TILE_ROOM:
+		if (!Extra.m_CanEnterRoom)
+			return CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN|CANTMOVE_ROOM;
 	}
 	return 0;
 }
 
-static int GetMoveRestrictionsMask(int Direction)
+static int GetMoveRestrictionsMask(int Direction, CCollision::MoveRestrictionExtra Extra)
 {
+	// F-DDrace
+	int Extras = 0;
+	if (!Extra.m_CanEnterRoom)
+		Extras |= CANTMOVE_ROOM;
+
 	switch(Direction)
 	{
-	case MR_DIR_HERE: return 0;
-	case MR_DIR_RIGHT: return CANTMOVE_RIGHT;
-	case MR_DIR_DOWN: return CANTMOVE_DOWN;
-	case MR_DIR_LEFT: return CANTMOVE_LEFT;
-	case MR_DIR_UP: return CANTMOVE_UP;
+	case MR_DIR_HERE: return Extras|0;
+	case MR_DIR_RIGHT: return Extras|CANTMOVE_RIGHT;
+	case MR_DIR_DOWN: return Extras|CANTMOVE_DOWN;
+	case MR_DIR_LEFT: return Extras|CANTMOVE_LEFT;
+	case MR_DIR_UP: return Extras|CANTMOVE_UP;
 	default: dbg_assert(false, "invalid dir");
 	}
 	return 0;
 }
 
-static int GetMoveRestrictions(int Direction, int Tile, int Flags)
+static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::MoveRestrictionExtra Extra)
 {
-	int Result = GetMoveRestrictionsRaw(Direction, Tile, Flags);
+	int Result = GetMoveRestrictionsRaw(Direction, Tile, Flags, Extra);
 	// Generally, stoppers only have an effect if they block us from moving
 	// *onto* them. The one exception is one-way blockers, they can also
 	// block us from moving if we're on top of them.
@@ -216,10 +225,10 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags)
 	{
 		return Result;
 	}
-	return Result&GetMoveRestrictionsMask(Direction);
+	return Result&GetMoveRestrictionsMask(Direction, Extra);
 }
 
-int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance)
+int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, MoveRestrictionExtra Extra)
 {
 	static const vec2 DIRECTIONS[NUM_MR_DIRS] =
 	{
@@ -249,7 +258,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 				Tile = GetFTileIndex(ModMapIndex);
 				Flags = GetFTileFlags(ModMapIndex);
 			}
-			Restrictions |= ::GetMoveRestrictions(d, Tile, Flags);
+			Restrictions |= ::GetMoveRestrictions(d, Tile, Flags, Extra);
 		}
 		if(pfnSwitchActive)
 		{
@@ -258,7 +267,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 			{
 				int Tile = GetDTileIndex(ModMapIndex);
 				int Flags = GetDTileFlags(ModMapIndex);
-				Restrictions |= ::GetMoveRestrictions(d, Tile, Flags);
+				Restrictions |= ::GetMoveRestrictions(d, Tile, Flags, Extra);
 			}
 		}
 	}

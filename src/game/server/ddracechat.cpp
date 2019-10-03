@@ -1419,13 +1419,13 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player has a key already");
 			return;
 		}
-		else if (pChr->Core()->m_CanEnterRoom)
+		else if (pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player got invited already");
 			return;
 		}
 
-		pChr->Core()->m_CanEnterRoom = true;
+		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true;
 		str_format(aBuf, sizeof(aBuf), "'%s' invited you to the room", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
 
@@ -1450,13 +1450,13 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "You can't kick a player with a key");
 			return;
 		}
-		else if (!pChr->Core()->m_CanEnterRoom)
+		else if (!pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player is not invited");
 			return;
 		}
 
-		pChr->Core()->m_CanEnterRoom = false;
+		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = false;
 		str_format(aBuf, sizeof(aBuf), "'%s' kicked you out of room", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
 

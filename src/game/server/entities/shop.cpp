@@ -396,7 +396,7 @@ void CCharacter::BuyItem(int ItemID)
 			(*Account).m_aHasItem[POLICE] = true;
 		(*Account).m_PoliceLevel++; break;
 	case 4: (*Account).m_aHasItem[SPOOKY_GHOST] = true; break;
-	case 5: m_pPlayer->m_HasRoomKey = true; m_Core.m_CanEnterRoom = true; break;
+	case 5: m_pPlayer->m_HasRoomKey = true; m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
 	case 7: if (Weapon == -1) Weapon = 0;
 	case 8: if (Weapon == -1) Weapon = 1;
 	case 9: if (Weapon == -1) Weapon = 2;

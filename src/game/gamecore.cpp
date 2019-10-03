@@ -106,7 +106,7 @@ void CCharacterCore::Reset()
 	m_Killer.m_Weapon = -1;
 	m_LastHookedPlayer = -1;
 	m_OldLastHookedPlayer = -1;
-	m_CanEnterRoom = false;
+	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 
 	m_Passive = false;
 	m_HookingFlag = false;
@@ -127,7 +127,7 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 
 	float PhysSize = 28.0f;
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, m_MoveRestrictionExtra);
 	m_TriggeredEvents = 0;
 	m_HookingFlag = false;
 

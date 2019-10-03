@@ -1677,7 +1677,7 @@ void CCharacter::HandleTiles(int Index)
 	//int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos);
+	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, m_Core.m_MoveRestrictionExtra);
 	//Sensitivity
 	int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f));
 	int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f));
@@ -2123,7 +2123,7 @@ void CCharacter::HandleTiles(int Index)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Teleport laser disabled");
 	}
 
-	if (!m_Core.m_CanEnterRoom && m_RoomAntiSpamTick < Server()->Tick())
+	if ((m_MoveRestrictions&CANTMOVE_ROOM) && m_RoomAntiSpamTick < Server()->Tick())
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You need a key to enter this room, buy one in the shop");
 		m_RoomAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
@@ -2800,7 +2800,7 @@ void CCharacter::FDDraceInit()
 	m_SavedDefEmote = EMOTE_NORMAL;
 
 	if (m_pPlayer->m_HasRoomKey)
-		m_Core.m_CanEnterRoom = true;
+		m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true;
 	m_RoomAntiSpamTick = Now;
 
 	for (int i = 0; i < 3; i++)

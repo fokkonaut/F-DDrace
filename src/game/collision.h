@@ -15,6 +15,8 @@ enum
 	CANTMOVE_RIGHT=1<<1,
 	CANTMOVE_UP=1<<2,
 	CANTMOVE_DOWN=1<<3,
+	// F-DDrace
+	CANTMOVE_ROOM=1<<4,
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
@@ -61,7 +63,12 @@ public:
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
 
-	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f);
+	struct MoveRestrictionExtra
+	{
+		bool m_CanEnterRoom;
+	};
+
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, MoveRestrictionExtra Extra = MoveRestrictionExtra());
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
 	{
 		return GetMoveRestrictions(0, 0, Pos, Distance);
