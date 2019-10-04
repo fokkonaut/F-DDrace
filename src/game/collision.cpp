@@ -192,24 +192,20 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags, CCollision
 	case TILE_ROOM:
 		if (!Extra.m_CanEnterRoom)
 			return CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN|CANTMOVE_ROOM;
+		break;
 	}
 	return 0;
 }
 
-static int GetMoveRestrictionsMask(int Direction, CCollision::MoveRestrictionExtra Extra)
+static int GetMoveRestrictionsMask(int Direction)
 {
-	// F-DDrace
-	int Extras = 0;
-	if (!Extra.m_CanEnterRoom)
-		Extras |= CANTMOVE_ROOM;
-
 	switch(Direction)
 	{
-	case MR_DIR_HERE: return Extras|0;
-	case MR_DIR_RIGHT: return Extras|CANTMOVE_RIGHT;
-	case MR_DIR_DOWN: return Extras|CANTMOVE_DOWN;
-	case MR_DIR_LEFT: return Extras|CANTMOVE_LEFT;
-	case MR_DIR_UP: return Extras|CANTMOVE_UP;
+	case MR_DIR_HERE: return 0;
+	case MR_DIR_RIGHT: return CANTMOVE_RIGHT;
+	case MR_DIR_DOWN: return CANTMOVE_DOWN;
+	case MR_DIR_LEFT: return CANTMOVE_LEFT;
+	case MR_DIR_UP: return CANTMOVE_UP;
 	default: dbg_assert(false, "invalid dir");
 	}
 	return 0;
@@ -225,7 +221,13 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::M
 	{
 		return Result;
 	}
-	return Result&GetMoveRestrictionsMask(Direction, Extra);
+
+	// F-DDrace
+	int Extras = 0;
+	if (Tile == TILE_ROOM && !Extra.m_CanEnterRoom)
+		Extras |= CANTMOVE_ROOM;
+
+	return Result&GetMoveRestrictionsMask(Direction)|Extras;
 }
 
 int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, MoveRestrictionExtra Extra)
