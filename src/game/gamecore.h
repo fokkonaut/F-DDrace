@@ -250,8 +250,6 @@ public:
 private:
 
 	CTeamsCore* m_pTeams;
-	int m_TileIndex;
-	int m_TileFlags;
 	int m_MoveRestrictions;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
