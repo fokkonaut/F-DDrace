@@ -1,9 +1,3 @@
-/*************************************************
-*                                                *
-*              B L O C K D D R A C E             *
-*                                                *
-**************************************************/
-
 #include "character.h"
 #include <game/server/player.h>
 #include <engine/shared/config.h>
