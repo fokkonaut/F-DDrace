@@ -1576,6 +1576,9 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	if (!pPlayer)
 		return;
 
+	if (pSelf->ProcessSpamProtection(pResult->m_ClientID))
+		return;
+
 	char aMsg[128];
 
 	// admins can enable or disable minigames with /<minigame> <enable/disable>
