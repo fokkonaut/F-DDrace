@@ -227,7 +227,7 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::M
 	if (Tile == TILE_ROOM && !Extra.m_CanEnterRoom)
 		Extras |= CANTMOVE_ROOM;
 
-	return Result&GetMoveRestrictionsMask(Direction)|Extras;
+	return (Result&GetMoveRestrictionsMask(Direction))|Extras;
 }
 
 int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, MoveRestrictionExtra Extra)
