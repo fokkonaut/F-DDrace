@@ -291,7 +291,7 @@ void CPlayer::Tick()
 				Msg.m_Weapon = m_MsgWeapon;
 				Msg.m_ModeSpecial = m_MsgModeSpecial;
 				for (int i = 0; i < MAX_CLIENTS; i++)
-					if (!g_Config.m_SvHideMinigamePlayers || (GameServer()->m_apPlayers[i] && m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame))
+					if (GameServer()->m_apPlayers[i] && (!g_Config.m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 
