@@ -1273,6 +1273,9 @@ void CCharacter::Die(int Killer, int Weapon)
 	m_Alive = false;
 	m_pPlayer->m_ForceKilled = false;
 
+	if (m_Passive)
+		Passive(false, -1, true);
+
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
