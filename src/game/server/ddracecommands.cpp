@@ -246,7 +246,6 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 	}
 	else if (Weapon == -2)
 	{
-		pChr->GiveWeapon(WEAPON_TASER, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_HEART_GUN, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
