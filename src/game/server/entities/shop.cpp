@@ -7,20 +7,21 @@
 void CCharacter::ShopWindow(int Dir)
 {
 	m_ShopMotdTick = 0;
+	int m_MaxShopPage = MAX_SHOP_PAGES;
 
 	if (Dir == 0)
-		m_ShopWindowPage = MENU_PAGE_MAIN;
+		m_ShopWindowPage = SHOP_PAGE_MAIN;
 	else if (Dir == 1)
 	{
 		m_ShopWindowPage++;
-		if (m_ShopWindowPage > MAX_SHOP_PAGES)
-			m_ShopWindowPage = MENU_PAGE_MAIN;
+		if (m_ShopWindowPage > m_MaxShopPage)
+			m_ShopWindowPage = SHOP_PAGE_MAIN;
 	}
 	else if (Dir == -1)
 	{
 		m_ShopWindowPage--;
-		if (m_ShopWindowPage < MENU_PAGE_MAIN)
-			m_ShopWindowPage = MAX_SHOP_PAGES;
+		if (m_ShopWindowPage < SHOP_PAGE_MAIN)
+			m_ShopWindowPage = m_MaxShopPage;
 	}
 
 	char aItem[256];
@@ -153,7 +154,7 @@ void CCharacter::ShopWindow(int Dir)
 	str_format(aTime, sizeof(aTime), "Time: %s", aTimeTmp);
 
 	char aBase[512];
-	if (m_ShopWindowPage > MENU_PAGE_MAIN)
+	if (m_ShopWindowPage > SHOP_PAGE_MAIN)
 	{
 		str_format(aBase, sizeof(aBase),
 			"***************************\n"
@@ -196,7 +197,7 @@ void CCharacter::ConfirmPurchase()
 		"***************************\n");
 
 	GameServer()->SendMotd(aBuf, GetPlayer()->GetCID());
-	m_PurchaseState = MENU_STATE_CONFIRM;;
+	m_PurchaseState = SHOP_STATE_CONFIRM;;
 }
 
 void CCharacter::PurchaseEnd(bool canceled)
@@ -218,10 +219,10 @@ void CCharacter::PurchaseEnd(bool canceled)
 	else
 	{
 		BuyItem(m_ShopWindowPage);
-		ShopWindow(MENU_STATE_NONE);
+		ShopWindow(SHOP_STATE_NONE);
 	}
 
-	m_PurchaseState = MENU_STATE_OPENED_WINDOW;
+	m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
 }
 
 void CCharacter::BuyItem(int ItemID)

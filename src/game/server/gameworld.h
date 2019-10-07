@@ -198,7 +198,6 @@ public:
 
 	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
 	int GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1);
-	int GetClosestJobFinder(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1);
 };
 
 #endif

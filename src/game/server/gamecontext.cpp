@@ -1441,22 +1441,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					if (pChr->m_InShop)
 					{
-						if (pChr->m_PurchaseState == MENU_STATE_CONFIRM)
+						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
 							pChr->PurchaseEnd(false);
-						else if (pChr->m_PurchaseState == MENU_STATE_OPENED_WINDOW)
+						else if (pChr->m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
 						{
-							if ((pChr->m_ShopWindowPage != MENU_PAGE_NONE) && (pChr->m_ShopWindowPage != MENU_PAGE_MAIN))
+							if ((pChr->m_ShopWindowPage != SHOP_PAGE_NONE) && (pChr->m_ShopWindowPage != SHOP_PAGE_MAIN))
 								pChr->ConfirmPurchase();
-						}
-					}
-					else if (pChr->m_InJobTalking)
-					{
-						if (pChr->m_JobFinderState == MENU_STATE_CONFIRM)
-							pChr->JobFinderEnd(false);
-						else if (pChr->m_JobFinderState == MENU_STATE_OPENED_WINDOW)
-						{
-							if ((pChr->m_JobWindowPage != MENU_PAGE_NONE) && (pChr->m_JobWindowPage != MENU_PAGE_MAIN))
-								pChr->ConfirmJob();
 						}
 					}
 					else
@@ -1469,22 +1459,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					if (pChr->m_InShop)
 					{
-						if (pChr->m_PurchaseState == MENU_STATE_CONFIRM)
+						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
 							pChr->PurchaseEnd(true);
-						else if(pChr->m_ShopWindowPage == MENU_PAGE_NONE)
+						else if(pChr->m_ShopWindowPage == SHOP_PAGE_NONE)
 						{
-							pChr->ShopWindow(MENU_PAGE_MAIN);
-							pChr->m_PurchaseState = MENU_STATE_OPENED_WINDOW;
-						}
-					}
-					else if (pChr->m_InJobTalking)
-					{
-						if (pChr->m_JobFinderState == MENU_STATE_CONFIRM)
-							pChr->JobFinderEnd(true);
-						else if (pChr->m_JobWindowPage == MENU_PAGE_NONE)
-						{
-							pChr->JobWindow(MENU_PAGE_MAIN);
-							pChr->m_JobFinderState = MENU_STATE_OPENED_WINDOW;
+							pChr->ShopWindow(0);
+							pChr->m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
 						}
 					}
 					else
@@ -3100,7 +3080,6 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_SurvivalDeaths = 0;
 	m_Accounts[ID].m_InstagibDeaths = 0;
 	m_Accounts[ID].m_TaserLevel = 0;
-	m_Accounts[ID].m_Job = JOB_NONE;
 
 	return ID;
 }
@@ -3153,7 +3132,6 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case SURVIVAL_DEATHS:			m_Accounts[ID].m_SurvivalDeaths = atoi(aData); break;
 		case INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(aData); break;
 		case TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(aData); break;
-		case JOB:						m_Accounts[ID].m_Job = atoi(aData); break;
 		}
 	}
 }
@@ -3200,7 +3178,6 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_SurvivalDeaths << "\n";
 		AccFile << m_Accounts[ID].m_InstagibDeaths << "\n";
 		AccFile << m_Accounts[ID].m_TaserLevel << "\n";
-		AccFile << m_Accounts[ID].m_Job << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -3376,31 +3353,6 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	OnClientEnter(DummyID);
 
 	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);
-}
-
-bool CGameContext::IsBlackMarketJob(int JobID)
-{
-	return JobID == JOB_DEALER;
-}
-
-int CGameContext::IsJobFinder(int ClientID)
-{
-	if (m_apPlayers[ClientID])
-	{
-		if (m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_JOB_FINDER)
-			return 0;
-		if (m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_BLACK_MARKET_JOB_FINDER)
-			return 1;
-	}
-	return -1;
-}
-
-int CGameContext::GetJobFinder()
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (IsJobFinder(i) != -1)
-			return i;
-	return -1;
 }
 
 bool CGameContext::IsShopDummy(int ClientID)

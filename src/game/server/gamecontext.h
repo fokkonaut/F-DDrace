@@ -48,14 +48,14 @@ typedef unsigned __int64 uint64_t;
 
 */
 
-enum Menu
+enum Shop
 {
-	MENU_PAGE_NONE = -1,
-	MENU_PAGE_MAIN,
+	SHOP_PAGE_NONE = -1,
+	SHOP_PAGE_MAIN,
 
-	MENU_STATE_NONE = 0,
-	MENU_STATE_OPENED_WINDOW,
-	MENU_STATE_CONFIRM,
+	SHOP_STATE_NONE = 0,
+	SHOP_STATE_OPENED_WINDOW,
+	SHOP_STATE_CONFIRM,
 };
 
 enum Item
@@ -301,10 +301,6 @@ public:
 	void ConnectDefaultDummies();
 	void SetV3Offset(int X = -1, int Y = -1);
 
-	bool IsBlackMarketJob(int JobID);
-	int IsJobFinder(int ClientID);
-	int GetJobFinder();
-
 	bool IsShopDummy(int ClientID);
 	int GetShopDummy();
 
@@ -365,7 +361,6 @@ public:
 		int m_SurvivalDeaths;
 		int m_InstagibDeaths;
 		int m_TaserLevel;
-		int m_Job;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -405,7 +400,6 @@ public:
 		SURVIVAL_DEATHS,
 		INSTAGIB_DEATHS,
 		TASER_LEVEL,
-		JOB,
 		NUM_ACCOUNT_VARIABLES
 	};
 

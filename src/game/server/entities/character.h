@@ -366,22 +366,10 @@ public:
 
 	bool m_MoneyTile;
 
-	int64 m_JobAntiSpamTick;
 	int64 m_RoomAntiSpamTick;
 	int64 m_ShopAntiSpamTick;
 
 	bool m_InShop;
-
-	bool m_InJobCenter;
-	bool m_InJobTalking;
-	int64 m_JobMotdTick;
-	int m_JobWindowPage;
-	int m_JobFinderState;
-	void JobWindow(int Dir);
-	void GetJob(int JobID);
-	void ConfirmJob();
-	void JobFinderEnd(bool Canceled);
-	bool m_IsBlackMarket;
 
 	void ShopWindow(int Dir);
 	int m_ShopWindowPage;
@@ -389,7 +377,7 @@ public:
 	void BuyItem(int ItemID);
 	void ConfirmPurchase();
 	int m_PurchaseState;
-	void PurchaseEnd(bool Canceled);
+	void PurchaseEnd(bool canceled);
 
 	//weapon indicator
 	void UpdateWeaponIndicator();

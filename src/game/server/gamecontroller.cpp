@@ -325,14 +325,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		new CClock(&GameServer()->m_World, Pos);
 	}
-	else if (Index == ENTITY_JOB_FINDER)
-	{
-		GameServer()->ConnectDummy(DUMMYMODE_JOB_FINDER, Pos);
-	}
-	else if (Index == ENTITY_BLACK_MARKET_JOB_FINDER)
-	{
-		GameServer()->ConnectDummy(DUMMYMODE_BLACK_MARKET_JOB_FINDER, Pos);
-	}
 	else if (Index == ENTITY_SHOP_DUMMY_SPAWN)
 	{
 		GameServer()->ConnectDummy(DUMMYMODE_SHOP_DUMMY, Pos);
