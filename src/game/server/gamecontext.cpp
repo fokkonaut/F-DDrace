@@ -3018,7 +3018,7 @@ int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageT
 		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 		pSelf->m_TempTopAccounts.push_back(Account);
 
-		pSelf->FreeAccount(ID);
+		pSelf->FreeAccount(ID, true);
 	}
 
 	return 0;
@@ -3042,7 +3042,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 			dbg_msg("acc", "logged out account '%s'", aUsername);
 		}
 		else
-			pSelf->FreeAccount(ID);
+			pSelf->FreeAccount(ID, true);
 	}
 
 	return 0;
@@ -3230,9 +3230,10 @@ int CGameContext::GetAccount(const char* pUsername)
 	return ID;
 }
 
-void CGameContext::FreeAccount(int ID)
+void CGameContext::FreeAccount(int ID, bool Silent)
 {
-	dbg_msg("acc", "freed account %d", ID);
+	if (!Silent)
+		dbg_msg("acc", "freed account %d", ID);
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 

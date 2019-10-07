@@ -310,7 +310,7 @@ public:
 
 	//account
 	int GetAccount(const char* pUsername);
-	void FreeAccount(int ID);
+	void FreeAccount(int ID, bool Silent = false);
 
 	struct TopAccounts
 	{
