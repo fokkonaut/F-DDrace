@@ -3966,6 +3966,10 @@ void CGameContext::SetPlayerSurvivalState(int State)
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
 		{
+			// only send playing people to deathmatch
+			if (State == SURVIVAL_DEATHMATCH && m_apPlayers[i]->m_SurvivalState != SURVIVAL_PLAYING)
+				continue;
+
 			// unset spectator mode and pause
 			m_apPlayers[i]->SetPlaying();
 			// kill the character
