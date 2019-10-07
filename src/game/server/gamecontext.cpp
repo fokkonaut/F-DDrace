@@ -3407,6 +3407,11 @@ void CGameContext::SetV3Offset(int X, int Y)
 			X = 97;
 			Y = 19;
 		}
+		else if (!str_comp(g_Config.m_SvMap, "BlmapChill"))
+		{
+			X = 696;
+			Y = 617;
+		}
 		g_Config.m_V3OffsetX = X;
 		g_Config.m_V3OffsetY = Y;
 	}
