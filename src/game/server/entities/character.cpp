@@ -2916,7 +2916,7 @@ void CCharacter::FDDraceTick()
 	if (m_TelekinesisTee != -1)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(m_TelekinesisTee);
-		if (pChr && GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime)
+		if (pChr && GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsSpectator())
 		{
 			pChr->Core()->m_Pos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 			pChr->Core()->m_Vel = vec2(0.f, 0.f);
