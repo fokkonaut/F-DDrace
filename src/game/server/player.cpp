@@ -150,7 +150,6 @@ void CPlayer::Reset()
 
 	m_Minigame = MINIGAME_NONE;
 	m_SurvivalState = SURVIVAL_OFFLINE;
-	m_ForceKilled = false;
 
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;

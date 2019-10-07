@@ -3966,7 +3966,6 @@ void CGameContext::SetPlayerSurvivalState(int State)
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
 		{
-			m_apPlayers[i]->m_ForceKilled = true;
 			// unset spectator mode and pause
 			m_apPlayers[i]->SetPlaying();
 			// kill the character
@@ -4020,7 +4019,7 @@ void CGameContext::InstagibTick(int Type)
 		return;
 	}
 
-	m_apPlayers[m_SurvivalWinner]->GiveXP(250, "win an instagib round");
+	//m_apPlayers[Winner]->GiveXP(250, "win an instagib round");
 
 	// add instagib here
 }
