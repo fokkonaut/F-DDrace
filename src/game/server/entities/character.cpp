@@ -1215,9 +1215,9 @@ void CCharacter::Die(int Killer, int Weapon)
 			}
 		}
 
-		if (m_KillStreak > 5)
+		if (m_KillStreak >= 5)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
+			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
 			GameServer()->SendChatTarget(-1, aBuf);
 			pKiller->GiveXP(250, "end a killing spree");
 		}
