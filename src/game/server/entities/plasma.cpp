@@ -12,7 +12,7 @@ const float ACCEL = 1.1f;
 
 CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 		bool Explosive, int ResponsibleTeam) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, Pos)
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_PLASMA, Pos)
 {
 	m_Pos = Pos;
 	m_Core = Dir;

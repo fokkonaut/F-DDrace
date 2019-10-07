@@ -11,7 +11,7 @@
 
 CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
 		int CaughtTeam, int Layer, int Number) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, Pos)
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAGGER, Pos)
 {
 	m_Layer = Layer;
 	m_Number = Number;

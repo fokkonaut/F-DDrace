@@ -13,7 +13,7 @@
 // CGun
 //////////////////////////////////////////////////
 CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer, int Number)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, Pos)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER_GUN, Pos)
 {
 	m_Layer = Layer;
 	m_Number = Number;
