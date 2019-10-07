@@ -3070,7 +3070,7 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	bool IsTeleWeapon = (WeaponID == WEAPON_GUN && m_HasTeleGun) || (WeaponID == WEAPON_GRENADE && m_HasTeleGrenade) || (WeaponID == WEAPON_LASER && m_HasTeleLaser);
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, m_DoorHammer);
+	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, (WeaponID == WEAPON_HAMMER && m_DoorHammer));
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(Weapon);
 
 	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon && !m_DoorHammer)
@@ -3084,7 +3084,7 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		Jetpack(false);
 	if (IsTeleWeapon)
 		TeleWeapon(WeaponID, false);
-	if (m_DoorHammer)
+	if (WeaponID == WEAPON_HAMMER && m_DoorHammer)
 		DoorHammer(false);
 }
 
