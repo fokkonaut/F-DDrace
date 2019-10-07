@@ -1951,7 +1951,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (m_LastIndexTile != TILE_SHOP && m_LastIndexFrontTile != TILE_SHOP)
 		{
-			if (m_ShopAntiSpamTick < Server()->Tick())
+			if (m_ShopAntiSpamTick < Server()->Tick() && !GameServer()->IsShopDummy(m_pPlayer->GetCID()))
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press f4 to start shopping.", Server()->ClientName(m_pPlayer->GetCID()));
@@ -2941,7 +2941,7 @@ void CCharacter::HandleLastIndexTiles()
 	{
 		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
 		{
-			if (m_ShopAntiSpamTick < Server()->Tick())
+			if (m_ShopAntiSpamTick < Server()->Tick() && !GameServer()->IsShopDummy(m_pPlayer->GetCID()))
 			{
 				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), "Bye! Come back if you need something.");
 				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
