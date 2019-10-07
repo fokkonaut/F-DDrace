@@ -1200,6 +1200,27 @@ void CCharacter::Die(int Killer, int Weapon)
 				(*Account).m_Deaths++;
 			}
 		}
+
+		// killing spree
+		char aBuf[128];
+		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
+		CCharacter* pKillerChar = pKiller->GetCharacter();
+		if (pKillerChar)
+		{
+			pKillerChar->m_KillStreak++;
+			if (pKillerChar->m_KillStreak % 5 == 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
+				GameServer()->SendChatTarget(-1, aBuf);
+			}
+		}
+
+		if (m_KillStreak > 5)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
+			GameServer()->SendChatTarget(-1, aBuf);
+			pKiller->GiveXP(250, "end a killing spree");
+		}
 	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
@@ -2827,6 +2848,8 @@ void CCharacter::FDDraceInit()
 	m_MoneyTile = false;
 	m_WasPausedLastTick = false;
 	m_GotTasered = false;
+
+	m_KillStreak = 0;
 }
 
 void CCharacter::FDDraceTick()

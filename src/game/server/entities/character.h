@@ -395,6 +395,8 @@ public:
 	bool m_WasPausedLastTick;
 	bool m_GotTasered;
 
+	int m_KillStreak;
+
 	// special race
 	bool m_HasFinishedSpecialRace;
 
