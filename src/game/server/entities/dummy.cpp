@@ -4019,6 +4019,23 @@ void CCharacter::DummyTick()
 			return;
 		}
 	}
+	else if (m_pPlayer->m_Dummymode == DUMMYMODE_JOB_FINDER || m_pPlayer->m_Dummymode == DUMMYMODE_BLACK_MARKET_JOB_FINDER) // job finder
+	{
+		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
+		if (pChr && pChr->m_InJobCenter)
+		{
+			m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+			m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+			m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+		}
+
+		if (Server()->Tick() % 400 == 0 && !m_InJobTalking)
+		{
+			Die(m_pPlayer->GetCID(), WEAPON_SELF);
+			return;
+		}
+	}
 	else if (m_pPlayer->m_Dummymode != DUMMYMODE_IDLE)
 		m_pPlayer->m_Dummymode = DUMMYMODE_IDLE;
 }

@@ -436,3 +436,32 @@ int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideW
 
 	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetShopDummy();
 }
+
+int CGameWorld::GetClosestJobFinder(vec2 Pos, CCharacter* pNotThis, int CollideWith)
+{
+	// Find other players
+	float ClosestRange = 0.f;
+	CCharacter* pClosest = 0;
+
+	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
+	for (; p; p = (CCharacter*)p->TypeNext())
+	{
+		if (p == pNotThis)
+			continue;
+
+		if (GameServer()->IsJobFinder(p->GetPlayer()->GetCID()) == -1)
+			continue;
+
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, false))
+			continue;
+
+		float Len = distance(Pos, p->m_Pos);
+		if (Len < ClosestRange || !ClosestRange)
+		{
+			ClosestRange = Len;
+			pClosest = p;
+		}
+	}
+
+	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetJobFinder();
+}

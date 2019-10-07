@@ -171,7 +171,9 @@ void CCharacter::HandleJetpack()
 	if (FullAuto && (m_LatestInput.m_Fire & 1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
-	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+	if (m_ShopWindowPage != MENU_PAGE_NONE && m_PurchaseState == MENU_STATE_OPENED_WINDOW)
+		return;
+	if (m_JobWindowPage != MENU_PAGE_NONE && m_JobFinderState == MENU_STATE_OPENED_WINDOW)
 		return;
 
 	if (!WillFire)
@@ -408,10 +410,18 @@ void CCharacter::FireWeapon()
 	}
 
 	// shop window
-	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+	if (m_ShopWindowPage != MENU_PAGE_NONE && m_PurchaseState == MENU_STATE_OPENED_WINDOW)
 	{
 		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 			ShopWindow(GetAimDir());
+		return;
+	}
+
+	// job window
+	if (m_JobWindowPage != MENU_PAGE_NONE && m_JobFinderState == MENU_STATE_OPENED_WINDOW)
+	{
+		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+			JobWindow(GetAimDir());
 		return;
 	}
 
@@ -1944,6 +1954,55 @@ void CCharacter::HandleTiles(int Index)
 		m_InShop = true;
 	}
 
+	//job finder
+	if (m_TileIndex == TILE_JOB_FINDER || m_TileFIndex == TILE_JOB_FINDER)
+	{
+		if (m_LastIndexTile != TILE_JOB_FINDER && m_LastIndexFrontTile != TILE_JOB_FINDER && m_LastIndexTile != TILE_JOB_TALKING && m_LastIndexFrontTile != TILE_JOB_TALKING)
+		{
+			if (m_JobAntiSpamTick < Server()->Tick())
+			{
+				char aBuf[256];
+				int JobFinder = GameWorld()->GetClosestJobFinder(m_Pos, this, m_pPlayer->GetCID());
+
+				if (GameServer()->IsJobFinder(JobFinder) == 0)
+				{
+					str_format(aBuf, sizeof(aBuf), "Welcome to the job center, %s! If you want a job, sit down and talk to me.", Server()->ClientName(m_pPlayer->GetCID()));
+					m_IsBlackMarket = false;
+				}
+				else if (GameServer()->IsJobFinder(JobFinder) == 1)
+				{
+					str_format(aBuf, sizeof(aBuf), "Yo, psst, %s! Do you want some quick money? Come around the corner...", Server()->ClientName(m_pPlayer->GetCID()));
+					m_IsBlackMarket = true;
+				}
+
+				GameServer()->SendChat(JobFinder, CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
+			}
+		}
+
+		m_InJobCenter = true;
+	}
+
+	if (m_TileIndex == TILE_JOB_TALKING || m_TileFIndex == TILE_JOB_TALKING)
+	{
+		if (m_LastIndexTile != TILE_JOB_TALKING && m_LastIndexFrontTile != TILE_JOB_TALKING)
+		{
+			if (m_JobAntiSpamTick < Server()->Tick())
+			{
+				char aBuf[256];
+				int JobFinder = GameWorld()->GetClosestJobFinder(m_Pos, this, m_pPlayer->GetCID());
+
+				if (GameServer()->IsJobFinder(JobFinder) == 0)
+					str_format(aBuf, sizeof(aBuf), "Hello. I have a list of jobs here for you. Just press f4 to see it.", Server()->ClientName(m_pPlayer->GetCID()));
+				else if (GameServer()->IsJobFinder(JobFinder) == 1)
+					str_format(aBuf, sizeof(aBuf), "Hey hey! I can offer you some small jobs, nothing crazy, just press f4 and choose one!", Server()->ClientName(m_pPlayer->GetCID()));
+
+				GameServer()->SendChat(JobFinder, CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
+			}
+		}
+
+		m_InJobTalking = true;
+	}
+
 	// moderator only
 	if ((m_TileIndex == TILE_MODERATORS_ONLY) || (m_TileFIndex == TILE_MODERATORS_ONLY))
 	{
@@ -2792,9 +2851,9 @@ void CCharacter::FDDraceInit()
 
 	int64 Now = Server()->Tick();
 	m_ShopAntiSpamTick = Now;
-	m_ShopWindowPage = SHOP_PAGE_NONE;
+	m_ShopWindowPage = MENU_PAGE_NONE;
 	m_ShopMotdTick = Now;
-	m_PurchaseState = SHOP_STATE_NONE;
+	m_PurchaseState = MENU_STATE_NONE;
 
 	UnsetSpookyGhost();
 
@@ -2825,6 +2884,14 @@ void CCharacter::FDDraceInit()
 	m_MoneyTile = false;
 	m_WasPausedLastTick = false;
 	m_GotTasered = false;
+
+	m_JobAntiSpamTick = Now;
+	m_InJobCenter = false;
+	m_InJobTalking = false;
+	m_JobMotdTick = Now;
+	m_JobWindowPage = MENU_PAGE_NONE;
+	m_JobFinderState = MENU_STATE_NONE;
+	m_IsBlackMarket = false;
 }
 
 void CCharacter::FDDraceTick()
@@ -2850,8 +2917,13 @@ void CCharacter::FDDraceTick()
 
 	if (m_ShopMotdTick < Server()->Tick())
 	{
-		m_ShopWindowPage = SHOP_PAGE_NONE;
-		m_PurchaseState = SHOP_STATE_NONE;
+		m_ShopWindowPage = MENU_PAGE_NONE;
+		m_PurchaseState = MENU_STATE_NONE;
+	}
+	if (m_JobMotdTick < Server()->Tick())
+	{
+		m_JobWindowPage = MENU_PAGE_NONE;
+		m_JobFinderState = MENU_STATE_NONE;
 	}
 
 	if (!m_AtomHooked && m_pPlayer->IsHooked(ATOM) && !m_Atom)
@@ -2923,13 +2995,13 @@ void CCharacter::HandleLastIndexTiles()
 				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
 			}
 
-			if (m_ShopWindowPage != SHOP_PAGE_NONE)
+			if (m_ShopWindowPage != MENU_PAGE_NONE)
 				GameServer()->SendMotd("", GetPlayer()->GetCID());
 
 			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
 
-			m_PurchaseState = SHOP_STATE_NONE;
-			m_ShopWindowPage = SHOP_PAGE_NONE;
+			m_PurchaseState = MENU_STATE_NONE;
+			m_ShopWindowPage = MENU_PAGE_NONE;
 
 			m_InShop = false;
 		}
@@ -2941,6 +3013,61 @@ void CCharacter::HandleLastIndexTiles()
 		{
 			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
 			m_MoneyTile = false;
+		}
+	}
+
+	if (m_InJobCenter)
+	{
+		if (m_TileIndex != TILE_JOB_FINDER && m_TileFIndex != TILE_JOB_FINDER && m_TileIndex != TILE_JOB_TALKING && m_TileFIndex != TILE_JOB_TALKING)
+		{
+			if (m_JobAntiSpamTick < Server()->Tick())
+			{
+				char aBuf[256];
+				int JobFinder = GameWorld()->GetClosestJobFinder(m_Pos, this, m_pPlayer->GetCID());
+
+				if (GameServer()->IsJobFinder(JobFinder) == 0)
+					str_format(aBuf, sizeof(aBuf), "Have a good day! Come back if you need another job.", Server()->ClientName(m_pPlayer->GetCID()));
+				else if (GameServer()->IsJobFinder(JobFinder) == 1)
+					str_format(aBuf, sizeof(aBuf), "See you later, my friend.", Server()->ClientName(m_pPlayer->GetCID()));
+
+				GameServer()->SendChat(JobFinder, CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
+
+				m_JobAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
+			}
+
+			GameServer()->SendMotd("", GetPlayer()->GetCID());
+			m_InJobCenter = false;
+		}
+	}
+
+	if (m_InJobTalking)
+	{
+		if (m_TileIndex != TILE_JOB_TALKING && m_TileFIndex != TILE_JOB_TALKING)
+		{
+			if (m_JobAntiSpamTick < Server()->Tick())
+			{
+				char aBuf[256];
+				int JobFinder = GameWorld()->GetClosestJobFinder(m_Pos, this, m_pPlayer->GetCID());
+
+				if (GameServer()->IsJobFinder(JobFinder) == 0)
+					str_format(aBuf, sizeof(aBuf), "It was nice to talk to you. I hope you are happy with your decision.", Server()->ClientName(m_pPlayer->GetCID()));
+				else if (GameServer()->IsJobFinder(JobFinder) == 1)
+					str_format(aBuf, sizeof(aBuf), "Don't disappoint me bro!", Server()->ClientName(m_pPlayer->GetCID()));
+
+				GameServer()->SendChat(JobFinder, CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
+
+				m_JobAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
+			}
+
+			if (m_JobWindowPage != MENU_PAGE_NONE)
+				GameServer()->SendMotd("", GetPlayer()->GetCID());
+
+			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
+
+			m_JobFinderState = MENU_STATE_NONE;
+			m_JobWindowPage = MENU_PAGE_NONE;
+
+			m_InJobTalking = false;
 		}
 	}
 }
