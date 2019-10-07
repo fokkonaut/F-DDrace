@@ -990,7 +990,7 @@ int CPlayer::GetAccID()
 	return 0;
 }
 
-void CPlayer::MoneyTransaction(int Amount, const char *Description)
+void CPlayer::MoneyTransaction(int Amount, const char *pDescription)
 {
 	if (GetAccID() < ACC_START)
 		return;
@@ -999,21 +999,22 @@ void CPlayer::MoneyTransaction(int Amount, const char *Description)
 
 	(*Account).m_Money += Amount;
 
-	if (!Description[0])
+	if (!pDescription[0])
 		return;
 
 	str_copy((*Account).m_aLastMoneyTransaction[4], (*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[4]));
 	str_copy((*Account).m_aLastMoneyTransaction[3], (*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[3]));
 	str_copy((*Account).m_aLastMoneyTransaction[2], (*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[2]));
 	str_copy((*Account).m_aLastMoneyTransaction[1], (*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[1]));
-	str_copy((*Account).m_aLastMoneyTransaction[0], Description, sizeof((*Account).m_aLastMoneyTransaction[0]));
+	str_copy((*Account).m_aLastMoneyTransaction[0], pDescription, sizeof((*Account).m_aLastMoneyTransaction[0]));
 }
 
-void CPlayer::GiveXP(int Amount)
+void CPlayer::GiveXP(int Amount, const char *pMessage)
 {
 	if (GetAccID() < ACC_START)
 		return;
 
+	char aBuf[256];
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
 
 	if ((*Account).m_Level < MAX_LEVEL)
@@ -1023,11 +1024,16 @@ void CPlayer::GiveXP(int Amount)
 		(*Account).m_XP += Amount;
 	}
 
+	if (pMessage[0])
+	{
+		str_format(aBuf, sizeof(aBuf), "+%d XP (%s)", Amount, pMessage);
+		GameServer()->SendChatTarget(m_ClientID, aBuf);
+	}
+
 	if ((*Account).m_Level < MAX_LEVEL && (*Account).m_XP >= GameServer()->m_aNeededXP[(*Account).m_Level])
 	{
 		(*Account).m_Level++;
 
-		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}

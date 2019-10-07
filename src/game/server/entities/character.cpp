@@ -1753,6 +1753,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 		m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
+		m_pPlayer->GiveXP(250, "finish the race");
 	}
 
 	// freeze
@@ -2053,6 +2054,7 @@ void CCharacter::HandleTiles(int Index)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
 		GameServer()->SendChatTarget(-1, aBuf);
+		m_pPlayer->GiveXP(250, "finish the special race");
 
 		m_HasFinishedSpecialRace = true;
 	}

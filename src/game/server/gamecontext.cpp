@@ -3804,6 +3804,7 @@ void CGameContext::SurvivalTick()
 
 			// add a win to the winners' accounts
 			m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
+			m_apPlayers[m_SurvivalWinner]->GiveXP(250, "win a survival round");
 		}
 
 		// sending back to lobby
@@ -4018,6 +4019,8 @@ void CGameContext::InstagibTick(int Type)
 		m_aMinigameDisabled[Type] = true;
 		return;
 	}
+
+	m_apPlayers[m_SurvivalWinner]->GiveXP(250, "win an instagib round");
 
 	// add instagib here
 }
