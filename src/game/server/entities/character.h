@@ -38,6 +38,7 @@ enum Extra
 	ITEM,
 	TELE_WEAPON,
 	ALWAYS_TELE_WEAPON,
+	DOOR_HAMMER,
 	NUM_EXTRAS
 };
 
@@ -143,6 +144,7 @@ public:
 	void Item(int Item, int FromID = -1, bool Silent = false);
 	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
 	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
+	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -348,6 +350,10 @@ public:
 	int m_TelekinesisTee;
 	CLightsaber* m_pLightsaber;
 	bool m_Spooky;
+	bool m_AlwaysTeleWeapon;
+	bool m_AtomHooked;
+	bool m_TrailHooked;
+	bool m_DoorHammer;
 
 	bool m_FakeTuneCollision;
 	bool m_OldFakeTuneCollision;
@@ -359,18 +365,11 @@ public:
 
 	bool m_PoliceHelper;
 
-	bool m_AlwaysTeleWeapon;
-
-	bool m_AtomHooked;
-	bool m_TrailHooked;
-
 	bool m_MoneyTile;
-
 	int64 m_RoomAntiSpamTick;
+	
 	int64 m_ShopAntiSpamTick;
-
 	bool m_InShop;
-
 	void ShopWindow(int Dir);
 	int m_ShopWindowPage;
 	int64 m_ShopMotdTick;

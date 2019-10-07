@@ -11,7 +11,7 @@
 #include <game/server/player.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon,
-	int Lifetime, int Bullets, bool SpreadWeapon, bool Jetpack, bool TeleWeapon)
+	int Lifetime, int Bullets, bool SpreadWeapon, bool Jetpack, bool TeleWeapon, bool DoorHammer)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize)
 {
 	m_Type = Type;
@@ -21,6 +21,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_SpreadWeapon = SpreadWeapon;
 	m_Jetpack = Jetpack;
 	m_TeleWeapon = TeleWeapon;
+	m_DoorHammer = DoorHammer;
 	m_Bullets = Bullets;
 	m_Owner = Owner;
 	m_Vel = vec2(5*Direction, -5);
@@ -131,6 +132,8 @@ void CPickupDrop::Pickup()
 				pChr->SpreadWeapon(m_Weapon);
 			if (m_TeleWeapon)
 				pChr->TeleWeapon(m_Weapon);
+			if (m_DoorHammer)
+				pChr->DoorHammer();
 
 			if (m_Weapon == WEAPON_SHOTGUN || m_Weapon == WEAPON_LASER || m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_TELE_RIFLE)
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
@@ -170,10 +173,11 @@ int CPickupDrop::IsCharacterNear()
 
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
-				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
+				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_DoorHammer && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
 				|| (m_Jetpack && (pChr->m_Jetpack || !pChr->GetWeaponGot(WEAPON_GUN)))
 				|| (m_SpreadWeapon && (pChr->m_aSpreadWeapon[m_Weapon] || !pChr->GetWeaponGot(m_Weapon)))
 				|| (m_TeleWeapon && (IsTeleWeapon || !pChr->GetWeaponGot(m_Weapon)))
+				|| (m_DoorHammer && (pChr->m_DoorHammer || !pChr->GetWeaponGot(WEAPON_HAMMER)))
 				)
 				continue;
 		}
@@ -408,7 +412,7 @@ void CPickupDrop::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO || (m_Type == POWERUP_WEAPON && GameServer()->GetRealWeapon(m_Weapon) == WEAPON_GUN))
+	if (m_Type == POWERUP_AMMO || (m_Type == POWERUP_WEAPON && (GameServer()->GetRealWeapon(m_Weapon) == WEAPON_GUN || GameServer()->GetRealWeapon(m_Weapon) == WEAPON_HAMMER)))
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)

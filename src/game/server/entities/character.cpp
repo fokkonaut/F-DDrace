@@ -466,6 +466,32 @@ void CCharacter::FireWeapon()
 		{
 			case WEAPON_HAMMER:
 			{
+				if (m_DoorHammer)
+				{
+					// game layer, front layer, switch layer = 3
+					CDoor* apEnts[3];
+					int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 3, CGameWorld::ENTTYPE_LASER);
+					for (int i = 0; i < Num; i++)
+					{
+						CDoor* pDoor = apEnts[i];
+						if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
+						{
+							if (GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()])
+							{
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = false;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = TILE_SWITCHCLOSE;
+							}
+							else
+							{
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = true;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = TILE_SWITCHOPEN;
+							}
+						}
+					}
+				}
+
 				// reset objects Hit
 				m_NumObjectsHit = 0;
 				if (Sound)
@@ -510,7 +536,7 @@ void CCharacter::FireWeapon()
 					Temp -= pTarget->m_Core.m_Vel;
 
 					pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-						m_pPlayer->GetCID(), GetActiveWeapon());
+						m_pPlayer->GetCID(), WEAPON_HAMMER);
 
 					pTarget->UnFreeze();
 
@@ -2807,6 +2833,7 @@ void CCharacter::FDDraceInit()
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_pItem = 0;
+	m_DoorHammer = false;
 
 	m_AlwaysTeleWeapon = g_Config.m_SvAlwaysTeleWeapon;
 
@@ -3030,7 +3057,7 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_HAMMER || WeaponID == WEAPON_NINJA
+	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || (WeaponID == WEAPON_HAMMER && !m_DoorHammer) || WeaponID == WEAPON_NINJA
 		|| (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN] && !m_HasTeleGun) || WeaponID == WEAPON_TASER)
 		return;
 
@@ -3043,10 +3070,10 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	bool IsTeleWeapon = (WeaponID == WEAPON_GUN && m_HasTeleGun) || (WeaponID == WEAPON_GRENADE && m_HasTeleGrenade) || (WeaponID == WEAPON_LASER && m_HasTeleLaser);
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon);
+	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, m_DoorHammer);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(Weapon);
 
-	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon)
+	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon && !m_DoorHammer)
 	{
 		GiveWeapon(WeaponID, true);
 		SetWeapon(WEAPON_GUN);
@@ -3057,6 +3084,8 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		Jetpack(false);
 	if (IsTeleWeapon)
 		TeleWeapon(WeaponID, false);
+	if (m_DoorHammer)
+		DoorHammer(false);
 }
 
 void CCharacter::DropPickup(int Type, int Amount)
@@ -3450,4 +3479,10 @@ void CCharacter::AlwaysTeleWeapon(bool Set, int FromID, bool Silent)
 {
 	m_AlwaysTeleWeapon = Set;
 	GameServer()->SendExtraMessage(ALWAYS_TELE_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
+{
+	m_DoorHammer = Set;
+	GameServer()->SendExtraMessage(DOOR_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

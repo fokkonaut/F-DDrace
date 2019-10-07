@@ -3506,10 +3506,12 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Rifle";
 	case WEAPON_NINJA:
 		return "Ninja";
-	case WEAPON_PLASMA_RIFLE:
-		return "Plasma Rifle";
+	case WEAPON_TASER:
+		return "Taser";
 	case WEAPON_HEART_GUN:
 		return "Heart Gun";
+	case WEAPON_PLASMA_RIFLE:
+		return "Plasma Rifle";
 	case WEAPON_STRAIGHT_GRENADE:
 		return "Straight Grenade";
 	case WEAPON_TELEKINESIS:
@@ -3518,8 +3520,6 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Lightsaber";
 	case WEAPON_TELE_RIFLE:
 		return "Tele Rifle";
-	case WEAPON_TASER:
-		return "Taser";
 	}
 	return "Unknown";
 }
@@ -3528,10 +3528,12 @@ int CGameContext::GetRealWeapon(int Weapon)
 {
 	switch (Weapon)
 	{
-	case WEAPON_PLASMA_RIFLE:
+	case WEAPON_TASER:
 		return WEAPON_LASER;
 	case WEAPON_HEART_GUN:
 		return WEAPON_GUN;
+	case WEAPON_PLASMA_RIFLE:
+		return WEAPON_LASER;
 	case WEAPON_STRAIGHT_GRENADE:
 		return WEAPON_GRENADE;
 	case WEAPON_TELEKINESIS:
@@ -3539,8 +3541,6 @@ int CGameContext::GetRealWeapon(int Weapon)
 	case WEAPON_LIGHTSABER:
 		return WEAPON_GUN;
 	case WEAPON_TELE_RIFLE:
-		return WEAPON_LASER;
-	case WEAPON_TASER:
 		return WEAPON_LASER;
 	}
 	return Weapon;
@@ -3600,7 +3600,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 	// message without a sender
 	if (FromID == -1 || FromID == ToID)
 	{
-		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER || Extra == SPREAD_WEAPON || Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON)
+		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER || Extra == SPREAD_WEAPON || Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON || Extra == DOOR_HAMMER)
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
 		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
@@ -3691,6 +3691,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		}
 	case ALWAYS_TELE_WEAPON:
 		return "Always Tele Weapon";
+	case DOOR_HAMMER:
+		return "Door Hammer";
 	}
 	return "Unknown";
 }

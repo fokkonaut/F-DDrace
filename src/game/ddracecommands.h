@@ -124,6 +124,8 @@ CONSOLE_COMMAND("telegun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleGun, t
 CONSOLE_COMMAND("telegrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleGrenade, this, "Gives a tele grenade to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleLaser, this, "Gives a tele laser to player v", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("doorhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConDoorHammer, this, "Gives a door hammer to player v", AUTHED_ADMIN)
+
 //account
 CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)

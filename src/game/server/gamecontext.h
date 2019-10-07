@@ -643,6 +643,8 @@ private:
 	static void ConTeleGrenade(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeleLaser(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);

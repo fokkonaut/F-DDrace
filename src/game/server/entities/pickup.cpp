@@ -266,7 +266,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO || (m_Type == POWERUP_WEAPON && GameServer()->GetRealWeapon(m_Subtype) == WEAPON_GUN))
+	if (m_Type == POWERUP_AMMO || (m_Type == POWERUP_WEAPON && (GameServer()->GetRealWeapon(m_Subtype) == WEAPON_GUN || GameServer()->GetRealWeapon(m_Subtype) == WEAPON_HAMMER)))
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)

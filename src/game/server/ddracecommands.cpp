@@ -246,8 +246,9 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 	}
 	else if (Weapon == -2)
 	{
-		pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
+		pChr->GiveWeapon(WEAPON_TASER, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_HEART_GUN, Remove, Amount);
+		pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
 		pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
 		pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
@@ -1389,4 +1390,12 @@ void CGameContext::ConTeleLaser(IConsole::IResult* pResult, void* pUserData)
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr) pChr->TeleWeapon(WEAPON_LASER, !pChr->m_HasTeleLaser, pResult->m_ClientID);
+}
+
+void CGameContext::ConDoorHammer(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->DoorHammer(!pChr->m_DoorHammer, pResult->m_ClientID);
 }
