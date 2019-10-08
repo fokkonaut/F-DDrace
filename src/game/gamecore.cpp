@@ -638,7 +638,7 @@ void CCharacterCore::Quantize()
 
 // F-DDrace
 
-void CCharacterCore::SetFlagPos(int Team, vec2 Pos, int Stand, vec2 Vel, bool Carried)
+void CCharacterCore::SetFlagInfo(int Team, vec2 Pos, int Stand, vec2 Vel, bool Carried)
 {
 	m_FlagPos[Team] = Pos;
 	m_AtStand[Team] = Stand;

@@ -1027,14 +1027,11 @@ void CCharacter::Tick()
 	// F-DDrace
 	for (int i = 0; i < 2; i++)
 	{
-		bool Carried = true;
 		CFlag* F = ((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[i];
 		if (!F)
 			continue;
 
-		if (F->GetCarrier() == NULL)
-			Carried = false;
-		m_Core.SetFlagPos(i, F->GetPos(), F->IsAtStand(), F->GetVel(), Carried);
+		m_Core.SetFlagInfo(i, F->GetPos(), F->IsAtStand(), F->GetVel(), F->GetCarrier());
 	}
 
 	m_Core.m_Input = m_Input;

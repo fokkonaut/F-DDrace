@@ -210,7 +210,7 @@ public:
 
 	// F-DDrace
 
-	void SetFlagPos(int Team, vec2 Pos, int Stand, vec2 Vel, bool Carried);
+	void SetFlagInfo(int Team, vec2 Pos, int Stand, vec2 Vel, bool Carried);
 
 	vec2 m_FlagPos[2];
 	vec2 m_FlagVel[2];
