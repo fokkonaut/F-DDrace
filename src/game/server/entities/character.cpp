@@ -536,7 +536,7 @@ void CCharacter::FireWeapon()
 					Temp -= pTarget->m_Core.m_Vel;
 
 					pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-						m_pPlayer->GetCID(), WEAPON_HAMMER);
+						m_pPlayer->GetCID(), GetActiveWeapon());
 
 					pTarget->UnFreeze();
 
