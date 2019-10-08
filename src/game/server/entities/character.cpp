@@ -778,7 +778,7 @@ void CCharacter::FireWeapon()
 			{
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
-				vec2 NewPos;
+				vec2 NewPos = CursorPos;
 				if (!g_Config.m_SvTeleRifleAllowBlocks)
 				{
 					vec2 PossiblePos;
