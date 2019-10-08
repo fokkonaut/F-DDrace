@@ -468,7 +468,7 @@ void CCharacter::FireWeapon()
 			{
 				if (m_DoorHammer)
 				{
-					// 4 x 3 = 9 (reachable tiles x (game layer, front layer, switch layer))
+					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
 					CDoor* apEnts[12];
 					int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 9, CGameWorld::ENTTYPE_DOOR);
 					for (int i = 0; i < Num; i++)
