@@ -61,6 +61,8 @@ bool CEntity::GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2* pOutPos)
 	while (GameServer()->Collision()->CheckPoint(Pos))
 	{
 		Pos -= normalize(PrevPos - Pos);
+		if (distance(Pos, PrevPos) > 4000.f)
+			return false;
 	}
 
 	vec2 PosInBlock = vec2(round_to_int(Pos.x) % 32, round_to_int(Pos.y) % 32);

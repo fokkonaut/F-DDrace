@@ -778,13 +778,15 @@ void CCharacter::FireWeapon()
 			{
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
-				vec2 NewPos = CursorPos;
+				vec2 NewPos;
 				if (!g_Config.m_SvTeleRifleAllowBlocks)
 				{
 					vec2 PossiblePos;
 					bool Found = GetNearestAirPos(CursorPos, m_Pos, &PossiblePos);
 					if (Found && PossiblePos)
 						NewPos = PossiblePos;
+					else
+						NewPos = m_Pos;
 				}
 				m_Core.m_Pos = NewPos;
 
