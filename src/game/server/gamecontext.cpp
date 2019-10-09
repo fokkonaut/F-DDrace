@@ -3106,7 +3106,7 @@ int CGameContext::AddAccount()
 void CGameContext::ReadAccountStats(int ID, const char *pName)
 {
 	std::string data;
-	char aData[32];
+	char aData[128];
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s/%s.acc", g_Config.m_SvAccFilePath, pName);
 	std::fstream AccFile(aBuf);
