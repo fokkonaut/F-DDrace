@@ -1218,7 +1218,7 @@ void CCharacter::Die(int Killer, int Weapon)
 				(*KillerAcc).m_KillingSpreeRecord = pKillerChar->m_KillStreak;
 
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "New killing spree record (%d %s)", pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
+				str_format(aBuf, sizeof(aBuf), "New personal killing spree record (%d %s)", pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
 				GameServer()->SendChatTarget(Killer, aBuf);
 			}
 
