@@ -93,6 +93,7 @@ enum Top5
 	TOP_LEVEL,
 	TOP_POINTS,
 	TOP_MONEY,
+	TOP_SPREE,
 };
 
 #define ACC_START 1 // account ids start with 1, 0 means not logged in
@@ -317,6 +318,7 @@ public:
 		int m_Level;
 		int m_Points;
 		int64 m_Money;
+		int m_KillStreak;
 		char m_aUsername[32];
 	};
 	std::vector<TopAccounts> m_TempTopAccounts;
@@ -361,6 +363,7 @@ public:
 		int m_SurvivalDeaths;
 		int m_InstagibDeaths;
 		int m_TaserLevel;
+		int m_KillingSpreeRecord;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -400,6 +403,7 @@ public:
 		SURVIVAL_DEATHS,
 		INSTAGIB_DEATHS,
 		TASER_LEVEL,
+		KILLING_SPREE_RECORD,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -570,6 +574,7 @@ private:
 	static void ConTop5Level(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5Points(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5Money(IConsole::IResult* pResult, void* pUserData);
+	static void ConTop5Spree(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 

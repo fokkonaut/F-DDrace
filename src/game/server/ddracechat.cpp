@@ -1721,7 +1721,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 
 	pSelf->UpdateTopAccounts(Type);
 
-	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : "Money");
+	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : Type == TOP_MONEY ? "Money" : "Spree");
 	str_format(aMsg, sizeof(aMsg), "----------- Top 5 %s -----------", aType);
 
 	if (StartRank > 0)
@@ -1739,7 +1739,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 			if (Type == TOP_MONEY)
 				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TempTopAccounts[i].m_aUsername, pSelf->m_TempTopAccounts[i].m_Money);
 			else
-				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : pSelf->m_TempTopAccounts[i].m_Points);
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : Type == TOP_POINTS ? pSelf->m_TempTopAccounts[i].m_Points : pSelf->m_TempTopAccounts[i].m_KillStreak);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		}
 		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
@@ -1758,7 +1758,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 			if (Type == TOP_MONEY)
 				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TempTopAccounts[i].m_aUsername, pSelf->m_TempTopAccounts[i].m_Money);
 			else
-				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : pSelf->m_TempTopAccounts[i].m_Points);
+				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TempTopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TempTopAccounts[i].m_Level : Type == TOP_POINTS ? pSelf->m_TempTopAccounts[i].m_Points : pSelf->m_TempTopAccounts[i].m_KillStreak);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		}
 		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
@@ -1781,6 +1781,12 @@ void CGameContext::ConTop5Money(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_MONEY);
+}
+
+void CGameContext::ConTop5Spree(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_SPREE);
 }
 
 void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)

@@ -1187,9 +1187,34 @@ void CCharacter::Die(int Killer, int Weapon)
 	// account kills and deaths
 	if (pKiller)
 	{
+		// killing spree
+		char aBuf[128];
+		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
+		CCharacter* pKillerChar = pKiller->GetCharacter();
+		if (pKillerChar)
+		{
+			pKillerChar->m_KillStreak++;
+			if (pKillerChar->m_KillStreak % 5 == 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
+				GameServer()->SendChatTarget(-1, aBuf);
+			}
+		}
+
+		if (m_KillStreak >= 5)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
+			GameServer()->SendChatTarget(-1, aBuf);
+			pKiller->GiveXP(250, "end a killing spree");
+		}
+
 		if (pKiller->GetAccID() >= ACC_START)
 		{
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
+
+			// kill streak;
+			if (pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
+				(*KillerAcc).m_KillingSpreeRecord = m_KillStreak;
 
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
 			{
@@ -1224,27 +1249,6 @@ void CCharacter::Die(int Killer, int Weapon)
 			{
 				(*Account).m_Deaths++;
 			}
-		}
-
-		// killing spree
-		char aBuf[128];
-		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
-		CCharacter* pKillerChar = pKiller->GetCharacter();
-		if (pKillerChar)
-		{
-			pKillerChar->m_KillStreak++;
-			if (pKillerChar->m_KillStreak % 5 == 0)
-			{
-				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
-				GameServer()->SendChatTarget(-1, aBuf);
-			}
-		}
-
-		if (m_KillStreak >= 5)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
-			GameServer()->SendChatTarget(-1, aBuf);
-			pKiller->GiveXP(250, "end a killing spree");
 		}
 	}
 

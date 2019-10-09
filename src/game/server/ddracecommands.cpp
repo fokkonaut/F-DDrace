@@ -1279,16 +1279,14 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int ID = pSelf->AddAccount();
-	pSelf->ReadAccountStats(ID, pResult->GetString(0));
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
-
-	if ((*Account).m_Username[0] == '\0')
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
 	{
-		pSelf->FreeAccount(ID);
 		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
 		return;
 	}
+
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "==== [ACCOUNT INFO] '%s' ====", pResult->GetString(0));
@@ -1356,7 +1354,8 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "Taser Level: %d", (*Account).m_TaserLevel);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	pSelf->FreeAccount(ID);
+	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+		pSelf->FreeAccount(ID);
 }
 
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)

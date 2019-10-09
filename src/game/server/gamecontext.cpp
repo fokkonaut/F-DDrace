@@ -3003,6 +3003,7 @@ void CGameContext::UpdateTopAccounts(int Type)
 	case TOP_LEVEL:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
 	case TOP_POINTS:	std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
 	case TOP_MONEY:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
+	case TOP_SPREE:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
 	}
 	m_TempTopAccounts.insert(m_TempTopAccounts.begin(), TopAccounts()); // we add an unused field so we can nicely start with 1
 }
@@ -3016,17 +3017,20 @@ int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageT
 		char aUsername[32];
 		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
 
-		int ID = pSelf->AddAccount();
-		pSelf->ReadAccountStats(ID, aUsername);
+		int ID = pSelf->GetAccount(aUsername);
+		if (ID < ACC_START)
+			return 0;
 
 		CGameContext::TopAccounts Account;
 		Account.m_Level = pSelf->m_Accounts[ID].m_Level;
 		Account.m_Points = pSelf->m_Accounts[ID].m_BlockPoints;
 		Account.m_Money = pSelf->m_Accounts[ID].m_Money;
+		Account.m_KillStreak = pSelf->m_Accounts[ID].m_KillingSpreeRecord;
 		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 		pSelf->m_TempTopAccounts.push_back(Account);
 
-		pSelf->FreeAccount(ID, true);
+		if (!pSelf->m_Accounts[ID].m_LoggedIn)
+			pSelf->FreeAccount(ID, true);
 	}
 
 	return 0;
@@ -3094,6 +3098,7 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_SurvivalDeaths = 0;
 	m_Accounts[ID].m_InstagibDeaths = 0;
 	m_Accounts[ID].m_TaserLevel = 0;
+	m_Accounts[ID].m_KillingSpreeRecord = 0;
 
 	return ID;
 }
@@ -3146,6 +3151,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case SURVIVAL_DEATHS:			m_Accounts[ID].m_SurvivalDeaths = atoi(aData); break;
 		case INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(aData); break;
 		case TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(aData); break;
+		case KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(aData); break;
 		}
 	}
 }
@@ -3192,6 +3198,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_SurvivalDeaths << "\n";
 		AccFile << m_Accounts[ID].m_InstagibDeaths << "\n";
 		AccFile << m_Accounts[ID].m_TaserLevel << "\n";
+		AccFile << m_Accounts[ID].m_KillingSpreeRecord << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

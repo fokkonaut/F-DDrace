@@ -81,6 +81,7 @@ CHAT_COMMAND("fng", "?s[enable/disable]", CFGFLAG_CHAT, ConJoinFNG, this, "Joins
 CHAT_COMMAND("top5level", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Level, this, "Shows top5 accounts sorted by level", AUTHED_NO)
 CHAT_COMMAND("top5points", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Points, this, "Shows top5 accounts sorted by block points", AUTHED_NO)
 CHAT_COMMAND("top5money", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Money, this, "Shows top5 accounts sorted by money", AUTHED_NO)
+CHAT_COMMAND("top5spree", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Spree, this, "Shows top5 accounts sorted by killing spree", AUTHED_NO)
 
 //police
 CHAT_COMMAND("policehelper", "s[add/remove] r[name]", CFGFLAG_CHAT, ConPoliceHelper, this, "Adds/removes player r to/from policehelpers", AUTHED_NO)
