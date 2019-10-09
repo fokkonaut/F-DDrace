@@ -1214,7 +1214,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 			// kill streak;
 			if (pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
-				(*KillerAcc).m_KillingSpreeRecord = m_KillStreak;
+				(*KillerAcc).m_KillingSpreeRecord = pKillerChar->m_KillStreak;
 
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
 			{
