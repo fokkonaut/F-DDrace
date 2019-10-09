@@ -3209,6 +3209,16 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 	m_aWeapons[Type].m_Ammo = Value;
 }
 
+void CCharacter::SetWeaponGot(int Type, bool Value)
+{
+	if (m_pPlayer->m_SpookyGhost)
+	{
+		m_aWeaponsBackupGot[Type][BACKUP_SPOOKY_GHOST] = Value;
+		return;
+	}
+	m_aWeapons[Type].m_Got = Value;
+}
+
 void CCharacter::UpdateWeaponIndicator()
 {
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile

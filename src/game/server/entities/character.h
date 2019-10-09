@@ -307,7 +307,7 @@ public:
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
-	void SetWeaponGot(int Type, bool Value) { m_aWeapons[Type].m_Got = Value; };
+	void SetWeaponGot(int Type, bool Value);
 	int GetWeaponAmmo(int Type);
 	void SetWeaponAmmo(int Type, int Value);
 	bool IsAlive() { return m_Alive; };
