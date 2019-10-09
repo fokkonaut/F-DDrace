@@ -1038,6 +1038,25 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 	}
 }
 
+void CPlayer::OnLogin()
+{
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	if (m_pCharacter)
+	{
+		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && (*Account).m_TaserLevel >= 1)
+			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
+	}
+}
+
+void CPlayer::OnLogout()
+{
+	if (m_pCharacter)
+	{
+		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
+			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
+	}
+}
+
 void CPlayer::GiveBlockPoints(int Amount)
 {
 	if (GetAccID() < ACC_START)

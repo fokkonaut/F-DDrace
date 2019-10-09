@@ -3208,7 +3208,10 @@ void CGameContext::WriteAccountStats(int ID)
 void CGameContext::Logout(int ID)
 {
 	if (m_Accounts[ID].m_ClientID >= 0)
+	{
 		SendChatTarget(m_Accounts[ID].m_ClientID, "Successfully logged out");
+		m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
+	}
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
 	WriteAccountStats(ID);

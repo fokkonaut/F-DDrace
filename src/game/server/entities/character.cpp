@@ -2972,9 +2972,6 @@ void CCharacter::FDDraceTick()
 	}
 
 	m_WasPausedLastTick = m_pPlayer->IsSpectator();
-
-	if (GetWeaponGot(WEAPON_TASER) && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1)
-		GiveWeapon(WEAPON_TASER, true);
 }
 
 void CCharacter::HandleLastIndexTiles()
@@ -3188,28 +3185,13 @@ void CCharacter::SetActiveWeapon(int Weapon)
 	UpdateWeaponIndicator();
 }
 
-bool CCharacter::GetWeaponGot(int Type)
-{
-	if (m_FreezeTime)
-		return m_aWeaponsBackupGot[Type][BACKUP_FREEZE];
-	return m_aWeapons[Type].m_Got;
-}
-
 int CCharacter::GetWeaponAmmo(int Type)
 {
 	if (m_FreezeTime)
 		return m_aWeaponsBackup[Type][BACKUP_FREEZE];
+	else if (m_pPlayer->m_SpookyGhost)
+		return m_aWeaponsBackup[Type][BACKUP_SPOOKY_GHOST];
 	return m_aWeapons[Type].m_Ammo;
-}
-
-void CCharacter::SetWeaponGot(int Type, bool Value)
-{
-	if (m_FreezeTime)
-	{
-		m_aWeaponsBackupGot[Type][BACKUP_FREEZE] = Value;
-		return;
-	}
-	m_aWeapons[Type].m_Got = Value;
 }
 
 void CCharacter::SetWeaponAmmo(int Type, int Value)
@@ -3217,6 +3199,11 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 	if (m_FreezeTime)
 	{
 		m_aWeaponsBackup[Type][BACKUP_FREEZE] = Value;
+		return;
+	}
+	else if (m_pPlayer->m_SpookyGhost)
+	{
+		m_aWeaponsBackup[Type][BACKUP_SPOOKY_GHOST] = Value;
 		return;
 	}
 	m_aWeapons[Type].m_Ammo = Value;

@@ -269,6 +269,8 @@ public:
 	int GetAccID();
 	void MoneyTransaction(int Amount, const char* pDescription = "");
 	void GiveXP(int Amount, const char* pMessage = "");
+	void OnLogin();
+	void OnLogout();
 
 	//room key
 	bool m_HasRoomKey;
