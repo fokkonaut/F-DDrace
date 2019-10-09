@@ -1214,13 +1214,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 			// kill streak;
 			if (pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
-			{
 				(*KillerAcc).m_KillingSpreeRecord = pKillerChar->m_KillStreak;
-
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "New personal killing spree record (%d %s)", pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
-				GameServer()->SendChatTarget(Killer, aBuf);
-			}
 
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
 			{
@@ -1242,6 +1236,14 @@ void CCharacter::Die(int Killer, int Weapon)
 		if (m_pPlayer->GetAccID() >= ACC_START)
 		{
 			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+			// kill streak
+			if (m_KillStreak > (*Account).m_KillingSpreeRecord)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "New personal killing spree record (%d %s)", m_KillStreak, IsBlock ? "blocks" : "kills");
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			}
 
 			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
 			{
