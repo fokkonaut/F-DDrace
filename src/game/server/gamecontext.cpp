@@ -781,19 +781,28 @@ void CGameContext::OnTick()
 	if (Collision()->m_NumSwitchers > 0)
 		for (int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
 		{
+			if (i == 26)
+				dbg_msg("hi", "%d", Collision()->m_pSwitchers[i].m_ClientID[0]);
+
 			for (int j = 0; j < MAX_CLIENTS; ++j)
 			{
+				// F-DDrace
+				if (!m_apPlayers[Collision()->m_pSwitchers[i].m_ClientID[j]] || (Collision()->m_pSwitchers[i].m_StartTick[j] < Server()->Tick() && Collision()->m_pSwitchers[i].m_EndTick[j] == 0))
+					Collision()->m_pSwitchers[i].m_ClientID[j] = -1;
+
 				if (Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
 				{
 					Collision()->m_pSwitchers[i].m_Status[j] = false;
 					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
 					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHCLOSE;
+					Collision()->m_pSwitchers[i].m_ClientID[j] = -1;
 				}
 				else if (Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDCLOSE)
 				{
 					Collision()->m_pSwitchers[i].m_Status[j] = true;
 					Collision()->m_pSwitchers[i].m_EndTick[j] = 0;
 					Collision()->m_pSwitchers[i].m_Type[j] = TILE_SWITCHOPEN;
+					Collision()->m_pSwitchers[i].m_ClientID[j] = -1;
 				}
 			}
 		}

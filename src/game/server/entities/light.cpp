@@ -37,6 +37,14 @@ bool CLight::HitCharacter()
 				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 			continue;
 		Char->Freeze();
+
+		// F-DDrace
+		int SwitchID = GameServer()->Collision()->m_pSwitchers[m_Number].m_ClientID[Char->Team()];
+		if (SwitchID >= 0 && GameServer()->m_apPlayers[SwitchID])
+		{
+			Char->Core()->m_Killer.m_ClientID = SwitchID;
+			Char->Core()->m_Killer.m_Weapon = -1;
+		}
 	}
 	return true;
 }

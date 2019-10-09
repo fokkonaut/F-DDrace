@@ -147,6 +147,9 @@ void CCollision::Init(class CLayers* pLayers)
 				m_pSwitchers[i].m_Status[j] = true;
 				m_pSwitchers[i].m_EndTick[j] = 0;
 				m_pSwitchers[i].m_Type[j] = 0;
+				// F-DDrace
+				m_pSwitchers[i].m_ClientID[j] = -1;
+				m_pSwitchers[i].m_StartTick[j] = 0;
 			}
 		}
 	}

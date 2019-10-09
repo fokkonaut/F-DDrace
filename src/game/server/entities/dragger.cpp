@@ -130,6 +130,14 @@ void CDragger::Drag()
 			{
 				vec2 Temp = Target->Core()->m_Vel + (normalize(GetPos() - Target->GetPos()) * m_Strength);
 				Target->Core()->m_Vel = ClampVel(Target->m_MoveRestrictions, Temp);
+
+				// F-DDrace
+				int SwitchID = GameServer()->Collision()->m_pSwitchers[m_Number].m_ClientID[Target->Team()];
+				if (SwitchID >= 0 && GameServer()->m_apPlayers[SwitchID])
+				{
+					Target->Core()->m_Killer.m_ClientID = SwitchID;
+					Target->Core()->m_Killer.m_Weapon = -1;
+				}
 			}
 		}
 	}

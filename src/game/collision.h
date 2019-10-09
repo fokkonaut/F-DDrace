@@ -140,6 +140,9 @@ private:
 		bool m_Initial;
 		int m_EndTick[MAX_CLIENTS];
 		int m_Type[MAX_CLIENTS];
+		// F-DDrace
+		int m_ClientID[MAX_CLIENTS];
+		int m_StartTick[MAX_CLIENTS];
 	};
 
 public:
