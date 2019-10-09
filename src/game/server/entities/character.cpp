@@ -1237,14 +1237,6 @@ void CCharacter::Die(int Killer, int Weapon)
 		{
 			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-			// kill streak
-			if (m_KillStreak > (*Account).m_KillingSpreeRecord)
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "New personal killing spree record (%d %s)", m_KillStreak, IsBlock ? "blocks" : "kills");
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-			}
-
 			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
 			{
 				(*Account).m_SurvivalDeaths++;
