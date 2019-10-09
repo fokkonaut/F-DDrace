@@ -781,15 +781,14 @@ void CGameContext::OnTick()
 	if (Collision()->m_NumSwitchers > 0)
 		for (int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
 		{
-			if (i == 26)
-				dbg_msg("hi", "%d", Collision()->m_pSwitchers[i].m_ClientID[0]);
-
 			for (int j = 0; j < MAX_CLIENTS; ++j)
 			{
 				// F-DDrace
+				// set current switcher client id to -1 if the player doesnt exist OR it is a non-timed switch and the player is not on the switch anymore
 				if (!m_apPlayers[Collision()->m_pSwitchers[i].m_ClientID[j]] || (Collision()->m_pSwitchers[i].m_StartTick[j] < Server()->Tick() && Collision()->m_pSwitchers[i].m_EndTick[j] == 0))
 					Collision()->m_pSwitchers[i].m_ClientID[j] = -1;
 
+				// if it is a timed switch, the client id will be reset after the time is over here
 				if (Collision()->m_pSwitchers[i].m_EndTick[j] <= Server()->Tick() && Collision()->m_pSwitchers[i].m_Type[j] == TILE_SWITCHTIMEDOPEN)
 				{
 					Collision()->m_pSwitchers[i].m_Status[j] = false;
