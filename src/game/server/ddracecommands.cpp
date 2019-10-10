@@ -1042,7 +1042,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Status: Dead");
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
-		str_format(aBuf, sizeof(aBuf), "AccountName: %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
+		str_format(aBuf, sizeof(aBuf), "Account Name: %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
