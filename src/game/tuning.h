@@ -52,7 +52,7 @@ MACRO_TUNING_PARAM(ExplosionStrength, explosion_strength, 6.0f, "Explosion stren
 MACRO_TUNING_PARAM(HammerStrength, hammer_strength, 1.0f, "Hammer strength")
 MACRO_TUNING_PARAM(HookDuration, hook_duration, 1.25f, "Hook duration")
 
-#define OLD_TUNES 37 // BlockDDrace // above are tunes until the fire delay tunes
+#define OLD_TUNES 37 // F-DDrace // above are tunes until the fire delay tunes
 
 MACRO_TUNING_PARAM(HammerFireDelay, hammer_fire_delay, 125, "Delay of hammering")
 MACRO_TUNING_PARAM(GunFireDelay, gun_fire_delay, 125, "Delay of firing gun")
