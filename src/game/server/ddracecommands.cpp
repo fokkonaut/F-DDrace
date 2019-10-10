@@ -1058,6 +1058,8 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Mode: DDrace");
 	else if (pPlayer->m_Gamemode == GAMEMODE_VANILLA)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Mode: Vanilla");
+	if (pPlayer->m_SpookyGhost)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Spooky Ghost: True");
 
 	if (pChr)
 	{
@@ -1109,6 +1111,18 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		}
 		if (pChr->m_Invisible)
 			pSelf->SendChatTarget(pResult->m_ClientID, "Invisibility: True");
+		if (pChr->m_HookPower != HOOK_NORMAL)
+		{
+			str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(HOOK_POWER, pChr->m_HookPower));
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		}
+		if (pChr->m_Item != -3)
+		{
+			str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetExtraName(ITEM, pChr->m_HookPower));
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		}
+		if (pChr->m_DoorHammer)
+			pSelf->SendChatTarget(pResult->m_ClientID, "Door Hammer: True");
 		str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
