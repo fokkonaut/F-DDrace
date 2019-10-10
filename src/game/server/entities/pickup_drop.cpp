@@ -337,6 +337,9 @@ void CPickupDrop::HandleTiles(int Index)
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 
+	// stopper
+	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
+
 	// teleporters
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if (z && Controller->m_TeleOuts[z - 1].size())
@@ -396,9 +399,6 @@ void CPickupDrop::HandleTiles(int Index)
 			m_Pos = SpawnPos;
 		return;
 	}
-
-	// stopper
-	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
 }
 
 void CPickupDrop::Snap(int SnappingClient)

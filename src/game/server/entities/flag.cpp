@@ -253,6 +253,9 @@ void CFlag::HandleTiles(int Index)
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, m_pLastCarrier ? m_pLastCarrier->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 
+	// stopper
+	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
+
 	// teleporters
 	int tcp = GameServer()->Collision()->IsTCheckpoint(MapIndex);
 	if (tcp)
@@ -316,9 +319,6 @@ void CFlag::HandleTiles(int Index)
 			m_Pos = SpawnPos;
 		return;
 	}
-
-	// stopper
-	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
 }
 
 void CFlag::Snap(int SnappingClient)
