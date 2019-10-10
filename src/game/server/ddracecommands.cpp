@@ -1139,12 +1139,8 @@ void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Amount = pResult->GetInteger(0);
-	int Dummymode = pResult->GetInteger(1);
-
-	if (!Amount)
-		Amount = 1;
-
+	int Amount = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1;
+	int Dummymode = pResult->NumArguments() == 2 ? pResult->GetInteger(1) : DUMMYMODE_IDLE;
 	for (int i = 0; i < Amount; i++)
 		pSelf->ConnectDummy(Dummymode);
 }
