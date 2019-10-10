@@ -48,6 +48,7 @@ void CPlayer::Reset()
 
 	// F-DDrace
 
+	m_LastCommandPos = 0;
 	m_LastPlaytime = time_get();
 	m_Sent1stAfkWarning = 0;
 	m_Sent2ndAfkWarning = 0;

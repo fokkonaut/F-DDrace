@@ -1089,9 +1089,6 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	if (!pPlayer)
 		return;
 
-	if (pSelf->ProcessSpamProtection(pResult->m_ClientID))
-		return;
-
 	if (!g_Config.m_SvAccounts)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
@@ -1180,9 +1177,6 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	if (!pPlayer)
 		return;
 
-	if (pSelf->ProcessSpamProtection(pResult->m_ClientID))
-		return;
-
 	if (!g_Config.m_SvAccounts)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
@@ -1250,9 +1244,6 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
-		return;
-
-	if (pSelf->ProcessSpamProtection(pResult->m_ClientID))
 		return;
 
 	if (!g_Config.m_SvAccounts && pPlayer->GetAccID() < ACC_START)
@@ -1585,9 +1576,6 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CPlayer* pPlayer = m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
-		return;
-
-	if (pSelf->ProcessSpamProtection(pResult->m_ClientID))
 		return;
 
 	char aMsg[128];

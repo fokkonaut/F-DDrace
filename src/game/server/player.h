@@ -112,6 +112,8 @@ public:
 	int m_LastChangeInfo;
 	int m_LastEmote;
 	int m_LastKill;
+	int m_LastCommands[4];
+	int m_LastCommandPos;
 	int m_LastReadyChange;
 
 	int m_LastInvited;

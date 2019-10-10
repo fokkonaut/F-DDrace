@@ -1159,6 +1159,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
+
+
 			// don't allow spectators to disturb players during a running game in tournament mode
 			int Mode = pMsg->m_Mode;
 			if((g_Config.m_SvTournamentMode == 2) &&
@@ -1173,6 +1175,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pMsg->m_pMessage[0] == '/')
 			{
+				if (g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
+					&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + Server()->TickSpeed() > Server()->Tick()
+					)
+					return;
+
+				int64 Now = Server()->Tick();
+				pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
+				pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
+
 				m_ChatResponseTargetID = ClientID;
 				Server()->RestrictRconOutput(ClientID);
 				Console()->SetFlagMask(CFGFLAG_CHAT);
