@@ -1159,8 +1159,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
-
-
 			// don't allow spectators to disturb players during a running game in tournament mode
 			int Mode = pMsg->m_Mode;
 			if((g_Config.m_SvTournamentMode == 2) &&
