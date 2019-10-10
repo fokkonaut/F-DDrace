@@ -447,9 +447,14 @@ void CPickupDrop::Snap(int SnappingClient)
 		pP->m_Type = GameServer()->GetRealPickupType(m_Type, m_Weapon);
 	}
 
+	bool Gun = m_Weapon == WEAPON_GUN && (m_Jetpack || m_TeleWeapon);
+	bool Plasma = m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_TeleWeapon);
+	bool Heart = m_Weapon == WEAPON_HEART_GUN;
+	bool Grenade = m_Weapon == WEAPON_STRAIGHT_GRENADE || (m_Weapon == WEAPON_GRENADE && m_TeleWeapon);
+
 	int ExtraBulletOffset = 30;
 	int SpreadOffset = -20;
-	if (m_SpreadWeapon && (m_Jetpack || m_TeleWeapon))
+	if (m_SpreadWeapon && (Gun || Plasma || Heart || Grenade))
 		ExtraBulletOffset = 50;
 
 	if (m_SpreadWeapon)
@@ -469,7 +474,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		}
 	}
 
-	if (m_Jetpack || (m_Weapon == WEAPON_GUN && m_TeleWeapon))
+	if (Gun)
 	{
 		CNetObj_Projectile* pShotgunBullet = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[0], sizeof(CNetObj_Projectile)));
 		if (!pShotgunBullet)
@@ -480,7 +485,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		pShotgunBullet->m_Type = WEAPON_SHOTGUN;
 		pShotgunBullet->m_StartTick = Server()->Tick();
 	}
-	else if (m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_TeleWeapon))
+	else if (Plasma)
 	{
 		CNetObj_Laser* pLaser = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[0], sizeof(CNetObj_Laser)));
 		if (!pLaser)
@@ -492,7 +497,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		pLaser->m_FromY = (int)m_Pos.y - ExtraBulletOffset;
 		pLaser->m_StartTick = Server()->Tick();
 	}
-	else if (m_Weapon == WEAPON_HEART_GUN)
+	else if (Heart)
 	{
 		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aID[0], sizeof(CNetObj_Pickup)));
 		if (!pPickup)
@@ -502,7 +507,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		pPickup->m_Y = (int)m_Pos.y - ExtraBulletOffset;
 		pPickup->m_Type = POWERUP_HEALTH;
 	}
-	else if (m_Weapon == WEAPON_STRAIGHT_GRENADE || (m_Weapon == WEAPON_GRENADE && m_TeleWeapon))
+	else if (Grenade)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[0], sizeof(CNetObj_Projectile)));
 		if (!pProj)
