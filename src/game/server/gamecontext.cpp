@@ -19,7 +19,7 @@
 #include "gamecontext.h"
 #include "player.h"
 
-#include <game/server/entities/flag.h>f
+#include <game/server/entities/flag.h>
 #include <game/server/entities/lasertext.h>
 #include <fstream>
 #include <limits>
