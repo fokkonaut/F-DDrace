@@ -1208,7 +1208,7 @@ void CCharacter::Die(int Killer, int Weapon)
 			pKiller->GiveXP(250, "end a killing spree");
 		}
 
-		if (pKiller->GetAccID() >= ACC_START)
+		if (pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
 		{
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
