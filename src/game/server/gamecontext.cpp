@@ -19,7 +19,7 @@
 #include "gamecontext.h"
 #include "player.h"
 
-#include <game/server/entities/flag.h>
+#include <game/server/entities/flag.h>f
 #include <game/server/entities/lasertext.h>
 #include <fstream>
 #include <limits>
@@ -3220,8 +3220,9 @@ void CGameContext::Logout(int ID)
 {
 	if (m_Accounts[ID].m_ClientID >= 0)
 	{
+		if (m_apPlayers[m_Accounts[ID].m_ClientID])
+			m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
 		SendChatTarget(m_Accounts[ID].m_ClientID, "Successfully logged out");
-		m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
 	}
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
