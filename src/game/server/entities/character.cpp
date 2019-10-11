@@ -1191,7 +1191,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		char aBuf[128];
 		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
 		CCharacter* pKillerChar = pKiller->GetCharacter();
-		if (pKillerChar)
+		if (pKillerChar && (!pKillerChar->GetPlayer()->m_IsDummy || g_Config.m_SvDummyBlocking))
 		{
 			pKillerChar->m_KillStreak++;
 			if (pKillerChar->m_KillStreak % 5 == 0)
@@ -1229,7 +1229,8 @@ void CCharacter::Die(int Killer, int Weapon)
 				(*KillerAcc).m_Kills++;
 
 				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * g_Config.m_SvBlockPointsDelay)
-					pKiller->GiveBlockPoints(1);
+					if (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking)
+						pKiller->GiveBlockPoints(1);
 			}
 		}
 
