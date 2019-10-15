@@ -298,7 +298,6 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	m_RconRestrict = -1;
 
 	m_RconPasswordSet = 0;
-	m_GeneratedRconPassword = 0;
 
 	Init();
 }
@@ -532,36 +531,6 @@ bool CServer::ClientIngame(int ClientID) const
 int CServer::MaxClients() const
 {
 	return m_NetServer.MaxClients();
-}
-
-void CServer::InitRconPasswordIfUnset()
-{
-	if(m_RconPasswordSet)
-	{
-		return;
-	}
-
-	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
-	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
-	static const size_t PASSWORD_LENGTH = 6;
-	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
-	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
-
-	dbg_assert(PASSWORD_LENGTH % 2 == 0, "need an even password length");
-	unsigned short aRandom[PASSWORD_LENGTH / 2];
-	char aRandomPassword[PASSWORD_LENGTH+1];
-	aRandomPassword[PASSWORD_LENGTH] = 0;
-
-	secure_random_fill(aRandom, sizeof(aRandom));
-	for(size_t i = 0; i < PASSWORD_LENGTH / 2; i++)
-	{
-		unsigned short RandomNumber = aRandom[i] % 2048;
-		aRandomPassword[2 * i + 0] = VALUES[RandomNumber / NUM_VALUES];
-		aRandomPassword[2 * i + 1] = VALUES[RandomNumber % NUM_VALUES];
-	}
-
-	str_copy(g_Config.m_SvRconPassword, aRandomPassword, sizeof(g_Config.m_SvRconPassword));
-	m_GeneratedRconPassword = 1;
 }
 
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
@@ -1100,48 +1069,80 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
-			const char *pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			const char *pAuth = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(!str_utf8_check(pAuth))
+				return;
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{
-				if(g_Config.m_SvRconPassword[0] == 0 && g_Config.m_SvRconModPassword[0] == 0)
+				int AuthLevel = -1;
+				int KeySlot = -1;
+
+				// oy removed the usernames...
+				// use "name:password" format until we establish new extended netmsg
+				char aName[64] = {};
+				const char *pDelim = str_find(pAuth, ":");
+				const char *pPw = nullptr;
+				if(!pDelim)
+					pPw = pAuth;
+				else
 				{
-					if(!m_aClients[ClientID].m_NoRconNote)
+					str_copy(aName, pAuth, min(sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
+					pPw = pDelim + 1;
+				}
+
+				if(!aName[0])
+				{
+					if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
+						AuthLevel = AUTHED_ADMIN;
+					else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
+						AuthLevel = AUTHED_MOD;
+				}
+				else
+				{
+					KeySlot = m_AuthManager.FindKey(aName);
+					if(m_AuthManager.CheckKey(KeySlot, pPw))
+						AuthLevel = m_AuthManager.KeyLevel(KeySlot);
+				}
+
+				if(AuthLevel != -1)
+				{
+					if(m_aClients[ClientID].m_Authed != AuthLevel)
 					{
-						SendRconLine(ClientID, "No rcon password set on server. Set sv_rcon_password and/or sv_rcon_mod_password to enable the remote console.");
-						m_aClients[ClientID].m_NoRconNote = true;
+						CMsgPacker Msg(NETMSG_RCON_AUTH_ON, true);
+						SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+						m_aClients[ClientID].m_Authed = AuthLevel; // Keeping m_Authed around is unwise...
+						m_aClients[ClientID].m_AuthKey = KeySlot;
+						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
+						// TODO: Check if it still does
+						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
+
+						// TODO: Check if we want to send all maps to all rcon clients
+						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
+							m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
+
+						GameServer()->OnClientAuth(ClientID, AuthLevel);
+
+						char aBuf[256];
+						const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
+						switch (AuthLevel)
+						{
+							case AUTHED_ADMIN:
+							{
+								SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (admin)", ClientID, pIdent);
+								break;
+							}
+							case AUTHED_MOD:
+							{
+								SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (moderator)", ClientID, pIdent);
+								break;
+							}
+						}
+						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					}
-				}
-				else if(g_Config.m_SvRconPassword[0] && str_comp(pPw, g_Config.m_SvRconPassword) == 0)
-				{
-					CMsgPacker Msg(NETMSG_RCON_AUTH_ON, true);
-					SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
-
-					m_aClients[ClientID].m_Authed = AUTHED_ADMIN;
-					m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_ADMIN, CFGFLAG_SERVER);
-					if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
-						m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
-					GameServer()->OnClientAuth(ClientID, AUTHED_ADMIN);
-					SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (admin)", ClientID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-				}
-				else if(g_Config.m_SvRconModPassword[0] && str_comp(pPw, g_Config.m_SvRconModPassword) == 0)
-				{
-					CMsgPacker Msg(NETMSG_RCON_AUTH_ON, true);
-					SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
-
-					m_aClients[ClientID].m_Authed = AUTHED_MOD;
-					m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_MOD, CFGFLAG_SERVER);
-					GameServer()->OnClientAuth(ClientID, AUTHED_MOD);
-					SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
-					const IConsole::CCommandInfo *pInfo = Console()->GetCommandInfo("sv_map", CFGFLAG_SERVER, false);
-					if(pInfo && pInfo->GetAccessLevel() == IConsole::ACCESS_LEVEL_MOD && m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
-						m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d authed (moderator)", ClientID);
-					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				}
 				else if(g_Config.m_SvRconMaxTries)
 				{
@@ -1388,6 +1389,8 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 
 int CServer::Run()
 {
+	m_AuthManager.Init();
+
 	if(g_Config.m_Debug)
 	{
 		g_UuidManager.DebugDump();
@@ -1451,7 +1454,7 @@ int CServer::Run()
 	// process pending commands
 	m_pConsole->StoreCommands(false);
 
-	if(m_GeneratedRconPassword)
+	if(m_AuthManager.IsGenerated())
 	{
 		dbg_msg("server", "+-------------------------+");
 		dbg_msg("server", "| rcon password: '%s' |", g_Config.m_SvRconPassword);
@@ -1677,10 +1680,17 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 			if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 			{
-				const char *pAuthStr = pThis->m_aClients[i].m_Authed == AUTHED_ADMIN ? "(Admin)" :
-										pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" : "";
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s client=%x name='%s' score=%d %s", i, aAddrStr,
-					pThis->m_aClients[i].m_Version, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, pAuthStr);
+				char aAuthStr[128];
+				aAuthStr[0] = '\0';
+				if(pThis->m_aClients[i].m_AuthKey >= 0)
+				{
+					const char *pAuthStr = pThis->m_aClients[i].m_Authed == AUTHED_ADMIN ? "(Admin)" :
+											pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" : "";
+
+					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
+				}
+					str_format(aBuf, sizeof(aBuf), "id=%d addr=%s client=%x name='%s' score=%d %s", i, aAddrStr,
+						pThis->m_aClients[i].m_Version, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
@@ -1694,6 +1704,237 @@ void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
 	str_copy(((CServer*)pUser)->m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_ShutdownMessage));
 	((CServer *)pUser)->m_RunServer = 0;
+}
+
+void CServer::LogoutClient(int ClientID, const char *pReason)
+{
+	CMsgPacker Msg(NETMSG_RCON_AUTH_OFF, true);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+	m_aClients[ClientID].m_AuthTries = 0;
+	m_aClients[ClientID].m_pRconCmdToSend = 0;
+
+	char aBuf[64];
+	if(*pReason)
+	{
+		str_format(aBuf, sizeof(aBuf), "Logged out by %s.", pReason);
+		SendRconLine(ClientID, aBuf);
+		str_format(aBuf, sizeof(aBuf), "ClientID=%d with key=%s logged out by %s", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey), pReason);
+	}
+	else
+	{
+		SendRconLine(ClientID, "Logout successful.");
+		str_format(aBuf, sizeof(aBuf), "ClientID=%d with key=%s logged out", ClientID, m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey));
+	}
+
+	m_aClients[ClientID].m_Authed = AUTHED_NO;
+	m_aClients[ClientID].m_AuthKey = -1;
+
+	GameServer()->OnClientAuth(ClientID, AUTHED_NO);
+
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
+
+void CServer::LogoutKey(int Key, const char *pReason)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(m_aClients[i].m_AuthKey == Key)
+			LogoutClient(i, pReason);
+}
+
+static int GetAuthLevel(const char *pLevel)
+{
+	int Level = -1;
+	if(!str_comp_nocase(pLevel, "admin"))
+		Level = AUTHED_ADMIN;
+	else if(!str_comp_nocase_num(pLevel, "mod", 3))
+		Level = AUTHED_MOD;
+
+	return Level;
+}
+
+void CServer::AuthRemoveKey(int KeySlot)
+{
+	int NewKeySlot = KeySlot;
+	int OldKeySlot = m_AuthManager.RemoveKey(KeySlot);
+	LogoutKey(KeySlot, "key removal");
+
+	// Update indices.
+	if(OldKeySlot != NewKeySlot)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(m_aClients[i].m_AuthKey == OldKeySlot)
+				m_aClients[i].m_AuthKey = NewKeySlot;
+	}
+}
+
+void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pIdent = pResult->GetString(0);
+	const char *pLevel = pResult->GetString(1);
+	const char *pPw = pResult->GetString(2);
+
+	int Level = GetAuthLevel(pLevel);
+	if(Level == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		return;
+	}
+
+	if(pManager->AddKey(pIdent, pPw, Level) < 0)
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	else
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
+}
+
+void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pIdent = pResult->GetString(0);
+	const char *pLevel = pResult->GetString(1);
+	const char *pPw = pResult->GetString(2);
+	const char *pSalt = pResult->GetString(3);
+
+	int Level = GetAuthLevel(pLevel);
+	if(Level == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		return;
+	}
+
+	MD5_DIGEST Hash;
+	unsigned char aSalt[SALT_BYTES];
+
+	if(md5_from_str(&Hash, pPw))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
+		return;
+	}
+	if(str_hex_decode(aSalt, sizeof(aSalt), pSalt))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
+		return;
+	}
+
+	if(pManager->AddKeyHash(pIdent, Hash, aSalt, Level) < 0)
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
+	else
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
+	}
+}
+
+void CServer::ConAuthUpdate(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pIdent = pResult->GetString(0);
+	const char *pLevel = pResult->GetString(1);
+	const char *pPw = pResult->GetString(2);
+
+	int KeySlot = pManager->FindKey(pIdent);
+	if(KeySlot == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
+		return;
+	}
+
+	int Level = GetAuthLevel(pLevel);
+	if(Level == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		return;
+	}
+
+	pManager->UpdateKey(KeySlot, pPw, Level);
+	pThis->LogoutKey(KeySlot, "key update");
+
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
+}
+
+void CServer::ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pIdent = pResult->GetString(0);
+	const char *pLevel = pResult->GetString(1);
+	const char *pPw = pResult->GetString(2);
+	const char *pSalt = pResult->GetString(3);
+
+	int KeySlot = pManager->FindKey(pIdent);
+	if(KeySlot == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
+		return;
+	}
+
+	int Level = GetAuthLevel(pLevel);
+	if(Level == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "level can be one of {\"admin\", \"mod(erator)\", \"helper\"}");
+		return;
+	}
+
+	MD5_DIGEST Hash;
+	unsigned char aSalt[SALT_BYTES];
+
+	if(md5_from_str(&Hash, pPw))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed password hash");
+		return;
+	}
+	if(str_hex_decode(aSalt, sizeof(aSalt), pSalt))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "Malformed salt hash");
+		return;
+	}
+
+	pManager->UpdateKeyHash(KeySlot, Hash, aSalt, Level);
+	pThis->LogoutKey(KeySlot, "key update");
+
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key updated");
+}
+
+void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	const char *pIdent = pResult->GetString(0);
+
+	int KeySlot = pManager->FindKey(pIdent);
+	if(KeySlot == -1)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident couldn't be found");
+		return;
+	}
+
+	pThis->AuthRemoveKey(KeySlot);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
+}
+
+static void ListKeysCallback(const char *pIdent, int Level, void *pUser)
+{
+	static const char LSTRING[][10] = {"helper", "moderator", "admin"};
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s %s", pIdent, LSTRING[Level - 1]);
+	((CServer *)pUser)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", aBuf);
+}
+
+void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	CAuthManager *pManager = &pThis->m_AuthManager;
+
+	pManager->ListKeys(ListKeysCallback, pThis);
 }
 
 void CServer::DemoRecorder_HandleAutoStart()
@@ -1823,13 +2064,46 @@ void CServer::ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void 
 	}
 }
 
-void CServer::ConchainRconPasswordSet(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult)
 {
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() >= 1)
+	if(pResult->NumArguments() == 1)
 	{
-		static_cast<CServer *>(pUserData)->m_RconPasswordSet = 1;
+		int KeySlot = m_AuthManager.DefaultKey(Level);
+		const char *pNew = pResult->GetString(0);
+		if(str_comp(pCurrent, pNew) == 0)
+		{
+			return;
+		}
+		if(KeySlot == -1 && pNew[0])
+		{
+			m_AuthManager.AddDefaultKey(Level, pNew);
+		}
+		else if(KeySlot >= 0)
+		{
+			if(!pNew[0])
+			{
+				AuthRemoveKey(KeySlot);
+				// Already logs users out.
+			}
+			else
+			{
+				m_AuthManager.UpdateKey(KeySlot, pNew, Level);
+				LogoutKey(KeySlot, "key update");
+			}
+		}
 	}
+}
+
+void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, g_Config.m_SvRconPassword, pResult);
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_MOD, g_Config.m_SvRconModPassword, pResult);
+	pfnCallback(pResult, pCallbackUserData);
 }
 
 void CServer::RegisterCommands()
@@ -1850,13 +2124,24 @@ void CServer::RegisterCommands()
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map", AUTHED_ADMIN);
 
+	// Auth Manager
+	// TODO: Maybe move these into CAuthManager?
+	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key", AUTHED_ADMIN);
+	Console()->Register("auth_add_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAddHashed, this, "Add a prehashed rcon key", AUTHED_ADMIN);
+	Console()->Register("auth_change", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdate, this, "Update a rcon key", AUTHED_ADMIN);
+	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data", AUTHED_ADMIN);
+	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key", AUTHED_ADMIN);
+	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys", AUTHED_ADMIN);
+
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("access_command", ConchainAccessCommandUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
-	Console()->Chain("sv_rcon_password", ConchainRconPasswordSet, this);
+
+	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
+	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);
@@ -1976,8 +2261,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfig->RestoreStrings();
 
 	pEngine->InitLogfile();
-
-	pServer->InitRconPasswordIfUnset();
 
 	// run the server
 	dbg_msg("server", "starting...");

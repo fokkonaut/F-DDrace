@@ -14,6 +14,7 @@
 #include <engine/shared/netban.h>
 #include "register.h"
 #include <engine/shared/fifo.h>
+#include "authmanager.h"
 
 class CSnapIDPool
 {
@@ -135,6 +136,7 @@ public:
 		int m_Country;
 		int m_Score;
 		int m_Authed;
+		int m_AuthKey;
 		int m_AuthTries;
 
 		int m_MapChunk;
@@ -208,6 +210,7 @@ public:
 	CDemoRecorder m_DemoRecorder;
 	CRegister m_Register;
 	CMapChecker m_MapChecker;
+	CAuthManager m_AuthManager;
 
 	CServer();
 
@@ -289,10 +292,22 @@ public:
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainAccessCommandUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainRconPasswordSet(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	void ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult);
+	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	void LogoutClient(int ClientID, const char *pReason);
+	void LogoutKey(int Key, const char *pReason);
+	void AuthRemoveKey(int KeySlot);
+	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthUpdate(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthRemove(IConsole::IResult *pResult, void *pUser);
+	static void ConAuthList(IConsole::IResult *pResult, void *pUser);
 
 	void RegisterCommands();
-
 
 	virtual int SnapNewID();
 	virtual void SnapFreeID(int ID);

@@ -1507,10 +1507,10 @@ int fs_storage_path(const char *appname, char *path, int max)
 	int i;
 	char *xdgdatahome = getenv("XDG_DATA_HOME");
 	char xdgpath[max];
-	
+
 	if(!home)
 		return -1;
-	
+
 #if defined(CONF_PLATFORM_MACOSX)
 	str_format(path, max, "%s/Library/Application Support/%s", home, appname);
 	return 0;
@@ -1534,7 +1534,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 		for(i = strlen(xdgdatahome)+1; xdgpath[i]; i++)
 			xdgpath[i] = tolower(xdgpath[i]);
 	}
-	
+
 	/* check for old location / backward compatibility */
 	if(fs_is_dir(path))
 	{
@@ -1542,7 +1542,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 		/* for backward compatibility */
 		return 0;
 	}
-	
+
 	str_format(path, max, "%s", xdgpath);
 
 	return 0;
@@ -2178,6 +2178,66 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size)
 	}
 }
 
+static int hexval(char x)
+{
+    switch(x)
+    {
+    case '0': return 0;
+    case '1': return 1;
+    case '2': return 2;
+    case '3': return 3;
+    case '4': return 4;
+    case '5': return 5;
+    case '6': return 6;
+    case '7': return 7;
+    case '8': return 8;
+    case '9': return 9;
+    case 'a':
+    case 'A': return 10;
+    case 'b':
+    case 'B': return 11;
+    case 'c':
+    case 'C': return 12;
+    case 'd':
+    case 'D': return 13;
+    case 'e':
+    case 'E': return 14;
+    case 'f':
+    case 'F': return 15;
+    default: return -1;
+    }
+}
+
+static int byteval(const char *byte, unsigned char *dst)
+{
+	int v1 = -1, v2 = -1;
+	v1 = hexval(byte[0]);
+	v2 = hexval(byte[1]);
+
+	if(v1 < 0 || v2 < 0)
+		return 1;
+
+	*dst = v1 * 16 + v2;
+	return 0;
+}
+
+int str_hex_decode(void *dst, int dst_size, const char *src)
+{
+	unsigned char *cdst = dst;
+	int slen = str_length(src);
+	int len = slen / 2;
+	int i;
+	if(slen != dst_size * 2)
+		return 2;
+
+	for(i = 0; i < len && dst_size; i++, dst_size--)
+	{
+		if(byteval(src + i * 2, cdst++))
+			return 1;
+	}
+	return 0;
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
@@ -2592,6 +2652,42 @@ void secure_random_fill(void *bytes, unsigned length)
 	}
 #endif
 }
+
+void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)
+{
+	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
+	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
+	unsigned i;
+	dbg_assert(length >= random_length * 2 + 1, "too small buffer");
+	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
+
+	buffer[random_length * 2] = 0;
+
+	for(i = 0; i < random_length; i++)
+	{
+		unsigned short random_number = random[i] % 2048;
+		buffer[2 * i + 0] = VALUES[random_number / NUM_VALUES];
+		buffer[2 * i + 1] = VALUES[random_number % NUM_VALUES];
+	}
+}
+
+#define MAX_PASSWORD_LENGTH 128
+
+void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
+{
+	unsigned short random[MAX_PASSWORD_LENGTH / 2];
+	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
+	dbg_assert(length >= pw_length + 1, "too small buffer");
+	dbg_assert(pw_length >= 6, "too small password length");
+	dbg_assert(pw_length % 2 == 0, "need an even password length");
+	dbg_assert(pw_length <= MAX_PASSWORD_LENGTH, "too large password length");
+
+	secure_random_fill(random, pw_length);
+
+	generate_password(buffer, length, random, pw_length / 2);
+}
+
+#undef MAX_PASSWORD_LENGTH
 
 int pid()
 {

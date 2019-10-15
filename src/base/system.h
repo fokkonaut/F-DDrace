@@ -1195,6 +1195,26 @@ const char *str_find(const char *haystack, const char *needle);
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
 /*
+	Function: str_hex_decode
+		Takes a hex string *without spaces between bytes* and returns a
+		byte array.
+
+	Parameters:
+		dst - Buffer for the byte array
+		dst_size - size of the buffer
+		data - String to decode
+
+	Returns:
+		2 - String doesn't exactly fit the buffer
+		1 - Invalid character in string
+		0 - Success
+
+	Remarks:
+		- The contents of the buffer is only valid on success
+*/
+int str_hex_decode(void *dst, int dst_size, const char *src);
+
+/*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
 
@@ -1652,6 +1672,21 @@ int secure_random_init();
 		length - Length of the buffer.
 */
 void secure_random_fill(void *bytes, unsigned length);
+
+/*
+	Function: secure_random_password
+		Fills the buffer with the specified amount of random password
+		characters.
+
+		The desired password length must be greater or equal to 6, even
+		and smaller or equal to 128.
+
+	Parameters:
+		buffer - Pointer to the start of the buffer.
+		length - Length of the buffer.
+		pw_length - Length of the desired password.
+*/
+void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
 
 /*
 	Function: pid
