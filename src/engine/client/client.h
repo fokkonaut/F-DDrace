@@ -212,6 +212,7 @@ public:
 	virtual bool RconAuthed() const { return m_RconAuthed != 0; }
 	virtual bool UseTempRconCommands() const { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword);
+	void RconLogin(const char *pName, const char *pPassword);
 	virtual void Rcon(const char *pCmd);
 
 	virtual bool ConnectionProblems() const;

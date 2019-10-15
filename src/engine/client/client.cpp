@@ -370,6 +370,17 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	SendMsg(&Msg, MSGFLAG_VITAL);
 }
 
+void CClient::RconLogin(const char *pName, const char *pPassword)
+{
+	if(RconAuthed())
+		return;
+
+	CMsgPacker Msg(NETMSG_RCON_LOGIN, true);
+	Msg.AddString(pName, 64);
+	Msg.AddString(pPassword, 32);
+	SendMsg(&Msg, MSGFLAG_VITAL);
+}
+
 void CClient::Rcon(const char *pCmd)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD, true);
@@ -2248,7 +2259,10 @@ void CClient::Con_Rcon(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_RconAuth(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->RconAuth("", pResult->GetString(0));
+	if(pResult->NumArguments() == 2)
+		pSelf->RconLogin(pResult->GetString(0), pResult->GetString(1));
+	else
+		pSelf->RconAuth("", pResult->GetString(0));
 }
 
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
@@ -2482,7 +2496,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server", AUTHED_NO);
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT, Con_Screenshot, this, "Take a screenshot", AUTHED_NO);
 	m_pConsole->Register("rcon", "r", CFGFLAG_CLIENT, Con_Rcon, this, "Send specified command to rcon", AUTHED_NO);
-	m_pConsole->Register("rcon_auth", "s", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon", AUTHED_NO);
+	m_pConsole->Register("rcon_auth", "s?s", CFGFLAG_CLIENT, Con_RconAuth, this, "Authenticate to rcon", AUTHED_NO);
 	m_pConsole->Register("play", "r", CFGFLAG_CLIENT|CFGFLAG_STORE, Con_Play, this, "Play the file specified", AUTHED_NO);
 	m_pConsole->Register("record", "?s", CFGFLAG_CLIENT, Con_Record, this, "Record to the file", AUTHED_NO);
 	m_pConsole->Register("stoprecord", "", CFGFLAG_CLIENT, Con_StopRecord, this, "Stop recording", AUTHED_NO);
