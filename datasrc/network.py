@@ -20,7 +20,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 							"GAME_PAUSED"]) # todo 0.8: sort (1 para)
 
-Authed = Enum("AUTHED", ["NO", "MOD", "ADMIN"])
+Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
 
 
 RawHeader = '''

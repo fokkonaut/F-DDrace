@@ -568,7 +568,7 @@ void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 {
-	CConsole* pConsole = static_cast<CConsole *>(pUser);
+	CConsole *pConsole = static_cast<CConsole *>(pUser);
 	char aBuf[128];
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(0), CFGFLAG_SERVER);
 	if(pCommand)
@@ -577,14 +577,24 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 		{
 			pCommand->SetAccessLevel(pResult->GetInteger(1));
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is now %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
 		}
 		else
+		{
 			str_format(aBuf, sizeof(aBuf), "moderator access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "helper access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_HELPER ? "enabled" : "disabled");
+			pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			str_format(aBuf, sizeof(aBuf), "user access for '%s' is %s", pResult->GetString(0), pCommand->GetAccessLevel() >= ACCESS_LEVEL_USER ? "enabled" : "disabled");
+		}
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
 
-	pConsole->Print(OUTPUT_LEVEL_STANDARD, "Console", aBuf);
+	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
@@ -811,14 +821,14 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_MOD);
-	Register("exec", "r", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", AUTHED_ADMIN);
+	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_MOD);
+	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", AUTHED_ADMIN);
 
-	Register("toggle", "sii", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", AUTHED_MOD);
-	Register("+toggle", "sii", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", AUTHED_NO);
+	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", AUTHED_MOD);
+	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", AUTHED_NO);
 
-	Register("access_command", "s?i", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility for moderators", AUTHED_ADMIN);
-	Register("access_status", "", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for moderators", AUTHED_MOD);
+	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", AUTHED_ADMIN);
+	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", AUTHED_MOD);
 	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users", AUTHED_NO);
 
 	// TODO: this should disappear

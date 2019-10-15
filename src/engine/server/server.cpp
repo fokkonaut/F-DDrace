@@ -1150,6 +1150,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (moderator)", ClientID, pIdent);
 								break;
 							}
+							case AUTHED_HELPER:
+							{
+								SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (helper)", ClientID, pIdent);
+								break;
+							}
 						}
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					}
@@ -1695,7 +1701,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				if(pThis->m_aClients[i].m_AuthKey >= 0)
 				{
 					const char *pAuthStr = pThis->m_aClients[i].m_Authed == AUTHED_ADMIN ? "(Admin)" :
-											pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" : "";
+											pThis->m_aClients[i].m_Authed == AUTHED_MOD ? "(Mod)" :
+											pThis->m_aClients[i].m_Authed == AUTHED_HELPER ? "(Helper)" : "";
 
 					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 				}
@@ -2113,6 +2120,12 @@ void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUser
 void CServer::ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_MOD, g_Config.m_SvRconModPassword, pResult);
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_HELPER, g_Config.m_SvRconHelperPassword, pResult);
 	pfnCallback(pResult, pCallbackUserData);
 }
 

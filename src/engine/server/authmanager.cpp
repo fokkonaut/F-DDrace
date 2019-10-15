@@ -146,7 +146,7 @@ void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 
 void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 {
-	if(Level < AUTHED_MOD || Level > AUTHED_ADMIN)
+	if(Level <= 0 || Level > AUTHED_ADMIN)
 		return;
 
 	static const char IDENTS[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};
