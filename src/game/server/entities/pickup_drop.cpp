@@ -335,7 +335,7 @@ void CPickupDrop::HandleTiles(int Index)
 	int MapIndex = Index;
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
+	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 
 	// stopper
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);

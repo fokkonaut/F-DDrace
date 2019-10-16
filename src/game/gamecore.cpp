@@ -127,7 +127,7 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 
 	float PhysSize = 28.0f;
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, m_MoveRestrictionExtra);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
 	m_TriggeredEvents = 0;
 	m_HookingFlag = false;
 
