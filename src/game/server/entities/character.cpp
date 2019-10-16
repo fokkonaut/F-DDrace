@@ -575,8 +575,8 @@ void CCharacter::FireWeapon()
 						ProjStartPos,//Pos
 						Direction,//Dir
 						Lifetime,//Span
-						0,//Freeze
-						0,//Explosive
+						false,//Freeze
+						false,//Explosive
 						0,//Force
 						-1,//SoundImpact
 						0,
@@ -608,7 +608,7 @@ void CCharacter::FireWeapon()
 							ProjStartPos,
 							vec2(cosf(a), sinf(a)) * Speed,
 							(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime),
-							0, 0, 0, -1);
+							false, false, 0, -1);
 					}
 				}
 				else
@@ -642,7 +642,7 @@ void CCharacter::FireWeapon()
 					ProjStartPos,//Pos
 					Direction,//Dir
 					Lifetime,//Span
-					0,//Freeze
+					false,//Freeze
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
@@ -691,12 +691,12 @@ void CCharacter::FireWeapon()
 					m_pPlayer->GetCID(),	//owner
 					ProjStartPos,			//pos
 					Direction,				//dir
-					0,						//freeze
-					1,						//explosive
-					1,						//unfreeze
-					0,						//bloody
-					0,						//ghost
-					0,						//spooky
+					false,					//freeze
+					true,					//explosive
+					true,					//unfreeze
+					false,					//bloody
+					false,					//ghost
+					false,					//spooky
 					WEAPON_PLASMA_RIFLE,	//type
 					6,						//lifetime
 					1.0f,					//accel
@@ -714,9 +714,9 @@ void CCharacter::FireWeapon()
 					m_pPlayer->GetCID(),	//owner
 					ProjStartPos,			//pos
 					Direction,				//dir
-					0,						//freeze
-					0,						//explosive
-					0,						//unfreeze
+					false,					//freeze
+					false,					//explosive
+					false,					//unfreeze
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//bloody
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//ghost
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//spooky
