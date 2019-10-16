@@ -3357,6 +3357,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	pDummy->m_IsDummy = true;
 	pDummy->m_Dummymode = Dummymode;
 	pDummy->m_ForceSpawnPos = Pos;
+	pDummy->m_Afk = false; // players are marked as afk when they first enter. dummies dont send real inputs, thats why we need to make them non-afk again
 
 	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
 		pDummy->m_Minigame = MINIGAME_BLOCK;
