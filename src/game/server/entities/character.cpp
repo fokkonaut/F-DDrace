@@ -470,7 +470,7 @@ void CCharacter::FireWeapon()
 				{
 					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
 					CDoor* apEnts[12];
-					int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 9, CGameWorld::ENTTYPE_DOOR);
+					int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 12, CGameWorld::ENTTYPE_DOOR);
 					for (int i = 0; i < Num; i++)
 					{
 						CDoor* pDoor = apEnts[i];
