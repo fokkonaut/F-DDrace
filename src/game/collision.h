@@ -69,9 +69,9 @@ public:
 	};
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, MoveRestrictionExtra Extra = MoveRestrictionExtra());
-	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f, MoveRestrictionExtra Extra = MoveRestrictionExtra())
 	{
-		return GetMoveRestrictions(0, 0, Pos, Distance);
+		return GetMoveRestrictions(0, 0, Pos, Distance, -1, Extra);
 	}
 
 	int GetTile(int x, int y);

@@ -148,7 +148,7 @@ bool CCharacter::IsGrounded()
 	if (GameServer()->Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
 		return true;
 
-	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f);
+	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() / 2 + 4), 0.0f, m_Core.m_MoveRestrictionExtra);
 	if(MoveRestrictionsBelow&CANTMOVE_DOWN)
 	{
 		return true;

@@ -222,7 +222,7 @@ bool CPickupDrop::IsGrounded(bool SetVel)
 		return true;
 	}
 
-	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f);
+	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 	if ((MoveRestrictionsBelow&CANTMOVE_DOWN) || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y + GetProximityRadius() + 4))) == TILE_STOPA)
 	{
 		if (SetVel)
