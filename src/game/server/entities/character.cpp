@@ -456,7 +456,7 @@ void CCharacter::FireWeapon()
 
 	float Spread[] = { 0, -0.1f, 0.1f, -0.2f, 0.2f, -0.3f, 0.3f, -0.4f, 0.4f };
 	if (g_Config.m_SvNumSpreadShots % 2 == 0)
-		for (int i = 0; i < sizeof(Spread); i++)
+		for (unsigned int i = 0; i < (sizeof(Spread)/sizeof(*Spread)); i++)
 			Spread[i] += 0.05f;
 
 	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? g_Config.m_SvNumSpreadShots : 1;
