@@ -68,7 +68,7 @@ public:
 		bool m_CanEnterRoom;
 	};
 
-	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, MoveRestrictionExtra Extra = MoveRestrictionExtra());
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, MoveRestrictionExtra Extra = MoveRestrictionExtra());
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
 	{
 		return GetMoveRestrictions(0, 0, Pos, Distance);

@@ -243,7 +243,7 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::M
 	return (Result&GetMoveRestrictionsMask(Direction))|Extras;
 }
 
-int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, MoveRestrictionExtra Extra)
+int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, int OverrideCenterTileIndex, MoveRestrictionExtra Extra)
 {
 	static const vec2 DIRECTIONS[NUM_MR_DIRS] =
 	{
@@ -259,6 +259,10 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 	{
 		vec2 ModPos = Pos + DIRECTIONS[d] * Distance;
 		int ModMapIndex = GetPureMapIndex(ModPos);
+		if(d == MR_DIR_HERE && OverrideCenterTileIndex >= 0)
+		{
+			ModMapIndex = OverrideCenterTileIndex;
+		}
 		for(int Front = 0; Front < 2; Front++)
 		{
 			int Tile;
