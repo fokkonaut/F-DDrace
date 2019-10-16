@@ -253,6 +253,7 @@ public:
 	int64 m_FirstFreezeTick;
 	int m_FreezeTime;
 	int m_FreezeTick;
+	bool m_FrozenLastTick;
 	bool m_DeepFreeze;
 	bool m_EndlessHook;
 	bool m_FreezeHammer;

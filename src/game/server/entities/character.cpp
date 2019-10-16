@@ -377,7 +377,11 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() ==	WEAPON_TASER
 	)
 		FullAuto = true;
-	if (m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
+	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
+		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(m_FrozenLastTick)
 		FullAuto = true;
 
 	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
@@ -441,7 +445,6 @@ void CCharacter::FireWeapon()
 				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				m_LastNoAmmoSound = Server()->Tick();
 			}
-			return;
 		}
 		return;
 	}
@@ -1018,7 +1021,7 @@ void CCharacter::ResetInput()
 
 void CCharacter::Tick()
 {
-	if (m_Paused)
+	if(m_Paused)
 		return;
 
 	// F-DDrace
@@ -2606,6 +2609,8 @@ void CCharacter::DDracePostCoreTick()
 	if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
 
+	m_FrozenLastTick = false;
+
 	if (m_DeepFreeze && !m_Super)
 		Freeze();
 
@@ -2702,8 +2707,8 @@ bool CCharacter::UnFreeze()
 			SetActiveWeapon(WEAPON_GUN);
 		m_FreezeTime = 0;
 		m_FreezeTick = 0;
+		m_FrozenLastTick = true;
 		m_FirstFreezeTick = 0;
-		if (GetActiveWeapon()==WEAPON_HAMMER) m_ReloadTimer = 0;
 
 		if (m_pPlayer->m_SmoothFreeze)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
