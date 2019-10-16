@@ -33,7 +33,6 @@ CProjectile::CProjectile
 	m_Type = Type;
 	m_Pos = Pos;
 	m_Direction = Dir;
-	m_InitialLifeSpan = Span;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
