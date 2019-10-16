@@ -450,7 +450,12 @@ void CCharacter::FireWeapon()
 
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
+
 	float Spread[] = { 0, -0.1f, 0.1f, -0.2f, 0.2f, -0.3f, 0.3f, -0.4f, 0.4f };
+	if (g_Config.m_SvNumSpreadShots % 2 == 0)
+		for (int i = 0; i < sizeof(Spread); i++)
+			Spread[i] += 0.05f;
+
 	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? g_Config.m_SvNumSpreadShots : 1;
 	if (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
 		NumShots = 1;

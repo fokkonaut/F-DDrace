@@ -173,7 +173,7 @@ MACRO_CONFIG_INT(SvMaxWeaponDrops, sv_max_weapon_drops, 5, 0, 10, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvMaxPickupDrops, sv_max_pickup_drops, 500, 0, 600, CFGFLAG_SERVER, "Maximum amount of dropped hearts and shields", AUTHED_ADMIN)
 
 // spread weapons
-MACRO_CONFIG_INT(SvNumSpreadShots, sv_num_spread_shots, 3, 3, 9, CFGFLAG_SERVER, "Number of shots for the spread weapons", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvNumSpreadShots, sv_num_spread_shots, 3, 2, 9, CFGFLAG_SERVER, "Number of shots for the spread weapons", AUTHED_ADMIN)
 
 // vanilla
 MACRO_CONFIG_INT(SvVanillaModeStart, sv_vanilla_mode_start, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to set the players mode to vanilla on spawn or ddrace", AUTHED_ADMIN)

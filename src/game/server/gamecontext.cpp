@@ -2159,16 +2159,6 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
-void CGameContext::ConchainNumSpreadShots(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if (pResult->NumArguments())
-	{
-		if (g_Config.m_SvNumSpreadShots % 2 == 0)
-			g_Config.m_SvNumSpreadShots += 1; //no even numbers, as the spread gun would be not mirrored otherwise
-	}
-}
-
 void CGameContext::ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -2258,7 +2248,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
 
 	// F-DDrace
-	Console()->Chain("sv_num_spread_shots", ConchainNumSpreadShots, this);
 	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
 
