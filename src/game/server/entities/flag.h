@@ -14,6 +14,8 @@ private:
 	int m_DropTick;
 	int m_GrabTick;
 
+	int m_DropFreezeTick;
+
 	CCharacter *m_pCarrier;
 	CCharacter *m_pLastCarrier;
 
@@ -30,10 +32,9 @@ private:
 	int m_TileFIndex;
 	int m_MoveRestrictions;
 
-public:
 	static const int ms_PhysSize = 14;
 
-	int m_DropFreezeTick;
+public:
 
 	CCharacter *GetCarrier() const { return m_pCarrier; }
 	CCharacter *GetLastCarrier() const { return m_pLastCarrier; }
