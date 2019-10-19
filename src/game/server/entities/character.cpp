@@ -1801,6 +1801,10 @@ void CCharacter::HandleTiles(int Index)
 
 		Teams()->OnCharacterStart(m_pPlayer->GetCID());
 		m_CpActive = -2;
+
+		// F-DDrace
+		// allow re-finishing the special race after touching start tiles without a kill
+		m_HasFinishedSpecialRace = false;
 	}
 
 	// finish
