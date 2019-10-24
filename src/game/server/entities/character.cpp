@@ -2004,6 +2004,17 @@ void CCharacter::HandleTiles(int Index)
 		m_InShop = true;
 	}
 
+	// helper only
+	if ((m_TileIndex == TILE_HELPERS_ONLY) || (m_TileFIndex == TILE_HELPERS_ONLY))
+	{
+		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_HELPER)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for helpers only");
+			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+			return;
+		}
+	}
+
 	// moderator only
 	if ((m_TileIndex == TILE_MODERATORS_ONLY) || (m_TileFIndex == TILE_MODERATORS_ONLY))
 	{
