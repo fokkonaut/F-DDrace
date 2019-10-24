@@ -32,6 +32,8 @@ void CAuthManager::Init()
 		NumDefaultKeys++;
 	if(g_Config.m_SvRconModPassword[0])
 		NumDefaultKeys++;
+	if(g_Config.m_SvRconHelperPassword[0])
+		NumDefaultKeys++;
 	if(m_aKeys.size() == NumDefaultKeys && !g_Config.m_SvRconPassword[0])
 	{
 		secure_random_password(g_Config.m_SvRconPassword, sizeof(g_Config.m_SvRconPassword), 6);
@@ -146,7 +148,7 @@ void CAuthManager::ListKeys(FListCallback pfnListCallback, void *pUser)
 
 void CAuthManager::AddDefaultKey(int Level, const char *pPw)
 {
-	if(Level <= 0 || Level > AUTHED_ADMIN)
+	if(Level < AUTHED_HELPER || Level > AUTHED_ADMIN)
 		return;
 
 	static const char IDENTS[3][sizeof(HELPER_IDENT)] = {ADMIN_IDENT, MOD_IDENT, HELPER_IDENT};

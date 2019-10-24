@@ -821,14 +821,14 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
-	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_MOD);
+	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_HELPER);
 	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", AUTHED_ADMIN);
 
-	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", AUTHED_MOD);
+	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value", AUTHED_HELPER);
 	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress", AUTHED_NO);
 
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", AUTHED_ADMIN);
-	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", AUTHED_MOD);
+	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", AUTHED_HELPER);
 	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users", AUTHED_NO);
 
 	// TODO: this should disappear
@@ -947,6 +947,9 @@ void CConsole::Register(const char *pName, const char *pParams,
 	{
 	case AUTHED_NO:
 		AccessLevel = ACCESS_LEVEL_USER;
+		break;
+	case AUTHED_HELPER:
+		AccessLevel = ACCESS_LEVEL_HELPER;
 		break;
 	case AUTHED_MOD:
 		AccessLevel = ACCESS_LEVEL_MOD;

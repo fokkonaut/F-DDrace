@@ -222,7 +222,7 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 
-	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_MOD)); }
+	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_HELPER)); }
 	void ResetServerGameSettings();
 
 	// F-DDrace

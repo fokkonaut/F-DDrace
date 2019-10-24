@@ -46,7 +46,7 @@ CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "", AUTHED_MOD)
 CONSOLE_COMMAND("muteid", "v[id] i[seconds]", CFGFLAG_SERVER, ConMuteID, this, "", AUTHED_MOD)
 CONSOLE_COMMAND("muteip", "s[ip] i[seconds]", CFGFLAG_SERVER, ConMuteIP, this, "", AUTHED_MOD)
 CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER, ConUnmute, this, "", AUTHED_MOD)
-CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", AUTHED_MOD)
+CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", AUTHED_HELPER)
 
 // F-DDrace
 //weapons
