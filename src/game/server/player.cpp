@@ -407,7 +407,7 @@ void CPlayer::Snap(int SnappingClient)
 		Score = 0;
 	pPlayerInfo->m_Score = Score;
 
-	if (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow))
+	if ((m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && Server()->GetAuthedState(m_ClientID))
 	{
 		CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientID = m_ClientID;
