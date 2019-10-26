@@ -384,7 +384,7 @@ void CCharacter::FireWeapon()
 	if(m_FrozenLastTick)
 		FullAuto = true;
 
-	// don't fire non auto weapons when player is deep and sv_deepfly is disabled
+	// don't fire hammer when player is deep and sv_deepfly is disabled
 	if (!g_Config.m_SvDeepfly && GetActiveWeapon() == WEAPON_HAMMER && m_DeepFreeze)
 		return;
 
