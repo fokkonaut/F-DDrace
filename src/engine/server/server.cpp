@@ -1129,7 +1129,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						m_aClients[ClientID].m_AuthKey = KeySlot;
 						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
 						// TODO: Check if it still does
-						//m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
+						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
 
 						// TODO: Check if we want to send all maps to all rcon clients
 						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
