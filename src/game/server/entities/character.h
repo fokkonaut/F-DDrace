@@ -39,6 +39,7 @@ enum Extra
 	TELE_WEAPON,
 	ALWAYS_TELE_WEAPON,
 	DOOR_HAMMER,
+	AIM_CLOSEST,
 	NUM_EXTRAS
 };
 
@@ -133,7 +134,6 @@ public:
 	void DDraceMode(int FromID = -1, bool Silent = false);
 	void Bloody(bool Set = true, int FromID = -1, bool Silent = false);
 	void StrongBloody(bool Set = true, int FromID = -1, bool Silent = false);
-	void PoliceHelper(bool Set = true, int FromID = -1, bool Silent = false);
 	void ScrollNinja(bool Set = true, int FromID = -1, bool Silent = false);
 	void HookPower(int Extra, int FromID = -1, bool Silent = false);
 	void EndlessHook(bool Set = true, int FromID = -1, bool Silent = false);
@@ -145,6 +145,7 @@ public:
 	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
 	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
+	void AimClosest(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character

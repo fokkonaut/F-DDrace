@@ -2995,6 +2995,9 @@ void CCharacter::FDDraceTick()
 	}
 
 	m_WasPausedLastTick = m_pPlayer->IsSpectator();
+
+	if (m_Core.m_AimClosest)
+		m_Core.m_AimClosestPos = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID())->m_Pos;
 }
 
 void CCharacter::HandleLastIndexTiles()
@@ -3520,4 +3523,10 @@ void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
 {
 	m_DoorHammer = Set;
 	GameServer()->SendExtraMessage(DOOR_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::AimClosest(bool Set, int FromID, bool Silent)
+{
+	m_Core.m_AimClosest = Set;
+	GameServer()->SendExtraMessage(AIM_CLOSEST, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

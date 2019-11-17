@@ -649,6 +649,8 @@ private:
 
 	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAimClosest(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);

@@ -1413,3 +1413,11 @@ void CGameContext::ConDoorHammer(IConsole::IResult* pResult, void* pUserData)
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr) pChr->DoorHammer(!pChr->m_DoorHammer, pResult->m_ClientID);
 }
+
+void CGameContext::ConAimClosest(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->AimClosest(!pChr->Core()->m_AimClosest, pResult->m_ClientID);
+}

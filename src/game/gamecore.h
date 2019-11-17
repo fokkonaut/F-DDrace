@@ -235,6 +235,8 @@ public:
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
 	bool m_Passive;
+	bool m_AimClosest;
+	vec2 m_AimClosestPos;
 
 	int m_Id;
 	bool m_pReset;

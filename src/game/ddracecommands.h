@@ -126,6 +126,8 @@ CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleLase
 
 CONSOLE_COMMAND("doorhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConDoorHammer, this, "Gives a door hammer to player v", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Makes player v aim to the closest tee", AUTHED_ADMIN)
+
 //account
 CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)

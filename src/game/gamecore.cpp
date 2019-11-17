@@ -110,6 +110,9 @@ void CCharacterCore::Reset()
 
 	m_Passive = false;
 	m_HookingFlag = false;
+
+	m_AimClosest = false;
+	m_AimClosestPos = vec2(0, 0);
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -150,7 +153,8 @@ void CCharacterCore::Tick(bool UseInput)
 	if(UseInput)
 	{
 		m_Direction = m_Input.m_Direction;
-		m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f);
+		// F-DDrace
+		m_Angle = m_AimClosest ? (int)(angle(vec2(m_AimClosestPos.x-m_Pos.x, m_AimClosestPos.y-m_Pos.y))*256.0f) : (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY)) * 256.0f);
 
 		// handle jump
 		if(m_Input.m_Jump)
