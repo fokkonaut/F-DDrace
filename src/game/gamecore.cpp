@@ -112,7 +112,7 @@ void CCharacterCore::Reset()
 	m_HookingFlag = false;
 
 	m_SpinBot = false;
-	m_SpinBotSpeed = 10;
+	m_SpinBotSpeed = 50;
 	m_SpinBotAngle = 0;
 	m_AimClosest = false;
 	m_AimClosestPos = vec2(0, 0);
