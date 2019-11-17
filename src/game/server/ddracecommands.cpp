@@ -219,7 +219,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		return;
 
 	int NumWeapons = NUM_WEAPONS;
-	if (clamp(Weapon, -2, NumWeapons) != Weapon)
+	if (clamp(Weapon, -3, NumWeapons) != Weapon)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 				"invalid weapon id");
@@ -230,33 +230,36 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 
 	bool Spread = Remove ? false : pResult->NumArguments() > 1 + Offset ? pResult->GetInteger(1 + Offset) : Weapon >= 0 ? pChr->m_aSpreadWeapon[Weapon] : false;
 
-	if (Weapon == -1)
+	if (Weapon < 0)
 	{
-		pChr->GiveWeapon(WEAPON_SHOTGUN, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_GRENADE, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_LASER, Remove, Amount);
-		if (!Remove)
+		if (Weapon == -1 || Weapon == -3)
 		{
-			pChr->GiveWeapon(WEAPON_HAMMER, Remove);
-			pChr->GiveWeapon(WEAPON_GUN, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_SHOTGUN, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_GRENADE, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_LASER, Remove, Amount);
+			if (!Remove)
+			{
+				pChr->GiveWeapon(WEAPON_HAMMER, Remove);
+				pChr->GiveWeapon(WEAPON_GUN, Remove, Amount);
+			}
+			for (int i = 0; i < WEAPON_NINJA; i++)
+				if (pChr->m_aSpreadWeapon[i] != Spread)
+					pChr->SpreadWeapon(i, Spread, pResult->m_ClientID);
 		}
-		for (int i = 0; i < WEAPON_NINJA; i++)
-			if (pChr->m_aSpreadWeapon[i] != Spread)
-				pChr->SpreadWeapon(i, Spread, pResult->m_ClientID);
-	}
-	else if (Weapon == -2)
-	{
-		pChr->GiveWeapon(WEAPON_HEART_GUN, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
-		pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
-		pChr->GiveWeapon(WEAPON_TELE_RIFLE, Remove, Amount);
-		pChr->GiveWeapon(WEAPON_PROJECTILE_RIFLE, Remove, Amount);
+		if (Weapon == -2 || Weapon == -3)
+		{
+			pChr->GiveWeapon(WEAPON_HEART_GUN, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
+			pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
+			pChr->GiveWeapon(WEAPON_TELE_RIFLE, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_PROJECTILE_RIFLE, Remove, Amount);
 
-		for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
-			if (pChr->m_aSpreadWeapon[i] != Spread)
-				pChr->SpreadWeapon(i, Spread, pResult->m_ClientID);
+			for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
+				if (pChr->m_aSpreadWeapon[i] != Spread)
+					pChr->SpreadWeapon(i, Spread, pResult->m_ClientID);
+		}
 	}
 	else
 	{
@@ -668,6 +671,18 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	CGameControllerDDrace*pController = (CGameControllerDDrace*)pSelf->m_pController;
 
 	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
+}
+
+void CGameContext::ConAllWeapons(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, -3, false);
+}
+
+void CGameContext::ConUnAllWeapons(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, -3, true);
 }
 
 void CGameContext::ConExtraWeapons(IConsole::IResult *pResult, void *pUserData)

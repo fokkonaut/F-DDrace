@@ -50,6 +50,9 @@ CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", AUTHED_HELPER)
 
 // F-DDrace
 //weapons
+CONSOLE_COMMAND("allweapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConAllWeapons, this, "Gives all weapons and extra weapons to player v, or spread weapons", AUTHED_ADMIN)
+CONSOLE_COMMAND("unallweapons", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnAllWeapons, this, "Takes all weapons and extra weapons from player v", AUTHED_ADMIN)
+
 CONSOLE_COMMAND("extraweapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConExtraWeapons, this, "Gives all extra weapons to player v, or spread extra weapons", AUTHED_ADMIN)
 CONSOLE_COMMAND("unextraweapons", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnExtraWeapons, this, "Takes all extra weapons from player v", AUTHED_ADMIN)
 

@@ -580,6 +580,9 @@ private:
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAllWeapons(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnAllWeapons(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConExtraWeapons(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnExtraWeapons(IConsole::IResult* pResult, void* pUserData);
 
