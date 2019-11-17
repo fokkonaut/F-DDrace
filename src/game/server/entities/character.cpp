@@ -376,6 +376,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
 		|| GetActiveWeapon() ==	WEAPON_TASER
 		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
+		|| GetActiveWeapon() == WEAPON_BALL_GRENADE
 	)
 		FullAuto = true;
 	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -828,6 +829,35 @@ void CCharacter::FireWeapon()
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			} break;
+
+			case WEAPON_BALL_GRENADE:
+			{
+				int Lifetime;
+				if (!m_TuneZone)
+					Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime);
+				else
+					Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
+
+				for (int i = 0; i < 5; i++)
+				{
+					new CProjectile
+					(
+						GameWorld(),
+						WEAPON_BALL_GRENADE,//Type
+						m_pPlayer->GetCID(),//Owner
+						ProjStartPos,//Pos
+						Direction,//Dir
+						Lifetime,//Span
+						false,//Freeze
+						i < 3,//Explosive
+						0,//Force
+						i == 0 ? SOUND_GRENADE_EXPLODE : -1//SoundImpact
+					);
+				}
+
+				if (Sound)
+					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
 		}
 
@@ -1454,7 +1484,8 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		|| Weapon == WEAPON_PLASMA_RIFLE
 		|| Weapon == WEAPON_LIGHTSABER
 		|| Weapon == WEAPON_TASER
-		|| Weapon == WEAPON_PROJECTILE_RIFLE)
+		|| Weapon == WEAPON_PROJECTILE_RIFLE
+		|| Weapon == WEAPON_BALL_GRENADE)
 	{
 		m_EmoteType = EMOTE_PAIN;
 		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;

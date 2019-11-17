@@ -70,6 +70,8 @@ CONSOLE_COMMAND("telerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleRifl
 CONSOLE_COMMAND("untelerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnTeleRifle, this, "Takes the tele rifle from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("projectilerifle", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConProjectileRifle, this, "Gives a projectile rifle to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("unprojectilerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnProjectileRifle, this, "Takes the projectile rifle from player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("ballgrenade", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConBallGrenade, this, "Gives a ball grenade to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("unballgrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConUnBallGrenade, this, "Takes the ball grenade from player v", AUTHED_ADMIN)
 
 CONSOLE_COMMAND("hammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConHammer, this, "Gives a hammer to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("gun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConGun, this, "Gives a gun to player v, or spread gun", AUTHED_ADMIN)

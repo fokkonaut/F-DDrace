@@ -3542,6 +3542,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Tele Rifle";
 	case WEAPON_PROJECTILE_RIFLE:
 		return "Projectile Rifle";
+	case WEAPON_BALL_GRENADE:
+		return "Ball Greande";
 	}
 	return "Unknown";
 }
@@ -3566,6 +3568,8 @@ int CGameContext::GetRealWeapon(int Weapon)
 		return WEAPON_LASER;
 	case WEAPON_PROJECTILE_RIFLE:
 		return WEAPON_LASER;
+	case WEAPON_BALL_GRENADE:
+		return WEAPON_GRENADE;
 	}
 	return Weapon;
 }

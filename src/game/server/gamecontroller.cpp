@@ -322,6 +322,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_PROJECTILE_RIFLE;
 	}
+	else if (Index == ENTITY_BALL_GRENADE)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_BALL_GRENADE;
+	}
 	else if (Index == ENTITY_PICKUP_AMMO)
 	{
 		Type = POWERUP_AMMO;

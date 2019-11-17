@@ -161,7 +161,7 @@ void CPickup::Tick()
 
 							RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
-							if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE)
+							if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
 							else if (m_Subtype == WEAPON_SHOTGUN || m_Subtype == WEAPON_LASER || m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_TELE_RIFLE || m_Subtype == WEAPON_PROJECTILE_RIFLE)
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
@@ -334,7 +334,7 @@ void CPickup::Snap(int SnappingClient)
 		pPickup->m_Y = (int)m_Pos.y - 30;
 		pPickup->m_Type = POWERUP_HEALTH;
 	}
-	else if (m_Subtype == WEAPON_STRAIGHT_GRENADE)
+	else if (m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID2, sizeof(CNetObj_Projectile)));
 		if (!pProj)

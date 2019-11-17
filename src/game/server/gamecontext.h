@@ -600,6 +600,8 @@ private:
 	static void ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConProjectileRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnProjectileRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConBallGrenade(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnBallGrenade(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConGun(IConsole::IResult* pResult, void* pUserData);
