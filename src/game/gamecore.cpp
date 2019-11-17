@@ -111,6 +111,9 @@ void CCharacterCore::Reset()
 	m_Passive = false;
 	m_HookingFlag = false;
 
+	m_SpinBot = false;
+	m_SpinBotSpeed = 10;
+	m_SpinBotAngle = 0;
 	m_AimClosest = false;
 	m_AimClosestPos = vec2(0, 0);
 }
@@ -153,8 +156,17 @@ void CCharacterCore::Tick(bool UseInput)
 	if(UseInput)
 	{
 		m_Direction = m_Input.m_Direction;
+
 		// F-DDrace
-		m_Angle = m_AimClosest ? (int)(angle(vec2(m_AimClosestPos.x-m_Pos.x, m_AimClosestPos.y-m_Pos.y))*256.0f) : (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY)) * 256.0f);
+		if (m_SpinBot)
+		{
+			m_Angle = m_SpinBotAngle;
+			m_SpinBotAngle += m_SpinBotSpeed;
+		}
+		else if (m_AimClosest)
+			m_Angle = (int)(angle(vec2(m_AimClosestPos.x-m_Pos.x, m_AimClosestPos.y-m_Pos.y))*256.0f);
+		else
+			m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f);
 
 		// handle jump
 		if(m_Input.m_Jump)

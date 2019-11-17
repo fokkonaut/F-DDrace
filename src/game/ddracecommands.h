@@ -133,6 +133,8 @@ CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConTeleLase
 
 CONSOLE_COMMAND("doorhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_CHEAT, ConDoorHammer, this, "Gives a door hammer to player v", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("spinbot", "?v[id]", CFGFLAG_SERVER, ConSpinBot, this, "Gives spinbot to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("spinbotspeed", "?v[id] ?i[speed]", CFGFLAG_SERVER, ConSpinBotSpeed, this, "Sets the spinbot speed i for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Makes player v aim to the closest tee", AUTHED_ADMIN)
 
 //account

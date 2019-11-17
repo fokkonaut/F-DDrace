@@ -656,6 +656,8 @@ private:
 
 	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConSpinBot(IConsole::IResult* pResult, void* pUserData);
+	static void ConSpinBotSpeed(IConsole::IResult* pResult, void* pUserData);
 	static void ConAimClosest(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);

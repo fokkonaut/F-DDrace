@@ -3723,6 +3723,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Door Hammer";
 	case AIM_CLOSEST:
 		return "Aim Closest";
+	case SPIN_BOT:
+		return "Spin Bot";
 	}
 	return "Unknown";
 }

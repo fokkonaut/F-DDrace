@@ -40,6 +40,7 @@ enum Extra
 	ALWAYS_TELE_WEAPON,
 	DOOR_HAMMER,
 	AIM_CLOSEST,
+	SPIN_BOT,
 	NUM_EXTRAS
 };
 
@@ -146,6 +147,7 @@ public:
 	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void AimClosest(bool Set = true, int FromID = -1, bool Silent = false);
+	void SpinBot(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character

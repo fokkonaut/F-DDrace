@@ -3589,6 +3589,14 @@ void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
 
 void CCharacter::AimClosest(bool Set, int FromID, bool Silent)
 {
+	m_Core.m_SpinBot = false;
 	m_Core.m_AimClosest = Set;
 	GameServer()->SendExtraMessage(AIM_CLOSEST, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::SpinBot(bool Set, int FromID, bool Silent)
+{
+	m_Core.m_AimClosest = false;
+	m_Core.m_SpinBot = Set;
+	GameServer()->SendExtraMessage(SPIN_BOT, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

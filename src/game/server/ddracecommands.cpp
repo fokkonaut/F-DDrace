@@ -1462,3 +1462,35 @@ void CGameContext::ConAimClosest(IConsole::IResult* pResult, void* pUserData)
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr) pChr->AimClosest(!pChr->Core()->m_AimClosest, pResult->m_ClientID);
 }
+
+void CGameContext::ConSpinBot(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->SpinBot(!pChr->Core()->m_SpinBot, pResult->m_ClientID);
+}
+
+void CGameContext::ConSpinBotSpeed(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	char aBuf[64];
+	if (pResult->NumArguments() < 2)
+	{
+		str_format(aBuf, sizeof(aBuf), "Value: %d", pChr->Core()->m_SpinBotSpeed);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+	else
+	{
+		int Speed = clamp(pResult->GetInteger(1), 1, 500);
+		str_format(aBuf, sizeof(aBuf), "Spinbot speed for '%s' changed to %d", pSelf->Server()->ClientName(Victim), Speed);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pChr->Core()->m_SpinBotSpeed = Speed;
+	}
+}
+
