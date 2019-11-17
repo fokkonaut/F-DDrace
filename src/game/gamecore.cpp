@@ -116,6 +116,7 @@ void CCharacterCore::Reset()
 	m_SpinBotAngle = 0;
 	m_AimClosest = false;
 	m_AimClosestPos = vec2(0, 0);
+	m_UpdateAngle = 0;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -158,15 +159,21 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// F-DDrace
-		if (m_SpinBot)
+		if (!m_UpdateAngle && (m_SpinBot || m_AimClosest))
 		{
-			m_Angle = m_SpinBotAngle;
-			m_SpinBotAngle += m_SpinBotSpeed;
+			if (m_SpinBot)
+			{
+				m_Angle = m_SpinBotAngle;
+				m_SpinBotAngle += m_SpinBotSpeed;
+			}
+			else if (m_AimClosest)
+				m_Angle = (int)(angle(vec2(m_AimClosestPos.x - m_Pos.x, m_AimClosestPos.y - m_Pos.y)) * 256.0f);
 		}
-		else if (m_AimClosest)
-			m_Angle = (int)(angle(vec2(m_AimClosestPos.x-m_Pos.x, m_AimClosestPos.y-m_Pos.y))*256.0f);
 		else
 			m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f);
+
+		if (m_UpdateAngle)
+			m_UpdateAngle--;
 
 		// handle jump
 		if(m_Input.m_Jump)
@@ -203,6 +210,10 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookedPlayer = -1;
 				m_HookTick = 0;
 				//m_TriggeredEvents |= COREEVENTFLAG_HOOK_LAUNCH;
+
+				// F-DDrace
+				// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
+				m_UpdateAngle = UPDATE_ANGLE_TIME;
 			}
 		}
 		else

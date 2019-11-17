@@ -24,6 +24,8 @@ enum
 	FLAG_BLUE
 };
 
+#define UPDATE_ANGLE_TIME 20
+
 
 class CTuneParam
 {
@@ -241,6 +243,7 @@ public:
 	float m_SpinBotAngle;
 	bool m_AimClosest;
 	vec2 m_AimClosestPos;
+	int m_UpdateAngle;
 
 	int m_Id;
 	bool m_pReset;

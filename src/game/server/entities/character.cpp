@@ -451,6 +451,9 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
+	// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
+	m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
+
 	vec2 CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
 
 	// F-DDrace
