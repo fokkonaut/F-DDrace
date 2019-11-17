@@ -81,7 +81,7 @@ public:
 
 	enum
 	{
-		MAX_RCONCMD_SEND=8,
+		MAX_RCONCMD_SEND=8, // this was 16 before, fokkonaut made it 8 because F-DDrace has so many rcon commands that it would interrupt the connection to the master server...
 		MAX_MAPLISTENTRY_SEND = 32,
 		MIN_MAPLIST_CLIENTVERSION=0x0703,	// todo 0.8: remove me
 		MAX_RCONCMD_RATIO=8,
