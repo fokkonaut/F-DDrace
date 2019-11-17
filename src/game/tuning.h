@@ -68,6 +68,7 @@ MACRO_TUNING_PARAM(StraightGrenadeFireDelay, straight_grenade_fire_delay, 500, "
 MACRO_TUNING_PARAM(TelekinesisFireDelay, telekinesis_fire_delay, 125, "Delay of using telekinesis")
 MACRO_TUNING_PARAM(LightsaberFireDelay, lightsaber_fire_delay, 500, "Delay of using lightsaber")
 MACRO_TUNING_PARAM(TeleRifleFireDelay, telerifle_fire_delay, 500, "Delay of using tele rifle")
+MACRO_TUNING_PARAM(ProjectileRifleFireDelay, projectile_fire_delay, 100, "Delay of firing projectile rifle")
 
 MACRO_TUNING_PARAM(StraightGrenadeSpeed, straight_grenade_speed, 750.0f, "Straight grenade speed")
 MACRO_TUNING_PARAM(StraightGrenadeLifetime, straight_grenade_lifetime, 5.0f, "Straight grenade lifetime")

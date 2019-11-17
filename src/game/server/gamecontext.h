@@ -595,6 +595,8 @@ private:
 	static void ConUnLightsaber(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeleRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConProjectileRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnProjectileRifle(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConGun(IConsole::IResult* pResult, void* pUserData);

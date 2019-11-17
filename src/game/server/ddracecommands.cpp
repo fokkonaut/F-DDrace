@@ -252,6 +252,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
 		pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
 		pChr->GiveWeapon(WEAPON_TELE_RIFLE, Remove, Amount);
+		pChr->GiveWeapon(WEAPON_PROJECTILE_RIFLE, Remove, Amount);
 
 		for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
 			if (pChr->m_aSpreadWeapon[i] != Spread)
@@ -775,6 +776,18 @@ void CGameContext::ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, true);
+}
+
+void CGameContext::ConProjectileRifle(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PROJECTILE_RIFLE, false);
+}
+
+void CGameContext::ConUnProjectileRifle(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PROJECTILE_RIFLE, true);
 }
 
 void CGameContext::ConScrollNinja(IConsole::IResult *pResult, void *pUserData)

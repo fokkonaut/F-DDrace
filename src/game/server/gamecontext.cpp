@@ -3540,6 +3540,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Lightsaber";
 	case WEAPON_TELE_RIFLE:
 		return "Tele Rifle";
+	case WEAPON_PROJECTILE_RIFLE:
+		return "Projectile Rifle";
 	}
 	return "Unknown";
 }
@@ -3561,6 +3563,8 @@ int CGameContext::GetRealWeapon(int Weapon)
 	case WEAPON_LIGHTSABER:
 		return WEAPON_GUN;
 	case WEAPON_TELE_RIFLE:
+		return WEAPON_LASER;
+	case WEAPON_PROJECTILE_RIFLE:
 		return WEAPON_LASER;
 	}
 	return Weapon;

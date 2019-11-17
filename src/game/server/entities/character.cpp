@@ -375,6 +375,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE
 		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
 		|| GetActiveWeapon() ==	WEAPON_TASER
+		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
 	)
 		FullAuto = true;
 	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -798,6 +799,35 @@ void CCharacter::FireWeapon()
 				GameServer()->CreatePlayerSpawn(NewPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			} break;
+
+			case WEAPON_PROJECTILE_RIFLE:
+			{
+				int Lifetime;
+				if (!m_TuneZone)
+					Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime);
+				else
+					Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
+
+				new CProjectile
+				(
+					GameWorld(),
+					WEAPON_PROJECTILE_RIFLE,//Type
+					m_pPlayer->GetCID(),//Owner
+					ProjStartPos,//Pos
+					Direction,//Dir
+					Lifetime,//Span
+					false,//Freeze
+					true,//Explosive
+					0,//Force
+					SOUND_GRENADE_EXPLODE,//SoundImpact
+					0,
+					0,
+					(m_Spooky || m_pPlayer->m_SpookyGhost)
+				);
+
+				if (Sound)
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
 		}
 
@@ -1423,7 +1453,8 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		|| Weapon == WEAPON_STRAIGHT_GRENADE
 		|| Weapon == WEAPON_PLASMA_RIFLE
 		|| Weapon == WEAPON_LIGHTSABER
-		|| Weapon == WEAPON_TASER)
+		|| Weapon == WEAPON_TASER
+		|| Weapon == WEAPON_PROJECTILE_RIFLE)
 	{
 		m_EmoteType = EMOTE_PAIN;
 		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
