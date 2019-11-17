@@ -219,6 +219,7 @@ public:
 	bool m_AtStand[2];
 	bool m_Carried[2];
 
+	int m_UpdateFlagAtStand;
 	int m_UpdateFlagVel;
 	vec2 m_UFlagVel;
 

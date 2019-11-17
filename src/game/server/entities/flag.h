@@ -10,7 +10,7 @@ class CFlag : public CEntity
 {
 private:
 	int m_Team;
-	int m_AtStand;
+	bool m_AtStand;
 	int m_DropTick;
 	int m_GrabTick;
 

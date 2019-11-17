@@ -1108,10 +1108,18 @@ void CCharacter::Tick()
 	m_Core.Tick(true);
 
 	// F-DDrace
-	if (m_Core.m_UpdateFlagVel == FLAG_RED)
-		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[TEAM_RED]->SetVel(m_Core.m_UFlagVel);
-	else if (m_Core.m_UpdateFlagVel == FLAG_BLUE)
-		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[TEAM_BLUE]->SetVel(m_Core.m_UFlagVel);
+	if (m_Core.m_UpdateFlagVel == FLAG_RED || m_Core.m_UpdateFlagVel == FLAG_BLUE)
+	{
+		int Flag = m_Core.m_UpdateFlagVel == FLAG_RED ? TEAM_RED : TEAM_BLUE;
+		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetVel(m_Core.m_UFlagVel);
+	}
+
+	if (m_Core.m_UpdateFlagAtStand == FLAG_RED || m_Core.m_UpdateFlagAtStand == FLAG_BLUE)
+	{
+		int Flag = m_Core.m_UpdateFlagAtStand == FLAG_RED ? TEAM_RED : TEAM_BLUE;
+		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
+
+	}
 
 	// handle Weapons
 	HandleWeapons();
