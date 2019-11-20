@@ -36,6 +36,7 @@ void CFlag::Reset(bool Init)
 	m_AtStand = true;
 	m_Pos = m_StandPos;
 	m_Vel = vec2(0,0);
+	m_DropTick = 0;
 	m_GrabTick = 0;
 	m_DropFreezeTick = 0;
 	m_TeleCheckpoint = 0;
@@ -43,7 +44,8 @@ void CFlag::Reset(bool Init)
 
 void CFlag::TickPaused()
 {
-	++m_DropTick;
+	if(m_DropTick)
+		++m_DropTick;
 	if(m_GrabTick)
 		++m_GrabTick;
 }
@@ -119,7 +121,7 @@ void CFlag::Tick()
 
 	if (!m_pCarrier && !m_AtStand)
 	{
-		if (Server()->Tick() > m_DropTick + Server()->TickSpeed() * 90)
+		if (m_DropTick && Server()->Tick() > m_DropTick + Server()->TickSpeed() * 90)
 		{
 			Reset();
 			return;
