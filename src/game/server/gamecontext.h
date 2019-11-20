@@ -664,6 +664,8 @@ private:
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
+
 	enum
 	{
 		MAX_MUTES = 32,
