@@ -3070,7 +3070,10 @@ void CCharacter::FDDraceTick()
 	m_WasPausedLastTick = m_pPlayer->IsSpectator();
 
 	if (m_Core.m_AimClosest)
-		m_Core.m_AimClosestPos = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID())->m_Pos;
+	{
+		CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID());
+		m_Core.m_AimClosestPos = pClosest ? pClosest->m_Pos : vec2(0, 0);
+	}
 }
 
 void CCharacter::HandleLastIndexTiles()
