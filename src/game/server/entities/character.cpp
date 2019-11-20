@@ -1622,7 +1622,7 @@ void CCharacter::Snap(int SnappingClient)
 		else if(GetActiveWeapon() == WEAPON_NINJA)
 			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		else if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
-			pCharacter->m_AmmoCount = !m_FreezeTime ? m_aWeapons[GetActiveWeapon()].m_Ammo : 0;
+			pCharacter->m_AmmoCount = m_aWeapons[GetActiveWeapon()].m_Ammo;
 	}
 
 	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused())
