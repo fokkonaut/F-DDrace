@@ -87,7 +87,7 @@ void CLight::Step()
 
 void CLight::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+
 }
 
 void CLight::Tick()

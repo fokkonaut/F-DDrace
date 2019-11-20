@@ -21,11 +21,10 @@ CClock::CClock(CGameWorld *pGameWorld, vec2 Pos)
 	Step();
 }
 
-void CClock::Reset()
+CClock::~CClock()
 {
 	Server()->SnapFreeID(m_ID2);
 	Server()->SnapFreeID(m_ID3);
-	GameWorld()->DestroyEntity(this);
 }
 
 void CClock::Tick()

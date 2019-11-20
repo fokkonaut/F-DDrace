@@ -29,8 +29,8 @@ class CClock : public CEntity
 	int GetSnapID(int Hand);
 public:
 	CClock(CGameWorld *pGameWorld, vec2 Pos);
+	virtual ~CClock();
 
-	virtual void Reset();
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 };
