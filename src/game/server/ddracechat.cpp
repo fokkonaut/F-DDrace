@@ -585,7 +585,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[256 + 24];
 
-	str_format(aBuf, 256 + 24, "### '%s' %s",
+	str_format(aBuf, 256 + 24, "'%s' %s",
 			pSelf->Server()->ClientName(pResult->m_ClientID),
 			pResult->GetString(0));
 	if (g_Config.m_SvSlashMe)
