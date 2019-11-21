@@ -45,6 +45,7 @@ public:
 	vec2 GetVel() { return m_Vel; }
 	void SetVel(vec2 Vel) { m_Vel = Vel; }
 
+	void SetDropTick(int DropTick) { m_DropTick = DropTick; };
 	int GetDropTick() { return m_DropTick; };
 	int GetTeam() { return m_Team; };
 

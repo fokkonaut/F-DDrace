@@ -1118,7 +1118,7 @@ void CCharacter::Tick()
 	{
 		int Flag = m_Core.m_UpdateFlagAtStand == FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
-
+		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
 	}
 
 	// handle Weapons
