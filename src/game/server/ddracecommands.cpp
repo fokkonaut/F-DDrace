@@ -84,7 +84,7 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "%s was killed by %s",
 				pSelf->Server()->ClientName(Victim),
 				pSelf->Server()->ClientName(pResult->m_ClientID));
-		pSelf->SendChatTarget(-1, aBuf);
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 }
 
@@ -470,7 +470,7 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 	char aBuf[128];
 	str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds.",
 			pDisplayName, Secs);
-	SendChatTarget(-1, aBuf);
+	SendChat(-1, CHAT_ALL, -1, aBuf);
 }
 
 void CGameContext::ConVoteMute(IConsole::IResult* pResult, void* pUserData)
@@ -495,7 +495,7 @@ void CGameContext::ConVoteMute(IConsole::IResult* pResult, void* pUserData)
 		char aBuf[128];
 		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
 			pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Victim), Seconds);
-		pSelf->SendChatTarget(-1, aBuf);
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 }
 
@@ -519,7 +519,7 @@ void CGameContext::ConVoteUnmute(IConsole::IResult* pResult, void* pUserData)
 		char aBuf[128];
 		str_format(aBuf, sizeof aBuf, "'%s' unbanned '%s' from voting.",
 			pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Victim));
-		pSelf->SendChatTarget(-1, aBuf);
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 }
 
@@ -1056,7 +1056,7 @@ void CGameContext::ConSayBy(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
 	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
-	if (pPlayer) pSelf->SendChat(Victim, CHAT_ALL, -1, pResult->GetString(1));
+	if (pPlayer) pSelf->SendChat(Victim, CHAT_ALL, -1, pResult->GetString(1), pResult->m_ClientID);
 }
 
 void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)

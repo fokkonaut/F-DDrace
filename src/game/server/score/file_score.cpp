@@ -282,7 +282,7 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 					pScore->m_aName, (int)Time / 60,
 					Time - ((int)Time / 60 * 60), Server()->ClientName(ClientID));
 		if (!Search)
-			GameServer()->SendChatTarget(-1, aBuf);
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, ClientID);
 		else
 			GameServer()->SendChatTarget(ClientID, aBuf);
 		return;

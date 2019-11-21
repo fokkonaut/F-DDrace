@@ -267,23 +267,32 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 			SendChatTarget(i, pText);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
+void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID)
 {
-	if (ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
-		if (ProcessSpamProtection(ChatterClientID))
+	if (SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
+		if (ProcessSpamProtection(SpamProtectionClientID))
 			return;
 
-	char aBuf[256];
+	char aBuf[256], aText[256];
+	str_copy(aText, pText, sizeof(aText));
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
-		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), pText);
+		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), aText);
+	else if (ChatterClientID == -2)
+	{
+		str_format(aBuf, sizeof(aBuf), "### %s", aText);
+		str_copy(aText, aBuf, sizeof(aText));
+		ChatterClientID = -1;
+	}
 	else
-		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
+		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 
 	char aBufMode[32];
 	if(Mode == CHAT_WHISPER)
 		str_copy(aBufMode, "whisper", sizeof(aBufMode));
 	else if(Mode == CHAT_TEAM)
 		str_copy(aBufMode, "teamchat", sizeof(aBufMode));
+	else if (Mode == CHAT_SINGLE)
+		str_copy(aBufMode, "chat-single", sizeof(aBufMode));
 	else
 		str_copy(aBufMode, "chat", sizeof(aBufMode));
 
@@ -293,7 +302,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Mode = Mode;
 	Msg.m_ClientID = ChatterClientID;
-	Msg.m_pMessage = pText;
+	Msg.m_pMessage = aText;
 	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
@@ -775,7 +784,7 @@ void CGameContext::OnTick()
 	{
 		const char* Line = Server()->GetAnnouncementLine(g_Config.m_SvAnnouncementFileName);
 		if (Line)
-			SendChatTarget(-1, Line);
+			SendChat(-1, CHAT_ALL, -1, Line);
 	}
 
 	if (Collision()->m_NumSwitchers > 0)
@@ -1215,7 +1224,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->FixForNoName(FIX_CHAT_MSG);
 			}
 			else if(Mode != CHAT_NONE)
-				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage);
+				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
@@ -1988,7 +1997,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "All players were moved to the %s", pSelf->m_pController->GetTeamName(Team));
-	pSelf->SendChatTarget(-1, aBuf);
+	pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 		if (pSelf->m_apPlayers[i])
@@ -2826,7 +2835,7 @@ void CGameContext::SendChatResponseAll(const char* pLine, void* pUser)
 			pLine++;
 	while ((pLine - 2 < pLineOrig || *(pLine - 2) != ':') && *pLine != 0);//remove the category (e.g. [Console]: No Such Command)
 
-	pSelf->SendChatTarget(-1, pLine);
+	pSelf->SendChat(-1, CHAT_ALL, -1, pLine);
 
 	ReentryGuard--;
 }
@@ -2885,7 +2894,7 @@ float CGameContext::PlayerJetpack()
 
 int CGameContext::ProcessSpamProtection(int ClientID)
 {
-	if(!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
+	if(!m_apPlayers[ClientID])
 		return 0;
 	if(g_Config.m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat
 		&& m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * g_Config.m_SvChatDelay > Server()->Tick())

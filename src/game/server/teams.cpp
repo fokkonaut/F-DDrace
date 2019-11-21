@@ -457,7 +457,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "%s joined team 0",
 					GameServer()->Server()->ClientName(Players[i]->GetCID()));
-			GameServer()->SendChatTarget(-1, aBuf);
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		}
 	}
 
@@ -480,7 +480,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 	else
-		GameServer()->SendChatTarget(-1, aBuf);
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 
 	float Diff = fabs(Time - pData->m_BestTime);
 
@@ -497,7 +497,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 		else
-			GameServer()->SendChatTarget(-1, aBuf);
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 	else if (pData->m_BestTime != 0) // tee has already finished?
 	{

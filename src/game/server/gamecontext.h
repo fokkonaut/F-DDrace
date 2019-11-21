@@ -233,7 +233,7 @@ public:
 	// network
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
-	void SendChat(int ChatterClientID, int Mode, int To, const char *pText);
+	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1);
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);

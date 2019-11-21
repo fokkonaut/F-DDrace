@@ -1273,14 +1273,14 @@ void CCharacter::Die(int Killer, int Weapon)
 			if (pKillerChar->m_KillStreak % 5 == 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
-				GameServer()->SendChatTarget(-1, aBuf);
+				GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 			}
 		}
 
 		if (m_KillStreak >= 5)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
-			GameServer()->SendChatTarget(-1, aBuf);
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 			pKiller->GiveXP(250, "end a killing spree");
 		}
 
@@ -2196,7 +2196,7 @@ void CCharacter::HandleTiles(int Index)
 
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
-		GameServer()->SendChatTarget(-1, aBuf);
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		m_pPlayer->GiveXP(250, "finish the special race");
 
 		m_HasFinishedSpecialRace = true;
