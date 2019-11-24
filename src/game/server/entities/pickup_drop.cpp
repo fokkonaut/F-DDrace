@@ -116,9 +116,9 @@ void CPickupDrop::Pickup()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			if (!m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_Weapon != WEAPON_HAMMER)
+			if (!m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon)
 			{
-				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1)
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1 && m_Weapon != WEAPON_HAMMER)
 					m_Bullets = 10;
 			
 				pChr->GiveWeapon(m_Weapon, false, m_Bullets);
