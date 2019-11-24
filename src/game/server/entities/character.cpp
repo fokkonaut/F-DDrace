@@ -1267,7 +1267,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		char aBuf[128];
 		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
 		CCharacter* pKillerChar = pKiller->GetCharacter();
-		if (pKillerChar && (!pKillerChar->GetPlayer()->m_IsDummy || g_Config.m_SvDummyBlocking))
+		if (pKillerChar && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
 		{
 			pKillerChar->m_KillStreak++;
 			if (pKillerChar->m_KillStreak % 5 == 0)
