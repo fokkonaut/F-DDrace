@@ -101,7 +101,7 @@ void CFlag::Tick()
 	else
 	{
 		CCharacter *apCloseCCharacters[MAX_CLIENTS];
-		int Num = GameWorld()->FindEntities(m_Pos, ms_PhysSize, (CEntity**)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius(), (CEntity**)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for (int i = 0; i < Num; i++)
 		{
 			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL))
@@ -135,8 +135,8 @@ void CFlag::Tick()
 
 bool CFlag::IsGrounded(bool SetVel)
 {
-	if ((GameServer()->Collision()->CheckPoint(m_Pos.x + ms_PhysSize, m_Pos.y + ms_PhysSize + 5))
-		|| (GameServer()->Collision()->CheckPoint(m_Pos.x - ms_PhysSize, m_Pos.y + ms_PhysSize + 5)))
+	if ((GameServer()->Collision()->CheckPoint(m_Pos.x + GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5))
+		|| (GameServer()->Collision()->CheckPoint(m_Pos.x - GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5)))
 	{
 		if (SetVel)
 			m_Vel.x *= 0.75f;
@@ -234,7 +234,7 @@ void CFlag::HandleDropped()
 		HandleTiles(CurrentIndex);
 	}
 	IsGrounded(true);
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), 0.5f);
+	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.5f);
 }
 
 bool CFlag::IsSwitchActiveCb(int Number, void* pUser)
