@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
-#define GAME_VERSION "0.7.3, 3.3"
+#define GAME_VERSION "0.7.3, 3.4"
 #define GAME_NETVERSION "0.7 802f1be60a05665f"
 #define CLIENT_VERSION 0x0703
 static const char GAME_RELEASE_VERSION[8] = "0.7.3.1";
