@@ -555,28 +555,6 @@ void CGameContext::AbortVoteOnTeamChange(int ClientID)
 		m_VoteCloseTime = -1;
 }
 
-
-void CGameContext::CheckPureTuning()
-{
-	// might not be created yet during start up
-	if(!m_pController)
-		return;
-
-	if(	str_comp(m_pController->GetGameType(), "DM")==0 ||
-		str_comp(m_pController->GetGameType(), "TDM")==0 ||
-		str_comp(m_pController->GetGameType(), "CTF")==0 ||
-		str_comp(m_pController->GetGameType(), "LMS")==0 ||
-		str_comp(m_pController->GetGameType(), "LTS")==0)
-	{
-		CTuningParams p;
-		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_Tuning = p;
-		}
-	}
-}
-
 void CGameContext::SendTuningParams(int ClientID, int Zone)
 {
 	if (ClientID == -1)
@@ -598,8 +576,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		}
 		return;
 	}
-
-	CheckPureTuning();
 
 	static CTuningParams Tuning;
 
@@ -639,9 +615,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
-	// check tuning
-	CheckPureTuning();
-
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
