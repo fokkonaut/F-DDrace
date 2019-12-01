@@ -215,11 +215,11 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 void CGameContext::CreatePlayerSpawn(vec2 Pos, int64_t Mask)
 {
 	// create the event
-	CNetEvent_Spawn *ev = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn), Mask);
-	if(ev)
+	CNetEvent_Spawn *pEvent = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn), Mask);
+	if(pEvent)
 	{
-		ev->m_X = (int)Pos.x;
-		ev->m_Y = (int)Pos.y;
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
 	}
 }
 
