@@ -1162,12 +1162,12 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "Invisibility: True");
 		if (pChr->m_HookPower != HOOK_NORMAL)
 		{
-			str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(HOOK_POWER, pChr->m_HookPower));
+			str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(pChr->m_HookPower));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		}
 		if (pChr->m_Item != -3)
 		{
-			str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetExtraName(ITEM, pChr->m_Item));
+			str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetWeaponName(pChr->m_Item));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		}
 		if (pChr->m_DoorHammer)
