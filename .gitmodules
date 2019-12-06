@@ -2,7 +2,13 @@
 	path = datasrc/languages
 	url = git://github.com/teeworlds/teeworlds-translation.git
 	branch = master
+<<<<<<< HEAD
 [submodule "datasrc/maps"]
 	path = datasrc/maps
 	url = git://github.com/teeworlds/teeworlds-maps.git
 	branch = master
+=======
+[submodule "ddnet-libs"]
+	path = ddnet-libs
+	url = https://github.com/ddnet/ddnet-libs
+>>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake

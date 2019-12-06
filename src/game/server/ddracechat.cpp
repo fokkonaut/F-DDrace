@@ -896,9 +896,17 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 {
+<<<<<<< HEAD
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
+=======
+#if defined(CONF_SQL)
+// TODO: SQL
+/*
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+>>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 		return;
 	char aFormat[32];
 	str_copy(aFormat, pResult->GetString(0), sizeof(aFormat));
@@ -1089,6 +1097,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	if (!pPlayer)
 		return;
 
+<<<<<<< HEAD
 	if (!g_Config.m_SvAccounts)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
@@ -1168,13 +1177,27 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully registered an account, you can login now");
 	dbg_msg("acc", "account created, file '%s/%s.acc'", g_Config.m_SvAccFilePath, aUsername);
+=======
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+*/
+#endif
+>>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 }
 
 void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 {
+<<<<<<< HEAD
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
+=======
+#if defined(CONF_SQL)
+// TODO: SQL
+/*
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+>>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 		return;
 
 	if (!g_Config.m_SvAccounts)
@@ -1295,6 +1318,7 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(1), sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password));
 	pSelf->WriteAccountStats(pPlayer->GetAccID());
 
+<<<<<<< HEAD
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
 }
 
@@ -1884,4 +1908,10 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	}
 	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", (*Account).m_TaserLevel * 10);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+=======
+	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
+		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
+*/
+#endif
+>>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 }
