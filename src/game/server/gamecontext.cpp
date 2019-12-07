@@ -15,7 +15,7 @@
 #include <game/version.h>
 
 #include "entities/character.h"
-#include "gamemodes/ddrace.h"
+#include "gamemodes/DDRace.h"
 #include "gamecontext.h"
 #include "player.h"
 
@@ -29,6 +29,7 @@
 
 #include "score.h"
 #include "score/file_score.h"
+#include "score/sql_score.h"
 
 #include <engine/server/server.h>
 #include <string.h>
@@ -200,7 +201,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			if (Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam) continue;
 
 			// Explode at most once per team
-			int PlayerTeam = ((CGameControllerDDrace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
+			int PlayerTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
 			if (GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !g_Config.m_SvHit || NoDamage)
 			{
 				if (!CmaskIsSet(TeamMask, PlayerTeam)) continue;
@@ -263,7 +264,7 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 void CGameContext::SendChatTeam(int Team, const char *pText)
 {
 	for(int i = 0; i<MAX_CLIENTS; i++)
-		if(((CGameControllerDDrace*)m_pController)->m_Teams.m_Core.Team(i) == Team)
+		if(((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(i) == Team)
 			SendChatTarget(i, pText);
 }
 
@@ -309,7 +310,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 	else if(Mode == CHAT_TEAM)
 	{
-		CTeamsCore* Teams = &((CGameControllerDDrace*)m_pController)->m_Teams.m_Core;
+		CTeamsCore* Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
 		// pack one for the recording only
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
@@ -2299,8 +2300,8 @@ void CGameContext::OnInit()
 
 	LoadMapSettings();
 
-	m_pController = new CGameControllerDDrace(this);
-	((CGameControllerDDrace*)m_pController)->m_Teams.Reset();
+	m_pController = new CGameControllerDDRace(this);
+	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
 	if(m_TeeHistorianActive)
@@ -2372,7 +2373,14 @@ void CGameContext::OnInit()
 	// delete old score object
 	if (m_pScore)
 		delete m_pScore;
-	m_pScore = new CFileScore(this);
+
+	// create score object (add sql later)
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		m_pScore = new CSqlScore(this);
+	else
+#endif
+		m_pScore = new CFileScore(this);
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
@@ -2782,6 +2790,7 @@ bool CGameContext::IsClientSpectator(int ClientID) const
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS;
 }
 
+const CUuid CGameContext::GameUuid() const { return m_GameUuid; }
 const char *CGameContext::GameType() const { return m_pController && m_pController->GetGameType() ? m_pController->GetGameType() : ""; }
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
@@ -2900,7 +2909,7 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 
 int CGameContext::GetDDRaceTeam(int ClientID)
 {
-	CGameControllerDDrace* pController = (CGameControllerDDrace*)m_pController;
+	CGameControllerDDRace* pController = (CGameControllerDDRace*)m_pController;
 	return pController->m_Teams.m_Core.Team(ClientID);
 }
 

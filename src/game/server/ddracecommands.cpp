@@ -2,7 +2,7 @@
 #include "gamecontext.h"
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 #include <game/server/entities/character.h>
 
@@ -280,10 +280,10 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
 
-	if (((CGameControllerDDrace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size())
+	if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size())
 	{
-		int Num = ((CGameControllerDDrace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size();
-		vec2 TelePos = ((CGameControllerDDrace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1][(!Num)?Num:rand() % Num];
+		int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1].size();
+		vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleOuts[TeleTo-1][(!Num)?Num:rand() % Num];
 		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if (pChr)
 		{
@@ -300,10 +300,10 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
 
-	if (((CGameControllerDDrace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size())
+	if (((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size())
 	{
-		int Num = ((CGameControllerDDrace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size();
-		vec2 TelePos = ((CGameControllerDDrace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1][(!Num)?Num:rand() % Num];
+		int Num = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1].size();
+		vec2 TelePos = ((CGameControllerDDRace*)pSelf->m_pController)->m_TeleCheckOuts[TeleTo-1][(!Num)?Num:rand() % Num];
 		CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if (pChr)
 		{
@@ -652,7 +652,7 @@ void CGameContext::ConList(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CGameControllerDDrace*pController = (CGameControllerDDrace*)pSelf->m_pController;
+	CGameControllerDDRace*pController = (CGameControllerDDRace*)pSelf->m_pController;
 
 	int Target = pResult->GetVictim();
 	int Team = pResult->GetInteger(1);
@@ -669,7 +669,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CGameControllerDDrace*pController = (CGameControllerDDrace*)pSelf->m_pController;
+	CGameControllerDDRace*pController = (CGameControllerDDRace*)pSelf->m_pController;
 
 	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }

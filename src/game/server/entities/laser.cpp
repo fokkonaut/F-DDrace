@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <generated/server_data.h>
 #include <game/server/gamecontext.h>
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 
 #include "character.h"
 #include "laser.h"
@@ -137,10 +137,10 @@ void CLaser::DoBounce()
 			else
 				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
 
-			if (Res == TILE_TELEINWEAPON && ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
+			if (Res == TILE_TELEINWEAPON && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
 			{
-				int Num = ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size();
-				m_TelePos = ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+				int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size();
+				m_TelePos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 				m_WasTele = true;
 			}
 			else

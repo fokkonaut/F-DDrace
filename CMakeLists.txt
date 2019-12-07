@@ -1505,8 +1505,12 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   register.h
   server.cpp
   server.h
+  sql_connector.cpp
+  sql_connector.h
   sql_server.cpp
   sql_server.h
+  sql_string_helpers.cpp
+  sql_string_helpers.h
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
@@ -1561,15 +1565,19 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/ddrace.cpp
-  gamemodes/ddrace.h
+  gamemodes/DDRace.cpp
+  gamemodes/DDRace.h
   gameworld.cpp
   gameworld.h
   player.cpp
   player.h
+  save.cpp
+  save.h
   score.h
   score/file_score.cpp
   score/file_score.h
+  score/sql_score.cpp
+  score/sql_score.h
   teams.cpp
   teams.h
   teehistorian.cpp

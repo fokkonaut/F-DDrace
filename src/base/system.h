@@ -174,7 +174,7 @@ void mem_zero(void *block, unsigned size);
 	Returns:
 		<0 - Block a is lesser then block b
 		0 - Block a is equal to block b
-		>0 - Block a is greater then block b
+		>0 - Block a is greater than block b
 */
 int mem_comp(const void *a, const void *b, int size);
 
@@ -183,6 +183,7 @@ enum {
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
 	IOFLAG_RANDOM = 4,
+	IOFLAG_APPEND = 8,
 
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
@@ -197,7 +198,7 @@ typedef struct IOINTERNAL *IOHANDLE;
 
 	Parameters:
 		filename - File to open.
-		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_RANDOM.
+		flags - A set of flags. IOFLAG_READ, IOFLAG_WRITE, IOFLAG_RANDOM, IOFLAG_APPEND.
 
 	Returns:
 		Returns a handle to the file on success and 0 on failure.
@@ -374,9 +375,10 @@ void thread_sleep(int milliseconds);
 	Parameters:
 		threadfunc - Entry point for the new thread.
 		user - Pointer to pass to the thread.
+		name - name describing the use of the thread
 
 */
-void *thread_init(void (*threadfunc)(void *), void *user);
+void *thread_init(void (*threadfunc)(void *), void *user, const char *name);
 
 /*
 	Function: thread_wait
@@ -416,16 +418,14 @@ void thread_detach(void *thread);
 /*
 	Function: thread_init_and_detach
 		Creates a new thread and if it succeeded detaches it.
-
 	Parameters:
 		threadfunc - Entry point for the new thread.
 		user - Pointer to pass to the thread.
 		name - name describing the use of the thread
-
 	Returns:
 		Returns the thread if no error occured, 0 on error.
 */
-void* thread_init_and_detach(void (*threadfunc)(void*), void* user);
+void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 /*
 	Function: cpu_relax

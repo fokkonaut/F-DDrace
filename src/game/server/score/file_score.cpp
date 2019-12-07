@@ -7,7 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include <string.h>
-#include "../gamemodes/ddrace.h"
+#include "../gamemodes/DDRace.h"
 #include "file_score.h"
 #include <engine/shared/console.h>
 
@@ -94,7 +94,7 @@ void CFileScore::SaveScoreThread(void *pUser)
 
 void CFileScore::Save()
 {
-	thread_init_and_detach(SaveScoreThread, this);
+	thread_init_and_detach(SaveScoreThread, this, "FileScore save");
 }
 
 void CFileScore::Init()
@@ -140,7 +140,7 @@ void CFileScore::Init()
 
 	// save the current best score
 	if (m_Top.size())
-		((CGameControllerDDrace*) GameServer()->m_pController)->m_CurrentRecord =
+		((CGameControllerDDRace*) GameServer()->m_pController)->m_CurrentRecord =
 				m_Top[0].m_Score;
 }
 

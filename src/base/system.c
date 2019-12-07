@@ -362,6 +362,8 @@ IOHANDLE io_open(const char *filename, int flags)
 	}
 	if(flags == IOFLAG_WRITE)
 		return (IOHANDLE)fopen(filename, "wb");
+	if(flags == IOFLAG_APPEND)
+		return (IOHANDLE)fopen(filename, "ab");
 	return 0x0;
 }
 
@@ -465,7 +467,7 @@ static unsigned long __stdcall thread_run(void *user)
 	return 0;
 }
 
-void *thread_init(void (*threadfunc)(void *), void *u)
+void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
 	struct THREAD_RUN *data = malloc(sizeof(*data));
 	data->threadfunc = threadfunc;
@@ -473,8 +475,10 @@ void *thread_init(void (*threadfunc)(void *), void *u)
 #if defined(CONF_FAMILY_UNIX)
 	{
 		pthread_t id;
-		if(pthread_create(&id, NULL, thread_run, data) != 0)
+		int result = pthread_create(&id, NULL, thread_run, data);
+		if(result != 0)
 		{
+			dbg_msg("thread", "creating %s thread failed: %d", name, result);
 			return 0;
 		}
 		return (void*)id;
@@ -540,10 +544,10 @@ void thread_detach(void *thread)
 #endif
 }
 
-void* thread_init_and_detach(void (*threadfunc)(void*), void* u)
+void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
 {
-	void* thread = thread_init(threadfunc, u);
-	if (thread)
+	void *thread = thread_init(threadfunc, u, name);
+	if(thread)
 		thread_detach(thread);
 	return thread;
 }

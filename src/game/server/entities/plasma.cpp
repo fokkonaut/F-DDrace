@@ -4,7 +4,7 @@
 #include <generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "plasma.h"
 #include "character.h"
 
@@ -76,7 +76,7 @@ void CPlasma::Tick()
 					WEAPON_GRENADE,
 					true,
 					m_ResponsibleTeam,
-					((CGameControllerDDrace*) GameServer()->m_pController)->m_Teams.TeamMask(
+					((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.TeamMask(
 							m_ResponsibleTeam));
 		Reset();
 	}

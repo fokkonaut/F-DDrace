@@ -11,6 +11,7 @@
 #include "laser.h"
 #include "projectile.h"
 
+<<<<<<< HEAD
 // F-DDrace
 #include "flag.h"
 #include "custom_projectile.h"
@@ -20,6 +21,9 @@
 #include "trail.h"
 
 #include <game/server/gamemodes/ddrace.h>
+=======
+#include <game/server/gamemodes/DDRace.h>
+>>>>>>> cfca0bc75... Add sql support without (/save)
 #include <game/server/score.h>
 
 #include <generated/protocol.h>
@@ -80,7 +84,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Pos = Pos;
 
 	m_Core.Reset();
-	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDrace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts);
+	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
 	m_Core.m_Pos = m_Pos;
 	SetActiveWeapon(WEAPON_GUN);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
@@ -1134,7 +1138,7 @@ void CCharacter::TickDefered()
 	// advance the dummy
 	{
 		CWorldCore TempWorld;
-		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &((CGameControllerDDrace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts);
+		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
@@ -1691,7 +1695,7 @@ int CCharacter::Team()
 
 CGameTeams* CCharacter::Teams()
 {
-	return &((CGameControllerDDrace*)GameServer()->m_pController)->m_Teams;
+	return &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams;
 }
 
 void CCharacter::HandleBroadcast()
@@ -1804,7 +1808,7 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 
 void CCharacter::HandleTiles(int Index)
 {
-	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
 	//int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);

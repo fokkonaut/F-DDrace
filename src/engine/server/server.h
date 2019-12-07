@@ -16,6 +16,11 @@
 #include <engine/shared/fifo.h>
 #include "authmanager.h"
 
+#if defined (CONF_SQL)
+	#include "sql_connector.h"
+	#include "sql_server.h"
+#endif
+
 class CSnapIDPool
 {
 	enum
@@ -74,6 +79,13 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+
+#if defined(CONF_SQL)
+	lock m_GlobalSqlLock;
+
+	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
+	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
+#endif
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -319,6 +331,7 @@ public:
 
 	// F-DDrace
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
+<<<<<<< HEAD
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
@@ -326,6 +339,15 @@ public:
 	void DummyLeave(int DummyID);
 
 	char m_ShutdownMessage[128];
+=======
+#if defined (CONF_SQL)
+	// console commands for sqlmasters
+	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
+
+	static void CreateTablesThread(void *pData);
+#endif
+>>>>>>> cfca0bc75... Add sql support without (/save)
 };
 
 #endif

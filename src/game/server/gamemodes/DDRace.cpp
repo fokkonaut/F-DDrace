@@ -4,9 +4,9 @@
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/gamecontext.h>
-#include "ddrace.h"
+#include "DDRace.h"
 
-CGameControllerDDrace::CGameControllerDDrace(class CGameContext *pGameServer) :
+CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 		IGameController(pGameServer), m_Teams(pGameServer)
 {
 	m_apFlags[0] = 0;
@@ -17,17 +17,17 @@ CGameControllerDDrace::CGameControllerDDrace(class CGameContext *pGameServer) :
 	InitTeleporter();
 }
 
-CGameControllerDDrace::~CGameControllerDDrace()
+CGameControllerDDRace::~CGameControllerDDRace()
 {
 	// Nothing to clean
 }
 
-void CGameControllerDDrace::Tick()
+void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
 }
 
-void CGameControllerDDrace::InitTeleporter()
+void CGameControllerDDRace::InitTeleporter()
 {
 	if (!GameServer()->Collision()->Layers()->TeleLayer())
 		return;

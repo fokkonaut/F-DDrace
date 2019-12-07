@@ -2,7 +2,7 @@
 #include <generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include <engine/shared/config.h>
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "character.h"
 
 #include "door.h"

@@ -6,6 +6,7 @@
 #include <new>
 #include <base/math.h>
 #include <engine/console.h>
+#include <base/math.h>
 #include "memheap.h"
 
 class CConsole : public IConsole

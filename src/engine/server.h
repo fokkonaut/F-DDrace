@@ -114,6 +114,7 @@ public:
 	virtual bool IsClientPlayer(int ClientID) const = 0;
 	virtual bool IsClientSpectator(int ClientID) const = 0;
 
+	virtual const CUuid GameUuid() const = 0;
 	virtual const char *GameType() const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
