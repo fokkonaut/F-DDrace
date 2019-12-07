@@ -85,8 +85,6 @@ class lock
 
 	LOCK var;
 
-	void take() { lock_wait(var); }
-	void release() { lock_unlock(var); }
 
 public:
 	lock()
@@ -98,6 +96,9 @@ public:
 	{
 		lock_destroy(var);
 	}
+
+	void take() { lock_wait(var); }
+	void release() { lock_unlock(var); }
 };
 
 class scope_lock

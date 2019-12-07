@@ -902,8 +902,6 @@ void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 =======
 #if defined(CONF_SQL)
-// TODO: SQL
-/*
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 >>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
@@ -1180,7 +1178,6 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 =======
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-*/
 #endif
 >>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 }
@@ -1193,8 +1190,6 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	if (!pPlayer)
 =======
 #if defined(CONF_SQL)
-// TODO: SQL
-/*
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	if (!CheckClientID(pResult->m_ClientID))
 >>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
@@ -1911,7 +1906,6 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 =======
 	if(pSelf->m_apPlayers[pResult->m_ClientID] && g_Config.m_SvUseSQL)
 		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastSQLQuery = pSelf->Server()->Tick();
-*/
 #endif
 >>>>>>> 9f34608a5... Use ddnet-libs and add MYSQL to cmake
 }
