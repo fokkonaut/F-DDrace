@@ -2298,6 +2298,8 @@ void CGameContext::OnInit()
 				Collision()->m_pSwitchers[i].m_Initial = true;
 	}
 
+	Console()->ExecuteFile(g_Config.m_SvResetFile, -1);
+
 	LoadMapSettings();
 
 	m_pController = new CGameControllerDDRace(this);
