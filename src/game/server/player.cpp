@@ -274,8 +274,8 @@ void CPlayer::Tick()
 	}
 	if ((m_ShowName || m_SetRealName) && m_RemovedName)
 	{
-		SetFakeName(Server()->ClientName(m_ClientID));
-		SetFakeClan(Server()->ClientClan(m_ClientID));
+		SetFakeName(m_aFakeName);
+		SetFakeClan(m_aFakeClan);
 		m_RemovedName = false;
 	}
 
