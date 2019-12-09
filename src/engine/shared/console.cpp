@@ -510,31 +510,17 @@ void CConsole::ExecuteLineFlag(const char* pStr, int FlagMask, int ClientID, boo
 }
 
 
-<<<<<<< HEAD
-void CConsole::ExecuteFile(const char* pFilename, int ClientID, bool LogFailure, int StorageType)
+bool CConsole::ExecuteFile(const char* pFilename, int ClientID, bool LogFailure, int StorageType)
 {
 	// make sure that this isn't being executed already
 	for (CExecFile* pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
 		if (str_comp(pFilename, pCur->m_pFilename) == 0)
-			return;
-=======
-bool CConsole::ExecuteFile(const char *pFilename)
-{
-	// make sure that this isn't being executed already
-	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
-		if(str_comp(pFilename, pCur->m_pFilename) == 0)
 			return false;
->>>>>>> master
 
 	if (!m_pStorage)
 		m_pStorage = Kernel()->RequestInterface<IStorage>();
-<<<<<<< HEAD
 	if (!m_pStorage)
-		return;
-=======
-	if(!m_pStorage)
 		return false;
->>>>>>> master
 
 	// push this one to the stack
 	CExecFile ThisFile;

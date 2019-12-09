@@ -213,15 +213,9 @@ public:
 	virtual void StoreCommands(bool Store);
 
 	virtual bool LineIsValid(const char *pStr);
-<<<<<<< HEAD
 	virtual void ExecuteLine(const char* pStr, int ClientID = -1, bool InterpretSemicolons = true);
 	virtual void ExecuteLineFlag(const char* pStr, int FlagMask, int ClientID = -1, bool InterpretSemicolons = true);
-	virtual void ExecuteFile(const char* pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
-=======
-	virtual void ExecuteLine(const char *pStr);
-	virtual void ExecuteLineFlag(const char *pStr, int FlagMask);
-	virtual bool ExecuteFile(const char *pFilename);
->>>>>>> master
+	virtual bool ExecuteFile(const char* pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL);
 
 	virtual int RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData);
 	virtual void SetPrintOutputLevel(int Index, int OutputLevel);
