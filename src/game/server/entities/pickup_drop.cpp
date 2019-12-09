@@ -332,7 +332,7 @@ bool CPickupDrop::IsSwitchActiveCb(int Number, void* pUser)
 
 void CPickupDrop::HandleTiles(int Index)
 {
-	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);

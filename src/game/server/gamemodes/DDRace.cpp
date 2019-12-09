@@ -56,7 +56,7 @@ void CGameControllerDDRace::InitTeleporter()
 
 // F-DDrace
 
-bool CGameControllerDDrace::OnEntity(int Index, vec2 Pos)
+bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos)
 {
 	int Team = -1;
 	if (Index == ENTITY_FLAGSTAND_RED) Team = TEAM_RED;
@@ -71,7 +71,7 @@ bool CGameControllerDDrace::OnEntity(int Index, vec2 Pos)
 	return true;
 }
 
-int CGameControllerDDrace::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
 {
 	int HadFlag = 0;
 
@@ -95,7 +95,7 @@ int CGameControllerDDrace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return HadFlag;
 }
 
-void CGameControllerDDrace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter *pNewCarrier)
+void CGameControllerDDRace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter *pNewCarrier)
 {
 	for (int i = 0; i < 2; i++)
 	{
@@ -109,7 +109,7 @@ void CGameControllerDDrace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter 
 	}
 }
 
-void CGameControllerDDrace::ForceFlagOwner(int ClientID, int Team)
+void CGameControllerDDRace::ForceFlagOwner(int ClientID, int Team)
 {
 	CFlag *F = m_apFlags[Team];
 	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
@@ -125,7 +125,7 @@ void CGameControllerDDrace::ForceFlagOwner(int ClientID, int Team)
 		F->Reset();
 }
 
-int CGameControllerDDrace::HasFlag(CCharacter *pChr)
+int CGameControllerDDRace::HasFlag(CCharacter *pChr)
 {
 	if (!pChr)
 		return -1;
@@ -141,7 +141,7 @@ int CGameControllerDDrace::HasFlag(CCharacter *pChr)
 	return -1;
 }
 
-void CGameControllerDDrace::Snap(int SnappingClient)
+void CGameControllerDDRace::Snap(int SnappingClient)
 {
 	IGameController::Snap(SnappingClient);
 

@@ -2337,7 +2337,6 @@ void CServer::GetClientAddr(int ClientID, NETADDR* pAddr)
 	}
 }
 
-<<<<<<< HEAD
 const char* CServer::GetAnnouncementLine(char const* pFileName)
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL);
@@ -2417,9 +2416,8 @@ void CServer::DummyLeave(int DummyID)
 
 	m_NetServer.DummyDelete(DummyID);
 }
-=======
-#if defined (CONF_SQL)
 
+#if defined (CONF_SQL)
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
@@ -2495,4 +2493,3 @@ void CServer::CreateTablesThread(void *pData)
 }
 
 #endif
->>>>>>> cfca0bc75... Add sql support without (/save)

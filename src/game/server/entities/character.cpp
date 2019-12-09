@@ -11,7 +11,6 @@
 #include "laser.h"
 #include "projectile.h"
 
-<<<<<<< HEAD
 // F-DDrace
 #include "flag.h"
 #include "custom_projectile.h"
@@ -19,11 +18,7 @@
 #include "pickup_drop.h"
 #include "atom.h"
 #include "trail.h"
-
-#include <game/server/gamemodes/ddrace.h>
-=======
 #include <game/server/gamemodes/DDRace.h>
->>>>>>> cfca0bc75... Add sql support without (/save)
 #include <game/server/score.h>
 
 #include <generated/protocol.h>
@@ -1101,7 +1096,7 @@ void CCharacter::Tick()
 	// F-DDrace
 	for (int i = 0; i < 2; i++)
 	{
-		CFlag* F = ((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[i];
+		CFlag* F = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[i];
 		if (!F)
 			continue;
 
@@ -1115,14 +1110,14 @@ void CCharacter::Tick()
 	if (m_Core.m_UpdateFlagVel == FLAG_RED || m_Core.m_UpdateFlagVel == FLAG_BLUE)
 	{
 		int Flag = m_Core.m_UpdateFlagVel == FLAG_RED ? TEAM_RED : TEAM_BLUE;
-		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetVel(m_Core.m_UFlagVel);
+		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetVel(m_Core.m_UFlagVel);
 	}
 
 	if (m_Core.m_UpdateFlagAtStand == FLAG_RED || m_Core.m_UpdateFlagAtStand == FLAG_BLUE)
 	{
 		int Flag = m_Core.m_UpdateFlagAtStand == FLAG_RED ? TEAM_RED : TEAM_BLUE;
-		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
-		((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
+		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
+		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
 	}
 
 	// handle Weapons
@@ -1367,7 +1362,7 @@ void CCharacter::Die(int Killer, int Weapon)
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 
-	((CGameControllerDDrace*)GameServer()->m_pController)->ChangeFlagOwner(this, GameServer()->GetPlayerChar(Killer));
+	((CGameControllerDDRace*)GameServer()->m_pController)->ChangeFlagOwner(this, GameServer()->GetPlayerChar(Killer));
 
 	// character doesnt exist, print some messages and set states
 	// if the player is in deathmatch mode, or simply playing
@@ -3158,7 +3153,7 @@ void CCharacter::DropFlag()
 {
 	for (int i = 0; i < 2; i++)
 	{
-		CFlag *F = ((CGameControllerDDrace*)GameServer()->m_pController)->m_apFlags[i];
+		CFlag *F = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[i];
 		if (!F)
 			continue;
 
@@ -3339,7 +3334,7 @@ void CCharacter::UpdateWeaponIndicator()
 
 int CCharacter::HasFlag()
 {
-	return ((CGameControllerDDrace*)GameServer()->m_pController)->HasFlag(this);
+	return ((CGameControllerDDRace*)GameServer()->m_pController)->HasFlag(this);
 }
 
 void CCharacter::CheckMoved()

@@ -125,7 +125,6 @@ MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SA
 	MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "", AUTHED_ADMIN)
 #endif
 
-<<<<<<< HEAD
 MACRO_CONFIG_INT(DbgFocus, dbg_focus, 0, 0, 1, CFGFLAG_CLIENT, "", AUTHED_ADMIN)
 MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 1, CFGFLAG_CLIENT, "", AUTHED_ADMIN)
 
@@ -195,23 +194,4 @@ MACRO_CONFIG_STR(SvContactDiscord, sv_contact_discord, 128, "", CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
-=======
-MACRO_CONFIG_INT(DbgFocus, dbg_focus, 0, 0, 1, CFGFLAG_CLIENT, "")
-MACRO_CONFIG_INT(DbgTuning, dbg_tuning, 0, 0, 1, CFGFLAG_CLIENT, "")
-
-// DDrace
-
-MACRO_CONFIG_STR(SvServerType, sv_server_type, 64, "none", CFGFLAG_SERVER, "Type of the server (novice, moderate, ...)")
-MACRO_CONFIG_INT(SvOldTeleportWeapons, sv_old_teleport_weapons, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Teleporting of all weapons (deprecated, use special entities instead)")
-MACRO_CONFIG_INT(SvOldTeleportHook, sv_old_teleport_hook, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Hook through teleporter (deprecated, use special entities instead)")
-MACRO_CONFIG_INT(SvDeepfly, sv_deepfly, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Allow fire non auto weapons when deep")
-MACRO_CONFIG_INT(SvDestroyBulletsOnDeath, sv_destroy_bullets_on_death, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Destroy bullets when their owner dies")
-MACRO_CONFIG_INT(SvDestroyLasersOnDeath, sv_destroy_lasers_on_death, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Destroy lasers when their owner dies")
-MACRO_CONFIG_INT(SvTeleportHoldHook, sv_teleport_hold_hook, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Hold hook when teleported")
-MACRO_CONFIG_INT(SvTeleportLoseWeapons, sv_teleport_lose_weapons, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Lose weapons when teleported (useful for some race maps)")
-MACRO_CONFIG_INT(SvRescue, sv_rescue, 0, 0, 1, CFGFLAG_SERVER, "Allow /rescue command so players can teleport themselves out of freeze")
-MACRO_CONFIG_INT(SvRescueDelay, sv_rescue_delay, 5, 0, 1000, CFGFLAG_SERVER, "Number of seconds between two rescues")
-MACRO_CONFIG_INT(SvJoinVoteDelay, sv_join_vote_delay, 300, 0, 1000, CFGFLAG_SERVER, "Add a delay before recently joined players can call any vote or participate in a kick/spec vote (in seconds)")
-MACRO_CONFIG_INT(SvSpectatorSlots, sv_spectator_slots, 0, 0, 64, CFGFLAG_SERVER, "Number of slots to reserve for spectators")
->>>>>>> cfca0bc75... Add sql support without (/save)
 #endif

@@ -331,7 +331,6 @@ public:
 
 	// F-DDrace
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
-<<<<<<< HEAD
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
@@ -339,7 +338,7 @@ public:
 	void DummyLeave(int DummyID);
 
 	char m_ShutdownMessage[128];
-=======
+
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
@@ -347,7 +346,6 @@ public:
 
 	static void CreateTablesThread(void *pData);
 #endif
->>>>>>> cfca0bc75... Add sql support without (/save)
 };
 
 #endif

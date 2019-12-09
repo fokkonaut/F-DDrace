@@ -100,10 +100,10 @@ void CCustomProjectile::Tick()
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if (z && ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
+	if (z && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
 	{
-		int Num = ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size();
-		m_Pos = ((CGameControllerDDrace*)GameServer()->m_pController)->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		int Num = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size();
+		m_Pos = ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		m_EvalTick = Server()->Tick();
 	}
 

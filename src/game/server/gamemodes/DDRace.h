@@ -7,10 +7,9 @@
 #include <vector>
 #include <map>
 
-<<<<<<< HEAD:src/game/server/gamemodes/ddrace.h
 #include <game/server/entities/flag.h>
 
-class CGameControllerDDrace: public IGameController
+class CGameControllerDDRace : public IGameController
 {
 public:
 
@@ -25,16 +24,8 @@ public:
 	void ChangeFlagOwner(CCharacter* pOldCarrier, CCharacter* pNewCarrier);
 	int HasFlag(CCharacter* pChr);
 
-	CGameControllerDDrace(class CGameContext* pGameServer);
-	~CGameControllerDDrace();
-=======
-class CGameControllerDDRace: public IGameController
-{
-public:
-
-	CGameControllerDDRace(class CGameContext *pGameServer);
+	CGameControllerDDRace(class CGameContext* pGameServer);
 	~CGameControllerDDRace();
->>>>>>> cfca0bc75... Add sql support without (/save):src/game/server/gamemodes/DDRace.h
 
 	CGameTeams m_Teams;
 

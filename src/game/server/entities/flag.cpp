@@ -5,7 +5,7 @@
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 #include "flag.h"
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "character.h"
 
 CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
@@ -249,7 +249,7 @@ bool CFlag::IsSwitchActiveCb(int Number, void* pUser)
 
 void CFlag::HandleTiles(int Index)
 {
-	CGameControllerDDrace* Controller = (CGameControllerDDrace*)GameServer()->m_pController;
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	int MapIndex = Index;
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
