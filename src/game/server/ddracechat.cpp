@@ -1315,8 +1315,9 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	CPlayer* pTo = pSelf->m_apPlayers[pSelf->GetCIDByName(pResult->GetString(1))];
-	if (!pTo)
+	int ID = pSelf->GetCIDByName(pResult->GetString(1));
+	CPlayer* pTo = pSelf->m_apPlayers[ID];
+	if (ID == -1 || !pTo)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 		return;
