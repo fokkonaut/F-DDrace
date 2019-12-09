@@ -1610,6 +1610,9 @@ int CServer::Run()
 				ReportTime += time_freq()*ReportInterval;
 			}
 
+			if(g_Config.m_SvShutdownWhenEmpty)
+				m_RunServer = false;
+
 			// wait for incomming data
 			net_socket_read_wait(m_NetServer.Socket(), 5);
 		}
