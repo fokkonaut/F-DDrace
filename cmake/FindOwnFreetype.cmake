@@ -30,7 +30,7 @@ if(FREETYPE_FOUND)
 
   is_bundled(FREETYPE_BUNDLED "${FREETYPE_LIBRARY}")
   if(FREETYPE_BUNDLED AND TARGET_OS STREQUAL "windows")
-    set(FREETYPE_COPY_FILES "${EXTRA_FREETYPE_LIBDIR}/freetype.dll")
+    set(FREETYPE_COPY_FILES "${EXTRA_FREETYPE_LIBDIR}/libfreetype.dll")
   else()
     set(FREETYPE_COPY_FILES)
   endif()

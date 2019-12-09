@@ -16,6 +16,7 @@ __pycache__/
 scripts/work/
 /SDL.dll
 /freetype.dll
+/libfreetype.dll
 /autoexec.cfg
 other/freetype
 other/sdl
