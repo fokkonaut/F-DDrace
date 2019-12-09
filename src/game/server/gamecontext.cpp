@@ -29,7 +29,10 @@
 
 #include "score.h"
 #include "score/file_score.h"
-#include "score/sql_score.h"
+
+#if defined (CONF_SQL)
+	#include "score/sql_score.h"
+#endif
 
 #include <engine/server/server.h>
 #include <string.h>
