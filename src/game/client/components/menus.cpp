@@ -983,6 +983,15 @@ void CMenus::UiDoListboxStart(CListBoxState* pState, const void *pID, float RowH
 	pState->m_ListBoxDoneEvents = 0;
 	pState->m_ListBoxItemActivated = false;
 
+	// handle input
+	int NewIndex = -1;
+	if(m_DownArrowPressed)
+		NewIndex = pState->m_ListBoxNewSelected + 1;
+	if(m_UpArrowPressed)
+		NewIndex = pState->m_ListBoxNewSelected - 1;
+	if(NewIndex > -1 && NewIndex < pState->m_ListBoxNumItems)
+		pState->m_ListBoxNewSelected = NewIndex;
+
 	// setup the scrollbar
 	pState->m_ScrollOffset = vec2(0, 0);
 	BeginScrollRegion(&pState->m_ScrollRegion, &pState->m_ListBoxView, &pState->m_ScrollOffset);
@@ -997,6 +1006,8 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow(CListBoxState* pState)
 	if(pState->m_ListBoxItemIndex%pState->m_ListBoxItemsPerRow == 0)
 		pState->m_ListBoxView.HSplitTop(pState->m_ListBoxRowHeight /*-2.0f*/, &s_RowView, &pState->m_ListBoxView);
 	ScrollRegionAddRect(&pState->m_ScrollRegion, s_RowView);
+	if(pState->m_ListBoxNewSelected != pState->m_ListBoxSelectedIndex && pState->m_ListBoxNewSelected == pState->m_ListBoxItemIndex)
+		ScrollRegionScrollHere(&pState->m_ScrollRegion, CScrollRegion::SCROLLHERE_KEEP_IN_VIEW);
 
 	s_RowView.VSplitLeft(s_RowView.w/(pState->m_ListBoxItemsPerRow-pState->m_ListBoxItemIndex%pState->m_ListBoxItemsPerRow), &Item.m_Rect, &s_RowView);
 
@@ -2492,6 +2503,7 @@ void CMenus::OnConsoleInit()
 	LoadFilters();
 
 	// add standard filters in case they are missing
+	bool UseDefaultFilters = !m_lFilters.size();
 	bool FilterStandard = false;
 	bool FilterFav = false;
 	bool FilterAll = false;
@@ -2521,6 +2533,9 @@ void CMenus::OnConsoleInit()
 		m_lFilters.add(CBrowserFilter(CBrowserFilter::FILTER_FAVORITES, Localize("Favorites"), ServerBrowser()));
 	if(!FilterAll)
 		m_lFilters.add(CBrowserFilter(CBrowserFilter::FILTER_ALL, Localize("All"), ServerBrowser()));
+	// expand the all filter tab by default
+	if(UseDefaultFilters)
+		m_lFilters[m_lFilters.size()-1].Switch();
 }
 
 void CMenus::OnShutdown()

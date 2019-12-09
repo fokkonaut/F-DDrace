@@ -147,7 +147,6 @@ void CPickup::Tick()
 						break;
 
 					case POWERUP_WEAPON:
-
 						if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 						{
 							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Subtype) != WEAPON_GUN)

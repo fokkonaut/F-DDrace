@@ -4,6 +4,7 @@
 #include <engine/console.h>
 #include <engine/storage.h>
 #include <engine/shared/config.h>
+#include <game/version.h>
 
 #include "protocol.h"
 
@@ -106,11 +107,13 @@ public:
 			return;
 		
 		if(!pFilename)
-			pFilename = "settings.cfg";
+			pFilename = SETTINGS_FILENAME ".cfg";
 		m_ConfigFile = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(!m_ConfigFile)
 			return;
+
+		WriteLine("# Teeworlds " GAME_VERSION);
 
 		char aLineBuf[1024*2];
 		char aEscapeBuf[1024*2];
