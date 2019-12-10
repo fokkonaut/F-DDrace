@@ -1611,7 +1611,16 @@ int CServer::Run()
 			}
 
 			if(g_Config.m_SvShutdownWhenEmpty)
-				m_RunServer = false;
+			{
+				bool ServerEmpty = true;
+
+				for(int c = 0; c < MAX_CLIENTS; c++)
+					if(m_aClients[c].m_State != CClient::STATE_EMPTY)
+						ServerEmpty = false;
+
+				if(ServerEmpty)
+					m_RunServer = false;
+			}
 
 			// wait for incomming data
 			net_socket_read_wait(m_NetServer.Socket(), 5);
