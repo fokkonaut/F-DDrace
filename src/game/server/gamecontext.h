@@ -496,9 +496,11 @@ private:
 	static void ConToggleSpec(IConsole::IResult* pResult, void* pUserData);
 	static void ConToggleSpecVoted(IConsole::IResult* pResult, void* pUserData);
 	static void ConForcePause(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeamTop5(IConsole::IResult *pResult, void *pUserData);
 	static void ConTop5(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConMapInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeamRank(IConsole::IResult* pResult, void* pUserData);
 	static void ConRank(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinTeam(IConsole::IResult* pResult, void* pUserData);
 	static void ConLockTeam(IConsole::IResult* pResult, void* pUserData);
