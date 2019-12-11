@@ -795,7 +795,29 @@ void CGameContext::OnTick()
 			}
 		}
 
-<<<<<<< HEAD
+	if (m_pRandomMapResult && m_pRandomMapResult->m_Done)
+	{
+		str_copy(g_Config.m_SvMap, m_pRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
+		m_pRandomMapResult = NULL;
+	}
+
+	if (m_pMapVoteResult && m_pMapVoteResult->m_Done)
+	{
+		m_VoteKick = false;
+		m_VoteSpec = false;
+		m_LastMapVote = time_get();
+
+		char aCmd[256];
+		str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"", m_pMapVoteResult->m_aServer, m_pMapVoteResult->m_aMap);
+
+		char aChatmsg[512];
+		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(m_pMapVoteResult->m_ClientID), m_pMapVoteResult->m_aMap, "/map");
+
+		CallVote(m_pMapVoteResult->m_ClientID, m_pMapVoteResult->m_aMap, aCmd, "/map", aChatmsg);
+
+		m_pMapVoteResult = NULL;
+	}
+
 	// F-DDrace
 	if (Server()->Tick() > m_LastAccSaveTick + Server()->TickSpeed() * g_Config.m_SvAccSaveInterval * 60)
 	{
@@ -813,31 +835,6 @@ void CGameContext::OnTick()
 	for (int i = 0; i < 2; i++)
 		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
 			InstagibTick(i);
-
-=======
-	if(m_pRandomMapResult && m_pRandomMapResult->m_Done)
-	{
-		str_copy(g_Config.m_SvMap, m_pRandomMapResult->m_aMap, sizeof(g_Config.m_SvMap));
-		m_pRandomMapResult = NULL;
-	}
-
-	if(m_pMapVoteResult && m_pMapVoteResult->m_Done)
-	{
-		m_VoteKick = false;
-		m_VoteSpec = false;
-		m_LastMapVote = time_get();
-
-		char aCmd[256];
-		str_format(aCmd, sizeof(aCmd), "sv_reset_file types/%s/flexreset.cfg; change_map \"%s\"", m_pMapVoteResult->m_aServer, m_pMapVoteResult->m_aMap);
-
-		char aChatmsg[512];
-		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(m_pMapVoteResult->m_ClientID), m_pMapVoteResult->m_aMap, "/map");
-
-		CallVote(m_pMapVoteResult->m_ClientID, m_pMapVoteResult->m_aMap, aCmd, "/map", aChatmsg);
-
-		m_pMapVoteResult = NULL;
-	}
->>>>>>> bd1b3fc80... Add random_map (closed #19)
 
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1308,7 +1305,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
-				int Authed = Server()->IsAuthed(ClientID);
+				int Authed = Server()->GetAuthedState(ClientID);
 				CVoteOptionServer *pOption = m_pVoteOptionFirst;
 				while(pOption)
 				{
@@ -2231,7 +2228,6 @@ void CGameContext::OnConsoleInit()
 
 	m_ChatPrintCBIndex = Console()->RegisterPrintCallback(0, SendChatResponse, this);
 
-<<<<<<< HEAD
 	Console()->Register("tune", "s[tuning] ?i[value]", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value", AUTHED_ADMIN);
 	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning", AUTHED_ADMIN);
 	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning", AUTHED_HELPER);
@@ -2265,6 +2261,9 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
 
+	Console()->Register("random_map", "?i[stars]", CFGFLAG_SERVER, ConRandomMap, this, "Random map", AUTHED_ADMIN);
+	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER, ConRandomUnfinishedMap, this, "Random unfinished map", AUTHED_ADMIN);
+
 	// F-DDrace
 	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
@@ -2273,35 +2272,6 @@ void CGameContext::OnConsoleInit()
 	#include <game/ddracecommands.h>
 	#define CHAT_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include "ddracechat.h"
-=======
-	Console()->Register("tune", "s[tuning] ?i[value]", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset tuning");
-	Console()->Register("tune_dump", "", CFGFLAG_SERVER, ConTuneDump, this, "Dump tuning");
-	Console()->Register("tune_zone", "i[zone] s[tuning] i[value]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
-	Console()->Register("tune_zone_dump", "i[zone]", CFGFLAG_SERVER, ConTuneDumpZone, this, "Dump zone tuning in zone x");
-	Console()->Register("tune_zone_reset", "?i[zone]", CFGFLAG_SERVER, ConTuneResetZone, this, "reset zone tuning in zone x or in all zones");
-	Console()->Register("tune_zone_enter", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area");
-	Console()->Register("tune_zone_leave", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area");
-	Console()->Register("switch_open", "i[switch]", CFGFLAG_SERVER|CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is deactivated by default (otherwise activated)");
-
-	Console()->Register("pausegame", "?i[on/off]", CFGFLAG_SERVER|CFGFLAG_STORE, ConPause, this, "Pause/unpause game");
-	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
-	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
-	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
-	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
-	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
-	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-
-	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
-	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
-	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
-	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
-
-	// DDRace
-
-	Console()->Register("random_map", "?i[stars]", CFGFLAG_SERVER, ConRandomMap, this, "Random map");
-	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER, ConRandomUnfinishedMap, this, "Random unfinished map");
->>>>>>> bd1b3fc80... Add random_map (closed #19)
 }
 
 void CGameContext::OnInit()
@@ -3050,6 +3020,46 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
+// DDRace
+
+void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg)
+{
+	// check if a vote is already running
+	if(m_VoteCloseTime)
+		return;
+
+	int64 Now = Server()->Tick();
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(!pPlayer)
+		return;
+
+	SendChat(-1, CHAT_ALL, -1, pChatmsg);
+	StartVote(pDesc, pCmd, pReason);
+	pPlayer->m_Vote = 1;
+	pPlayer->m_VotePos = m_VotePos = 1;
+	m_VoteCreator = ClientID;
+	pPlayer->m_LastVoteCall = Now;
+}
+
+void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
+
+	pSelf->m_pScore->RandomMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
+}
+
+void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
+
+	pSelf->m_pScore->RandomUnfinishedMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
+}
+
 // F-DDrace
 
 void CGameContext::UpdateTopAccounts(int Type)
@@ -3653,7 +3663,6 @@ int CGameContext::GetRealPickupType(int Type, int Subtype)
 	return Subtype;
 }
 
-<<<<<<< HEAD
 void CGameContext::SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special)
 {
 	if (Silent)
@@ -4119,44 +4128,4 @@ void CGameContext::InstagibTick(int Type)
 	//m_apPlayers[Winner]->GiveXP(250, "win an instagib round");
 
 	// add instagib here
-=======
-// DDRace
-
-void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg)
-{
-	// check if a vote is already running
-	if(m_VoteCloseTime)
-		return;
-
-	int64 Now = Server()->Tick();
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-
-	if(!pPlayer)
-		return;
-
-	SendChat(-1, CHAT_ALL, -1, pChatmsg);
-	StartVote(pDesc, pCmd, pReason);
-	pPlayer->m_Vote = 1;
-	pPlayer->m_VotePos = m_VotePos = 1;
-	m_VoteCreator = ClientID;
-	pPlayer->m_LastVoteCall = Now;
-}
-
-void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
-
-	pSelf->m_pScore->RandomMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
-}
-
-void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
-
-	pSelf->m_pScore->RandomUnfinishedMap(&pSelf->m_pRandomMapResult, pSelf->m_VoteCreator, Stars);
->>>>>>> bd1b3fc80... Add random_map (closed #19)
 }

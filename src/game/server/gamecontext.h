@@ -153,14 +153,12 @@ class CGameContext : public IGameServer
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-<<<<<<< HEAD
 	static void ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
-=======
+
 	// DDRace
 
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData);
->>>>>>> bd1b3fc80... Add random_map (closed #19)
 
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
