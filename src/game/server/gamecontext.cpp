@@ -1328,6 +1328,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							return;
 						}
 						m_VoteType = VOTE_START_OP;
+						m_LastMapVote = time_get();
 						break;
 					}
 
