@@ -1287,7 +1287,7 @@ void CCharacter::Die(int Killer, int Weapon)
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
 			// kill streak;
-			if (pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
+			if (pKillerChar && pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
 				(*KillerAcc).m_KillingSpreeRecord = pKillerChar->m_KillStreak;
 
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
