@@ -2289,7 +2289,10 @@ void CGameContext::OnInit()
 
 	DeleteTempfile();
 
-	for(int i = 0; i < NUM_NETOBJTYPES; i++)
+	// HACK: only set static size for items, which were available in the first 0.7 release
+	// so new items don't break the snapshot delta
+	static const int OLD_NUM_NETOBJTYPES = 23;
+	for(int i = 0; i < OLD_NUM_NETOBJTYPES; i++)
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
 	m_Layers.Init(Kernel());

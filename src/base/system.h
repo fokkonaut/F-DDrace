@@ -1732,6 +1732,19 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
 */
 int pid();
 
+/*
+	Function: bytes_be_to_uint
+		Packs 4 big endian bytes into an unsigned
+
+	Returns:
+		The packed unsigned
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+unsigned bytes_be_to_uint(const unsigned char *bytes);
+
 #ifdef __cplusplus
 }
 #endif

@@ -2735,6 +2735,11 @@ int pid()
 #endif
 }
 
+unsigned bytes_be_to_uint(const unsigned char *bytes)
+{
+	return (bytes[0]<<24) | (bytes[1]<<16) | (bytes[2]<<8) | bytes[3];
+}
+
 #if defined(__cplusplus)
 }
 #endif
