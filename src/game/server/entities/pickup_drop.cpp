@@ -6,7 +6,7 @@
 #include "pickup.h"
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "character.h"
 #include <game/server/player.h>
 

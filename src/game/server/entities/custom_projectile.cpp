@@ -4,7 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include "custom_projectile.h"
-#include <game/server/gamemodes/ddrace.h>
+#include <game/server/gamemodes/DDRace.h>
 #include <engine/shared/config.h>
 #include "character.h"
 #include <generated/server_data.h>
