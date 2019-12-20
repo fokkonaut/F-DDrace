@@ -334,7 +334,7 @@ void CFileScore::RandomMap(std::shared_ptr<CRandomMapResult> *ppResult, int Clie
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Random map not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
-	*ppResult = NULL;
+	*ppResult = nullptr;
 }
 
 void CFileScore::RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult, int ClientID, int stars)
@@ -342,7 +342,7 @@ void CFileScore::RandomUnfinishedMap(std::shared_ptr<CRandomMapResult> *ppResult
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "Random unfinished map not supported in file based servers");
 	GameServer()->SendChatTarget(ClientID, aBuf);
-	*ppResult = NULL;
+	*ppResult = nullptr;
 }
 
 void CFileScore::SaveTeam(int Team, const char* Code, int ClientID, const char* Server)

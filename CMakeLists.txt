@@ -125,6 +125,17 @@ function(add_c_compiler_flag_if_supported VARIABLE FLAG)
 endfunction()
 
 if(NOT MSVC)
+  if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
+    check_cxx_compiler_flag(-std=gnu++11 FLAG_SUPPORTED_std_gnu__11)
+    if(FLAG_SUPPORTED_std_gnu__11)
+      if(CMAKE_CXX_FLAGS)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+      else()
+        set(CMAKE_CXX_FLAGS -std=gnu++11)
+      endif()
+    endif()
+  endif()
+
   # Protect the stack pointer.
   # -fstack-protector-all doesn't work on MinGW.
   add_c_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-strong)
