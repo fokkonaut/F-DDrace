@@ -417,6 +417,9 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 					}
 					else
 					{
+						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+							return;
+
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags&CFGFLAG_NONTEEHISTORIC))
 						{
 							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
@@ -437,7 +440,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 						}
 
-						if (pCommand->m_Flags & CMDFLAG_CHEAT)
+						if (pCommand->m_Flags&CMDFLAG_TEST)
 							m_Cheated = true;
 					}
 				}

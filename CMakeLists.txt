@@ -77,7 +77,7 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 option(MYSQL "Enable mysql support" OFF)
-option(CLIENT "Compile client" OFF)
+option(CLIENT "Compile client" ON)
 option(DOWNLOAD_DEPENDENCIES "Download dependencies (only available on Windows)" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DOWNLOAD_GTEST "Download and compile GTest if not found" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -1641,6 +1641,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontroller.h
   gamemodes/DDRace.cpp
   gamemodes/DDRace.h
+  gamemodes/gamemode.h
   gameworld.cpp
   gameworld.h
   player.cpp

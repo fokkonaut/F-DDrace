@@ -1697,6 +1697,13 @@ int CServer::MapListEntryCallback(const char *pFilename, int IsDir, int DirType,
 	return 0;
 }
 
+void CServer::ConTestingCommands(IConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", g_Config.m_SvTestingCommands);
+	((IConsole*)pUser)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -2322,6 +2329,8 @@ int main(int argc, const char **argv) // ignore_convention
 
 	// restore empty config strings to their defaults
 	pConfig->RestoreStrings();
+
+	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off", AUTHED_ADMIN);
 
 	pEngine->InitLogfile();
 

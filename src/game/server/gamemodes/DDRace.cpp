@@ -5,6 +5,8 @@
 #include <game/server/player.h>
 #include <game/server/gamecontext.h>
 #include "DDRace.h"
+#include "gamemode.h"
+
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 		IGameController(pGameServer), m_Teams(pGameServer)
@@ -12,7 +14,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
 
-	m_pGameType = "F-DDrace";
+	m_pGameType = g_Config.m_SvTestingCommands ? TEST_NAME : GAME_NAME;
 
 	InitTeleporter();
 }
