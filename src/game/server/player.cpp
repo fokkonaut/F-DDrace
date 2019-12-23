@@ -1113,11 +1113,6 @@ bool CPlayer::IsHooked(int Power)
 	return false;
 }
 
-bool CPlayer::IsSpectator()
-{
-	return m_Paused != PAUSE_NONE || m_Team == TEAM_SPECTATORS || (m_pCharacter && m_pCharacter->IsPaused());
-}
-
 void CPlayer::SetPlaying()
 {
 	Pause(PAUSE_NONE, true);

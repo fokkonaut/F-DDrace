@@ -290,7 +290,6 @@ public:
 
 	//others
 	bool IsHooked(int Power = -1);
-	bool IsSpectator();
 	void SetPlaying();
 	bool m_ResumeMoved;
 
