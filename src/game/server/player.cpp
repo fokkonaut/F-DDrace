@@ -1152,18 +1152,24 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 
 void CPlayer::SendSpookyGhostSkin()
 {
-	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "default", 24);
-	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "", 24);
-	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "unibop", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "spiky", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "tricircular", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "", 24);
 	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", 24);
 	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", 24);
-	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", 24);
+	str_copy(m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "colorable", 24);
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		m_TeeInfos.m_aUseCustomColors[p] = 1;
-		m_TeeInfos.m_aSkinPartColors[p] = 255;
 	}
+
+	m_TeeInfos.m_aSkinPartColors[SKINPART_BODY] = 255;
+	m_TeeInfos.m_aSkinPartColors[SKINPART_MARKING] = -16777016;
+	m_TeeInfos.m_aSkinPartColors[SKINPART_DECORATION] = 255;
+	m_TeeInfos.m_aSkinPartColors[SKINPART_HANDS] = 184;
+	m_TeeInfos.m_aSkinPartColors[SKINPART_FEET] = 9765959;
+	m_TeeInfos.m_aSkinPartColors[SKINPART_EYES] = 255;
 
 	GameServer()->SendSkinChange(m_ClientID, -1);
 }
