@@ -259,10 +259,13 @@ void CPlayer::Tick()
 	// checking whether scoreboard is activated or not
 	if (m_pCharacter)
 	{
-		if (m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
+		if (m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 			m_pCharacter->m_ShopMotdTick = 0;
 		else
 			m_pCharacter->m_NumGhostShots = 0;
+
+		if (m_PlayerFlags&PLAYERFLAG_CHATTING)
+			m_pCharacter->Core()->m_UpdateAngle = UPDATE_ANGLE_TIME;
 	}
 
 	// name
