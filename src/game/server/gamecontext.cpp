@@ -898,6 +898,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->Respawn();
 	m_apPlayers[ClientID]->BackupSkin();
 
+	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
+
 	// load score
 	{
 		Score()->PlayerData(ClientID)->Reset();
@@ -1716,6 +1718,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				SendSkinChange(pPlayer->GetCID(), i);
 			}
+		}
+		else if (MsgID == NETMSGTYPE_CL_COMMAND)
+		{
+			CNetMsg_Cl_Command *pMsg = (CNetMsg_Cl_Command*)pRawMsg;
+			m_pController->OnPlayerCommand(pPlayer, pMsg->m_Name, pMsg->m_Arguments);
 		}
 	}
 	else
