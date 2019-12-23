@@ -51,7 +51,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags & CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 			return pCommand;
 	}
 
@@ -607,7 +607,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags & CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
