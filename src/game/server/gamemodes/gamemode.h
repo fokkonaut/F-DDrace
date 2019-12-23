@@ -4,5 +4,5 @@
 #define GAME_SERVER_GAMEMODES_GAMEMODE_H
 
 #define GAME_NAME "F-DDrace"
-#define TEST_NAME "Test F-DDrace"
+#define TEST_NAME "F-DDrace"
 #endif // GAME_SERVER_GAMEMODES_GAMEMODE_H

@@ -40,7 +40,7 @@ const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLeve
 	const CCommand *pInfo = m_pNext;
 	while(pInfo)
 	{
-		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel)
+		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel && (!(pInfo->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 			break;
 		pInfo = pInfo->m_pNext;
 	}
@@ -51,7 +51,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
+		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags & CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 			return pCommand;
 	}
 
@@ -366,7 +366,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 
 		CCommand* pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
-		if (pCommand)
+		if (pCommand && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			if (ClientID == IConsole::CLIENT_ID_GAME
 				&& !(pCommand->m_Flags & CFGFLAG_GAME))
@@ -417,9 +417,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 					}
 					else
 					{
-						if(pCommand->m_Flags&CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
-							return;
-
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags&CFGFLAG_NONTEEHISTORIC))
 						{
 							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
@@ -467,7 +464,7 @@ void CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPoss
 {
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->m_Temp == Temp)
+		if(pCommand->m_Flags&FlagMask && pCommand->m_Temp == Temp && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			if(str_find_nocase(pCommand->m_pName, pStr))
 				pfnCallback(pCommand->m_pName, pUser);
@@ -488,7 +485,7 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 {
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask)
+		if(pCommand->m_Flags&FlagMask && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
 				return pCommand;
@@ -610,7 +607,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
+		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags & CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -1164,7 +1161,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 {
 	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->m_Temp == Temp)
+		if(pCommand->m_Flags&FlagMask && pCommand->m_Temp == Temp && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
 		{
 			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
 				return pCommand;
