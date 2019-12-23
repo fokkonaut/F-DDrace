@@ -625,6 +625,15 @@ void CPlayer::Respawn(bool WeakHook)
 	}
 }
 
+CCharacter* CPlayer::ForceSpawn(vec2 Pos)
+{
+	m_Spawning = false;
+	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_pCharacter->Spawn(this, Pos);
+	m_Team = 0;
+	return m_pCharacter;
+}
+
 bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
 {
 	if((SpecMode == m_SpecMode && SpecMode != SPEC_PLAYER) ||

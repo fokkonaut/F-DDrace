@@ -67,7 +67,7 @@ void CGameContext::MoveCharacter(int ClientID, int X, int Y, bool Raw)
 
 	pChr->Core()->m_Pos.x += ((Raw) ? 1 : 32) * X;
 	pChr->Core()->m_Pos.y += ((Raw) ? 1 : 32) * Y;
-	pChr->m_DDraceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
 void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
@@ -107,7 +107,7 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 		pChr->UnFreeze();
 		pChr->m_TeamBeforeSuper = pChr->Team();
 		pChr->Teams()->SetCharacterTeam(Victim, TEAM_SUPER);
-		pChr->m_DDraceState = DDRACE_CHEAT;
+		pChr->m_DDRaceState = DDRACE_CHEAT;
 		if (pChr->m_Passive)
 			pChr->PassiveCollision(false);
 	}
@@ -272,7 +272,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 			pChr->SpreadWeapon(Weapon, Spread, pResult->m_ClientID);
 	}
 
-	pChr->m_DDraceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
@@ -290,7 +290,7 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 			pChr->Core()->m_Pos = TelePos;
 			pChr->SetPos(TelePos);
 			pChr->m_PrevPos = TelePos;
-			pChr->m_DDraceState = DDRACE_CHEAT;
+			pChr->m_DDRaceState = DDRACE_CHEAT;
 		}
 	}
 }
@@ -310,7 +310,7 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 			pChr->Core()->m_Pos = TelePos;
 			pChr->SetPos(TelePos);
 			pChr->m_PrevPos = TelePos;
-			pChr->m_DDraceState = DDRACE_CHEAT;
+			pChr->m_DDRaceState = DDRACE_CHEAT;
 			pChr->m_TeleCheckpoint = TeleTo;
 		}
 	}
@@ -330,7 +330,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 		pChr->Core()->m_Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 		pChr->SetPos(pSelf->m_apPlayers[TeleTo]->m_ViewPos);
 		pChr->m_PrevPos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-		pChr->m_DDraceState = DDRACE_CHEAT;
+		pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
 }
 

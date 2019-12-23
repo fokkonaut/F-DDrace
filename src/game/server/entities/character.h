@@ -78,6 +78,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
+	bool IsSolo() { return m_Solo; }
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
@@ -244,7 +245,7 @@ public:
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
-	int m_DDraceState;
+	int m_DDRaceState;
 	int Team();
 	bool CanCollide(int ClientID, bool CheckPassive = true);
 	bool SameTeam(int ClientID);
@@ -310,18 +311,38 @@ public:
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
+	int GetQueuedWeapon() { return m_QueuedWeapon; };
+	void SetQueuedWeapon(int Weapon) { m_QueuedWeapon = Weapon; };
 	bool GetWeaponGot(int Type) { return m_aWeapons[Type].m_Got; };
 	void SetWeaponGot(int Type, bool Value);
+	int GetWeaponAmmoRegenStart(int Type) { return m_aWeapons[Type].m_AmmoRegenStart; };
+	void SetWeaponAmmoRegenStart(int Type, int Value) { m_aWeapons[Type].m_AmmoRegenStart = Value; };
 	int GetWeaponAmmo(int Type);
 	void SetWeaponAmmo(int Type, int Value);
-	bool IsAlive() { return m_Alive; };
 	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+	void SetAlive(bool Alive) { m_Alive = Alive; }
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
+	void SetPrevPos(vec2 PrevPos) { m_PrevPos = PrevPos; };
+
+	void SetCoreHook(int Hook) { m_Core.m_Hook = Hook; }
+	void SetCoreCollision(int Collision) { m_Core.m_Collision = Collision; }
+	void SetCoreJumped(int Jumped) { m_Core.m_Jumped = Jumped; }
+	void SetCoreJumpedTotal(int JumpedTotal) { m_Core.m_JumpedTotal = JumpedTotal; }
+	void SetCoreJumps(int Jumps) { m_Core.m_Jumps = Jumps; }
+	void SetCoreHookTick(int HookTick) { m_Core.m_HookTick = HookTick; }
+	void SetCoreHookedPlayer(int HookedPlayer) { m_Core.m_HookedPlayer = HookedPlayer; }
+	void SetCoreHookState(int HookState) { m_Core.m_HookState = HookState; }
+	void SetCoreHookPos(vec2 HookPos) { m_Core.m_HookPos = HookPos; }
+	void SetCoreHookDir(vec2 HookDir) { m_Core.m_HookDir = HookDir; }
+	void SetCoreHookTeleBase(vec2 HookTeleBase) { m_Core.m_HookTeleBase = HookTeleBase; }
+
+	void SetCorePos(vec2 Pos) { m_Core.m_Pos = Pos; };
+	void SetCoreVel(vec2 Vel) { m_Core.m_Vel = Vel; };
 
 	//last tile
 	int m_LastIndexTile;

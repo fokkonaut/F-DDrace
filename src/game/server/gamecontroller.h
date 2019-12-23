@@ -41,8 +41,6 @@ class IGameController
 	void EvaluateSpawnType(CSpawnEval* pEval, int MapIndex) const;
 
 protected:
-	CGameContext *GameServer() const { return m_pGameServer; }
-	IServer *Server() const { return m_pServer; }
 
 	// game
 	int m_GameStartTick;
@@ -97,6 +95,8 @@ protected:
 	CChatCommands m_Commands;
 
 public:
+	CGameContext* GameServer() const { return m_pGameServer; }
+	IServer* Server() const { return m_pServer; }
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController() {};
 

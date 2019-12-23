@@ -393,6 +393,104 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->MapInfo(pResult->m_ClientID, g_Config.m_SvMap);
 }
 
+void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+#if defined(CONF_SQL)
+	if(!g_Config.m_SvSaveGames)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		return;
+	}
+
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+
+	int Team = ((CGameControllerDDRace*) pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+
+	const char* pCode = pResult->GetString(0);
+	char aCountry[5];
+	if(str_length(pCode) > 3 && pCode[0] >= 'A' && pCode[0] <= 'Z' && pCode[1] >= 'A'
+		&& pCode[1] <= 'Z' && pCode[2] >= 'A' && pCode[2] <= 'Z')
+	{
+		if(pCode[3] == ' ')
+		{
+			str_copy(aCountry, pCode, 4);
+			pCode = pCode + 4;
+		}
+		else if(str_length(pCode) > 4 && pCode[4] == ' ')
+		{
+			str_copy(aCountry, pCode, 5);
+			pCode = pCode + 5;
+		}
+		else
+		{
+			str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
+		}
+	}
+	else
+	{
+		str_copy(aCountry, g_Config.m_SvSqlServerName, sizeof(aCountry));
+	}
+
+	if(str_in_list(g_Config.m_SvSqlValidServerNames, ",", aCountry))
+	{
+		pSelf->Score()->SaveTeam(Team, pCode, pResult->m_ClientID, aCountry);
+
+		if(g_Config.m_SvUseSQL)
+			pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+	}
+	else
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Unknown server name '%s'.", aCountry);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+
+#endif
+}
+
+void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+#if defined(CONF_SQL)
+	if(!g_Config.m_SvSaveGames)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Save-function is disabled on this server");
+		return;
+	}
+
+	if(g_Config.m_SvUseSQL)
+		if(pPlayer->m_LastSQLQuery + g_Config.m_SvSqlQueriesDelay * pSelf->Server()->TickSpeed() >= pSelf->Server()->Tick())
+			return;
+#endif
+
+	if (pResult->NumArguments() > 0)
+		pSelf->Score()->LoadTeam(pResult->GetString(0), pResult->m_ClientID);
+	else
+		return;
+
+#if defined(CONF_SQL)
+	if(g_Config.m_SvUseSQL)
+		pPlayer->m_LastSQLQuery = pSelf->Server()->Tick();
+#endif
+}
+
 void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
@@ -889,7 +987,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 	CCharacter* pChr = pPlayer->GetCharacter();
 	if (!pChr)
 		return;
-	if(pChr->m_DDraceState != DDRACE_STARTED)
+	if(pChr->m_DDRaceState != DDRACE_STARTED)
 		return;
 
 	char aBuftime[64];
@@ -914,7 +1012,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	CCharacter* pChr = pPlayer->GetCharacter();
 	if (!pChr)
 		return;
-	if(pChr->m_DDraceState != DDRACE_STARTED)
+	if(pChr->m_DDRaceState != DDRACE_STARTED)
 		return;
 
 	char aBuftime[64];
@@ -983,7 +1081,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
-	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDraceState == DDRACE_STARTED)
+	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 			pPlayer->KillCharacter(WEAPON_SELF);
 

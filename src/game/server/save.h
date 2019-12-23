@@ -23,7 +23,6 @@ private:
 
 	int m_Alive;
 	int m_Paused;
-	int m_NeededFaketuning;
 
 	// Teamstuff
 	int m_TeeFinished;
@@ -33,7 +32,6 @@ private:
 	{
 		int m_AmmoRegenStart;
 		int m_Ammo;
-		int m_Ammocost;
 		int m_Got;
 
 	} m_aWeapons[NUM_WEAPONS];
@@ -67,10 +65,6 @@ private:
 	float m_CpCurrent[25];
 
 	int m_NotEligibleForFinish;
-
-	int m_HasTelegunGun;
-	int m_HasTelegunGrenade;
-	int m_HasTelegunLaser;
 
 	// Core
 	vec2 m_CorePos;

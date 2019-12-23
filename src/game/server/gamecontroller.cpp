@@ -459,9 +459,9 @@ void IGameController::Snap(int SnappingClient)
 	CPlayer* pSnap = GameServer()->m_apPlayers[SnappingClient];
 	CCharacter* pSpectator = pSnap && pSnap->IsSpectator() ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : 0;
 
-	if (pSpectator && pSpectator->m_DDraceState == DDRACE_STARTED)
+	if (pSpectator && pSpectator->m_DDRaceState == DDRACE_STARTED)
 		pGameData->m_GameStartTick = pSpectator->m_StartTime;
-	else if (!pSpectator && pSnappingChar && pSnappingChar->m_DDraceState == DDRACE_STARTED)
+	else if (!pSpectator && pSnappingChar && pSnappingChar->m_DDRaceState == DDRACE_STARTED)
 		pGameData->m_GameStartTick = pSnappingChar->m_StartTime;
 	else
 		pGameData->m_GameStartTick = m_GameStartTick;

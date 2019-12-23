@@ -1697,7 +1697,7 @@ void CCharacter::HandleBroadcast()
 {
 	CPlayerData* pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
 
-	if (m_DDraceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
+	if (m_DDRaceState == DDRACE_STARTED && m_CpLastBroadcast != m_CpActive &&
 		m_CpActive > -1 && m_CpTick > Server()->Tick() && pData->m_BestTime && pData->m_aBestCpTime[m_CpActive] != 0)
 	{
 		char aBroadcast[128];
@@ -1830,14 +1830,14 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 	int cp = GameServer()->Collision()->IsCheckpoint(MapIndex);
-	if (cp != -1 && m_DDraceState == DDRACE_STARTED && cp > m_CpActive)
+	if (cp != -1 && m_DDRaceState == DDRACE_STARTED && cp > m_CpActive)
 	{
 		m_CpActive = cp;
 		m_CpCurrent[cp] = m_Time;
 		m_CpTick = Server()->Tick() + Server()->TickSpeed() * 2;
 	}
 	int cpf = GameServer()->Collision()->IsFCheckpoint(MapIndex);
-	if (cpf != -1 && m_DDraceState == DDRACE_STARTED && cpf > m_CpActive)
+	if (cpf != -1 && m_DDRaceState == DDRACE_STARTED && cpf > m_CpActive)
 	{
 		m_CpActive = cpf;
 		m_CpCurrent[cpf] = m_Time;
@@ -1848,7 +1848,7 @@ void CCharacter::HandleTiles(int Index)
 		m_TeleCheckpoint = tcp;
 
 	// start
-	if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDraceState == DDRACE_NONE || m_DDraceState == DDRACE_FINISHED || (m_DDraceState == DDRACE_STARTED && !Team() && g_Config.m_SvTeam != 3)))
+	if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && g_Config.m_SvTeam != 3)))
 	{
 		if (g_Config.m_SvResetPickups)
 		{
@@ -1879,7 +1879,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// finish
-	if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDraceState == DDRACE_STARTED)
+	if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
 	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 		m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
@@ -2186,7 +2186,7 @@ void CCharacter::HandleTiles(int Index)
 	// special finish
 	if (!m_HasFinishedSpecialRace && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
 	{
-		if (m_DDraceState == DDRACE_STARTED)
+		if (m_DDRaceState == DDRACE_STARTED)
 		{
 			Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
 			m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
@@ -2848,7 +2848,7 @@ void CCharacter::DDraceInit()
 	m_Solo = false;
 
 	m_Paused = false;
-	m_DDraceState = DDRACE_NONE;
+	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
 	m_SetSavePos = false;
 	m_LastBroadcast = 0;
@@ -2874,7 +2874,7 @@ void CCharacter::DDraceInit()
 
 				if (pChar)
 				{
-					m_DDraceState = pChar->m_DDraceState;
+					m_DDRaceState = pChar->m_DDRaceState;
 					m_StartTime = pChar->m_StartTime;
 				}
 			}

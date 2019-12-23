@@ -1709,6 +1709,34 @@ int secure_random_init();
 void secure_random_fill(void *bytes, unsigned length);
 
 /*
+	Function: str_next_token
+		Writes the next token after str into buf, returns the rest of the string.
+	Parameters:
+		str - Pointer to string.
+		delim - Delimiter for tokenization.
+		buffer - Buffer to store token in.
+		buffer_size - Size of the buffer.
+	Returns:
+		Pointer to rest of the string.
+	Remarks:
+		- The token is always null-terminated.
+*/
+const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size);
+
+/*
+	Function: str_in_list
+		Checks if needle is in list delimited by delim
+	Parameters:
+		list - List
+		delim - List delimiter.
+		needle - Item that is being looked for.
+	Returns:
+		1 - Item is in list.
+		0 - Item isn't in list.
+*/
+int str_in_list(const char *list, const char *delim, const char *needle);
+
+/*
 	Function: secure_random_password
 		Fills the buffer with the specified amount of random password
 		characters.

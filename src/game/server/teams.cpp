@@ -31,12 +31,12 @@ void CGameTeams::OnCharacterStart(int ClientID)
 	CCharacter* pStartingChar = Character(ClientID);
 	if(!pStartingChar)
 		return;
-	if(m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDraceState == DDRACE_FINISHED)
+	if(m_Core.Team(ClientID) != TEAM_FLOCK && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
 		return;
 	if(m_Core.Team(ClientID) == TEAM_FLOCK
 			|| m_Core.Team(ClientID) == TEAM_SUPER)
 	{
-		pStartingChar->m_DDraceState = DDRACE_STARTED;
+		pStartingChar->m_DDRaceState = DDRACE_STARTED;
 		pStartingChar->m_StartTime = Tick;
 		return;
 	}
@@ -52,7 +52,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			continue;
 
 		Waiting = true;
-		pStartingChar->m_DDraceState = DDRACE_NONE;
+		pStartingChar->m_DDRaceState = DDRACE_NONE;
 
 		if(m_LastChat[ClientID] + Server()->TickSpeed()
 				+ g_Config.m_SvChatDelay < Tick)
@@ -212,7 +212,7 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	if (Team == TEAM_SUPER && !Character(ClientID)->m_Super)
 		return false;
 	//if you begin race
-	if (Character(ClientID)->m_DDraceState != DDRACE_NONE && Team != TEAM_SUPER)
+	if (Character(ClientID)->m_DDRaceState != DDRACE_NONE && Team != TEAM_SUPER)
 		return false;
 
 	SetForceCharacterTeam(ClientID, Team);
@@ -381,7 +381,7 @@ int CGameTeams::GetDDRaceState(CPlayer* Player)
 
 	CCharacter* pChar = Player->GetCharacter();
 	if (pChar)
-		return pChar->m_DDraceState;
+		return pChar->m_DDRaceState;
 	return DDRACE_NONE;
 }
 
@@ -392,7 +392,7 @@ void CGameTeams::SetDDRaceState(CPlayer* Player, int DDRaceState)
 
 	CCharacter* pChar = Player->GetCharacter();
 	if (pChar)
-		pChar->m_DDraceState = DDRaceState;
+		pChar->m_DDRaceState = DDRaceState;
 }
 
 int CGameTeams::GetStartTime(CPlayer* Player)
@@ -639,7 +639,7 @@ void CGameTeams::KillSavedTeam(int Team)
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
 		{
 			// Set so that no finish is accidentally given to some of the players
-			GameServer()->m_apPlayers[i]->GetCharacter()->m_DDraceState = DDRACE_NONE;
+			GameServer()->m_apPlayers[i]->GetCharacter()->m_DDRaceState = DDRACE_NONE;
 			m_TeeFinished[i] = false;
 		}
 	}
