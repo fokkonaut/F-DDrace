@@ -121,8 +121,6 @@ public:
 
 	virtual void OnClientEngineJoin(int ClientID) = 0;
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
-
-	virtual bool TimeScore() const { return false; }
 };
 
 extern IGameServer *CreateGameServer();

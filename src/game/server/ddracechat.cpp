@@ -1124,6 +1124,9 @@ void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Changed displayed score to '%s'", aFormat);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+		// Update the gameinfo, add or remove GAMEFLAG_RACE as wanted (time score needs it, the others dont)
+		pSelf->m_pController->UpdateGameInfo(pResult->m_ClientID);
 	}
 }
 

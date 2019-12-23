@@ -1882,7 +1882,6 @@ void CCharacter::HandleTiles(int Index)
 	if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
 	{
 		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
-		m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
 		m_pPlayer->GiveXP(250, "finish the race");
 	}
 
@@ -2189,7 +2188,6 @@ void CCharacter::HandleTiles(int Index)
 		if (m_DDRaceState == DDRACE_STARTED)
 		{
 			Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
-			m_pPlayer->m_Score = GameServer()->Score()->PlayerData(m_pPlayer->GetCID())->m_BestTime;
 		}
 
 		char aBuf[64];

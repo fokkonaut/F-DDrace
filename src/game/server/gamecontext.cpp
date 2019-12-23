@@ -898,8 +898,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->Respawn();
 	m_apPlayers[ClientID]->BackupSkin();
 
-	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
-
 	// load score
 	{
 		Score()->PlayerData(ClientID)->Reset();
@@ -979,6 +977,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
+	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
 	m_pController->UpdateGameInfo(ClientID);
 
 	for (int i = 0; i < MAX_CLIENTS; i++)

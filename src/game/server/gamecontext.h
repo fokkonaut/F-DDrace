@@ -239,6 +239,7 @@ public:
 	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1LL);
 	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1LL);
 
+	// F-DDrace
 	void CreateSoundGlobal(int Sound);
 	void CreateSound(int Sound, int ClientID);
 

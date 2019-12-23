@@ -455,6 +455,7 @@ void IGameController::Snap(int SnappingClient)
 	if(!pGameData)
 		return;
 
+	// F-DDrace
 	CCharacter* pSnappingChar = GameServer()->GetPlayerChar(SnappingClient);
 	CPlayer* pSnap = GameServer()->m_apPlayers[SnappingClient];
 	CCharacter* pSpectator = (pSnap && (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused())) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : 0;
@@ -472,6 +473,15 @@ void IGameController::Snap(int SnappingClient)
 		pGameData->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if (GameServer()->m_World.m_Paused)
 		pGameData->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
+
+	// F-DDrace
+	CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
+	if (!pGameDataRace)
+		return;
+
+	pGameDataRace->m_BestTime = m_CurrentRecord * 1000.0f;
+	pGameDataRace->m_Precision = 0;
+	pGameDataRace->m_RaceFlags = 0;
 
 	// demo recording
 	if(SnappingClient == -1)
@@ -547,6 +557,10 @@ void IGameController::UpdateGameInfo(int ClientID)
 	GameInfoMsg.m_TimeLimit = m_GameInfo.m_TimeLimit;
 	GameInfoMsg.m_MatchNum = m_GameInfo.m_MatchNum;
 	GameInfoMsg.m_MatchCurrent = m_GameInfo.m_MatchCurrent;
+
+	// F-DDrace
+	if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME)
+		GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
 
 	CNetMsg_Sv_GameInfo GameInfoMsgNoRace = GameInfoMsg;
 	GameInfoMsgNoRace.m_GameFlags &= ~GAMEFLAG_RACE;

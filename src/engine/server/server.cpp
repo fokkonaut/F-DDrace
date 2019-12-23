@@ -1263,7 +1263,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	int Flags = 0;
 	if(g_Config.m_Password[0])  // password set
 		Flags |= SERVERINFO_FLAG_PASSWORD;
-	if(GameServer()->TimeScore())
+	if(g_Config.m_SvDefaultScoreMode == 0) // F-DDrace // CPlayer::SCORE_TIME means 0
 		Flags |= SERVERINFO_FLAG_TIMESCORE;
 	pPacker->AddInt(Flags);
 

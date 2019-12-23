@@ -400,7 +400,7 @@ void CPlayer::Snap(int SnappingClient)
 	}
 	else
 	{
-		Score = abs(m_Score) * -1;
+		Score = m_Score == -9999 ? -9999 : abs(m_Score) * 1000.0f;
 		TimeFormat = true;
 	}
 	if (!TimeFormat && GetAccID() < ACC_START)
