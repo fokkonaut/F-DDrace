@@ -1131,7 +1131,7 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientID = m_ClientID;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = GetTeam();
+	NewClientInfoMsg.m_Team = m_Team;
 	NewClientInfoMsg.m_pName = m_aFakeName;
 	NewClientInfoMsg.m_pClan = m_aFakeClan;
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(m_ClientID);
