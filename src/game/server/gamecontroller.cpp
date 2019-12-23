@@ -479,7 +479,7 @@ void IGameController::Snap(int SnappingClient)
 	if (!pGameDataRace)
 		return;
 
-	pGameDataRace->m_BestTime = m_CurrentRecord * 1000.0f;
+	pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
 	pGameDataRace->m_Precision = 0;
 	pGameDataRace->m_RaceFlags = 0;
 
