@@ -302,6 +302,7 @@ public:
 	void UpdateFakeInformation(int ClientID = -1);
 	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); UpdateFakeInformation(); };
 	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); UpdateFakeInformation(); };
+	void SetFakeInfo(const char *pName, const char *pClan) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); UpdateFakeInformation(); };
 	char m_aFakeName[MAX_NAME_LENGTH];
 	char m_aFakeClan[MAX_CLAN_LENGTH];
 
