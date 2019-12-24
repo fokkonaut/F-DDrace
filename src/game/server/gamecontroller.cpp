@@ -558,10 +558,6 @@ void IGameController::UpdateGameInfo(int ClientID)
 	GameInfoMsg.m_MatchNum = m_GameInfo.m_MatchNum;
 	GameInfoMsg.m_MatchCurrent = m_GameInfo.m_MatchCurrent;
 
-	// F-DDrace
-	if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME)
-		GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
-
 	CNetMsg_Sv_GameInfo GameInfoMsgNoRace = GameInfoMsg;
 	GameInfoMsgNoRace.m_GameFlags &= ~GAMEFLAG_RACE;
 
@@ -572,12 +568,20 @@ void IGameController::UpdateGameInfo(int ClientID)
 			if(!GameServer()->m_apPlayers[i] || !Server()->ClientIngame(i))
 				continue;
 
+			// F-DDrace
+			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME)
+				GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
+
 			CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(i) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
 			Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		}
 	}
 	else
 	{
+		// F-DDrace
+		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME)
+			GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
+
 		CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(ClientID) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
 		Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
