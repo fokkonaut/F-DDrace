@@ -3138,7 +3138,7 @@ void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 {
 	if (GetWeaponGot(PreferedWeapon))
 		SetWeapon(PreferedWeapon);
-	else for (int i = NUM_WEAPONS; i > -1; i--)
+	else for (int i = 0; i < NUM_WEAPONS; i++)
 	{
 		if (i != WEAPON_NINJA)
 			if (GetWeaponGot(i))
