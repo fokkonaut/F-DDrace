@@ -405,7 +405,7 @@ void CStats::OnRender()
 			CUIRect Rect = {x + StartX, y+0.3f*LineHeight, 0.0f, BarHeight};
 			for(i=0; i<NUM_WEAPONS; i++)
 			{
-				extern int _dummy[(int)(NUM_WEAPONS == 6)]; (void)_dummy; // static assert that there are 6 weapons
+				extern int _dummy[(int)(/*NUM_WEAPONS in F-DDrace there are more than 6 weapons*/6 == 6)]; (void)_dummy; // static assert that there are 6 weapons
 				static const vec4 Colors[NUM_WEAPONS] =
 				{
 					// crosshair colors
