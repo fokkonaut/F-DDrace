@@ -1388,8 +1388,10 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	m_Alive = false;
 
+	// F-DDrace
 	if (m_Passive)
 		Passive(false, -1, true);
+	UnsetSpookyGhost();
 
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
@@ -2942,8 +2944,6 @@ void CCharacter::FDDraceInit()
 	m_ShopWindowPage = SHOP_PAGE_NONE;
 	m_ShopMotdTick = Now;
 	m_PurchaseState = SHOP_STATE_NONE;
-
-	UnsetSpookyGhost();
 
 	m_pPlayer->m_Gamemode = (g_Config.m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
