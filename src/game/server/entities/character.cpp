@@ -495,8 +495,6 @@ void CCharacter::FireWeapon()
 				{
 					CCharacter* pTarget = apEnts[i];
 
-					//if ((pTarget == this) || GameServer()->Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
-					//	continue;
 					if ((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCID()))))
 						continue;
 
