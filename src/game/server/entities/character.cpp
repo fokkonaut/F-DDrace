@@ -208,16 +208,7 @@ void CCharacter::HandleNinja()
 	{
 		if ((Server()->Tick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
 		{
-			// time's up, return
 			RemoveNinja();
-			/*m_aWeapons[WEAPON_NINJA].m_Got = false;
-			SetActiveWeapon(m_LastWeapon);
-
-			// reset velocity
-			if (m_Ninja.m_CurrentMoveTime > 0)
-				m_Core.m_Vel = m_Ninja.m_ActivationDir * m_Ninja.m_OldVelAmount;
-
-			SetWeapon(GetActiveWeapon());*/
 			return;
 		}
 
