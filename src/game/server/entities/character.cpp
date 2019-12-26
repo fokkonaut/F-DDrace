@@ -1091,10 +1091,7 @@ void CCharacter::Tick()
 	for (int i = 0; i < 2; i++)
 	{
 		CFlag* F = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[i];
-		if (!F)
-			continue;
-
-		m_Core.SetFlagInfo(i, F->GetPos(), F->IsAtStand(), F->GetVel(), F->GetCarrier());
+		if (F) m_Core.SetFlagInfo(i, F->GetPos(), F->IsAtStand(), F->GetVel(), F->GetCarrier());
 	}
 
 	m_Core.m_Input = m_Input;
