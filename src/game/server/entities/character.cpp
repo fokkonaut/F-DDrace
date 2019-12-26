@@ -837,7 +837,7 @@ void CCharacter::FireWeapon()
 				else
 					Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
 
-				for (int i = 0; i < 5; i++)
+				for (int i = 0; i < 7; i++)
 				{
 					new CProjectile
 					(
