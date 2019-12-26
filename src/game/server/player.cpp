@@ -98,7 +98,7 @@ void CPlayer::Reset()
 	m_Paused = PAUSE_NONE;
 
 	m_LastPause = 0;
-	m_Score = -9999;
+	m_Score = -1;
 	m_HasFinishScore = false;
 
 	// Variable initialized:
@@ -378,7 +378,7 @@ void CPlayer::Snap(int SnappingClient)
 	// send 0 if times of others are not shown
 	if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 	{
-		Score = -9999;
+		Score = -1;
 		TimeFormat = true;
 	}
 	else if (pSnapping->m_Minigame == MINIGAME_BLOCK)
@@ -402,7 +402,7 @@ void CPlayer::Snap(int SnappingClient)
 	}
 	else
 	{
-		Score = m_Score == -9999 ? -9999 : abs(m_Score) * 1000.0f;
+		Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
 		TimeFormat = true;
 	}
 	if (!TimeFormat && GetAccID() < ACC_START)
