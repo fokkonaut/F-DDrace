@@ -17,7 +17,7 @@ class CCustomProjectile : public CEntity
 public:
 
 	CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir, bool Freeze,
-		bool Explosive, bool Unfreeze, bool Bloody, bool Ghost, bool Spooky, int Type, float Lifetime = 1.5, float Accel = 1.1f, float Speed = 1.0f);
+		bool Explosive, bool Unfreeze, bool Bloody, bool Ghost, bool Spooky, int Type, float Lifetime = 6.0f, float Accel = 1.0f, float Speed = 10.0f);
 
 	virtual void Reset();
 	virtual void Tick();

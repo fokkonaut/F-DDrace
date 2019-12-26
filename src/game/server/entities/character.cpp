@@ -564,10 +564,7 @@ void CCharacter::FireWeapon()
 							true,					//bloody
 							true,					//ghost
 							true,					//spooky
-							WEAPON_GUN,				//type
-							6,						//lifetime
-							1.0f,					//accel
-							10.0f					//speed
+							WEAPON_GUN				//type
 						);
 					}
 					else
@@ -709,10 +706,7 @@ void CCharacter::FireWeapon()
 					false,					//bloody
 					false,					//ghost
 					false,					//spooky
-					WEAPON_PLASMA_RIFLE,	//type
-					6,						//lifetime
-					1.0f,					//accel
-					10.0f					//speed
+					WEAPON_PLASMA_RIFLE	//type
 				);
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -732,10 +726,7 @@ void CCharacter::FireWeapon()
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//bloody
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//ghost
 					(m_Spooky || m_pPlayer->m_SpookyGhost),//spooky
-					WEAPON_HEART_GUN,		//type
-					6,						//lifetime
-					1.0f,					//accel
-					10.0f					//speed
+					WEAPON_HEART_GUN		//type
 				);
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
