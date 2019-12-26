@@ -470,18 +470,11 @@ void CCharacter::FireWeapon()
 						CDoor* pDoor = apEnts[i];
 						if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
 						{
-							if (GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()])
-							{
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = false;
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = TILE_SWITCHCLOSE;
-							}
-							else
-							{
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = true;
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
-								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = TILE_SWITCHOPEN;
-							}
+							bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
+
+							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = !Status;
+							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
+							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = Status ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
 						}
 					}
 				}
