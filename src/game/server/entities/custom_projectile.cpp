@@ -164,7 +164,7 @@ void CCustomProjectile::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == WEAPON_PLASMA_RIFLE)
+	if (m_Type == WEAPON_PLASMA_RIFLE || m_Type == WEAPON_GUN)
 	{
 		CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 		if (!pLaser)

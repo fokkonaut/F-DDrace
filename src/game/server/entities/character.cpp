@@ -392,25 +392,7 @@ void CCharacter::FireWeapon()
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-	{
 		WillFire = true;
-
-		//spooky ghost
-		if (!m_FreezeTime && m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
-		{
-			m_NumGhostShots++;
-			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
-			{
-				SetSpookyGhost();
-				m_NumGhostShots = 0;
-			}
-			else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
-			{
-				UnsetSpookyGhost();
-				m_NumGhostShots = 0;
-			}
-		}
-	}
 
 	// shop window
 	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
@@ -566,34 +548,59 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_GUN:
 			{
+				g_Config.m_SvTestingCommands = 1;
+
 				if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 				{
-					int Lifetime;
-					if (!m_TuneZone)
-						Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? GameServer()->Tuning()->m_VanillaGunLifetime : GameServer()->Tuning()->m_GunLifetime));
+					if (m_pPlayer->m_SpookyGhost)
+					{
+						new CCustomProjectile
+						(
+							GameWorld(),
+							m_pPlayer->GetCID(),	//owner
+							ProjStartPos,			//pos
+							Direction,				//dir
+							false,					//freeze
+							false,					//explosive
+							true,					//unfreeze
+							true,					//bloody
+							true,					//ghost
+							true,					//spooky
+							WEAPON_GUN,				//type
+							6,						//lifetime
+							1.0f,					//accel
+							10.0f					//speed
+						);
+					}
 					else
-						Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? GameServer()->TuningList()[m_TuneZone].m_VanillaGunLifetime : GameServer()->TuningList()[m_TuneZone].m_GunLifetime));
+					{
+						int Lifetime;
+						if (!m_TuneZone)
+							Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? GameServer()->Tuning()->m_VanillaGunLifetime : GameServer()->Tuning()->m_GunLifetime));
+						else
+							Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? GameServer()->TuningList()[m_TuneZone].m_VanillaGunLifetime : GameServer()->TuningList()[m_TuneZone].m_GunLifetime));
 
-					new CProjectile
-					(
-						GameWorld(),
-						WEAPON_GUN,//Type
-						m_pPlayer->GetCID(),//Owner
-						ProjStartPos,//Pos
-						Direction,//Dir
-						Lifetime,//Span
-						false,//Freeze
-						false,//Explosive
-						0,//Force
-						-1,//SoundImpact
-						0,
-						0,
-						(m_Spooky || m_pPlayer->m_SpookyGhost),
-						m_pPlayer->m_Gamemode == GAMEMODE_VANILLA
-					);
+						new CProjectile
+						(
+							GameWorld(),
+							WEAPON_GUN,//Type
+							m_pPlayer->GetCID(),//Owner
+							ProjStartPos,//Pos
+							Direction,//Dir
+							Lifetime,//Span
+							false,//Freeze
+							false,//Explosive
+							0,//Force
+							-1,//SoundImpact
+							0,
+							0,
+							(m_Spooky || m_pPlayer->m_SpookyGhost),
+							m_pPlayer->m_Gamemode == GAMEMODE_VANILLA
+						);
+					}
 
 					if (Sound)
-						GameServer()->CreateSound(m_Pos, (m_Jetpack && !g_Config.m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+						GameServer()->CreateSound(m_Pos, m_pPlayer->m_SpookyGhost ? SOUND_PICKUP_HEALTH : (m_Jetpack && !g_Config.m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				}
 			} break;
 
@@ -883,6 +890,22 @@ void CCharacter::FireWeapon()
 		int W = Weapon == WEAPON_SHOTGUN ? 0 : Weapon == WEAPON_GRENADE ? 1 : Weapon == WEAPON_LASER ? 2 : -1;
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[Weapon].m_Ammo == 0)
 			GiveWeapon(Weapon, true);
+	}
+
+	//spooky ghost
+	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+	{
+		m_NumGhostShots++;
+		if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+		{
+			SetSpookyGhost();
+			m_NumGhostShots = 0;
+		}
+		else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
+		{
+			UnsetSpookyGhost();
+			m_NumGhostShots = 0;
+		}
 	}
 
 	if (!m_ReloadTimer)
