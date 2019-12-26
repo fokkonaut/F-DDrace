@@ -373,15 +373,10 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	
 	int Score = 0;
-	bool TimeFormat = false;
+	bool AccUsed = true;
 
-	// send 0 if times of others are not shown
-	if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-	{
-		Score = -1;
-		TimeFormat = true;
-	}
-	else if (pSnapping->m_Minigame == MINIGAME_BLOCK)
+	// check for minigames first, then normal score modes, as minigames of course overwrite the wanted scoremodes
+	if (pSnapping->m_Minigame == MINIGAME_BLOCK)
 	{
 		Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
 	}
@@ -392,20 +387,27 @@ void CPlayer::Snap(int SnappingClient)
 	else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
 	{
 		Score = m_InstagibScore;
+		AccUsed = false;
 	}
-	else if (pSnapping->m_ScoreMode != SCORE_TIME)
+	else if (pSnapping->m_ScoreMode == SCORE_TIME)
 	{
-		if (pSnapping->m_ScoreMode == SCORE_LEVEL)
-			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
-		if (pSnapping->m_ScoreMode == SCORE_BLOCK_POINTS)
-			Score = GameServer()->m_Accounts[GetAccID()].m_BlockPoints;
+		// send 0 if times of others are not shown
+		if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
+			Score = -1;
+		else
+			Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
+		AccUsed = false;
 	}
-	else
+	else if (pSnapping->m_ScoreMode == SCORE_LEVEL)
 	{
-		Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
-		TimeFormat = true;
+		Score = GameServer()->m_Accounts[GetAccID()].m_Level;
 	}
-	if (!TimeFormat && GetAccID() < ACC_START)
+	else if (pSnapping->m_ScoreMode == SCORE_BLOCK_POINTS)
+	{
+		Score = GameServer()->m_Accounts[GetAccID()].m_BlockPoints;
+	}
+
+	if (AccUsed && GetAccID() < ACC_START)
 		Score = 0;
 	pPlayerInfo->m_Score = Score;
 

@@ -569,7 +569,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 				continue;
 
 			// F-DDrace
-			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME)
+			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME && GameServer()->m_apPlayers[i]->m_Minigame == MINIGAME_NONE)
 				GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
 
 			CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(i) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
@@ -579,7 +579,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 	else
 	{
 		// F-DDrace
-		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME)
+		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME && GameServer()->m_apPlayers[ClientID]->m_Minigame == MINIGAME_NONE)
 			GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
 
 		CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(ClientID) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;

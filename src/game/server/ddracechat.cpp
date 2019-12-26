@@ -1863,6 +1863,9 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 	pPlayer->m_Minigame = Minigame;
 
 	pSelf->UpdateHidePlayers();
+
+	// Update the gameinfo, add or remove GAMEFLAG_RACE as wanted (in minigames we disable it to properly show the scores)
+	pSelf->m_pController->UpdateGameInfo(pResult->m_ClientID);
 }
 
 void CGameContext::ConLeaveMinigame(IConsole::IResult *pResult, void *pUserData)
