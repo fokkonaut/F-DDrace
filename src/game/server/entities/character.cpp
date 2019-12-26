@@ -548,8 +548,6 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_GUN:
 			{
-				g_Config.m_SvTestingCommands = 1;
-
 				if (!m_Jetpack || !m_pPlayer->m_NinjaJetpack)
 				{
 					if (m_pPlayer->m_SpookyGhost)
