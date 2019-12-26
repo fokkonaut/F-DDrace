@@ -3143,10 +3143,7 @@ void CCharacter::DropFlag()
 	for (int i = 0; i < 2; i++)
 	{
 		CFlag *F = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[i];
-		if (!F)
-			continue;
-
-		if (F->GetCarrier() == this)
+		if (F && F->GetCarrier() == this)
 			F->Drop(GetAimDir());
 	}
 }
