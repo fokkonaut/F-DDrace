@@ -864,18 +864,21 @@ void CCharacter::FireWeapon()
 	}
 
 	//spooky ghost
-	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+	if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 	{
-		m_NumGhostShots++;
-		if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+		if (m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
 		{
-			SetSpookyGhost();
-			m_NumGhostShots = 0;
-		}
-		else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
-		{
-			UnsetSpookyGhost();
-			m_NumGhostShots = 0;
+			m_NumGhostShots++;
+			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+			{
+				SetSpookyGhost();
+				m_NumGhostShots = 0;
+			}
+			else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
+			{
+				UnsetSpookyGhost();
+				m_NumGhostShots = 0;
+			}
 		}
 	}
 
