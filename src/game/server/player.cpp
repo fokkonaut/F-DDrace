@@ -159,7 +159,6 @@ void CPlayer::Reset()
 	m_HasSpookyGhost = false;
 
 	m_LoadedSkin = true;
-	m_ExactDieTick = Server()->Tick();
 
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 	m_HasRoomKey = false;

@@ -1387,7 +1387,6 @@ void CCharacter::Die(int Killer, int Weapon)
 	// this is for auto respawn after 3 secs
 	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
 	m_pPlayer->m_DieTick = Server()->Tick();
-	m_pPlayer->m_ExactDieTick = Server()->Tick();
 
 	m_Alive = false;
 

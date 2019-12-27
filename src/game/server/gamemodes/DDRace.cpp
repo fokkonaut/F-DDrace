@@ -88,7 +88,7 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 			HadFlag |= 2;
 		if (F->GetCarrier() == pVictim)
 		{
-			if (HasFlag(pKiller->GetCharacter()) != -1 || pKiller->m_ExactDieTick >= pVictim->GetPlayer()->m_ExactDieTick)
+			if (HasFlag(pKiller->GetCharacter()) != -1)
 				F->Drop();
 			HadFlag |= 1;
 		}
