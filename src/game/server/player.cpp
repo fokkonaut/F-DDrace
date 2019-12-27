@@ -1080,14 +1080,6 @@ void CPlayer::OnLogout()
 
 void CPlayer::GiveBlockPoints(int Amount)
 {
-	if (GetAccID() < ACC_START)
-	{
-		m_UnsavedBlockPoints++;
-		if (m_UnsavedBlockPoints % 5 == 0)
-			GameServer()->SendChatTarget(m_ClientID, "You made unsaved block points. Save your stats using an account. Check '/accountinfo'");
-		return;
-	}
-
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
 
 	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
