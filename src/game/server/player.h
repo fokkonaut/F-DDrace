@@ -246,7 +246,6 @@ public:
 	bool m_SpookyGhost;
 	TeeInfos m_CurrentTeeInfos;
 
-	bool m_LoadedSkin;
 	void ResetSkin(bool Unforce = false);
 	void SetSkin(const char* pSkin, bool Force = false);
 

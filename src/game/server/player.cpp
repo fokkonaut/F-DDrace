@@ -158,8 +158,6 @@ void CPlayer::Reset()
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
 
-	m_LoadedSkin = true;
-
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 	m_SmoothFreeze = g_Config.m_SvSmoothFreeze;
@@ -433,13 +431,6 @@ void CPlayer::Snap(int SnappingClient)
 		}
 
 		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
-
-		m_LoadedSkin = false;
-	}
-	else if (!m_LoadedSkin)
-	{
-		m_LoadedSkin = true;
-		ResetSkin();
 	}
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
