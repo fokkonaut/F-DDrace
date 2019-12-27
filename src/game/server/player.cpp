@@ -182,7 +182,7 @@ void CPlayer::Tick()
 	if (m_ChatScore > 0)
 		m_ChatScore--;
 
-	Server()->SetClientScore(m_ClientID, g_Config.m_SvDefaultScoreMode == SCORE_TIME ? m_Score : GameServer()->m_Accounts[GetAccID()].m_Level);
+	Server()->SetClientScore(m_ClientID, g_Config.m_SvDefaultScoreMode == SCORE_TIME ? m_Score : g_Config.m_SvDefaultScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[GetAccID()].m_Level : GameServer()->m_Accounts[GetAccID()].m_BlockPoints);
 
 	// do latency stuff
 	if (!m_IsDummy)
