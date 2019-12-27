@@ -2278,6 +2278,7 @@ void CGameContext::OnConsoleInit()
 
 void CGameContext::OnInit()
 {
+	g_Config.m_SvTestingCommands = 1;
 	// init everything
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();

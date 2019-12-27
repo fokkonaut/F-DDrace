@@ -3678,7 +3678,9 @@ void CCharacter::DummyTick()
 			if (m_Core.m_Pos.x > 282 * 32 && m_Core.m_Pos.x < 284 * 32)
 				m_Input.m_Jump = 1;
 		}
-		if (m_Core.m_Pos.y > 337.4 * 32 && m_Core.m_Pos.y < 345 * 32 && m_Core.m_Pos.x > 295 * 32 && m_Core.m_Pos.x < 365 * 32) // walkking left in air to get on the little block
+		if (m_Core.m_Pos.x > 294 * 32 && m_Core.m_Pos.x < 297 * 32 && m_Core.m_Pos.y > 343 * 32 && m_Core.m_Pos.y < 345 * 32) // fix someone blocking flappy, he would just keep moving left into the wall and do nothing there
+			m_Input.m_Direction = 1;
+		else if (m_Core.m_Pos.y > 337.4 * 32 && m_Core.m_Pos.y < 345 * 32 && m_Core.m_Pos.x > 295 * 32 && m_Core.m_Pos.x < 365 * 32) // walkking left in air to get on the little block
 			m_Input.m_Direction = -1;
 		if (m_Core.m_Pos.y < 355 * 32 && m_Core.m_Pos.y > 346 * 32)
 		{
