@@ -165,7 +165,7 @@ void CPlayer::Reset()
 	m_SmoothFreeze = g_Config.m_SvSmoothFreeze;
 	m_UnsavedBlockPoints = 0;
 
-	// this variable is only used for CSkins, not for any other stuff
+	// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
 	m_TeeInfos.m_aSkinName[0] = '\0';
 }
 

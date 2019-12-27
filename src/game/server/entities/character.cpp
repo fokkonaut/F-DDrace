@@ -3251,11 +3251,11 @@ void CCharacter::SetSpookyGhost()
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
 			m_aWeapons[i].m_Got = false;
+	m_pPlayer->m_SpookyGhost = true;
 	m_pPlayer->m_ShowName = false;
 	m_SavedDefEmote = m_pPlayer->m_DefEmote;
 	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
 	m_pPlayer->SetSkin("spooky_ghost");
-	m_pPlayer->m_SpookyGhost = true;
 }
 
 void CCharacter::UnsetSpookyGhost()
