@@ -3058,6 +3058,10 @@ void CCharacter::FDDraceTick()
 
 	m_WasPausedLastTick = m_pPlayer->IsPaused();
 
+	// stop spinning when we are paused
+	if (m_pPlayer->IsPaused())
+		m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
+
 	if (m_Core.m_AimClosest)
 	{
 		CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID());
