@@ -542,7 +542,7 @@ void CCharacter::FireWeapon()
 							Direction,				//dir
 							false,					//freeze
 							false,					//explosive
-							true,					//unfreeze
+							false,					//unfreeze
 							true,					//bloody
 							true,					//ghost
 							true,					//spooky
