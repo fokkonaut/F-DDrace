@@ -362,7 +362,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
 
 	// realistic ping for dummies
-	if (m_IsDummy && g_Config.m_SvFakeDummyPing)
+	if (m_IsDummy && g_Config.m_SvFakeDummyPing && SnappingClient == m_ClientID)
 	{
 		if (Server()->Tick() % 200 == 0)
 			m_FakePing = 32 + rand() % 11;
