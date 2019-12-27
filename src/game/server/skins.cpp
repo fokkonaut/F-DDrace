@@ -5,7 +5,7 @@
 const char *pSkinName[NUM_SKINS] = { "beaver", "bluekitty", "bluestripe", "brownbear", "bumbler", "cammo", "cammostripes", "cavebat", "default", "force", "fox", "greycoon",
 							"greyfox", "hippo", "koala", "limedog", "limekitty", "monkey", "paintgre", "pandabear", "panther", "pento", "piggy", "pinky", "raccoon",
 							"redbopp", "redstripe", "saddo", "setisu", "snowti", "spiky", "swardy", "tiger", "tooxy", "toptri", "twinbop", "twintri", "warmouse", "warpaint",
-							"spooky_ghost", "greensward", };
+							"spooky_ghost", "greensward", "dummy", };
 
 int pSkinCustomColor[NUM_SKINS][NUM_SKINPARTS] = { { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 0 }, { 1, 0, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 },
 		{ 1, 1, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 0, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 },
@@ -13,7 +13,7 @@ int pSkinCustomColor[NUM_SKINS][NUM_SKINPARTS] = { { 1, 1, 0, 1, 1, 1 }, { 1, 1,
 		{ 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 1, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 1, 1, 1, 1 },
 		{ 1, 0, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 0 }, { 1, 1, 1, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 }, { 1, 1, 0, 1, 1, 1 },
 		{ 1, 1, 1, 1, 1, 0 }, { 1, 0, 0, 1, 1, 0 }, { 1, 1, 1, 1, 1, 0 }, { 1, 1, 0, 1, 1, 0 }, { 1, 1, 0, 1, 1, 1 }, { 1, 0, 0, 1, 1, 0 }, { 1, 1, 1, 1, 1, 1 },
-		{ 1, 1, 0, 0, 0, 0 },
+		{ 1, 1, 0, 0, 0, 0 }, { 1, 1, 1, 1, 1, 1 },
 };
 
 const char* pSkinPartNames[NUM_SKINS][NUM_SKINPARTS] = {
@@ -57,6 +57,7 @@ const char* pSkinPartNames[NUM_SKINS][NUM_SKINPARTS] = {
 		{ "mouse", "mice", "", "standard", "standard", "negative" },
 		{ "standard", "warpaint", "", "standard", "standard", "standard" },
 		{ "spiky", "tricircular", "", "standard", "standard", "colorable" },
+		{ "greensward", "duodonny", "", "standard", "standard", "standard" },
 		{ "greensward", "duodonny", "", "standard", "standard", "standard" },
 };
 
@@ -102,6 +103,7 @@ int pSkinPartColor[NUM_SKINS][NUM_SKINPARTS] = {
 		{ 1944919, -16711808, 65408, 750337, 1944919, 65408 },
 		{ 255, -16777016, 255, 184, 9765959, 255 },
 		{ 5635840, -11141356, 65408, 65408, 65408, 65408 },
+		{ 50, -16777146, 50, 50, 50, 50 },
 };
 
 CSkins::CSkins()

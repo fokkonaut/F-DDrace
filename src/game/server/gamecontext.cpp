@@ -954,9 +954,9 @@ void CGameContext::OnClientEnter(int ClientID)
 		ClientInfoMsg.m_Silent = false;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_TeeInfos.m_aaSkinPartNames[p];
-			ClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[p];
-			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[p];
+			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aaSkinPartNames[p];
+			ClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aUseCustomColors[p];
+			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aSkinPartColors[p];
 		}
 		Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
@@ -3436,18 +3436,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward", 24);
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_MARKING], "duodonny", 24);
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_DECORATION], "", 24);
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_HANDS], "standard", 24);
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_FEET], "standard", 24);
-	str_copy(pDummy->m_TeeInfos.m_aaSkinPartNames[SKINPART_EYES], "standard", 24);
-
-	for (int p = 0; p < NUM_SKINPARTS; p++)
-	{
-		pDummy->m_TeeInfos.m_aUseCustomColors[p] = 1;
-		pDummy->m_TeeInfos.m_aSkinPartColors[p] = p == SKINPART_MARKING ? -16777146 : 50;
-	}
+	pDummy->m_TeeInfos = m_pSkins->m_Skins[SKIN_DUMMY];
 
 	OnClientEnter(DummyID);
 
