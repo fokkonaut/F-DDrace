@@ -122,6 +122,9 @@ public:
 	// TODO: clean this up
 	struct TeeInfos
 	{
+		// F-DDrace // for CSkins
+		char m_aSkinName[24];
+
 		char m_aaSkinPartNames[NUM_SKINPARTS][24];
 		int m_aUseCustomColors[NUM_SKINPARTS];
 		int m_aSkinPartColors[NUM_SKINPARTS];
@@ -241,13 +244,11 @@ public:
 
 	//spooky ghost
 	bool m_SpookyGhost;
-	void SendSpookyGhostSkin();
-	TeeInfos m_SavedTeeInfos;
-
-	void BackupSkin();
-	void LoadSkin();
+	TeeInfos m_CurrentTeeInfos;
 
 	bool m_LoadedSkin;
+	void ResetSkin(bool Unforce = false);
+	void SetSkin(const char* pSkin, bool Force = false);
 
 	//no name fix
 	bool m_RemovedName;
@@ -299,9 +300,8 @@ public:
 
 	//fake information
 	void UpdateFakeInformation(int ClientID = -1);
-	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); UpdateFakeInformation(); };
-	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); UpdateFakeInformation(); };
-	void SetFakeInfo(const char *pName, const char *pClan) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); UpdateFakeInformation(); };
+	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); };
+	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); };
 	char m_aFakeName[MAX_NAME_LENGTH];
 	char m_aFakeClan[MAX_CLAN_LENGTH];
 

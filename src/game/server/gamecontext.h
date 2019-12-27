@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
+#include "skins.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -251,7 +252,7 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendSettings(int ClientID);
-	void SendSkinChange(int ClientID, int TargetID);
+	void SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int TargetID);
 
 	// DDRace
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
@@ -443,6 +444,8 @@ public:
 	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
+
+	CSkins m_pSkins[NUM_SKINS];
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
@@ -639,6 +642,7 @@ private:
 
 	static void ConPlayerName(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerClan(IConsole::IResult* pResult, void* pUserData);
+	static void ConPlayerSkin(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);

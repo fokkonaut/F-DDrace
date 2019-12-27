@@ -96,6 +96,7 @@ CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the 
 //client information
 CONSOLE_COMMAND("player_name", "v[id] ?r[name]", CFGFLAG_SERVER, ConPlayerName, this, "Sets name of player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("player_clan", "v[id] ?r[clan]", CFGFLAG_SERVER, ConPlayerClan, this, "Sets clan of player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("player_skin", "v[id] ?r[skin]", CFGFLAG_SERVER, ConPlayerSkin, this, "Sets skin of player v", AUTHED_ADMIN)
 
 //info
 CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player r", AUTHED_ADMIN)

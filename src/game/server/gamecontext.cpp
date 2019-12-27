@@ -428,17 +428,20 @@ void CGameContext::SendSettings(int ClientID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::SendSkinChange(int ClientID, int TargetID)
+void CGameContext::SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int TargetID)
 {
 	CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientID = ClientID;
 	for(int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		Msg.m_apSkinPartNames[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aaSkinPartNames[p];
-		Msg.m_aUseCustomColors[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aUseCustomColors[p];
-		Msg.m_aSkinPartColors[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aSkinPartColors[p];
+		Msg.m_apSkinPartNames[p] = pTeeInfos.m_aaSkinPartNames[p];
+		Msg.m_aUseCustomColors[p] = pTeeInfos.m_aUseCustomColors[p];
+		Msg.m_aSkinPartColors[p] = pTeeInfos.m_aSkinPartColors[p];
 	}
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, TargetID);
+
+	if (m_apPlayers[ClientID])
+		m_apPlayers[ClientID]->m_CurrentTeeInfos = pTeeInfos;
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
@@ -896,7 +899,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_copy(m_apPlayers[ClientID]->m_aFakeName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	str_copy(m_apPlayers[ClientID]->m_aFakeClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->Respawn();
-	m_apPlayers[ClientID]->BackupSkin();
+	m_apPlayers[ClientID]->m_CurrentTeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
 
 	// load score
 	{
@@ -1691,17 +1694,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 			CNetMsg_Cl_SkinChange *pMsg = (CNetMsg_Cl_SkinChange *)pRawMsg;
 
-			// save skin for spooky ghost unset
-			for (int p = 0; p < NUM_SKINPARTS; p++)
-			{
-				str_copy(pPlayer->m_SavedTeeInfos.m_aaSkinPartNames[p], pMsg->m_apSkinPartNames[p], 24);
-				pPlayer->m_SavedTeeInfos.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
-				pPlayer->m_SavedTeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
-			}
-
-			if (pPlayer->m_SpookyGhost)
-				return;
-
 			for(int p = 0; p < NUM_SKINPARTS; p++)
 			{
 				str_copy(pPlayer->m_TeeInfos.m_aaSkinPartNames[p], pMsg->m_apSkinPartNames[p], 24);
@@ -1709,13 +1701,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
 
+			if (pPlayer->m_SpookyGhost || pPlayer->m_TeeInfos.m_aSkinName[0] != '\0')
+				return;
+
 			// update all clients
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if(!m_apPlayers[i] || (!Server()->ClientIngame(i) && !m_apPlayers[i]->IsDummy()) || Server()->GetClientVersion(i) < MIN_SKINCHANGE_CLIENTVERSION)
 					continue;
 
-				SendSkinChange(pPlayer->GetCID(), i);
+				SendSkinChange(pPlayer->m_TeeInfos, pPlayer->GetCID(), i);
 			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_COMMAND)

@@ -1255,6 +1255,7 @@ void CGameContext::ConPlayerName(IConsole::IResult* pResult, void* pUserData)
 		return;
 	const char* pName = pResult->NumArguments() > 1 ? pResult->GetString(1) : pSelf->Server()->ClientName(Victim);
 	pSelf->m_apPlayers[Victim]->SetFakeName(pName);
+	pSelf->m_apPlayers[Victim]->UpdateFakeInformation();
 }
 
 void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
@@ -1265,6 +1266,20 @@ void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
 		return;
 	const char* pClan = pResult->NumArguments() > 1 ? pResult->GetString(1) : pSelf->Server()->ClientClan(Victim);
 	pSelf->m_apPlayers[Victim]->SetFakeClan(pClan);
+	pSelf->m_apPlayers[Victim]->UpdateFakeInformation();
+}
+
+void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	if (!pSelf->m_apPlayers[Victim])
+		return;
+
+	if (pResult->NumArguments() > 1)
+		pSelf->m_apPlayers[Victim]->SetSkin(pResult->GetString(1), true);
+	else
+		pSelf->m_apPlayers[Victim]->ResetSkin(true);
 }
 
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)

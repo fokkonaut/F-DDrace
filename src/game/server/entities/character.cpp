@@ -3251,12 +3251,11 @@ void CCharacter::SetSpookyGhost()
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
 			m_aWeapons[i].m_Got = false;
-	m_pPlayer->m_SpookyGhost = true;
 	m_pPlayer->m_ShowName = false;
 	m_SavedDefEmote = m_pPlayer->m_DefEmote;
 	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
-	m_pPlayer->BackupSkin();
-	m_pPlayer->SendSpookyGhostSkin();
+	m_pPlayer->SetSkin("spooky_ghost");
+	m_pPlayer->m_SpookyGhost = true;
 }
 
 void CCharacter::UnsetSpookyGhost()
@@ -3268,7 +3267,7 @@ void CCharacter::UnsetSpookyGhost()
 	m_pPlayer->m_ShowName = true;
 	m_pPlayer->m_SpookyGhost = false;
 	m_pPlayer->m_DefEmote = m_SavedDefEmote;
-	m_pPlayer->LoadSkin();
+	m_pPlayer->ResetSkin();
 }
 
 void CCharacter::SetActiveWeapon(int Weapon)
@@ -3359,8 +3358,6 @@ void CCharacter::Rainbow(bool Set, int FromID, bool Silent)
 {
 	m_Rainbow = Set;
 	m_pPlayer->m_InfRainbow = false;
-	if (Set)
-		m_pPlayer->BackupSkin();
 	GameServer()->SendExtraMessage(RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
@@ -3368,8 +3365,6 @@ void CCharacter::InfRainbow(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_InfRainbow = Set;
 	m_Rainbow = false;
-	if (Set)
-		m_pPlayer->BackupSkin();
 	GameServer()->SendExtraMessage(INF_RAINBOW, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
