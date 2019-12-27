@@ -2,13 +2,6 @@
 
 #include "skins.h"
 
-/*case SKINPART_BODY:
-case SKINPART_MARKING:
-case SKINPART_DECORATION:
-case SKINPART_HANDS:
-case SKINPART_FEET:
-case SKINPART_EYES:*/
-
 const char *pSkinName[NUM_SKINS] = { "beaver", "bluekitty", "bluestripe", "brownbear", "bumbler", "cammo", "cammostripes", "cavebat", "default", "force", "fox", "greycoon",
 							"greyfox", "hippo", "koala", "limedog", "limekitty", "monkey", "paintgre", "pandabear", "panther", "pento", "piggy", "pinky", "raccoon",
 							"redbopp", "redstripe", "saddo", "setisu", "snowti", "spiky", "swardy", "tiger", "tooxy", "toptri", "twinbop", "twintri", "warmouse", "warpaint",
