@@ -1619,7 +1619,7 @@ int CServer::Run()
 				bool ServerEmpty = true;
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
-					if(m_aClients[c].m_State != CClient::STATE_EMPTY)
+					if(m_aClients[c].m_State != CClient::STATE_EMPTY && m_aClients[c].m_State != CClient::STATE_DUMMY)
 						ServerEmpty = false;
 
 				if(ServerEmpty)
