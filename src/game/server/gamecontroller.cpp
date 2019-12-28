@@ -684,7 +684,7 @@ IGameController::CChatCommand *IGameController::CChatCommands::GetCommand(const 
 void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *pPlayer)
 {
 	// F-DDrace
-	// Remove the clientside commands (expect w (whisper))
+	// Remove the clientside commands (expect w)
 	{
 		SendRemoveCommand(pServer, "all", pPlayer->GetCID());
 		SendRemoveCommand(pServer, "friend", pPlayer->GetCID());
@@ -703,6 +703,9 @@ void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *
 		AddCommand("login", "", "<name> <pw> Log into an account", 0);
 		AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
 
+		// this one is not displayed on the client, but it still gets added.
+		// it pushes the client command w up by one, so that the command under this is at the bottom (client does weird sorting)
+		AddCommand("", "", "", 0); 
 		AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
 	}
 
