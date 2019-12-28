@@ -60,7 +60,9 @@ protected:
 		int m_TimeLimit;
 	} m_GameInfo;
 
-	typedef void (*COMMAND_CALLBACK)(class CPlayer *pPlayer, const char *pArgs);
+	typedef void (*COMMAND_CALLBACK)(CGameContext *pGameServer, int ClientID, const char *pArgs);
+
+	static void CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs);
 
 	struct CChatCommand 
 	{

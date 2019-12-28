@@ -467,6 +467,9 @@ public:
 	//instagib
 	void InstagibTick(int Type);
 
+	//chat commands
+	void ExecuteChatCommand(const char *pMessage, int ClientID);
+
 private:
 
 	bool m_VoteWillPass;

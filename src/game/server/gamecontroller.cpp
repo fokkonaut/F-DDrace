@@ -694,6 +694,17 @@ void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *
 		SendRemoveCommand(pServer, "team", pPlayer->GetCID());
 	}
 
+	// Add some important commands, client wont sort alphabetically!
+	{
+		AddCommand("cmdlist", "", "List all commands which are accessible for users", 0);
+		AddCommand("credits", "", "Shows the credits of the F-DDrace mod", 0);
+		AddCommand("info", "", "Shows info about this server", 0);
+		AddCommand("login", "", "<name> <pw> Log into an account", 0);
+		AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
+
+		AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
+	}
+
 	for(int i = 0; i < MAX_COMMANDS; i++)
 	{
 		CChatCommand *pCommand = &m_aCommands[i];
@@ -715,6 +726,13 @@ void IGameController::OnPlayerCommand(CPlayer *pPlayer, const char *pCommandName
 	// TODO: Add a argument parser?
 	CChatCommand *pCommand = CommandsManager()->GetCommand(pCommandName);
 
-	if(pCommand)
-		pCommand->m_pfnCallback(pPlayer, pCommandArgs);
+	if(pCommand && pCommand->m_pfnCallback)
+		pCommand->m_pfnCallback(GameServer(), pPlayer->GetCID(), pCommandArgs);
+	else
+		GameServer()->ExecuteChatCommand(pCommandArgs, pPlayer->GetCID());
+}
+
+void IGameController::CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs)
+{
+	pGameServer->ExecuteChatCommand("/cmdlist", ClientID);
 }
