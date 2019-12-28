@@ -684,7 +684,7 @@ IGameController::CChatCommand *IGameController::CChatCommands::GetCommand(const 
 void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *pPlayer)
 {
 	// F-DDrace
-	// Remove the clientside commands (expect w, whisper)
+	// Remove the clientside commands (expect w (whisper))
 	{
 		SendRemoveCommand(pServer, "all", pPlayer->GetCID());
 		SendRemoveCommand(pServer, "friend", pPlayer->GetCID());
@@ -692,6 +692,7 @@ void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *
 		SendRemoveCommand(pServer, "mute", pPlayer->GetCID());
 		SendRemoveCommand(pServer, "r", pPlayer->GetCID());
 		SendRemoveCommand(pServer, "team", pPlayer->GetCID());
+		SendRemoveCommand(pServer, "whisper", pPlayer->GetCID());
 	}
 
 	// Add some important commands, client wont sort alphabetically!
