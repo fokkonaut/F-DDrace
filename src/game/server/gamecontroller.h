@@ -92,6 +92,8 @@ protected:
 		CChatCommand *GetCommand(const char *pName);
 
 		void OnPlayerConnect(class IServer *pServer, class CPlayer *pPlayer);
+
+		void OnInit();
 	};
 
 	CChatCommands m_Commands;

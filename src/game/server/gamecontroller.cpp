@@ -43,7 +43,11 @@ IGameController::IGameController(CGameContext *pGameServer)
 	// map
 	m_aMapWish[0] = 0;
 
+	// F-DDrace
+
 	m_CurrentRecord = 0;
+
+	CommandsManager()->OnInit();
 }
 
 bool IGameController::CanSpawn(vec2 *pOutPos, int Index) const
@@ -695,20 +699,6 @@ void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *
 		SendRemoveCommand(pServer, "whisper", pPlayer->GetCID());
 	}
 
-	// Add some important commands, client wont sort alphabetically!
-	{
-		AddCommand("cmdlist", "", "List all commands which are accessible for users", 0);
-		AddCommand("credits", "", "Shows the credits of the F-DDrace mod", 0);
-		AddCommand("info", "", "Shows info about this server", 0);
-		AddCommand("login", "", "<name> <pw> Log into an account", 0);
-		AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
-
-		// this one is not displayed on the client, but it still gets added.
-		// it pushes the client command w up by one, so that the command under this is at the bottom (client does weird sorting)
-		AddCommand("", "", "", 0);
-		AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
-	}
-
 	for(int i = 0; i < MAX_COMMANDS; i++)
 	{
 		CChatCommand *pCommand = &m_aCommands[i];
@@ -734,6 +724,21 @@ void IGameController::OnPlayerCommand(CPlayer *pPlayer, const char *pCommandName
 		pCommand->m_pfnCallback(GameServer(), pPlayer->GetCID(), pCommandArgs);
 	else
 		GameServer()->ExecuteChatCommand(pCommandArgs, pPlayer->GetCID());
+}
+
+void IGameController::CChatCommands::OnInit()
+{
+	// Add some important commands, client wont sort alphabetically!
+	AddCommand("cmdlist", "", "List all commands which are accessible for users", 0);
+	AddCommand("credits", "", "Shows the credits of the F-DDrace mod", 0);
+	AddCommand("info", "", "Shows info about this server", 0);
+	AddCommand("login", "", "<name> <pw> Log into an account", 0);
+	AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
+
+	// this one is not displayed on the client, but it still gets added.
+	// it pushes the client command w up by one, so that the command under this is at the bottom (client does weird sorting)
+	AddCommand("", "", "", 0);
+	AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
 }
 
 void IGameController::CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs)
