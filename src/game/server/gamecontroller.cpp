@@ -705,7 +705,7 @@ void IGameController::CChatCommands::OnPlayerConnect(IServer *pServer, CPlayer *
 
 		// this one is not displayed on the client, but it still gets added.
 		// it pushes the client command w up by one, so that the command under this is at the bottom (client does weird sorting)
-		AddCommand("", "", "", 0); 
+		AddCommand("", "", "", 0);
 		AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
 	}
 
