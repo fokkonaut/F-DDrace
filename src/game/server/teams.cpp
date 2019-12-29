@@ -442,7 +442,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, 
 	bool CallSaveScore = false;
 
 #if defined(CONF_SQL)
-	// CallSaveScore = g_Config.m_SvUseSQL; // TODO: SQL
+	CallSaveScore = g_Config.m_SvUseSQL;
 #endif
 
 	int PlayerCIDs[MAX_CLIENTS];
