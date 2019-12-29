@@ -16,12 +16,18 @@ void CNetConnection::ResetStats()
 	mem_zero(&m_Stats, sizeof(m_Stats));
 }
 
-void CNetConnection::Reset()
+void CNetConnection::Reset(bool Rejoin)
 {
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_PeerAck = 0;
 	m_RemoteClosed = 0;
+
+	if(!Rejoin)
+	{
+		m_TimeoutProtected = false;
+		m_TimeoutSituation = false;
+	}
 
 	m_State = NET_CONNSTATE_OFFLINE;
 	m_LastSendTime = 0;
@@ -152,7 +158,8 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 		else
 		{
 			// out of buffer
-			Disconnect("too weak connection (out of buffer)");
+			// unused due to timeout protection
+			//Disconnect("too weak connection (out of buffer)");
 			return -1;
 		}
 	}
@@ -221,10 +228,13 @@ void CNetConnection::Disconnect(const char *pReason)
 
 	if(m_RemoteClosed == 0)
 	{
-		if(pReason)
-			SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason)+1);
-		else
-			SendControl(NET_CTRLMSG_CLOSE, 0, 0);
+		if(!m_TimeoutSituation)
+		{
+			if(pReason)
+				SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason)+1);
+			else
+				SendControl(NET_CTRLMSG_CLOSE, 0, 0);
+		}
 
 		if(pReason != m_ErrorString)
 		{
@@ -410,16 +420,25 @@ int CNetConnection::Update()
 {
 	int64 Now = time_get();
 
+	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now-m_LastRecvTime) > time_freq()*Config()->m_ConnTimeoutProtection)
+	{
+		m_TimeoutSituation = false;
+		SetError("Timeout Protection over");
+	}
+
 	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR || State() == NET_CONNSTATE_DUMMY)
 		return 0;
+
+	m_TimeoutSituation = false;
 
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_TOKEN &&
-		(Now-m_LastRecvTime) > time_freq()*10)
+		(Now-m_LastRecvTime) > time_freq()*Config()->m_ConnTimeout)
 	{
 		m_State = NET_CONNSTATE_ERROR;
 		SetError("Timeout");
+		m_TimeoutSituation = true;
 	}
 	else if(State() == NET_CONNSTATE_TOKEN && (Now - m_LastRecvTime) > time_freq() * 5)
 	{
@@ -433,10 +452,13 @@ int CNetConnection::Update()
 		CNetChunkResend *pResend = m_Buffer.First();
 
 		// check if we have some really old stuff laying around and abort if not acked
-		if(Now-pResend->m_FirstSendTime > time_freq()*10)
+		if(Now-pResend->m_FirstSendTime > time_freq()* Config()->m_ConnTimeout)
 		{
 			m_State = NET_CONNSTATE_ERROR;
-			SetError("Too weak connection (not acked for 10 seconds)");
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "Too weak connection (not acked for %d seconds)", Config()->m_ConnTimeout);
+			SetError(aBuf);
+			m_TimeoutSituation = true;
 		}
 		else
 		{
@@ -507,4 +529,36 @@ void CNetConnection::DummyConnect()
 void CNetConnection::DummyDrop()
 {
 	Reset();
+}
+
+void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, TOKEN Token, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, TOKEN PeerToken, bool Sevendown, SECURITY_TOKEN SecurityToken)
+{
+	int64 Now = time_get();
+
+	m_Sequence = Sequence;
+	m_Ack = Ack;
+	m_RemoteClosed = 0;
+
+	m_State = NET_CONNSTATE_ONLINE;
+	m_PeerAddr = *pAddr;
+	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+	m_Token = Token;
+	m_SecurityToken = SecurityToken;
+	m_Sevendown = Sevendown;
+	m_PeerToken = PeerToken;
+
+	// copy resend buffer
+	m_Buffer.Init();
+	while (pResendBuffer->First())
+	{
+		CNetChunkResend *First = pResendBuffer->First();
+
+		CNetChunkResend *pResend = m_Buffer.Allocate(sizeof(CNetChunkResend)+First->m_DataSize);
+		mem_copy(pResend, First, sizeof(CNetChunkResend)+First->m_DataSize);
+
+		pResendBuffer->PopFirst();
+	}
 }

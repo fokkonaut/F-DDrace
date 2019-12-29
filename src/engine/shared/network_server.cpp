@@ -82,7 +82,9 @@ int CNetServer::Update()
 			continue;
 
 		m_aSlots[i].m_Connection.Update();
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
+		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR &&
+			(!m_aSlots[i].m_Connection.m_TimeoutProtected ||
+			 !m_aSlots[i].m_Connection.m_TimeoutSituation))
 		{
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
@@ -398,7 +400,7 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token, bool Sevendown)
 		int Flags = 0;
 		dbg_assert(pChunk->m_ClientID >= 0, "errornous client id");
 		dbg_assert(pChunk->m_ClientID < NET_MAX_CLIENTS, "errornous client id");
-		dbg_assert(m_aSlots[pChunk->m_ClientID].m_Connection.State() != NET_CONNSTATE_OFFLINE, "errornous client id");
+		//dbg_assert(m_aSlots[pChunk->m_ClientID].m_Connection.State() != NET_CONNSTATE_OFFLINE, "errornous client id");
 
 		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
@@ -410,7 +412,8 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token, bool Sevendown)
 		}
 		else
 		{
-			Drop(pChunk->m_ClientID, "Error sending data");
+			// unused due to timeout protection
+			//Drop(pChunk->m_ClientID, "Error sending data");
 		}
 	}
 	return 0;
@@ -470,4 +473,30 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	m_aSpamConns[Oldest].m_Time = Now;
 	m_aSpamConns[Oldest].m_Conns = 1;
 	return false;
+}
+
+bool CNetServer::SetTimedOut(int ClientID, int OrigID)
+{
+	if (m_aSlots[ClientID].m_Connection.State() != NET_CONNSTATE_ERROR)
+		return false;
+
+	m_aSlots[ClientID].m_Connection.SetTimedOut(ClientAddr(OrigID), m_aSlots[OrigID].m_Connection.SeqSequence(), m_aSlots[OrigID].m_Connection.AckSequence(), m_aSlots[OrigID].m_Connection.Token(), m_aSlots[OrigID].m_Connection.ResendBuffer(), m_aSlots[OrigID].m_Connection.PeerToken(), m_aSlots[OrigID].m_Connection.m_Sevendown, m_aSlots[OrigID].m_Connection.m_SecurityToken);
+	m_aSlots[OrigID].m_Connection.Reset();
+	return true;
+}
+
+void CNetServer::SetTimeoutProtected(int ClientID)
+{
+	m_aSlots[ClientID].m_Connection.m_TimeoutProtected = true;
+}
+
+int CNetServer::ResetErrorString(int ClientID)
+{
+	m_aSlots[ClientID].m_Connection.ResetErrorString();
+	return 0;
+}
+
+const char *CNetServer::ErrorString(int ClientID)
+{
+	return m_aSlots[ClientID].m_Connection.ErrorString();
 }

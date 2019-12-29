@@ -361,10 +361,7 @@ private:
 	NETSTATS m_Stats;
 	CNetBase *m_pNetBase;
 
-	SECURITY_TOKEN m_SecurityToken;
-
 	//
-	void Reset();
 	void ResetStats();
 	void SetError(const char *pString);
 	void AckChunks(int Ack);
@@ -378,6 +375,7 @@ private:
 	static TOKEN GenerateToken(const NETADDR *pPeerAddr);
 
 public:
+	void Reset(bool Rejoin = false);
 	void Init(CNetBase *pNetBase, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
@@ -415,8 +413,15 @@ public:
 	void DummyConnect();
 	void DummyDrop();
 
+	SECURITY_TOKEN m_SecurityToken;
 	bool m_Sevendown;
 	void DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown);
+
+	int SeqSequence() const { return m_Sequence; }
+	TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *ResendBuffer() { return &m_Buffer; };
+	bool m_TimeoutProtected;
+	bool m_TimeoutSituation;
+	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, TOKEN Token, TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, TOKEN PeerToken, bool Sevendown, SECURITY_TOKEN SecurityToken);
 };
 
 class CConsoleNetConnection
@@ -526,6 +531,7 @@ public:
 	void SetMaxClientsPerIP(int MaxClientsPerIP);
 
 	// F-DDrace
+
 	void DummyInit(int DummyID);
 	void DummyDelete(int DummyID);
 
@@ -535,6 +541,11 @@ public:
 
 	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
 	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
+
+	int ResetErrorString(int ClientID);
+	const char *ErrorString(int ClientID);
+	bool SetTimedOut(int ClientID, int OrigID);
+	void SetTimeoutProtected(int ClientID);
 };
 
 class CNetConsole

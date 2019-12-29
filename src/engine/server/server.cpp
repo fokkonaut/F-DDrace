@@ -2904,6 +2904,18 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 	return v[m_AnnouncementLastLine];
 }
 
+bool CServer::SetTimedOut(int ClientID, int OrigID)
+{
+	if (!m_NetServer.SetTimedOut(ClientID, OrigID))
+	{
+		return false;
+	}
+	DelClientCallback(OrigID, "Timeout Protection used", this);
+	m_aClients[ClientID].m_Authed = AUTHED_NO;
+	//m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
+	return true;
+}
+
 int* CServer::GetIdMap(int ClientID)
 {
 	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);

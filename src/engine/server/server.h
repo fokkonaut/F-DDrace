@@ -358,6 +358,12 @@ public:
 	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
 
 	// F-DDrace
+
+	const char *GetNetErrorString(int ClientID) { return m_NetServer.ErrorString(ClientID); };
+	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
+	bool SetTimedOut(int ClientID, int OrigID);
+	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
+
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;

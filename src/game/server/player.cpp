@@ -68,6 +68,7 @@ void CPlayer::Reset()
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = true;
 	m_LastSetSpectatorMode = 0;
+	m_TimeoutCode[0] = '\0';
 
 	delete m_pLastTarget;
 	m_pLastTarget = nullptr;
@@ -244,6 +245,14 @@ void CPlayer::Tick()
 			m_Latency.m_AccumMin = 1000;
 			m_Latency.m_AccumMax = 0;
 		}
+	}
+
+	if(Server()->GetNetErrorString(m_ClientID)[0])
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+		Server()->ResetNetErrorString(m_ClientID);
 	}
 
 	if (!GameServer()->m_World.m_Paused)
