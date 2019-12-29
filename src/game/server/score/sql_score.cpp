@@ -645,7 +645,7 @@ bool CSqlScore::SaveTeamScoreThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		aUpdateID[0] = 0;
 
 		str_format(aBuf, sizeof(aBuf),
-			"SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s') as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;",
+			"SELECT Name, l.ID, Time FROM ((SELECT ID FROM %s_teamrace WHERE Map = '%s' AND Name = '%s' AND DDNet7 = true) as l) LEFT JOIN %s_teamrace as r ON l.ID = r.ID ORDER BY ID;",
 			pSqlServer->GetPrefix(), pData->m_Map.ClrStr(), pData->m_aNames[0].ClrStr(), pSqlServer->GetPrefix()
 		);
 		pSqlServer->executeSqlQuery(aBuf);
