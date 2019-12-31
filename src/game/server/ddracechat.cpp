@@ -1898,22 +1898,31 @@ void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
 }
 
-void CGameContext::ConSmoothFreeze(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConPredict(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
 
-	pPlayer->m_SmoothFreeze = !pPlayer->m_SmoothFreeze;
+	if (pResult->NumArguments())
+	{
+		if (pPlayer->m_Predict == (bool)pResult->GetInteger(0))
+			return;
 
-	if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_FreezeTime)
-		pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
-
-	if (pPlayer->m_SmoothFreeze)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze activated");
+		pPlayer->m_Predict = pResult->GetInteger(0);
+	}
 	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "Smooth Freeze deactivated");
+	{
+		pPlayer->m_Predict = !pPlayer->m_Predict;
+	}
+
+	if (pPlayer->m_Predict)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Prediction enabled");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Prediction disabled");
+
+	pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)

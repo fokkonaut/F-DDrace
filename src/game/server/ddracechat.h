@@ -72,7 +72,7 @@ CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tel
 
 //other
 CHAT_COMMAND("resumemoved", "?i['0'|'1']", CFGFLAG_CHAT, ConResumeMoved, this, "Whether to resume from pause when someone moved your tee (off by default), optional i = 0 for off else for on", AUTHED_NO)
-CHAT_COMMAND("smoothfreeze", "", CFGFLAG_CHAT, ConSmoothFreeze, this, "Fix buggy tee when moving in freeze", AUTHED_NO)
+CHAT_COMMAND("predict", "?i['0'|'1']", CFGFLAG_CHAT, ConPredict, this, "Predict some ddrace tiles such as freeze, stopper, doors", AUTHED_NO)
 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)

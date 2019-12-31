@@ -292,7 +292,7 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
-	bool m_SmoothFreeze;
+	bool m_Predict;
 
 	void GiveBlockPoints(int Amount);
 	int m_UnsavedBlockPoints;

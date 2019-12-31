@@ -602,20 +602,45 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->GetPlayer()->m_SmoothFreeze && pChr->m_FreezeTime)
+		if (pChr->GetPlayer()->m_Predict)
 		{
-			Tuning.m_GroundControlSpeed = 0.f;
-			Tuning.m_GroundJumpImpulse = 0.f;
-			Tuning.m_GroundControlAccel = 0.f;
-			Tuning.m_AirControlSpeed = 0.f;
-			Tuning.m_AirJumpImpulse = 0.f;
-			Tuning.m_AirControlAccel = 0.f;
-			Tuning.m_HookFireSpeed = 0.f;
+			if (pChr->m_FreezeTime)
+			{
+				Tuning.m_GroundControlSpeed = 0.f;
+				Tuning.m_GroundJumpImpulse = 0.f;
+				Tuning.m_GroundControlAccel = 0.f;
+				Tuning.m_AirControlSpeed = 0.f;
+				Tuning.m_AirJumpImpulse = 0.f;
+				Tuning.m_AirControlAccel = 0.f;
+				Tuning.m_HookFireSpeed = 0.f;
+			}
+
+			if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP) || (pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
+			{
+				Tuning.m_HookDragAccel = 0.f;
+				Tuning.m_HookDragSpeed = 0.f;
+			}
+			if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP))
+			{
+				Tuning.m_Gravity = 0.f;
+			}
+			if (pChr->m_MoveRestrictions&CANTMOVE_UP)
+			{
+				Tuning.m_GroundJumpImpulse = 0.f;
+				Tuning.m_AirJumpImpulse = 0.f;
+			}
+			if ((pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
+			{
+				Tuning.m_GroundControlSpeed = 0.f;
+				Tuning.m_GroundControlAccel = 0.f;
+				Tuning.m_AirControlSpeed = 0.f;
+				Tuning.m_AirControlAccel = 0.f;
+			}
 		}
 	}
-
+	
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int* pParams = (int*)& Tuning;
+	int* pParams = (int*)&Tuning;
 
 	unsigned int last = sizeof(m_Tuning) / sizeof(int);
 	for (unsigned i = 0; i < last; i++)

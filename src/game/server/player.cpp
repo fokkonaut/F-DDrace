@@ -160,7 +160,7 @@ void CPlayer::Reset()
 
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
-	m_SmoothFreeze = g_Config.m_SvSmoothFreeze;
+	m_Predict = g_Config.m_SvPrediction;
 	m_UnsavedBlockPoints = 0;
 
 	// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
