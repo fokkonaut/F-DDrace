@@ -44,7 +44,7 @@ void CAtom::Tick()
 			return;
 		}
 
-		if (!pChr || pChr->IsPaused())
+		if (!pChr)
 		{
 			Clear();
 			return;
@@ -57,7 +57,7 @@ void CAtom::Tick()
 	{
 		for (int i = 0; i<NUM_ATOMS; i++)
 		{
-			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner));
+			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner, vec2(), true));
 		}
 		m_AtomPosition = 0;
 	}

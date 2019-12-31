@@ -41,7 +41,7 @@ void CTrail::Tick()
 			return;
 		}
 
-		if (!pChr || pChr->IsPaused())
+		if (!pChr)
 		{
 			Clear();
 			return;
@@ -54,7 +54,7 @@ void CTrail::Tick()
 	{
 		for (int i = 0; i<NUM_TRAILS; i++)
 		{
-			m_TrailProjs.push_back(new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_Owner));
+			m_TrailProjs.push_back(new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_Owner, vec2(), true));
 		}
 		m_TrailHistory.clear();
 		m_TrailHistory.push_front(HistoryPoint(m_Pos, 0.0f));
