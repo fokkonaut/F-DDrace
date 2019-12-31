@@ -199,10 +199,10 @@ void CCharacter::ConfirmPurchase()
 	m_PurchaseState = SHOP_STATE_CONFIRM;;
 }
 
-void CCharacter::PurchaseEnd(bool canceled)
+void CCharacter::PurchaseEnd(bool Canceled)
 {
 	char aResult[256];
-	if (canceled)
+	if (Canceled)
 	{
 		char aBuf[256];
 		str_format(aResult, sizeof(aResult), "You canceled the purchase.");
@@ -330,6 +330,7 @@ void CCharacter::BuyItem(int ItemID)
 		}
 	}
 
+	// check whether we have the item already
 	bool HasAlready = false;
 
 	switch (ItemID)
@@ -385,6 +386,7 @@ void CCharacter::BuyItem(int ItemID)
 	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", Price, aItem);
 	m_pPlayer->MoneyTransaction(-Price, aMsg);
 
+	// give us the bought item
 	int Weapon = -1;
 	switch (ItemID)
 	{

@@ -403,7 +403,7 @@ public:
 	void BuyItem(int ItemID);
 	void ConfirmPurchase();
 	int m_PurchaseState;
-	void PurchaseEnd(bool canceled);
+	void PurchaseEnd(bool Canceled);
 
 	//weapon indicator
 	void UpdateWeaponIndicator();
