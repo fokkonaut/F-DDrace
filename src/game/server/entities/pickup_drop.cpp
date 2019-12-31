@@ -116,7 +116,8 @@ void CPickupDrop::Pickup()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			if (!m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon)
+			// only give the weapon if its not an extra
+			if (!m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_DoorHammer)
 			{
 				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1
 					&& m_Weapon != WEAPON_HAMMER && m_Weapon != WEAPON_TELEKINESIS && m_Weapon != WEAPON_LIGHTSABER)
