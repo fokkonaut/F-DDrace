@@ -206,7 +206,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			Dir = 3;
 		float Deg = Dir * (pi / 2);
-		CProjectile *bullet = new CProjectile
+		CProjectile *pBullet = new CProjectile
 			(
 			&GameServer()->m_World,
 			WEAPON_SHOTGUN, //Type
@@ -223,7 +223,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			false, //Spooky
 			true //FakeTuning
 			);
-		bullet->SetBouncing(2 - (Dir % 2));
+		pBullet->SetBouncing(2 - (Dir % 2));
 	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN)
 	{
@@ -237,7 +237,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			Dir = 3;
 		float Deg = Dir * ( pi / 2);
-		CProjectile *bullet = new CProjectile
+		CProjectile *pBullet = new CProjectile
 			(
 			&GameServer()->m_World,
 			WEAPON_SHOTGUN, //Type
@@ -254,7 +254,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			false, //Spooky
 			true //FakeTuning
 			);
-		bullet->SetBouncing(2 - (Dir % 2));
+		pBullet->SetBouncing(2 - (Dir % 2));
 	}
 
 	if(Index == ENTITY_ARMOR_1)
