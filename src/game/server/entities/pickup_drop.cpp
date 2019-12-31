@@ -207,7 +207,7 @@ void CPickupDrop::IsShieldNear()
 		{
 			if (GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE)
 			{
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 				Reset();
 			}
 		}
