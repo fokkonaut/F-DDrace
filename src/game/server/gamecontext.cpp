@@ -638,7 +638,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			}
 		}
 	}
-	
+
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int* pParams = (int*)&Tuning;
 
