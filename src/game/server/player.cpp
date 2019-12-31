@@ -1177,15 +1177,15 @@ void CPlayer::SetSkin(const char *pSkin, bool Force)
 
 void CPlayer::ResetSkin(bool Unforce)
 {
+	if (Unforce)
+	{
+		m_TeeInfos.m_aSkinName[0] = '\0';
+	}
+
 	if (m_SpookyGhost)
 	{
 		SetSkin("spooky_ghost");
 		return;
-	}
-
-	if (Unforce)
-	{
-		m_TeeInfos.m_aSkinName[0] = '\0';
 	}
 	else if (m_TeeInfos.m_aSkinName[0] != '\0')
 	{
