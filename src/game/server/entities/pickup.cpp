@@ -90,7 +90,7 @@ void CPickup::Tick()
 						{
 							if (pChr->IncreaseHealth(1))
 							{
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
 								RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 							}
 						}
@@ -103,7 +103,7 @@ void CPickup::Tick()
 						{
 							if (pChr->IncreaseArmor(1))
 							{
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
+								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 								RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 							}
 						}
@@ -171,8 +171,7 @@ void CPickup::Tick()
 							else if (m_Subtype == WEAPON_LIGHTSABER)
 								GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team()));
 
-							if (pChr->GetPlayer())
-								GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
+							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
 
 						}
 						break;
@@ -208,7 +207,7 @@ void CPickup::Tick()
 							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 								RespawnTime = g_pData->m_aPickups[POWERUP_WEAPON].m_Respawntime;
 
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 						}
 						break;
 
@@ -260,8 +259,7 @@ void CPickup::Snap(int SnappingClient)
 
 	if (pOwner && Char)
 	{
-		int64_t TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
-		if (!CmaskIsSet(TeamMask, SnappingClient))
+		if (!CmaskIsSet(pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner), SnappingClient))
 			return;
 	}
 
