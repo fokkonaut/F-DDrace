@@ -25,7 +25,7 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
-			"F-DDrace Mod. Version: " GAME_VERSION);
+			"F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"For more info, say '/cmdlist'");
 }
