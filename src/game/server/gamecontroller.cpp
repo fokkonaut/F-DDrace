@@ -729,7 +729,7 @@ void IGameController::OnPlayerCommand(CPlayer *pPlayer, const char *pCommandName
 void IGameController::CChatCommands::OnInit()
 {
 	// Add some important commands, client wont sort alphabetically!
-	AddCommand("cmdlist", "", "List all commands which are accessible for users", 0);
+	AddCommand("cmdlist", "", "List all commands which are accessible for you", 0);
 	AddCommand("credits", "", "Shows the credits of the F-DDrace mod", 0);
 	AddCommand("info", "", "Shows info about this server", 0);
 	AddCommand("login", "", "<username> <pw> Log into an account", 0);

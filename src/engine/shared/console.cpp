@@ -830,7 +830,7 @@ CConsole::CConsole(int FlagMask)
 
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", AUTHED_ADMIN);
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", AUTHED_HELPER);
-	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users", AUTHED_NO);
+	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for you", AUTHED_NO);
 
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
