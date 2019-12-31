@@ -3561,7 +3561,7 @@ void CGameContext::ExecuteChatCommand(const char *pMessage, int ClientID)
 		Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
 	Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
 
-	Console()->ExecuteLine(pMessage + 1, ClientID);
+	Console()->ExecuteLine(pMessage + 1, ClientID, false);
 	// m_apPlayers[ClientID] can be NULL, if the player used a
 	// timeout code and replaced another client.
 	char aBuf[256];
