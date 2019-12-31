@@ -732,7 +732,7 @@ void IGameController::CChatCommands::OnInit()
 	AddCommand("cmdlist", "", "List all commands which are accessible for users", 0);
 	AddCommand("credits", "", "Shows the credits of the F-DDrace mod", 0);
 	AddCommand("info", "", "Shows info about this server", 0);
-	AddCommand("login", "", "<name> <pw> Log into an account", 0);
+	AddCommand("login", "", "<username> <pw> Log into an account", 0);
 	AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
 
 	// this one is not displayed on the client, but it still gets added.
