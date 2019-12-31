@@ -79,7 +79,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Pos = Pos;
 
 	m_Core.Reset();
-	m_Core.Init(&GameServer()->m_World.m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
+	m_Core.Init(&GameWorld()->m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
 	m_Core.m_Pos = m_Pos;
 	SetActiveWeapon(WEAPON_GUN);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
@@ -455,7 +455,7 @@ void CCharacter::FireWeapon()
 				{
 					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
 					CDoor* apEnts[12];
-					int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 12, CGameWorld::ENTTYPE_DOOR);
+					int Num = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 12, CGameWorld::ENTTYPE_DOOR);
 					for (int i = 0; i < Num; i++)
 					{
 						CDoor* pDoor = apEnts[i];
@@ -2816,8 +2816,8 @@ void CCharacter::Pause(bool Pause)
 	m_Paused = Pause;
 	if (Pause)
 	{
-		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
-		GameServer()->m_World.RemoveEntity(this);
+		GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
+		GameWorld()->RemoveEntity(this);
 
 		if (m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
 		{
@@ -2828,8 +2828,8 @@ void CCharacter::Pause(bool Pause)
 	else
 	{
 		m_Core.m_Vel = vec2(0, 0);
-		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
-		GameServer()->m_World.InsertEntity(this);
+		GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
+		GameWorld()->InsertEntity(this);
 	}
 }
 
@@ -3211,7 +3211,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 			GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin());
 		}
 		float Dir = ((rand() % 50 - 25) * 0.1); // in a range of -2.5 to +2.5
-		CPickupDrop *PickupDrop = new CPickupDrop(&GameServer()->m_World, m_Pos, Type, m_pPlayer->GetCID(), Dir);
+		CPickupDrop *PickupDrop = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir);
 		GameServer()->m_vPickupDropLimit.push_back(PickupDrop);
 	}
 	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));

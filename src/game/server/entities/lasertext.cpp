@@ -307,12 +307,12 @@ CLaserText::CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int AliveTic
 
 void CLaserText::Reset()
 {
-	GameServer()->m_World.DestroyEntity(this);
+	GameWorld()->DestroyEntity(this);
 }
 
 void CLaserText::Tick()
 {
-	if(++m_CurTicks - m_StartTick > m_AliveTicks) GameServer()->m_World.DestroyEntity(this);
+	if(++m_CurTicks - m_StartTick > m_AliveTicks) GameWorld()->DestroyEntity(this);
 }
 
 inline char NeighboursVert(const bool pCharVert[3], int pVertOff){

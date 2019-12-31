@@ -181,9 +181,9 @@ void CLaser::DoBounce()
 		vec2 At;
 		CCharacter* pHit;
 		if (pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE) && m_Type == WEAPON_LASER) : g_Config.m_SvHit)
-			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
+			pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
 		else
-			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+			pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
 		if (pHit)
 			Found = GetNearestAirPosPlayer(pHit->GetPos(), &PossiblePos);
