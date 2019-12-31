@@ -440,6 +440,7 @@ void CGameContext::SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int
 	}
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, TargetID);
 
+	// F-DDrace
 	if (m_apPlayers[ClientID])
 		m_apPlayers[ClientID]->m_CurrentTeeInfos = pTeeInfos;
 }
