@@ -595,6 +595,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	else
 		Tuning = m_aTuningList[Zone];
 
+	// F-DDrace
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (pChr)
 	{
@@ -2327,7 +2328,7 @@ void CGameContext::OnInit()
 		g_Config.m_SvOldTeleportHook = 0;
 		g_Config.m_SvOldTeleportWeapons = 0;
 		g_Config.m_SvTeleportHoldHook = 0;
-		g_Config.m_SvTeam = 0;
+		//g_Config.m_SvTeam = 1;
 		g_Config.m_SvShowOthersDefault = 0;
 
 		if (Collision()->m_NumSwitchers > 0)
