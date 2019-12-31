@@ -7,21 +7,20 @@
 void CCharacter::ShopWindow(int Dir)
 {
 	m_ShopMotdTick = 0;
-	int m_MaxShopPage = MAX_SHOP_PAGES;
 
 	if (Dir == 0)
 		m_ShopWindowPage = SHOP_PAGE_MAIN;
 	else if (Dir == 1)
 	{
 		m_ShopWindowPage++;
-		if (m_ShopWindowPage > m_MaxShopPage)
+		if (m_ShopWindowPage > MAX_SHOP_PAGES)
 			m_ShopWindowPage = SHOP_PAGE_MAIN;
 	}
 	else if (Dir == -1)
 	{
 		m_ShopWindowPage--;
 		if (m_ShopWindowPage < SHOP_PAGE_MAIN)
-			m_ShopWindowPage = m_MaxShopPage;
+			m_ShopWindowPage = MAX_SHOP_PAGES;
 	}
 
 	char aItem[256];
