@@ -2081,7 +2081,7 @@ void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pU
 		((CServer *)pUserData)->m_NetServer.SetMaxClientsPerIP(pResult->GetInteger(0));
 }
 
-void CServer::ConchainAccessCommandUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	if(pResult->NumArguments() == 2)
 	{
@@ -2199,7 +2199,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
-	Console()->Chain("access_command", ConchainAccessCommandUpdate, this);
+	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
