@@ -1922,7 +1922,8 @@ void CGameContext::ConPredict(IConsole::IResult* pResult, void* pUserData)
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "Prediction disabled");
 
-	pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
+	if (pPlayer->GetCharacter())
+		pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)
