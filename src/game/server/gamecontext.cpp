@@ -3497,6 +3497,12 @@ void CGameContext::SetV3Offset(int X, int Y)
 	g_Config.m_V3OffsetY = Y;
 }
 
+void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText)
+{
+	Pos.y -= 40.0 * 2.5;
+	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * 3, pText, (int)(strlen(pText)));
+}
+
 void CGameContext::UpdateHidePlayers(int ClientID)
 {
 	if (ClientID == -1)
@@ -3514,12 +3520,7 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 					|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[j]->m_Minigame != m_apPlayers[i]->m_Minigame))
 					Team = TEAM_BLUE;
 
-				CNetMsg_Sv_Team Msg;
-				Msg.m_ClientID = j;
-				Msg.m_Team = Team;
-				Msg.m_Silent = 1;
-				Msg.m_CooldownTick = Server()->Tick();
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+				SendTeamChange(j, Team, true, Server()->Tick(), i);
 			}
 		}
 	}
@@ -3539,12 +3540,7 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 				|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
 				Team = TEAM_BLUE;
 
-			CNetMsg_Sv_Team Msg;
-			Msg.m_ClientID = ClientID;
-			Msg.m_Team = Team;
-			Msg.m_Silent = 1;
-			Msg.m_CooldownTick = Server()->Tick();
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+			SendTeamChange(ClientID, Team, true, Server()->Tick(), i);
 		}
 	}
 }
@@ -3556,10 +3552,14 @@ void CGameContext::SendMotd(const char *pMsg, int ClientID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText)
+void CGameContext::SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID)
 {
-	Pos.y -= 40.0 * 2.5;
-	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * 3, pText, (int)(strlen(pText)));
+	CNetMsg_Sv_Team Msg;
+	Msg.m_ClientID = ClientID;
+	Msg.m_Team = Team;
+	Msg.m_Silent = (int)Silent;
+	Msg.m_CooldownTick = CooldownTick;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ToClientID);
 }
 
 void CGameContext::ExecuteChatCommand(const char *pMessage, int ClientID)

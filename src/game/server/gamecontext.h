@@ -255,6 +255,8 @@ public:
 	void SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int TargetID);
 
 	// DDRace
+	void SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID);
+
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
 
 	void List(int ClientID, const char* filter);
