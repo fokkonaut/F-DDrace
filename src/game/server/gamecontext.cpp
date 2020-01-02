@@ -3508,40 +3508,25 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 	if (ClientID == -1)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			for (int j = 0; j < MAX_CLIENTS; j++)
-			{
-				if (i == j || !m_apPlayers[i] || !m_apPlayers[j] || m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS)
-					continue;
-
-				int Team = TEAM_RED;
-				
-				if ((g_Config.m_SvHideDummies && m_apPlayers[j]->m_IsDummy)
-					|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[j]->m_Minigame != m_apPlayers[i]->m_Minigame))
-					Team = TEAM_BLUE;
-
-				SendTeamChange(j, Team, true, Server()->Tick(), i);
-			}
-		}
+			UpdateHidePlayers(i);
+		return;
 	}
-	else
+
+	if (!m_apPlayers[ClientID])
+		return;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (!m_apPlayers[ClientID])
-			return;
+		if (i == ClientID || !m_apPlayers[i] || m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
+			continue;
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (i == ClientID || !m_apPlayers[i] || m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
-				continue;
+		int Team = TEAM_RED;
 
-			int Team = TEAM_RED;
+		if ((g_Config.m_SvHideDummies && m_apPlayers[ClientID]->m_IsDummy)
+			|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
+			Team = TEAM_BLUE;
 
-			if ((g_Config.m_SvHideDummies && m_apPlayers[ClientID]->m_IsDummy)
-				|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
-				Team = TEAM_BLUE;
-
-			SendTeamChange(ClientID, Team, true, Server()->Tick(), i);
-		}
+		SendTeamChange(ClientID, Team, true, Server()->Tick(), i);
 	}
 }
 
