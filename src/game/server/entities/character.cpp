@@ -746,14 +746,18 @@ void CCharacter::FireWeapon()
 
 						if (!IsTelekinesed)
 						{
-							m_TelekinesisEntity = pEntity;
-							TelekinesisSound = true;
-
-							if (pFlag && pFlag->IsAtStand())
+							if (!pFlag || !pFlag->GetCarrier())
 							{
-								pFlag->SetAtStand(false);
-								pFlag->SetDropTick(Server()->Tick());
+								m_TelekinesisEntity = pEntity;
+								TelekinesisSound = true;
+
+								if (pFlag && pFlag->IsAtStand())
+								{
+									pFlag->SetAtStand(false);
+									pFlag->SetDropTick(Server()->Tick());
+								}
 							}
+
 						}
 					}
 				}
