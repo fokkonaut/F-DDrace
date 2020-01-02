@@ -2227,7 +2227,7 @@ void CServer::RegisterCommands()
 
 	// register console commands
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason", AUTHED_ADMIN);
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players", AUTHED_MOD);
+	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players", AUTHED_HELPER);
 	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon", AUTHED_HELPER);
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)", AUTHED_ADMIN);
