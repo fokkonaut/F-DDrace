@@ -62,6 +62,8 @@ class CSkins
 public:
 
 	CSkins();
+
+	int GetSkinID(const char *pSkin);
 	CPlayer::TeeInfos m_Skins[NUM_SKINS];
 };
 

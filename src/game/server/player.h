@@ -250,7 +250,7 @@ public:
 	TeeInfos m_CurrentTeeInfos;
 
 	void ResetSkin(bool Unforce = false);
-	void SetSkin(const char* pSkin, bool Force = false);
+	void SetSkin(int Skin, bool Force = false);
 
 	//no name fix
 	bool m_RemovedName;

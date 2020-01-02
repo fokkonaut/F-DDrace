@@ -1135,31 +1135,27 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 	GameServer()->UpdateHidePlayers(m_ClientID);
 }
 
-void CPlayer::SetSkin(const char *pSkin, bool Force)
+void CPlayer::SetSkin(int Skin, bool Force)
 {
-	for (int i = 0; i < NUM_SKINS; i++)
+	if (Skin < 0 || Skin >= NUM_SKINS)
+		return;
+
+	if (Force)
+		str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins->m_Skins[Skin].m_aSkinName, 24);
+
+	if (m_SpookyGhost)
+		return;
+
+	TeeInfos pTeeInfos;
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		if (!str_comp_nocase(pSkin, GameServer()->m_pSkins->m_Skins[i].m_aSkinName))
-		{
-			if (Force)
-				str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins->m_Skins[i].m_aSkinName, 24);
-
-			if (m_SpookyGhost)
-				break;
-
-			TeeInfos pTeeInfos;
-
-			for (int p = 0; p < NUM_SKINPARTS; p++)
-			{
-				str_copy(pTeeInfos.m_aaSkinPartNames[p], GameServer()->m_pSkins->m_Skins[i].m_aaSkinPartNames[p], 24);
-				pTeeInfos.m_aUseCustomColors[p] = GameServer()->m_pSkins->m_Skins[i].m_aUseCustomColors[p];
-				pTeeInfos.m_aSkinPartColors[p] = GameServer()->m_pSkins->m_Skins[i].m_aSkinPartColors[p];
-			}
-
-			GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
-			break;
-		}
+		str_copy(pTeeInfos.m_aaSkinPartNames[p], GameServer()->m_pSkins->m_Skins[Skin].m_aaSkinPartNames[p], 24);
+		pTeeInfos.m_aUseCustomColors[p] = GameServer()->m_pSkins->m_Skins[Skin].m_aUseCustomColors[p];
+		pTeeInfos.m_aSkinPartColors[p] = GameServer()->m_pSkins->m_Skins[Skin].m_aSkinPartColors[p];
 	}
+
+	GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
 }
 
 void CPlayer::ResetSkin(bool Unforce)
@@ -1168,9 +1164,9 @@ void CPlayer::ResetSkin(bool Unforce)
 		m_TeeInfos.m_aSkinName[0] = '\0';
 
 	if (m_SpookyGhost)
-		SetSkin("spooky_ghost");
+		SetSkin(SKIN_SPOOKY_GHOST);
 	else if (m_TeeInfos.m_aSkinName[0] != '\0')
-		SetSkin(m_TeeInfos.m_aSkinName, true);
+		SetSkin(GameServer()->m_pSkins->GetSkinID(m_TeeInfos.m_aSkinName), true);
 	else
 		GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
 }

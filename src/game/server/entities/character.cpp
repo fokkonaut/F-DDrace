@@ -3261,7 +3261,7 @@ void CCharacter::SetSpookyGhost()
 	m_SavedDefEmote = m_pPlayer->m_DefEmote;
 	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
 	m_pPlayer->m_ShowName = false;
-	m_pPlayer->SetSkin("spooky_ghost");
+	m_pPlayer->SetSkin(SKIN_SPOOKY_GHOST);
 	m_pPlayer->m_SpookyGhost = true; // set m_SpookyGhost after we set the skin
 }
 

@@ -119,3 +119,10 @@ CSkins::CSkins()
 		}
 	}
 }
+
+int CSkins::GetSkinID(const char *pSkin)
+{
+	for (int i = 0; i < NUM_SKINS; i++)
+		if (!str_comp_nocase(pSkin, m_Skins[i].m_aSkinName))
+			return i;
+}

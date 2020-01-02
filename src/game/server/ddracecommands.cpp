@@ -1277,7 +1277,7 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	if (pResult->NumArguments() > 1)
-		pSelf->m_apPlayers[Victim]->SetSkin(pResult->GetString(1), true);
+		pSelf->m_apPlayers[Victim]->SetSkin(pSelf->m_pSkins->GetSkinID(pResult->GetString(1)), true);
 	else
 		pSelf->m_apPlayers[Victim]->ResetSkin(true);
 }
