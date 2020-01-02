@@ -76,7 +76,7 @@ public:
 	void OnDisconnect();
 
 	void ThreadKillCharacter(int Weapon = WEAPON_GAME);
-	void KillCharacter(int Weapon = WEAPON_GAME);
+	void KillCharacter(int Weapon = WEAPON_GAME, bool UpdateTeeControl = true);
 	CCharacter *GetCharacter();
 
 	void SpectatePlayerName(const char* pName);

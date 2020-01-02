@@ -1676,8 +1676,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			pPlayer->m_LastKill = Server()->Tick();
-			pPlayer->KillCharacter(WEAPON_SELF);
-			pPlayer->Respawn();
+
+			if (pPlayer->m_pControlledTee && pPlayer->m_pControlledTee->m_IsDummy)
+			{
+				CPlayer *pControlledTee = pPlayer->m_pControlledTee;
+				pControlledTee->KillCharacter(WEAPON_SELF, false);
+				pControlledTee->Respawn();
+			}
+			else
+			{
+				pPlayer->KillCharacter(WEAPON_SELF);
+				pPlayer->Respawn();
+			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_READYCHANGE)
 		{

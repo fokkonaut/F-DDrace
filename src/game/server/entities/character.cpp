@@ -1252,13 +1252,14 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon)
+void CCharacter::Die(int Killer, int Weapon, bool UpdateTeeControl)
 {
 	// unset anyones telekinesis on us
 	GameServer()->UnsetTelekinesis(this);
 
 	// update tee controlling
-	m_pPlayer->UpdateTeeControl();
+	if (UpdateTeeControl)
+		m_pPlayer->UpdateTeeControl();
 
 	// drop armor, hearts and weapons
 	DropLoot();

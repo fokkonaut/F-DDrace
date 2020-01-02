@@ -629,11 +629,11 @@ void CPlayer::ThreadKillCharacter(int Weapon)
 	m_KillMe = Weapon;
 }
 
-void CPlayer::KillCharacter(int Weapon)
+void CPlayer::KillCharacter(int Weapon, bool UpdateTeeControl)
 {
 	if(m_pCharacter)
 	{
-		m_pCharacter->Die(m_ClientID, Weapon);
+		m_pCharacter->Die(m_ClientID, Weapon, UpdateTeeControl);
 		delete m_pCharacter;
 		m_pCharacter = 0;
 	}
