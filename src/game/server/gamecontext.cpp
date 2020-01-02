@@ -1002,7 +1002,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	// F-DDrace
-	UpdateHidePlayers(m_apPlayers[ClientID]->m_IsDummy ? ClientID : -1);
+	UpdateHidePlayers();
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
@@ -3517,7 +3517,7 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i == ClientID || !m_apPlayers[i] || m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
+		if (i == ClientID || !m_apPlayers[i] || m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[i]->m_IsDummy)
 			continue;
 
 		int Team = TEAM_RED;
@@ -3525,6 +3525,12 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 		if ((g_Config.m_SvHideDummies && m_apPlayers[ClientID]->m_IsDummy)
 			|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
 			Team = TEAM_BLUE;
+
+		// only update the team when its not the same as before
+		if (m_apPlayers[i]->m_HidePlayerTeam[ClientID] == Team)
+			continue;
+
+		m_apPlayers[i]->m_HidePlayerTeam[ClientID] = Team;
 
 		SendTeamChange(ClientID, Team, true, Server()->Tick(), i);
 	}

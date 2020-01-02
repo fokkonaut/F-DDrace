@@ -239,6 +239,9 @@ public:
 	int m_FakePing;
 	vec2 m_ForceSpawnPos;
 
+	//hide players
+	int m_HidePlayerTeam[MAX_CLIENTS];
+
 	//gamemodes
 	int m_Gamemode;
 
