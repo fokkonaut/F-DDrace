@@ -1234,7 +1234,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	// drop armor, hearts and weapons
 	DropLoot();
 
-	// only let unfrozen kills through if you have damage activated
+	// only let unfrozen kills through if you have damage activated (if the weapon is bigger than 0 it means you got killed right now)
 	if (!m_FreezeTime && (Killer < 0 || Killer == m_pPlayer->GetCID() || Weapon < 0))
 	{
 		m_Core.m_Killer.m_ClientID = -1;
@@ -1247,6 +1247,7 @@ void CCharacter::Die(int Killer, int Weapon)
 
 	// set the new killer and weapon
 	Killer = m_Core.m_Killer.m_ClientID;
+	// dont set a weapon if it was WEAPON_WORLD, etc...
 	if (Weapon >= 0)
 		Weapon = m_Core.m_Killer.m_Weapon;
 
@@ -1339,7 +1340,7 @@ void CCharacter::Die(int Killer, int Weapon)
 			pKiller->FixForNoName(FIX_SET_NAME_ONLY);
 
 		m_pPlayer->m_MsgKiller = Killer;
-		m_pPlayer->m_MsgWeapon = GameServer()->GetRealWeapon(m_Core.m_Killer.m_Weapon);
+		m_pPlayer->m_MsgWeapon = GameServer()->GetRealWeapon(Weapon);
 		m_pPlayer->m_MsgModeSpecial = ModeSpecial;
 		m_pPlayer->FixForNoName(FIX_KILL_MSG);
 	}
@@ -1348,7 +1349,7 @@ void CCharacter::Die(int Killer, int Weapon)
 		CNetMsg_Sv_KillMsg Msg;
 		Msg.m_Killer = Killer;
 		Msg.m_Victim = m_pPlayer->GetCID();
-		Msg.m_Weapon = GameServer()->GetRealWeapon(m_Core.m_Killer.m_Weapon);
+		Msg.m_Weapon = GameServer()->GetRealWeapon(Weapon);
 		Msg.m_ModeSpecial = ModeSpecial;
 		// only send kill message to players in the same minigame
 		for (int i = 0; i < MAX_CLIENTS; i++)

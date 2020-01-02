@@ -89,9 +89,6 @@ void CFlag::Tick()
 		return;
 	}
 
-	if (!m_pLastCarrier || !m_pLastCarrier->IsAlive())
-		m_pLastCarrier = NULL;
-
 	if (m_pCarrier && m_pCarrier->IsAlive())
 	{
 		if (m_pCarrier->m_IsFrozen && m_pCarrier->m_FirstFreezeTick != 0)
