@@ -1727,6 +1727,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		if (pThis->m_aClients[i].m_State == CClient::STATE_DUMMY)
 		{
 			str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d dummy=yes", i, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score);
+			if (!g_Config.m_SvHideBotsStatus)
+				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 		else if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
@@ -1748,9 +1750,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=%s connecting", i, aAddrStr);
-		}
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		}
 	}
 }
 
