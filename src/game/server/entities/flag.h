@@ -9,6 +9,8 @@
 class CFlag : public CEntity
 {
 private:
+	static const int ms_PhysSize = 14;
+
 	int m_Team;
 	bool m_AtStand;
 	int m_DropTick;
@@ -32,7 +34,9 @@ private:
 	int m_TileFIndex;
 	int m_MoveRestrictions;
 
-	static const int ms_PhysSize = 14;
+	void PlaySound(int Sound);
+	int m_SoundTick;
+	bool m_CanPlaySound;
 
 public:
 

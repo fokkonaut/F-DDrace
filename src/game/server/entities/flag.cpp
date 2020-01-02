@@ -40,14 +40,33 @@ void CFlag::Reset(bool Init)
 	m_GrabTick = 0;
 	m_DropFreezeTick = 0;
 	m_TeleCheckpoint = 0;
+	m_SoundTick = 0;
+	m_CanPlaySound = true;
+}
+
+void CFlag::PlaySound(int Sound)
+{
+	if (!g_Config.m_SvFlagSounds)
+		return;
+
+	if (!m_SoundTick)
+		m_CanPlaySound = true;
+
+	if (m_SoundTick < 10 && m_CanPlaySound)
+	{
+		m_SoundTick++;
+		GameServer()->CreateSoundGlobal(Sound);
+	}
+	else
+		m_CanPlaySound = false;
 }
 
 void CFlag::TickPaused()
 {
 	if(m_DropTick)
-		++m_DropTick;
+		m_DropTick++;
 	if(m_GrabTick)
-		++m_GrabTick;
+		m_GrabTick++;
 }
 
 void CFlag::TickDefered()
@@ -58,8 +77,7 @@ void CFlag::TickDefered()
 
 void CFlag::Drop(int Dir)
 {
-	if (g_Config.m_SvFlagSounds)
-		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+	PlaySound(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
 	m_DropFreezeTick = Server()->Tick();
 	if (m_pCarrier)
@@ -71,8 +89,7 @@ void CFlag::Drop(int Dir)
 
 void CFlag::Grab(CCharacter *pChr)
 {
-	if (g_Config.m_SvFlagSounds)
-		GameServer()->CreateSoundGlobal(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
+	PlaySound(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 	if (m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
@@ -127,6 +144,9 @@ void CFlag::Tick()
 		else
 			HandleDropped();
 	}
+
+	if (m_SoundTick && Server()->Tick() % Server()->TickSpeed() == 0)
+		m_SoundTick--;
 
 	m_PrevPos = m_Pos;
 }
