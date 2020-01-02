@@ -1195,7 +1195,7 @@ void CPlayer::ResetSkin(bool Unforce)
 
 void CPlayer::SetTeeControl(CPlayer *pVictim)
 {
-	if (!pVictim || pVictim->m_TeeControllerID != -1 || pVictim == this || pVictim == m_pControlledTee)
+	if (!pVictim || pVictim->m_TeeControllerID != -1 || pVictim == this || pVictim == m_pControlledTee || m_IsDummy)
 		return;
 
 	if (m_pControlledTee)
