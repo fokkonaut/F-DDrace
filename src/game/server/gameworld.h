@@ -204,6 +204,7 @@ public:
 	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
 	int GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1);
 
+	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
 	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1);
 };
 
