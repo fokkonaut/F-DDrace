@@ -367,6 +367,13 @@ void CCharacter::BuyItem(int ItemID)
 	if (ItemID == 6) // vip can only be bought with real money
 		return;
 
+	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
+	if (ItemID == 1)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Rainbow is currently disabled.");
+		return;
+	}
+
 	if ((*Account).m_Money < Price)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You don't have enough money");
