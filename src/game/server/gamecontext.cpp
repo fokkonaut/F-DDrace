@@ -1078,6 +1078,9 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 			pChr->Core()->m_Killer.m_ClientID = -1;
 			pChr->Core()->m_Killer.m_Weapon = -1;
 		}
+
+		if (m_apPlayers[i])
+			m_apPlayers[i]->m_HidePlayerTeam[ClientID] = -2;
 	}
 
 	m_apPlayers[ClientID]->OnDisconnect();
