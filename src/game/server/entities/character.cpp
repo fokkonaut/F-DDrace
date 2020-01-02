@@ -718,14 +718,28 @@ void CCharacter::FireWeapon()
 			{
 				bool TelekinesisSound = false;
 
-				if (m_TelekinesisTee == -1)
+				if (!m_TelekinesisEntity)
 				{
-					CCharacter* pChr = GameWorld()->ClosestCharacter(CursorPos, 20.f, this, m_pPlayer->GetCID());
-					if (pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_TelekinesisTee != m_pPlayer->GetCID())
+					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
+
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(CursorPos, 20.f, Types, this, m_pPlayer->GetCID());
+
+					CCharacter *pChr = 0;
+					CFlag *pFlag = 0;
+					if (pEntity)
 					{
-						bool IsTelekinesed = false;
+						switch (pEntity->GetObjType())
+						{
+						case CGameWorld::ENTTYPE_CHARACTER: pChr = (CCharacter *)pEntity; break;
+						case CGameWorld::ENTTYPE_FLAG: pFlag = (CFlag *)pEntity; break;
+						}
+					}
+
+					bool IsTelekinesed = false;
+					if ((pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_TelekinesisEntity != this) || (pEntity && pEntity != pChr))
+					{
 						for (int i = 0; i < MAX_CLIENTS; i++)
-							if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->m_TelekinesisTee == pChr->GetPlayer()->GetCID())
+							if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->m_TelekinesisEntity == pEntity)
 							{
 								IsTelekinesed = true;
 								break;
@@ -733,14 +747,20 @@ void CCharacter::FireWeapon()
 
 						if (!IsTelekinesed)
 						{
-							m_TelekinesisTee = pChr->GetPlayer()->GetCID();
+							m_TelekinesisEntity = pEntity;
 							TelekinesisSound = true;
+
+							if (pFlag && pFlag->IsAtStand())
+							{
+								pFlag->SetAtStand(false);
+								pFlag->SetDropTick(Server()->Tick());
+							}
 						}
 					}
 				}
-				else if (m_TelekinesisTee != -1)
+				else
 				{
-					m_TelekinesisTee = -1;
+					m_TelekinesisEntity = 0;
 					TelekinesisSound = true;
 				}
 
@@ -1231,6 +1251,9 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	// unset anyones telekinesis on us
+	GameServer()->UnsetTelekinesis(this);
+
 	// drop armor, hearts and weapons
 	DropLoot();
 
@@ -2938,7 +2961,7 @@ void CCharacter::FDDraceInit()
 	m_Passive = false;
 	m_pPassiveShield = 0;
 	m_PoliceHelper = false;
-	m_TelekinesisTee = -1;
+	m_TelekinesisEntity = 0;
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_pItem = 0;
@@ -3020,16 +3043,44 @@ void CCharacter::FDDraceTick()
 	m_AtomHooked = m_pPlayer->IsHooked(ATOM);
 	m_TrailHooked = m_pPlayer->IsHooked(TRAIL);
 
-	if (m_TelekinesisTee != -1)
+	if (m_TelekinesisEntity)
 	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(m_TelekinesisTee);
-		if (pChr && GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
+		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
 		{
-			pChr->Core()->m_Pos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
-			pChr->Core()->m_Vel = vec2(0.f, 0.f);
+			CCharacter *pChr = 0;
+			CFlag *pFlag = 0;
+			CPickupDrop *pPickup = 0;
+
+			vec2 Pos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
+			vec2 Vel = vec2(0.f, 0.f);
+
+			switch (m_TelekinesisEntity->GetObjType())
+			{
+				case (CGameWorld::ENTTYPE_CHARACTER): 
+				{
+					pChr = (CCharacter*)m_TelekinesisEntity;
+					pChr->Core()->m_Pos = Pos;
+					pChr->Core()->m_Vel = Vel;
+					break;
+				}
+				case (CGameWorld::ENTTYPE_FLAG):
+				{
+					pFlag = (CFlag *)m_TelekinesisEntity;
+					pFlag->SetPos(Pos);
+					pFlag->SetVel(Vel);
+					break;
+				}
+				case (CGameWorld::ENTTYPE_PICKUP_DROP):
+				{
+					pPickup = (CPickupDrop*)m_TelekinesisEntity;
+					pPickup->SetPos(Pos);
+					pPickup->SetVel(Vel);
+					break;
+				}
+			}
 		}
 		else
-			m_TelekinesisTee = -1;
+			m_TelekinesisEntity = 0;
 	}
 
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))

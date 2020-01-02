@@ -439,3 +439,35 @@ int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideW
 
 	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetShopDummy();
 }
+
+CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith)
+{
+	CEntity *pClosest = 0;
+
+	for (int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if (!(Types&1<<i))
+			continue;
+
+		if (i == ENTTYPE_CHARACTER)
+		{
+			CCharacter* pChr = ClosestCharacter(Pos, Radius, pNotThis, CollideWith);
+			if (pChr)
+			{
+				pClosest = pChr;
+				break;
+			}
+		}
+		else
+		{
+			CEntity* pEntity = ClosestEntity(Pos, Radius, i, pNotThis);
+			if (pEntity)
+			{
+				pClosest = pEntity;
+				break;
+			}
+		}
+	}
+
+	return pClosest;
+}

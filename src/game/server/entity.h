@@ -147,6 +147,8 @@ public:
 
 	int m_Number;
 	int m_Layer;
+
+	int GetObjType() { return m_ObjType; };
 };
 
 #endif

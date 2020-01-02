@@ -78,6 +78,7 @@ void CFlag::Grab(CCharacter *pChr)
 	m_AtStand = false;
 	m_pCarrier = pChr;
 	m_pCarrier->m_FirstFreezeTick = 0;
+	GameServer()->UnsetTelekinesis(this);
 }
 
 void CFlag::Tick()

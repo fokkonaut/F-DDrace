@@ -17,9 +17,12 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
-	static int const ms_PhysSize = 14;
+	void SetPos(vec2 Pos) { m_Pos = Pos; };
+	void SetVel(vec2 Vel) { m_Vel = Vel; };
 
 private:
+	static int const ms_PhysSize = 14;
+
 	int IsCharacterNear();
 	void IsShieldNear();
 	void Pickup();

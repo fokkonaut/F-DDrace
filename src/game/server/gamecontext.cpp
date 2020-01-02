@@ -3539,6 +3539,19 @@ void CGameContext::UpdateHidePlayers(int ClientID)
 	}
 }
 
+void CGameContext::UnsetTelekinesis(CEntity *pEntity)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChr = GetPlayerChar(i);
+		if (pChr && pChr->m_TelekinesisEntity == pEntity)
+		{
+			pChr->m_TelekinesisEntity = 0;
+			break; // can break here, every entity can only be picked by one player using telekinesis at the time
+		}
+	}
+}
+
 void CGameContext::SendMotd(const char *pMsg, int ClientID)
 {
 	CNetMsg_Sv_Motd Msg;

@@ -182,7 +182,6 @@ public:
 
 	// F-DDrace
 
-	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, class CEntity* pNotThis);
 	void ReleaseHooked(int ClientID);
 
 
@@ -204,6 +203,8 @@ public:
 
 	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
 	int GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1);
+
+	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1);
 };
 
 #endif

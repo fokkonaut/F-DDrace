@@ -240,10 +240,6 @@ public:
 	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1LL);
 	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1LL);
 
-	// F-DDrace
-	void CreateSoundGlobal(int Sound);
-	void CreateSound(int Sound, int ClientID);
-
 	// network
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
@@ -448,6 +444,11 @@ public:
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
 
 	CSkins m_pSkins[NUM_SKINS];
+
+	void CreateSoundGlobal(int Sound);
+	void CreateSound(int Sound, int ClientID);
+
+	void UnsetTelekinesis(CEntity *pEntity);
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
