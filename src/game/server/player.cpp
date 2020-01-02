@@ -1162,20 +1162,12 @@ void CPlayer::SetSkin(const char *pSkin, bool Force)
 void CPlayer::ResetSkin(bool Unforce)
 {
 	if (Unforce)
-	{
 		m_TeeInfos.m_aSkinName[0] = '\0';
-	}
 
 	if (m_SpookyGhost)
-	{
 		SetSkin("spooky_ghost");
-		return;
-	}
 	else if (m_TeeInfos.m_aSkinName[0] != '\0')
-	{
 		SetSkin(m_TeeInfos.m_aSkinName, true);
-		return;
-	}
-
-	GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
+	else
+		GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
 }
