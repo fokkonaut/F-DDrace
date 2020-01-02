@@ -1517,3 +1517,14 @@ void CGameContext::ConSpinBotSpeed(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	if (!pSelf->m_apPlayers[pResult->GetInteger(0)])
+		return;
+
+	if (pResult->NumArguments() < 2)
+		pSelf->m_apPlayers[pResult->GetInteger(0)]->UnsetTeeControl();
+	else
+		pSelf->m_apPlayers[pResult->GetInteger(0)]->SetTeeControl(pSelf->m_apPlayers[pResult->GetInteger(1)]);
+}

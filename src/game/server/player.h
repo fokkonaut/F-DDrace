@@ -273,6 +273,13 @@ public:
 	int m_InfMeteors;
 	bool m_HasSpookyGhost;
 
+	//teecontrol
+	void SetTeeControl(CPlayer *pVictim);
+	void UnsetTeeControl();
+	void UpdateTeeControl();
+	CPlayer *m_pControlledTee;
+	int m_TeeControllerID;
+
 	//account
 	int GetAccID();
 	void MoneyTransaction(int Amount, const char* pDescription = "");

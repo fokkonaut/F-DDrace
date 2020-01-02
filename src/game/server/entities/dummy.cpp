@@ -19,7 +19,7 @@ void CCharacter::Fire(bool Fire)
 
 void CCharacter::DummyTick()
 {
-	if (!m_pPlayer->m_IsDummy)
+	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
 		return;
 
 	int V3_OFFSET_X = g_Config.m_V3OffsetX * 32;

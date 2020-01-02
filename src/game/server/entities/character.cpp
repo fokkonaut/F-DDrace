@@ -1257,6 +1257,9 @@ void CCharacter::Die(int Killer, int Weapon)
 	// unset anyones telekinesis on us
 	GameServer()->UnsetTelekinesis(this);
 
+	// update tee controlling
+	m_pPlayer->UpdateTeeControl();
+
 	// drop armor, hearts and weapons
 	DropLoot();
 
@@ -1632,7 +1635,7 @@ void CCharacter::Snap(int SnappingClient)
 		pCharacter->m_AmmoCount = 10;
 	}
 
-	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
+	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 || m_pPlayer->m_TeeControllerID == SnappingClient ||
 		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID()))
 	{
 		pCharacter->m_Health = m_Health;
@@ -2663,7 +2666,7 @@ void CCharacter::SendZoneMsgs()
 
 void CCharacter::DDraceTick()
 {
-	if (!m_pPlayer->m_IsDummy)
+	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
 		mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
 
 	if (m_Input.m_Direction != 0 || m_Input.m_Jump != 0)

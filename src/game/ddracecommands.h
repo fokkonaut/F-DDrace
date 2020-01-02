@@ -89,6 +89,7 @@ CONSOLE_COMMAND("connectdefaultdummies", "", CFGFLAG_SERVER, ConConnectDefaultDu
 //power
 CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConForceFlagOwner, this, "Gives flag i to player i (0 = red, 1 = blue) (to return flag, set id = -1)", AUTHED_ADMIN)
 CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says a chat message as player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("teecontrol", "i[id] ?i[victim]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)

@@ -880,8 +880,19 @@ void CGameContext::OnTick()
 }
 
 // Server hooks
-void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
+void CGameContext::OnClientDirectInput(int ClientID, void *pInput, bool TeeControlled)
 {
+	// F-DDrace
+	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
+	{
+		OnClientDirectInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
+		return;
+	}
+	else if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
+	{
+		return;
+	}
+
 	int NumFailures = m_NetObjHandler.NumObjFailures();
 	if(m_NetObjHandler.ValidateObj(NETOBJTYPE_PLAYERINPUT, pInput, sizeof(CNetObj_PlayerInput)) == -1)
 	{
@@ -901,8 +912,22 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 	}
 }
 
-void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
+void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, bool TeeControlled)
 {
+	// F-DDrace
+	if (m_apPlayers[ClientID])
+	{
+		if (m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
+		{
+			OnClientPredictedInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
+			return;
+		}
+		else if (m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
+		{
+			return;
+		}
+	}
+
 	if(!m_World.m_Paused)
 	{
 		int NumFailures = m_NetObjHandler.NumObjFailures();
@@ -1066,23 +1091,6 @@ void CGameContext::OnClientTeamChange(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
-	// F-DDrace
-	if (m_apPlayers[ClientID]->GetAccID() >= ACC_START)
-		Logout(m_apPlayers[ClientID]->GetAccID());
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CCharacter* pChr = GetPlayerChar(i);
-		if (pChr && pChr->Core()->m_Killer.m_ClientID == ClientID)
-		{
-			pChr->Core()->m_Killer.m_ClientID = -1;
-			pChr->Core()->m_Killer.m_Weapon = -1;
-		}
-
-		if (m_apPlayers[i])
-			m_apPlayers[i]->m_HidePlayerTeam[ClientID] = -2;
-	}
-
 	m_apPlayers[ClientID]->OnDisconnect();
 
 	AbortVoteOnDisconnect(ClientID);
@@ -1589,8 +1597,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
-			if(!pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID))
-				SendGameMsg(GAMEMSG_SPEC_INVALIDID, ClientID);
+			pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 		{
