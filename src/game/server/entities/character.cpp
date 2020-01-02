@@ -721,7 +721,6 @@ void CCharacter::FireWeapon()
 				if (!m_TelekinesisEntity)
 				{
 					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
-
 					CEntity *pEntity = GameWorld()->ClosestEntityTypes(CursorPos, 20.f, Types, this, m_pPlayer->GetCID());
 
 					CCharacter *pChr = 0;
@@ -735,9 +734,9 @@ void CCharacter::FireWeapon()
 						}
 					}
 
-					bool IsTelekinesed = false;
 					if ((pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_TelekinesisEntity != this) || (pEntity && pEntity != pChr))
 					{
+						bool IsTelekinesed = false;
 						for (int i = 0; i < MAX_CLIENTS; i++)
 							if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->m_TelekinesisEntity == pEntity)
 							{
