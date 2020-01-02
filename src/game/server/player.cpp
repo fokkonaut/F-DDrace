@@ -1138,6 +1138,12 @@ void CPlayer::SetSkin(const char *pSkin, bool Force)
 	{
 		if (!str_comp_nocase(pSkin, GameServer()->m_pSkins->m_Skins[i].m_aSkinName))
 		{
+			if (Force)
+				str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins->m_Skins[i].m_aSkinName, 24);
+
+			if (m_SpookyGhost)
+				break;
+
 			TeeInfos pTeeInfos;
 
 			for (int p = 0; p < NUM_SKINPARTS; p++)
@@ -1148,9 +1154,6 @@ void CPlayer::SetSkin(const char *pSkin, bool Force)
 			}
 
 			GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
-
-			if (Force)
-				str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins->m_Skins[i].m_aSkinName, 24);
 			break;
 		}
 	}
