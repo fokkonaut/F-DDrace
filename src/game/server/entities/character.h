@@ -427,9 +427,9 @@ public:
 	int m_KillStreak;
 
 	// cursor
-	CStableProjectile* m_pCursorIndicator;
-	void SetCursorIndicator();
-	void RemoveCursorIndicator();
+	CStableProjectile* m_pTeeControlCursor;
+	void SetTeeControlCursor();
+	void RemoveTeeControlCursor();
 
 	// special race
 	bool m_HasFinishedSpecialRace;

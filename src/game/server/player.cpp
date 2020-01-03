@@ -1000,9 +1000,9 @@ int CPlayer::Pause(int State, bool Force)
 			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 
 			if (m_Paused == PAUSE_NONE)
-				m_pCharacter->SetCursorIndicator();
+				m_pCharacter->SetTeeControlCursor();
 			else
-				m_pCharacter->RemoveCursorIndicator();
+				m_pCharacter->RemoveTeeControlCursor();
 		}
 	}
 
@@ -1254,7 +1254,7 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	GameServer()->SendTeamChange(m_ClientID, TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
 
 	if (m_pCharacter)
-		m_pCharacter->SetCursorIndicator();
+		m_pCharacter->SetTeeControlCursor();
 }
 
 void CPlayer::UnsetTeeControl()
@@ -1266,7 +1266,7 @@ void CPlayer::UnsetTeeControl()
 	m_pControlledTee = 0;
 
 	if (m_pCharacter)
-		m_pCharacter->RemoveCursorIndicator();
+		m_pCharacter->RemoveTeeControlCursor();
 }
 
 void CPlayer::UpdateTeeControl()
