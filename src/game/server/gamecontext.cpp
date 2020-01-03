@@ -877,26 +877,8 @@ void CGameContext::OnTick()
 }
 
 // Server hooks
-void CGameContext::OnClientDirectInput(int ClientID, void *pInput, bool TeeControlled)
+void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 {
-	// F-DDrace
-	if (m_apPlayers[ClientID])
-	{
-		if (m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
-		{
-			OnClientDirectInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
-			return;
-		}
-		else if (m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
-		{
-			return;
-		}
-		else if (m_apPlayers[ClientID]->m_TeeControlMode && !m_apPlayers[ClientID]->m_pControlledTee)
-		{
-			return;
-		}
-	}
-
 	int NumFailures = m_NetObjHandler.NumObjFailures();
 	if(m_NetObjHandler.ValidateObj(NETOBJTYPE_PLAYERINPUT, pInput, sizeof(CNetObj_PlayerInput)) == -1)
 	{
@@ -916,26 +898,8 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput, bool TeeContr
 	}
 }
 
-void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, bool TeeControlled)
+void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 {
-	// F-DDrace
-	if (m_apPlayers[ClientID])
-	{
-		if (m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
-		{
-			OnClientPredictedInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
-			return;
-		}
-		else if (m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
-		{
-			return;
-		}
-		else if (m_apPlayers[ClientID]->m_TeeControlMode && !m_apPlayers[ClientID]->m_pControlledTee)
-		{
-			return;
-		}
-	}
-
 	if(!m_World.m_Paused)
 	{
 		int NumFailures = m_NetObjHandler.NumObjFailures();

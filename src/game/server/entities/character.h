@@ -88,8 +88,8 @@ public:
 	void HandleNinja();
 	void HandleJetpack();
 
-	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
-	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled = false);
+	void OnDirectInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled = false);
 	void ResetInput();
 	void FireWeapon();
 
@@ -422,6 +422,7 @@ public:
 	int m_SpawnTick;
 	bool m_aSpawnWeaponActive[3];
 	bool m_WasPausedLastTick;
+	bool m_PreventShotAfterPause;
 	bool m_GotTasered;
 
 	int m_KillStreak;

@@ -1052,8 +1052,18 @@ void CCharacter::SetEmote(int Emote, int Tick)
 	m_EmoteStop = Tick;
 }
 
-void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
+void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled)
 {
+	// F-DDrace
+	if (m_pPlayer->m_pControlledTee)
+	{
+		if (m_pPlayer->m_pControlledTee->GetCharacter() && !m_pPlayer->IsPaused())
+			m_pPlayer->m_pControlledTee->GetCharacter()->OnPredictedInput(pNewInput, true);
+		return;
+	}
+	else if (m_pPlayer->m_TeeControllerID != -1 && !TeeControlled)
+		return;
+
 	// check for changes
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();
@@ -1069,8 +1079,18 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 }
 
-void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
+void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled)
 {
+	// F-DDrace
+	if (m_pPlayer->m_pControlledTee)
+	{
+		if (m_pPlayer->m_pControlledTee->GetCharacter() && !m_pPlayer->IsPaused())
+			m_pPlayer->m_pControlledTee->GetCharacter()->OnDirectInput(pNewInput, true);
+		return;
+	}
+	else if (m_pPlayer->m_TeeControllerID != -1 && !TeeControlled)
+		return;
+
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
 
@@ -1078,7 +1098,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !m_WasPausedLastTick && !m_pPlayer->m_TeeControlMode)
+	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		HandleWeaponSwitch();
 		FireWeapon();
@@ -1096,9 +1116,8 @@ void CCharacter::ResetInput()
 		m_Input.m_Fire++;
 	m_Input.m_Fire &= INPUT_STATE_MASK;
 	m_Input.m_Jump = 0;
-	m_LatestPrevInput = m_LatestInput = m_Input;
-	// fix walking while paused or chatting
-	m_SavedInput = m_Input;
+	m_LatestPrevInput = m_LatestInput = m_SavedInput = m_Input;
+	m_NumInputs = 0;
 }
 
 void CCharacter::Tick()
@@ -3012,6 +3031,7 @@ void CCharacter::FDDraceInit()
 	m_SpawnTick = Now;
 	m_MoneyTile = false;
 	m_WasPausedLastTick = false;
+	m_PreventShotAfterPause = false;
 	m_GotTasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
@@ -3123,7 +3143,8 @@ void CCharacter::FDDraceTick()
 		}
 	}
 
-	m_WasPausedLastTick = m_pPlayer->IsPaused() || m_pPlayer->m_TeeControlMode;
+	m_WasPausedLastTick = m_pPlayer->IsPaused();
+	m_PreventShotAfterPause = m_pPlayer->IsPaused() || m_pPlayer->m_TeeControlMode;
 
 	// stop spinning when we are paused
 	if (m_pPlayer->IsPaused())

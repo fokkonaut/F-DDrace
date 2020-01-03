@@ -285,8 +285,8 @@ public:
 	virtual void OnClientEnter(int ClientID);
 	virtual void OnClientDrop(int ClientID, const char *pReason);
 	virtual void OnClientAuth(int ClientID, int Level);
-	virtual void OnClientDirectInput(int ClientID, void *pInput, bool TeeControlled = false);
-	virtual void OnClientPredictedInput(int ClientID, void *pInput, bool TeeControlled = false);
+	virtual void OnClientDirectInput(int ClientID, void *pInput);
+	virtual void OnClientPredictedInput(int ClientID, void *pInput);
 
 	virtual void OnClientEngineJoin(int ClientID);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);

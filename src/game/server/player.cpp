@@ -551,7 +551,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter && !m_Paused)
+	if(m_pCharacter && !m_Paused && (!m_TeeControlMode || m_pControlledTee))
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
@@ -588,7 +588,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	if (m_pCharacter)
 	{
-		if (!m_Paused)
+		if (!m_Paused && (!m_TeeControlMode || m_pControlledTee))
 			m_pCharacter->OnDirectInput(NewInput);
 		else
 			m_pCharacter->ResetInput();
@@ -604,8 +604,13 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 			m_ActiveSpecSwitch = true;
 			if(m_SpecMode == SPEC_FREEVIEW)
 			{
-				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_CHARACTER, (m_pCharacter && m_pCharacter->IsAlive()) ? m_pCharacter : 0);
-				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, GetCharacter());
+				// F-DDrace
+				CCharacter *pNotThis = (m_pCharacter && m_pCharacter->IsAlive()) ? m_pCharacter : 0;
+				if (m_pControlledTee && m_pControlledTee->m_pCharacter)
+					pNotThis = m_pControlledTee->m_pCharacter;
+
+				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_CHARACTER, pNotThis);
+				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, pNotThis);
 				if(pChar || pFlag)
 				{
 					if(!pChar || (pFlag && pChar && distance(m_ViewPos, pFlag->GetPos()) < distance(m_ViewPos, pChar->GetPos())))
