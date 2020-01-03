@@ -604,7 +604,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->m_FreezeTime || pChr->GetPlayer()->IsPaused() || pChr->GetPlayer()->m_TeeControlMode)
+		if (pChr->m_FreezeTime || pChr->GetPlayer()->IsPaused() || pChr->GetPlayer()->m_TeeControlMode || pChr->GetPlayer()->m_TeeControllerID != -1)
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;

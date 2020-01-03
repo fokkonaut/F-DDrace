@@ -1258,6 +1258,9 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	m_pControlledTee->Pause(PAUSE_NONE, true);
 	m_pControlledTee->m_TeeControllerID = m_ClientID;
 
+	if (m_pControlledTee->m_pCharacter)
+		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
+
 	if (m_pCharacter)
 		m_pCharacter->SetTeeControlCursor();
 }
@@ -1268,6 +1271,8 @@ void CPlayer::UnsetTeeControl()
 		return;
 
 	m_pControlledTee->m_TeeControllerID = -1;
+	if (m_pControlledTee->m_pCharacter)
+		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
 	m_pControlledTee = 0;
 
 	if (m_pCharacter)
