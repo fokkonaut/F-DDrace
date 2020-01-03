@@ -603,9 +603,9 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if (m_pCharacter)
+	if (m_pCharacter && !m_TeeControlMode)
 	{
-		if (!m_Paused && !m_TeeControlMode)
+		if (!m_Paused)
 			m_pCharacter->OnDirectInput(NewInput);
 		else
 			m_pCharacter->ResetInput();
