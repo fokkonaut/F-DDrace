@@ -276,7 +276,7 @@ public:
 	//teecontrol
 	void SetTeeControl(CPlayer *pVictim);
 	void UnsetTeeControl();
-	void UpdateTeeControl();
+	void ResumeFromTeeControl();
 	CPlayer *m_pControlledTee;
 	int m_TeeControllerID;
 	bool m_HasTeeControl;

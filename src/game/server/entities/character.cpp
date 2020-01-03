@@ -1259,7 +1259,11 @@ void CCharacter::Die(int Killer, int Weapon, bool UpdateTeeControl)
 
 	// update tee controlling
 	if (UpdateTeeControl)
-		m_pPlayer->UpdateTeeControl();
+	{
+		m_pPlayer->ResumeFromTeeControl();
+		if (m_pPlayer->m_TeeControllerID != -1)
+			GameServer()->m_apPlayers[m_pPlayer->m_TeeControllerID]->ResumeFromTeeControl();
+	}
 
 	// drop armor, hearts and weapons
 	DropLoot();
@@ -3699,6 +3703,6 @@ void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)
 	m_pPlayer->m_HasTeeControl = Set;
 	m_pPlayer->m_TeeControlForcedID = ForcedID;
 	if (!Set)
-		m_pPlayer->UpdateTeeControl();
+		m_pPlayer->ResumeFromTeeControl();
 	GameServer()->SendExtraMessage(TEE_CONTROL, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

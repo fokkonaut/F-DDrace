@@ -1528,7 +1528,18 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	int ForcedID = pResult->NumArguments() == 2 ? pResult->GetInteger(1) : -1;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, ForcedID, pResult->m_ClientID);
+	if (!pChr)
+		return;
+
+	int ForcedID = -1;
+	if (pResult->NumArguments() == 2)
+	{
+		if (pSelf->m_apPlayers[pResult->GetInteger(1)])
+			ForcedID = pResult->GetInteger(1);
+		else
+			ForcedID = -2;
+	}
+	if (ForcedID != -2)
+		pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, ForcedID, pResult->m_ClientID);
 }

@@ -531,7 +531,15 @@ void CPlayer::OnDisconnect()
 		}
 
 		if (GameServer()->m_apPlayers[i])
+		{
 			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = -2;
+
+			if (GameServer()->m_apPlayers[i]->m_TeeControlForcedID == m_ClientID)
+			{
+				GameServer()->m_apPlayers[i]->m_HasTeeControl = false;
+				GameServer()->m_apPlayers[i]->m_TeeControlForcedID = -1;
+			}
+		}
 	}
 }
 
@@ -760,9 +768,6 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		if (GameServer()->m_apPlayers[i])
 			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = -2;
 	}
-
-	// update tee controlling
-	UpdateTeeControl();
 
 	GameServer()->OnClientTeamChange(m_ClientID);
 
@@ -1252,7 +1257,6 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	m_pControlledTee = pVictim;
 	m_pControlledTee->Pause(PAUSE_NONE, true);
 	m_pControlledTee->m_TeeControllerID = m_ClientID;
-	GameServer()->SendTeamChange(m_ClientID, TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
 
 	if (m_pCharacter)
 		m_pCharacter->SetTeeControlCursor();
@@ -1270,22 +1274,14 @@ void CPlayer::UnsetTeeControl()
 		m_pCharacter->RemoveTeeControlCursor();
 }
 
-void CPlayer::UpdateTeeControl()
+void CPlayer::ResumeFromTeeControl()
 {
-	m_TeeControlMode = false;
+	if (!m_TeeControlMode)
+		return;
+
 	GameServer()->SendTeamChange(m_ClientID, m_Team, true, Server()->Tick(), m_ClientID);
-
-	if (m_pControlledTee)
-	{
-		UnsetTeeControl();
-		if (m_pCharacter)
-			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
-	}
-
-	if (m_TeeControllerID != -1)
-	{
-		GameServer()->m_apPlayers[m_TeeControllerID]->UnsetTeeControl();
-		if (GameServer()->GetPlayerChar(m_TeeControllerID))
-			GameServer()->SendTuningParams(m_ClientID, GameServer()->GetPlayerChar(m_TeeControllerID)->m_TuneZone);
-	}
+	m_TeeControlMode = false;
+	UnsetTeeControl();
+	if (m_pCharacter)
+		GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 }
