@@ -894,7 +894,7 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput, bool TeeContr
 		{
 			return;
 		}
-		else if (m_apPlayers[ClientID]->m_TeeControlMode)
+		else if (m_apPlayers[ClientID]->m_TeeControlMode && !m_apPlayers[ClientID]->m_pControlledTee)
 		{
 			return;
 		}
@@ -933,7 +933,7 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, bool TeeCo
 		{
 			return;
 		}
-		else if (m_apPlayers[ClientID]->m_TeeControlMode)
+		else if (m_apPlayers[ClientID]->m_TeeControlMode && !m_apPlayers[ClientID]->m_pControlledTee)
 		{
 			return;
 		}
