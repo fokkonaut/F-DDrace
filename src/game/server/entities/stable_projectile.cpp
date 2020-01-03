@@ -4,7 +4,7 @@
 #include <game/server/player.h>
 #include "character.h"
 
-CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec)
+CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec, bool OnlyShowOwner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_STABLE_PROJECTILE, Pos)
 {
 	m_Type = GameServer()->GetRealWeapon(Type);
@@ -14,6 +14,7 @@ CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner
 	m_HideOnSpec = HideOnSpec;
 	m_LastResetTick = Server()->Tick();
 	m_CalculatedVel = false;
+	m_OnlyShowOwner = OnlyShowOwner;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -111,6 +112,8 @@ void CStableProjectile::Snap(int SnappingClient)
 	if (m_HideOnSpec && pOwner && pOwner->IsPaused())
 		return;
 
+	if (m_OnlyShowOwner && SnappingClient != m_Owner)
+		return;
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(!pProj)
