@@ -282,8 +282,6 @@ public:
 	bool m_HasTeeControlMode;
 	bool m_TeeControlMode;
 
-	void HandlePausedInput(CNetObj_PlayerInput *NewInput);
-
 	//account
 	int GetAccID();
 	void MoneyTransaction(int Amount, const char* pDescription = "");
