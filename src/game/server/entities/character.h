@@ -10,7 +10,6 @@
 
 #include "pickup.h"
 #include "lightsaber.h"
-#include "stable_projectile.h"
 
 enum Extra
 {
@@ -390,8 +389,6 @@ public:
 
 	int m_Item;
 	CPickup* m_pItem;
-
-	CStableProjectile* m_pCursorIndicator;
 
 	bool m_PoliceHelper;
 
