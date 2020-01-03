@@ -71,8 +71,8 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 
-	void OnDirectInput(CNetObj_PlayerInput *NewInput);
-	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
+	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
+	void OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnDisconnect();
 
 	void ThreadKillCharacter(int Weapon = WEAPON_GAME);

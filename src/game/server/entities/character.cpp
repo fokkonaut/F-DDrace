@@ -1054,16 +1054,6 @@ void CCharacter::SetEmote(int Emote, int Tick)
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled)
 {
-	// F-DDrace
-	if (m_pPlayer->m_pControlledTee)
-	{
-		if (m_pPlayer->m_pControlledTee->GetCharacter() && !m_pPlayer->IsPaused())
-			m_pPlayer->m_pControlledTee->GetCharacter()->OnPredictedInput(pNewInput, true);
-		return;
-	}
-	else if (m_pPlayer->m_TeeControllerID != -1 && !TeeControlled)
-		return;
-
 	// check for changes
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();
@@ -1081,16 +1071,6 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput, bool TeeContro
 
 void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled)
 {
-	// F-DDrace
-	if (m_pPlayer->m_pControlledTee)
-	{
-		if (m_pPlayer->m_pControlledTee->GetCharacter() && !m_pPlayer->IsPaused())
-			m_pPlayer->m_pControlledTee->GetCharacter()->OnDirectInput(pNewInput, true);
-		return;
-	}
-	else if (m_pPlayer->m_TeeControllerID != -1 && !TeeControlled)
-		return;
-
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
 

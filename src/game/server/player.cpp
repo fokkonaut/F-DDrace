@@ -543,20 +543,37 @@ void CPlayer::OnDisconnect()
 	}
 }
 
-void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
+void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
+	// F-DDrace
+	if (m_pControlledTee)
+	{
+		if (m_pControlledTee && !IsPaused())
+			m_pControlledTee->OnPredictedInput(NewInput, true);
+	}
+	else if (m_TeeControllerID != -1 && !TeeControlled)
+		return;
+
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
 		return;
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter && !m_Paused && (!m_TeeControlMode || m_pControlledTee))
+	if(m_pCharacter && !m_Paused && !m_TeeControlMode)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
-void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
+void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
+	if (m_pControlledTee)
+	{
+		if (m_pControlledTee && !IsPaused())
+			m_pControlledTee->OnDirectInput(NewInput, true);
+	}
+	else if (m_TeeControllerID != -1 && !TeeControlled)
+		return;
+
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
@@ -577,7 +594,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 			return;
 
 		// reset input
-		if(m_pCharacter)
+		if(m_pCharacter && !m_TeeControlMode)
 			m_pCharacter->ResetInput();
 
 		m_PlayerFlags = NewInput->m_PlayerFlags;
@@ -588,7 +605,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 
 	if (m_pCharacter)
 	{
-		if (!m_Paused && (!m_TeeControlMode || m_pControlledTee))
+		if (!m_Paused && !m_TeeControlMode)
 			m_pCharacter->OnDirectInput(NewInput);
 		else
 			m_pCharacter->ResetInput();
