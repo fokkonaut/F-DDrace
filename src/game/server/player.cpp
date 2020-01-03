@@ -171,6 +171,8 @@ void CPlayer::Reset()
 
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;
+	m_TeeControlMode = false;
+	m_HasTeeControlMode = false;
 }
 
 void CPlayer::Tick()
@@ -232,7 +234,7 @@ void CPlayer::Tick()
 			if (m_pCharacter->IsAlive())
 			{
 				ProcessPause();
-				if (!m_Paused)
+				if (!m_Paused && !m_pControlledTee)
 					m_ViewPos = m_pCharacter->GetPos();
 			}
 			else if (!m_pCharacter->IsPaused())
@@ -335,7 +337,7 @@ void CPlayer::PostTick()
 		else if (GameServer()->GetPlayerChar(m_SpectatorID))
 			m_ViewPos = GameServer()->GetPlayerChar(m_SpectatorID)->GetPos();
 	}
-	else if (m_pControlledTee && m_pControlledTee->GetCharacter())
+	else if (m_Team != TEAM_SPECTATORS && !m_Paused && m_pControlledTee && m_pControlledTee->GetCharacter())
 		m_ViewPos = m_pControlledTee->GetCharacter()->GetPos();
 }
 
@@ -441,15 +443,31 @@ void CPlayer::Snap(int SnappingClient)
 		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
 	}
 
-	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_pControlledTee))
+	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
 	{
 		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
 		if (!pSpectatorInfo)
 			return;
 
-		bool TeeControl = m_pControlledTee && m_Team != TEAM_SPECTATORS && !m_Paused;
-		pSpectatorInfo->m_SpecMode = TeeControl ? SPEC_PLAYER : m_SpecMode;
-		pSpectatorInfo->m_SpectatorID = TeeControl ? m_pControlledTee->GetCID() : m_SpectatorID;
+		int SpecMode = m_SpecMode;
+		int SpectatorID = m_SpectatorID;
+
+		if (m_Team != TEAM_SPECTATORS && !m_Paused)
+		{
+			if (m_pControlledTee)
+			{
+				SpecMode = SPEC_PLAYER;
+				SpectatorID = m_pControlledTee->GetCID();
+			}
+			else if (m_TeeControlMode)
+			{
+				SpecMode = SPEC_PLAYER;
+				SpectatorID = m_ClientID;
+			}
+		}
+
+		pSpectatorInfo->m_SpecMode = SpecMode;
+		pSpectatorInfo->m_SpectatorID = SpectatorID;
 		if (m_pSpecFlag)
 		{
 			pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
@@ -929,6 +947,9 @@ int CPlayer::Pause(int State, bool Force)
 	if (!m_pCharacter)
 		return 0;
 
+	if ((m_TeeControlMode && !m_pControlledTee) || (m_TeeControllerID != -1 && State != PAUSE_NONE))
+		return 0;
+
 	char aBuf[128];
 	if (State != m_Paused)
 	{
@@ -960,7 +981,7 @@ int CPlayer::Pause(int State, bool Force)
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
 
-		GameServer()->SendTeamChange(m_ClientID, !m_Paused && !m_pControlledTee ? m_Team : TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
+		GameServer()->SendTeamChange(m_ClientID, !m_Paused && !m_TeeControlMode ? m_Team : TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
 	}
 
 	return m_Paused;
@@ -1205,13 +1226,6 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 		return;
 	}
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "You are now controlling '%s'", Server()->ClientName(pVictim->GetCID()));
-	GameServer()->SendChatTarget(m_ClientID, aBuf);
-
-	str_format(aBuf, sizeof(aBuf), "'%s' is now controlling you", Server()->ClientName(m_ClientID));
-	GameServer()->SendChatTarget(pVictim->GetCID(), aBuf);
-
 	m_pControlledTee = pVictim;
 	m_pControlledTee->m_TeeControllerID = m_ClientID;
 	GameServer()->SendTeamChange(m_ClientID, TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
@@ -1222,20 +1236,14 @@ void CPlayer::UnsetTeeControl()
 	if (!m_pControlledTee)
 		return;
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "You are no longer controlling '%s'", Server()->ClientName(m_pControlledTee->GetCID()));
-	GameServer()->SendChatTarget(m_ClientID, aBuf);
-
-	str_format(aBuf, sizeof(aBuf), "'%s' is no longer controlling you", Server()->ClientName(m_ClientID));
-	GameServer()->SendChatTarget(m_pControlledTee->GetCID(), aBuf);
-
 	m_pControlledTee->m_TeeControllerID = -1;
 	m_pControlledTee = 0;
-	GameServer()->SendTeamChange(m_ClientID, m_Team, true, Server()->Tick(), m_ClientID);
+	GameServer()->SendTeamChange(m_ClientID, m_TeeControlMode ? TEAM_SPECTATORS : m_Team, true, Server()->Tick(), m_ClientID);
 }
 
 void CPlayer::UpdateTeeControl()
 {
+	m_TeeControlMode = false;
 	if (m_pControlledTee)
 		UnsetTeeControl();
 	if (m_TeeControllerID != -1)

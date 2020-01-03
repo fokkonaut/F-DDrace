@@ -883,14 +883,21 @@ void CGameContext::OnTick()
 void CGameContext::OnClientDirectInput(int ClientID, void *pInput, bool TeeControlled)
 {
 	// F-DDrace
-	if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
+	if (m_apPlayers[ClientID])
 	{
-		OnClientDirectInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
-		return;
-	}
-	else if (m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
-	{
-		return;
+		if (m_apPlayers[ClientID]->m_pControlledTee && !m_apPlayers[ClientID]->IsPaused() && !TeeControlled)
+		{
+			OnClientDirectInput(m_apPlayers[ClientID]->m_pControlledTee->GetCID(), pInput, true);
+			return;
+		}
+		else if (m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
+		{
+			return;
+		}
+		else if (m_apPlayers[ClientID]->m_TeeControlMode)
+		{
+			return;
+		}
 	}
 
 	int NumFailures = m_NetObjHandler.NumObjFailures();
@@ -923,6 +930,10 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, bool TeeCo
 			return;
 		}
 		else if (m_apPlayers[ClientID]->m_TeeControllerID != -1 && !TeeControlled)
+		{
+			return;
+		}
+		else if (m_apPlayers[ClientID]->m_TeeControlMode)
 		{
 			return;
 		}
@@ -1551,6 +1562,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetTeam *pMsg = (CNetMsg_Cl_SetTeam *)pRawMsg;
 
+			if (pPlayer->m_HasTeeControlMode)
+			{
+				if (pMsg->m_Team != TEAM_SPECTATORS)
+					pPlayer->UnsetTeeControl();
+				pPlayer->m_TeeControlMode = pMsg->m_Team == TEAM_SPECTATORS;
+				SendTeamChange(ClientID, pMsg->m_Team == TEAM_SPECTATORS ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
+				SendChatTarget(ClientID, pPlayer->m_TeeControlMode ? "You are now using the tee controller" : "You are no longer using the tee controller");
+				return;
+			}
+
 			if (pPlayer->GetTeam() == pMsg->m_Team
 				|| (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
 				|| pPlayer->m_TeamChangeTick > Server()->Tick())
@@ -1597,7 +1618,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
-			pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID);
+
+			if (pPlayer->m_TeeControlMode && pPlayer->m_TeamChangeTick != TEAM_SPECTATORS && !pPlayer->IsPaused())
+			{
+				if (pMsg->m_SpecMode != SPEC_PLAYER)
+					pPlayer->UnsetTeeControl();
+				else
+					pPlayer->SetTeeControl(m_apPlayers[pMsg->m_SpectatorID]);
+			}
+			else
+				pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID);
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 		{

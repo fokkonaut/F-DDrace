@@ -1520,11 +1520,15 @@ void CGameContext::ConSpinBotSpeed(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	if (!pSelf->m_apPlayers[pResult->GetInteger(0)])
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer)
 		return;
 
-	if (pResult->NumArguments() < 2)
-		pSelf->m_apPlayers[pResult->GetInteger(0)]->UnsetTeeControl();
+	pPlayer->m_HasTeeControlMode = !pPlayer->m_HasTeeControlMode;
+
+	if (pPlayer->m_HasTeeControlMode)
+		pSelf->SendChatTarget(Victim, "You are now permitted to use the tee controller");
 	else
-		pSelf->m_apPlayers[pResult->GetInteger(0)]->SetTeeControl(pSelf->m_apPlayers[pResult->GetInteger(1)]);
+		pSelf->SendChatTarget(Victim, "You are no longer permitted to use the tee controller");
 }

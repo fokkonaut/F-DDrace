@@ -279,6 +279,10 @@ public:
 	void UpdateTeeControl();
 	CPlayer *m_pControlledTee;
 	int m_TeeControllerID;
+	bool m_HasTeeControlMode;
+	bool m_TeeControlMode;
+
+	void HandlePausedInput(CNetObj_PlayerInput *NewInput);
 
 	//account
 	int GetAccID();
