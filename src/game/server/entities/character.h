@@ -10,6 +10,7 @@
 
 #include "pickup.h"
 #include "lightsaber.h"
+#include "stable_projectile.h"
 
 enum Extra
 {
@@ -424,6 +425,11 @@ public:
 	bool m_GotTasered;
 
 	int m_KillStreak;
+
+	// cursor
+	CStableProjectile* m_pCursorIndicator;
+	void SetCursorIndicator();
+	void RemoveCursorIndicator();
 
 	// special race
 	bool m_HasFinishedSpecialRace;

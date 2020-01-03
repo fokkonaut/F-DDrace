@@ -3009,8 +3009,8 @@ void CCharacter::FDDraceInit()
 	m_MoneyTile = false;
 	m_WasPausedLastTick = false;
 	m_GotTasered = false;
-
 	m_KillStreak = 0;
+	m_pCursorIndicator = 0;
 }
 
 void CCharacter::FDDraceTick()
@@ -3129,6 +3129,16 @@ void CCharacter::FDDraceTick()
 	{
 		CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID());
 		m_Core.m_AimClosestPos = pClosest ? pClosest->m_Pos : vec2(0, 0);
+	}
+
+	if (m_pCursorIndicator && m_pPlayer->m_pControlledTee)
+	{
+		CCharacter *pControlledTee = m_pPlayer->m_pControlledTee->GetCharacter();
+		if (pControlledTee)
+		{
+			vec2 CursorPos = vec2(pControlledTee->GetPos().x + pControlledTee->GetInput().m_TargetX, pControlledTee->GetPos().y + pControlledTee->GetInput().m_TargetY);
+			m_pCursorIndicator->SetPos(CursorPos);
+		}
 	}
 }
 
@@ -3409,6 +3419,23 @@ int CCharacter::GetAliveState()
 			return i;
 	}
 	return 0;
+}
+
+void CCharacter::SetCursorIndicator()
+{
+	if (m_pCursorIndicator || !m_pPlayer->m_pControlledTee)
+		return;
+
+	m_pCursorIndicator = new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_pPlayer->GetCID(), vec2(), false, true);
+}
+
+void CCharacter::RemoveCursorIndicator()
+{
+	if (!m_pCursorIndicator)
+		return;
+
+	m_pCursorIndicator->Reset();
+	m_pCursorIndicator = 0;
 }
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)

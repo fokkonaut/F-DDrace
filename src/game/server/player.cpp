@@ -993,9 +993,17 @@ int CPlayer::Pause(int State, bool Force)
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
 
-		if (m_pCharacter)
-			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 		GameServer()->SendTeamChange(m_ClientID, !m_Paused && !m_TeeControlMode ? m_Team : TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
+
+		if (m_pCharacter)
+		{
+			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
+
+			if (m_Paused == PAUSE_NONE)
+				m_pCharacter->SetCursorIndicator();
+			else
+				m_pCharacter->RemoveCursorIndicator();
+		}
 	}
 
 	return m_Paused;
@@ -1244,6 +1252,9 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	m_pControlledTee->Pause(PAUSE_NONE, true);
 	m_pControlledTee->m_TeeControllerID = m_ClientID;
 	GameServer()->SendTeamChange(m_ClientID, TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
+
+	if (m_pCharacter)
+		m_pCharacter->SetCursorIndicator();
 }
 
 void CPlayer::UnsetTeeControl()
@@ -1253,12 +1264,15 @@ void CPlayer::UnsetTeeControl()
 
 	m_pControlledTee->m_TeeControllerID = -1;
 	m_pControlledTee = 0;
-	GameServer()->SendTeamChange(m_ClientID, m_TeeControlMode ? TEAM_SPECTATORS : m_Team, true, Server()->Tick(), m_ClientID);
+
+	if (m_pCharacter)
+		m_pCharacter->RemoveCursorIndicator();
 }
 
 void CPlayer::UpdateTeeControl()
 {
 	m_TeeControlMode = false;
+	GameServer()->SendTeamChange(m_ClientID, m_Team, true, Server()->Tick(), m_ClientID);
 
 	if (m_pControlledTee)
 	{
@@ -1266,8 +1280,6 @@ void CPlayer::UpdateTeeControl()
 		if (m_pCharacter)
 			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 	}
-	else // if you are not controlling someone but you are in the selection
-		GameServer()->SendTeamChange(m_ClientID, m_TeeControlMode ? TEAM_SPECTATORS : m_Team, true, Server()->Tick(), m_ClientID);
 
 	if (m_TeeControllerID != -1)
 	{
