@@ -594,7 +594,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 			return;
 
 		// reset input
-		if(m_pCharacter && !m_TeeControlMode)
+		if(m_pCharacter && m_TeeControllerID == -1)
 			m_pCharacter->ResetInput();
 
 		m_PlayerFlags = NewInput->m_PlayerFlags;
@@ -603,11 +603,11 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if (m_pCharacter && !m_TeeControlMode)
+	if (m_pCharacter)
 	{
-		if (!m_Paused)
+		if (!m_Paused && !m_TeeControlMode)
 			m_pCharacter->OnDirectInput(NewInput);
-		else
+		else if (m_TeeControllerID == -1)
 			m_pCharacter->ResetInput();
 	}
 
