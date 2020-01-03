@@ -3030,8 +3030,6 @@ void CCharacter::FDDraceInit()
 	m_HasFinishedSpecialRace = false;
 	m_SpawnTick = Now;
 	m_MoneyTile = false;
-	m_WasPausedLastTick = false;
-	m_PreventShotAfterPause = false;
 	m_GotTasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
@@ -3142,9 +3140,6 @@ void CCharacter::FDDraceTick()
 			}
 		}
 	}
-
-	m_WasPausedLastTick = m_pPlayer->IsPaused();
-	m_PreventShotAfterPause = m_pPlayer->IsPaused() || m_pPlayer->m_TeeControlMode;
 
 	// stop spinning when we are paused
 	if (m_pPlayer->IsPaused())

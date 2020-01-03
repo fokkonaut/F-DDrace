@@ -421,8 +421,6 @@ public:
 
 	int m_SpawnTick;
 	bool m_aSpawnWeaponActive[3];
-	bool m_WasPausedLastTick;
-	bool m_PreventShotAfterPause;
 	bool m_GotTasered;
 
 	int m_KillStreak;
