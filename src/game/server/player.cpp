@@ -1266,6 +1266,9 @@ void CPlayer::UpdateTeeControl()
 		if (m_pCharacter)
 			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 	}
+	else // if you are not controlling someone but you are in the selection
+		GameServer()->SendTeamChange(m_ClientID, m_TeeControlMode ? TEAM_SPECTATORS : m_Team, true, Server()->Tick(), m_ClientID);
+
 	if (m_TeeControllerID != -1)
 	{
 		GameServer()->m_apPlayers[m_TeeControllerID]->UnsetTeeControl();
