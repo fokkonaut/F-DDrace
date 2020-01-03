@@ -1619,7 +1619,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 
-			if (pPlayer->m_TeeControlMode && pPlayer->m_TeamChangeTick != TEAM_SPECTATORS && !pPlayer->IsPaused())
+			if (pPlayer->m_TeeControlMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused())
 			{
 				if (pMsg->m_SpecMode != SPEC_PLAYER)
 					pPlayer->UnsetTeeControl();
