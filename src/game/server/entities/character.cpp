@@ -1078,7 +1078,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !m_WasPausedLastTick)
+	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !m_WasPausedLastTick && !m_pPlayer->m_TeeControlMode)
 	{
 		HandleWeaponSwitch();
 		FireWeapon();
@@ -3121,7 +3121,7 @@ void CCharacter::FDDraceTick()
 		}
 	}
 
-	m_WasPausedLastTick = m_pPlayer->IsPaused();
+	m_WasPausedLastTick = m_pPlayer->IsPaused() || m_pPlayer->m_TeeControlMode;
 
 	// stop spinning when we are paused
 	if (m_pPlayer->IsPaused())

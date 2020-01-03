@@ -1582,14 +1582,13 @@ int CServer::Run()
 				// apply new input
 				for(int c = 0; c < MAX_CLIENTS; c++)
 				{
-					if(m_aClients[c].m_State == CClient::STATE_EMPTY)
+					if(m_aClients[c].m_State != CClient::STATE_INGAME)
 						continue;
 					for(int i = 0; i < 200; i++)
 					{
 						if(m_aClients[c].m_aInputs[i].m_GameTick == Tick())
 						{
-							if(m_aClients[c].m_State == CClient::STATE_INGAME)
-								GameServer()->OnClientPredictedInput(c, m_aClients[c].m_aInputs[i].m_aData);
+							GameServer()->OnClientPredictedInput(c, m_aClients[c].m_aInputs[i].m_aData);
 							break;
 						}
 					}
