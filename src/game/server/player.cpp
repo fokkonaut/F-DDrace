@@ -947,8 +947,11 @@ int CPlayer::Pause(int State, bool Force)
 	if (!m_pCharacter)
 		return 0;
 
-	if ((m_TeeControlMode && !m_pControlledTee) || (m_TeeControllerID != -1 && State != PAUSE_NONE))
+	if ((m_TeeControlMode && !m_pControlledTee) || m_TeeControllerID != -1)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "You can't pause while you are controlled by someone else");
 		return 0;
+	}
 
 	char aBuf[128];
 	if (State != m_Paused)
@@ -1227,6 +1230,7 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	}
 
 	m_pControlledTee = pVictim;
+	m_pControlledTee->Pause(PAUSE_NONE, true);
 	m_pControlledTee->m_TeeControllerID = m_ClientID;
 	GameServer()->SendTeamChange(m_ClientID, TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
 }
