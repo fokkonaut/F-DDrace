@@ -1011,8 +1011,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		ClientInfoMsg.m_ClientID = i;
 		ClientInfoMsg.m_Local = 0;
 		ClientInfoMsg.m_Team = m_apPlayers[i]->GetTeam();
-		ClientInfoMsg.m_pName = Server()->ClientName(i);
-		ClientInfoMsg.m_pClan = Server()->ClientClan(i);
+		ClientInfoMsg.m_pName = m_apPlayers[i]->m_aFakeName;
+		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_aFakeClan;
 		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
 		ClientInfoMsg.m_Silent = false;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
@@ -1045,13 +1045,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
 	m_pController->UpdateGameInfo(ClientID);
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!m_apPlayers[i])
-			continue;
-		m_apPlayers[i]->UpdateFakeInformation(ClientID);
-	}
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)

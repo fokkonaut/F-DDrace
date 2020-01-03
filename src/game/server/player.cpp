@@ -743,10 +743,11 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", m_ClientID, Server()->ClientName(m_ClientID), m_Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-	if (Team == TEAM_SPECTATORS)
+	
+	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		// update spectator modes
-		for (int i = 0; i < MAX_CLIENTS; ++i)
+		if (Team == TEAM_SPECTATORS)
 		{
 			if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SpectatorID == m_ClientID)
 			{
@@ -754,6 +755,9 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 				GameServer()->m_apPlayers[i]->m_SpecMode = SPEC_FREEVIEW;
 			}
 		}
+
+		if (GameServer()->m_apPlayers[i])
+			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = -2;
 	}
 
 	// update tee controlling
