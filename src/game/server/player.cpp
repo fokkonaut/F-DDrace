@@ -947,9 +947,14 @@ int CPlayer::Pause(int State, bool Force)
 	if (!m_pCharacter)
 		return 0;
 
-	if ((m_TeeControlMode && !m_pControlledTee) || m_TeeControllerID != -1)
+	if (m_TeeControllerID != -1)
 	{
 		GameServer()->SendChatTarget(m_ClientID, "You can't pause while you are controlled by someone else");
+		return 0;
+	}
+	if (m_TeeControlMode && !m_pControlledTee)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "You can't pause while you are selecting a tee to control");
 		return 0;
 	}
 
