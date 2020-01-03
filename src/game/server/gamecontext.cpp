@@ -1554,13 +1554,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pPlayer->m_HasTeeControl && !pPlayer->IsPaused())
 			{
-				if (pMsg->m_Team != TEAM_SPECTATORS)
+				bool SetTeeControl = pMsg->m_Team == TEAM_SPECTATORS;
+				if (!SetTeeControl)
 					pPlayer->UnsetTeeControl();
-				pPlayer->m_TeeControlMode = pMsg->m_Team == TEAM_SPECTATORS;
-				SendTeamChange(ClientID, pMsg->m_Team == TEAM_SPECTATORS ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
+				pPlayer->m_TeeControlMode = SetTeeControl;
+				SendTeamChange(ClientID, SetTeeControl ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
 				SendChatTarget(ClientID, pPlayer->m_TeeControlMode ? "You are now using the tee controller" : "You are no longer using the tee controller");
 				if (pPlayer->GetCharacter())
 					SendTuningParams(ClientID, pPlayer->GetCharacter()->m_TuneZone);
+				if (pPlayer->m_TeeControlForcedID != -1 && SetTeeControl)
+					pPlayer->SetTeeControl(m_apPlayers[pPlayer->m_TeeControlForcedID]);
 				return;
 			}
 

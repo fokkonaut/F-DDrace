@@ -281,6 +281,7 @@ public:
 	int m_TeeControllerID;
 	bool m_HasTeeControl;
 	bool m_TeeControlMode;
+	int m_TeeControlForcedID;
 
 	//account
 	int GetAccID();
