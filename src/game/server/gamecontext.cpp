@@ -1552,7 +1552,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetTeam *pMsg = (CNetMsg_Cl_SetTeam *)pRawMsg;
 
-			if (pPlayer->m_HasTeeControlMode)
+			if (pPlayer->m_HasTeeControl)
 			{
 				if (pMsg->m_Team != TEAM_SPECTATORS)
 					pPlayer->UnsetTeeControl();
@@ -3780,6 +3780,8 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
 		else if (Extra == INFINITE_JUMPS)
 			str_format(aMsg, sizeof(aMsg), "You %shave %s", Set ? "" : "don't ", aItem);
+		else if (Extra == TEE_CONTROL)
+			str_format(aMsg, sizeof(aMsg), "You are %s permitted to use the tee controller", Set ? "now" : "no longer");
 		else
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have" : "lost", aItem);
 	}
@@ -3867,6 +3869,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Aim Closest";
 	case SPIN_BOT:
 		return "Spin Bot";
+	case TEE_CONTROL:
+		return "Tee Control";
 	}
 	return "Unknown";
 }

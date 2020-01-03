@@ -1109,6 +1109,13 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Mode: Vanilla");
 	if (pPlayer->m_SpookyGhost)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Spooky Ghost: True");
+	if (pPlayer->m_pControlledTee)
+	{
+		str_format(aBuf, sizeof(aBuf), "Tee Control: %s", pSelf->Server()->ClientName(pPlayer->m_pControlledTee->GetCID()));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else if (pPlayer->m_HasTeeControl)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Tee Control: True");
 
 	if (pChr)
 	{
@@ -1521,17 +1528,6 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
-	if (!pPlayer)
-		return;
-
-	pPlayer->m_HasTeeControlMode = !pPlayer->m_HasTeeControlMode;
-
-	if (!pPlayer->m_HasTeeControlMode)
-		pPlayer->UpdateTeeControl();
-
-	if (pPlayer->m_HasTeeControlMode)
-		pSelf->SendChatTarget(Victim, "You are now permitted to use the tee controller");
-	else
-		pSelf->SendChatTarget(Victim, "You are no longer permitted to use the tee controller");
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, pResult->m_ClientID);
 }

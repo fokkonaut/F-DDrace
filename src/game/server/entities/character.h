@@ -41,6 +41,7 @@ enum Extra
 	DOOR_HAMMER,
 	AIM_CLOSEST,
 	SPIN_BOT,
+	TEE_CONTROL,
 	NUM_EXTRAS
 };
 
@@ -149,6 +150,7 @@ public:
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void AimClosest(bool Set = true, int FromID = -1, bool Silent = false);
 	void SpinBot(bool Set = true, int FromID = -1, bool Silent = false);
+	void TeeControl(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character

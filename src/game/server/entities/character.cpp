@@ -3666,3 +3666,11 @@ void CCharacter::SpinBot(bool Set, int FromID, bool Silent)
 	m_Core.m_SpinBot = Set;
 	GameServer()->SendExtraMessage(SPIN_BOT, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
+
+void CCharacter::TeeControl(bool Set, int FromID, bool Silent)
+{
+	m_pPlayer->m_HasTeeControl = Set;
+	if (!Set)
+		m_pPlayer->UpdateTeeControl();
+	GameServer()->SendExtraMessage(TEE_CONTROL, m_pPlayer->GetCID(), Set, FromID, Silent);
+}

@@ -170,7 +170,7 @@ void CPlayer::Reset()
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;
 	m_TeeControlMode = false;
-	m_HasTeeControlMode = false;
+	m_HasTeeControl = false;
 }
 
 void CPlayer::Tick()

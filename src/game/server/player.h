@@ -279,7 +279,7 @@ public:
 	void UpdateTeeControl();
 	CPlayer *m_pControlledTee;
 	int m_TeeControllerID;
-	bool m_HasTeeControlMode;
+	bool m_HasTeeControl;
 	bool m_TeeControlMode;
 
 	//account
