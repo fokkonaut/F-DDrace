@@ -2801,8 +2801,7 @@ bool CCharacter::Freeze(float Seconds)
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
 
-		if (m_pPlayer->m_Predict)
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 		return true;
 	}
 	return false;
@@ -2826,8 +2825,7 @@ bool CCharacter::UnFreeze()
 		m_FrozenLastTick = true;
 		m_FirstFreezeTick = 0;
 
-		if (m_pPlayer->m_Predict)
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 		if (!m_GotTasered)
 		{

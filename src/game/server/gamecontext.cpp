@@ -604,40 +604,37 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->GetPlayer()->m_Predict)
+		if (pChr->m_FreezeTime || pChr->GetPlayer()->IsPaused() || pChr->GetPlayer()->m_TeeControlMode)
 		{
-			if (pChr->m_FreezeTime)
-			{
-				Tuning.m_GroundControlSpeed = 0.f;
-				Tuning.m_GroundJumpImpulse = 0.f;
-				Tuning.m_GroundControlAccel = 0.f;
-				Tuning.m_AirControlSpeed = 0.f;
-				Tuning.m_AirJumpImpulse = 0.f;
-				Tuning.m_AirControlAccel = 0.f;
-				Tuning.m_HookFireSpeed = 0.f;
-			}
+			Tuning.m_GroundControlSpeed = 0.f;
+			Tuning.m_GroundJumpImpulse = 0.f;
+			Tuning.m_GroundControlAccel = 0.f;
+			Tuning.m_AirControlSpeed = 0.f;
+			Tuning.m_AirJumpImpulse = 0.f;
+			Tuning.m_AirControlAccel = 0.f;
+			Tuning.m_HookFireSpeed = 0.f;
+		}
 
-			if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP) || (pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
-			{
-				Tuning.m_HookDragAccel = 0.f;
-				Tuning.m_HookDragSpeed = 0.f;
-			}
-			if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP))
-			{
-				Tuning.m_Gravity = 0.f;
-			}
-			if (pChr->m_MoveRestrictions&CANTMOVE_UP)
-			{
-				Tuning.m_GroundJumpImpulse = 0.f;
-				Tuning.m_AirJumpImpulse = 0.f;
-			}
-			if ((pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
-			{
-				Tuning.m_GroundControlSpeed = 0.f;
-				Tuning.m_GroundControlAccel = 0.f;
-				Tuning.m_AirControlSpeed = 0.f;
-				Tuning.m_AirControlAccel = 0.f;
-			}
+		if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP) || (pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
+		{
+			Tuning.m_HookDragAccel = 0.f;
+			Tuning.m_HookDragSpeed = 0.f;
+		}
+		if ((pChr->m_MoveRestrictions&CANTMOVE_DOWN) || (pChr->m_MoveRestrictions&CANTMOVE_UP))
+		{
+			Tuning.m_Gravity = 0.f;
+		}
+		if (pChr->m_MoveRestrictions&CANTMOVE_UP)
+		{
+			Tuning.m_GroundJumpImpulse = 0.f;
+			Tuning.m_AirJumpImpulse = 0.f;
+		}
+		if ((pChr->m_MoveRestrictions&CANTMOVE_LEFT) || (pChr->m_MoveRestrictions&CANTMOVE_RIGHT))
+		{
+			Tuning.m_GroundControlSpeed = 0.f;
+			Tuning.m_GroundControlAccel = 0.f;
+			Tuning.m_AirControlSpeed = 0.f;
+			Tuning.m_AirControlAccel = 0.f;
 		}
 	}
 
@@ -1562,6 +1559,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeControlMode = pMsg->m_Team == TEAM_SPECTATORS;
 				SendTeamChange(ClientID, pMsg->m_Team == TEAM_SPECTATORS ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
 				SendChatTarget(ClientID, pPlayer->m_TeeControlMode ? "You are now using the tee controller" : "You are no longer using the tee controller");
+				if (pPlayer->GetCharacter())
+					SendTuningParams(ClientID, pPlayer->GetCharacter()->m_TuneZone);
 				return;
 			}
 

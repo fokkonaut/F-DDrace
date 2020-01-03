@@ -160,8 +160,6 @@ void CPlayer::Reset()
 
 	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
-	m_Predict = g_Config.m_SvPrediction;
-	m_UnsavedBlockPoints = 0;
 
 	// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
 	m_TeeInfos.m_aSkinName[0] = '\0';
@@ -995,6 +993,8 @@ int CPlayer::Pause(int State, bool Force)
 		m_Paused = State;
 		m_LastPause = Server()->Tick();
 
+		if (m_pCharacter)
+			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 		GameServer()->SendTeamChange(m_ClientID, !m_Paused && !m_TeeControlMode ? m_Team : TEAM_SPECTATORS, true, Server()->Tick(), m_ClientID);
 	}
 

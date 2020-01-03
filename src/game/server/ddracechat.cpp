@@ -1898,34 +1898,6 @@ void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
 }
 
-void CGameContext::ConPredict(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-	if (pResult->NumArguments())
-	{
-		if (pPlayer->m_Predict == (bool)pResult->GetInteger(0))
-			return;
-
-		pPlayer->m_Predict = pResult->GetInteger(0);
-	}
-	else
-	{
-		pPlayer->m_Predict = !pPlayer->m_Predict;
-	}
-
-	if (pPlayer->m_Predict)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Prediction enabled");
-	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "Prediction disabled");
-
-	if (pPlayer->GetCharacter())
-		pSelf->SendTuningParams(pResult->m_ClientID, pPlayer->GetCharacter()->m_TuneZone);
-}
-
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
