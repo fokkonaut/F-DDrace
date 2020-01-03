@@ -1259,8 +1259,17 @@ void CPlayer::UnsetTeeControl()
 void CPlayer::UpdateTeeControl()
 {
 	m_TeeControlMode = false;
+
 	if (m_pControlledTee)
+	{
 		UnsetTeeControl();
+		if (m_pCharacter)
+			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
+	}
 	if (m_TeeControllerID != -1)
+	{
 		GameServer()->m_apPlayers[m_TeeControllerID]->UnsetTeeControl();
+		if (GameServer()->GetPlayerChar(m_TeeControllerID))
+			GameServer()->SendTuningParams(m_ClientID, GameServer()->GetPlayerChar(m_TeeControllerID)->m_TuneZone);
+	}
 }

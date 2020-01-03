@@ -1527,6 +1527,9 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 
 	pPlayer->m_HasTeeControlMode = !pPlayer->m_HasTeeControlMode;
 
+	if (!pPlayer->m_HasTeeControlMode)
+		pPlayer->UpdateTeeControl();
+
 	if (pPlayer->m_HasTeeControlMode)
 		pSelf->SendChatTarget(Victim, "You are now permitted to use the tee controller");
 	else
