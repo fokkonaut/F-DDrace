@@ -1552,7 +1552,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetTeam *pMsg = (CNetMsg_Cl_SetTeam *)pRawMsg;
 
-			if (pPlayer->m_HasTeeControl)
+			if (pPlayer->m_HasTeeControl && !pPlayer->IsPaused())
 			{
 				if (pMsg->m_Team != TEAM_SPECTATORS)
 					pPlayer->UnsetTeeControl();
