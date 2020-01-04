@@ -735,10 +735,10 @@ void IGameController::CChatCommands::OnInit()
 	AddCommand("login", "", "<username> <pw> Log into an account", 0);
 	AddCommand("register", "", "<username> <pw> <pw> Register an account", 0);
 	AddCommand("stats", "", "<playername> Shows stats of player", 0);
-	AddCommand("For a full list of commands:", "", "/cmdlist", CmdList);
+	AddCommand("For a full list of commands:", "", "/cmdlist", Com_CmdList);
 }
 
-void IGameController::CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs)
+void IGameController::Com_CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs)
 {
 	pGameServer->ExecuteChatCommand("/cmdlist", ClientID);
 }

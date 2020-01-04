@@ -62,7 +62,7 @@ protected:
 
 	typedef void (*COMMAND_CALLBACK)(CGameContext *pGameServer, int ClientID, const char *pArgs);
 
-	static void CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs);
+	static void Com_CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs);
 
 	struct CChatCommand 
 	{
