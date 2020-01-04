@@ -88,8 +88,8 @@ public:
 	void HandleNinja();
 	void HandleJetpack();
 
-	void OnPredictedInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled = false);
-	void OnDirectInput(CNetObj_PlayerInput *pNewInput, bool TeeControlled = false);
+	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
+	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void ResetInput();
 	void FireWeapon();
 
