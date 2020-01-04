@@ -548,7 +548,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 	// F-DDrace
 	if (m_pControlledTee)
 	{
-		if (m_pControlledTee && !IsPaused())
+		if (m_pControlledTee && !m_Paused)
 			m_pControlledTee->OnPredictedInput(NewInput, true);
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
@@ -568,7 +568,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	if (m_pControlledTee)
 	{
-		if (m_pControlledTee && !IsPaused())
+		if (m_pControlledTee && !m_Paused)
 			m_pControlledTee->OnDirectInput(NewInput, true);
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
