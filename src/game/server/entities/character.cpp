@@ -1836,13 +1836,7 @@ void CCharacter::HandleTiles(int Index)
 	//int PureMapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-
-	// F-DDrace
-	m_MoveRestrictionsOld = m_MoveRestrictions;
 	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex, m_Core.m_MoveRestrictionExtra);
-	if (m_MoveRestrictionsOld != m_MoveRestrictions)
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-
 	//Sensitivity
 	int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f));
 	int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f));

@@ -288,8 +288,6 @@ public:
 	int m_TileFIndex;
 
 	int m_MoveRestrictions;
-	// F-DDrace
-	int m_MoveRestrictionsOld;
 
 	vec2 m_Intersection;
 	int64 m_LastStartWarning;
