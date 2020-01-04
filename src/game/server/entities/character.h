@@ -425,6 +425,8 @@ public:
 
 	int m_KillStreak;
 
+	void ResetNumInputs() { m_NumInputs = 0; };
+
 	// cursor
 	CStableProjectile* m_pTeeControlCursor;
 	void SetTeeControlCursor();

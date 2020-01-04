@@ -608,7 +608,10 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		if (!m_Paused && !m_TeeControlMode)
 			m_pCharacter->OnDirectInput(NewInput);
 		else if (m_TeeControllerID == -1)
+		{
 			m_pCharacter->ResetInput();
+			m_pCharacter->ResetNumInputs();
+		}
 	}
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
@@ -1282,7 +1285,7 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 
 	if (m_pControlledTee->m_pCharacter)
 	{
-		m_pControlledTee->m_pCharacter->ResetInput();
+		m_pControlledTee->m_pCharacter->ResetNumInputs();
 		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
 	}
 
@@ -1298,7 +1301,7 @@ void CPlayer::UnsetTeeControl()
 	m_pControlledTee->m_TeeControllerID = -1;
 	if (m_pControlledTee->m_pCharacter)
 	{
-		m_pControlledTee->m_pCharacter->ResetInput();
+		m_pControlledTee->m_pCharacter->ResetNumInputs();
 		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
 	}
 	m_pControlledTee = 0;

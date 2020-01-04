@@ -1097,7 +1097,6 @@ void CCharacter::ResetInput()
 	m_Input.m_Fire &= INPUT_STATE_MASK;
 	m_Input.m_Jump = 0;
 	m_LatestPrevInput = m_LatestInput = m_SavedInput = m_Input;
-	m_NumInputs = 0;
 }
 
 void CCharacter::Tick()
