@@ -1280,13 +1280,24 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
-	if (!pSelf->m_apPlayers[Victim])
+	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer)
 		return;
 
 	if (pResult->NumArguments() > 1)
-		pSelf->m_apPlayers[Victim]->SetSkin(pSelf->m_pSkins->GetSkinID(pResult->GetString(1)), true);
+	{
+		int Skin = pSelf->m_pSkins->GetSkinID(pResult->GetString(1));
+		CPlayer* pFrom = pSelf->m_apPlayers[pResult->GetInteger(1)];
+		char aInteger[4];
+		str_format(aInteger, sizeof(aInteger), "%d", pResult->GetInteger(1));
+
+		if (pFrom && Skin == -1 && !str_comp_nocase(aInteger, pResult->GetString(1)))
+			pSelf->SendSkinChange(pFrom->m_CurrentTeeInfos, Victim, -1);
+		else
+			pPlayer->SetSkin(Skin, true);
+	}
 	else
-		pSelf->m_apPlayers[Victim]->ResetSkin(true);
+		pPlayer->ResetSkin(true);
 }
 
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
