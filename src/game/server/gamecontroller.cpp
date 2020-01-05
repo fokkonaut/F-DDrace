@@ -47,6 +47,7 @@ IGameController::IGameController(CGameContext *pGameServer)
 
 	m_CurrentRecord = 0;
 
+	// commands
 	CommandsManager()->OnInit();
 }
 
@@ -742,3 +743,13 @@ void IGameController::Com_CmdList(CGameContext* pGameServer, int ClientID, const
 {
 	pGameServer->ExecuteChatCommand("/cmdlist", ClientID);
 }
+
+void IGameController::CChatCommands::OnInit()
+{
+	//AddCommand("example", "si", "I am a description", Com_Example);
+}
+
+/*void IGameController::Com_Example(class CPlayer *pPlayer, const char *pArgs)
+{
+	// Do something with the player here
+}*/
