@@ -1275,7 +1275,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						str_format(aBuf, sizeof(aBuf),
 							"'%d:%s' voted %s '%s' reason='%s' cmd='%s' force=%d",
 							ClientID, Server()->ClientName(ClientID), pMsg->m_Type,
-							aDesc, pReason, aCmd, pMsg->m_Force
+							aDesc, aReason, aCmd, pMsg->m_Force
 						);
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 						if(pMsg->m_Force)
@@ -1319,7 +1319,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aBuf, sizeof(aBuf),
 					"'%d:%s' voted %s '%d:%s' reason='%s' cmd='%s' force=%d",
 					ClientID, Server()->ClientName(ClientID), pMsg->m_Type,
-					KickID, Server()->ClientName(KickID), pReason, aCmd, pMsg->m_Force
+					KickID, Server()->ClientName(KickID), aReason, aCmd, pMsg->m_Force
 				);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				if(pMsg->m_Force)
@@ -1424,7 +1424,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_format(aBuf, sizeof(aBuf),
 					"'%d:%s' voted %s '%d:%s' reason='%s' cmd='%s' force=%d",
 					ClientID, Server()->ClientName(ClientID), pMsg->m_Type,
-					SpectateID, Server()->ClientName(SpectateID), pReason, aCmd, pMsg->m_Force
+					SpectateID, Server()->ClientName(SpectateID), aReason, aCmd, pMsg->m_Force
 				);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				if(pMsg->m_Force)
