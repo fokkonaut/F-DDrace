@@ -560,7 +560,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter && !m_Paused)
+	if(m_pCharacter && !m_Paused && (!m_TeeControlMode || TeeControlled))
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
@@ -606,7 +606,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	if (m_pCharacter)
 	{
-		if (!m_Paused)
+		if (!m_Paused && (!m_TeeControlMode || TeeControlled))
 			m_pCharacter->OnDirectInput(NewInput);
 		else
 		{
