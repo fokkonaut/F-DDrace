@@ -881,7 +881,7 @@ void CCharacter::FireWeapon()
 			m_aWeapons[WEAPON_LASER].m_Ammo--;
 
 		int Weapon = GetActiveWeapon() == WEAPON_TASER ? WEAPON_LASER : GetActiveWeapon();
-		int W = Weapon == WEAPON_SHOTGUN ? 0 : Weapon == WEAPON_GRENADE ? 1 : Weapon == WEAPON_LASER ? 2 : -1;
+		int W = GetSpawnWeaponIndex(Weapon);
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[Weapon].m_Ammo == 0)
 			GiveWeapon(Weapon, true);
 	}
@@ -974,7 +974,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	int W = Weapon == WEAPON_SHOTGUN ? 0 : Weapon == WEAPON_GRENADE ? 1 : Weapon == WEAPON_LASER ? 2 : -1;
+	int W = GetSpawnWeaponIndex(Weapon);
 	if (W != -1)
 		m_aSpawnWeaponActive[W] = false;
 
@@ -3223,12 +3223,11 @@ void CCharacter::DropFlag()
 void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 {
 	// Do not drop spawnweapons
-	int W = WeaponID == WEAPON_SHOTGUN ? 0 : WeaponID == WEAPON_GRENADE ? 1 : WeaponID == WEAPON_LASER ? 2 : -1;
+	int W = GetSpawnWeaponIndex(WeaponID);
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || (WeaponID == WEAPON_HAMMER && !m_DoorHammer) || WeaponID == WEAPON_NINJA
-		|| (WeaponID == WEAPON_GUN && m_pPlayer->m_Gamemode != GAMEMODE_VANILLA && !m_Jetpack && !m_aSpreadWeapon[WEAPON_GUN] && !m_HasTeleGun) || WeaponID == WEAPON_TASER)
+	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
@@ -3374,6 +3373,17 @@ void CCharacter::SetWeaponGot(int Type, bool Value)
 		return;
 	}
 	m_aWeapons[Type].m_Got = Value;
+}
+
+int CCharacter::GetSpawnWeaponIndex(int Weapon)
+{
+	switch (Weapon)
+	{
+	case WEAPON_SHOTGUN: return 0;
+	case WEAPON_GRENADE: return 1;
+	case WEAPON_LASER: return 2;
+	}
+	return -1;
 }
 
 void CCharacter::UpdateWeaponIndicator()

@@ -295,7 +295,7 @@ void CPickup::Snap(int SnappingClient)
 
 		pP->m_X = (int)m_Pos.x;
 		pP->m_Y = (int)m_Pos.y;
-		pP->m_Type = GameServer()->GetRealPickupType(m_Type, m_Subtype);
+		pP->m_Type = GameServer()->GetPickupType(m_Type, m_Subtype);
 	}
 
 	if (m_Subtype == WEAPON_PROJECTILE_RIFLE)

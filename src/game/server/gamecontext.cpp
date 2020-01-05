@@ -3682,7 +3682,7 @@ int CGameContext::GetRealWeapon(int Weapon)
 	return Weapon;
 }
 
-int CGameContext::GetRealPickupType(int Type, int Subtype)
+int CGameContext::GetPickupType(int Type, int Subtype)
 {
 	if (Type == POWERUP_NINJA)
 		return PICKUP_NINJA;

@@ -418,12 +418,15 @@ public:
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
 	int m_SpawnTick;
-	bool m_aSpawnWeaponActive[3];
 	bool m_GotTasered;
 
 	int m_KillStreak;
 
 	void ResetNumInputs() { m_NumInputs = 0; };
+
+	// spawnweapons
+	bool m_aSpawnWeaponActive[3];
+	int GetSpawnWeaponIndex(int Weapon);
 
 	// cursor
 	CStableProjectile* m_pTeeControlCursor;
