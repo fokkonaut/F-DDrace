@@ -3671,6 +3671,10 @@ int CGameContext::GetRealPickupType(int Type, int Subtype)
 	Subtype = GetRealWeapon(Subtype);
 	switch (Subtype)
 	{
+	case WEAPON_GUN:
+		return PICKUP_GUN;
+	case WEAPON_HAMMER:
+		return PICKUP_HAMMER;
 	case WEAPON_SHOTGUN:
 		return PICKUP_SHOTGUN;
 	case WEAPON_GRENADE:
