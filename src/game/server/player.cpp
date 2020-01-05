@@ -546,10 +546,10 @@ void CPlayer::OnDisconnect()
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	// F-DDrace
-	if (m_pControlledTee)
+	if (m_pControlledTee && !m_Paused && !TeeControlled)
 	{
-		if (m_pControlledTee && !m_Paused)
-			m_pControlledTee->OnPredictedInput(NewInput, true);
+		m_pControlledTee->OnPredictedInput(NewInput, true);
+		return;
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
@@ -560,16 +560,17 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter && !m_Paused && !m_TeeControlMode)
+	if(m_pCharacter && !m_Paused)
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
-	if (m_pControlledTee)
+	// F-DDrace
+	if (m_pControlledTee && !m_Paused && !TeeControlled)
 	{
-		if (m_pControlledTee && !m_Paused)
-			m_pControlledTee->OnDirectInput(NewInput, true);
+		m_pControlledTee->OnDirectInput(NewInput, true);
+		return;
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
@@ -594,7 +595,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 			return;
 
 		// reset input
-		if(m_pCharacter && m_TeeControllerID == -1)
+		if(m_pCharacter)
 			m_pCharacter->ResetInput();
 
 		m_PlayerFlags = NewInput->m_PlayerFlags;
@@ -605,12 +606,15 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	if (m_pCharacter)
 	{
-		if (!m_Paused && !m_TeeControlMode)
+		if (!m_Paused)
 			m_pCharacter->OnDirectInput(NewInput);
-		else if (m_TeeControllerID == -1)
+		else
 		{
 			m_pCharacter->ResetInput();
 			m_pCharacter->ResetNumInputs();
+
+			if (m_pControlledTee && m_pControlledTee->m_pCharacter)
+				m_pControlledTee->m_pCharacter->ResetNumInputs();
 		}
 	}
 
