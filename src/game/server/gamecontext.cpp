@@ -1481,7 +1481,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							pChr->PurchaseEnd(true);
 						else if(pChr->m_ShopWindowPage == SHOP_PAGE_NONE)
 						{
-							pChr->ShopWindow(0);
+							pChr->ShopWindow(SHOP_PAGE_MAIN);
 							pChr->m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
 						}
 					}
