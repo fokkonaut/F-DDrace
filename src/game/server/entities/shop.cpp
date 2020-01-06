@@ -357,6 +357,7 @@ void CCharacter::BuyItem(int ItemID)
 		case 7: case 8: case 9: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum amount of bullets"); break;
 		case 11: GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You already have the maximum taser level"); break;
 		case 4: case 5: UseThe = true;
+			// fallthrough
 		default:
 			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", aItem);
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aMsg);
@@ -406,8 +407,11 @@ void CCharacter::BuyItem(int ItemID)
 	case 4: (*Account).m_aHasItem[SPOOKY_GHOST] = true; break;
 	case 5: m_pPlayer->m_HasRoomKey = true; m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
 	case 7: if (Weapon == -1) Weapon = 0;
+		// fallthrough
 	case 8: if (Weapon == -1) Weapon = 1;
+		// fallthrough
 	case 9: if (Weapon == -1) Weapon = 2;
+		// fallthrough
 		(*Account).m_SpawnWeapon[Weapon]++; break;
 	case 10: (*Account).m_Ninjajetpack = true; break;
 	case 11: (*Account).m_TaserLevel++; break;
