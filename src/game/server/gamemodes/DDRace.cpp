@@ -58,7 +58,7 @@ void CGameControllerDDRace::InitTeleporter()
 
 // F-DDrace
 
-bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos)
+bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
 {
 	int Team = -1;
 	if (Index == ENTITY_FLAGSTAND_RED) Team = TEAM_RED;

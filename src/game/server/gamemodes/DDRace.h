@@ -17,7 +17,7 @@ public:
 
 	virtual void Snap(int SnappingClient);
 
-	virtual bool OnEntity(int Index, vec2 Pos);
+	virtual bool OnEntity(int Index, vec2 Pos, int Layer = 0, int Flags = 0, int Number = 0);
 	virtual int OnCharacterDeath(class CCharacter* pVictim, class CPlayer* pKiller, int Weapon);
 
 	void ForceFlagOwner(int ClientID, int Team);
