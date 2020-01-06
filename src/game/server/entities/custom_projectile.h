@@ -44,7 +44,6 @@ private:
 	int m_Type;
 
 	float m_Accel;
-	float m_Speed;
 
 	int m_CollisionState;
 
