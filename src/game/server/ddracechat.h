@@ -11,6 +11,7 @@ CHAT_COMMAND("emote", "?s[emote name] i[duration in seconds]", CFGFLAG_CHAT, Con
 CHAT_COMMAND("settings", "?s[configname]", CFGFLAG_CHAT, ConSettings, this, "Shows gameplay information for this server", AUTHED_NO)
 CHAT_COMMAND("help", "?r[command]", CFGFLAG_CHAT, ConHelp, this, "Shows help to command r, general help if left blank", AUTHED_NO)
 CHAT_COMMAND("info", "", CFGFLAG_CHAT, ConInfo, this, "Shows info about this server", AUTHED_NO)
+CHAT_COMMAND("list", "?s[filter]", CFGFLAG_CHAT, ConList, this, "List connected players with optional case-insensitive substring matching filter", AUTHED_NO)
 CHAT_COMMAND("me", "r[message]", CFGFLAG_CHAT|CFGFLAG_NONTEEHISTORIC, ConMe, this, "Like the famous irc command '/me says hi' will display '<yourname> says hi'", AUTHED_NO)
 CHAT_COMMAND("pause", "?r[player name]", CFGFLAG_CHAT, ConTogglePause, this, "Toggles pause", AUTHED_NO)
 CHAT_COMMAND("spec", "?r[player name]", CFGFLAG_CHAT, ConToggleSpec, this, "Toggles spec (if not available behaves as /pause)", AUTHED_NO)
