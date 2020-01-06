@@ -12,7 +12,6 @@
 class CLightsaber : public CEntity
 {
 	int m_Length;
-	float m_Rotation;
 	vec2 m_To;
 	bool m_Extending;
 	bool m_Retracting;
