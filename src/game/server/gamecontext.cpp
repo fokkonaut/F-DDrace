@@ -1020,7 +1020,7 @@ void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
 		SendVoteSet(m_VoteType, ClientID);
 
 	// send motd
-	SendMotd(FixMotd(g_Config.m_SvMotd), ClientID);
+	SendMotd(FormatMotd(g_Config.m_SvMotd), ClientID);
 
 	// send settings
 	SendSettings(ClientID);
@@ -2195,7 +2195,7 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 	{
 		CGameContext *pSelf = (CGameContext *)pUserData;
 		char aMotd[900];
-		str_copy(aMotd, pSelf->FixMotd(g_Config.m_SvMotd), sizeof(aMotd));
+		str_copy(aMotd, pSelf->FormatMotd(g_Config.m_SvMotd), sizeof(aMotd));
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 			if (pSelf->m_apPlayers[i])
 				pSelf->SendMotd(aMotd, i);
@@ -3368,7 +3368,7 @@ void CGameContext::CreateSound(int Sound, int ClientID)
 	CreateSound(m_apPlayers[ClientID]->m_ViewPos, Sound, CmaskOne(ClientID));
 }
 
-const char *CGameContext::FixMotd(const char *pMsg)
+const char *CGameContext::FormatMotd(const char *pMsg)
 {
 	char aTemp[64];
 	char aTemp2[64];
@@ -3418,6 +3418,45 @@ const char *CGameContext::FixMotd(const char *pMsg)
 		}
 		str_format(aRet, sizeof(aRet), "%s%sF-DDrace is a mod by fokkonaut\nF-DDrace Mod. Ver.: %s", aMotd, aTemp, GAME_VERSION);
 	}
+	return aRet;
+}
+
+const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
+{
+	static char aRet[1024];
+
+	const char* pTextColor = "^999";
+	const char* pSymbolColor = "^999";
+	const char* pValueColor = "^595";
+
+	const int ColorOffset = 4;
+	int i = 0;
+	int s = ColorOffset;
+	str_copy(aRet, pTextColor, s+1);
+
+	int BroadcastLen = str_length(pMsg) + 1;
+	for (int i = 0; i < BroadcastLen; i++)
+	{
+		aRet[s] = pMsg[i];
+		s++;
+
+		if (pMsg[i+1] == '[' || pMsg[i+1] == ']' || pMsg[i+1] == '/')
+		{
+			s += ColorOffset;
+			str_append(aRet, pSymbolColor, s+1);
+		}
+		else if (pMsg[i] == '[' || pMsg[i] == '/')
+		{
+			s += ColorOffset;
+			str_append(aRet, pValueColor, s+1);
+		}
+		else if (pMsg[i] == ']')
+		{
+			s += ColorOffset;
+			str_append(aRet, pTextColor, s+1);
+		}
+	}
+
 	return aRet;
 }
 

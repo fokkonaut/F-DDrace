@@ -419,7 +419,10 @@ public:
 	};
 
 	//motd
-	const char* FixMotd(const char* pMsg);
+	const char* FormatMotd(const char* pMsg);
+
+	//acc broadcast
+	const char* FormatExperienceBroadcast(const char* pMsg);
 
 	//extras
 	void SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special = 0);

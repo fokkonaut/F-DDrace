@@ -2195,17 +2195,17 @@ void CCharacter::HandleTiles(int Index)
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
-				str_format(aPlusXP, sizeof(aPlusXP), " ^666+%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
-						"^666Money ^222[^444%llu^222] ^666+1%s%s\n"
-						"^666XP ^222[^444%d^222/^444%d^222]%s\n"
-						"^666Level ^222[^444%d^222]",
+						"Money [%llu] +1%s%s\n"
+						"XP [%d/%d]%s\n"
+						"Level [%d]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
 						(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
 						(*Account).m_Level
 					);
 
-				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
+				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg), m_pPlayer->GetCID(), false);
 			}
 		}
 	}
