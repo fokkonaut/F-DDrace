@@ -3431,7 +3431,7 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 	int s = ColorOffset;
 	int i = 0;
 
-	static char aRet[1024];
+	static char aRet[256];
 	str_copy(aRet, pTextColor, s+1);
 
 	int BroadcastLen = str_length(pMsg) + 1;
