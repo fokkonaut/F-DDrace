@@ -20,5 +20,6 @@
 UUID(NETMSG_WHATIS,         "what-is@ddnet.tw")
 UUID(NETMSG_ITIS,           "it-is@ddnet.tw")
 UUID(NETMSG_IDONTKNOW,      "i-dont-know@ddnet.tw")
+UUID(NETMSG_MYOWNMESSAGE,   "my-own-message@heinrich5991.de")
 
 UUID(NETMSG_RCON_LOGIN,     "rcon-login@7.ddnet.tw")
