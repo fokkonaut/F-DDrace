@@ -3429,7 +3429,6 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 
 	const int ColorOffset = 4;
 	int s = ColorOffset;
-	int i = 0;
 
 	static char aRet[256];
 	str_copy(aRet, pTextColor, sizeof(aRet));
