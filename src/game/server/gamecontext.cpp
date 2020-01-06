@@ -3432,7 +3432,7 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 	int i = 0;
 
 	static char aRet[256];
-	str_copy(aRet, pTextColor, s+1);
+	str_copy(aRet, pTextColor, sizeof(aRet));
 
 	int BroadcastLen = str_length(pMsg) + 1;
 	for (int i = 0; i < BroadcastLen; i++)
@@ -3443,17 +3443,17 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 		if (pMsg[i+1] == '[' || pMsg[i+1] == ']' || pMsg[i+1] == '/')
 		{
 			s += ColorOffset;
-			str_append(aRet, pSymbolColor, s+1);
+			str_append(aRet, pSymbolColor, sizeof(aRet));
 		}
 		else if (pMsg[i] == '[' || pMsg[i] == '/')
 		{
 			s += ColorOffset;
-			str_append(aRet, pValueColor, s+1);
+			str_append(aRet, pValueColor, sizeof(aRet));
 		}
 		else if (pMsg[i] == ']')
 		{
 			s += ColorOffset;
-			str_append(aRet, pTextColor, s+1);
+			str_append(aRet, pTextColor, sizeof(aRet));
 		}
 	}
 
