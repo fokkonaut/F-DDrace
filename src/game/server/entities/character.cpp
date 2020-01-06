@@ -1401,8 +1401,8 @@ void CCharacter::Die(int Killer, int Weapon, bool UpdateTeeControl)
 		if (GameServer()->CountSurvivalPlayers(GameServer()->m_SurvivalGameState) > 2)
 		{
 			// if there are more than just two players left, you will watch your killer or a random player
-			m_pPlayer->SetSpectatorID(SPEC_PLAYER, pKiller ? Killer : GameServer()->GetRandomSurvivalPlayer(GameServer()->m_SurvivalGameState, m_pPlayer->GetCID()));
 			m_pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
+			m_pPlayer->SetSpectatorID(SPEC_PLAYER, pKiller ? Killer : GameServer()->GetRandomSurvivalPlayer(GameServer()->m_SurvivalGameState, m_pPlayer->GetCID()));
 
 			// printing a message that you died and informing about remaining players
 			char aKillMsg[128];
