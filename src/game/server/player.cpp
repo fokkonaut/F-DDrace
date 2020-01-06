@@ -165,7 +165,7 @@ void CPlayer::Reset()
 	m_TeeInfos.m_aSkinName[0] = '\0';
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_HidePlayerTeam[i] = -2;
+		m_HidePlayerTeam[i] = TEAM_RED;
 
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;
@@ -532,7 +532,7 @@ void CPlayer::OnDisconnect()
 
 		if (GameServer()->m_apPlayers[i])
 		{
-			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = -2;
+			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = TEAM_RED;
 
 			if (GameServer()->m_apPlayers[i]->m_TeeControlForcedID == m_ClientID)
 			{
@@ -795,7 +795,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		}
 
 		if (GameServer()->m_apPlayers[i])
-			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = -2;
+			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = TEAM_RED;
 	}
 
 	GameServer()->OnClientTeamChange(m_ClientID);
