@@ -1113,7 +1113,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			// allow "name:password" for the meanwhile
 
 			char aName[64] = "";
-			const char *pName = '\0', *pPw = '\0', *pDelim = '\0';
+			const char *pName = "", *pPw = "", *pDelim = "";
 			switch(Msg)
 			{
 			case NETMSG_RCON_LOGIN:
