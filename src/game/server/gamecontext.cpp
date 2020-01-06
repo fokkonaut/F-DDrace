@@ -3423,15 +3423,15 @@ const char *CGameContext::FormatMotd(const char *pMsg)
 
 const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 {
-	static char aRet[1024];
-
-	const char* pTextColor = "^999";
-	const char* pSymbolColor = "^999";
-	const char* pValueColor = "^595";
+	const char *pTextColor = "^999";
+	const char *pSymbolColor = "^999";
+	const char *pValueColor = "^595";
 
 	const int ColorOffset = 4;
-	int i = 0;
 	int s = ColorOffset;
+	int i = 0;
+
+	static char aRet[1024];
 	str_copy(aRet, pTextColor, s+1);
 
 	int BroadcastLen = str_length(pMsg) + 1;
