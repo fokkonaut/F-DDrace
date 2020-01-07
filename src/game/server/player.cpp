@@ -319,7 +319,7 @@ void CPlayer::Tick()
 void CPlayer::PostTick()
 {
 	// update latency value
-	if(m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+	if(m_PlayerFlags&PLAYERFLAG_SCOREBOARD || (m_pControlledTee && m_pControlledTee->m_PlayerFlags&PLAYERFLAG_SCOREBOARD))
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
