@@ -152,6 +152,10 @@ MACRO_CONFIG_INT(SvAccounts, sv_accounts, 1, 0, 1, CFGFLAG_SERVER, "Whether acco
 MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path were the server searches the .acc files", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAccSaveInterval, sv_acc_save_interval, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between account saves", AUTHED_ADMIN)
 
+MACRO_CONFIG_STR(SvExpMsgColorText, sv_exp_msg_color_text, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Text color for the experience broadcast", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Symbol color for the experience broadcast", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvExpMsgColorValue, sv_exp_msg_color_value, 4, "595", CFGFLAG_SERVER|CFGFLAG_GAME, "Value color for the experience broadcast", AUTHED_ADMIN)
+
 // flags
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 1, 0, 1, CFGFLAG_SERVER, "Whether flags create a public sound on drop/pickup/respawn", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable", AUTHED_ADMIN)

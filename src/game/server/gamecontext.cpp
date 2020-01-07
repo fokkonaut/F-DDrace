@@ -3421,9 +3421,9 @@ const char *CGameContext::FormatMotd(const char *pMsg)
 
 const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 {
-	const char *pTextColor = "^999";
-	const char *pSymbolColor = "^999";
-	const char *pValueColor = "^595";
+	char pTextColor[5] = { '^', g_Config.m_SvExpMsgColorText[0], g_Config.m_SvExpMsgColorText[1], g_Config.m_SvExpMsgColorText[2] };
+	char pSymbolColor[5] = { '^', g_Config.m_SvExpMsgColorSymbol[0], g_Config.m_SvExpMsgColorSymbol[1], g_Config.m_SvExpMsgColorSymbol[2] };
+	char pValueColor[5] = { '^', g_Config.m_SvExpMsgColorValue[0], g_Config.m_SvExpMsgColorValue[1], g_Config.m_SvExpMsgColorValue[2] };
 
 	const int ColorOffset = 4;
 	int s = ColorOffset;
