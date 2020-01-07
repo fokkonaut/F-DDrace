@@ -2482,7 +2482,6 @@ void CGameContext::OnInit()
 			if (Index >= ENTITY_OFFSET)
 			{
 				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-				((CGameControllerDDRace*)m_pController)->OnEntity(Index, Pos);
 				m_pController->OnEntity(Index, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
 			}
 
@@ -2520,7 +2519,6 @@ void CGameContext::OnInit()
 				if (Index >= ENTITY_OFFSET)
 				{
 					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
-					((CGameControllerDDRace*)m_pController)->OnEntity(Index, Pos);
 					m_pController->OnEntity(Index, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
 				}
 			}

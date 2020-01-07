@@ -60,6 +60,9 @@ void CGameControllerDDRace::InitTeleporter()
 
 bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
 {
+	if(IGameController::OnEntity(Index, Pos, Layer, Flags, Number))
+		return true;
+
 	int Team = -1;
 	if (Index == ENTITY_FLAGSTAND_RED) Team = TEAM_RED;
 	if (Index == ENTITY_FLAGSTAND_BLUE) Team = TEAM_BLUE;
