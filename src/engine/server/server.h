@@ -154,6 +154,9 @@ public:
 		// DDrace
 		bool m_ShowIps;
 
+		float m_Traffic;
+		int64 m_TrafficSince;
+
 		int m_MapChunk;
 		bool m_NoRconNote;
 		bool m_Quitting;

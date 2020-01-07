@@ -134,6 +134,9 @@ enum
 
 	NET_CONN_BUFFERSIZE=1024*32,
 
+	// F-DDrace
+	NET_CONNLIMIT_IPS=16,
+
 	NET_ENUM_TERMINATOR
 };
 
@@ -426,6 +429,16 @@ class CNetServer
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
 
+	// F-DDrace
+	struct CSpamConn
+	{
+		NETADDR m_Addr;
+		int64 m_Time;
+		int m_Conns;
+	};
+
+	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
+
 	CNetRecvUnpacker m_RecvUnpacker;
 
 	CNetTokenManager m_TokenManager;
@@ -461,6 +474,8 @@ public:
 	// F-DDrace
 	void DummyInit(int DummyID);
 	void DummyDelete(int DummyID);
+
+	bool Connlimit(NETADDR Addr);
 };
 
 class CNetConsole

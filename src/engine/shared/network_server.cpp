@@ -6,6 +6,7 @@
 
 #include "netban.h"
 #include "network.h"
+#include "config.h"
 
 
 bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags)
@@ -80,13 +81,7 @@ int CNetServer::Update()
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
 		{
-			if(Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() && NetBan())
-			{
-				if(NetBan()->BanAddr(ClientAddr(i), 60, "Stressing network") == -1)
-					Drop(i, m_aSlots[i].m_Connection.ErrorString());
-			}
-			else
-				Drop(i, m_aSlots[i].m_Connection.ErrorString());
+			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
 	}
 
@@ -172,6 +167,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 			{
 				if(m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_CONNECT)
 				{
+					if (Connlimit(Addr))
+					{
+						const char LimitMsg[] = "Too many connections in a short time";
+						CNetBase::SendControlMsg(m_Socket, &Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, str_length(LimitMsg) + 1);
+						return 0; // failed to add client
+					}
+
 					bool Found = false;
 
 					// only allow a specific number of players with the same ip
@@ -324,4 +326,37 @@ void CNetServer::DummyInit(int DummyID)
 void CNetServer::DummyDelete(int DummyID)
 {
 	m_aSlots[DummyID].m_Connection.DummyDrop();
+}
+
+bool CNetServer::Connlimit(NETADDR Addr)
+{
+	int64 Now = time_get();
+	int Oldest = 0;
+
+	for(int i = 0; i < NET_CONNLIMIT_IPS; ++i)
+	{
+		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
+		{
+			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
+			{
+				if(m_aSpamConns[i].m_Conns >= g_Config.m_SvConnlimit)
+					return true;
+			}
+			else
+			{
+				m_aSpamConns[i].m_Time = Now;
+				m_aSpamConns[i].m_Conns = 0;
+			}
+			m_aSpamConns[i].m_Conns++;
+			return false;
+		}
+
+		if(m_aSpamConns[i].m_Time < m_aSpamConns[Oldest].m_Time)
+			Oldest = i;
+	}
+
+	m_aSpamConns[Oldest].m_Addr = Addr;
+	m_aSpamConns[Oldest].m_Time = Now;
+	m_aSpamConns[Oldest].m_Conns = 1;
+	return false;
 }

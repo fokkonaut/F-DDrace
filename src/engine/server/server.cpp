@@ -443,6 +443,8 @@ int CServer::Init()
 		m_aClients[i].m_Country = -1;
 		m_aClients[i].m_Snapshots.Init();
 		m_aClients[i].m_ShowIps = false;
+		m_aClients[i].m_Traffic = 0;
+		m_aClients[i].m_TrafficSince = 0;
 	}
 
 	m_ShutdownMessage[0] = '\0';
@@ -731,6 +733,8 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
 	pThis->m_aClients[ClientID].m_ShowIps = false;
+	pThis->m_aClients[ClientID].m_Traffic = 0;
+	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	return 0;
@@ -764,6 +768,8 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_NoRconNote = false;
 	pThis->m_aClients[ClientID].m_Quitting = false;
 	pThis->m_aClients[ClientID].m_ShowIps = false;
+	pThis->m_aClients[ClientID].m_Traffic = 0;
+	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
@@ -930,6 +936,25 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	else if(Result == UNPACKMESSAGE_ANSWER)
 	{
 		SendMsg(&Packer, MSGFLAG_VITAL, ClientID);
+	}
+
+	if(g_Config.m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
+	{
+		int64 Now = time_get();
+		int64 Diff = Now - m_aClients[ClientID].m_TrafficSince;
+		float Alpha = g_Config.m_SvNetlimitAlpha / 100.0f;
+		float Limit = (float)g_Config.m_SvNetlimit * 1024 / time_freq();
+
+		if (m_aClients[ClientID].m_Traffic > Limit)
+		{
+			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network");
+			return;
+		}
+		if (Diff > 100)
+		{
+			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0f - Alpha) * m_aClients[ClientID].m_Traffic;
+			m_aClients[ClientID].m_TrafficSince = Now;
+		}
 	}
 
 	if(Sys)
