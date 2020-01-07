@@ -887,6 +887,8 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		returns true if kicked
 	*/
 
+	if (m_IsDummy)
+		return false;
 	if (Server()->GetAuthedState(m_ClientID))
 		return false; // don't kick admins
 	if (g_Config.m_SvMaxAfkTime == 0)
@@ -938,6 +940,8 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 
 void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
 {
+	if (m_IsDummy)
+		return;
 	if (g_Config.m_SvMaxAfkVoteTime == 0)
 		return;
 
