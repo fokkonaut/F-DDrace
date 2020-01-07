@@ -1259,7 +1259,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	if (m_Core.m_Killer.m_ClientID == -1)
 		m_Core.m_Killer.m_ClientID = m_pPlayer->GetCID();
 
-	// dont set a weapon if we got killed by the game or its a selfkill
+	// dont set a weapon if we dont have a tee for it
 	int Killer = m_Core.m_Killer.m_ClientID;
 	if (Killer != m_pPlayer->GetCID())
 		Weapon = m_Core.m_Killer.m_Weapon;
