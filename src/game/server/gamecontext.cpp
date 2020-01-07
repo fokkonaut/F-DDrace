@@ -1455,7 +1455,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pMsg->m_Vote == 1) //vote yes (f3)
 			{
-				if (pChr)
+				if (pPlayer->m_pControlledTee)
+				{
+					if (pPlayer->m_pControlledTee->GetCharacter())
+						pPlayer->m_pControlledTee->GetCharacter()->DropFlag();
+				}
+				else if (pChr)
 				{
 					if (pChr->m_InShop)
 					{
@@ -1473,7 +1478,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (pMsg->m_Vote == -1) //vote no (f4)
 			{
-				if (pChr)
+				if (pPlayer->m_pControlledTee)
+				{
+					if (pPlayer->m_pControlledTee->GetCharacter())
+						pPlayer->m_pControlledTee->GetCharacter()->DropWeapon(pPlayer->m_pControlledTee->GetCharacter()->GetActiveWeapon());
+				}
+				else if (pChr)
 				{
 					if (pChr->m_InShop)
 					{
