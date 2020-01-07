@@ -689,7 +689,7 @@ void CPlayer::KillCharacter(int Weapon, bool UpdateTeeControl)
 {
 	if(m_pCharacter)
 	{
-		m_pCharacter->Die(m_ClientID, Weapon, UpdateTeeControl);
+		m_pCharacter->Die(Weapon, UpdateTeeControl);
 		delete m_pCharacter;
 		m_pCharacter = 0;
 	}

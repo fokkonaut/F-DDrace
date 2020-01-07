@@ -38,7 +38,7 @@ void CCharacter::DummyTick()
 		{
 			if (m_Core.m_Pos.y > 50 * 32 || m_Core.m_Pos.x > 150 * 32 || m_Solo)
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 
@@ -59,7 +59,7 @@ void CCharacter::DummyTick()
 
 		if (m_IsFrozen && Server()->Tick() == m_FirstFreezeTick + 300)
 		{
-			Die(m_pPlayer->GetCID(), WEAPON_SELF);
+			Die();
 			return;
 		}
 
@@ -331,7 +331,7 @@ void CCharacter::DummyTick()
 
 				if (m_Core.m_Pos.x > 331 * 32 && m_IsFrozen)
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 
@@ -362,7 +362,7 @@ void CCharacter::DummyTick()
 					//selfkill
 					if (m_IsFrozen)
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 
@@ -395,7 +395,7 @@ void CCharacter::DummyTick()
 					//selfkill
 					if (m_IsFrozen)
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 
@@ -426,7 +426,7 @@ void CCharacter::DummyTick()
 				//Selfkills
 				if (m_IsFrozen && IsGrounded()) //should never lie in freeze at the ground
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 
@@ -450,13 +450,13 @@ void CCharacter::DummyTick()
 			{
 				if (Server()->Tick() % 40 == 0)
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 			}
 			if (m_Core.m_Pos.y > 116 * 32 && m_Core.m_Pos.x > 394 * 32)
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 
@@ -505,7 +505,7 @@ void CCharacter::DummyTick()
 					{
 						if (Server()->Tick() % 370 == 0)
 						{
-							Die(m_pPlayer->GetCID(), WEAPON_SELF);
+							Die();
 							return;
 						}
 					}
@@ -524,7 +524,7 @@ void CCharacter::DummyTick()
 					{
 						if (Server()->Tick() % 270 == 0)
 						{
-							Die(m_pPlayer->GetCID(), WEAPON_SELF);
+							Die();
 							return;
 						}
 					}
@@ -533,7 +533,7 @@ void CCharacter::DummyTick()
 				{
 					if (m_IsFrozen && m_Core.m_Vel.y == 0.000000f && m_Core.m_Vel.x < 0.1f && m_Core.m_Vel.x > -0.1f)
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 				}
@@ -542,19 +542,19 @@ void CCharacter::DummyTick()
 			//instant self kills
 			if (m_Core.m_Pos.x < 390 * 32 && m_Core.m_Pos.x > 325 * 32 && m_Core.m_Pos.y > 215 * 32)  //Links am spawn runter
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 
 			else if (m_Core.m_Pos.y < 215 * 32 && m_Core.m_Pos.y > 213 * 32 && m_Core.m_Pos.x > 415 * 32 && m_Core.m_Pos.x < 428 * 32) //freeze decke im tunnel
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 
 			if ((m_Core.m_Pos.y < 220 * 32 && m_Core.m_Pos.x < 415 * 32 && m_FreezeTime > 1) && (m_Core.m_Pos.x > 350 * 32)) //always suicide on freeze if not reached teh block area yet             (new) AND not coming from the new spawn and falling through the freeze
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 
@@ -1797,7 +1797,7 @@ void CCharacter::DummyTick()
 				//wenn der bot freeze is warte erstmal n paar sekunden und dann kill dich
 				if (Server()->Tick() % 300 == 0)
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 			}
@@ -1845,7 +1845,7 @@ void CCharacter::DummyTick()
 				//wenn der bot freeze is warte erstmal n paar sekunden und dann kill dich
 				if (Server()->Tick() % 300 == 0)
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 			}
@@ -1938,7 +1938,7 @@ void CCharacter::DummyTick()
 
 					if (m_Core.m_Pos.x > 331 * 32 && m_IsFrozen)
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 
@@ -1969,7 +1969,7 @@ void CCharacter::DummyTick()
 						//selfkill
 						if (m_IsFrozen)
 						{
-							Die(m_pPlayer->GetCID(), WEAPON_SELF);
+							Die();
 							return;
 						}
 
@@ -2002,7 +2002,7 @@ void CCharacter::DummyTick()
 						//selfkill
 						if (m_IsFrozen)
 						{
-							Die(m_pPlayer->GetCID(), WEAPON_SELF);
+							Die();
 							return;
 						}
 
@@ -2033,7 +2033,7 @@ void CCharacter::DummyTick()
 					//Selfkills
 					if (m_IsFrozen && IsGrounded()) //should never lie in freeze at the ground
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 					if (m_Core.m_Pos.y < 166 * 32 - 20)
@@ -2050,22 +2050,22 @@ void CCharacter::DummyTick()
 			{
 				if (m_Core.m_Pos.x < 390 * 32 && m_Core.m_Pos.x > 325 * 32 && m_Core.m_Pos.y > 215 * 32)  //Links am spawn runter
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 				else if (m_Core.m_Pos.y < 215 * 32 && m_Core.m_Pos.y > 213 * 32 && m_Core.m_Pos.x > 415 * 32 && m_Core.m_Pos.x < 428 * 32) //freeze decke im tunnel
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 				else if (m_Core.m_Pos.y > 222 * 32) //freeze becken unter area
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 				if (m_Core.m_Pos.y < 220 * 32 && m_Core.m_Pos.x < 415 * 32 && m_FreezeTime > 1 && m_Core.m_Pos.x > 352 * 32) //always suicide on freeze if not reached teh block area yet AND dont suicide in spawn area because new spawn sys can get pretty freezy
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 				//new spawn do something agianst hookers 
@@ -2322,7 +2322,7 @@ void CCharacter::DummyTick()
 				{
 					if (Server()->Tick() % 150 == 0)
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 				}
@@ -3070,7 +3070,7 @@ void CCharacter::DummyTick()
 
 			if (Server()->Tick() % 200 == 0)
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 		}
@@ -3328,7 +3328,7 @@ void CCharacter::DummyTick()
 					GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing
 				if (Server()->Tick() % 500 == 0 && IsGrounded()) //kill when freeze
 				{
-					Die(m_pPlayer->GetCID(), WEAPON_SELF);
+					Die();
 					return;
 				}
 			}
@@ -3340,17 +3340,17 @@ void CCharacter::DummyTick()
 				m_DummySpawnTeleporter = 3;
 			if (m_Core.m_Pos.y > 21 * 32 && m_Core.m_Pos.x > 43 * 32 && m_Core.m_Pos.y < 35 * 32) // kill 
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 			if (m_Core.m_Pos.y > 35 * 32 && m_Core.m_Pos.x < 43 * 32) // area bottom right from spawn, if he fall, he will kill
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 			if (m_Core.m_Pos.x < 16 * 32) // area left of old spawn, he will kill too
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 			else if (m_Core.m_Pos.y > 25 * 32) // after unfreeze hold hook to the right and walk right.
@@ -3464,7 +3464,7 @@ void CCharacter::DummyTick()
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing
 			if (Server()->Tick() % 500 == 0 && IsGrounded()) // kill when freeze
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 		}
@@ -3472,7 +3472,7 @@ void CCharacter::DummyTick()
 		{
 			if (Server()->Tick() % 500 == 0) // kill when freeze
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 		}
@@ -3510,7 +3510,7 @@ void CCharacter::DummyTick()
 				m_Input.m_Jump = 1;
 			if (m_Core.m_Pos.y > 339 * 32) // if he falls into the hole to police station he will kill
 			{
-				Die(m_pPlayer->GetCID(), WEAPON_SELF);
+				Die();
 				return;
 			}
 		}
@@ -3997,7 +3997,7 @@ void CCharacter::DummyTick()
 						GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing
 					if (Server()->Tick() % 3000 == 0 && (IsGrounded() || m_Core.m_Pos.x > 430 * 32)) // kill when freeze
 					{
-						Die(m_pPlayer->GetCID(), WEAPON_SELF);
+						Die();
 						return;
 					}
 				}
@@ -4017,7 +4017,7 @@ void CCharacter::DummyTick()
 
 		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0 && !m_InShop)
 		{
-			Die(m_pPlayer->GetCID(), WEAPON_SELF);
+			Die();
 			return;
 		}
 	}

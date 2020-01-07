@@ -1246,8 +1246,24 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool UpdateTeeControl)
+void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 {
+	// reset if killed by the game or if not killed by a player or deathtile while unfrozen
+	if (Weapon == WEAPON_GAME || (!m_FreezeTime && Weapon != WEAPON_PLAYER && Weapon != WEAPON_WORLD))
+	{
+		m_Core.m_Killer.m_ClientID = -1;
+		m_Core.m_Killer.m_Weapon = -1;
+	}
+
+	// if no killer exists its a selfkill
+	if (m_Core.m_Killer.m_ClientID == -1)
+		m_Core.m_Killer.m_ClientID = m_pPlayer->GetCID();
+
+	// dont set a weapon if we got killed by the game or its a selfkill
+	int Killer = m_Core.m_Killer.m_ClientID;
+	if (Killer != m_pPlayer->GetCID())
+		Weapon = m_Core.m_Killer.m_Weapon;
+
 	// unset anyones telekinesis on us
 	GameServer()->UnsetTelekinesis(this);
 
@@ -1261,23 +1277,6 @@ void CCharacter::Die(int Killer, int Weapon, bool UpdateTeeControl)
 
 	// drop armor, hearts and weapons
 	DropLoot();
-
-	// only let unfrozen kills through if you have damage activated (if the weapon is bigger than 0 it means you got killed right now)
-	if (!m_FreezeTime && (Killer < 0 || Killer == m_pPlayer->GetCID() || Weapon < 0))
-	{
-		m_Core.m_Killer.m_ClientID = -1;
-		m_Core.m_Killer.m_Weapon = -1;
-	}
-
-	// if no killer exists its a selfkill
-	if (m_Core.m_Killer.m_ClientID == -1)
-		m_Core.m_Killer.m_ClientID = m_pPlayer->GetCID();
-
-	// set the new killer and weapon
-	Killer = m_Core.m_Killer.m_ClientID;
-	// dont set a weapon if it was WEAPON_WORLD, etc...
-	if (Weapon >= 0)
-		Weapon = m_Core.m_Killer.m_Weapon;
 
 	CPlayer *pKiller = (Killer >= 0 && Killer != m_pPlayer->GetCID() && GameServer()->m_apPlayers[Killer]) ? GameServer()->m_apPlayers[Killer] : 0;
 
@@ -1488,7 +1487,7 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 		// check for death
 		if(m_Health <= 0)
 		{
-			Die(From, Weapon);
+			Die(WEAPON_PLAYER);
 
 			// set attacker's face to happy (taunt!)
 			if (From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
@@ -1746,13 +1745,13 @@ void CCharacter::HandleSkippableTiles(int Index)
 		GameServer()->Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
 		!m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		Die(WEAPON_WORLD);
 		return;
 	}
 
 	if (GameLayerClipped(m_Pos))
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		Die(WEAPON_WORLD);
 		return;
 	}
 
@@ -1890,7 +1889,7 @@ void CCharacter::HandleTiles(int Index)
 				GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have to be in a team with other tees to start");
 				m_LastStartWarning = Server()->Tick();
 			}
-			Die(GetPlayer()->GetCID(), WEAPON_WORLD);
+			Die(WEAPON_WORLD);
 			return;
 		}
 
@@ -2104,7 +2103,7 @@ void CCharacter::HandleTiles(int Index)
 		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_HELPER)
 		{
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for helpers only");
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+			Die(WEAPON_WORLD);
 			return;
 		}
 	}
@@ -2115,7 +2114,7 @@ void CCharacter::HandleTiles(int Index)
 		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_MOD)
 		{
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for moderators only");
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+			Die(WEAPON_WORLD);
 			return;
 		}
 	}
@@ -2126,7 +2125,7 @@ void CCharacter::HandleTiles(int Index)
 		if (Server()->GetAuthedState(m_pPlayer->GetCID()) < AUTHED_ADMIN)
 		{
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), "This area is for admins only");
-			Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+			Die(WEAPON_WORLD);
 			return;
 		}
 	}
