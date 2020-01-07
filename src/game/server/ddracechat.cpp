@@ -1238,9 +1238,10 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to the following commands:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to some extras. They can use following commands:");
 	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money per second more.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can use '/room' to invite other players to the room.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money more per second.");
 	if (g_Config.m_SvContactDiscord[0] != '\0')
 	{
 		char aBuf[256];
