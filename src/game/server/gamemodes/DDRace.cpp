@@ -124,11 +124,7 @@ void CGameControllerDDRace::ForceFlagOwner(int ClientID, int Team)
 	if (!F || (Team != TEAM_RED && Team != TEAM_BLUE) || (!pChr && ClientID >= 0))
 		return;
 	if (ClientID >= 0 && HasFlag(pChr) == -1)
-	{
-		if (F->GetCarrier())
-			F->SetLastCarrier(F->GetCarrier());
 		F->Grab(pChr);
-	}
 	else if (ClientID == -1)
 		F->Reset();
 }
