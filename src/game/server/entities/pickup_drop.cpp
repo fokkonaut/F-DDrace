@@ -249,17 +249,14 @@ void CPickupDrop::HandleDropped()
 	//Speedups
 	if (GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos)))
 	{
+		vec2 Direction, MaxVel, TempVel = m_Vel;
 		int Force, MaxSpeed = 0;
-		vec2 Direction, MaxVel;
-		vec2 TempVel = m_Vel;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos), &Direction, &Force, &MaxSpeed);
-
 		if (Force == 255 && MaxSpeed)
 		{
 			m_Vel = Direction * (MaxSpeed / 5);
 		}
-
 		else
 		{
 			if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
@@ -293,15 +290,16 @@ void CPickupDrop::HandleDropped()
 
 				DiffAngle = SpeederAngle - TeeAngle;
 				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if (abs(SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+				if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
-				else if (abs(SpeedLeft) > Force)
+				else if (abs((int)SpeedLeft) > Force)
 					TempVel += Direction * -Force;
 				else
 					TempVel += Direction * SpeedLeft;
 			}
 			else
 				TempVel += Direction * Force;
+
 			m_Vel = TempVel;
 		}
 	}
