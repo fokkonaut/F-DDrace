@@ -3437,20 +3437,19 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 		aRet[s] = pMsg[i];
 		s++;
 
+		int Found = 0;
 		if (pMsg[i+1] == '[' || pMsg[i+1] == ']' || pMsg[i+1] == '/')
-		{
-			s += ColorOffset;
-			str_append(aRet, pSymbolColor, sizeof(aRet));
-		}
+			Found |= 1<<0;
 		else if (pMsg[i] == '[' || pMsg[i] == '/')
-		{
-			s += ColorOffset;
-			str_append(aRet, pValueColor, sizeof(aRet));
-		}
+			Found |= 1<<1;
 		else if (pMsg[i] == ']')
+			Found |= 1<<2;
+
+		if (Found)
 		{
 			s += ColorOffset;
-			str_append(aRet, pTextColor, sizeof(aRet));
+			const char *pColorCode = Found&1<<0 ? pSymbolColor : Found&1<<1 ? pValueColor : pTextColor;
+			str_append(aRet, pColorCode, sizeof(aRet));
 		}
 	}
 
