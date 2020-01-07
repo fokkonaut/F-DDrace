@@ -605,6 +605,11 @@ private:
 
 	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConRainbowVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConBloodyVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConAtomVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConTrailVIP(IConsole::IResult* pResult, void* pUserData);
+
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
 

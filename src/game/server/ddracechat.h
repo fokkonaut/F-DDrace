@@ -90,4 +90,10 @@ CHAT_COMMAND("top5spree", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Spree, 
 
 //police
 CHAT_COMMAND("policehelper", "s[add/remove] r[name]", CFGFLAG_CHAT, ConPoliceHelper, this, "Adds/removes player r to/from policehelpers", AUTHED_NO)
+
+//vip
+CHAT_COMMAND("rainbow", "", CFGFLAG_CHAT, ConRainbowVIP, this, "Toggles rainbow for yourself", AUTHED_NO)
+CHAT_COMMAND("bloody", "", CFGFLAG_CHAT, ConBloodyVIP, this, "Toggles bloody for yourself", AUTHED_NO)
+CHAT_COMMAND("atom", "", CFGFLAG_CHAT, ConAtomVIP, this, "Toggles atom for yourself", AUTHED_NO)
+CHAT_COMMAND("trail", "", CFGFLAG_CHAT, ConTrailVIP, this, "Toggles trail for yourself", AUTHED_NO)
 #undef CHAT_COMMAND

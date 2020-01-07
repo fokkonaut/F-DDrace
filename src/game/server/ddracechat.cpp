@@ -1238,7 +1238,8 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to extras like rainbow, atom or trail.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to the following commands:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money per second more.");
 	if (g_Config.m_SvContactDiscord[0] != '\0')
 	{
@@ -2087,4 +2088,72 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", (*Account).m_TaserLevel * 10);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+}
+
+void CGameContext::ConRainbowVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+		return;
+	}
+
+	pChr->Rainbow(!(pChr->m_Rainbow || pChr->GetPlayer()->m_InfRainbow), pResult->m_ClientID);
+}
+
+void CGameContext::ConBloodyVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+		return;
+	}
+
+	pChr->Bloody(!(pChr->m_Bloody || pChr->m_StrongBloody), pResult->m_ClientID);
+}
+
+void CGameContext::ConAtomVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+		return;
+	}
+
+	pChr->Atom(!pChr->m_Atom, pResult->m_ClientID);
+}
+
+void CGameContext::ConTrailVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+		return;
+	}
+
+	pChr->Trail(!pChr->m_Trail, pResult->m_ClientID);
 }
