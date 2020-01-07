@@ -883,9 +883,9 @@ void CCharacter::FireWeapon()
 	}
 
 	//spooky ghost
-	if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
 	{
-		if (m_pPlayer->m_PlayerFlags & PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		{
 			m_NumGhostShots++;
 			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
