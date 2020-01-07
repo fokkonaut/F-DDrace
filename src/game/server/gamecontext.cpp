@@ -1452,13 +1452,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 			CCharacter *pChr = pPlayer->GetCharacter();
+			CCharacter *pControlledTee = pPlayer->m_pControlledTee ? pPlayer->m_pControlledTee->GetCharacter() : 0;
 
 			if (pMsg->m_Vote == 1) //vote yes (f3)
 			{
-				if (pPlayer->m_pControlledTee)
+				if (pPlayer->m_TeeControlMode)
 				{
-					if (pPlayer->m_pControlledTee->GetCharacter())
-						pPlayer->m_pControlledTee->GetCharacter()->DropFlag();
+					if (pControlledTee)
+						pControlledTee->DropFlag();
 				}
 				else if (pChr)
 				{
@@ -1478,10 +1479,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (pMsg->m_Vote == -1) //vote no (f4)
 			{
-				if (pPlayer->m_pControlledTee)
+				if (pPlayer->m_TeeControlMode)
 				{
-					if (pPlayer->m_pControlledTee->GetCharacter())
-						pPlayer->m_pControlledTee->GetCharacter()->DropWeapon(pPlayer->m_pControlledTee->GetCharacter()->GetActiveWeapon());
+					if (pControlledTee)
+						pControlledTee->DropWeapon(pControlledTee->GetActiveWeapon());
 				}
 				else if (pChr)
 				{
