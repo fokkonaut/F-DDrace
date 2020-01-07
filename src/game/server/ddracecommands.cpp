@@ -661,6 +661,8 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }
 
+// F-DDrace
+
 void CGameContext::ConAllWeapons(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
