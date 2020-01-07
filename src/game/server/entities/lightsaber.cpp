@@ -77,6 +77,8 @@ void CLightsaber::Tick()
 
 	if (!m_pOwner)
 		Reset();
+	else
+		m_Pos = m_pOwner->GetPos();
 
 	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : -1LL;
 
@@ -129,9 +131,6 @@ void CLightsaber::Snap(int SnappingClient)
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 	if (!pObj)
 		return;
-
-	if (m_pOwner)
-		m_Pos = m_pOwner->GetPos();
 
 	pObj->m_X = (int)m_Pos.x;
 	pObj->m_Y = (int)m_Pos.y;
