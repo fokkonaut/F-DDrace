@@ -279,16 +279,16 @@ void CPlayer::Tick()
 	// name
 	if (!m_ShowName && !m_RemovedName)
 	{
-		SetFakeName(" ");
-		SetFakeClan(Server()->ClientName(m_ClientID));
-		UpdateFakeInformation();
+		SetName(" ");
+		SetClan(Server()->ClientName(m_ClientID));
+		UpdateInformation();
 		m_RemovedName = true;
 	}
 	if ((m_ShowName || m_SetRealName) && m_RemovedName)
 	{
-		SetFakeName(Server()->ClientName(m_ClientID));
-		SetFakeClan(Server()->ClientClan(m_ClientID));
-		UpdateFakeInformation();
+		SetName(Server()->ClientName(m_ClientID));
+		SetClan(Server()->ClientClan(m_ClientID));
+		UpdateInformation();
 		m_RemovedName = false;
 	}
 
@@ -1210,7 +1210,7 @@ void CPlayer::SetPlaying()
 		m_pCharacter->Pause(false);
 }
 
-void CPlayer::UpdateFakeInformation(int ClientID)
+void CPlayer::UpdateInformation(int ClientID)
 {
 	CNetMsg_Sv_ClientDrop ClientDropMsg;
 	ClientDropMsg.m_ClientID = m_ClientID;
@@ -1221,8 +1221,8 @@ void CPlayer::UpdateFakeInformation(int ClientID)
 	NewClientInfoMsg.m_ClientID = m_ClientID;
 	NewClientInfoMsg.m_Local = 0;
 	NewClientInfoMsg.m_Team = m_Team;
-	NewClientInfoMsg.m_pName = m_aFakeName;
-	NewClientInfoMsg.m_pClan = m_aFakeClan;
+	NewClientInfoMsg.m_pName = m_aCurrentName;
+	NewClientInfoMsg.m_pClan = m_aCurrentClan;
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(m_ClientID);
 	NewClientInfoMsg.m_Silent = 1;
 

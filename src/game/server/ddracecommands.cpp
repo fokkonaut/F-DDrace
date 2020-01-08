@@ -1250,8 +1250,8 @@ void CGameContext::ConPlayerName(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	const char* pName = pResult->NumArguments() > 1 ? pResult->GetString(1) : pSelf->Server()->ClientName(Victim);
-	pSelf->m_apPlayers[Victim]->SetFakeName(pName);
-	pSelf->m_apPlayers[Victim]->UpdateFakeInformation();
+	pSelf->m_apPlayers[Victim]->SetName(pName);
+	pSelf->m_apPlayers[Victim]->UpdateInformation();
 }
 
 void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
@@ -1261,8 +1261,8 @@ void CGameContext::ConPlayerClan(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 	const char* pClan = pResult->NumArguments() > 1 ? pResult->GetString(1) : pSelf->Server()->ClientClan(Victim);
-	pSelf->m_apPlayers[Victim]->SetFakeClan(pClan);
-	pSelf->m_apPlayers[Victim]->UpdateFakeInformation();
+	pSelf->m_apPlayers[Victim]->SetClan(pClan);
+	pSelf->m_apPlayers[Victim]->UpdateInformation();
 }
 
 void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)

@@ -898,8 +898,8 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 void CGameContext::OnClientEnter(int ClientID)
 {
 	// F-DDrace
-	str_copy(m_apPlayers[ClientID]->m_aFakeName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
-	str_copy(m_apPlayers[ClientID]->m_aFakeClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_aCurrentName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_aCurrentClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->Respawn();
 	m_apPlayers[ClientID]->m_CurrentTeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
 
@@ -950,8 +950,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		ClientInfoMsg.m_ClientID = i;
 		ClientInfoMsg.m_Local = 0;
 		ClientInfoMsg.m_Team = m_apPlayers[i]->GetTeam();
-		ClientInfoMsg.m_pName = m_apPlayers[i]->m_aFakeName;
-		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_aFakeClan;
+		ClientInfoMsg.m_pName = m_apPlayers[i]->m_aCurrentName;
+		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_aCurrentClan;
 		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
 		ClientInfoMsg.m_Silent = false;
 		for(int p = 0; p < NUM_SKINPARTS; p++)

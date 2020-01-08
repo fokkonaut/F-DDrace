@@ -309,11 +309,11 @@ public:
 	void GiveBlockPoints(int Amount);
 
 	//fake information
-	void UpdateFakeInformation(int ClientID = -1);
-	void SetFakeName(const char *pName) { str_copy(m_aFakeName, pName, MAX_NAME_LENGTH); };
-	void SetFakeClan(const char *pClan) { str_copy(m_aFakeClan, pClan, MAX_CLAN_LENGTH); };
-	char m_aFakeName[MAX_NAME_LENGTH];
-	char m_aFakeClan[MAX_CLAN_LENGTH];
+	void UpdateInformation(int ClientID = -1);
+	void SetName(const char *pName) { str_copy(m_aCurrentName, pName, MAX_NAME_LENGTH); };
+	void SetClan(const char *pClan) { str_copy(m_aCurrentClan, pClan, MAX_CLAN_LENGTH); };
+	char m_aCurrentName[MAX_NAME_LENGTH];
+	char m_aCurrentClan[MAX_CLAN_LENGTH];
 
 	//minigames
 	int m_Minigame;
