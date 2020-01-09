@@ -92,9 +92,6 @@ private:
 
 	int m_BackgroundItem[MAX_CLIENTS];
 
-	bool IsPolice(int Item);
-	bool IsTaser(int Item);
-
 public:
 
 	CShop(CGameContext *pGameServer);
@@ -110,7 +107,7 @@ public:
 
 	void OnPageChange(int ClientID, int Dir) { ShopWindow(ClientID, Dir); };
 	bool IsInShop(int ClientID) { return m_InShop[ClientID]; };
-	void SetMotdTick(int ClientID, int Tick) { m_MotdTick[ClientID] = Tick; };
+	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; };
 };
 
 #endif

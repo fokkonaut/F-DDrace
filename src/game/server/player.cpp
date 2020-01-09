@@ -267,7 +267,7 @@ void CPlayer::Tick()
 	if (m_pCharacter)
 	{
 		if (m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
-			GameServer()->m_pShop->SetMotdTick(m_ClientID, 0);
+			GameServer()->m_pShop->ResetMotdTick(m_ClientID);
 		else
 			m_pCharacter->m_NumGhostShots = 0;
 

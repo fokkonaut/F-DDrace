@@ -92,23 +92,23 @@ void CShop::OnShopLeave(int ClientID)
 
 	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
 
-	if (pChr->m_TileIndex != TILE_SHOP && pChr->m_TileFIndex != TILE_SHOP)
+	if (pChr->m_TileIndex == TILE_SHOP || pChr->m_TileFIndex == TILE_SHOP)
+		return;
+
+	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID))
 	{
-		if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID))
-		{
-			m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
-			m_AntiSpamTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 5;
-		}
-
-		if (m_WindowPage[ClientID] != PAGE_NONE)
-			m_pGameServer->SendMotd("", ClientID);
-		m_pGameServer->SendBroadcast("", ClientID, false);
-
-		m_PurchaseState[ClientID] = STATE_NONE;
-		m_WindowPage[ClientID] = PAGE_NONE;
-
-		m_InShop[ClientID] = false;
+		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
+		m_AntiSpamTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 5;
 	}
+
+	if (m_WindowPage[ClientID] != PAGE_NONE)
+		m_pGameServer->SendMotd("", ClientID);
+	m_pGameServer->SendBroadcast("", ClientID, false);
+
+	m_PurchaseState[ClientID] = STATE_NONE;
+	m_WindowPage[ClientID] = PAGE_NONE;
+
+	m_InShop[ClientID] = false;
 }
 
 void CShop::OnKeyPress(int ClientID, int Dir)
@@ -236,9 +236,9 @@ void CShop::ShopWindow(int ClientID, int Dir)
 void CShop::SendWindow(int ClientID, int Item)
 {
 	int Page = Item;
-	if (IsPolice(Item))
+	if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5)
 		Page = ITEM_POLICE;
-	else if (IsTaser(Item))
+	else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7)
 		Page = ITEM_TASER;
 
 	char aBase[512];
@@ -318,7 +318,7 @@ void CShop::EndPurchase(int ClientID, bool Cancelled)
 
 void CShop::BuyItem(int ClientID, int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS)
+	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS_LIST)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "Invalid item");
 		return;
@@ -330,18 +330,20 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	char aMsg[128];
 
+	int ItemID = Item == ITEM_POLICE || Item == ITEM_TASER ? m_BackgroundItem[ClientID] : Item;
+
 	// Check whether we have the item already
-	if ((Item == ITEM_RAINBOW			&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
-		|| (Item == ITEM_BLOODY			&& (pChr->m_Bloody || pChr->m_StrongBloody))
-		|| (Item == ITEM_POLICE			&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
-		|| (Item == ITEM_SPOOKY_GHOST	&& (*Account).m_SpookyGhost)
-		|| (Item == ITEM_ROOM_KEY		&& (pPlayer->m_HasRoomKey))
-		|| (Item == ITEM_VIP			&& (*Account).m_VIP)
-		|| (Item == ITEM_SPAWN_SHOTGUN	&& (*Account).m_SpawnWeapon[0] == 5)
-		|| (Item == ITEM_SPAWN_GRENADE	&& (*Account).m_SpawnWeapon[1] == 5)
-		|| (Item == ITEM_SPAWN_RIFLE	&& (*Account).m_SpawnWeapon[2] == 5)
-		|| (Item == ITEM_NINJAJETPACK	&& (*Account).m_Ninjajetpack)
-		|| (Item == ITEM_TASER			&& (*Account).m_TaserLevel == NUM_TASER_LEVELS))
+	if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
+		|| (Item == ITEM_BLOODY				&& (pChr->m_Bloody || pChr->m_StrongBloody))
+		|| (Item == ITEM_POLICE				&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
+		|| (Item == ITEM_SPOOKY_GHOST		&& (*Account).m_SpookyGhost)
+		|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
+		|| (Item == ITEM_VIP				&& (*Account).m_VIP)
+		|| (Item == ITEM_SPAWN_SHOTGUN		&& (*Account).m_SpawnWeapon[0] == 5)
+		|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
+		|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
+		|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
+		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS))
 	{
 		bool UseThe = false;
 
@@ -353,47 +355,47 @@ void CShop::BuyItem(int ClientID, int Item)
 		case ITEM_SPOOKY_GHOST: case ITEM_ROOM_KEY:									UseThe = true;
 			// fallthrough
 		default:
-			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[Item].m_pName);
+			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[ItemID].m_pName);
 			m_pGameServer->SendChatTarget(ClientID, aMsg);
 		}
 		return;
 	}
 
 	// vip cant be bought ingame
-	if (Item == ITEM_VIP)
+	if (ItemID == ITEM_VIP)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "VIP can only be bought using real money. Check '/vipinfo'");
 		return;
 	}
 
 	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
-	if (Item == ITEM_RAINBOW)
+	if (ItemID == ITEM_RAINBOW)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "Rainbow is currently disabled.");
 		return;
 	}
 
 	// check for the correct price
-	if ((*Account).m_Money < m_aItems[Item].m_Price)
+	if ((*Account).m_Money < m_aItems[ItemID].m_Price)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "You don't have enough money");
 		return;
 	}
 
 	// check for the correct level
-	if ((*Account).m_Level < m_aItems[Item].m_Level)
+	if ((*Account).m_Level < m_aItems[ItemID].m_Level)
 	{
-		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[Item].m_Level, m_aItems[m_BackgroundItem[ClientID]].m_pName);
+		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[ItemID].m_Level, m_aItems[ItemID].m_pName);
 		m_pGameServer->SendChatTarget(ClientID, aMsg);
 		return;
 	}
 
 	// send a message that we bought the item
-	str_format(aMsg, sizeof(aMsg), "You bought %s %s", m_aItems[m_BackgroundItem[ClientID]].m_pName, m_aItems[Item].m_Time == TIME_DEATH ? "until death" : m_aItems[Item].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
+	str_format(aMsg, sizeof(aMsg), "You bought %s %s", m_aItems[ItemID].m_pName, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
 
 	// apply a message to the history
-	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", m_aItems[Item].m_Price, m_aItems[m_BackgroundItem[ClientID]].m_pName);
+	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_pName);
 	pPlayer->MoneyTransaction(-m_aItems[Item].m_Price, aMsg);
 
 	// give us the bought item
@@ -416,14 +418,4 @@ void CShop::BuyItem(int ClientID, int Item)
 	case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
 	case ITEM_TASER:			(*Account).m_TaserLevel++; break;
 	}
-}
-
-bool CShop::IsPolice(int Item)
-{
-	return Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5;
-}
-
-bool CShop::IsTaser(int Item)
-{
-	return Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7;
 }
