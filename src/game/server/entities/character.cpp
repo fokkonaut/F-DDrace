@@ -888,7 +888,7 @@ void CCharacter::FireWeapon()
 		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		{
 			m_NumGhostShots++;
-			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_aHasItem[SPOOKY_GHOST]) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_SpookyGhost) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
 			{
 				SetSpookyGhost();
 				m_NumGhostShots = 0;
@@ -2195,7 +2195,7 @@ void CCharacter::HandleTiles(int Index)
 						"Money [%llu] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
-						(*Account).m_Money, (PoliceTile && (*Account).m_aHasItem[POLICE]) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
+						(*Account).m_Money, (PoliceTile && (*Account).m_PoliceLevel) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
 						(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
 						(*Account).m_Level
 					);

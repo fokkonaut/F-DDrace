@@ -1400,9 +1400,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Survival Wins: %d", (*Account).m_SurvivalWins);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Spooky Ghost: %d", (int)(*Account).m_aHasItem[SPOOKY_GHOST]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Police: %d", (int)(*Account).m_aHasItem[POLICE]);
+	str_format(aBuf, sizeof(aBuf), "Spooky Ghost: %d", (int)(*Account).m_SpookyGhost);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 0: %s", (*Account).m_aLastMoneyTransaction[0]);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);

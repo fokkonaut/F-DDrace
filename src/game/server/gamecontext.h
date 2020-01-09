@@ -59,13 +59,6 @@ enum Shop
 	SHOP_STATE_CONFIRM,
 };
 
-enum Item
-{
-	SPOOKY_GHOST,
-	POLICE,
-	NUM_ITEMS
-};
-
 enum Minigames
 {
 	MINIGAME_NONE = 0,
@@ -362,7 +355,7 @@ public:
 		int m_PoliceLevel;
 		int m_SurvivalKills;
 		int m_SurvivalWins;
-		bool m_aHasItem[NUM_ITEMS];
+		bool m_SpookyGhost;
 		char m_aLastMoneyTransaction[5][256];
 		bool m_VIP;
 		int m_BlockPoints;
@@ -395,8 +388,7 @@ public:
 		POLICE_LEVEL,
 		SURVIVAL_KILLS,
 		SURVIVAL_WINS,
-		ITEM_SPOOKY_GHOST,
-		ITEM_POLICE,
+		SPOOKY_GHOST,
 		LAST_MONEY_TRANSACTION_0,
 		LAST_MONEY_TRANSACTION_1,
 		LAST_MONEY_TRANSACTION_2,

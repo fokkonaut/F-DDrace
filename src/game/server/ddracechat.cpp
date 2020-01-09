@@ -2019,7 +2019,7 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
 		}
-		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
+		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player is a police officer");
 			return;
@@ -2044,7 +2044,7 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
 		}
-		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_aHasItem[POLICE])
+		else if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player is a police officer");
 			return;

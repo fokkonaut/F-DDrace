@@ -259,7 +259,7 @@ void CCharacter::BuyItem(int ItemID)
 		case 3:
 		{
 			str_format(aItem, sizeof(aItem), "Police Rank %d", (*Account).m_PoliceLevel + 1);
-			if (!(*Account).m_aHasItem[POLICE])
+			if (!(*Account).m_PoliceLevel)
 				Level = 18;
 			else if ((*Account).m_PoliceLevel == 1)
 				Level = 25;
@@ -338,7 +338,7 @@ void CCharacter::BuyItem(int ItemID)
 	case 1: if (m_Rainbow || m_pPlayer->m_InfRainbow) HasAlready = true; break;
 	case 2: if (m_Bloody || m_StrongBloody) HasAlready = true; break;
 	case 3: if ((*Account).m_PoliceLevel == 5) HasAlready = true; break;
-	case 4: if ((*Account).m_aHasItem[SPOOKY_GHOST]) HasAlready = true; break;
+	case 4: if ((*Account).m_SpookyGhost) HasAlready = true; break;
 	case 5: if (m_pPlayer->m_HasRoomKey) HasAlready = true; break;
 	case 6: if ((*Account).m_VIP) HasAlready = true; break;
 	case 7: if ((*Account).m_SpawnWeapon[0] == 5) HasAlready = true; break;
@@ -393,11 +393,8 @@ void CCharacter::BuyItem(int ItemID)
 	{
 	case 1: Rainbow(true, -1, true); break;
 	case 2: Bloody(true, -1, true); break;
-	case 3:
-		if (!(*Account).m_aHasItem[POLICE])
-			(*Account).m_aHasItem[POLICE] = true;
-		(*Account).m_PoliceLevel++; break;
-	case 4: (*Account).m_aHasItem[SPOOKY_GHOST] = true; break;
+	case 3: (*Account).m_PoliceLevel++; break;
+	case 4: (*Account).m_SpookyGhost = true; break;
 	case 5: m_pPlayer->m_HasRoomKey = true; m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
 	case 7: if (Weapon == -1) Weapon = 0;
 		// fallthrough

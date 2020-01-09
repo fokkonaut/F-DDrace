@@ -3169,8 +3169,7 @@ int CGameContext::AddAccount()
 	m_Accounts[ID].m_aLastMoneyTransaction[2][0] = '\0';
 	m_Accounts[ID].m_aLastMoneyTransaction[3][0] = '\0';
 	m_Accounts[ID].m_aLastMoneyTransaction[4][0] = '\0';
-	m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = false;
-	m_Accounts[ID].m_aHasItem[POLICE] = false;
+	m_Accounts[ID].m_SpookyGhost = false;
 	m_Accounts[ID].m_VIP = false;
 	m_Accounts[ID].m_BlockPoints = 0;
 	m_Accounts[ID].m_InstagibKills = 0;
@@ -3216,8 +3215,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(pData); break;
 		case SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(pData); break;
 		case SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(pData); break;
-		case ITEM_SPOOKY_GHOST:			m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] = atoi(pData); break;
-		case ITEM_POLICE:				m_Accounts[ID].m_aHasItem[POLICE] = atoi(pData); break;
+		case SPOOKY_GHOST:				m_Accounts[ID].m_SpookyGhost = atoi(pData); break;
 		case LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0])); break;
 		case LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1])); break;
 		case LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2])); break;
@@ -3263,8 +3261,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_PoliceLevel << "\n";
 		AccFile << m_Accounts[ID].m_SurvivalKills << "\n";
 		AccFile << m_Accounts[ID].m_SurvivalWins << "\n";
-		AccFile << m_Accounts[ID].m_aHasItem[SPOOKY_GHOST] << "\n";
-		AccFile << m_Accounts[ID].m_aHasItem[POLICE] << "\n";
+		AccFile << m_Accounts[ID].m_SpookyGhost << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[0] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[1] << "\n";
 		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[2] << "\n";
