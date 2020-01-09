@@ -3139,7 +3139,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 			dbg_msg("acc", "logged out account '%s'", aUsername);
 		}
 		else
-			pSelf->Logout(ID);
+			pSelf->FreeAccount(ID, true);
 	}
 
 	return 0;
@@ -3216,7 +3216,6 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(pData); break;
 		case SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(pData); break;
 		case SPOOKY_GHOST:				m_Accounts[ID].m_SpookyGhost = atoi(pData); break;
-		case ITEM_POLICE:				break;
 		case LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0])); break;
 		case LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1])); break;
 		case LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2])); break;
