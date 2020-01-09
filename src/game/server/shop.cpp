@@ -362,14 +362,14 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 
 	// vip cant be bought ingame
-	if (ItemID == ITEM_VIP)
+	if (Item == ITEM_VIP)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "VIP can only be bought using real money. Check '/vipinfo'");
 		return;
 	}
 
 	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
-	if (ItemID == ITEM_RAINBOW)
+	if (Item == ITEM_RAINBOW)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "Rainbow is currently disabled.");
 		return;
