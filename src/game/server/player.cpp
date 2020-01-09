@@ -439,7 +439,7 @@ void CPlayer::Snap(int SnappingClient)
 			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
 		}
 
-		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
+		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, SnappingClient);
 	}
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
