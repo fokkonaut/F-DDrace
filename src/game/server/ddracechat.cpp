@@ -1401,7 +1401,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
 		return;
 	}
-
+	return;
 	char aUsername[32];
 	char aPassword[128];
 	str_copy(aUsername, pResult->GetString(0), sizeof(aUsername));
