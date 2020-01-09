@@ -366,6 +366,13 @@ void CShop::BuyItem(int ClientID, int Item)
 		return;
 	}
 
+	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
+	if (Item == ITEM_RAINBOW)
+	{
+		m_pGameServer->SendChatTarget(ClientID, "Rainbow is currently disabled.");
+		return;
+	}
+
 	// check for the correct price
 	if ((*Account).m_Money < m_aItems[Item].m_Price)
 	{
