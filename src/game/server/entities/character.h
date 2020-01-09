@@ -21,7 +21,7 @@ enum Extra
 	INF_RAINBOW,
 	ATOM,
 	TRAIL,
-	EXTRA_SPOOKY_GHOST,
+	SPOOKY_GHOST,
 	SPOOKY,
 	METEOR,
 	INF_METEOR,
@@ -396,16 +396,6 @@ public:
 
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
-	
-	int64 m_ShopAntiSpamTick;
-	bool m_InShop;
-	void ShopWindow(int Dir);
-	int m_ShopWindowPage;
-	int64 m_ShopMotdTick;
-	void BuyItem(int ItemID);
-	void ConfirmPurchase();
-	int m_PurchaseState;
-	void PurchaseEnd(bool Canceled);
 
 	//weapon indicator
 	void UpdateWeaponIndicator();

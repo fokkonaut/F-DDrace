@@ -64,7 +64,7 @@ protected:
 
 	static void Com_CmdList(CGameContext* pGameServer, int ClientID, const char* pArgs);
 
-	struct CChatCommand 
+	struct CChatCommand
 	{
 		char m_aName[32];
 		char m_aHelpText[64];

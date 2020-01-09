@@ -12,6 +12,7 @@
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
 #include "skins.h"
+#include "shop.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -49,16 +50,6 @@ typedef unsigned __int64 uint64_t;
 
 */
 
-enum Shop
-{
-	SHOP_PAGE_NONE = -1,
-	SHOP_PAGE_MAIN,
-
-	SHOP_STATE_NONE = 0,
-	SHOP_STATE_OPENED_WINDOW,
-	SHOP_STATE_CONFIRM,
-};
-
 enum Minigames
 {
 	MINIGAME_NONE = 0,
@@ -90,8 +81,14 @@ enum Top5
 	TOP_SPREE,
 };
 
-#define ACC_START 1 // account ids start with 1, 0 means not logged in
-#define MAX_LEVEL 100
+enum
+{
+	ACC_START = 1, // account ids start with 1, 0 means not logged in
+	MAX_LEVEL = 100,
+	NUM_TASER_LEVELS = 7,
+	NUM_POLICE_LEVELS = 5,
+};
+
 
 enum
 {
@@ -336,6 +333,7 @@ public:
 	void Logout(int ID);
 
 	int m_aTaserPrice[7];
+	int m_aPoliceLevel[5];
 	int m_aNeededXP[MAX_LEVEL + 1];
 	int m_LastAccSaveTick;
 
@@ -374,39 +372,39 @@ public:
 	// make sure these are in the same order as the variables above
 	enum AccountVariables
 	{
-		PORT,
-		LOGGED_IN,
-		DISABLED,
-		PASSWORD,
-		USERNAME,
-		CLIENT_ID,
-		LEVEL,
-		XP,
-		MONEY,
-		KILLS,
-		DEATHS,
-		POLICE_LEVEL,
-		SURVIVAL_KILLS,
-		SURVIVAL_WINS,
-		SPOOKY_GHOST,
-		LAST_MONEY_TRANSACTION_0,
-		LAST_MONEY_TRANSACTION_1,
-		LAST_MONEY_TRANSACTION_2,
-		LAST_MONEY_TRANSACTION_3,
-		LAST_MONEY_TRANSACTION_4,
-		VIP,
-		BLOCK_POINTS,
-		INSTAGIB_KILLS,
-		INSTAGIB_WINS,
-		SPAWN_WEAPON_0,
-		SPAWN_WEAPON_1,
-		SPAWN_WEAPON_2,
-		NINJAJETPACK,
-		LAST_PLAYER_NAME,
-		SURVIVAL_DEATHS,
-		INSTAGIB_DEATHS,
-		TASER_LEVEL,
-		KILLING_SPREE_RECORD,
+		ACC_PORT,
+		ACC_LOGGED_IN,
+		ACC_DISABLED,
+		ACC_PASSWORD,
+		ACC_USERNAME,
+		ACC_CLIENT_ID,
+		ACC_LEVEL,
+		ACC_XP,
+		ACC_MONEY,
+		ACC_KILLS,
+		ACC_DEATHS,
+		ACC_POLICE_LEVEL,
+		ACC_SURVIVAL_KILLS,
+		ACC_SURVIVAL_WINS,
+		ACC_SPOOKY_GHOST,
+		ACC_LAST_MONEY_TRANSACTION_0,
+		ACC_LAST_MONEY_TRANSACTION_1,
+		ACC_LAST_MONEY_TRANSACTION_2,
+		ACC_LAST_MONEY_TRANSACTION_3,
+		ACC_LAST_MONEY_TRANSACTION_4,
+		ACC_VIP,
+		ACC_BLOCK_POINTS,
+		ACC_INSTAGIB_KILLS,
+		ACC_INSTAGIB_WINS,
+		ACC_SPAWN_WEAPON_0,
+		ACC_SPAWN_WEAPON_1,
+		ACC_SPAWN_WEAPON_2,
+		ACC_NINJAJETPACK,
+		ACC_LAST_PLAYER_NAME,
+		ACC_SURVIVAL_DEATHS,
+		ACC_INSTAGIB_DEATHS,
+		ACC_TASER_LEVEL,
+		ACC_KILLING_SPREE_RECORD,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -438,7 +436,9 @@ public:
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
 
-	CSkins m_pSkins[NUM_SKINS];
+	CSkins m_pSkins;
+	class CShop *m_pShop;
+
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSound(int Sound, int ClientID);

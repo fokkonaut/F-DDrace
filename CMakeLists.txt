@@ -1631,7 +1631,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/plasma.h
   entities/projectile.cpp
   entities/projectile.h
-  entities/shop.cpp
   entities/stable_projectile.cpp
   entities/stable_projectile.h
   entities/trail.cpp
@@ -1658,6 +1657,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   score/file_score.h
   score/sql_score.cpp
   score/sql_score.h
+  shop.cpp
+  shop.h
   skins.cpp
   skins.h
   teams.cpp

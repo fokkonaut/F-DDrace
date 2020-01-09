@@ -66,6 +66,7 @@ void CGameContext::Construct(int Resetting)
 		m_pScore = 0;
 		m_NumMutes = 0;
 		m_NumVoteMutes = 0;
+		m_pShop = 0;
 	}
 
 	m_aDeleteTempfile[0] = 0;
@@ -74,6 +75,9 @@ void CGameContext::Construct(int Resetting)
 
 	m_pRandomMapResult = nullptr;
 	m_pMapVoteResult = nullptr;
+
+	// F-DDrace
+	m_pShop = 0;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -95,6 +99,8 @@ CGameContext::~CGameContext()
 
 	if (m_pScore)
 		delete m_pScore;
+	if (m_pShop)
+		delete m_pShop;
 }
 
 void CGameContext::Clear()
@@ -673,6 +679,9 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
 		}
+
+		// F-DDrace
+		m_pShop->Tick(i);
 	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -1463,16 +1472,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					if (pChr->m_InShop)
-					{
-						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
-							pChr->PurchaseEnd(false);
-						else if (pChr->m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
-						{
-							if ((pChr->m_ShopWindowPage != SHOP_PAGE_NONE) && (pChr->m_ShopWindowPage != SHOP_PAGE_MAIN))
-								pChr->ConfirmPurchase();
-						}
-					}
+					if (m_pShop->IsInShop(ClientID))
+						m_pShop->OnKeyPress(ClientID, pMsg->m_Vote);
 					else
 						pChr->DropFlag();
 				}
@@ -1486,16 +1487,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					if (pChr->m_InShop)
-					{
-						if (pChr->m_PurchaseState == SHOP_STATE_CONFIRM)
-							pChr->PurchaseEnd(true);
-						else if(pChr->m_ShopWindowPage == SHOP_PAGE_NONE)
-						{
-							pChr->ShopWindow(SHOP_PAGE_MAIN);
-							pChr->m_PurchaseState = SHOP_STATE_OPENED_WINDOW;
-						}
-					}
+					if (m_pShop->IsInShop(ClientID))
+						m_pShop->OnKeyPress(ClientID, pMsg->m_Vote);
 					else
 						pChr->DropWeapon(pChr->GetActiveWeapon());
 				}
@@ -2586,13 +2579,21 @@ void CGameContext::OnInit()
 	m_aNeededXP[MAX_LEVEL] = NeededXP[MAX_LEVEL-1];
 
 	int TaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000 };
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < NUM_TASER_LEVELS; i++)
 		m_aTaserPrice[i] = TaserPrice[i];
+
+	int PoliceLevel[] = { 18, 25, 30, 40, 50 };
+	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
+		m_aPoliceLevel[i] = PoliceLevel[i];
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
 
 	m_LastAccSaveTick = Server()->Tick();
+
+	if (m_pShop)
+		delete m_pShop;
+	m_pShop = new CShop(this);
 
 
 #ifdef CONF_DEBUG
@@ -2763,6 +2764,8 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;
+	delete m_pShop;
+	m_pShop = 0;
 	Clear();
 }
 
@@ -3201,39 +3204,39 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 
 		switch (i)
 		{
-		case PORT:						m_Accounts[ID].m_Port = atoi(pData); break;
-		case LOGGED_IN:					m_Accounts[ID].m_LoggedIn = atoi(pData); break;
-		case DISABLED:					m_Accounts[ID].m_Disabled = atoi(pData); break;
-		case PASSWORD:					str_copy(m_Accounts[ID].m_Password, pData, sizeof(m_Accounts[ID].m_Password)); break;
-		case USERNAME:					str_copy(m_Accounts[ID].m_Username, pData, sizeof(m_Accounts[ID].m_Username)); break;
-		case CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(pData); break;
-		case LEVEL:						m_Accounts[ID].m_Level = atoi(pData); break;
-		case XP:						m_Accounts[ID].m_XP = atoi(pData); break;
-		case MONEY:						m_Accounts[ID].m_Money = atoi(pData); break;
-		case KILLS:						m_Accounts[ID].m_Kills = atoi(pData); break;
-		case DEATHS:					m_Accounts[ID].m_Deaths = atoi(pData); break;
-		case POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(pData); break;
-		case SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(pData); break;
-		case SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(pData); break;
-		case SPOOKY_GHOST:				m_Accounts[ID].m_SpookyGhost = atoi(pData); break;
-		case LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0])); break;
-		case LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1])); break;
-		case LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2])); break;
-		case LAST_MONEY_TRANSACTION_3:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3])); break;
-		case LAST_MONEY_TRANSACTION_4:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4])); break;
-		case VIP:						m_Accounts[ID].m_VIP = atoi(pData); break;
-		case BLOCK_POINTS:				m_Accounts[ID].m_BlockPoints = atoi(pData); break;
-		case INSTAGIB_KILLS:			m_Accounts[ID].m_InstagibKills = atoi(pData); break;
-		case INSTAGIB_WINS:				m_Accounts[ID].m_InstagibWins = atoi(pData); break;
-		case SPAWN_WEAPON_0:			m_Accounts[ID].m_SpawnWeapon[0] = atoi(pData); break;
-		case SPAWN_WEAPON_1:			m_Accounts[ID].m_SpawnWeapon[1] = atoi(pData); break;
-		case SPAWN_WEAPON_2:			m_Accounts[ID].m_SpawnWeapon[2] = atoi(pData); break;
-		case NINJAJETPACK:				m_Accounts[ID].m_Ninjajetpack = atoi(pData); break;
-		case LAST_PLAYER_NAME:			str_copy(m_Accounts[ID].m_aLastPlayerName, pData, sizeof(m_Accounts[ID].m_aLastPlayerName)); break;
-		case SURVIVAL_DEATHS:			m_Accounts[ID].m_SurvivalDeaths = atoi(pData); break;
-		case INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(pData); break;
-		case TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(pData); break;
-		case KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
+		case ACC_PORT:						m_Accounts[ID].m_Port = atoi(pData); break;
+		case ACC_LOGGED_IN:					m_Accounts[ID].m_LoggedIn = atoi(pData); break;
+		case ACC_DISABLED:					m_Accounts[ID].m_Disabled = atoi(pData); break;
+		case ACC_PASSWORD:					str_copy(m_Accounts[ID].m_Password, pData, sizeof(m_Accounts[ID].m_Password)); break;
+		case ACC_USERNAME:					str_copy(m_Accounts[ID].m_Username, pData, sizeof(m_Accounts[ID].m_Username)); break;
+		case ACC_CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(pData); break;
+		case ACC_LEVEL:						m_Accounts[ID].m_Level = atoi(pData); break;
+		case ACC_XP:						m_Accounts[ID].m_XP = atoi(pData); break;
+		case ACC_MONEY:						m_Accounts[ID].m_Money = atoi(pData); break;
+		case ACC_KILLS:						m_Accounts[ID].m_Kills = atoi(pData); break;
+		case ACC_DEATHS:					m_Accounts[ID].m_Deaths = atoi(pData); break;
+		case ACC_POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(pData); break;
+		case ACC_SURVIVAL_KILLS:			m_Accounts[ID].m_SurvivalKills = atoi(pData); break;
+		case ACC_SURVIVAL_WINS:				m_Accounts[ID].m_SurvivalWins = atoi(pData); break;
+		case ACC_SPOOKY_GHOST:				m_Accounts[ID].m_SpookyGhost = atoi(pData); break;
+		case ACC_LAST_MONEY_TRANSACTION_0:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[0], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[0])); break;
+		case ACC_LAST_MONEY_TRANSACTION_1:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[1], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[1])); break;
+		case ACC_LAST_MONEY_TRANSACTION_2:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[2], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[2])); break;
+		case ACC_LAST_MONEY_TRANSACTION_3:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[3], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[3])); break;
+		case ACC_LAST_MONEY_TRANSACTION_4:	str_copy(m_Accounts[ID].m_aLastMoneyTransaction[4], pData, sizeof(m_Accounts[ID].m_aLastMoneyTransaction[4])); break;
+		case ACC_VIP:						m_Accounts[ID].m_VIP = atoi(pData); break;
+		case ACC_BLOCK_POINTS:				m_Accounts[ID].m_BlockPoints = atoi(pData); break;
+		case ACC_INSTAGIB_KILLS:			m_Accounts[ID].m_InstagibKills = atoi(pData); break;
+		case ACC_INSTAGIB_WINS:				m_Accounts[ID].m_InstagibWins = atoi(pData); break;
+		case ACC_SPAWN_WEAPON_0:			m_Accounts[ID].m_SpawnWeapon[0] = atoi(pData); break;
+		case ACC_SPAWN_WEAPON_1:			m_Accounts[ID].m_SpawnWeapon[1] = atoi(pData); break;
+		case ACC_SPAWN_WEAPON_2:			m_Accounts[ID].m_SpawnWeapon[2] = atoi(pData); break;
+		case ACC_NINJAJETPACK:				m_Accounts[ID].m_Ninjajetpack = atoi(pData); break;
+		case ACC_LAST_PLAYER_NAME:			str_copy(m_Accounts[ID].m_aLastPlayerName, pData, sizeof(m_Accounts[ID].m_aLastPlayerName)); break;
+		case ACC_SURVIVAL_DEATHS:			m_Accounts[ID].m_SurvivalDeaths = atoi(pData); break;
+		case ACC_INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(pData); break;
+		case ACC_TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(pData); break;
+		case ACC_KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
 		}
 	}
 }
@@ -3482,7 +3485,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
-	pDummy->m_TeeInfos = m_pSkins->m_Skins[SKIN_DUMMY];
+	pDummy->m_TeeInfos = m_pSkins.GetSkin(SKIN_DUMMY);
 
 	OnClientEnter(DummyID);
 
@@ -3822,7 +3825,7 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Atom";
 	case TRAIL:
 		return "Trail";
-	case EXTRA_SPOOKY_GHOST:
+	case SPOOKY_GHOST:
 		return "Spooky Ghost";
 	case SPOOKY:
 		return "Spooky Mode";

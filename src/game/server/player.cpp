@@ -267,7 +267,7 @@ void CPlayer::Tick()
 	if (m_pCharacter)
 	{
 		if (m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
-			m_pCharacter->m_ShopMotdTick = 0;
+			GameServer()->m_pShop->SetMotdTick(m_ClientID, 0);
 		else
 			m_pCharacter->m_NumGhostShots = 0;
 
@@ -1245,7 +1245,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 		return;
 
 	if (Force)
-		str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins->m_Skins[Skin].m_aSkinName, 24);
+		str_copy(m_TeeInfos.m_aSkinName, GameServer()->m_pSkins.GetSkin(Skin).m_aSkinName, 24);
 
 	if (m_SpookyGhost)
 		return;
@@ -1254,9 +1254,9 @@ void CPlayer::SetSkin(int Skin, bool Force)
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		str_copy(pTeeInfos.m_aaSkinPartNames[p], GameServer()->m_pSkins->m_Skins[Skin].m_aaSkinPartNames[p], 24);
-		pTeeInfos.m_aUseCustomColors[p] = GameServer()->m_pSkins->m_Skins[Skin].m_aUseCustomColors[p];
-		pTeeInfos.m_aSkinPartColors[p] = GameServer()->m_pSkins->m_Skins[Skin].m_aSkinPartColors[p];
+		str_copy(pTeeInfos.m_aaSkinPartNames[p], GameServer()->m_pSkins.GetSkin(Skin).m_aaSkinPartNames[p], 24);
+		pTeeInfos.m_aUseCustomColors[p] = GameServer()->m_pSkins.GetSkin(Skin).m_aUseCustomColors[p];
+		pTeeInfos.m_aSkinPartColors[p] = GameServer()->m_pSkins.GetSkin(Skin).m_aSkinPartColors[p];
 	}
 
 	GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
@@ -1270,7 +1270,7 @@ void CPlayer::ResetSkin(bool Unforce)
 	if (m_SpookyGhost)
 		SetSkin(SKIN_SPOOKY_GHOST);
 	else if (m_TeeInfos.m_aSkinName[0] != '\0')
-		SetSkin(GameServer()->m_pSkins->GetSkinID(m_TeeInfos.m_aSkinName), true);
+		SetSkin(GameServer()->m_pSkins.GetSkinID(m_TeeInfos.m_aSkinName), true);
 	else
 		GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
 }

@@ -1275,7 +1275,7 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 
 	if (pResult->NumArguments() > 1)
 	{
-		int Skin = pSelf->m_pSkins->GetSkinID(pResult->GetString(1));
+		int Skin = pSelf->m_pSkins.GetSkinID(pResult->GetString(1));
 		CPlayer* pFrom = pSelf->m_apPlayers[pResult->GetInteger(1)];
 		char aInteger[4];
 		str_format(aInteger, sizeof(aInteger), "%d", pResult->GetInteger(1));

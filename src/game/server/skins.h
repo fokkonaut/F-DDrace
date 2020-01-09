@@ -59,12 +59,15 @@ enum Skins
 
 class CSkins
 {
+private:
+	CPlayer::TeeInfos m_Skins[NUM_SKINS];
+
 public:
 
 	CSkins();
 
 	int GetSkinID(const char *pSkin);
-	CPlayer::TeeInfos m_Skins[NUM_SKINS];
+	CPlayer::TeeInfos GetSkin(int Skin) { return m_Skins[Skin]; };
 };
 
 #endif

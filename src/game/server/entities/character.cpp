@@ -170,7 +170,7 @@ void CCharacter::HandleJetpack()
 	if (FullAuto && (m_LatestInput.m_Fire & 1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
-	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
 		return;
 
 	if (!WillFire)
@@ -382,10 +382,10 @@ void CCharacter::FireWeapon()
 		WillFire = true;
 
 	// shop window
-	if (m_ShopWindowPage != SHOP_PAGE_NONE && m_PurchaseState == SHOP_STATE_OPENED_WINDOW)
+	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
 	{
 		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-			ShopWindow(GetAimDir());
+			GameServer()->m_pShop->OnPageChange(m_pPlayer->GetCID(), GetAimDir());
 		return;
 	}
 
@@ -2082,19 +2082,7 @@ void CCharacter::HandleTiles(int Index)
 	if (m_TileIndex == TILE_SHOP || m_TileFIndex == TILE_SHOP)
 	{
 		if (m_LastIndexTile != TILE_SHOP && m_LastIndexFrontTile != TILE_SHOP)
-		{
-			if (m_ShopAntiSpamTick < Server()->Tick() && !GameServer()->IsShopDummy(m_pPlayer->GetCID()))
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press f4 to start shopping.", Server()->ClientName(m_pPlayer->GetCID()));
-				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), aBuf);
-			}
-		}
-
-		if (Server()->Tick() % 50 == 0)
-			GameServer()->SendBroadcast("~ S H O P ~", m_pPlayer->GetCID(), false);
-
-		m_InShop = true;
+			GameServer()->m_pShop->OnShopEnter(m_pPlayer->GetCID());
 	}
 
 	// helper only
@@ -2965,19 +2953,13 @@ void CCharacter::FDDraceInit()
 
 	m_AlwaysTeleWeapon = g_Config.m_SvAlwaysTeleWeapon;
 
-	m_InShop = false;
-
-	int64 Now = Server()->Tick();
-	m_ShopAntiSpamTick = Now;
-	m_ShopWindowPage = SHOP_PAGE_NONE;
-	m_ShopMotdTick = Now;
-	m_PurchaseState = SHOP_STATE_NONE;
-
 	m_pPlayer->m_Gamemode = (g_Config.m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
 
 	m_NumGhostShots = 0;
 	m_SavedDefEmote = EMOTE_NORMAL;
+
+	int64 Now = Server()->Tick();
 
 	if (m_pPlayer->m_HasRoomKey)
 		m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true;
@@ -3001,6 +2983,8 @@ void CCharacter::FDDraceInit()
 	m_GotTasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
+
+	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
 }
 
 void CCharacter::FDDraceTick()
@@ -3022,12 +3006,6 @@ void CCharacter::FDDraceTick()
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 		m_OldFakeTuneCollision = m_FakeTuneCollision;
-	}
-
-	if (m_ShopMotdTick < Server()->Tick())
-	{
-		m_ShopWindowPage = SHOP_PAGE_NONE;
-		m_PurchaseState = SHOP_STATE_NONE;
 	}
 
 	if (!m_AtomHooked && m_pPlayer->IsHooked(ATOM) && !m_Atom)
@@ -3132,27 +3110,7 @@ void CCharacter::FDDraceTick()
 
 void CCharacter::HandleLastIndexTiles()
 {
-	if (m_InShop)
-	{
-		if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
-		{
-			if (m_ShopAntiSpamTick < Server()->Tick() && !GameServer()->IsShopDummy(m_pPlayer->GetCID()))
-			{
-				GameServer()->SendChat(GameWorld()->GetClosestShopDummy(m_Pos, this, m_pPlayer->GetCID()), CHAT_SINGLE, m_pPlayer->GetCID(), "Bye! Come back if you need something.");
-				m_ShopAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
-			}
-
-			if (m_ShopWindowPage != SHOP_PAGE_NONE)
-				GameServer()->SendMotd("", GetPlayer()->GetCID());
-
-			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
-
-			m_PurchaseState = SHOP_STATE_NONE;
-			m_ShopWindowPage = SHOP_PAGE_NONE;
-
-			m_InShop = false;
-		}
-	}
+	GameServer()->m_pShop->OnShopLeave(m_pPlayer->GetCID());
 
 	if (m_MoneyTile)
 	{
@@ -3386,7 +3344,7 @@ void CCharacter::UpdateWeaponIndicator()
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
 		|| (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Level < MAX_LEVEL)
 		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN)
-		|| (m_TileIndex == TILE_SHOP || m_TileFIndex == TILE_SHOP))
+		|| GameServer()->m_pShop->IsInShop(m_pPlayer->GetCID()))
 		return;
 
 	char aBuf[256];
@@ -3479,7 +3437,7 @@ void CCharacter::Trail(bool Set, int FromID, bool Silent)
 void CCharacter::SpookyGhost(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_HasSpookyGhost = Set;
-	GameServer()->SendExtraMessage(EXTRA_SPOOKY_GHOST, m_pPlayer->GetCID(), Set, FromID, Silent);
+	GameServer()->SendExtraMessage(SPOOKY_GHOST, m_pPlayer->GetCID(), Set, FromID, Silent);
 	if (!Silent && Set)
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "For more info, say '/spookyghostinfo'");
 }

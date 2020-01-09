@@ -2079,9 +2079,9 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser is a rifle that freezes players for a short time.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser relies on the normal rifle, if you loose it, you loose the taser.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your taser stats ~~~");
-	str_format(aBuf, sizeof(aBuf), "Taser level: %d/7", (*Account).m_TaserLevel);
+	str_format(aBuf, sizeof(aBuf), "Taser level: %d/%d", (*Account).m_TaserLevel, NUM_TASER_LEVELS);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	if ((*Account).m_TaserLevel < 7)
+	if ((*Account).m_TaserLevel < NUM_TASER_LEVELS)
 	{
 		str_format(aBuf, sizeof(aBuf), "Price for the next level: %d", pSelf->m_aTaserPrice[(*Account).m_TaserLevel]);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
