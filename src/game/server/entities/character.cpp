@@ -3079,10 +3079,10 @@ void CCharacter::FDDraceTick()
 				char aSurvival[32];
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
-				str_format(aMsg, sizeof(aMsg), " \n \n^666XP ^222[^444%d^222/^444%d^222] ^666+1 flag%s%s",
+				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
 					(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
-				GameServer()->SendBroadcast(aMsg, m_pPlayer->GetCID(), false);
+				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg), m_pPlayer->GetCID(), false);
 			}
 		}
 	}
