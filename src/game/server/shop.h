@@ -76,6 +76,7 @@ private:
 
 	const char *GetHeadline(int Item);
 	const char *GetTimeMessage(int Time);
+	const char *FormatMotd(const char *pMsg, int Item);
 
 	void SendWindow(int ClientID, int Item);
 

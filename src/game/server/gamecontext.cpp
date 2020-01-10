@@ -3389,12 +3389,11 @@ const char *CGameContext::FormatMotd(const char *pMsg)
 	{
 		int count = 0;
 		int MotdLen = str_length(aMotd) + 1;
-		for (int i = 0, k = 0, s = 0; i < MotdLen && k < (int)sizeof(aMotd); i++, k++)
+		for (int i = 0, s = 0; i < MotdLen; i++)
 		{
 			s++;
-			if (aMotd[i] == '\\' && aMotd[i + 1] == 'n')
+			if ((aMotd[i] == '\\' && aMotd[i + 1] == 'n') || aMotd[i] == '\n')
 			{
-				i++;
 				count++;
 				s = 0;
 			}
@@ -3407,7 +3406,7 @@ const char *CGameContext::FormatMotd(const char *pMsg)
 
 		for (int i = MotdLen; i > 0; i--)
 		{
-			if ((aMotd[i - 1] == '\\' && aMotd[i] == 'n') || count > 20)
+			if ((aMotd[i - 1] == '\\' && aMotd[i] == 'n') || aMotd[i] == '\n' || count > 20)
 			{
 				aMotd[i] = '\0';
 				aMotd[i - 1] = '\0';

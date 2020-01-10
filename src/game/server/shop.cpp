@@ -2,6 +2,8 @@
 
 #include "shop.h"
 
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 11, 9, 9, 9, 10, 9, 12, 17 };
+
 CShop::CShop(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
@@ -16,15 +18,15 @@ CShop::CShop(CGameContext *pGameServer)
 
 	AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
 	AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
-	AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot.\nFor more information about the specific police ranks\nplease say '/policeinfo'.");
-	AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes.\nIf your ghost is activated you will be able to shoot plasma\nprojectiles. For more information please visit '/spookyghostinfo'.");
-	AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room.\nIt's under the spawn and there is a money tile.");
-	AddItem("VIP", 1, -1, TIME_FOREVER, "VIP gives you some benefits,\ncheck '/vipinfo'.");
-	AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn.\nFor more information about spawn weapons,\nplease type '/spawnweaponsinfo'.");
-	AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn.\nFor more information about spawn weapons,\nplease type '/spawnweaponsinfo'.");
-	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn.\nFor more information about spawn weapons,\nplease type '/spawnweaponsinfo'.");
-	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.\nToggle it using '/ninjajetpack'.");
-	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player\nFor more information about the taser and your taser stats,\nplase visit '/taserinfo'.");
+	AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
+	AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
+	AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
+	AddItem("VIP", 1, -1, TIME_FOREVER, "VIP gives you some benefits, check '/vipinfo'.");
+	AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+	AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
+	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
 
 	static char aaBuf[NUM_POLICE_LEVELS][32];
 	for (int i = 0; i < 5; i++)
@@ -78,7 +80,7 @@ void CShop::OnShopEnter(int ClientID)
 		CCharacter* pChr = m_pGameServer->GetPlayerChar(ClientID);
 
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press f4 to start shopping.", m_pServer->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", m_pServer->ClientName(ClientID));
 		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, aBuf);
 	}
 
@@ -149,13 +151,10 @@ const char *CShop::GetHeadline(int Item)
 	if (Item < ITEM_RAINBOW || Item > NUM_ITEMS)
 		return "Unknown";
 
-	const char *pStart = "~  ";
-	const char *pEnd = "  ~";
-
 	static char aRet[64];
-	str_copy(aRet, pStart, sizeof(aRet));
+	str_copy(aRet, "", sizeof(aRet));
 
-	int s = str_length(pStart);
+	int s = 0;
 
 	int NameLength = str_length(m_aItems[Item].m_pName) + 1;
 	for (int i = 0; i < NameLength; i++)
@@ -166,8 +165,41 @@ const char *CShop::GetHeadline(int Item)
 		str_append(aRet, " ", sizeof(aRet));
 		s += 2;
 	}
-	str_append(aRet, pEnd, sizeof(aRet));
 
+	return aRet;
+}
+
+const char *CShop::FormatMotd(const char *pMsg, int Item)
+{
+	char aTemp[64];
+	char aTemp2[64];
+	char aPage[64];
+	static char aRet[512];
+
+	int Page = Item;
+	if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5) Page = ITEM_POLICE;
+	else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7) Page = ITEM_TASER;
+	else if (Item == -1) Page = NUM_ITEMS_LIST;
+	else if (Item == -2) Page = NUM_ITEMS_LIST+1;
+
+	str_format(aPage, sizeof(aPage), "~ %d ~", Page);
+
+	aTemp[0] = 0;
+	for (int i = 0; i < pNumNewLines[Page]; i++)
+	{
+		str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
+		str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
+	}
+
+	str_format(aRet, sizeof(aRet),
+		"**************************************\n"
+		"                  ~  S H O P  ~\n"
+		"**************************************\n\n"
+		"%s"
+		"%s"
+		"**************************************\n"
+		"%s\n"
+		"%s", pMsg, aTemp, Item >= PAGE_MAIN ? "If you want to buy an item, press F3" : "", Item > PAGE_MAIN ? aPage : "");
 	return aRet;
 }
 
@@ -235,43 +267,22 @@ void CShop::ShopWindow(int ClientID, int Dir)
 
 void CShop::SendWindow(int ClientID, int Item)
 {
-	int Page = Item;
-	if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5)
-		Page = ITEM_POLICE;
-	else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7)
-		Page = ITEM_TASER;
-
-	char aBase[512];
+	char aMsg[512];
 	if (m_WindowPage[ClientID] > PAGE_MAIN)
 	{
-		str_format(aBase, sizeof(aBase),
-			"***************************\n"
-			"         ~  S H O P  ~\n"
-			"***************************\n\n"
+		str_format(aMsg, sizeof(aMsg),
 			"%s\n\n"
 			"Level: %d\n"
 			"Price: %d\n"
 			"Time: %s\n\n"
-			"%s\n\n"
-			"***************************\n"
-			"If you want to buy an item press f3.\n\n\n"
-			"              ~ %d ~              ", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription, Page);
+			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
 	}
 	else
 	{
-		str_format(aBase, sizeof(aBase),
-			"***************************\n"
-			"         ~  S H O P  ~\n"
-			"***************************\n\n"
-			"Welcome to the shop!\n\n"
-			"By shooting to the right you go one site forward,\n"
-			"and by shooting left you go one site\n"
-			"back.\n\n"
-			"***************************\n"
-			"If you want to buy an item press f3.");
+		str_format(aMsg, sizeof(aMsg), "Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.");
 	}
 
-	m_pGameServer->SendMotd(aBase, ClientID);
+	m_pGameServer->SendMotd(FormatMotd(aMsg, Item), ClientID);
 	m_MotdTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 10; // motd is there for 10 sec
 }
 
@@ -279,33 +290,19 @@ void CShop::ConfirmPurchase(int ClientID)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf),
-		"***************************\n"
-		"        ~  S H O P  ~      \n"
-		"***************************\n\n"
 		"Are you sure you want to buy this item?\n\n"
-		"f3 - yes\n"
-		"f4 - no\n\n"
-		"***************************\n");
+		"F3 - yes\n"
+		"F4 - no\n\n");
 
-	m_pGameServer->SendMotd(aBuf, ClientID);
+	m_pGameServer->SendMotd(FormatMotd(aBuf, -1), ClientID);
 	m_PurchaseState[ClientID] = STATE_CONFIRM;
 }
 
 void CShop::EndPurchase(int ClientID, bool Cancelled)
 {
-	char aResult[256];
 	if (Cancelled)
 	{
-		char aBuf[256];
-		str_format(aResult, sizeof(aResult), "You canceled the purchase.");
-		str_format(aBuf, sizeof(aBuf),
-			"***************************\n"
-			"        ~  S H O P  ~      \n"
-			"***************************\n\n"
-			"%s\n\n"
-			"***************************\n", aResult);
-
-		m_pGameServer->SendMotd(aBuf, ClientID);
+		m_pGameServer->SendMotd(FormatMotd("You canceled the purchase.", -2), ClientID);
 	}
 	else
 	{
