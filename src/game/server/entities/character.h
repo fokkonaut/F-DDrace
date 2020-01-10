@@ -409,7 +409,7 @@ public:
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
 	int m_SpawnTick;
-	bool m_GotTasered;
+	bool m_GotLasered;
 
 	int m_KillStreak;
 

@@ -67,6 +67,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if (m_Type == WEAPON_LASER)
 	{
+		pHit->m_GotLasered = true;
 		pHit->UnFreeze();
 	}
 	else if (m_Type == WEAPON_TASER)
@@ -74,7 +75,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		if (pOwnerChar)
 		{
 			pHit->Freeze(10.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
-			pHit->m_GotTasered = true;
+			pHit->m_GotLasered = true;
 		}
 	}
 	pHit->TakeDamage(vec2(0.f, 0.f), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetRealWeapon(m_Type)].m_Damage, m_Owner, m_Type);

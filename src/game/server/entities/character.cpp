@@ -2806,13 +2806,13 @@ bool CCharacter::UnFreeze()
 
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
-		if (!m_GotTasered)
+		if (!m_GotLasered)
 		{
 			m_Core.m_Killer.m_ClientID = -1;
 			m_Core.m_Killer.m_Weapon = -1;
 		}
 		else
-			m_GotTasered = false;
+			m_GotLasered = false;
 
 		return true;
 	}
@@ -2980,7 +2980,7 @@ void CCharacter::FDDraceInit()
 	m_HasFinishedSpecialRace = false;
 	m_SpawnTick = Now;
 	m_MoneyTile = false;
-	m_GotTasered = false;
+	m_GotLasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
 
