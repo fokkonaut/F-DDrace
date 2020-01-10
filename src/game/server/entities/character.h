@@ -363,7 +363,6 @@ public:
 	void SetSpookyGhost();
 	void UnsetSpookyGhost();
 	int m_NumGhostShots;
-	int m_SavedDefEmote;
 
 	//extras
 	bool m_Rainbow;

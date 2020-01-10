@@ -1598,7 +1598,7 @@ void CCharacter::Snap(int SnappingClient)
 		m_EmoteStop = -1;
 	}
 
-	pCharacter->m_Emote = m_EmoteType;
+	pCharacter->m_Emote = m_pPlayer->m_SpookyGhost ? EMOTE_SURPRISE : m_EmoteType;
 
 	pCharacter->m_AmmoCount = 0;
 	pCharacter->m_Health = 0;
@@ -2957,7 +2957,6 @@ void CCharacter::FDDraceInit()
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
 
 	m_NumGhostShots = 0;
-	m_SavedDefEmote = EMOTE_NORMAL;
 
 	int64 Now = Server()->Tick();
 
@@ -3269,8 +3268,6 @@ void CCharacter::SetSpookyGhost()
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
 			m_aWeapons[i].m_Got = false;
-	m_SavedDefEmote = m_pPlayer->m_DefEmote;
-	m_pPlayer->m_DefEmote = EMOTE_SURPRISE;
 	m_pPlayer->m_ShowName = false;
 	m_pPlayer->SetSkin(SKIN_SPOOKY_GHOST);
 	m_pPlayer->m_SpookyGhost = true; // set m_SpookyGhost after we set the skin
@@ -3282,7 +3279,6 @@ void CCharacter::UnsetSpookyGhost()
 		return;
 
 	LoadWeaponBackup(BACKUP_SPOOKY_GHOST);
-	m_pPlayer->m_DefEmote = m_SavedDefEmote;
 	m_pPlayer->m_ShowName = true;
 	m_pPlayer->m_SpookyGhost = false; // set m_SpookyGhost before we reset the skin
 	m_pPlayer->ResetSkin();

@@ -1636,9 +1636,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						pChr->SetEmoteType(EMOTE_NORMAL);
 						break;
 				}
-				if (pPlayer->m_SpookyGhost || pChr->m_Spooky)
-					pChr->SetEmoteType(EMOTE_SURPRISE);
-				else if (pChr->GetActiveWeapon() == WEAPON_HEART_GUN)
+				if (pChr->GetActiveWeapon() == WEAPON_HEART_GUN)
 					pChr->SetEmoteType(EMOTE_HAPPY);
 				pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
 			}
