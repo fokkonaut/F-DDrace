@@ -1148,7 +1148,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int ID = pResult->NumArguments() ? pSelf->GetCIDByName(pResult->GetString(0)) : pResult->m_ClientID;
 	CPlayer* pPlayer = pSelf->m_apPlayers[ID];
-	if (!pPlayer)
+	if (ID == -1 || !pPlayer)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Player not found");
 		return;
@@ -1618,14 +1618,16 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	int ID = pSelf->GetCIDByName(pResult->GetString(1));
+	CCharacter* pChr = pSelf->GetPlayerChar(ID);
+
 	char aBuf[128];
 	char aCmd[64];
 	str_copy(aCmd, pResult->GetString(0), sizeof(aCmd));
 
 	if (!str_comp_nocase(aCmd, "invite"))
 	{
-		CCharacter* pChr = pSelf->GetPlayerChar(pSelf->GetCIDByName(pResult->GetString(1)));
-		if (!pChr)
+		if (ID == -1 || !pChr)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
@@ -1655,8 +1657,7 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 	}
 	else if (!str_comp_nocase(aCmd, "kick"))
 	{
-		CCharacter* pChr = pSelf->GetPlayerChar(pSelf->GetCIDByName(pResult->GetString(1)));
-		if (!pChr)
+		if (ID == -1 || !pChr)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
@@ -2014,7 +2015,7 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 
 	if (!str_comp_nocase(aCmd, "add"))
 	{
-		if (!pChr)
+		if (ID == -1 || !pChr)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
@@ -2039,7 +2040,7 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 	}
 	else if (!str_comp_nocase(aCmd, "remove"))
 	{
-		if (!pChr)
+		if (ID == -1 || !pChr)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "That player doesn't exist");
 			return;
