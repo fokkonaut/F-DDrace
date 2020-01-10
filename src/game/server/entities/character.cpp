@@ -3182,6 +3182,13 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
 		return;
 
+	int Count = 0;
+	for (int i = 0; i < NUM_WEAPONS; i++)
+		if (i != WEAPON_NINJA && m_aWeapons[i].m_Got)
+			Count++;
+	if (Count < 2)
+		return;
+
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
 	{
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false, false);
