@@ -127,3 +127,10 @@ int CSkins::GetSkinID(const char *pSkin)
 			return i;
 	return -1;
 }
+
+CPlayer::TeeInfos CSkins::GetSkin(int Skin)
+{
+	if (Skin < 0 || Skin >= NUM_SKINS)
+		return m_Skins[SKIN_DEFAULT];
+	return m_Skins[Skin];
+}

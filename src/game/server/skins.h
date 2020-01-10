@@ -67,7 +67,7 @@ public:
 	CSkins();
 
 	int GetSkinID(const char *pSkin);
-	CPlayer::TeeInfos GetSkin(int Skin) { return m_Skins[Skin]; };
+	CPlayer::TeeInfos GetSkin(int Skin);
 };
 
 #endif
