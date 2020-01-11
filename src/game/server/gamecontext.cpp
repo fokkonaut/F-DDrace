@@ -3130,7 +3130,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 
 	if (!IsDir && str_endswith(pName, ".acc"))
 	{
-		char aUsername[32];
+		char aUsername[64];
 		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
 
 		int ID = pSelf->AddAccount();
