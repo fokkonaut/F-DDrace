@@ -321,10 +321,11 @@ public:
 		int64 m_Money;
 		int m_KillStreak;
 		char m_aUsername[32];
+		char m_aAccountName[32];
 	};
-	std::vector<TopAccounts> m_TempTopAccounts;
-	static int TopAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
+	std::vector<TopAccounts> m_TopAccounts;
 	void UpdateTopAccounts(int Type);
+	void SetTopAccStats(int FromID);
 
 	static int LogoutAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();

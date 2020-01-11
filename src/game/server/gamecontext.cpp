@@ -2586,6 +2586,7 @@ void CGameContext::OnInit()
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		m_aPoliceLevel[i] = PoliceLevel[i];
 
+	m_TopAccounts.push_back(TopAccounts()); // we add an unused field so we can nicely start with 1
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
 
@@ -3084,44 +3085,17 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 
 void CGameContext::UpdateTopAccounts(int Type)
 {
-	m_TempTopAccounts.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, TopAccountsCallback, this);
+	// update top accounts with all currently online accs so we get correct and up-to-date information
+	for (int i = ACC_START; i < m_Accounts.size(); i++)
+		SetTopAccStats(i);
+
 	switch (Type)
 	{
-	case TOP_LEVEL:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
-	case TOP_POINTS:	std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
-	case TOP_MONEY:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
-	case TOP_SPREE:		std::sort(m_TempTopAccounts.begin(), m_TempTopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
+	case TOP_LEVEL:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
+	case TOP_POINTS:	std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
+	case TOP_MONEY:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
+	case TOP_SPREE:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
 	}
-	m_TempTopAccounts.insert(m_TempTopAccounts.begin(), TopAccounts()); // we add an unused field so we can nicely start with 1
-}
-
-int CGameContext::TopAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser)
-{
-	CGameContext* pSelf = (CGameContext*)pUser;
-
-	if (!IsDir && str_endswith(pName, ".acc"))
-	{
-		char aUsername[32];
-		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
-
-		int ID = pSelf->GetAccount(aUsername);
-		if (ID < ACC_START)
-			return 0;
-
-		CGameContext::TopAccounts Account;
-		Account.m_Level = pSelf->m_Accounts[ID].m_Level;
-		Account.m_Points = pSelf->m_Accounts[ID].m_BlockPoints;
-		Account.m_Money = pSelf->m_Accounts[ID].m_Money;
-		Account.m_KillStreak = pSelf->m_Accounts[ID].m_KillingSpreeRecord;
-		str_copy(Account.m_aUsername, pSelf->m_Accounts[ID].m_aLastPlayerName, sizeof(Account.m_aUsername));
-		pSelf->m_TempTopAccounts.push_back(Account);
-
-		if (!pSelf->m_Accounts[ID].m_LoggedIn)
-			pSelf->FreeAccount(ID, true);
-	}
-
-	return 0;
 }
 
 int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
@@ -3136,6 +3110,9 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 		int ID = pSelf->AddAccount();
 		pSelf->ReadAccountStats(ID, aUsername);
 
+		// load all accounts into the top account list too
+		pSelf->SetTopAccStats(ID);
+
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == g_Config.m_SvPort)
 		{
 			pSelf->Logout(ID);
@@ -3146,6 +3123,33 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 	}
 
 	return 0;
+}
+
+void CGameContext::SetTopAccStats(int FromID)
+{
+	for (int i = ACC_START; i < m_TopAccounts.size(); i++)
+	{
+		// update if we have it in already
+		if (!str_comp(m_Accounts[FromID].m_Username, m_TopAccounts[i].m_aAccountName))
+		{
+			m_TopAccounts[i].m_Level = m_Accounts[FromID].m_Level;
+			m_TopAccounts[i].m_Points = m_Accounts[FromID].m_BlockPoints;
+			m_TopAccounts[i].m_Money = m_Accounts[FromID].m_Money;
+			m_TopAccounts[i].m_KillStreak = m_Accounts[FromID].m_KillingSpreeRecord;
+			str_copy(m_TopAccounts[i].m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(m_TopAccounts[i].m_aUsername));
+			return;
+		}
+	}
+
+	// if not existing in m_TopAccounts yet, add it
+	CGameContext::TopAccounts Account;
+	Account.m_Level = m_Accounts[FromID].m_Level;
+	Account.m_Points = m_Accounts[FromID].m_BlockPoints;
+	Account.m_Money = m_Accounts[FromID].m_Money;
+	Account.m_KillStreak = m_Accounts[FromID].m_KillingSpreeRecord;
+	str_copy(Account.m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(Account.m_aUsername));
+	str_copy(Account.m_aAccountName, m_Accounts[FromID].m_Username, sizeof(Account.m_aAccountName));
+	m_TopAccounts.push_back(Account);
 }
 
 int CGameContext::AddAccount()
