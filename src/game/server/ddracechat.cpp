@@ -1416,7 +1416,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	int ID = pSelf->AddAccount();
 	pSelf->ReadAccountStats(ID, aUsername);
 
-	if (pSelf->m_Accounts[ID].m_Username[0] == 0)
+	if (pSelf->m_Accounts[ID].m_Username[0] == '\0')
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "That account doesn't exist, please register first");
 		pSelf->FreeAccount(ID);
