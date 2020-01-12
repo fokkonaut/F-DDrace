@@ -394,7 +394,7 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	// apply a message to the history
 	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_pName);
-	pPlayer->MoneyTransaction(-m_aItems[Item].m_Price, aMsg);
+	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg);
 
 	// give us the bought item
 	int Weapon = -1;
