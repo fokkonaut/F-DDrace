@@ -2,6 +2,7 @@
 
 #include "shop.h"
 
+// manually checked amount of newlines between the end of the description of the current page and the footer
 int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 11, 9, 9, 9, 10, 9, 12, 17 };
 
 CShop::CShop(CGameContext *pGameServer)
