@@ -30,14 +30,14 @@ CShop::CShop(CGameContext *pGameServer)
 	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
 
 	static char aaBuf[NUM_POLICE_LEVELS][32];
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 	{
 		str_format(aaBuf[i], sizeof(aaBuf[i]), "Police Rank %d", i+1);
 		AddItem(aaBuf[i], m_pGameServer->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
 	}
 
 	static char aaBuf2[NUM_TASER_LEVELS][32];
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < NUM_TASER_LEVELS; i++)
 	{
 		str_format(aaBuf2[i], sizeof(aaBuf2[i]), "Taser Level %d", i+1);
 		AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, m_pGameServer->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
