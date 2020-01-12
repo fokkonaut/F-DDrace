@@ -237,8 +237,6 @@ public:
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
-	bool m_Passive;
-
 	bool m_SpinBot;
 	int m_SpinBotSpeed;
 	float m_SpinBotAngle;

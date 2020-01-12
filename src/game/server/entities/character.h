@@ -124,8 +124,6 @@ public:
 	void SetAvailableWeapon(int PreferedWeapon = WEAPON_GUN);
 	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
 
-	void PassiveCollision(bool Set);
-
 	void Jetpack(bool Set = true, int FromID = -1, bool Silent = false);
 	void Rainbow(bool Set = true, int FromID = -1, bool Silent = false);
 	void InfRainbow(bool Set = true, int FromID = -1, bool Silent = false);

@@ -109,7 +109,7 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 		pChr->Teams()->SetCharacterTeam(Victim, TEAM_SUPER);
 		pChr->m_DDRaceState = DDRACE_CHEAT;
 		if (pChr->m_Passive)
-			pChr->PassiveCollision(false);
+			pSelf->SendTuningParams(Victim, pChr->m_TuneZone);
 	}
 }
 
@@ -125,7 +125,7 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 		pChr->m_Super = false;
 		pChr->Teams()->SetForceCharacterTeam(pResult->m_ClientID, pChr->m_TeamBeforeSuper);
 		if (pChr->m_Passive)
-			pChr->PassiveCollision(true);
+			pSelf->SendTuningParams(Victim, pChr->m_TuneZone);
 	}
 }
 

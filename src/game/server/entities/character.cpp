@@ -3482,19 +3482,10 @@ void CCharacter::Passive(bool Set, int FromID, bool Silent)
 {
 	m_Passive = Set;
 	Teams()->m_Core.SetPassive(m_pPlayer->GetCID(), Set);
-	PassiveCollision(Set);
+	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	m_pPassiveShield = !Set ? 0 : new CPickup(GameWorld(), m_Pos, POWERUP_ARMOR, 0, 0, 0, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(PASSIVE, m_pPlayer->GetCID(), Set, FromID, Silent);
-}
-
-void CCharacter::PassiveCollision(bool Set)
-{
-	m_Core.m_Collision = !Set;
-	m_Core.m_Hook = !Set;
-	m_Hit = Set ? (DISABLE_HIT_GRENADE|DISABLE_HIT_HAMMER|DISABLE_HIT_RIFLE|DISABLE_HIT_SHOTGUN) : HIT_ALL;
-
-	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 }
 
 void CCharacter::VanillaMode(int FromID, bool Silent)

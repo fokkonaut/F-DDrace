@@ -108,7 +108,6 @@ void CCharacterCore::Reset()
 	m_OldLastHookedPlayer = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 
-	m_Passive = false;
 	m_HookingFlag = false;
 
 	m_SpinBot = false;
@@ -287,7 +286,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// Check against other players first
-		if((m_Hook || m_Passive) && m_pWorld && m_pWorld->m_Tuning.m_PlayerHooking)
+		if(m_Hook && m_pWorld && m_pWorld->m_Tuning.m_PlayerHooking)
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -559,7 +558,7 @@ void CCharacterCore::Move()
 
 	m_Vel.x = m_Vel.x*(1.0f/RampValue);
 
-	if (m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision && m_Collision && !m_Passive)
+	if (m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision && m_Collision)
 	{
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
