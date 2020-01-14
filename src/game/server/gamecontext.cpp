@@ -2547,15 +2547,8 @@ void CGameContext::OnInit()
 
 	// F-DDrace
 
-	// check if there are minigame spawns available
-	int Index = ENTITY_SPAWN;
-	for (int i = 0; i < NUM_MINIGAMES; i++)
-	{
-		if (i == MINIGAME_BLOCK)
-			Index = TILE_MINIGAME_BLOCK;
-
-		m_aMinigameDisabled[i] = Collision()->GetRandomTile(Index) == vec2(-1, -1);
-	}
+	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
+	m_aMinigameDisabled[MINIGAME_BLOCK] = Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) == vec2(-1, -1);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
