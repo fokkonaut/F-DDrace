@@ -3389,7 +3389,6 @@ void CCharacter::RemoveTeeControlCursor()
 
 void CCharacter::OnPlayerHook()
 {
-	GameServer()->SendChatTarget(-1, "hi");
 	CCharacter *pHookedTee = GameServer()->GetPlayerChar(m_Core.m_HookedPlayer);
 	CCharacterCore *pHookedCore = pHookedTee ? pHookedTee->Core() : 0;
 	if (!pHookedTee)
