@@ -224,6 +224,7 @@ public:
 	vec2 m_UFlagVel;
 
 	bool m_HookingFlag;
+	bool m_HookingPlayer;
 
 	struct KillerInfo
 	{

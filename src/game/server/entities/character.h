@@ -377,8 +377,6 @@ public:
 	CLightsaber* m_pLightsaber;
 	bool m_Spooky;
 	bool m_AlwaysTeleWeapon;
-	bool m_AtomHooked;
-	bool m_TrailHooked;
 	bool m_DoorHammer;
 
 	bool m_FakeTuneCollision;
@@ -427,6 +425,8 @@ public:
 
 	//this means the character is directly on a freezetile
 	bool m_IsFrozen;
+
+	void OnPlayerHook();
 
 
 	/////////dummymode variables

@@ -1194,11 +1194,7 @@ bool CPlayer::IsHooked(int Power)
 			continue;
 
 		if (pChr->Core()->m_HookedPlayer == m_ClientID)
-		{
-			if (Power == -2 && m_pCharacter)
-				m_pCharacter->Core()->m_Killer.m_ClientID = i;
 			return Power >= 0 ? pChr->m_HookPower == Power : true;
-		}
 	}
 	return false;
 }

@@ -1190,7 +1190,9 @@ void CCharacter::TickDefered()
 
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
+	// F-DDrace
 	if (m_Core.m_HookingFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	if (m_Core.m_HookingPlayer) OnPlayerHook();
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{
@@ -2988,14 +2990,6 @@ void CCharacter::FDDraceInit()
 
 void CCharacter::FDDraceTick()
 {
-	// checking if someone hooks you, setting last touched tee
-	m_pPlayer->IsHooked(-2);
-
-	// reset last hit weapon if someone new hooks us
-	if (m_Core.m_LastHookedPlayer != m_Core.m_OldLastHookedPlayer)
-		m_Core.m_Killer.m_Weapon = -1;
-	m_Core.m_OldLastHookedPlayer = m_Core.m_LastHookedPlayer;
-
 	// fake tune collision
 	{
 		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, 50.0f, this);
@@ -3006,14 +3000,6 @@ void CCharacter::FDDraceTick()
 
 		m_OldFakeTuneCollision = m_FakeTuneCollision;
 	}
-
-	if (!m_AtomHooked && m_pPlayer->IsHooked(ATOM) && !m_Atom)
-		new CAtom(GameWorld(), m_Pos, m_pPlayer->GetCID());
-	if (!m_TrailHooked && m_pPlayer->IsHooked(TRAIL) && !m_Trail)
-		new CTrail(GameWorld(), m_Pos, m_pPlayer->GetCID());
-
-	m_AtomHooked = m_pPlayer->IsHooked(ATOM);
-	m_TrailHooked = m_pPlayer->IsHooked(TRAIL);
 
 	if (m_TelekinesisEntity)
 	{
@@ -3395,6 +3381,29 @@ void CCharacter::RemoveTeeControlCursor()
 
 	m_pTeeControlCursor->Reset();
 	m_pTeeControlCursor = 0;
+}
+
+void CCharacter::OnPlayerHook()
+{
+	GameServer()->SendChatTarget(-1, "hi");
+	CCharacter *pHookedTee = GameServer()->GetPlayerChar(m_Core.m_HookedPlayer);
+	CCharacterCore *pHookedCore = pHookedTee ? pHookedTee->Core() : 0;
+	if (!pHookedTee)
+		return;
+
+	// checking if we hook someone, setting last touched tee
+	pHookedCore->m_Killer.m_ClientID = m_pPlayer->GetCID();
+
+	// reset last hit weapon if someone new hooks us
+	if (pHookedCore->m_LastHookedPlayer != pHookedCore->m_OldLastHookedPlayer)
+		pHookedCore->m_Killer.m_Weapon = -1;
+	pHookedCore->m_OldLastHookedPlayer = pHookedCore->m_LastHookedPlayer;
+
+	// set hook extra stuff
+	if (pHookedTee->GetPlayer()->IsHooked(ATOM) && !pHookedTee->m_Atom)
+		new CAtom(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
+	if (pHookedTee->GetPlayer()->IsHooked(TRAIL) && !pHookedTee->m_Trail)
+		new CTrail(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
 }
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)

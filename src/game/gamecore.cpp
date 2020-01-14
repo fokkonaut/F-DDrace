@@ -109,6 +109,7 @@ void CCharacterCore::Reset()
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 
 	m_HookingFlag = false;
+	m_HookingPlayer = false;
 
 	m_SpinBot = false;
 	m_SpinBotSpeed = 50;
@@ -137,6 +138,7 @@ void CCharacterCore::Tick(bool UseInput)
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
 	m_TriggeredEvents = 0;
 	m_HookingFlag = false;
+	m_HookingPlayer = false;
 
 	// get ground state
 	bool Grounded = false;
@@ -304,8 +306,11 @@ void CCharacterCore::Tick(bool UseInput)
 						m_HookState = HOOK_GRABBED;
 						m_HookedPlayer = i;
 						Distance = distance(m_HookPos, pCharCore->m_Pos);
+						
+						// F-DDrace
 						pCharCore->m_LastHookedPlayer = m_Id;
 						pCharCore->m_LastHookedTick = 0;
+						m_HookingPlayer = true;
 					}
 				}
 			}
