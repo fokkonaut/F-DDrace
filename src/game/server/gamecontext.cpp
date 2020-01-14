@@ -3079,7 +3079,7 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 void CGameContext::UpdateTopAccounts(int Type)
 {
 	// update top accounts with all currently online accs so we get correct and up-to-date information
-	for (int i = ACC_START; i < m_Accounts.size(); i++)
+	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
 		SetTopAccStats(i);
 
 	switch (Type)
@@ -3120,7 +3120,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 
 void CGameContext::SetTopAccStats(int FromID)
 {
-	for (int i = ACC_START; i < m_TopAccounts.size(); i++)
+	for (unsigned int i = ACC_START; i < m_TopAccounts.size(); i++)
 	{
 		// update if we have it in already
 		if (!str_comp(m_Accounts[FromID].m_Username, m_TopAccounts[i].m_aAccountName))
