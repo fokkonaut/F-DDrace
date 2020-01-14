@@ -3553,36 +3553,36 @@ void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText)
 	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * 3, pText, (int)(strlen(pText)));
 }
 
-void CGameContext::UpdateHidePlayers(int ClientID)
+void CGameContext::UpdateHidePlayers(int UpdateID)
 {
-	if (ClientID == -1)
+	if (UpdateID == -1)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			UpdateHidePlayers(i);
 		return;
 	}
 
-	if (!m_apPlayers[ClientID])
+	if (!m_apPlayers[UpdateID])
 		return;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i == ClientID || !m_apPlayers[i] || m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[i]->m_IsDummy)
+		if (i == UpdateID || !m_apPlayers[i] || m_apPlayers[UpdateID]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[i]->m_IsDummy)
 			continue;
 
 		int Team = TEAM_RED;
 
-		if ((g_Config.m_SvHideDummies && m_apPlayers[ClientID]->m_IsDummy)
-			|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[ClientID]->m_Minigame != m_apPlayers[i]->m_Minigame))
+		if ((g_Config.m_SvHideDummies && m_apPlayers[UpdateID]->m_IsDummy)
+			|| (g_Config.m_SvHideMinigamePlayers && m_apPlayers[UpdateID]->m_Minigame != m_apPlayers[i]->m_Minigame))
 			Team = TEAM_BLUE;
 
 		// only update the team when its not the same as before
-		if (m_apPlayers[i]->m_HidePlayerTeam[ClientID] == Team)
+		if (m_apPlayers[i]->m_HidePlayerTeam[UpdateID] == Team)
 			continue;
 
-		m_apPlayers[i]->m_HidePlayerTeam[ClientID] = Team;
+		m_apPlayers[i]->m_HidePlayerTeam[UpdateID] = Team;
 
-		SendTeamChange(ClientID, Team, true, Server()->Tick(), i);
+		SendTeamChange(UpdateID, Team, true, Server()->Tick(), i);
 	}
 }
 

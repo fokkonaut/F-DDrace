@@ -308,7 +308,7 @@ public:
 
 	int GetNextClientID(bool Inverted = false);
 
-	void UpdateHidePlayers(int ClientID = -1);
+	void UpdateHidePlayers(int UpdateID = -1);
 
 	//account
 	int GetAccount(const char* pUsername);
