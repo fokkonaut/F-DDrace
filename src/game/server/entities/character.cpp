@@ -3001,6 +3001,7 @@ void CCharacter::FDDraceTick()
 		m_OldFakeTuneCollision = m_FakeTuneCollision;
 	}
 
+	// update telekinesis entitiy position
 	if (m_TelekinesisEntity)
 	{
 		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
@@ -3041,10 +3042,11 @@ void CCharacter::FDDraceTick()
 			m_TelekinesisEntity = 0;
 	}
 
+	// retract lightsaber
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))
 		m_pLightsaber->Retract();
 
-	//flag bonus
+	// flag bonus
 	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
 	{
 		CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
@@ -3076,12 +3078,14 @@ void CCharacter::FDDraceTick()
 	if (m_pPlayer->IsPaused())
 		m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
 
+	// set aim bot pos
 	if (m_Core.m_AimClosest)
 	{
 		CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID());
 		m_Core.m_AimClosestPos = pClosest ? pClosest->m_Pos : vec2(0, 0);
 	}
 
+	// set cursor pos when controlling another tee
 	if (m_pTeeControlCursor && m_pPlayer->m_pControlledTee)
 	{
 		CCharacter *pControlledTee = m_pPlayer->m_pControlledTee->GetCharacter();
