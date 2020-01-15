@@ -3092,10 +3092,6 @@ void CGameContext::UpdateTopAccounts(int Type)
 	case TOP_MONEY:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
 	case TOP_SPREE:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
 	}
-
-	char aBuf[64];
-	str_copy(aBuf, m_TopAccounts[1].m_aAccountName, sizeof(aBuf));
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
