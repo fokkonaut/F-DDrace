@@ -104,12 +104,10 @@ void CCharacterCore::Reset()
 	// F-DDrace
 	m_Killer.m_ClientID = -1;
 	m_Killer.m_Weapon = -1;
-	m_LastHookedPlayer = -1;
-	m_OldLastHookedPlayer = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 
-	m_HookingFlag = false;
-	m_HookingPlayer = false;
+	m_OnHookFlag = false;
+	m_OnHookPlayer = false;
 
 	m_SpinBot = false;
 	m_SpinBotSpeed = 50;
@@ -125,20 +123,11 @@ void CCharacterCore::Tick(bool UseInput)
 	m_UpdateFlagVel = 0;
 	m_UpdateFlagAtStand = 0;
 
-	if (m_LastHookedTick != -1)
-		m_LastHookedTick++;
-
-	if (m_LastHookedTick > SERVER_TICK_SPEED * 10)
-	{
-		m_LastHookedPlayer = -1;
-		m_LastHookedTick = -1;
-	}
-
 	float PhysSize = 28.0f;
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
 	m_TriggeredEvents = 0;
-	m_HookingFlag = false;
-	m_HookingPlayer = false;
+	m_OnHookFlag = false;
+	m_OnHookPlayer = false;
 
 	// get ground state
 	bool Grounded = false;
@@ -308,9 +297,13 @@ void CCharacterCore::Tick(bool UseInput)
 						Distance = distance(m_HookPos, pCharCore->m_Pos);
 						
 						// F-DDrace
-						pCharCore->m_LastHookedPlayer = m_Id;
-						pCharCore->m_LastHookedTick = 0;
-						m_HookingPlayer = true;
+
+						// reset last hit weapon if someone new hooks us
+						if (pCharCore->m_Killer.m_ClientID != m_Id)
+							pCharCore->m_Killer.m_Weapon = -1;
+
+						pCharCore->m_Killer.m_ClientID = m_Id;
+						m_OnHookPlayer = true;
 					}
 				}
 			}
@@ -323,7 +316,7 @@ void CCharacterCore::Tick(bool UseInput)
 					ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
 					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PhysSize + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 40.f), ClosestPoint) < PhysSize + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
 					{
-						m_HookingFlag = true;
+						m_OnHookFlag = true;
 						m_HookState = HOOK_GRABBED;
 						if (i == TEAM_RED)
 							m_HookedPlayer = FLAG_RED;
@@ -432,7 +425,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		}
 
-		// release hook (max hook time is 1.25
+		// release hook (max hook time is 1.25)
 		m_HookTick++;
 		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5 || (m_HookedPlayer < MAX_CLIENTS && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
@@ -440,11 +433,6 @@ void CCharacterCore::Tick(bool UseInput)
 			m_HookState = HOOK_RETRACTED;
 			m_HookPos = m_Pos;
 		}
-	}
-
-	if (m_LastHookedPlayer != -1 && !m_pWorld->m_apCharacters[m_LastHookedPlayer])
-	{
-		m_LastHookedPlayer = -1;
 	}
 
 	if(m_pWorld)
@@ -477,6 +465,10 @@ void CCharacterCore::Tick(bool UseInput)
 				m_Vel *= 0.85f;
 
 				// F-DDrace // body check
+				// reset last hit weapon if someone new touches us
+				if (m_Killer.m_ClientID != pCharCore->m_Id)
+					m_Killer.m_Weapon = -1;
+
 				m_Killer.m_ClientID = pCharCore->m_Id;
 			}
 

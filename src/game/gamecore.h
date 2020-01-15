@@ -185,7 +185,6 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
-	int m_LastHookedTick;
 
 	bool m_NewHook;
 
@@ -223,8 +222,8 @@ public:
 	int m_UpdateFlagVel;
 	vec2 m_UFlagVel;
 
-	bool m_HookingFlag;
-	bool m_HookingPlayer;
+	bool m_OnHookFlag;
+	bool m_OnHookPlayer;
 
 	struct KillerInfo
 	{
@@ -232,9 +231,6 @@ public:
 		int m_Weapon;
 	};
 	KillerInfo m_Killer;
-
-	int m_LastHookedPlayer;
-	int m_OldLastHookedPlayer;
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 

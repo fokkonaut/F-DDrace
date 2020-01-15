@@ -1191,8 +1191,8 @@ void CCharacter::TickDefered()
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
 	// F-DDrace
-	if (m_Core.m_HookingFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	if (m_Core.m_HookingPlayer) OnPlayerHook();
+	if (m_Core.m_OnHookFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	if (m_Core.m_OnHookPlayer) OnPlayerHook();
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{
@@ -3393,14 +3393,6 @@ void CCharacter::OnPlayerHook()
 	CCharacterCore *pHookedCore = pHookedTee ? pHookedTee->Core() : 0;
 	if (!pHookedTee)
 		return;
-
-	// checking if we hook someone, setting last touched tee
-	pHookedCore->m_Killer.m_ClientID = m_pPlayer->GetCID();
-
-	// reset last hit weapon if someone new hooks us
-	if (pHookedCore->m_LastHookedPlayer != pHookedCore->m_OldLastHookedPlayer)
-		pHookedCore->m_Killer.m_Weapon = -1;
-	pHookedCore->m_OldLastHookedPlayer = pHookedCore->m_LastHookedPlayer;
 
 	// set hook extra stuff
 	if (pHookedTee->GetPlayer()->IsHooked(ATOM) && !pHookedTee->m_Atom)
