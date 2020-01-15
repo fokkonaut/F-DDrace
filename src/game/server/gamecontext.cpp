@@ -1583,10 +1583,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pPlayer->m_TeeControlMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused())
 			{
-				if (pMsg->m_SpecMode != SPEC_PLAYER)
-					pPlayer->UnsetTeeControl();
-				else
-					pPlayer->SetTeeControl(m_apPlayers[pMsg->m_SpectatorID]);
+				if (pPlayer->m_TeeControlForcedID == -1)
+				{
+					if (pMsg->m_SpecMode != SPEC_PLAYER)
+						pPlayer->UnsetTeeControl();
+					else
+						pPlayer->SetTeeControl(m_apPlayers[pMsg->m_SpectatorID]);
+				}
 			}
 			else
 				pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID);
