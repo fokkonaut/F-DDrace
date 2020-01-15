@@ -428,6 +428,8 @@ public:
 
 	void OnPlayerHook();
 
+	int m_LastTouchedSwitcher;
+
 
 	/////////dummymode variables
 

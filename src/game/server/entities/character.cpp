@@ -1257,6 +1257,13 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		m_Core.m_Killer.m_Weapon = -1;
 	}
 
+	bool CountKill = true;
+	if (GameServer()->Collision()->m_pSwitchers)
+	{
+		if (GameServer()->Collision()->m_pSwitchers[m_LastTouchedSwitcher].m_ClientID[Team()] == m_Core.m_Killer.m_ClientID)
+			CountKill = false;
+	}
+
 	// if no killer exists its a selfkill
 	if (m_Core.m_Killer.m_ClientID == -1)
 		m_Core.m_Killer.m_ClientID = m_pPlayer->GetCID();
@@ -1289,7 +1296,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		char aBuf[128];
 		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
 		CCharacter* pKillerChar = pKiller->GetCharacter();
-		if (pKillerChar && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
+		if (CountKill && pKillerChar && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
 		{
 			pKillerChar->m_KillStreak++;
 			if (pKillerChar->m_KillStreak % 5 == 0)
@@ -1306,7 +1313,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 			pKiller->GiveXP(250, "end a killing spree");
 		}
 
-		if (pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
+		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
 		{
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
@@ -2986,6 +2993,8 @@ void CCharacter::FDDraceInit()
 	m_pTeeControlCursor = 0;
 
 	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
+
+	m_LastTouchedSwitcher = -1;
 }
 
 void CCharacter::FDDraceTick()

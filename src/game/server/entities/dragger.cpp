@@ -137,6 +137,7 @@ void CDragger::Drag()
 				{
 					Target->Core()->m_Killer.m_ClientID = SwitchID;
 					Target->Core()->m_Killer.m_Weapon = -1;
+					Target->m_LastTouchedSwitcher = m_Number;
 				}
 			}
 		}

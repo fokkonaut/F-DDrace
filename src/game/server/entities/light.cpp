@@ -44,6 +44,7 @@ bool CLight::HitCharacter()
 		{
 			Char->Core()->m_Killer.m_ClientID = SwitchID;
 			Char->Core()->m_Killer.m_Weapon = -1;
+			Char->m_LastTouchedSwitcher = m_Number;
 		}
 	}
 	return true;
