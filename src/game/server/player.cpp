@@ -1339,7 +1339,7 @@ bool CPlayer::CheckClanProtection()
 	if (!g_Config.m_SvClanProtection)
 		return false;
 
-	if (str_comp_nocase(Server()->ClientClan(m_ClientID), "Chilli.*") || !str_comp_nocase(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward"))
+	if (str_comp_nocase(Server()->ClientClan(m_ClientID), "Chilli.*") || !str_comp(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward"))
 	{
 		if (m_ClanProtectionPunished)
 		{
