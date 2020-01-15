@@ -1314,7 +1314,10 @@ void CPlayer::UnsetTeeControl()
 	m_pControlledTee = 0;
 
 	if (m_pCharacter)
+	{
+		m_pCharacter->ResetNumInputs();
 		m_pCharacter->RemoveTeeControlCursor();
+	}
 }
 
 void CPlayer::ResumeFromTeeControl()
