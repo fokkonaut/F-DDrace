@@ -172,6 +172,7 @@ void CPlayer::Reset()
 	m_TeeControlMode = false;
 	m_HasTeeControl = false;
 	m_TeeControlForcedID = -1;
+	m_ClanProtectionPunished = false;
 }
 
 void CPlayer::Tick()
@@ -1331,4 +1332,37 @@ void CPlayer::ResumeFromTeeControl()
 	// update walk prediction
 	if (m_pCharacter)
 		GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
+}
+
+bool CPlayer::CheckClanProtection()
+{
+	if (!g_Config.m_SvClanProtection)
+		return false;
+
+	if (str_comp_nocase(Server()->ClientClan(m_ClientID), "Chilli.*") || !str_comp_nocase(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward"))
+	{
+		if (m_ClanProtectionPunished)
+		{
+			if (m_pCharacter)
+			{
+				m_pCharacter->m_DeepFreeze = false;
+				m_pCharacter->UnFreeze();
+			}
+
+			GameServer()->SendChatTarget(m_ClientID, "You got unfrozen by the clan protection.");
+		}
+
+		m_ClanProtectionPunished = false;
+		return false;
+	}
+
+	GameServer()->SendChatTarget(m_ClientID, "~~~ WARNING ~~~");
+	GameServer()->SendChatTarget(m_ClientID, "You got frozen by the clan protection.");
+	GameServer()->SendChatTarget(m_ClientID, "Remove your 'Chilli.*' clantag and reconnect, or set your skin body to 'greensward'.");
+
+	if (m_pCharacter)
+		m_pCharacter->m_DeepFreeze = true;
+
+	m_ClanProtectionPunished = true;
+	return true;
 }

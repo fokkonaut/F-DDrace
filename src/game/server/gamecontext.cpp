@@ -991,6 +991,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
+	m_apPlayers[ClientID]->CheckClanProtection();
+
 	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
 	m_pController->UpdateGameInfo(ClientID);
 }
@@ -1710,6 +1712,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
+
+			// F-DDrace
+			pPlayer->CheckClanProtection();
 
 			if (pPlayer->m_SpookyGhost || pPlayer->m_TeeInfos.m_aSkinName[0] != '\0')
 				return;

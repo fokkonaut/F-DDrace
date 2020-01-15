@@ -288,6 +288,7 @@ public:
 	int GetAccID();
 	void MoneyTransaction(int Amount, const char* pDescription = "");
 	void GiveXP(int Amount, const char* pMessage = "");
+	void GiveBlockPoints(int Amount);
 	void OnLogin();
 	void OnLogout();
 
@@ -306,7 +307,9 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
-	void GiveBlockPoints(int Amount);
+	// clan protection
+	bool m_ClanProtectionPunished;
+	bool CheckClanProtection();
 
 	//fake information
 	void UpdateInformation(int ClientID = -1);
