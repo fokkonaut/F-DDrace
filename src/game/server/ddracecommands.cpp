@@ -1560,5 +1560,5 @@ void CGameContext::ConSet(IConsole::IResult *pResult, void *pUserData)
 	(*Account).m_KillingSpreeRecord = pResult->GetInteger(3);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
-		pSelf->FreeAccount(ID);
+		pSelf->Logout(ID);
 }
