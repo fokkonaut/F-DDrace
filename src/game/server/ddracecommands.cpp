@@ -1541,3 +1541,24 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 	if (ForcedID != -2)
 		pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, ForcedID, pResult->m_ClientID);
 }
+
+void CGameContext::ConSet(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		return;
+	}
+
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
+
+	(*Account).m_Kills = pResult->GetInteger(1);
+	(*Account).m_BlockPoints = pResult->GetInteger(2);
+	(*Account).m_KillingSpreeRecord = pResult->GetInteger(3);
+
+	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+		pSelf->FreeAccount(ID);
+}

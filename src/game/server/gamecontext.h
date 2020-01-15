@@ -697,6 +697,8 @@ private:
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConSet(IConsole::IResult* pResult, void* pUserData);
+
 	enum
 	{
 		MAX_MUTES = 32,
