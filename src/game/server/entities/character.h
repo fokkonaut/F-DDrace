@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+Ri/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
@@ -423,7 +423,7 @@ public:
 	// special race
 	bool m_HasFinishedSpecialRace;
 
-	//this means the character is directly on a freezetile
+	// true if the character is constantly getting freezed by Freeze() function, e.g. on a freeze tile or while deepfrozen
 	bool m_IsFrozen;
 
 	void OnPlayerHook();
