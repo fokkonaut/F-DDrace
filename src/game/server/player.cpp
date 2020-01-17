@@ -315,6 +315,10 @@ void CPlayer::Tick()
 			m_SetRealName = false;
 		}
 	}
+
+	// dummy fake ping
+	if (m_IsDummy && g_Config.m_SvFakeDummyPing && Server()->Tick() % 200 == 0)
+		m_FakePing = 32 + rand() % 11;
 }
 
 void CPlayer::PostTick()
@@ -378,11 +382,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	// realistic ping for dummies
 	if (m_IsDummy && g_Config.m_SvFakeDummyPing)
-	{
-		if (Server()->Tick() % 200 == 0)
-			m_FakePing = 32 + rand() % 11;
 		pPlayerInfo->m_Latency = m_FakePing;
-	}
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	
