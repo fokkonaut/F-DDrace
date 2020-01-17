@@ -3115,7 +3115,8 @@ void CCharacter::FDDraceTick()
 
 void CCharacter::HandleLastIndexTiles()
 {
-	GameServer()->m_pShop->OnShopLeave(m_pPlayer->GetCID());
+	if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
+		GameServer()->m_pShop->OnShopLeave(m_pPlayer->GetCID());
 
 	if (m_MoneyTile)
 	{

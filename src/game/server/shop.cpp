@@ -95,9 +95,6 @@ void CShop::OnShopLeave(int ClientID)
 
 	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
 
-	if (pChr->m_TileIndex == TILE_SHOP || pChr->m_TileFIndex == TILE_SHOP)
-		return;
-
 	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID))
 	{
 		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
