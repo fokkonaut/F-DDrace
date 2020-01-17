@@ -971,6 +971,9 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/BlmapChill.map
+  maps/blmapV3RoyalX.map
+  maps/ChillBlock5.map
+  maps/Multimap.map
   particles.png
   race_flag.png
   skins/beaver.json
@@ -1150,7 +1153,7 @@ if(NOT EXISTS ${PROJECT_SOURCE_DIR}/datasrc/languages/index.json)
   endforeach()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/datasrc/maps/BlmapChill.map")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/datasrc/maps/Multimap.map")
   message(WARNING "Missing datasrc/maps submodule. Please download a source release or update your git submodules with `git submodule update --init`")
   foreach(item ${EXPECTED_DATA})
     if(item MATCHES "^maps/")
