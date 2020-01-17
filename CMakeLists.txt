@@ -971,9 +971,9 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/BlmapChill.map
-  maps/blmapV3RoyalX.map
   maps/ChillBlock5.map
   maps/Multimap.map
+  maps/blmapV3RoyalX.map
   particles.png
   race_flag.png
   skins/beaver.json
