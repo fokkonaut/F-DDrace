@@ -1485,14 +1485,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if (pPlayer->m_TeeControlMode)
 				{
 					if (pControlledTee)
-						pControlledTee->DropWeapon(pControlledTee->GetActiveWeapon());
+						pControlledTee->DropWeapon(pControlledTee->GetActiveWeapon(), false);
 				}
 				else if (pChr)
 				{
 					if (m_pShop->IsInShop(ClientID))
 						m_pShop->OnKeyPress(ClientID, pMsg->m_Vote);
 					else
-						pChr->DropWeapon(pChr->GetActiveWeapon());
+						pChr->DropWeapon(pChr->GetActiveWeapon(), false);
 				}
 			}
 

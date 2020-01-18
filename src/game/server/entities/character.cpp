@@ -3179,14 +3179,14 @@ void CCharacter::DropFlag()
 	}
 }
 
-void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
+void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 {
 	// Do not drop spawnweapons
 	int W = GetSpawnWeaponIndex(WeaponID);
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !Forced) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
+	if ((m_FreezeTime && !OnDeath) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
 		return;
 
 	int Count = 0;
@@ -3214,13 +3214,13 @@ void CCharacter::DropWeapon(int WeaponID, float Dir, bool Forced)
 		SetWeapon(WEAPON_GUN);
 	}
 	if (m_aSpreadWeapon[WeaponID])
-		SpreadWeapon(WeaponID, false);
+		SpreadWeapon(WeaponID, false, -1, OnDeath);
 	if (WeaponID == WEAPON_GUN && m_Jetpack)
-		Jetpack(false);
+		Jetpack(false, -1, OnDeath);
 	if (IsTeleWeapon)
-		TeleWeapon(WeaponID, false);
+		TeleWeapon(WeaponID, false, -1, OnDeath);
 	if (WeaponID == WEAPON_HAMMER && m_DoorHammer)
-		DoorHammer(false);
+		DoorHammer(false, -1, OnDeath);
 }
 
 void CCharacter::DropPickup(int Type, int Amount)
@@ -3260,7 +3260,7 @@ void CCharacter::DropLoot()
 		for (int i = WEAPON_GUN; i < NUM_VANILLA_WEAPONS-1; i++)
 		{
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon(i, Dir, true);
+			DropWeapon(i, true, Dir);
 		}
 	}
 	else if (m_pPlayer->m_Minigame == MINIGAME_NONE)
@@ -3268,7 +3268,7 @@ void CCharacter::DropLoot()
 		for (int i = 0; i < 2; i++)
 		{
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon(rand() % NUM_WEAPONS, Dir, true);
+			DropWeapon(rand() % NUM_WEAPONS, true, Dir);
 		}
 	}
 }
