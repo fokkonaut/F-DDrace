@@ -205,25 +205,50 @@ const char *CBinds::Get(int KeyID, int Modifier)
 	return "";
 }
 
-void CBinds::GetKey(const char *pBindStr, char aKey[64], unsigned BufSize)
+void CBinds::GetKeyID(const char *pBindStr, int& KeyID, int& Modifier)
 {
-	aKey[0] = 0;
-	for(int KeyID = 0; KeyID < KEY_LAST; KeyID++)
+	KeyID = KEY_LAST;
+	Modifier = MODIFIER_COUNT;
+
+	for(int LocalKeyID = 0; LocalKeyID < KEY_LAST; LocalKeyID++)
 	{
-		for(int m = 0; m < MODIFIER_COUNT; m++)
+		for(int LocalModifier = 0; LocalModifier < MODIFIER_COUNT; LocalModifier++)
 		{
-			const char *pBind = Get(KeyID, m);
+			const char *pBind = Get(LocalKeyID, LocalModifier);
 			if(!pBind[0])
 				continue;
 
 			if(str_comp(pBind, pBindStr) == 0)
 			{
-				str_format(aKey, BufSize, "%s%s", GetModifierName(m), Input()->KeyName(KeyID));
+				KeyID = LocalKeyID;
+				Modifier = LocalModifier;
 				return;
+			}
+			if(str_find(pBind, pBindStr) != 0)
+			{
+				KeyID = LocalKeyID;
+				Modifier = LocalModifier;
 			}
 		}
 	}
-	str_copy(aKey, "key not found", BufSize);
+}
+
+void CBinds::GetKey(const char *pBindStr, char aKey[64], unsigned BufSize, int KeyID, int Modifier)
+{
+	aKey[0] = 0;
+	if(KeyID < KEY_LAST)
+	{
+		str_format(aKey, BufSize, "%s%s", GetModifierName(Modifier), Input()->KeyName(KeyID));
+		return;
+	}
+	str_copy(aKey, Localize("key not found"), BufSize);
+}
+
+void CBinds::GetKey(const char *pBindStr, char aKey[64], unsigned BufSize)
+{
+	int KeyID, Modifier;
+	GetKeyID(pBindStr, KeyID, Modifier);
+	GetKey(pBindStr, aKey, BufSize, KeyID, Modifier);
 }
 
 void CBinds::SetDefaults()

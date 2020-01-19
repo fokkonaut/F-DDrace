@@ -679,7 +679,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 					char aLabel[64];
 					GetPlayerLabel(aLabel, sizeof(aLabel), ClientID, m_aClients[ClientID].m_aName);
 					str_format(aBuf, sizeof(aBuf), Localize("'%s' initiated a pause"), aLabel);
-					m_pChat->AddLine(-1, 0, aBuf);
+					m_pChat->AddLine(aBuf);
 				}
 				break;
 			case GAMEMSG_CTF_CAPTURE:
@@ -712,7 +712,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 						str_format(aBuf, sizeof(aBuf), Localize("The red flag was captured by '%s'"), aLabel);
 					}
 				}
-				m_pChat->AddLine(-1, 0, aBuf);
+				m_pChat->AddLine(aBuf);
 			}
 			return;
 		}
@@ -728,7 +728,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		switch(gs_GameMsgList[GameMsgID].m_Action)
 		{
 		case DO_CHAT:
-			m_pChat->AddLine(-1, 0, pText);
+			m_pChat->AddLine(pText);
 			break;
 		case DO_BROADCAST:
 			m_pBroadcast->DoBroadcast(pText);
@@ -811,7 +811,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 			char aLabel[64];
 			GetPlayerLabel(aLabel, sizeof(aLabel), pMsg->m_ClientID, m_aClients[pMsg->m_ClientID].m_aName);
 			str_format(aBuf, sizeof(aBuf), Localize("%s is muted by you"), aLabel);
-			m_pChat->AddLine(-2, 0, aBuf);
+			m_pChat->AddLine(aBuf, CChat::CLIENT_MSG);
 		}
 
 		m_aClients[pMsg->m_ClientID].UpdateRenderInfo(this, pMsg->m_ClientID, true);
@@ -891,9 +891,10 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
 		CNetMsg_Sv_ServerSettings *pMsg = (CNetMsg_Sv_ServerSettings *)pRawMsg;
 
 		if(!m_ServerSettings.m_TeamLock && pMsg->m_TeamLock)
-			m_pChat->AddLine(-1, 0, Localize("Teams were locked"));
+			m_pChat->AddLine(Localize("Teams were locked"));
 		else if(m_ServerSettings.m_TeamLock && !pMsg->m_TeamLock)
-			m_pChat->AddLine(-1, 0, Localize("Teams were unlocked"));
+			m_pChat->AddLine(Localize("Teams were unlocked"));
+
 		m_ServerSettings.m_KickVote = pMsg->m_KickVote;
 		m_ServerSettings.m_KickMin = pMsg->m_KickMin;
 		m_ServerSettings.m_SpecVote = pMsg->m_SpecVote;
@@ -1309,9 +1310,12 @@ void CGameClient::OnNewSnapshot()
 		CSnapState::CCharacterInfo *c = &m_Snap.m_aCharacters[m_LocalClientID];
 		if(c->m_Active)
 		{
-			m_Snap.m_pLocalCharacter = &c->m_Cur;
-			m_Snap.m_pLocalPrevCharacter = &c->m_Prev;
-			m_LocalCharacterPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
+			if (!m_Snap.m_SpecInfo.m_Active)
+			{
+				m_Snap.m_pLocalCharacter = &c->m_Cur;
+				m_Snap.m_pLocalPrevCharacter = &c->m_Prev;
+				m_LocalCharacterPos = vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y);
+			}
 		}
 		else if(Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_CHARACTER, m_LocalClientID))
 		{
@@ -1699,7 +1703,7 @@ void CGameClient::DoEnterMessage(const char *pName, int ClientID, int Team)
 	case STR_TEAM_BLUE: str_format(aBuf, sizeof(aBuf), Localize("'%s' entered and joined the blue team"), aLabel); break;
 	case STR_TEAM_SPECTATORS: str_format(aBuf, sizeof(aBuf), Localize("'%s' entered and joined the spectators"), aLabel); break;
 	}
-	m_pChat->AddLine(-1, 0, aBuf);
+	m_pChat->AddLine(aBuf);
 }
 
 void CGameClient::DoLeaveMessage(const char *pName, int ClientID, const char *pReason)
@@ -1710,7 +1714,7 @@ void CGameClient::DoLeaveMessage(const char *pName, int ClientID, const char *pR
 		str_format(aBuf, sizeof(aBuf), Localize("'%s' has left the game (%s)"), aLabel, pReason);
 	else
 		str_format(aBuf, sizeof(aBuf), Localize("'%s' has left the game"), aLabel);
-	m_pChat->AddLine(-1, 0, aBuf);
+	m_pChat->AddLine(aBuf);
 }
 
 void CGameClient::DoTeamChangeMessage(const char *pName, int ClientID, int Team)
@@ -1725,7 +1729,7 @@ void CGameClient::DoTeamChangeMessage(const char *pName, int ClientID, int Team)
 	case STR_TEAM_BLUE: str_format(aBuf, sizeof(aBuf), Localize("'%s' joined the blue team"), aLabel); break;
 	case STR_TEAM_SPECTATORS: str_format(aBuf, sizeof(aBuf), Localize("'%s' joined the spectators"), aLabel); break;
 	}
-	m_pChat->AddLine(-1, 0, aBuf);
+	m_pChat->AddLine(aBuf);
 }
 
 void CGameClient::SendSwitchTeam(int Team)

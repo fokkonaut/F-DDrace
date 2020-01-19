@@ -1455,24 +1455,27 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 			// entries
 			for(int f = 0; f < m_lFriendList[i].size(); ++f, ++ButtonId)
 			{
-				View.HSplitTop(20.0f + GetListHeaderHeight(), &Rect, &View);
+				if(i == FRIEND_OFF)
+					View.HSplitTop(8.0f + GetListHeaderHeight(), &Rect, &View);
+				else
+					View.HSplitTop(20.0f + GetListHeaderHeight(), &Rect, &View);
 				ScrollRegionAddRect(&s_ScrollRegion, Rect);
-
-				RenderTools()->DrawUIRect(&Rect, vec4(0.5f, 0.5f, 0.5f, 0.5f), CUI::CORNER_ALL, 5.0f);
+				if(i == FRIEND_PLAYER_ON)
+					RenderTools()->DrawUIRect(&Rect, vec4(0.5f, 1.0f, 0.5f, 0.30f), CUI::CORNER_ALL, 5.0f);
+				else if(i == FRIEND_CLAN_ON)
+					RenderTools()->DrawUIRect(&Rect, vec4(0.5f, 0.5f, 1.5f, 0.30f), CUI::CORNER_ALL, 5.0f);
+				else
+					RenderTools()->DrawUIRect(&Rect, vec4(1.0f, 0.5f, 0.5f, 0.30f), CUI::CORNER_ALL, 5.0f);
 				Rect.VMargin(2.0f, &Rect);
+				Rect.HMargin(2.0f, &Rect);
 				Rect.VSplitRight(45.0f, &Rect, &Icon);
 				Rect.HSplitTop(20.0f, &Button, 0);
 				// name
 				Rect.HSplitTop(10.0f, &Button, &Rect);
-				vec4 Colour = (i == FRIEND_PLAYER_ON) ? vec4(0.5f, 1.0f, 0.5f, 0.15f) :
-					(i == FRIEND_CLAN_ON || !m_lFriendList[i][f].m_aName[0]) ? vec4(0.0f, 0.0f, 0.0f, 0.15f) : vec4(1.0f, 0.5f, 0.5f, 0.15f);
-				RenderTools()->DrawUIRect(&Button, Colour, CUI::CORNER_T, 4.0f);
 				Button.VSplitLeft(2.0f, 0, &Button);
 				UI()->DoLabel(&Button, m_lFriendList[i][f].m_aName, FontSize - 2, CUI::ALIGN_LEFT);
 				// clan
 				Rect.HSplitTop(10.0f, &Button, &Rect);
-				Colour = (i != FRIEND_OFF) ? vec4(0.5f, 1.0f, 0.5f, 0.15f) : vec4(1.0f, 0.5f, 0.5f, 0.15f);
-				RenderTools()->DrawUIRect(&Button, Colour, CUI::CORNER_B, 4.0f);
 				Button.VSplitLeft(2.0f, 0, &Button);
 				UI()->DoLabel(&Button, m_lFriendList[i][f].m_aClan, FontSize - 2, CUI::ALIGN_LEFT);
 				// info
@@ -1488,14 +1491,15 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 					UI()->DoLabel(&Button, aBuf, FontSize - 2, CUI::ALIGN_LEFT);
 				}
 				// delete button
-				Icon.HSplitTop(20.0f, &Rect, 0);
-				Rect.VSplitRight(10.0f, &Button, &Icon);
+				Icon.HSplitTop(14.0f, &Rect, 0);
+				Rect.VSplitRight(12.0f, 0, &Icon);
 				Icon.HMargin((Icon.h - Icon.w) / 2, &Icon);
 				if(DoButton_SpriteClean(IMAGE_TOOLICONS, SPRITE_TOOL_X_B, &Icon))
 				{
 					m_pDeleteFriend = &m_lFriendList[i][f];
 				}
 				// join button
+				Rect.VSplitRight(15.0f, &Button, 0);
 				if(m_lFriendList[i][f].m_pServerInfo)
 				{
 					Button.Margin((Button.h - GetListHeaderHeight() + 2.0f) / 2, &Button);
@@ -1787,7 +1791,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 		RenderTools()->DrawUIRect(&Button, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
 		Button.VMargin(4.0f, &Button);
 		static int s_BrFilterPing = 0;
-		Value = round_to_int(DoScrollbarH(&s_BrFilterPing, &Button, (float)(Value - Min) / (float)(Max - Min))*(float)(Max - Min) + (float)Min + 0.1f);
+		Value = LogarithmicScrollbarScale.ToAbsolute(DoScrollbarH(&s_BrFilterPing, &Button, LogarithmicScrollbarScale.ToRelative(Value, Min, Max)), Min, Max);
 		if(Value != FilterInfo.m_Ping) {
 			FilterInfo.m_Ping = Value;
 			pFilter->SetFilter(&FilterInfo);
