@@ -1132,38 +1132,31 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_RconAuthLevel = AUTHED_ADMIN;
 			}
 		}
-		else if(Msg == NETMSG_RCON_AUTH || Msg == NETMSG_RCON_LOGIN)
+		else if(Msg == NETMSG_RCON_AUTH)
 		{
-			// oy removed the usernames...
-			// allow "name:password" for the meanwhile
-
-			char aName[64] = "";
-			const char *pName = "", *pPw = "", *pDelim = "";
-			switch(Msg)
-			{
-			case NETMSG_RCON_LOGIN:
-				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				break;
-			case NETMSG_RCON_AUTH:
-				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				pDelim = str_find(pName, ":");
-				if(!pDelim)
-					pPw = pName;
-				else
-				{
-					str_copy(aName, pName, min(sizeof(aName), (unsigned long)(pDelim - pName + 1)));
-					pName = aName;
-					pPw = pDelim + 1;
-				}
-			}
+			const char *pAuth = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+			if(!str_utf8_check(pAuth))
+				return;
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{
 				int AuthLevel = -1;
 				int KeySlot = -1;
 
-				if(!pName[0])
+				// oy removed the usernames...
+				// use "name:password" format until we establish new extended netmsg
+				char aName[64] = {};
+				const char *pDelim = str_find(pAuth, ":");
+				const char *pPw = nullptr;
+				if(!pDelim)
+					pPw = pAuth;
+				else
+				{
+					str_copy(aName, pAuth, min(sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
+					pPw = pDelim + 1;
+				}
+
+				if(!aName[0])
 				{
 					if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
 						AuthLevel = AUTHED_ADMIN;
@@ -1174,7 +1167,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					KeySlot = m_AuthManager.FindKey(pName);
+					KeySlot = m_AuthManager.FindKey(aName);
 					if(m_AuthManager.CheckKey(KeySlot, pPw))
 						AuthLevel = m_AuthManager.KeyLevel(KeySlot);
 				}
