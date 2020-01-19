@@ -2165,7 +2165,7 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 				(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->m_pName) >= 0))
 					continue;
 
-				if(OldAccessLevel == IConsole::ACCESS_LEVEL_ADMIN)
+				if(OldAccessLevel < pInfo->GetAccessLevel())
 					pThis->SendRconCmdAdd(pInfo, i);
 				else
 					pThis->SendRconCmdRem(pInfo, i);
