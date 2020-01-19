@@ -921,6 +921,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
+	if (g_Config.m_SvWelcome[0] != 0)
+		SendChatTarget(ClientID, g_Config.m_SvWelcome);
 
 	m_VoteUpdate = true;
 
