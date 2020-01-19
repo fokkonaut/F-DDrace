@@ -1149,10 +1149,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 				pDelim = str_find(pName, ":");
 				if(!pDelim)
-				{
 					pPw = pName;
-					pName = nullptr;
-				}
 				else
 				{
 					str_copy(aName, pName, min(sizeof(aName), (unsigned long)(pDelim - pName + 1)));
@@ -1166,7 +1163,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				int AuthLevel = -1;
 				int KeySlot = -1;
 
-				if(!pName || !pName[0])
+				if(!pName[0])
 				{
 					if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
 						AuthLevel = AUTHED_ADMIN;
