@@ -3176,44 +3176,43 @@ void CGameContext::SetTopAccStats(int FromID)
 
 int CGameContext::AddAccount()
 {
-	m_Accounts.push_back(AccountInfo());
+	AccountInfo Account;
+	Account.m_Port = g_Config.m_SvPort;
+	Account.m_LoggedIn = false;
+	Account.m_Disabled = false;
+	Account.m_Password[0] = '\0';
+	Account.m_Username[0] = '\0';
+	Account.m_ClientID = -1;
+	Account.m_Level = 0;
+	Account.m_XP = 0;
+	Account.m_Money = 0;
+	Account.m_Kills = 0;
+	Account.m_Deaths = 0;
+	Account.m_PoliceLevel = 0;
+	Account.m_SurvivalKills = 0;
+	Account.m_SurvivalWins = 0;
+	Account.m_aLastMoneyTransaction[0][0] = '\0';
+	Account.m_aLastMoneyTransaction[1][0] = '\0';
+	Account.m_aLastMoneyTransaction[2][0] = '\0';
+	Account.m_aLastMoneyTransaction[3][0] = '\0';
+	Account.m_aLastMoneyTransaction[4][0] = '\0';
+	Account.m_SpookyGhost = false;
+	Account.m_VIP = false;
+	Account.m_BlockPoints = 0;
+	Account.m_InstagibKills = 0;
+	Account.m_InstagibWins = 0;
+	Account.m_SpawnWeapon[0] = 0;
+	Account.m_SpawnWeapon[1] = 0;
+	Account.m_SpawnWeapon[2] = 0;
+	Account.m_Ninjajetpack = false;
+	Account.m_aLastPlayerName[0] = '\0';
+	Account.m_SurvivalDeaths = 0;
+	Account.m_InstagibDeaths = 0;
+	Account.m_TaserLevel = 0;
+	Account.m_KillingSpreeRecord = 0;
 
-	int ID = m_Accounts.size()-1;
-	m_Accounts[ID].m_Port = g_Config.m_SvPort;
-	m_Accounts[ID].m_LoggedIn = false;
-	m_Accounts[ID].m_Disabled = false;
-	m_Accounts[ID].m_Password[0] = '\0';
-	m_Accounts[ID].m_Username[0] = '\0';
-	m_Accounts[ID].m_ClientID = -1;
-	m_Accounts[ID].m_Level = 0;
-	m_Accounts[ID].m_XP = 0;
-	m_Accounts[ID].m_Money = 0;
-	m_Accounts[ID].m_Kills = 0;
-	m_Accounts[ID].m_Deaths = 0;
-	m_Accounts[ID].m_PoliceLevel = 0;
-	m_Accounts[ID].m_SurvivalKills = 0;
-	m_Accounts[ID].m_SurvivalWins = 0;
-	m_Accounts[ID].m_aLastMoneyTransaction[0][0] = '\0';
-	m_Accounts[ID].m_aLastMoneyTransaction[1][0] = '\0';
-	m_Accounts[ID].m_aLastMoneyTransaction[2][0] = '\0';
-	m_Accounts[ID].m_aLastMoneyTransaction[3][0] = '\0';
-	m_Accounts[ID].m_aLastMoneyTransaction[4][0] = '\0';
-	m_Accounts[ID].m_SpookyGhost = false;
-	m_Accounts[ID].m_VIP = false;
-	m_Accounts[ID].m_BlockPoints = 0;
-	m_Accounts[ID].m_InstagibKills = 0;
-	m_Accounts[ID].m_InstagibWins = 0;
-	m_Accounts[ID].m_SpawnWeapon[0] = 0;
-	m_Accounts[ID].m_SpawnWeapon[1] = 0;
-	m_Accounts[ID].m_SpawnWeapon[2] = 0;
-	m_Accounts[ID].m_Ninjajetpack = false;
-	m_Accounts[ID].m_aLastPlayerName[0] = '\0';
-	m_Accounts[ID].m_SurvivalDeaths = 0;
-	m_Accounts[ID].m_InstagibDeaths = 0;
-	m_Accounts[ID].m_TaserLevel = 0;
-	m_Accounts[ID].m_KillingSpreeRecord = 0;
-
-	return ID;
+	m_Accounts.push_back(Account);
+	return m_Accounts.size()-1;
 }
 
 void CGameContext::ReadAccountStats(int ID, const char *pName)
