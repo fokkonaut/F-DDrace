@@ -1157,6 +1157,16 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 	}
 }
 
+void CPlayer::GiveBlockPoints(int Amount)
+{
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+
+	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
+		Amount += 1;
+
+	(*Account).m_BlockPoints += Amount;
+}
+
 void CPlayer::OnLogin()
 {
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
@@ -1176,16 +1186,6 @@ void CPlayer::OnLogout()
 
 		m_pCharacter->UnsetSpookyGhost();
 	}
-}
-
-void CPlayer::GiveBlockPoints(int Amount)
-{
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
-
-	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
-		Amount += 1;
-
-	(*Account).m_BlockPoints += Amount;
 }
 
 bool CPlayer::IsHooked(int Power)
