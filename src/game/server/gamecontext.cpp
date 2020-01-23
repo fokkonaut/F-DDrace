@@ -1589,10 +1589,26 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				if (pPlayer->m_TeeControlForcedID == -1)
 				{
-					if (pMsg->m_SpecMode != SPEC_PLAYER)
+					switch (pMsg->m_SpecMode)
+					{
+					case SPEC_FREEVIEW:
 						pPlayer->UnsetTeeControl();
-					else
+						break;
+					case SPEC_PLAYER:
 						pPlayer->SetTeeControl(m_apPlayers[pMsg->m_SpectatorID]);
+						break;
+					case SPEC_FLAGRED:
+					case SPEC_FLAGBLUE:
+						for (int i = 0; i < 2; i++)
+						{
+							CFlag* F = ((CGameControllerDDRace*)m_pController)->m_apFlags[i];
+							if (!F || !F->GetCarrier())
+								continue;
+
+							if ((pMsg->m_SpecMode == SPEC_FLAGRED && i == TEAM_RED) || (pMsg->m_SpecMode == SPEC_FLAGBLUE && i == TEAM_BLUE))
+								pPlayer->SetTeeControl(F->GetCarrier()->GetPlayer());
+						} break;
+					}
 				}
 			}
 			else
