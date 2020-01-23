@@ -2609,7 +2609,6 @@ void CGameContext::OnInit()
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		m_aPoliceLevel[i] = PoliceLevel[i];
 
-	m_TopAccounts.push_back(TopAccounts()); // we add an unused field so we can nicely start with 1
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	Storage()->ListDirectory(IStorage::TYPE_ALL, g_Config.m_SvAccFilePath, LogoutAccountsCallback, this);
 
@@ -3114,10 +3113,10 @@ void CGameContext::UpdateTopAccounts(int Type)
 
 	switch (Type)
 	{
-	case TOP_LEVEL:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
-	case TOP_POINTS:	std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
-	case TOP_MONEY:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
-	case TOP_SPREE:		std::sort(m_TopAccounts.begin()+1, m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
+	case TOP_LEVEL:		std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Level > b.m_Level; }); break;
+	case TOP_POINTS:	std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
+	case TOP_MONEY:		std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
+	case TOP_SPREE:		std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
 	}
 }
 
@@ -3150,7 +3149,7 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 
 void CGameContext::SetTopAccStats(int FromID)
 {
-	for (unsigned int i = ACC_START; i < m_TopAccounts.size(); i++)
+	for (unsigned int i = 0; i < m_TopAccounts.size(); i++)
 	{
 		// update if we have it in already
 		if (!str_comp(m_Accounts[FromID].m_Username, m_TopAccounts[i].m_aAccountName))

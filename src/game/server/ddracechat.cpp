@@ -1922,56 +1922,31 @@ void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	int StartRank = pResult->NumArguments() == 1 && pResult->GetInteger(0) != 0 ? pResult->GetInteger(0) : 1;
-	int EndRank = 0;
-	char aBuf[64];
 	char aType[8];
-	char aMsg[64];
 
 	pSelf->UpdateTopAccounts(Type);
 
+	char aBuf[512];
+	int Debut = pResult->NumArguments() >= 1 && pResult->GetInteger(0) != 0 ? pResult->GetInteger(0) : 1;
+	Debut = max(1, Debut < 0 ? (int)pSelf->m_TopAccounts.size() + Debut - 3 : Debut);
+
 	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : Type == TOP_MONEY ? "Money" : "Spree");
-	str_format(aMsg, sizeof(aMsg), "----------- Top 5 %s -----------", aType);
-
-	if (StartRank > 0)
+	str_format(aBuf, sizeof(aBuf), "----------- Top 5 %s -----------", aType);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	for (int i = 0; i < 5; i++)
 	{
-		EndRank = StartRank + 5;
+		if (i + Debut > (int)pSelf->m_TopAccounts.size())
+			break;
+		CGameContext::TopAccounts* r = &pSelf->m_TopAccounts[i + Debut - 1];
 
-		while ((unsigned)StartRank > pSelf->m_TopAccounts.size())
-			StartRank--;
-		while ((unsigned)EndRank > pSelf->m_TopAccounts.size())
-			EndRank--;
+		if (Type == TOP_MONEY)
+			str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i + Debut, r->m_aUsername, r->m_Money);
+		else
+			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i + Debut, r->m_aUsername, aType, Type == TOP_LEVEL ? r->m_Level : Type == TOP_POINTS ? r->m_Points : r->m_KillStreak);
 
-		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
-		for (int i = StartRank; i < EndRank; i++)
-		{
-			if (Type == TOP_MONEY)
-				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TopAccounts[i].m_aUsername, pSelf->m_TopAccounts[i].m_Money);
-			else
-				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TopAccounts[i].m_Level : Type == TOP_POINTS ? pSelf->m_TopAccounts[i].m_Points : pSelf->m_TopAccounts[i].m_KillStreak);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-		}
-		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
-	else if (StartRank < 0)
-	{
-		EndRank = pSelf->m_TopAccounts.size() - (StartRank*-1-1);
-		StartRank = EndRank - 5;
-
-		while (StartRank <= 0)
-			StartRank++;
-
-		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
-		for (int i = StartRank; i < EndRank; i++)
-		{
-			if (Type == TOP_MONEY)
-				str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i, pSelf->m_TopAccounts[i].m_aUsername, pSelf->m_TopAccounts[i].m_Money);
-			else
-				str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i, pSelf->m_TopAccounts[i].m_aUsername, aType, Type == TOP_LEVEL ? pSelf->m_TopAccounts[i].m_Level : Type == TOP_POINTS ? pSelf->m_TopAccounts[i].m_Points : pSelf->m_TopAccounts[i].m_KillStreak);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-		}
-		pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
-	}
+	pSelf->SendChatTarget(pResult->m_ClientID, "----------------------------------------");
 }
 
 void CGameContext::ConTop5Level(IConsole::IResult* pResult, void* pUserData)
