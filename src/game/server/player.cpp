@@ -1173,6 +1173,8 @@ void CPlayer::OnLogout()
 	{
 		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
 			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
+
+		m_pCharacter->UnsetSpookyGhost();
 	}
 }
 
