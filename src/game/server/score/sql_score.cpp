@@ -189,7 +189,7 @@ bool CSqlScore::CheckBirthdayThread(CSqlServer* pSqlServer, const CSqlData *pGam
 		{
 			int yearsAgo = pSqlServer->GetResults()->getInt("YearsAgo");
 			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday to %s for finishing their first map %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
-			pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+			pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, pData->m_ClientID);
 
 			str_format(aBuf, sizeof(aBuf), "Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!", pData->m_Name.Str(), yearsAgo, yearsAgo > 1 ? "s" : "");
 
@@ -798,7 +798,7 @@ bool CSqlScore::ShowRankThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d. %s Time: %02d:%05.2f, requested by %s", Rank, pSqlServer->GetResults()->getString("Name").c_str(), (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-				pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+				pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, pData->m_ClientID);
 			}
 		}
 
@@ -888,7 +888,7 @@ bool CSqlScore::ShowTeamRankThread(CSqlServer* pSqlServer, const CSqlData *pGame
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d. %s Team time: %02d:%05.02f, requested by %s", Rank, aNames, (int)(Time/60), Time-((int)Time/60*60), pData->m_aRequestingPlayer);
-				pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+				pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, pData->m_ClientID);
 			}
 		}
 
@@ -1227,7 +1227,7 @@ bool CSqlScore::ShowPointsThread(CSqlServer* pSqlServer, const CSqlData *pGameDa
 			int count = pSqlServer->GetResults()->getInt("Points");
 			int rank = pSqlServer->GetResults()->getInt("Rank");
 			str_format(aBuf, sizeof(aBuf), "%d. %s Points: %d, requested by %s", rank, pSqlServer->GetResults()->getString("Name").c_str(), count, pData->m_aRequestingPlayer);
-			pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+			pData->GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, pData->m_ClientID);
 		}
 
 		dbg_msg("sql", "Showing points done");
