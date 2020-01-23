@@ -2470,8 +2470,9 @@ void CGameContext::OnInit()
 		for (int x = 0; x < pTileMap->m_Width; x++)
 		{
 			int Index = pTiles[y * pTileMap->m_Width + x].m_Index;
+			vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 
-			Collision()->m_vTiles[Index].push_back(vec2(x*32.0f+16.0f, y*32.0f+16.0f));
+			Collision()->m_vTiles[Index].push_back(Pos);
 
 			if (Index == TILE_OLDLASER)
 			{
@@ -2501,7 +2502,6 @@ void CGameContext::OnInit()
 
 			if (Index >= ENTITY_OFFSET)
 			{
-				vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 				m_pController->OnEntity(Index, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
 			}
 
@@ -2538,7 +2538,6 @@ void CGameContext::OnInit()
 				}
 				if (Index >= ENTITY_OFFSET)
 				{
-					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 					m_pController->OnEntity(Index, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
 				}
 			}
@@ -2549,7 +2548,6 @@ void CGameContext::OnInit()
 				// if (Index == TILE_DOOR_OFF)
 				if (Index >= ENTITY_OFFSET)
 				{
-					vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 					m_pController->OnEntity(Index, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
 				}
 			}
