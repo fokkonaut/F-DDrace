@@ -3407,7 +3407,6 @@ void CCharacter::RemoveTeeControlCursor()
 void CCharacter::OnPlayerHook()
 {
 	CCharacter *pHookedTee = GameServer()->GetPlayerChar(m_Core.m_HookedPlayer);
-	CCharacterCore *pHookedCore = pHookedTee ? pHookedTee->Core() : 0;
 	if (!pHookedTee)
 		return;
 
