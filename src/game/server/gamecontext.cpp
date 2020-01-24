@@ -476,7 +476,6 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-//
 void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)
 {
 	// check if a vote is already running
@@ -503,7 +502,6 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	SendVoteSet(m_VoteType, -1);
 	m_VoteUpdate = true;
 }
-
 
 void CGameContext::EndVote(int Type, bool Force)
 {
