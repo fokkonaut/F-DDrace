@@ -1037,9 +1037,6 @@ int CPlayer::Pause(int State, bool Force)
 
 		if (m_pCharacter)
 		{
-			// update walk prediction
-			GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
-
 			if (m_Paused == PAUSE_NONE)
 				m_pCharacter->SetTeeControlCursor();
 			else
@@ -1294,7 +1291,7 @@ void CPlayer::SetTeeControl(CPlayer *pVictim)
 	if (m_pControlledTee->m_pCharacter)
 	{
 		m_pControlledTee->m_pCharacter->ResetNumInputs();
-		// update walk prediction
+		// update walk prediction for the controlled tee
 		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
 	}
 
@@ -1311,7 +1308,7 @@ void CPlayer::UnsetTeeControl()
 	if (m_pControlledTee->m_pCharacter)
 	{
 		m_pControlledTee->m_pCharacter->ResetNumInputs();
-		// update walk prediction
+		// update walk prediction for the controlled tee
 		GameServer()->SendTuningParams(m_pControlledTee->GetCID(), m_pControlledTee->m_pCharacter->m_TuneZone);
 	}
 	m_pControlledTee = 0;
@@ -1331,9 +1328,6 @@ void CPlayer::ResumeFromTeeControl()
 	GameServer()->SendTeamChange(m_ClientID, m_Team, true, Server()->Tick(), m_ClientID);
 	m_TeeControlMode = false;
 	UnsetTeeControl();
-	// update walk prediction
-	if (m_pCharacter)
-		GameServer()->SendTuningParams(m_ClientID, m_pCharacter->m_TuneZone);
 }
 
 bool CPlayer::CheckClanProtection()
