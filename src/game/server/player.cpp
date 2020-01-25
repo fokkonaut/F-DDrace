@@ -1250,16 +1250,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 	if (m_SpookyGhost)
 		return;
 
-	TeeInfos pTeeInfos;
-
-	for (int p = 0; p < NUM_SKINPARTS; p++)
-	{
-		str_copy(pTeeInfos.m_aaSkinPartNames[p], GameServer()->m_pSkins.GetSkin(Skin).m_aaSkinPartNames[p], 24);
-		pTeeInfos.m_aUseCustomColors[p] = GameServer()->m_pSkins.GetSkin(Skin).m_aUseCustomColors[p];
-		pTeeInfos.m_aSkinPartColors[p] = GameServer()->m_pSkins.GetSkin(Skin).m_aSkinPartColors[p];
-	}
-
-	GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
+	GameServer()->SendSkinChange(GameServer()->m_pSkins.GetSkin(Skin), m_ClientID, -1);
 }
 
 void CPlayer::ResetSkin(bool Unforce)
