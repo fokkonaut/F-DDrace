@@ -1377,9 +1377,9 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		if (pKiller && !pKiller->m_ShowName)
 			pKiller->FixForNoName(FIX_SET_NAME_ONLY);
 
-		m_pPlayer->m_MsgKiller = Killer;
-		m_pPlayer->m_MsgWeapon = GameServer()->GetRealWeapon(Weapon);
-		m_pPlayer->m_MsgModeSpecial = ModeSpecial;
+		m_pPlayer->m_KillMsgFix.m_Killer = Killer;
+		m_pPlayer->m_KillMsgFix.m_Weapon = GameServer()->GetRealWeapon(Weapon);
+		m_pPlayer->m_KillMsgFix.m_ModeSpecial = ModeSpecial;
 		m_pPlayer->FixForNoName(FIX_KILL_MSG);
 	}
 	else

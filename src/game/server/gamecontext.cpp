@@ -1184,8 +1184,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (!pPlayer->m_ShowName)
 			{
-				str_copy(pPlayer->m_ChatText, pMsg->m_pMessage, sizeof(pPlayer->m_ChatText));
-				pPlayer->m_ChatTeam = Mode;
+				pPlayer->m_ChatFix.m_Mode = Mode;
+				pPlayer->m_ChatFix.m_Target = pMsg->m_Target;
+				str_copy(pPlayer->m_ChatFix.m_Message, pMsg->m_pMessage, sizeof(pPlayer->m_ChatFix.m_Message));
 				pPlayer->FixForNoName(FIX_CHAT_MSG);
 			}
 			else if(Mode != CHAT_NONE)

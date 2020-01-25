@@ -258,13 +258,23 @@ public:
 	void FixForNoName(int ID);
 	int m_FixNameID;
 	bool m_ShowName;
+
 	bool m_SetRealName;
 	int64 m_SetRealNameTick;
-	int m_ChatTeam;
-	char m_ChatText[256];
-	int m_MsgKiller;
-	int m_MsgWeapon;
-	int m_MsgModeSpecial;
+
+	struct ChatFix
+	{
+		int m_Mode;
+		int m_Target;
+		char m_Message[256];
+	} m_ChatFix;
+
+	struct KillMsgFix
+	{
+		int m_Killer;
+		int m_Weapon;
+		int m_ModeSpecial;
+	} m_KillMsgFix;
 
 	//extras
 	int m_RainbowSpeed;

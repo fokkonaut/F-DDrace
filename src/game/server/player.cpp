@@ -132,13 +132,16 @@ void CPlayer::Reset()
 	m_FixNameID = -1;
 	m_RemovedName = false;
 	m_ShowName = true;
+
 	m_SetRealName = false;
 	m_SetRealNameTick = Now;
-	m_ChatTeam = CHAT_ALL;
-	m_ChatText[0] = '\0';
-	m_MsgKiller = -1;
-	m_MsgWeapon = -1;
-	m_MsgModeSpecial = 0;
+
+	m_ChatFix.m_Mode = CHAT_ALL;
+	m_ChatFix.m_Target = -1;
+	m_ChatFix.m_Message[0] = '\0';
+	m_KillMsgFix.m_Killer = -1;
+	m_KillMsgFix.m_Weapon = -1;
+	m_KillMsgFix.m_ModeSpecial = 0;
 
 	m_ResumeMoved = false;
 
@@ -299,14 +302,14 @@ void CPlayer::Tick()
 		if (m_SetRealNameTick < Server()->Tick())
 		{
 			if (m_FixNameID == FIX_CHAT_MSG)
-				GameServer()->SendChat(m_ClientID, m_ChatTeam, -1, m_ChatText, m_ClientID);
+				GameServer()->SendChat(m_ClientID, m_ChatFix.m_Mode, m_ChatFix.m_Target, m_ChatFix.m_Message, m_ClientID);
 			else if (m_FixNameID == FIX_KILL_MSG)
 			{
 				CNetMsg_Sv_KillMsg Msg;
-				Msg.m_Killer = m_MsgKiller;
+				Msg.m_Killer = m_KillMsgFix.m_Killer;
 				Msg.m_Victim = GetCID();
-				Msg.m_Weapon = m_MsgWeapon;
-				Msg.m_ModeSpecial = m_MsgModeSpecial;
+				Msg.m_Weapon = m_KillMsgFix.m_Weapon;
+				Msg.m_ModeSpecial = m_KillMsgFix.m_ModeSpecial;
 				for (int i = 0; i < MAX_CLIENTS; i++)
 					if (GameServer()->m_apPlayers[i] && (!g_Config.m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
