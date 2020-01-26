@@ -422,6 +422,7 @@ class CNetServer
 	NETSOCKET m_Socket;
 	class CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
+	int m_NumClients;
 	int m_MaxClients;
 	int m_MaxClientsPerIP;
 
@@ -466,10 +467,9 @@ public:
 	NETSOCKET Socket() const { return m_Socket; }
 	class CNetBan *NetBan() const { return m_pNetBan; }
 	int NetType() const { return m_Socket.type; }
-	int MaxClients() const { return m_MaxClients; }
 
-	//
-	void SetMaxClientsPerIP(int Max);
+	void SetMaxClients(int MaxClients);
+	void SetMaxClientsPerIP(int MaxClientsPerIP);
 
 	// F-DDrace
 	void DummyInit(int DummyID);

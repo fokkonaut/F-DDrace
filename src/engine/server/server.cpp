@@ -543,11 +543,6 @@ bool CServer::ClientIngame(int ClientID) const
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && (m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_DUMMY);
 }
 
-int CServer::MaxClients() const
-{
-	return m_NetServer.MaxClients();
-}
-
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	CNetChunk Packet;
@@ -872,7 +867,7 @@ void CServer::SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int Cli
 
 void CServer::UpdateClientRconCommands()
 {
-	for(int ClientID = Tick() % MAX_RCONCMD_RATIO; ClientID < MaxClients(); ClientID += MAX_RCONCMD_RATIO)
+	for(int ClientID = Tick() % MAX_RCONCMD_RATIO; ClientID < MAX_CLIENTS; ClientID += MAX_RCONCMD_RATIO)
 	{
 		if(m_aClients[ClientID].m_State != CClient::STATE_EMPTY && m_aClients[ClientID].m_Authed)
 		{
@@ -903,7 +898,7 @@ void CServer::SendMapListEntryRem(const CMapListEntry *pMapListEntry, int Client
 
 void CServer::UpdateClientMapListEntries()
 {
-	for(int ClientID = Tick() % MAX_RCONCMD_RATIO; ClientID < MaxClients(); ClientID += MAX_RCONCMD_RATIO)
+	for(int ClientID = Tick() % MAX_RCONCMD_RATIO; ClientID < MAX_CLIENTS; ClientID += MAX_RCONCMD_RATIO)
 	{
 		if(m_aClients[ClientID].m_State != CClient::STATE_EMPTY && m_aClients[ClientID].m_Authed)
 		{
@@ -1314,7 +1309,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	pPacker->AddInt(PlayerCount); // num players
 	pPacker->AddInt(g_Config.m_SvPlayerSlots); // max players
 	pPacker->AddInt(ClientCount); // num clients
-	pPacker->AddInt(m_NetServer.MaxClients()); // max clients
+	pPacker->AddInt(max(ClientCount, g_Config.m_SvMaxClients)); // max clients
 
 	if(Token != -1)
 	{
@@ -2138,6 +2133,13 @@ void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
+void CServer::ConchainMaxclientsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+		((CServer *)pUserData)->m_NetServer.SetMaxClients(pResult->GetInteger(0));
+}
+
 void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -2265,6 +2267,8 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
+	Console()->Chain("sv_max_clients", ConchainMaxclientsUpdate, this);
+	Console()->Chain("sv_max_clients", ConchainSpecialInfoupdate, this);
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
