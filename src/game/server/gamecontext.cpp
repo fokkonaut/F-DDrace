@@ -676,10 +676,10 @@ void CGameContext::OnTick()
 		{
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
-		}
 
-		// F-DDrace
-		m_pShop->Tick(i);
+			// F-DDrace
+			m_pShop->Tick(i);
+		}
 	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
