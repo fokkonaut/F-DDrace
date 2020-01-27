@@ -1332,12 +1332,7 @@ bool CPlayer::CheckClanProtection()
 	if (str_comp_nocase(Server()->ClientClan(m_ClientID), "Chilli.*") || !str_comp(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward"))
 	{
 		if (m_ClanProtectionPunished)
-		{
-			if (m_pCharacter)
-				m_pCharacter->m_DeepFreeze = false;
-
 			GameServer()->SendChatTarget(m_ClientID, "You got unfrozen by the clan protection.");
-		}
 
 		m_ClanProtectionPunished = false;
 		return false;
@@ -1346,9 +1341,6 @@ bool CPlayer::CheckClanProtection()
 	GameServer()->SendChatTarget(m_ClientID, "~~~ WARNING ~~~");
 	GameServer()->SendChatTarget(m_ClientID, "You got frozen by the clan protection.");
 	GameServer()->SendChatTarget(m_ClientID, "Remove your 'Chilli.*' clantag and reconnect, or set your skin body to 'greensward'.");
-
-	if (m_pCharacter)
-		m_pCharacter->m_DeepFreeze = true;
 
 	m_ClanProtectionPunished = true;
 	return true;

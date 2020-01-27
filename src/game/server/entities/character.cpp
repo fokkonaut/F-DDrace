@@ -1929,8 +1929,7 @@ void CCharacter::HandleTiles(int Index)
 	if (((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Super && !m_DeepFreeze)
 		m_DeepFreeze = true;
 	else if (((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Super && m_DeepFreeze)
-		if (!m_pPlayer->m_ClanProtectionPunished) // F-DDrace
-			m_DeepFreeze = false;
+		m_DeepFreeze = false;
 
 	// endless hook
 	if (((m_TileIndex == TILE_EHOOK_START) || (m_TileFIndex == TILE_EHOOK_START)) && !m_EndlessHook)
@@ -2356,8 +2355,7 @@ void CCharacter::HandleTiles(int Index)
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
 	{
 		if (GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()])
-			if (!m_pPlayer->m_ClanProtectionPunished) // F-DDrace
-				m_DeepFreeze = false;
+			m_DeepFreeze = false;
 	}
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_HIT_START && m_Hit & DISABLE_HIT_HAMMER && GameServer()->Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
@@ -2719,7 +2717,7 @@ void CCharacter::DDracePostCoreTick()
 
 	m_FrozenLastTick = false;
 
-	if (m_DeepFreeze && !m_Super)
+	if ((m_DeepFreeze || m_pPlayer->m_ClanProtectionPunished) && !m_Super)
 		Freeze();
 
 	if (m_Core.m_Jumps == 0 && !m_Super)
@@ -2999,9 +2997,6 @@ void CCharacter::FDDraceInit()
 	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
 
 	m_LastTouchedSwitcher = -1;
-
-	if (m_pPlayer->m_ClanProtectionPunished)
-		m_DeepFreeze = true;
 }
 
 void CCharacter::FDDraceTick()
