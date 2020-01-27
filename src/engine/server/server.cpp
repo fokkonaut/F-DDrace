@@ -447,7 +447,6 @@ int CServer::Init()
 		m_aClients[i].m_TrafficSince = 0;
 	}
 
-	m_ShutdownMessage[0] = '\0';
 	m_AnnouncementLastLine = 0;
 	m_CurrentGameTick = 0;
 
@@ -1501,13 +1500,11 @@ int CServer::Run()
 		BindAddr.port = g_Config.m_SvPort;
 	}
 
-	if(!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, 0))
+	if(!m_NetServer.Open(BindAddr, &m_ServerBan, g_Config.m_SvMaxClients, g_Config.m_SvMaxClientsPerIP, NewClientCallback, DelClientCallback, this))
 	{
 		dbg_msg("server", "couldn't open socket. port %d might already be in use", g_Config.m_SvPort);
 		return -1;
 	}
-
-	m_NetServer.SetCallbacks(NewClientCallback, DelClientCallback, this);
 
 	m_Econ.Init(Console(), &m_ServerBan);
 
@@ -1668,11 +1665,8 @@ int CServer::Run()
 		}
 	}
 	// disconnect all clients on shutdown
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-			m_NetServer.Drop(i, m_ShutdownMessage[0] != '\0' ? m_ShutdownMessage : "Server shutdown");
-	}
+	m_NetServer.Close();
+	m_Econ.Shutdown();
 
 	m_Econ.Shutdown();
 
@@ -1794,7 +1788,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
-	str_copy(((CServer*)pUser)->m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_ShutdownMessage));
+	str_copy(((CServer*)pUser)->m_NetServer.m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_NetServer.m_ShutdownMessage));
 	((CServer *)pUser)->m_RunServer = 0;
 }
 
@@ -2133,11 +2127,25 @@ void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
+void CServer::ConchainPlayerSlotsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		if(g_Config.m_SvMaxClients < g_Config.m_SvPlayerSlots)
+			g_Config.m_SvPlayerSlots = g_Config.m_SvMaxClients;
+	}
+}
+
 void CServer::ConchainMaxclientsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
+	{
+		if(g_Config.m_SvMaxClients < g_Config.m_SvPlayerSlots)
+			g_Config.m_SvPlayerSlots = g_Config.m_SvMaxClients;
 		((CServer *)pUserData)->m_NetServer.SetMaxClients(pResult->GetInteger(0));
+	}
 }
 
 void CServer::ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -2267,6 +2275,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
+	Console()->Chain("sv_player_slots", ConchainPlayerSlotsUpdate, this);
 	Console()->Chain("sv_max_clients", ConchainMaxclientsUpdate, this);
 	Console()->Chain("sv_max_clients", ConchainSpecialInfoupdate, this);
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
