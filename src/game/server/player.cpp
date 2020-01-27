@@ -1334,10 +1334,7 @@ bool CPlayer::CheckClanProtection()
 		if (m_ClanProtectionPunished)
 		{
 			if (m_pCharacter)
-			{
 				m_pCharacter->m_DeepFreeze = false;
-				m_pCharacter->UnFreeze();
-			}
 
 			GameServer()->SendChatTarget(m_ClientID, "You got unfrozen by the clan protection.");
 		}
