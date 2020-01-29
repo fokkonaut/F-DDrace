@@ -230,7 +230,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	MainView.Margin(5.0f, &MainView);
 
 	// prepare scroll
-	static CScrollRegion s_ScrollRegion(this);
+	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0, 0);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ClipBgColor = vec4(0,0,0,0);
@@ -483,7 +483,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	RenderTools()->DrawUIRect(&Motd, vec4(0.0, 0.0, 0.0, 0.25f), CUI::CORNER_ALL, 5.0f);
 	Motd.Margin(5.0f, &Motd);
 
-	static CScrollRegion s_ScrollRegion(this);
+	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0, 0);
 	s_ScrollRegion.Begin(&Motd, &ScrollOffset);
 	Motd.y += ScrollOffset.y;
@@ -503,7 +503,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)
 {
-	static CListBox s_ListBox(this);
+	static CListBox s_ListBox;
 	CUIRect List = MainView;
 	s_ListBox.DoHeader(&List, Localize("Option"), GetListHeaderHeight());
 	s_ListBox.DoStart(20.0f, m_pClient->m_pVoting->m_NumVoteOptions, 1, m_CallvoteSelectedOption, 0, true);
@@ -523,9 +523,8 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		}
 	}
 
-	bool doCallVote = false;
-	m_CallvoteSelectedOption = s_ListBox.DoEnd(&doCallVote);
-	return doCallVote;
+	m_CallvoteSelectedOption = s_ListBox.DoEnd();
+	return s_ListBox.WasItemActivated();
 }
 
 void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
@@ -552,7 +551,7 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	const float NameWidth = 250.0f;
 	const float ClanWidth = 250.0f;
 
-	static CListBox s_ListBox(this);
+	static CListBox s_ListBox;
 	CUIRect List = MainView;
 	s_ListBox.DoHeader(&List, Localize("Player"), GetListHeaderHeight());
 	s_ListBox.DoStart(20.0f, NumOptions, 1, Selected, 0, true);
@@ -597,7 +596,7 @@ void CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		}
 	}
 
-	Selected = s_ListBox.DoEnd(0);
+	Selected = s_ListBox.DoEnd();
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
 }
 
@@ -784,7 +783,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				Label = ClearButton;
 				Label.y += 2.0f;
 				UI()->DoLabel(&Label, "x", Label.h*ms_FontmodHeight*0.8f, CUI::ALIGN_CENTER);
-				if(UI()->DoButtonLogic(s_ClearButton.GetID(), "x", 0, &ClearButton))
+				if(UI()->DoButtonLogic(s_ClearButton.GetID(), &ClearButton))
 					m_aCallvoteReason[0] = 0;
 			}
 		}

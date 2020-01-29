@@ -11,6 +11,7 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/shared/config.h>
+#include <engine/shared/jsonwriter.h>
 #include <engine/client/contacts.h>
 
 #include <generated/client_data.h>
@@ -247,85 +248,77 @@ void CMenus::SaveFilters()
 	if(!File)
 		return;
 
-	char aBuf[512];
+	CJsonWriter Writer(File);
+
+	Writer.BeginObject(); // root
 
 	// settings
-	const char *p = "{\"settings\": {\n";
-	io_write(File, p, str_length(p));
-
-	str_format(aBuf, sizeof(aBuf), "\t\"sidebar_active\": %d,\n", m_SidebarActive);
-	io_write(File, aBuf, str_length(aBuf));
-	str_format(aBuf, sizeof(aBuf), "\t\"sidebar_tab\": %d,\n", m_SidebarTab);
-	io_write(File, aBuf, str_length(aBuf));
-	p = "\t\"filters\": [\n";
-	io_write(File, p, str_length(p));
-	for(int i = 0; i < IServerBrowser::NUM_TYPES; i++)
+	Writer.WriteAttribute("settings");
+	Writer.BeginObject();
 	{
-		str_format(aBuf, sizeof(aBuf), "\t\t%d%s\n", m_aSelectedFilters[i], i < IServerBrowser::NUM_TYPES-1 ? "," : "");
-		io_write(File, aBuf, str_length(aBuf));
+		Writer.WriteAttribute("sidebar_active");
+		Writer.WriteIntValue(m_SidebarActive);
+
+		Writer.WriteAttribute("sidebar_tab");
+		Writer.WriteIntValue(m_SidebarTab);
+
+		Writer.WriteAttribute("filters");
+		Writer.BeginArray();
+		for(int i = 0; i < IServerBrowser::NUM_TYPES; i++)
+			Writer.WriteIntValue(m_aSelectedFilters[i]);
+		Writer.EndArray();
 	}
-	p = "\t]\n";
-	io_write(File, p, str_length(p));
+	Writer.EndObject();
 
-	// settings end
-	p = "},\n";
-	io_write(File, p, str_length(p));
-	
 	// filter
-	p = " \"filter\": [";
-	io_write(File, p, str_length(p));
-
+	Writer.WriteAttribute("filter");
+	Writer.BeginArray();
 	for(int i = 0; i < m_lFilters.size(); i++)
 	{
 		// part start
-		if(i == 0)
-			p = "\n";
-		else
-			p = ",\n";
-		io_write(File, p, str_length(p));
-
-		str_format(aBuf, sizeof(aBuf), "\t{\"%s\": {\n", m_lFilters[i].Name());
-		io_write(File, aBuf, str_length(aBuf));
-
-		str_format(aBuf, sizeof(aBuf), "\t\t\"type\": %d,\n", m_lFilters[i].Custom());
-		io_write(File, aBuf, str_length(aBuf));
-
-		// filter setting
-		CServerFilterInfo FilterInfo;
-		m_lFilters[i].GetFilter(&FilterInfo);
-
-		str_format(aBuf, sizeof(aBuf), "\t\t\"settings\": {\n");
-		io_write(File, aBuf, str_length(aBuf));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_hash\": %d,\n", FilterInfo.m_SortHash);
-		io_write(File, aBuf, str_length(aBuf));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_gametype\": [");
-		io_write(File, aBuf, str_length(aBuf));
-		for(unsigned j = 0; j < CServerFilterInfo::MAX_GAMETYPES && FilterInfo.m_aGametype[j][0]; ++j)
+		Writer.BeginObject();
+		Writer.WriteAttribute(m_lFilters[i].Name());
+		Writer.BeginObject();
 		{
-			str_format(aBuf, sizeof(aBuf), "\n\t\t\t\t\"%s\",", FilterInfo.m_aGametype[j]);
-			io_write(File, aBuf, str_length(aBuf));
+			Writer.WriteAttribute("type");
+			Writer.WriteIntValue(m_lFilters[i].Custom());
+
+			// filter setting
+			CServerFilterInfo FilterInfo;
+			m_lFilters[i].GetFilter(&FilterInfo);
+
+			Writer.WriteAttribute("settings");
+			Writer.BeginObject();
+			{
+				Writer.WriteAttribute("filter_hash");
+				Writer.WriteIntValue(FilterInfo.m_SortHash);
+
+				Writer.WriteAttribute("filter_gametype");
+				Writer.BeginArray();
+				for(unsigned j = 0; j < CServerFilterInfo::MAX_GAMETYPES && FilterInfo.m_aGametype[j][0]; ++j)
+					Writer.WriteStrValue(FilterInfo.m_aGametype[j]);
+				Writer.EndArray();
+
+				Writer.WriteAttribute("filter_ping");
+				Writer.WriteIntValue(FilterInfo.m_Ping);
+
+				Writer.WriteAttribute("filter_serverlevel");
+				Writer.WriteIntValue(FilterInfo.m_ServerLevel);
+
+				Writer.WriteAttribute("filter_address");
+				Writer.WriteStrValue(FilterInfo.m_aAddress);
+
+				Writer.WriteAttribute("filter_country");
+				Writer.WriteIntValue(FilterInfo.m_Country);
+			}
+			Writer.EndObject();
 		}
-		p = "\n\t\t\t],\n";
-		io_write(File, p, str_length(p));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_ping\": %d,\n", FilterInfo.m_Ping);
-		io_write(File, aBuf, str_length(aBuf));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_serverlevel\": %d,\n", FilterInfo.m_ServerLevel);
-		io_write(File, aBuf, str_length(aBuf));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_address\": \"%s\",\n", FilterInfo.m_aAddress);
-		io_write(File, aBuf, str_length(aBuf));
-		str_format(aBuf, sizeof(aBuf), "\t\t\t\"filter_country\": %d\n\t\t\t}", FilterInfo.m_Country);
-		io_write(File, aBuf, str_length(aBuf));
-
-		// part end
-		p = "\n\t\t}\n\t}";
-		io_write(File, p, str_length(p));
+		Writer.EndObject();
+		Writer.EndObject();
 	}
+	Writer.EndArray();
 
-	// filter end
-	p = "]\n}";
-	io_write(File, p, str_length(p));
-
-	io_close(File);
+	Writer.EndObject(); // end root
 }
 
 void CMenus::RemoveFilter(int FilterIndex)
@@ -383,7 +376,7 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 {
 	// logic
 	int ReturnValue = 0;
-	int Inside = UI()->MouseInside(&View) && UI()->MouseInsideClip();
+	bool Inside = UI()->MouseInside(&View) && UI()->MouseInsideClip();
 
 	if(UI()->CheckActiveItem(pID))
 	{
@@ -660,13 +653,9 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 		View.VSplitLeft(160.0f, &Info, &View);
 		RenderDetailInfo(Info, pEntry);
 
-		CUIRect NewClipArea = *UI()->ClipArea();
-		CUIRect OldClipArea = NewClipArea;
-		NewClipArea.x = View.x;
-		NewClipArea.w = View.w;
-		UI()->ClipEnable(&NewClipArea);
+		UI()->ClipEnable(&View);
 		RenderDetailScoreboard(View, pEntry, 4, vec4(TextBaseColor.r, TextBaseColor.g, TextBaseColor.b, TextAlpha));
-		UI()->ClipEnable(&OldClipArea);
+		UI()->ClipDisable();
 	}
 
 	TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.3f);
@@ -686,7 +675,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	RenderTools()->DrawUIRect(&View, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
 
 	CUIRect Button, EditButtons;
-	if(UI()->DoButtonLogic(pFilter, "", 0, &View))
+	if(UI()->DoButtonLogic(pFilter, &View))
 	{
 		Switch = true; // switch later, to make sure we haven't clicked one of the filter buttons (edit...)
 	}
@@ -727,7 +716,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	if(FilterIndex > 0 && (pFilter->Custom() > CBrowserFilter::FILTER_ALL || m_lFilters[FilterIndex-1].Custom() != CBrowserFilter::FILTER_STANDARD))
 	{
 		DoIcon(IMAGE_TOOLICONS, SPRITE_TOOL_UP_A, &Button);
-		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[0], "", 0, &Button))
+		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[0], &Button))
 		{
 			Move(true, FilterIndex);
 			Switch = false;
@@ -742,7 +731,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	if(FilterIndex >= 0 && FilterIndex < m_lFilters.size()-1 && (pFilter->Custom() != CBrowserFilter::FILTER_STANDARD || m_lFilters[FilterIndex+1].Custom() > CBrowserFilter::FILTER_ALL))
 	{
 		DoIcon(IMAGE_TOOLICONS, SPRITE_TOOL_DOWN_A, &Button);
-		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[1], "", 0, &Button))
+		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[1], &Button))
 		{
 			Move(false, FilterIndex);
 			Switch = false;
@@ -861,7 +850,7 @@ void CMenus::RenderServerbrowserOverlay()
 			{
 				CUIRect Name, Clan, Score, Flag;
 				ServerScoreBoard.HSplitTop(ButtonHeight, &Name, &ServerScoreBoard);
-				if(UI()->DoButtonLogic(&pInfo->m_aClients[i], "", 0, &Name))
+				if(UI()->DoButtonLogic(&pInfo->m_aClients[i], &Name))
 				{
 					if(pInfo->m_aClients[i].m_FriendState == CContactInfo::CONTACT_PLAYER)
 						m_pClient->Friends()->RemoveFriend(pInfo->m_aClients[i].m_aName, pInfo->m_aClients[i].m_aClan);
@@ -1211,7 +1200,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 
 	// scrollbar
-	static CScrollRegion s_ScrollRegion(this);
+	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0, 0);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ClipBgColor = vec4(0,0,0,0);
@@ -1545,7 +1534,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	}
 
 	// scrollbar
-	static CScrollRegion s_ScrollRegion(this);
+	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0, 0);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ClipBgColor = vec4(0,0,0,0);
@@ -1646,7 +1635,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 		Label.HMargin(2.0f, &Label);
 		UI()->DoLabel(&Label, aBuf, FontSize, CUI::ALIGN_LEFT);
 		static int s_HeaderButton[NUM_FRIEND_TYPES] = { 0 };
-		if(UI()->DoButtonLogic(&s_HeaderButton[i], "", 0, &Header))
+		if(UI()->DoButtonLogic(&s_HeaderButton[i], &Header))
 		{
 			s_ListExtended[i] ^= 1;
 		}
@@ -1680,7 +1669,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	if(s_aName[0] || s_aClan[0])
 		DoIcon(IMAGE_FRIENDICONS, UI()->MouseInside(&Button)?SPRITE_FRIEND_PLUS_A:SPRITE_FRIEND_PLUS_B, &Icon);
 	static CButtonContainer s_AddFriend;
-	if((s_aName[0] || s_aClan[0]) && UI()->DoButtonLogic(&s_AddFriend, "", 0, &Button))
+	if((s_aName[0] || s_aClan[0]) && UI()->DoButtonLogic(&s_AddFriend, &Button))
 	{
 		m_pClient->Friends()->AddFriend(s_aName, s_aClan);
 		FriendlistOnUpdate();
@@ -1716,7 +1705,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 	if(s_aFilterName[0])
 		DoIcon(IMAGE_FRIENDICONS, UI()->MouseInside(&Button) ? SPRITE_FRIEND_PLUS_A : SPRITE_FRIEND_PLUS_B, &Icon);
 	static CButtonContainer s_AddFilter;
-	if(s_aFilterName[0] && UI()->DoButtonLogic(&s_AddFilter, "", 0, &Button))
+	if(s_aFilterName[0] && UI()->DoButtonLogic(&s_AddFilter, &Button))
 	{
 		m_lFilters.add(CBrowserFilter(CBrowserFilter::FILTER_CUSTOM, s_aFilterName, ServerBrowser()));
 		s_aFilterName[0] = 0;
@@ -1858,7 +1847,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 	RenderTools()->DrawUIRect(&Button, vec4(1.0f, 1.0f, 1.0f, 0.25f), CUI::CORNER_R, 5.0f);
 	DoIcon(IMAGE_FRIENDICONS, UI()->MouseInside(&Button) ? SPRITE_FRIEND_PLUS_A : SPRITE_FRIEND_PLUS_B, &Button);
 	static CButtonContainer s_AddGametype;
-	if(s_aGametype[0] && UI()->DoButtonLogic(&s_AddGametype, "", 0, &Button))
+	if(s_aGametype[0] && UI()->DoButtonLogic(&s_AddGametype, &Button))
 	{
 		for(int i = 0; i < CServerFilterInfo::MAX_GAMETYPES; ++i)
 		{
@@ -1883,8 +1872,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 		UpdateFilter = true;
 	}
 
-	if(!NeedScrollbar)
-		ServerFilter.HSplitTop(LineSize - 4.f, &Button, &ServerFilter);
+	ServerFilter.HSplitTop(LineSize - 4.f, &Button, &ServerFilter);
 
 	{
 		int Value = FilterInfo.m_Ping, Min = 20, Max = 999;
@@ -1934,7 +1922,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 		m_pClient->m_pCountryFlags->Render(FilterInfo.m_Country, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		static int s_BrFilterCountryIndex = 0;
-		if((FilterInfo.m_SortHash&IServerBrowser::FILTER_COUNTRY) && UI()->DoButtonLogic(&s_BrFilterCountryIndex, "", 0, &Rect))
+		if((FilterInfo.m_SortHash&IServerBrowser::FILTER_COUNTRY) && UI()->DoButtonLogic(&s_BrFilterCountryIndex, &Rect))
 			m_Popup = POPUP_COUNTRY;
 	}
 
@@ -2092,7 +2080,7 @@ void CMenus::RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int 
 		float RowWidth = (RowCount == 0) ? View.w : (View.w * 0.25f);
 		float LineHeight = 20.0f;
 
-		static CScrollRegion s_ScrollRegion(this);
+		static CScrollRegion s_ScrollRegion;
 		vec2 ScrollOffset(0, 0);
 		CScrollRegionParams ScrollParams;
 		ScrollParams.m_ClipBgColor = vec4(0,0,0,0);
@@ -2108,7 +2096,7 @@ void CMenus::RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int 
 			static float s_ScrollValue = 0.0f;
 			if(Width > View.w)
 			{
-				View.HSplitBottom(8.0f, &View, &Scroll);
+				View.HSplitBottom(14.0f, &View, &Scroll);
 				Scroll.VMargin(5.0f, &Scroll);
 				s_ScrollValue = DoScrollbarH(&s_ScrollValue, &Scroll, s_ScrollValue);
 				View.x += (View.w - Width) * s_ScrollValue;
@@ -2136,7 +2124,7 @@ void CMenus::RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int 
 			RenderTools()->DrawUIRect(&Name, vec4(1.0f, 1.0f, 1.0f, (Count % 2 + 1)*0.05f), CUI::CORNER_ALL, 4.0f);
 
 			// friend
-			if(UI()->DoButtonLogic(&pInfo->m_aClients[i], "", 0, &Name))
+			if(UI()->DoButtonLogic(&pInfo->m_aClients[i], &Name))
 			{
 				if(pInfo->m_aClients[i].m_FriendState == CContactInfo::CONTACT_PLAYER)
 					m_pClient->Friends()->RemoveFriend(pInfo->m_aClients[i].m_aName, pInfo->m_aClients[i].m_aClan);
