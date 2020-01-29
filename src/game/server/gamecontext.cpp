@@ -2324,6 +2324,7 @@ void CGameContext::OnInit()
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
+	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
 
 	DeleteTempfile();
 
@@ -3517,6 +3518,12 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 bool CGameContext::IsShopDummy(int ClientID)
 {
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_SHOP_DUMMY;
+}
+
+void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUser)
+{
+	CGameContext* pSelf = (CGameContext*)pUser;
+	*IsDummy = pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_IsDummy;
 }
 
 int CGameContext::GetShopDummy()

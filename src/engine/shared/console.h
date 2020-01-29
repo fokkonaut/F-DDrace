@@ -76,6 +76,9 @@ class CConsole : public IConsole
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
 
+	FIsDummyCallback m_pfnIsDummyCallback;
+	void *m_pIsDummyUserdata;
+
 	enum
 	{
 		CONSOLE_MAX_STR_LENGTH = 1024,
@@ -124,6 +127,7 @@ class CConsole : public IConsole
 
 		enum
 		{
+			VICTIM_DUMMY = -4,
 			VICTIM_NONE = -3,
 			VICTIM_ME = -2,
 			VICTIM_ALL = -1,
@@ -223,6 +227,7 @@ public:
 	virtual void Print(int Level, const char *pFrom, const char *pStr, bool Highlighted=false);
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
+	virtual void SetIsDummyCallback(FIsDummyCallback pfnCallback, void *pUser);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_HELPER)); }
 	void ResetServerGameSettings();

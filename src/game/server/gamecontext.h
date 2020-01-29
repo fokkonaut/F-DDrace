@@ -469,6 +469,9 @@ public:
 	//chat commands
 	void ExecuteChatCommand(const char *pMessage, int ClientID);
 
+	//isdummy callback for console victim dummy
+	static void ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUser);
+
 private:
 
 	bool m_VoteWillPass;

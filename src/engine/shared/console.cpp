@@ -276,6 +276,12 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 	m_pTeeHistorianCommandUserdata = pUser;
 }
 
+void CConsole::SetIsDummyCallback(FIsDummyCallback pfnCallback, void* pUser)
+{
+	m_pfnIsDummyCallback = pfnCallback;
+	m_pIsDummyUserdata = pUser;
+}
+
 bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr || *pStr == 0)
@@ -430,10 +436,17 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 						if (Result.GetVictim() == CResult::VICTIM_ME)
 							Result.SetVictim(ClientID);
 
-						if (Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						if (Result.HasVictim() && (Result.GetVictim() == CResult::VICTIM_ALL || Result.GetVictim() == CResult::VICTIM_DUMMY))
 						{
 							for (int i = 0; i < MAX_CLIENTS; i++)
 							{
+								bool IsDummy = false;
+								if (m_pfnIsDummyCallback)
+									m_pfnIsDummyCallback(i, &IsDummy, m_pIsDummyUserdata);
+
+								if (Result.GetVictim() == CResult::VICTIM_DUMMY && !IsDummy)
+									continue;
+
 								Result.SetVictim(i);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 							}
@@ -824,6 +837,8 @@ CConsole::CConsole(int FlagMask)
 	m_NumPrintCB = 0;
 	m_pfnTeeHistorianCommandCallback = 0;
 	m_pTeeHistorianCommandUserdata = 0;
+	m_pfnIsDummyCallback = 0;
+	m_pIsDummyUserdata = 0;
 
 	m_pStorage = 0;
 
@@ -1241,7 +1256,7 @@ bool CConsole::CResult::HasVictim()
 
 void CConsole::CResult::SetVictim(int Victim)
 {
-	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+	m_Victim = clamp<int>(Victim, VICTIM_DUMMY, MAX_CLIENTS - 1);
 }
 
 void CConsole::CResult::SetVictim(const char* pVictim)
@@ -1250,6 +1265,8 @@ void CConsole::CResult::SetVictim(const char* pVictim)
 		m_Victim = VICTIM_ME;
 	else if (!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
+	else if (!str_comp(pVictim, "dummy"))
+		m_Victim = VICTIM_DUMMY;
 	else
 		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
 }
