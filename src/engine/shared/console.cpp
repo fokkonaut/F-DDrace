@@ -440,12 +440,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 						{
 							for (int i = 0; i < MAX_CLIENTS; i++)
 							{
-								bool IsDummy = false;
-								if (m_pfnIsDummyCallback)
-									m_pfnIsDummyCallback(i, &IsDummy, m_pIsDummyUserdata);
-
-								if (Result.GetVictim() == CResult::VICTIM_DUMMY && !IsDummy)
-									continue;
+								if (Result.GetVictim() == CResult::VICTIM_DUMMY)
+								{
+									bool IsDummy = false;
+									if (m_pfnIsDummyCallback)
+										m_pfnIsDummyCallback(i, &IsDummy, m_pIsDummyUserdata);
+									if (!IsDummy)
+										continue;
+								}
 
 								Result.SetVictim(i);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
