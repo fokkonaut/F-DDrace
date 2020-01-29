@@ -438,9 +438,10 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 
 						if (Result.HasVictim() && (Result.GetVictim() == CResult::VICTIM_ALL || Result.GetVictim() == CResult::VICTIM_DUMMY))
 						{
+							bool DummyVictim = Result.GetVictim() == CResult::VICTIM_DUMMY;
 							for (int i = 0; i < MAX_CLIENTS; i++)
 							{
-								if (Result.GetVictim() == CResult::VICTIM_DUMMY)
+								if (DummyVictim)
 								{
 									bool IsDummy = false;
 									if (m_pfnIsDummyCallback)
