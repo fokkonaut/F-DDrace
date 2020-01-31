@@ -25,7 +25,6 @@ class CClock : public CEntity
 	int m_ID3;
 
 	void SetHandRotations();
-	void Step();
 	int GetSnapID(int Hand);
 public:
 	CClock(CGameWorld *pGameWorld, vec2 Pos);

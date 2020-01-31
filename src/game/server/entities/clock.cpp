@@ -17,8 +17,6 @@ CClock::CClock(CGameWorld *pGameWorld, vec2 Pos)
 	m_ID2 = Server()->SnapNewID();
 	m_ID3 = Server()->SnapNewID();
 	GameWorld()->InsertEntity(this);
-
-	Step();
 }
 
 CClock::~CClock()
@@ -29,12 +27,9 @@ CClock::~CClock()
 
 void CClock::Tick()
 {
-	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
-		Step();
-}
+	if (Server()->Tick() % Server()->TickSpeed() != 0)
+		return;
 
-void CClock::Step()
-{
 	SetHandRotations();
 	for (int i = 0; i < 3; i++)
 	{
