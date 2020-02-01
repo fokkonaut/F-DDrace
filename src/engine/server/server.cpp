@@ -1761,9 +1761,13 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 	char aBuf[1024];
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	CServer* pThis = static_cast<CServer *>(pUser);
+	const char *pName = pResult->NumArguments() == 1 ? pResult->GetString(0) : "";
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		if (!str_utf8_find_nocase(pThis->m_aClients[i].m_aName, pName))
+			continue;
+
 		if (pThis->m_aClients[i].m_State == CClient::STATE_DUMMY)
 		{
 			str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d dummy=yes", i, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score);
@@ -2262,7 +2266,7 @@ void CServer::RegisterCommands()
 
 	// register console commands
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason", AUTHED_ADMIN);
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players", AUTHED_HELPER);
+	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players", AUTHED_HELPER);
 	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon", AUTHED_HELPER);
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)", AUTHED_ADMIN);
