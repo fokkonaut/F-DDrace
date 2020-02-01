@@ -1055,7 +1055,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	int ID = pSelf->GetCIDByName(pResult->GetString(0));
 	if (ID < 0)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid player");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid client id");
 		return;
 	}
 
@@ -1064,112 +1064,112 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pResult->GetString(0));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	if (pSelf->Server()->GetAuthedState(ID))
 	{
 		str_format(aBuf, sizeof(aBuf), "Authed: %d", pSelf->Server()->GetAuthedState(ID));
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "ClientID: %d", ID);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	if (pChr)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Status: Ingame");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Ingame");
 	else if (pPlayer->GetTeam() == TEAM_SPECTATORS)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Status: Spectator");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Spectator");
 	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "Status: Dead");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Dead");
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
 		str_format(aBuf, sizeof(aBuf), "Account Name: %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "Account: Not logged in");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Account: Not logged in");
 	if (pPlayer->m_InfRainbow)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Infinite Rainbow: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Infinite Rainbow: True");
 	if (pPlayer->m_InfMeteors > 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "Infinite Meteors: %d", pPlayer->m_InfMeteors);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	if (pPlayer->m_Gamemode == GAMEMODE_DDRACE)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Mode: DDrace");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Mode: DDrace");
 	else if (pPlayer->m_Gamemode == GAMEMODE_VANILLA)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Mode: Vanilla");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Mode: Vanilla");
 	if (pPlayer->m_SpookyGhost)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Spooky Ghost: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Spooky Ghost: True");
 	if (pPlayer->m_pControlledTee)
 	{
 		str_format(aBuf, sizeof(aBuf), "Tee Control: %s", pSelf->Server()->ClientName(pPlayer->m_pControlledTee->GetCID()));
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	else if (pPlayer->m_HasTeeControl)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Tee Control: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Tee Control: True");
 
 	if (pChr)
 	{
 		if (pChr->HasFlag() == TEAM_RED)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Flag: Red");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Red");
 		if (pChr->HasFlag() == TEAM_BLUE)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Flag: Blue");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Blue");
 		if (pChr->m_DeepFreeze)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Frozen: Deep");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: Deep");
 		else if (pChr->m_IsFrozen)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Frozen: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: True");
 		else if (pChr->m_FreezeTime)
 		{
 			str_format(aBuf, sizeof(aBuf), "Frozen: Freezetime: %d", pChr->m_FreezeTime);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 		if (pChr->m_SuperJump)
-			pSelf->SendChatTarget(pResult->m_ClientID, "SuperJump: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "SuperJump: True");
 		if (pChr->m_EndlessHook)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Endless: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Endless: True");
 		if (pChr->m_Jetpack)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Jetpack: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Jetpack: True");
 		if (pChr->m_Rainbow)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Rainbow: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Rainbow: True");
 		if (pChr->m_Atom)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Atom: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Atom: True");
 		if (pChr->m_Trail)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Trail: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Trail: True");
 		if (pChr->m_Bloody)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Bloody: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Bloody: True");
 		if (pChr->m_StrongBloody)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Strong Bloody: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Strong Bloody: True");
 		if (pChr->m_Meteors > 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "Meteors: %d", pChr->m_Meteors);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 		if (pChr->m_Passive)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Passive Mode: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Passive Mode: True");
 		if (pChr->m_PoliceHelper)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Police Helper: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Police Helper: True");
 		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
 			if (pChr->m_aSpreadWeapon[i])
 			{
 				str_format(aBuf, sizeof(aBuf), "Spread %s: True", pSelf->GetWeaponName(i));
-				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			}
 		}
 		if (pChr->m_Invisible)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Invisibility: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invisibility: True");
 		if (pChr->m_HookPower != HOOK_NORMAL)
 		{
 			str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(pChr->m_HookPower));
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 		if (pChr->m_Item != -3)
 		{
 			str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetWeaponName(pChr->m_Item));
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 		if (pChr->m_DoorHammer)
-			pSelf->SendChatTarget(pResult->m_ClientID, "Door Hammer: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
 		str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
 
@@ -1296,7 +1296,7 @@ void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
 		return;
 	}
 
@@ -1324,7 +1324,7 @@ void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
 		return;
 	}
 
@@ -1347,7 +1347,7 @@ void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
 		return;
 	}
 
@@ -1374,7 +1374,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
 		return;
 	}
 
@@ -1382,73 +1382,73 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "==== [ACCOUNT INFO] '%s' ====", pResult->GetString(0));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Port: %d", (*Account).m_Port);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Logged in: %d", (int)(*Account).m_LoggedIn);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Disabled: %d", (int)(*Account).m_Disabled);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Password: %s", (*Account).m_Password);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Username: %s", (*Account).m_Username);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "ClientID: %d", (*Account).m_ClientID);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Level: %d", (*Account).m_Level);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "XP: %d", (*Account).m_XP);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Money: %llu", (*Account).m_Money);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Police Level: %d", (*Account).m_PoliceLevel);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Survival Kills: %d", (*Account).m_SurvivalKills);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Survival Wins: %d", (*Account).m_SurvivalWins);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Spooky Ghost: %d", (int)(*Account).m_SpookyGhost);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 0: %s", (*Account).m_aLastMoneyTransaction[0]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 1: %s", (*Account).m_aLastMoneyTransaction[1]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 2: %s", (*Account).m_aLastMoneyTransaction[2]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 3: %s", (*Account).m_aLastMoneyTransaction[3]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 4: %s", (*Account).m_aLastMoneyTransaction[4]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "VIP: %d", (int)(*Account).m_VIP);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Block Points: %d", (*Account).m_BlockPoints);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Instagib Kills: %d", (*Account).m_InstagibKills);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Instagib Wins: %d", (*Account).m_InstagibWins);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Spawn Shotgun: %d", (*Account).m_SpawnWeapon[0]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Spawn Grenade: %d", (*Account).m_SpawnWeapon[1]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Spawn Rifle: %d", (*Account).m_SpawnWeapon[2]);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Ninjajetpack: %d", (*Account).m_Ninjajetpack);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Last Player Name: %s", (*Account).m_aLastPlayerName);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Survival Deaths: %d", (*Account).m_SurvivalDeaths);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Instagib Deaths: %d", (*Account).m_InstagibDeaths);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Taser Level: %d", (*Account).m_TaserLevel);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Killing Spree Record: %d", (*Account).m_KillingSpreeRecord);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->FreeAccount(ID);

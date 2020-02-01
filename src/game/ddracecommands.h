@@ -99,7 +99,7 @@ CONSOLE_COMMAND("player_clan", "v[id] ?r[clan]", CFGFLAG_SERVER, ConPlayerClan, 
 CONSOLE_COMMAND("player_skin", "v[id] ?r[skin]", CFGFLAG_SERVER, ConPlayerSkin, this, "Sets skin of player v", AUTHED_ADMIN)
 
 //info
-CONSOLE_COMMAND("playerinfo", "r[name]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConPlayerInfo, this, "Shows information about the player r", AUTHED_ADMIN)
+CONSOLE_COMMAND("playerinfo", "i[id]", CFGFLAG_SERVER, ConPlayerInfo, this, "Shows information about the player with client id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
 
 //extras
@@ -143,5 +143,5 @@ CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Ma
 CONSOLE_COMMAND("acc_logout", "s[username]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_vip", "s[username]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account s", AUTHED_ADMIN)
-CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
 #undef CONSOLE_COMMAND
