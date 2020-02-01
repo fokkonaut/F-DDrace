@@ -1771,7 +1771,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		if (pThis->m_aClients[i].m_State == CClient::STATE_DUMMY)
 		{
 			str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d dummy=yes", i, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score);
-			if (!g_Config.m_SvHideBotsStatus)
+			if (!g_Config.m_SvHideBotsStatus || pName[0] != 0)
 				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 		}
 		else if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
