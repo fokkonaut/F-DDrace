@@ -140,7 +140,7 @@ CONSOLE_COMMAND("spinbotspeed", "?v[id] ?i[speed]", CFGFLAG_SERVER, ConSpinBotSp
 CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Makes player v aim to the closest tee", AUTHED_ADMIN)
 
 //account
-CONSOLE_COMMAND("acc_logout", "v[id]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account of player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_logout", "s[username]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_vip", "s[username]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)

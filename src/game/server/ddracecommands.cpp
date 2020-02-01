@@ -1292,18 +1292,29 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	int Victim = pResult->GetVictim();
-	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
-	if (!pPlayer)
-		return;
-	if (pPlayer->GetAccID() >= ACC_START)
+
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username, pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		pSelf->SendChatTarget(Victim, "You have been logged out by an admin");
-		pSelf->Logout(pPlayer->GetAccID());
+		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid account");
+		return;
 	}
+
+	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account is not marked as logged in");
+		pSelf->FreeAccount(ID);
+		return;
+	}
+
+	if (pSelf->m_Accounts[ID].m_ClientID >= 0)
+		pSelf->SendChatTarget(pSelf->m_Accounts[ID].m_ClientID, "You have been logged out by an admin");
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts[ID].m_Username, pSelf->m_Accounts[ID].m_ClientID >= 0 ? pSelf->Server()->ClientName(pSelf->m_Accounts[ID].m_ClientID) : "player not online");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+	pSelf->Logout(ID);
 }
 
 void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
