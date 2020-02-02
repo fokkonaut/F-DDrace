@@ -49,9 +49,6 @@ public:
 
 	int CompleteSize() const { return m_pEnd - m_pStart; }
 	const unsigned char *CompleteData() const { return m_pStart; }
-
-	// for protocol_ex.cpp, to access m_Debug config value
-	class CConfig *m_pConfig;
 };
 
 #endif
