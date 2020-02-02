@@ -44,7 +44,7 @@ void CCustomProjectile::Tick()
 	if (GameServer()->GetPlayerChar(m_Owner))
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
 
-	if (m_Owner >= 0 && !m_pOwner && g_Config.m_SvDestroyBulletsOnDeath)
+	if (m_Owner >= 0 && !m_pOwner && Config()->m_SvDestroyBulletsOnDeath)
 	{
 		Reset();
 		return;
@@ -96,7 +96,7 @@ void CCustomProjectile::Tick()
 	// weapon teleport
 	int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_Pos);
 	int z;
-	if (g_Config.m_SvOldTeleportWeapons)
+	if (Config()->m_SvOldTeleportWeapons)
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);

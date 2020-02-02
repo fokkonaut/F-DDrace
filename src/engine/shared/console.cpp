@@ -40,7 +40,7 @@ const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLeve
 	const CCommand *pInfo = m_pNext;
 	while(pInfo)
 	{
-		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel && (!(pInfo->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel && (!(pInfo->m_Flags&CMDFLAG_TEST) || ((CConsole*)pInfo->m_pUserData)->m_pConfig->m_SvTestingCommands))
 			break;
 		pInfo = pInfo->m_pNext;
 	}
@@ -51,7 +51,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags&CMDFLAG_TEST) || ((CConsole*)pCommand->m_pUserData)->m_pConfig->m_SvTestingCommands))
 			return pCommand;
 	}
 
@@ -378,7 +378,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 
 		CCommand* pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
-		if (pCommand && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if (pCommand && (!(pCommand->m_Flags&CMDFLAG_TEST) || m_pConfig->m_SvTestingCommands))
 		{
 			if (ClientID == IConsole::CLIENT_ID_GAME
 				&& !(pCommand->m_Flags & CFGFLAG_GAME))
@@ -398,7 +398,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 					char aBuf[96];
 					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", m_pConfig->m_SvMap, m_pConfig->m_SvMap);
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
@@ -539,9 +539,7 @@ bool CConsole::ExecuteFile(const char* pFilename, int ClientID, bool LogFailure,
 		if (str_comp(pFilename, pCur->m_pFilename) == 0)
 			return false;
 
-	if (!m_pStorage)
-		m_pStorage = Kernel()->RequestInterface<IStorage>();
-	if (!m_pStorage)
+	if(!m_pStorage)
 		return false;
 
 	// push this one to the stack
@@ -573,6 +571,13 @@ bool CConsole::ExecuteFile(const char* pFilename, int ClientID, bool LogFailure,
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		bool AbsHeur = false;
+		AbsHeur = AbsHeur || (pFilename[0] == '/' || pFilename[0] == '\\');
+		AbsHeur = AbsHeur || (pFilename[0] && pFilename[1] == ':' && (pFilename[2] == '/' || pFilename[2] == '\\'));
+		if(AbsHeur)
+		{
+			Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Info: only relative paths starting from the ones you specify in 'storage.cfg' are allowed");
+		}
 	}
 
 	m_pFirstExec = pPrev;
@@ -629,7 +634,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags&CMDFLAG_TEST) || g_Config.m_SvTestingCommands))
+		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags&CMDFLAG_TEST) || pConsole->m_pConfig->m_SvTestingCommands))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -842,6 +847,7 @@ CConsole::CConsole(int FlagMask)
 	m_pfnIsDummyCallback = 0;
 	m_pIsDummyUserdata = 0;
 
+	m_pConfig = 0;
 	m_pStorage = 0;
 
 	// register some basic commands
@@ -854,25 +860,6 @@ CConsole::CConsole(int FlagMask)
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)", AUTHED_ADMIN);
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3", AUTHED_HELPER);
 	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for you", AUTHED_NO);
-
-	// TODO: this should disappear
-	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
-	{ \
-		static CIntVariableData Data = { this, &g_Config.m_##Name, Min, Max, Def }; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc, AccessLevel); \
-	}
-
-	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,AccessLevel) \
-	{ \
-		static char OldValue[Len] = Def; \
-		static CStrVariableData Data = { this, g_Config.m_##Name, Len, OldValue }; \
-		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, AccessLevel); \
-	}
-
-	#include "config_variables.h"
-
-	#undef MACRO_CONFIG_INT
-	#undef MACRO_CONFIG_STR
 
 	m_Cheated = false;
 }
@@ -895,6 +882,30 @@ CConsole::~CConsole()
 		delete m_pTempMapListHeap;
 		m_pTempMapListHeap = 0;
 	}
+}
+
+void CConsole::Init()
+{
+	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+	// TODO: this should disappear
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,Accesslevel) \
+	{ \
+		static CIntVariableData Data = { this, &m_pConfig->m_##Name, Min, Max }; \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc, Accesslevel); \
+	}
+
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,Accesslevel) \
+	{ \
+		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len }; \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
+	}
+
+	#include "config_variables.h"
+
+	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_STR
 }
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)

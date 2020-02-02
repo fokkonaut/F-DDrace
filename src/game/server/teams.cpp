@@ -55,7 +55,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 		pStartingChar->m_DDRaceState = DDRACE_NONE;
 
 		if(m_LastChat[ClientID] + Server()->TickSpeed()
-				+ g_Config.m_SvChatDelay < Tick)
+				+ GameServer()->Config()->m_SvChatDelay < Tick)
 		{
 			char aBuf[128];
 			str_format(
@@ -67,7 +67,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			m_LastChat[ClientID] = Tick;
 		}
 		if(m_LastChat[i] + Server()->TickSpeed()
-				+ g_Config.m_SvChatDelay < Tick)
+				+ GameServer()->Config()->m_SvChatDelay < Tick)
 		{
 			char aBuf[128];
 			str_format(
@@ -115,7 +115,7 @@ void CGameTeams::OnCharacterStart(int ClientID)
 			}
 		}
 
-		if(g_Config.m_SvTeam < 3 && g_Config.m_SvTeamMaxSize != 2 && g_Config.m_SvPauseable)
+		if(GameServer()->Config()->m_SvTeam < 3 && GameServer()->Config()->m_SvTeamMaxSize != 2 && GameServer()->Config()->m_SvPauseable)
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -442,7 +442,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, 
 	bool CallSaveScore = false;
 
 #if defined(CONF_SQL)
-	CallSaveScore = g_Config.m_SvUseSQL;
+	CallSaveScore = GameServer()->Config()->m_SvUseSQL;
 #endif
 
 	int PlayerCIDs[MAX_CLIENTS];
@@ -451,7 +451,7 @@ void CGameTeams::OnTeamFinish(CPlayer** Players, unsigned int Size, float Time, 
 	{
 		PlayerCIDs[i] = Players[i]->GetCID();
 
-		if(g_Config.m_SvRejoinTeam0 && g_Config.m_SvTeam != 3 && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
+		if(GameServer()->Config()->m_SvRejoinTeam0 && GameServer()->Config()->m_SvTeam != 3 && (m_Core.Team(Players[i]->GetCID()) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(Players[i]->GetCID())]))
 		{
 			SetForceCharacterTeam(Players[i]->GetCID(), 0);
 			char aBuf[512];
@@ -477,7 +477,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 			"%s finished in: %d minute(s) %5.2f second(s)",
 			Server()->ClientName(Player->GetCID()), (int)Time / 60,
 			Time - ((int)Time / 60 * 60));
-	if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+	if (GameServer()->Config()->m_SvHideScore || !GameServer()->Config()->m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 	else
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
@@ -494,7 +494,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		else
 			str_format(aBuf, sizeof(aBuf), "New record: %5.2f second(s) better.",
 					Diff);
-		if (g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
+		if (GameServer()->Config()->m_SvHideScore || !GameServer()->Config()->m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 		else
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
@@ -529,7 +529,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	}
 
 	if (CallSaveScore)
-		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
+		if (GameServer()->Config()->m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
 			GameServer()->Score()->SaveScore(Player->GetCID(), Time, pTimestamp,
 					GetCpCurrent(Player), Player->m_NotEligibleForFinish);
 
@@ -538,7 +538,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 			|| Time < GameServer()->m_pController->m_CurrentRecord)
 	{
 		// check for nameless
-		if (g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
+		if (GameServer()->Config()->m_SvNamelessScore || !str_startswith(Server()->ClientName(Player->GetCID()), "nameless tee"))
 		{
 			GameServer()->m_pController->m_CurrentRecord = Time;
 			//dbg_msg("character", "Finish");

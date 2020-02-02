@@ -66,7 +66,7 @@ void CPlayer::Reset()
 	m_Halloween = false;
 	m_FirstPacket = true;
 
-	if (g_Config.m_Events)
+	if (GameServer()->Config()->m_Events)
 	{
 		time_t rawtime;
 		struct tm* timeinfo;
@@ -90,8 +90,8 @@ void CPlayer::Reset()
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
-	m_ShowOthers = g_Config.m_SvShowOthersDefault;
-	m_ShowAll = g_Config.m_SvShowAllDefault;
+	m_ShowOthers = GameServer()->Config()->m_SvShowOthersDefault;
+	m_ShowAll = GameServer()->Config()->m_SvShowAllDefault;
 	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 
@@ -112,7 +112,7 @@ void CPlayer::Reset()
 	//
 	// Otherwise, block voting in the begnning after joining.
 	if (Now > GameServer()->m_NonEmptySince + 10 * TickSpeed)
-		m_FirstVoteTick = Now + g_Config.m_SvJoinVoteDelay * TickSpeed;
+		m_FirstVoteTick = Now + GameServer()->Config()->m_SvJoinVoteDelay * TickSpeed;
 	else
 		m_FirstVoteTick = Now;
 
@@ -127,7 +127,7 @@ void CPlayer::Reset()
 
 	m_vWeaponLimit.resize(NUM_WEAPONS);
 
-	m_Gamemode = g_Config.m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+	m_Gamemode = GameServer()->Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 
 	m_FixNameID = -1;
 	m_RemovedName = false;
@@ -145,7 +145,7 @@ void CPlayer::Reset()
 
 	m_ResumeMoved = false;
 
-	m_RainbowSpeed = g_Config.m_SvRainbowSpeedDefault;
+	m_RainbowSpeed = GameServer()->Config()->m_SvRainbowSpeedDefault;
 	m_RainbowColor = 0;
 	m_InfRainbow = false;
 	m_InfMeteors = 0;
@@ -153,7 +153,7 @@ void CPlayer::Reset()
 	m_InstagibScore = 0;
 
 	m_ForceSpawnPos = vec2(-1, -1);
-	m_WeaponIndicator = g_Config.m_SvWeaponIndicatorDefault;
+	m_WeaponIndicator = GameServer()->Config()->m_SvWeaponIndicatorDefault;
 
 	m_Minigame = MINIGAME_NONE;
 	m_SurvivalState = SURVIVAL_OFFLINE;
@@ -161,7 +161,7 @@ void CPlayer::Reset()
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
 
-	m_ScoreMode = g_Config.m_SvDefaultScoreMode;
+	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 
 	// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
@@ -193,7 +193,7 @@ void CPlayer::Tick()
 	if (m_ChatScore > 0)
 		m_ChatScore--;
 
-	Server()->SetClientScore(m_ClientID, g_Config.m_SvDefaultScoreMode == SCORE_TIME ? m_Score : g_Config.m_SvDefaultScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[GetAccID()].m_Level : GameServer()->m_Accounts[GetAccID()].m_BlockPoints);
+	Server()->SetClientScore(m_ClientID, GameServer()->Config()->m_SvDefaultScoreMode == SCORE_TIME ? m_Score : GameServer()->Config()->m_SvDefaultScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[GetAccID()].m_Level : GameServer()->m_Accounts[GetAccID()].m_BlockPoints);
 
 	// do latency stuff
 	if (!m_IsDummy)
@@ -311,7 +311,7 @@ void CPlayer::Tick()
 				Msg.m_Weapon = m_KillMsgFix.m_Weapon;
 				Msg.m_ModeSpecial = m_KillMsgFix.m_ModeSpecial;
 				for (int i = 0; i < MAX_CLIENTS; i++)
-					if (GameServer()->m_apPlayers[i] && (!g_Config.m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
+					if (GameServer()->m_apPlayers[i] && (!GameServer()->Config()->m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 
@@ -320,7 +320,7 @@ void CPlayer::Tick()
 	}
 
 	// dummy fake ping
-	if (m_IsDummy && g_Config.m_SvFakeDummyPing && Server()->Tick() % 200 == 0)
+	if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing && Server()->Tick() % 200 == 0)
 		m_FakePing = 32 + rand() % 11;
 }
 
@@ -350,10 +350,7 @@ void CPlayer::PostTick()
 
 void CPlayer::PostPostTick()
 {
-#ifdef CONF_DEBUG
-	if (!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
-#endif
-	if (!Server()->ClientIngame(m_ClientID))
+	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
 	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
@@ -380,11 +377,11 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
 	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
-	if (m_IsDummy && g_Config.m_SvDummyBotSkin)
+	if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
 
 	// realistic ping for dummies
-	if (m_IsDummy && g_Config.m_SvFakeDummyPing)
+	if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing)
 		pPlayerInfo->m_Latency = m_FakePing;
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
@@ -409,7 +406,7 @@ void CPlayer::Snap(int SnappingClient)
 	else if (pSnapping->m_ScoreMode == SCORE_TIME)
 	{
 		// send 0 if times of others are not shown
-		if (SnappingClient != m_ClientID && g_Config.m_SvHideScore)
+		if (SnappingClient != m_ClientID && GameServer()->Config()->m_SvHideScore)
 			Score = -1;
 		else
 			Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
@@ -865,7 +862,7 @@ void CPlayer::TryRespawn()
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
-	if (g_Config.m_SvTeam == 3)
+	if (GameServer()->Config()->m_SvTeam == 3)
 	{
 		int NewTeam = 0;
 		for (; NewTeam < TEAM_SUPER; NewTeam++)
@@ -895,7 +892,7 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		return false;
 	if (Server()->GetAuthedState(m_ClientID))
 		return false; // don't kick admins
-	if (g_Config.m_SvMaxAfkTime == 0)
+	if (GameServer()->Config()->m_SvMaxAfkTime == 0)
 		return false; // 0 = disabled
 
 	if (NewTargetX != m_LastTarget_x || NewTargetY != m_LastTarget_y)
@@ -912,27 +909,27 @@ bool CPlayer::AfkTimer(int NewTargetX, int NewTargetY)
 		if (!m_Paused)
 		{
 			// not playing, check how long
-			if (m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.5))
+			if (m_Sent1stAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(GameServer()->Config()->m_SvMaxAfkTime * 0.5))
 			{
 				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.5),
-					g_Config.m_SvMaxAfkTime
+					(int)(GameServer()->Config()->m_SvMaxAfkTime * 0.5),
+					GameServer()->Config()->m_SvMaxAfkTime
 				);
 				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
 				m_Sent1stAfkWarning = 1;
 			}
-			else if (m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(g_Config.m_SvMaxAfkTime * 0.9))
+			else if (m_Sent2ndAfkWarning == 0 && m_LastPlaytime < time_get() - time_freq() * (int)(GameServer()->Config()->m_SvMaxAfkTime * 0.9))
 			{
 				str_format(m_pAfkMsg, sizeof(m_pAfkMsg),
 					"You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.",
-					(int)(g_Config.m_SvMaxAfkTime * 0.9),
-					g_Config.m_SvMaxAfkTime
+					(int)(GameServer()->Config()->m_SvMaxAfkTime * 0.9),
+					GameServer()->Config()->m_SvMaxAfkTime
 				);
 				m_pGameServer->SendChatTarget(m_ClientID, m_pAfkMsg);
 				m_Sent2ndAfkWarning = 1;
 			}
-			else if (m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+			else if (m_LastPlaytime < time_get() - time_freq() * GameServer()->Config()->m_SvMaxAfkTime)
 			{
 				m_pGameServer->Server()->Kick(m_ClientID, "Away from keyboard");
 				return true;
@@ -946,7 +943,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
 {
 	if (m_IsDummy)
 		return;
-	if (g_Config.m_SvMaxAfkVoteTime == 0)
+	if (GameServer()->Config()->m_SvMaxAfkVoteTime == 0)
 		return;
 
 	if(!m_pLastTarget)
@@ -961,7 +958,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
 		m_LastPlaytime = time_get();
 		mem_copy(m_pLastTarget, NewTarget, sizeof(CNetObj_PlayerInput));
 	}
-	else if (m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkVoteTime)
+	else if (m_LastPlaytime < time_get() - time_freq() * GameServer()->Config()->m_SvMaxAfkVoteTime)
 	{
 		m_Afk = true;
 		return;
@@ -1014,7 +1011,7 @@ int CPlayer::Pause(int State, bool Force)
 		case PAUSE_NONE:
 			if (m_pCharacter->IsPaused()) // First condition might be unnecessary
 			{
-				if (!Force && m_LastPause && m_LastPause + g_Config.m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
+				if (!Force && m_LastPause && m_LastPause + GameServer()->Config()->m_SvSpecFrequency * Server()->TickSpeed() > Server()->Tick())
 				{
 					GameServer()->SendChatTarget(m_ClientID, "Can't /spec that quickly.");
 					return m_Paused; // Do not update state. Do not collect $200
@@ -1024,7 +1021,7 @@ int CPlayer::Pause(int State, bool Force)
 			}
 			// fall-thru
 		case PAUSE_SPEC:
-			if (g_Config.m_SvPauseMessages)
+			if (GameServer()->Config()->m_SvPauseMessages)
 			{
 				str_format(aBuf, sizeof(aBuf), (State > PAUSE_NONE) ? "'%s' speced" : "'%s' resumed", Server()->ClientName(m_ClientID));
 				GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
@@ -1054,7 +1051,7 @@ int CPlayer::ForcePause(int Time)
 {
 	m_ForcePauseTime = Server()->Tick() + Server()->TickSpeed() * Time;
 
-	if (g_Config.m_SvPauseMessages)
+	if (GameServer()->Config()->m_SvPauseMessages)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' was force-paused for %ds", Server()->ClientName(m_ClientID), Time);
@@ -1326,7 +1323,7 @@ void CPlayer::ResumeFromTeeControl()
 
 bool CPlayer::CheckClanProtection()
 {
-	if (!g_Config.m_SvClanProtection)
+	if (!GameServer()->Config()->m_SvClanProtection)
 		return false;
 
 	if (str_comp_nocase(Server()->ClientClan(m_ClientID), "Chilli.*") || !str_comp(m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY], "greensward"))

@@ -23,6 +23,7 @@
 IGameController::IGameController(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
+	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
 
 	// game
@@ -37,8 +38,8 @@ IGameController::IGameController(CGameContext *pGameServer)
 
 	m_GameInfo.m_MatchCurrent = 0;
 	m_GameInfo.m_MatchNum = 0;
-	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
-	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
+	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
+	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
 
 	// map
 	m_aMapWish[0] = 0;
@@ -218,7 +219,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			true, //Freeze
 			true, //Explosive
 			0, //Force
-			(g_Config.m_SvShotgunBulletSound)?SOUND_GRENADE_EXPLODE:-1,//SoundImpact
+			(Config()->m_SvShotgunBulletSound)?SOUND_GRENADE_EXPLODE:-1,//SoundImpact
 			Layer,
 			Number,
 			false, //Spooky
@@ -506,22 +507,22 @@ void IGameController::Snap(int SnappingClient)
 void IGameController::Tick()
 {
 	// check for inactive players
-	if (g_Config.m_SvInactiveKickTime > 0)
+	if (Config()->m_SvInactiveKickTime > 0)
 	{
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
 #ifdef CONF_DEBUG
-			if (g_Config.m_DbgDummies)
+			if (Config()->m_DbgDummies)
 			{
-				if (i >= MAX_CLIENTS - g_Config.m_DbgDummies)
+				if (i >= MAX_CLIENTS - Config()->m_DbgDummies)
 					break;
 			}
 #endif
 			if (GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->m_IsDummy && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
 			{
-				if (Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
+				if (Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + Config()->m_SvInactiveKickTime * Server()->TickSpeed() * 60)
 				{
-					switch (g_Config.m_SvInactiveKick)
+					switch (Config()->m_SvInactiveKick)
 					{
 					case 0:
 					{
@@ -536,7 +537,7 @@ void IGameController::Tick()
 						for (int j = 0; j < MAX_CLIENTS; ++j)
 							if (GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS)
 								++Spectators;
-						if (Spectators >= g_Config.m_SvSpectatorSlots)
+						if (Spectators >= Config()->m_SvSpectatorSlots)
 							Server()->Kick(i, "Kicked for inactivity");
 						else
 							GameServer()->m_apPlayers[i]->SetTeam(TEAM_SPECTATORS);
@@ -594,7 +595,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 
 void IGameController::ChangeMap(const char *pToMap)
 {
-	str_copy(g_Config.m_SvMap, pToMap, sizeof(g_Config.m_SvMap));
+	str_copy(Config()->m_SvMap, pToMap, sizeof(Config()->m_SvMap));
 }
 
 bool IGameController::CanJoinTeam(int Team, int NotThisID) const
@@ -612,7 +613,7 @@ bool IGameController::CanJoinTeam(int Team, int NotThisID) const
 		}
 	}
 
-	return (aNumplayers[0] + aNumplayers[1]) < g_Config.m_SvMaxClients - g_Config.m_SvSpectatorSlots;
+	return (aNumplayers[0] + aNumplayers[1]) < Config()->m_SvMaxClients - Config()->m_SvSpectatorSlots;
 }
 
 int IGameController::ClampTeam(int Team) const

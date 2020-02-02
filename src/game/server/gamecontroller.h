@@ -16,6 +16,7 @@
 class IGameController
 {
 	class CGameContext *m_pGameServer;
+	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
 	// map
@@ -99,8 +100,9 @@ protected:
 	CChatCommands m_Commands;
 
 public:
-	CGameContext* GameServer() const { return m_pGameServer; }
-	IServer* Server() const { return m_pServer; }
+	CGameContext *GameServer() const { return m_pGameServer; }
+	CConfig *Config() const { return m_pConfig; }
+	IServer *Server() const { return m_pServer; }
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController() {};
 

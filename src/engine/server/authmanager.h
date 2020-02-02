@@ -11,6 +11,8 @@
 
 class CAuthManager
 {
+	class CConfig *m_pConfig;
+
 private:
 	struct CKey
 	{
@@ -25,6 +27,8 @@ private:
 	bool m_Generated;
 
 public:
+	CConfig *Config() const { return m_pConfig; }
+
 	typedef void (*FListCallback)(const char *pIdent, int Level, void *pUser);
 
 	CAuthManager();

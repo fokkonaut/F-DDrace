@@ -22,9 +22,11 @@ static int HostLookupThread(void *pUser)
 class CEngine : public IEngine
 {
 public:
+	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	bool m_Logging;
+	const char *m_pAppname;
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{
@@ -40,8 +42,8 @@ public:
 			char aBuf[32];
 			str_timestamp(aBuf, sizeof(aBuf));
 			char aFilenameSent[128], aFilenameRecv[128];
-			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/network_sent_%s.txt", aBuf);
-			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/network_recv_%s.txt", aBuf);
+			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/%s_network_sent_%s.txt", pEngine->m_pAppname, aBuf);
+			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/%s_network_recv_%s.txt", pEngine->m_pAppname, aBuf);
 			CNetBase::OpenLog(pEngine->m_pStorage->OpenFile(aFilenameSent, IOFLAG_WRITE, IStorage::TYPE_SAVE),
 								pEngine->m_pStorage->OpenFile(aFilenameRecv, IOFLAG_WRITE, IStorage::TYPE_SAVE));
 			pEngine->m_Logging = true;
@@ -66,20 +68,23 @@ public:
 
 		// init the network
 		net_init();
-		CNetBase::Init();
 
 		m_JobPool.Init(1);
 
 		m_Logging = false;
+		m_pAppname = pAppname;
 	}
 
 	void Init()
 	{
+		m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 		m_pConsole = Kernel()->RequestInterface<IConsole>();
 		m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 		if(!m_pConsole || !m_pStorage)
 			return;
+
+		CNetBase::Init(m_pConfig);
 
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network", AUTHED_ADMIN);
 	}
@@ -87,15 +92,15 @@ public:
 	void InitLogfile()
 	{
 		// open logfile if needed
-		if(g_Config.m_Logfile[0])
+		if(m_pConfig->m_Logfile[0])
 		{
 			char aBuf[32];
-			if(g_Config.m_LogfileTimestamp)
+			if(m_pConfig->m_LogfileTimestamp)
 				str_timestamp(aBuf, sizeof(aBuf));
 			else
 				aBuf[0] = 0;
-			char aLogFilename[128];			
-			str_format(aLogFilename, sizeof(aLogFilename), "dumps/%s%s", g_Config.m_Logfile, aBuf);
+			char aLogFilename[128];
+			str_format(aLogFilename, sizeof(aLogFilename), "dumps/%s%s.txt", m_pConfig->m_Logfile, aBuf);
 			IOHANDLE Handle = m_pStorage->OpenFile(aLogFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 			if(Handle)
 				dbg_logger_filehandle(Handle);
@@ -113,7 +118,7 @@ public:
 
 	void AddJob(CJob *pJob, JOBFUNC pfnFunc, void *pData)
 	{
-		if(g_Config.m_Debug)
+		if(m_pConfig->m_Debug)
 			dbg_msg("engine", "job added");
 		m_JobPool.Add(pJob, pfnFunc, pData);
 	}

@@ -39,7 +39,7 @@ void CGun::Fire()
 	}
 
 	int Num = -1;
-	Num = GameWorld()->FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)Ents, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvPlasmaRange, (CEntity**)Ents, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	for (int i = 0; i < Num; i++)
 	{
@@ -106,7 +106,7 @@ void CGun::Tick()
 		}
 		m_Pos+=m_Core;
 	}
-	if (m_LastFire + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec <= Server()->Tick())
+	if (m_LastFire + Server()->TickSpeed() / Config()->m_SvPlasmaPerSec <= Server()->Tick())
 		Fire();
 
 }

@@ -373,7 +373,7 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 
 	// don't fire hammer when player is deep and sv_deepfly is disabled
-	if (!g_Config.m_SvDeepfly && GetActiveWeapon() == WEAPON_HAMMER && m_DeepFreeze)
+	if (!Config()->m_SvDeepfly && GetActiveWeapon() == WEAPON_HAMMER && m_DeepFreeze)
 		return;
 
 	// check if we gonna fire
@@ -428,11 +428,11 @@ void CCharacter::FireWeapon()
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
 
 	float Spread[] = { 0, -0.1f, 0.1f, -0.2f, 0.2f, -0.3f, 0.3f, -0.4f, 0.4f };
-	if (g_Config.m_SvNumSpreadShots % 2 == 0)
+	if (Config()->m_SvNumSpreadShots % 2 == 0)
 		for (unsigned int i = 0; i < (sizeof(Spread)/sizeof(*Spread)); i++)
 			Spread[i] += 0.05f;
 
-	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? g_Config.m_SvNumSpreadShots : 1;
+	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? Config()->m_SvNumSpreadShots : 1;
 	if (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
 		NumShots = 1;
 	bool Sound = true;
@@ -573,7 +573,7 @@ void CCharacter::FireWeapon()
 					}
 
 					if (Sound)
-						GameServer()->CreateSound(m_Pos, m_pPlayer->m_SpookyGhost ? SOUND_PICKUP_HEALTH : (m_Jetpack && !g_Config.m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+						GameServer()->CreateSound(m_Pos, m_pPlayer->m_SpookyGhost ? SOUND_PICKUP_HEALTH : (m_Jetpack && !Config()->m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				}
 			} break;
 
@@ -785,7 +785,7 @@ void CCharacter::FireWeapon()
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 				vec2 NewPos = CursorPos;
-				if (!g_Config.m_SvTeleRifleAllowBlocks)
+				if (!Config()->m_SvTeleRifleAllowBlocks)
 				{
 					vec2 PossiblePos;
 					bool Found = GetNearestAirPos(CursorPos, m_Pos, &PossiblePos);
@@ -1298,7 +1298,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		char aBuf[128];
 		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
 		CCharacter* pKillerChar = pKiller->GetCharacter();
-		if (CountKill && pKillerChar && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
+		if (CountKill && pKillerChar && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
 		{
 			pKillerChar->m_KillStreak++;
 			if (pKillerChar->m_KillStreak % 5 == 0)
@@ -1315,7 +1315,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 			pKiller->GiveXP(250, "end a killing spree");
 		}
 
-		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking))
+		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
 		{
 			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
@@ -1335,8 +1335,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 			{
 				(*KillerAcc).m_Kills++;
 
-				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * g_Config.m_SvBlockPointsDelay)
-					if (!m_pPlayer->m_IsDummy || g_Config.m_SvDummyBlocking)
+				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * Config()->m_SvBlockPointsDelay)
+					if (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking)
 						pKiller->GiveBlockPoints(1);
 			}
 		}
@@ -1391,7 +1391,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		Msg.m_ModeSpecial = ModeSpecial;
 		// only send kill message to players in the same minigame
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (GameServer()->m_apPlayers[i] && (!g_Config.m_SvHideMinigamePlayers || (m_pPlayer->m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
+			if (GameServer()->m_apPlayers[i] && (!Config()->m_SvHideMinigamePlayers || (m_pPlayer->m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 
@@ -1644,13 +1644,14 @@ void CCharacter::Snap(int SnappingClient)
 		pCharacter->m_AmmoCount = 10;
 	}
 
-	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 || m_pPlayer->m_TeeControllerID == SnappingClient ||
-		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID()))
+	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
+		(!Config()->m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID())
+		|| m_pPlayer->m_TeeControllerID == SnappingClient)
 	{
 		pCharacter->m_Health = m_Health;
 		pCharacter->m_Armor = m_Armor;
 		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
-			pCharacter->m_AmmoCount = m_FreezeTick + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
+			pCharacter->m_AmmoCount = m_FreezeTick + Config()->m_SvFreezeDelay * Server()->TickSpeed();
 		else if(GetActiveWeapon() == WEAPON_NINJA)
 			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		else if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
@@ -1882,9 +1883,9 @@ void CCharacter::HandleTiles(int Index)
 		m_TeleCheckpoint = tcp;
 
 	// start
-	if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && g_Config.m_SvTeam != 3)))
+	if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && Config()->m_SvTeam != 3)))
 	{
-		if (g_Config.m_SvResetPickups)
+		if (Config()->m_SvResetPickups)
 		{
 			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
 			{
@@ -1893,7 +1894,7 @@ void CCharacter::HandleTiles(int Index)
 					SetActiveWeapon(WEAPON_GUN);
 			}
 		}
-		if (g_Config.m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
+		if (Config()->m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
 		{
 			if (m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 			{
@@ -2475,19 +2476,19 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
-	if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z - 1].size())
+	if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z - 1].size())
 	{
 		if (m_Super)
 			return;
 		int Num = Controller->m_TeleOuts[z - 1].size();
 		m_Core.m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
-		if (!g_Config.m_SvTeleportHoldHook)
+		if (!Config()->m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
-		if (g_Config.m_SvTeleportLoseWeapons)
+		if (Config()->m_SvTeleportLoseWeapons)
 		{
 			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 				if (i != WEAPON_NINJA)
@@ -2502,18 +2503,18 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		m_Core.m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
-		if (!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+		if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
 
-			if (!g_Config.m_SvTeleportHoldHook)
+			if (!Config()->m_SvTeleportHoldHook)
 			{
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
 				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 				m_Core.m_HookPos = m_Core.m_Pos;
 			}
-			if (g_Config.m_SvTeleportLoseWeapons)
+			if (Config()->m_SvTeleportLoseWeapons)
 			{
 				for(int i=WEAPON_SHOTGUN;i<NUM_WEAPONS;i++)
 					if (i != WEAPON_NINJA)
@@ -2535,7 +2536,7 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 				m_Core.m_Vel = vec2(0, 0);
 
-				if (!g_Config.m_SvTeleportHoldHook)
+				if (!Config()->m_SvTeleportHoldHook)
 				{
 					m_Core.m_HookedPlayer = -1;
 					m_Core.m_HookState = HOOK_RETRACTED;
@@ -2553,7 +2554,7 @@ void CCharacter::HandleTiles(int Index)
 			m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0, 0);
 
-			if (!g_Config.m_SvTeleportHoldHook)
+			if (!Config()->m_SvTeleportHoldHook)
 			{
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
@@ -2575,7 +2576,7 @@ void CCharacter::HandleTiles(int Index)
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 
-				if (!g_Config.m_SvTeleportHoldHook)
+				if (!Config()->m_SvTeleportHoldHook)
 				{
 					m_Core.m_HookedPlayer = -1;
 					m_Core.m_HookState = HOOK_RETRACTED;
@@ -2591,7 +2592,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			m_Core.m_Pos = SpawnPos;
 
-			if (!g_Config.m_SvTeleportHoldHook)
+			if (!Config()->m_SvTeleportHoldHook)
 			{
 				m_Core.m_HookedPlayer = -1;
 				m_Core.m_HookState = HOOK_RETRACTED;
@@ -2683,7 +2684,7 @@ void CCharacter::DDraceTick()
 	HandleTuneLayer(); // need this before coretick
 
 	// look for save position for rescue feature
-	if (g_Config.m_SvRescue) {
+	if (Config()->m_SvRescue) {
 		int index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		int tile = GameServer()->Collision()->GetTileIndex(index);
 		int ftile = GameServer()->Collision()->GetFTileIndex(index);
@@ -2712,7 +2713,7 @@ void CCharacter::DDracePostCoreTick()
 		m_EmoteStop = -1;
 	}
 
-	if (m_EndlessHook || (m_Super && g_Config.m_SvEndlessSuperHook))
+	if (m_EndlessHook || (m_Super && Config()->m_SvEndlessSuperHook))
 		m_Core.m_HookTick = 0;
 
 	m_FrozenLastTick = false;
@@ -2799,7 +2800,7 @@ bool CCharacter::Freeze(float Seconds)
 
 bool CCharacter::Freeze()
 {
-	return Freeze(g_Config.m_SvFreezeDelay);
+	return Freeze(Config()->m_SvFreezeDelay);
 }
 
 bool CCharacter::UnFreeze()
@@ -2873,8 +2874,8 @@ void CCharacter::DDraceInit()
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
 	m_TeleCheckpoint = 0;
-	m_EndlessHook = g_Config.m_SvEndlessDrag;
-	m_Hit = g_Config.m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE | DISABLE_HIT_HAMMER | DISABLE_HIT_RIFLE | DISABLE_HIT_SHOTGUN;
+	m_EndlessHook = Config()->m_SvEndlessDrag;
+	m_Hit = Config()->m_SvHit ? HIT_ALL : DISABLE_HIT_GRENADE | DISABLE_HIT_HAMMER | DISABLE_HIT_RIFLE | DISABLE_HIT_SHOTGUN;
 	m_SuperJump = false;
 	m_Jetpack = false;
 	m_Core.m_Jumps = 2;
@@ -2899,7 +2900,7 @@ void CCharacter::DDraceInit()
 		}
 	}
 
-	if (g_Config.m_SvTeam == 2 && Team == TEAM_FLOCK)
+	if (Config()->m_SvTeam == 2 && Team == TEAM_FLOCK)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "Please join a team before you start");
 		m_LastStartWarning = Server()->Tick();
@@ -2909,10 +2910,10 @@ void CCharacter::DDraceInit()
 void CCharacter::Rescue()
 {
 	if (m_SetSavePos && !m_Super && !m_DeepFreeze && IsGrounded() && m_Pos == m_PrevPos) {
-		if (m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
+		if (m_LastRescue + Config()->m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + g_Config.m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
+			str_format(aBuf, sizeof(aBuf), "You have to wait %d seconds until you can rescue yourself", (int)((m_LastRescue + Config()->m_SvRescueDelay * Server()->TickSpeed() - Server()->Tick()) / Server()->TickSpeed()));
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			return;
 		}
@@ -2962,9 +2963,9 @@ void CCharacter::FDDraceInit()
 	m_pItem = 0;
 	m_DoorHammer = false;
 
-	m_AlwaysTeleWeapon = g_Config.m_SvAlwaysTeleWeapon;
+	m_AlwaysTeleWeapon = Config()->m_SvAlwaysTeleWeapon;
 
-	m_pPlayer->m_Gamemode = (g_Config.m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+	m_pPlayer->m_Gamemode = (Config()->m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
 
 	m_NumGhostShots = 0;
@@ -3181,7 +3182,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !OnDeath) || !g_Config.m_SvDropWeapons || g_Config.m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
+	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
 		return;
 
 	int Count = 0;
@@ -3191,7 +3192,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (Count < 2)
 		return;
 
-	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)g_Config.m_SvMaxWeaponDrops)
+	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
 	{
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false, false);
 		m_pPlayer->m_vWeaponLimit[WeaponID].erase(m_pPlayer->m_vWeaponLimit[WeaponID].begin());
@@ -3220,12 +3221,12 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 void CCharacter::DropPickup(int Type, int Amount)
 {
-	if (Type > POWERUP_ARMOR || g_Config.m_SvMaxPickupDrops == 0 || Amount <= 0)
+	if (Type > POWERUP_ARMOR || Config()->m_SvMaxPickupDrops == 0 || Amount <= 0)
 		return;
 
 	for (int i = 0; i < Amount; i++)
 	{
-		if (GameServer()->m_vPickupDropLimit.size() == (unsigned)g_Config.m_SvMaxPickupDrops)
+		if (GameServer()->m_vPickupDropLimit.size() == (unsigned)Config()->m_SvMaxPickupDrops)
 		{
 			GameServer()->m_vPickupDropLimit[0]->Reset(false, false);
 			GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin());
@@ -3239,7 +3240,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 
 void CCharacter::DropLoot()
 {
-	if (!g_Config.m_SvDropsOnDeath)
+	if (!Config()->m_SvDropsOnDeath)
 		return;
 
 	if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL)

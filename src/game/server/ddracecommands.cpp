@@ -345,13 +345,13 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 			|| (pPlayer->m_LastKill
 					&& pPlayer->m_LastKill
 					+ pSelf->Server()->TickSpeed()
-					* g_Config.m_SvKillDelay
+					* pSelf->Config()->m_SvKillDelay
 					> pSelf->Server()->Tick()))
 		return;
 
 	pPlayer->m_LastKill = pSelf->Server()->Tick();
 	pPlayer->KillCharacter(WEAPON_SELF);
-	//pPlayer->m_RespawnTick = pSelf->Server()->Tick() + pSelf->Server()->TickSpeed() * g_Config.m_SvSuicidePenalty;
+	//pPlayer->m_RespawnTick = pSelf->Server()->Tick() + pSelf->Server()->TickSpeed() * pSelf->Config()->m_SvSuicidePenalty;
 }
 
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)

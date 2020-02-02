@@ -41,16 +41,16 @@ CFileScore::~CFileScore()
 	lock_unlock(gs_ScoreLock);
 }
 
-std::string SaveFile()
+std::string CFileScore::SaveFile()
 {
 	std::ostringstream oss;
 	char aBuf[256];
-	str_copy(aBuf, g_Config.m_SvMap, sizeof(aBuf));
+	str_copy(aBuf, m_pConfig->m_SvMap, sizeof(aBuf));
 	for(int i = 0; i < 256; i++) if(aBuf[i] == '/') aBuf[i] = '-';
-	if (g_Config.m_SvScoreFolder[0])
-		oss << g_Config.m_SvScoreFolder << "/" << aBuf << "_record.dtb";
+	if (m_pConfig->m_SvScoreFolder[0])
+		oss << m_pConfig->m_SvScoreFolder << "/" << aBuf << "_record.dtb";
 	else
-		oss << g_Config.m_SvMap << "_record.dtb";
+		oss << m_pConfig->m_SvMap << "_record.dtb";
 	return oss.str();
 }
 
@@ -69,10 +69,10 @@ void CFileScore::SaveScoreThread(void *pUser)
 	CFileScore *pSelf = (CFileScore *) pUser;
 	lock_wait(gs_ScoreLock);
 	std::fstream f;
-	f.open(SaveFile().c_str(), std::ios::out);
+	f.open(pSelf->SaveFile().c_str(), std::ios::out);
 	if(f.fail())
 	{
-		dbg_msg("filescore", "opening '%s' for writing failed", SaveFile().c_str());
+		dbg_msg("filescore", "opening '%s' for writing failed", pSelf->SaveFile().c_str());
 	}
 	else
 	{
@@ -82,7 +82,7 @@ void CFileScore::SaveScoreThread(void *pUser)
 		{
 			f << r.front().m_aName << std::endl << r.front().m_Score
 					<< std::endl;
-			if (g_Config.m_SvCheckpointSave)
+			if (pSelf->m_pConfig->m_SvCheckpointSave)
 			{
 				for (int c = 0; c < NUM_CHECKPOINTS; c++)
 					f << r.front().m_aCpTime[c] << " ";
@@ -107,8 +107,8 @@ void CFileScore::Init()
 	lock_wait(gs_ScoreLock);
 
 	// create folder if not exist
-	if (g_Config.m_SvScoreFolder[0])
-		fs_makedir(g_Config.m_SvScoreFolder);
+	if (m_pConfig->m_SvScoreFolder[0])
+		fs_makedir(m_pConfig->m_SvScoreFolder);
 
 	std::fstream f;
 	f.open(SaveFile().c_str(), std::ios::in);
@@ -126,7 +126,7 @@ void CFileScore::Init()
 			std::getline(f, TmpScore);
 			float aTmpCpTime[NUM_CHECKPOINTS] =
 			{ 0 };
-			if (g_Config.m_SvCheckpointSave)
+			if (m_pConfig->m_SvCheckpointSave)
 			{
 				std::getline(f, TmpCpLine);
 
@@ -238,7 +238,7 @@ void CFileScore::SaveScore(int ClientID, float Time, const char *pTimestamp,
 		float CpTime[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole* pCon = (CConsole*) GameServer()->Console();
-	if (!pCon->m_Cheated || g_Config.m_SvRankCheats)
+	if (!pCon->m_Cheated || m_pConfig->m_SvRankCheats)
 		UpdatePlayer(ClientID, Time, CpTime);
 }
 
@@ -277,7 +277,7 @@ void CFileScore::ShowRank(int ClientID, const char* pName, bool Search)
 	if (pScore && Pos > -1)
 	{
 		float Time = pScore->m_Score;
-		if (g_Config.m_SvHideScore)
+		if (m_pConfig->m_SvHideScore)
 			str_format(aBuf, sizeof(aBuf),
 					"Your time: %d minute(s) %5.2f second(s)", (int)Time / 60,
 					Time - ((int)Time / 60 * 60));

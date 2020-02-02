@@ -31,10 +31,10 @@ void CCharacter::DummyTick()
 	}
 	else if (m_pPlayer->m_Dummymode == DUMMYMODE_V3_BLOCKER)  //ChillBlock5 blmapv3 1o1 mode // made by chillerdragon // improved by fokkonaut
 	{
-		int V3_OFFSET_X = g_Config.m_V3OffsetX * 32;
-		int V3_OFFSET_Y = g_Config.m_V3OffsetY * 32;
+		int V3_OFFSET_X = Config()->m_V3OffsetX * 32;
+		int V3_OFFSET_Y = Config()->m_V3OffsetY * 32;
 
-		if (!str_comp(g_Config.m_SvMap, "blmapV3RoyalX"))
+		if (!str_comp(Config()->m_SvMap, "blmapV3RoyalX"))
 		{
 			if (m_Core.m_Pos.y > 50 * 32 || m_Core.m_Pos.x > 150 * 32 || m_Solo)
 			{

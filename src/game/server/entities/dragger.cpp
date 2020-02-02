@@ -39,7 +39,7 @@ void CDragger::Move()
 	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	CCharacter *TempEnts[MAX_CLIENTS];
 
-	int Num = GameWorld()->FindEntities(m_Pos, g_Config.m_SvDraggerRange,
+	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvDraggerRange,
 			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
 
@@ -118,7 +118,7 @@ void CDragger::Drag()
 			else
 				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
 						Target->GetPos(), 0, 0);
-			if (Res || length(m_Pos - Target->GetPos()) > g_Config.m_SvDraggerRange)
+			if (Res || length(m_Pos - Target->GetPos()) > Config()->m_SvDraggerRange)
 			{
 				Target = 0;
 				if (i == -1)

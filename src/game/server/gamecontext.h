@@ -101,6 +101,7 @@ class CMapVoteResult;
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 	IStorage* m_pStorage;
 	CLayers m_Layers;
@@ -157,6 +158,7 @@ class CGameContext : public IGameServer
 	bool m_Resetting;
 public:
 	IServer *Server() const { return m_pServer; }
+	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	IStorage* Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }

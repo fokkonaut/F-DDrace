@@ -26,7 +26,7 @@ void CFlag::Reset(bool Init)
 {
 	if (!Init)
 	{
-		if (g_Config.m_SvFlagSounds)
+		if (Config()->m_SvFlagSounds)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
 		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
@@ -46,7 +46,7 @@ void CFlag::Reset(bool Init)
 
 void CFlag::PlaySound(int Sound)
 {
-	if (!g_Config.m_SvFlagSounds)
+	if (!Config()->m_SvFlagSounds)
 		return;
 
 	if (!m_SoundTick)

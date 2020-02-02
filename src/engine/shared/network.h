@@ -431,6 +431,7 @@ class CNetServer
 	void *m_UserPtr;
 
 	// F-DDrace
+	class CConfig *m_pConfig;
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
@@ -558,16 +559,16 @@ public:
 // TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
 class CNetBase
 {
+	static class CConfig *m_pConfig;
 	static IOHANDLE ms_DataLogSent;
 	static IOHANDLE ms_DataLogRecv;
 	static CHuffman ms_Huffman;
 public:
+	static CConfig *Config() { return m_pConfig; }
 	static void OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv);
 	static void CloseLog();
-	static void Init();
-	static int Compress(const void *pData, int DataSize, void *pOutput, int OutputSize);
-	static int Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize);
-
+	static void Init(class CConfig *pConfig);
+	
 	static void SendControlMsg(NETSOCKET Socket, const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, const void *pExtra, int ExtraSize);
 	static void SendControlMsgWithToken(NETSOCKET Socket, const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended);
 	static void SendPacketConnless(NETSOCKET Socket, const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize);

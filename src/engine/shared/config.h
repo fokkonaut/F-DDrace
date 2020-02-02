@@ -5,16 +5,15 @@
 
 #include <engine/config.h>
 
-struct CConfiguration
+class CConfig
 {
-	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc,AccessLevel) int m_##Name;
-	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc,AccessLevel) char m_##Name[Len]; // Flawfinder: ignore
+public:
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Save,Desc,Accesslevel) int m_##Name;
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc,Accesslevel) char m_##Name[Len]; // Flawfinder: ignore
 	#include "config_variables.h"
 	#undef MACRO_CONFIG_INT
 	#undef MACRO_CONFIG_STR
 };
-
-extern CConfiguration g_Config;
 
 enum
 {
@@ -33,7 +32,7 @@ enum
 	CFGFLAG_NONTEEHISTORIC=512,
 };
 
-class CConfig : public IConfig
+class CConfigManager : public IConfigManager
 {
 	enum
 	{
@@ -52,14 +51,16 @@ class CConfig : public IConfig
 	int m_FlagMask;
 	CCallback m_aCallbacks[MAX_CALLBACKS];
 	int m_NumCallbacks;
+	CConfig m_Values;
 
 public:
-	CConfig();
+	CConfigManager();
 
 	virtual void Init(int FlagMask);
 	virtual void Reset();
 	virtual void RestoreStrings();
 	virtual void Save(const char *pFilename);
+	virtual CConfig *Values() { return &m_Values; }
 
 	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData);
 

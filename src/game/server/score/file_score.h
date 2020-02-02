@@ -12,6 +12,7 @@ class CFileScore: public IScore
 {
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
+	class CConfig *m_pConfig;
 
 	class CPlayerScore
 	{
@@ -56,6 +57,8 @@ class CFileScore: public IScore
 	void Init();
 	void Save();
 	static void SaveScoreThread(void *pUser);
+
+	std::string SaveFile();
 
 public:
 

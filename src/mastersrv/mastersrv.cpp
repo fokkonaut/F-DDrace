@@ -288,29 +288,32 @@ int main(int argc, const char **argv) // ignore_convention
 
 	dbg_logger_stdout();
 	net_init();
-	CNetBase::Init();
-
+	
 	mem_copy(m_CountData.m_Header, SERVERBROWSE_COUNT, sizeof(SERVERBROWSE_COUNT));
 
 	int FlagMask = CFGFLAG_MASTER;
 	IKernel *pKernel = IKernel::Create();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_BASIC, argc, argv);
-	IConfig *pConfig = CreateConfig();
+	IConfigManager *pConfigManager = CreateConfigManager();
+	CConfig *pConfig = pConfigManager->Values();
 	m_pConsole = CreateConsole(FlagMask);
+
+	CNetBase::Init(pConfig);
 	
 	bool RegisterFail = !pKernel->RegisterInterface(pStorage);
 	RegisterFail |= !pKernel->RegisterInterface(m_pConsole);
-	RegisterFail |= !pKernel->RegisterInterface(pConfig);
+	RegisterFail |= !pKernel->RegisterInterface(pConfigManager);
 
 	if(RegisterFail)
 		return -1;
 
-	pConfig->Init(FlagMask);
+	pConfigManager->Init(FlagMask);
+	m_pConsole->Init();
 	m_NetBan.Init(m_pConsole, pStorage);
 	if(argc > 1) // ignore_convention
 		m_pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
-	if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
+	if(pConfig->m_Bindaddr[0] && net_host_lookup(pConfig->m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
 	{
 		// got bindaddr
 		BindAddr.type = NETTYPE_ALL;

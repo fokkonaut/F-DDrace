@@ -341,9 +341,9 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	{
 		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
 		{
-			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
+			if(m_aSpamConns[i].m_Time > Now - time_freq() * m_pConfig->m_SvConnlimitTime)
 			{
-				if(m_aSpamConns[i].m_Conns >= g_Config.m_SvConnlimit)
+				if(m_aSpamConns[i].m_Conns >= m_pConfig->m_SvConnlimit)
 					return true;
 			}
 			else

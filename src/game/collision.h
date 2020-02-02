@@ -126,6 +126,8 @@ public:
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
 
+	class CConfig *m_pConfig;
+
 private:
 
 	class CTeleTile* m_pTele;
