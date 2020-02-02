@@ -23,6 +23,6 @@ enum
 
 void RegisterUuids(class CUuidManager *pManager);
 
-int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker);
+int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker, bool Debug);
 
 #endif // ENGINE_SHARED_PROTOCOL_EX_H

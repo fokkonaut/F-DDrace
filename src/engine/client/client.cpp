@@ -1129,7 +1129,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 	bool Sys;
 	CUuid Uuid;
 
-	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer, m_pConfig->m_Debug);
 	if(Result == UNPACKMESSAGE_ERROR)
 	{
 		return;
