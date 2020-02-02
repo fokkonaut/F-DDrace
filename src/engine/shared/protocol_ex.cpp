@@ -72,7 +72,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 				return UNPACKMESSAGE_ANSWER;
 			}
 		case NETMSG_IDONTKNOW:
-			if(pUnpacker->m_pConfig->m_Debug)
+			/*if(g_Config.m_Debug)
 			{
 				CUuid Uuid2;
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
@@ -81,10 +81,10 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 				char aBuf[UUID_MAXSTRSIZE];
 				FormatUuid(Uuid2, aBuf, sizeof(aBuf));
 				dbg_msg("uuid", "peer: unknown %s", aBuf);
-			}
+			}*/
 			break;
 		case NETMSG_ITIS:
-			if(pUnpacker->m_pConfig->m_Debug)
+			/*if(g_Config.m_Debug)
 			{
 				CUuid Uuid2;
 				g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
@@ -94,7 +94,7 @@ int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpac
 				char aBuf[UUID_MAXSTRSIZE];
 				FormatUuid(Uuid2, aBuf, sizeof(aBuf));
 				dbg_msg("uuid", "peer: %s %s", aBuf, pName);
-			}
+			}*/
 			break;
 		}
 	}
