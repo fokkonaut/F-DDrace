@@ -40,7 +40,7 @@ const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLeve
 	const CCommand *pInfo = m_pNext;
 	while(pInfo)
 	{
-		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel && (!(pInfo->m_Flags&CMDFLAG_TEST) || ((CConsole*)pInfo->m_pUserData)->m_pConfig->m_SvTestingCommands))
+		if(pInfo->m_Flags&FlagMask && pInfo->m_AccessLevel >= AccessLevel)
 			break;
 		pInfo = pInfo->m_pNext;
 	}
@@ -51,7 +51,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 {
 	for(const CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel && (!(pCommand->m_Flags&CMDFLAG_TEST) || ((CConsole*)pCommand->m_pUserData)->m_pConfig->m_SvTestingCommands))
+		if(pCommand->m_Flags&FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
 			return pCommand;
 	}
 
@@ -378,9 +378,18 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 
 		CCommand* pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
-		if (pCommand && (!(pCommand->m_Flags&CMDFLAG_TEST) || m_pConfig->m_SvTestingCommands))
+		if (pCommand)
 		{
-			if (ClientID == IConsole::CLIENT_ID_GAME
+			if ((pCommand->m_Flags&CMDFLAG_TEST) && !m_pConfig->m_SvTestingCommands)
+			{
+				if (Stroke)
+				{
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Command '%s' is a testing command and can only be executed when 'sv_test_cmds' is set to '1'.", Result.m_pCommand);
+					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				}
+			}
+			else if (ClientID == IConsole::CLIENT_ID_GAME
 				&& !(pCommand->m_Flags & CFGFLAG_GAME))
 			{
 				if (Stroke)
@@ -634,7 +643,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER) && (!(pCommand->m_Flags&CMDFLAG_TEST) || pConsole->m_pConfig->m_SvTestingCommands))
+		if(pCommand->m_Flags&pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->NumArguments() ? pResult->GetInteger(0) : pConsole->m_AccessLevel, (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
