@@ -892,7 +892,7 @@ void CConsole::Init()
 	// TODO: this should disappear
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,Accesslevel) \
 	{ \
-		static CIntVariableData Data = { this, &m_pConfig->m_##Name, Min, Max }; \
+		static CIntVariableData Data = { this, &m_pConfig->m_##Name, Min, Max, Def }; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc, Accesslevel); \
 	}
 
