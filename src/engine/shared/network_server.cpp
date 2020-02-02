@@ -323,11 +323,13 @@ void CNetServer::SetMaxClientsPerIP(int MaxClientsPerIP)
 void CNetServer::DummyInit(int DummyID)
 {
 	m_aSlots[DummyID].m_Connection.DummyConnect();
+	m_NumClients++;
 }
 
 void CNetServer::DummyDelete(int DummyID)
 {
 	m_aSlots[DummyID].m_Connection.DummyDrop();
+	m_NumClients--;
 }
 
 bool CNetServer::Connlimit(NETADDR Addr)
