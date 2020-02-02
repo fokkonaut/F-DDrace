@@ -1336,7 +1336,7 @@ bool CSqlScore::RandomMapThread(CSqlServer* pSqlServer, const CSqlData *pGameDat
 		else
 			str_format(aBuf, sizeof(aBuf),
 				"SELECT * FROM %s_maps WHERE Server = \"%s\" AND Map != \"%s\" ORDER BY RAND() LIMIT 1;",
-				pSqlServer->GetPrefix(), pData->GameServer()->Config()->m_SvServerType, g_Config.m_SvMap
+				pSqlServer->GetPrefix(), pData->GameServer()->Config()->m_SvServerType, pData->GameServer()->Config()->m_SvMap
 			);
 		pSqlServer->executeSqlQuery(aBuf);
 
