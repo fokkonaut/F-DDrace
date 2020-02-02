@@ -6,7 +6,7 @@
 
 #include <time.h>
 
-struct CConfiguration;
+struct CConfig;
 class CTuningParams;
 class CUuidManager;
 
