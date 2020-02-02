@@ -430,7 +430,7 @@ int CGameClient::OnSnapInput(int *pData)
 void CGameClient::OnConnected()
 {
 	m_Layers.Init(Kernel());
-	m_Collision.Init(Layers());
+	m_Collision.Init(Layers(), m_pConfig);
 
 	RenderTools()->RenderTilemapGenerateSkip(Layers());
 

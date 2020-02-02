@@ -56,11 +56,12 @@ CCollision::~CCollision()
 	Dest();
 }
 
-void CCollision::Init(class CLayers* pLayers)
+void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 {
 	Dest();
 	m_NumSwitchers = 0;
 	m_pLayers = pLayers;
+	m_pConfig = pConfig;
 	m_Width = m_pLayers->GameLayer()->m_Width;
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile*>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));

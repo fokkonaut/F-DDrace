@@ -2337,7 +2337,7 @@ void CGameContext::OnInit()
 		Server()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
 	m_Layers.Init(Kernel());
-	m_Collision.Init(&m_Layers);
+	m_Collision.Init(&m_Layers, m_pConfig);
 
 	// Reset Tunezones
 	CTuningParams TuningParams;

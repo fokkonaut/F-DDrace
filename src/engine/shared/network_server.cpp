@@ -10,7 +10,7 @@
 #include "config.h"
 
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
+bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser, CConfig *pConfig)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
@@ -38,6 +38,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	// F-DDrace
 	m_ShutdownMessage[0] = '\0';
+	m_pConfig = pConfig;
 
 	return true;
 }
