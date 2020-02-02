@@ -898,7 +898,8 @@ void CConsole::Init()
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,Accesslevel) \
 	{ \
-		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len }; \
+	static char OldValue[Len] = Def; \
+		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len, OldValue }; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
 	}
 
@@ -1204,7 +1205,7 @@ extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
 
 void CConsole::ResetServerGameSettings()
 {
-#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
+	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,AccessLevel) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \
@@ -1222,7 +1223,7 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
-#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,AccessLevel) \
+	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,AccessLevel) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
 		{ \
@@ -1240,10 +1241,10 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
-#include "config_variables.h"
+	#include "config_variables.h"
 
-#undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_STR
+	#undef MACRO_CONFIG_INT
+	#undef MACRO_CONFIG_STR
 }
 
 int CConsole::CResult::GetVictim()
