@@ -898,7 +898,7 @@ void CConsole::Init()
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,Accesslevel) \
 	{ \
-	static char OldValue[Len] = Def; \
+		static char OldValue[Len] = Def; \
 		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len, OldValue }; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
 	}
