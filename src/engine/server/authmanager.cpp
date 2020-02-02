@@ -25,19 +25,19 @@ CAuthManager::CAuthManager()
 	m_Generated = false;
 }
 
-void CAuthManager::Init()
+void CAuthManager::Init(CConfig *pConfig)
 {
 	int NumDefaultKeys = 0;
-	if(Config()->m_SvRconPassword[0])
+	if(pConfig->m_SvRconPassword[0])
 		NumDefaultKeys++;
-	if(Config()->m_SvRconModPassword[0])
+	if(pConfig->m_SvRconModPassword[0])
 		NumDefaultKeys++;
-	if(Config()->m_SvRconHelperPassword[0])
+	if(pConfig->m_SvRconHelperPassword[0])
 		NumDefaultKeys++;
-	if(m_aKeys.size() == NumDefaultKeys && !Config()->m_SvRconPassword[0])
+	if(m_aKeys.size() == NumDefaultKeys && !pConfig->m_SvRconPassword[0])
 	{
-		secure_random_password(Config()->m_SvRconPassword, sizeof(Config()->m_SvRconPassword), 6);
-		AddDefaultKey(AUTHED_ADMIN, Config()->m_SvRconPassword);
+		secure_random_password(pConfig->m_SvRconPassword, sizeof(pConfig->m_SvRconPassword), 6);
+		AddDefaultKey(AUTHED_ADMIN, pConfig->m_SvRconPassword);
 		m_Generated = true;
 	}
 }

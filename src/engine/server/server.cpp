@@ -1461,7 +1461,7 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 
 int CServer::Run()
 {
-	m_AuthManager.Init();
+	m_AuthManager.Init(m_pConfig);
 
 	if(Config()->m_Debug)
 	{

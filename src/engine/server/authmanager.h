@@ -11,8 +11,6 @@
 
 class CAuthManager
 {
-	class CConfig *m_pConfig;
-
 private:
 	struct CKey
 	{
@@ -27,13 +25,11 @@ private:
 	bool m_Generated;
 
 public:
-	CConfig *Config() const { return m_pConfig; }
-
 	typedef void (*FListCallback)(const char *pIdent, int Level, void *pUser);
 
 	CAuthManager();
 
-	void Init();
+	void Init(CConfig *pConfig);
 
 	int AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel);
 	int AddKey(const char *pIdent, const char *pPw, int AuthLevel);

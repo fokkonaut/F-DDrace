@@ -12,7 +12,6 @@ class CFileScore: public IScore
 {
 	CGameContext *m_pGameServer;
 	IServer *m_pServer;
-	class CConfig *m_pConfig;
 
 	class CPlayerScore
 	{
