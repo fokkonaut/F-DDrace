@@ -49,13 +49,6 @@ void CPlayer::Reset()
 
 	// F-DDrace
 
-	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 1;i < VANILLA_MAX_CLIENTS;i++)
-	{
-		pIdMap[i] = -1;
-	}
-	pIdMap[0] = m_ClientID;
-
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
 	m_Sent1stAfkWarning = 0;
@@ -364,54 +357,12 @@ void CPlayer::PostPostTick()
 		TryRespawn();
 }
 
-void CPlayer::SendConnect(int ClientID, int FakeID)
-{
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	if (!pPlayer)
-		return;
-
-	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
-	NewClientInfoMsg.m_ClientID = FakeID;
-	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = pPlayer->m_Team;
-	NewClientInfoMsg.m_pName = pPlayer->m_aCurrentName;
-	NewClientInfoMsg.m_pClan = pPlayer->m_aCurrentClan;
-	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
-	NewClientInfoMsg.m_Silent = 1;
-
-	for (int p = 0; p < NUM_SKINPARTS; p++)
-	{
-		NewClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_CurrentTeeInfos.m_aaSkinPartNames[p];
-		NewClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_CurrentTeeInfos.m_aUseCustomColors[p];
-		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_CurrentTeeInfos.m_aSkinPartColors[p];
-	}
-
-	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, m_ClientID);
-}
-
-void CPlayer::SendDisconnect(int ClientID, int FakeID)
-{
-	if (!GameServer()->m_apPlayers[ClientID]);
-		return;
-
-	CNetMsg_Sv_ClientDrop ClientDropMsg;
-	ClientDropMsg.m_ClientID = FakeID;
-	ClientDropMsg.m_pReason = "";
-	ClientDropMsg.m_Silent = 1;
-
-	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, m_ClientID);
-}
-
 void CPlayer::Snap(int SnappingClient)
 {
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
-	int id = m_ClientID;
-	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
-		return;
-
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, sizeof(CNetObj_PlayerInfo)));
 	if(!pPlayerInfo)
 		return;
 
@@ -494,7 +445,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
 	{
-		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, id, sizeof(CNetObj_SpectatorInfo)));
+		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
 		if (!pSpectatorInfo)
 			return;
 
@@ -549,32 +500,6 @@ void CPlayer::Snap(int SnappingClient)
 			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 		}
 	}
-}
-
-void CPlayer::FakeSnap()
-{
-	// This is problematic when it's sent before we know whether it's a non-64-player-client
-	// Then we can't spectate players at the start
-
-	int FakeID = VANILLA_MAX_CLIENTS - 1;
-
-	if(m_Paused != PAUSE_PAUSED)
-		return;
-
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
-	if(!pPlayerInfo)
-		return;
-
-	pPlayerInfo->m_Latency = m_Latency.m_Min;
-	pPlayerInfo->m_Score = -9999;
-
-	CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, FakeID, sizeof(CNetObj_SpectatorInfo)));
-	if(!pSpectatorInfo)
-		return;
-
-	pSpectatorInfo->m_SpectatorID = m_SpectatorID;
-	pSpectatorInfo->m_X = m_ViewPos.x;
-	pSpectatorInfo->m_Y = m_ViewPos.y;
 }
 
 void CPlayer::OnDisconnect()

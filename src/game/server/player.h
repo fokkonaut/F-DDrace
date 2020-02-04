@@ -71,7 +71,6 @@ public:
 	void PostTick();
 	void PostPostTick();
 	void Snap(int SnappingClient);
-	void FakeSnap();
 
 	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
@@ -332,10 +331,6 @@ public:
 	//minigames
 	int m_Minigame;
 	int m_SurvivalState;
-
-	// 128p
-	void SendConnect(int ClientID, int FakeID);
-	void SendDisconnect(int ClientID, int FakeID);
 };
 
 #endif
