@@ -432,8 +432,6 @@ void CGameClient::OnConnected()
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers(), m_pConfig);
 
-	RenderTools()->RenderTilemapGenerateSkip(Layers());
-
 	for(int i = 0; i < m_All.m_Num; i++)
 	{
 		m_All.m_paComponents[i]->OnMapLoad();
@@ -1777,6 +1775,20 @@ void CGameClient::SendSkinChange()
 	}
 	Client()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_FLUSH);
 	m_LastSkinChangeTime = Client()->LocalTime();
+}
+
+int CGameClient::GetClientID(const char *pName)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_aClients[i].m_Active || i == m_LocalClientID) // skip local user
+			continue;
+
+		if(!str_comp(m_aClients[i].m_aName, pName))
+			return i;
+	}
+
+	return -1;
 }
 
 void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)

@@ -109,6 +109,8 @@ public:
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetIsDummyCallback(FIsDummyCallback pfnCallback, void *pUser) = 0;
 
+	virtual int ParseCommandArgs(const char *pArgs, const char *pFormat, FCommandCallback pfnCallback, void *pContext) = 0;
+
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
 	virtual void ResetServerGameSettings() = 0;

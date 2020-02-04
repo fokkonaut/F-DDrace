@@ -276,6 +276,8 @@ public:
 	void DoLeaveMessage(const char *pName, int ClientID, const char *pReason);
 	void DoTeamChangeMessage(const char *pName, int ClientID, int Team);
 
+	int GetClientID(const char *pName);
+
 	// actions
 	// TODO: move these
 	void SendSwitchTeam(int Team);

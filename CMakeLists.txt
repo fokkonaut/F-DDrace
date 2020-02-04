@@ -1351,6 +1351,7 @@ set(ENGINE_GENERATED_SHARED src/generated/protocol.cpp src/generated/protocol.h)
 set_src(GAME_SHARED GLOB src/game
   collision.cpp
   collision.h
+  commands.h
   ddracecommands.h
   gamecore.cpp
   gamecore.h

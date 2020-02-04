@@ -184,6 +184,8 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 's') // validate string
 					pStr = str_skip_to_whitespace(pStr);
+				else if(Command == 'p')
+					pStr = str_skip_to_whitespace(pStr);
 
 				if(pStr[0] != 0) // check for end of string
 				{
@@ -228,6 +230,22 @@ char CConsole::NextParam(const char *&pFormat)
 		}
 	}
 	return *pFormat;
+}
+
+int CConsole::ParseCommandArgs(const char *pArgs, const char *pFormat, FCommandCallback pfnCallback, void *pContext)
+{
+	CResult Result;
+	str_copy(Result.m_aStringStorage, pArgs, sizeof(Result.m_aStringStorage));
+	Result.m_pArgsStart = Result.m_aStringStorage;
+
+	int Error = ParseArgs(&Result, pFormat);
+	if(Error)
+		return Error;
+
+	if(pfnCallback)
+		pfnCallback(&Result, pContext);
+
+	return 0;
 }
 
 int CConsole::RegisterPrintCallback(int OutputLevel, FPrintCallback pfnPrintCallback, void *pUserData)

@@ -230,13 +230,14 @@ public:
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 	virtual void SetIsDummyCallback(FIsDummyCallback pfnCallback, void *pUser);
 
-	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_HELPER)); }
+	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	void ResetServerGameSettings();
 
 	// F-DDrace
 
 	static void ConUserCommandStatus(IConsole::IResult* pResult, void* pUser);
 	void SetFlagMask(int FlagMask) { m_FlagMask = FlagMask; }
+	virtual int ParseCommandArgs(const char *pArgs, const char *pFormat, FCommandCallback pfnCallback, void *pContext);
 };
 
 #endif

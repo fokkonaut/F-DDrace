@@ -476,6 +476,53 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
+void CGameContext::SendChatCommand(const CCommandManager::CCommand *pCommand, int ClientID)
+{
+	CNetMsg_Sv_CommandInfo Msg;
+	Msg.m_Name = pCommand->m_aName;
+	Msg.m_HelpText = pCommand->m_aHelpText;
+	Msg.m_ArgsFormat = pCommand->m_aArgsFormat;
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::SendChatCommands(int ClientID)
+{
+	// F-DDrace
+	// Remove the clientside commands (expect w)
+	{
+		SendRemoveChatCommand("all", ClientID);
+		SendRemoveChatCommand("friend", ClientID);
+		SendRemoveChatCommand("m", ClientID);
+		SendRemoveChatCommand("mute", ClientID);
+		SendRemoveChatCommand("r", ClientID);
+		SendRemoveChatCommand("team", ClientID);
+		SendRemoveChatCommand("whisper", ClientID);
+	}
+
+	for(int i = 0; i < CommandManager()->CommandCount(); i++)
+	{
+		SendChatCommand(CommandManager()->GetCommand(i), ClientID);
+	}
+}
+
+void CGameContext::SendRemoveChatCommand(const CCommandManager::CCommand *pCommand, int ClientID)
+{
+	CNetMsg_Sv_CommandInfoRemove Msg;
+	Msg.m_Name = pCommand->m_aName;
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::SendRemoveChatCommand(const char *pName, int ClientID)
+{
+	CNetMsg_Sv_CommandInfoRemove Msg;
+	Msg.m_Name = pName;
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
+//
 void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char *pReason)
 {
 	// check if a vote is already running
@@ -993,8 +1040,10 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_apPlayers[ClientID]->CheckClanProtection();
 
-	m_pController->CommandsManager()->OnPlayerConnect(Server(), m_apPlayers[ClientID]);
 	m_pController->UpdateGameInfo(ClientID);
+
+	// send chat commands
+	SendChatCommands(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1748,7 +1797,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if (MsgID == NETMSGTYPE_CL_COMMAND)
 		{
 			CNetMsg_Cl_Command *pMsg = (CNetMsg_Cl_Command*)pRawMsg;
-			m_pController->OnPlayerCommand(pPlayer, pMsg->m_Name, pMsg->m_Arguments);
+			CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
 		}
 	}
 	else
@@ -2314,6 +2363,18 @@ void CGameContext::OnConsoleInit()
 	#include "ddracechat.h"
 }
 
+void CGameContext::NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext)
+{
+	CGameContext *pSelf = (CGameContext *)pContext;
+	pSelf->SendChatCommand(pCommand, -1);
+}
+
+void CGameContext::RemoveCommandHook(const CCommandManager::CCommand *pCommand, void *pContext)
+{
+	CGameContext *pSelf = (CGameContext *)pContext;
+	pSelf->SendRemoveChatCommand(pCommand, -1);
+}
+
 void CGameContext::OnInit()
 {
 	// init everything
@@ -2323,6 +2384,7 @@ void CGameContext::OnInit()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
+	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
@@ -2387,6 +2449,8 @@ void CGameContext::OnInit()
 
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
+
+	m_pController->RegisterChatCommands(CommandManager());
 
 	m_TeeHistorianActive = Config()->m_SvTeeHistorian;
 	if(m_TeeHistorianActive)

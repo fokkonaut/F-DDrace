@@ -6,6 +6,7 @@
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <game/commands.h>
 #include <game/layers.h>
 #include <game/voting.h>
 
@@ -147,6 +148,9 @@ class CGameContext : public IGameServer
 
 	static void ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
+	static void NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
+	static void RemoveCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
+
 	// DDRace
 
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
@@ -175,6 +179,9 @@ public:
 
 	class IGameController *m_pController;
 	CGameWorld m_World;
+	CCommandManager m_CommandManager;
+
+	CCommandManager *CommandManager() { return &m_CommandManager; }
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
@@ -252,6 +259,11 @@ public:
 	void SendGameMsg(int GameMsgID, int ClientID);
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID);
 	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID);
+
+	void SendChatCommand(const CCommandManager::CCommand *pCommand, int ClientID);
+	void SendChatCommands(int ClientID);
+	void SendRemoveChatCommand(const CCommandManager::CCommand *pCommand, int ClientID);
+	void SendRemoveChatCommand(const char *pName, int ClientID);
 
 	//
 	void SendTuningParams(int ClientID, int Zone = 0);
