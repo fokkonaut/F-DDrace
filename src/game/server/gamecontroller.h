@@ -140,8 +140,6 @@ public:
 	// F-DDrace
 
 	float m_CurrentRecord;
-
-	static void Com_CmdList(IConsole::IResult *pResult, void *pContext);
 };
 
 #endif

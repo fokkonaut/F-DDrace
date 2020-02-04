@@ -636,13 +636,5 @@ void IGameController::RegisterChatCommands(CCommandManager *pManager)
 	pManager->AddCommand("login", "<username> <pw> Log into an account", "", 0, this);
 	pManager->AddCommand("register", "<username> <pw> <pw> Register an account", "", 0, this);
 	pManager->AddCommand("stats", "<playername> Shows stats of player", "", 0, this);
-	pManager->AddCommand("For a full list of commands:", "/cmdlist", "", Com_CmdList, this);
-}
-
-void IGameController::Com_CmdList(IConsole::IResult *pResult, void *pContext)
-{
-	CCommandManager::SCommandContext *pComContext = (CCommandManager::SCommandContext *)pContext;
-	IGameController *pSelf = (IGameController *)pComContext->m_pContext;
-
-	pSelf->GameServer()->ExecuteChatCommand("/cmdlist", pResult->m_ClientID);
+	pManager->AddCommand("", "For a full list of commands: /cmdlist", "", 0, this);
 }

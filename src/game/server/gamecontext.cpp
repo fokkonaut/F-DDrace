@@ -1797,7 +1797,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if (MsgID == NETMSGTYPE_CL_COMMAND)
 		{
 			CNetMsg_Cl_Command *pMsg = (CNetMsg_Cl_Command*)pRawMsg;
-			CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
+			const CCommandManager::CCommand *pCom = CommandManager()->GetCommand(pMsg->m_Name);
+			if (pCom && pCom->m_pfnCallback)
+			{
+				CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
+			}
+			else
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "/%s %s", pMsg->m_Name, pMsg->m_Arguments);
+				ExecuteChatCommand(aBuf, ClientID);
+			}
 		}
 	}
 	else
