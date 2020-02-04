@@ -1290,7 +1290,19 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	}
 
 	pPacker->AddString(GameServer()->Version(), 32);
-	pPacker->AddString(Config()->m_SvName, 64);
+
+	//pPacker->AddString(Config()->m_SvName, 64);
+	if (Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
+	{
+		pPacker->AddString(Config()->m_SvName, 64);
+	}
+	else
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, Config()->m_SvMaxClients);
+		pPacker->AddString(aBuf, 64);
+	}
+
 	pPacker->AddString(Config()->m_SvHostname, 128);
 	pPacker->AddString(GetMapName(), 32);
 
@@ -1305,11 +1317,24 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 		Flags |= SERVERINFO_FLAG_TIMESCORE;
 	pPacker->AddInt(Flags);
 
+	int MaxClients = Config()->m_SvMaxClients;
+	if (ClientCount >= VANILLA_MAX_CLIENTS)
+	{
+		if (ClientCount < MaxClients)
+			ClientCount = VANILLA_MAX_CLIENTS - 1;
+		else
+			ClientCount = VANILLA_MAX_CLIENTS;
+	}
+	if (MaxClients > VANILLA_MAX_CLIENTS)
+		MaxClients = VANILLA_MAX_CLIENTS;
+	if (PlayerCount > ClientCount)
+		PlayerCount = ClientCount;
+
 	pPacker->AddInt(Config()->m_SvSkillLevel);	// server skill level
 	pPacker->AddInt(PlayerCount); // num players
 	pPacker->AddInt(Config()->m_SvPlayerSlots); // max players
 	pPacker->AddInt(ClientCount); // num clients
-	pPacker->AddInt(max(ClientCount, Config()->m_SvMaxClients)); // max clients
+	pPacker->AddInt(max(ClientCount, MaxClients)); // max clients
 
 	if(Token != -1)
 	{
@@ -2498,21 +2523,33 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 	return v[m_AnnouncementLastLine];
 }
 
+int* CServer::GetIdMap(int ClientID)
+{
+	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+}
+
 
 void CServer::DummyJoin(int DummyID)
 {
 	const char* pNames[] = {
-		"ZillyDreck", /*0*/ "flappy", "Chillingo", "Fluffy", "MLG_PRO", "Enzym", "ciliDR[HUN]", "fuzzle", "Piko", "chilliger", "fokkonautt", "GubbaFubba", "fuZZle", "<bot>", "<noob>", "<police>", "<train>", //16th name
-		"<boat>", "<blocker>", "<racer>", "<hyper>", "$heeP", "b3ep", "chilluminatee", "auftragschiller", "abcJuhee", "BANANA", "POTATO", "<cucumber>", "fokkoNUT", "<_BoT__>", "NotMyName", "NotChiller", //32nd name
-		"NotChiIIer", "NotChlIer", "fuckmesoon", "DataNub", "5.196.132.14", "<hacker>", "<cheater>", "<glitcher>", "__ERROR", "404_kein_tier", "ZitrusFRUCHT", "BAUMKIND", "KELLERKIND", "KINDERKIND", "einZug-", "<bob>",  //48th name
-		"BezzyHill", "BeckySkill", "Skilli.*", "UltraVa.", "DONATE!", "SUBSCRIBE!", "SHARE!", "#like", "<#name_>", "KRISTIAN-.", ".,-,08/524", "3113pimml34", "NotAB0t", "Hurman", "xxlddnnet64", "flappy2", //64th name
-
+		"ZillyDreck", /*0*/ "flappy", "Chillingo", "Fluffy", "MLG_PRO", "Enzym", "ciliDR[HUN]", "fuzzle", "Piko", "chilliger", "fokkonautt", "GubbaFubba", "fuZZle", "<bot>", "<noob>", "<police>", //16th name
+		"<train>", "<boat>", "<blocker>", "<racer>", "<hyper>", "$heeP", "b3ep", "chilluminatee", "auftragschiller", "abcJuhee", "BANANA", "POTATO", "<cucumber>", "fokkoNUT", "<_BoT__>", "NotMyName", //32nd name
+		"NotChiller", "NotChiIIer", "NotChlIer", "fuckmesoon", "DataNub", "5.196.132.14", "<hacker>", "<cheater>", "<glitcher>", "__ERROR", "404_kein_tier", "ZitrusFRUCHT", "BAUMKIND", "KELLERKIND", "KINDERKIND", "einZug-", //48th name
+		"<bob>",  "BezzyHill", "BeckySkill", "Skilli.*", "UltraVa.", "DONATE!", "SUBSCRIBE!", "SHARE!", "#like", "<#name_>", "KRISTIAN-.", ".,-,08/524", "3113pimml34", "NotAB0t", "Hurman", "xxlddnnet64", "flappy2", //64th name
+		"steeeve", "naki", "tuba", "higge", "linux_uzer3k", "hubbat.*", "Proviet-", "7h89", "1276", "SchinKKKen", "FOSSIELamKIEL", "apfelFUZ", "cron_tabur", "hinter_c_dur", "equariator", "deckztinator", //80th name
+		"intezinatoha", "defquirlibaor", "enmuhinakur", "wooknazitur", "demnatura", "intranuza", "eggspikuza", "finaluba", "denkrikator", "nihilatur", "Goethe[HUN]", "RightIsRight", "Egg_user_xd", "avucadur", "NoeeoN", "wuuuzzZZZa", //96th name
+		"JezzicaP", "Jeqqicaqua", "analyticus", "haspiclecane", "nameus", "tahdequz", "rostBEULEH", "regenwurm674", "mc_cm", "blockddrace", "BlockDDrace", "pidgin.,a", "bibubablbl", "randomNAME2", "Mircaduzla", "zer0_brain", //112th name
+		"haxxor-420", "fok-me-fok", "fok-fee-san", "denzulat", "epsilat", "destructat", "hinzuckat", "penZilin", "deszilin", "VogelFisch7", "Dont4sk", "i_fokmen_i", "noobScout24", "geneticual", "trollface" //128th name
 	};
 	const char* pClans[] = {
 		"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
 		"17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
 		"33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48",
 		"49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64",
+		"55", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
+		"81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96",
+		"97", "98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112",
+		"113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128",
 	};
 
 	m_NetServer.DummyInit(DummyID);
