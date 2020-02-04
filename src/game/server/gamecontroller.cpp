@@ -629,6 +629,13 @@ const char* IGameController::GetTeamName(int Team)
 
 void IGameController::RegisterChatCommands(CCommandManager *pManager)
 {
+	// Add some important commands, client wont sort alphabetically!
+	pManager->AddCommand("cmdlist", "List all commands which are accessible for you", "", 0, this);
+	pManager->AddCommand("credits", "Shows the credits of the F-DDrace mod", "", 0, this);
+	pManager->AddCommand("info", "Shows info about this server", "", 0, this);
+	pManager->AddCommand("login", "<username> <pw> Log into an account", "", 0, this);
+	pManager->AddCommand("register", "<username> <pw> <pw> Register an account", "", 0, this);
+	pManager->AddCommand("stats", "<playername> Shows stats of player", "", 0, this);
 	pManager->AddCommand("For a full list of commands:", "/cmdlist", "", Com_CmdList, this);
 }
 
