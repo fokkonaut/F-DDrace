@@ -75,6 +75,9 @@ void CPickupDrop::Tick()
 	if (m_Owner != -1 && GameServer()->GetPlayerChar(m_Owner))
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
 
+	if (GameServer()->m_apPlayers[m_Owner])
+		m_DDraceMode = GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE;
+
 	if (m_Owner >= 0 && !GameServer()->m_apPlayers[m_Owner] && Config()->m_SvDestroyDropsOnLeave)
 	{
 		Reset();
@@ -197,6 +200,9 @@ int CPickupDrop::IsCharacterNear()
 
 void CPickupDrop::IsShieldNear()
 {
+	if (!m_DDraceMode)
+		return;
+
 	CPickup *apEnts[9];
 	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity**)apEnts, 9, CGameWorld::ENTTYPE_PICKUP);
 
@@ -206,11 +212,8 @@ void CPickupDrop::IsShieldNear()
 
 		if (pShield->GetType() == POWERUP_ARMOR)
 		{
-			if (GameServer()->m_apPlayers[m_Owner] && GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE)
-			{
-				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
-				Reset();
-			}
+			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
+			Reset();
 		}
 	}
 }

@@ -35,6 +35,7 @@ private:
 	CCharacter* m_pOwner;
 	int m_Owner;
 
+	bool m_DDraceMode;
 	int m_Type;
 	int m_Weapon;
 	int m_Lifetime;
