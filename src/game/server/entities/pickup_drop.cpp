@@ -30,6 +30,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_PrevPos = m_Pos;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_SnapPos = m_Pos;
+	m_DDraceMode = true;
 
 	for (int i = 0; i < 4; i++)
 		m_aID[i] = Server()->SnapNewID();
