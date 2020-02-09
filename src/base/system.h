@@ -605,6 +605,14 @@ typedef struct
 } NETADDR;
 
 /*
+	Function: net_invalidate_socket
+		Invalidates a socket.
+
+	Remarks:
+		You should close the socket before invalidating it.
+*/
+void net_invalidate_socket(NETSOCKET *socket);
+/*
 	Function: net_init
 		Initiates network functionallity.
 
@@ -1864,6 +1872,16 @@ int pid();
 		- Assumes unsigned is 4 bytes
 */
 unsigned bytes_be_to_uint(const unsigned char *bytes);
+
+/*
+	Function: uint_to_bytes_be
+		Packs an unsigned into 4 big endian bytes
+
+	Remarks:
+		- Assumes the passed array is 4 bytes
+		- Assumes unsigned is 4 bytes
+*/
+void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
 #ifdef __cplusplus
 }

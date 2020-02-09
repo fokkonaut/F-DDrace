@@ -26,6 +26,8 @@ public:
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	bool m_Logging;
+	IOHANDLE m_DataLogSent;
+	IOHANDLE m_DataLogRecv;
 	const char *m_pAppname;
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
@@ -34,8 +36,7 @@ public:
 
 		if(pEngine->m_Logging)
 		{
-			CNetBase::CloseLog();
-			pEngine->m_Logging = false;
+			pEngine->StopLogging();
 		}
 		else
 		{
@@ -44,9 +45,8 @@ public:
 			char aFilenameSent[128], aFilenameRecv[128];
 			str_format(aFilenameSent, sizeof(aFilenameSent), "dumps/%s_network_sent_%s.txt", pEngine->m_pAppname, aBuf);
 			str_format(aFilenameRecv, sizeof(aFilenameRecv), "dumps/%s_network_recv_%s.txt", pEngine->m_pAppname, aBuf);
-			CNetBase::OpenLog(pEngine->m_pStorage->OpenFile(aFilenameSent, IOFLAG_WRITE, IStorage::TYPE_SAVE),
-								pEngine->m_pStorage->OpenFile(aFilenameRecv, IOFLAG_WRITE, IStorage::TYPE_SAVE));
-			pEngine->m_Logging = true;
+			pEngine->StartLogging(pEngine->m_pStorage->OpenFile(aFilenameSent, IOFLAG_WRITE, IStorage::TYPE_SAVE),
+									pEngine->m_pStorage->OpenFile(aFilenameRecv, IOFLAG_WRITE, IStorage::TYPE_SAVE));
 		}
 	}
 
@@ -66,13 +66,18 @@ public:
 		dbg_msg("engine", "unknown endian");
 	#endif
 
-		// init the network
-		net_init();
-
+		
 		m_JobPool.Init(1);
 
+		m_DataLogSent = 0;
+		m_DataLogRecv = 0;
 		m_Logging = false;
 		m_pAppname = pAppname;
+	}
+
+	~CEngine()
+	{
+		StopLogging();
 	}
 
 	void Init()
@@ -83,8 +88,6 @@ public:
 
 		if(!m_pConsole || !m_pStorage)
 			return;
-
-		CNetBase::Init(m_pConfig);
 
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network", AUTHED_ADMIN);
 	}
@@ -107,6 +110,50 @@ public:
 			else
 				dbg_msg("engine/logfile", "failed to open '%s' for logging", aLogFilename);
 		}
+	}
+
+	void QueryNetLogHandles(IOHANDLE *pHDLSend, IOHANDLE *pHDLRecv)
+	{
+		*pHDLSend = m_DataLogSent;
+		*pHDLRecv = m_DataLogRecv;
+	}
+
+	void StartLogging(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
+	{
+		if(DataLogSent)
+		{
+			m_DataLogSent = DataLogSent;
+			dbg_msg("engine", "logging network sent packages");
+		}
+		else
+			dbg_msg("engine", "failed to start logging network sent packages");
+
+		if(DataLogRecv)
+		{
+			m_DataLogRecv = DataLogRecv;
+			dbg_msg("engine", "logging network recv packages");
+		}
+		else
+			dbg_msg("engine", "failed to start logging network recv packages");
+
+		m_Logging = true;
+	}
+
+	void StopLogging()
+	{
+		if(m_DataLogSent)
+		{
+			dbg_msg("engine", "stopped logging network sent packages");
+			io_close(m_DataLogSent);
+			m_DataLogSent = 0;
+		}
+		if(m_DataLogRecv)
+		{
+			dbg_msg("engine", "stopped logging network recv packages");
+			io_close(m_DataLogRecv);
+			m_DataLogRecv = 0;
+		}
+		m_Logging = false;
 	}
 
 	void HostLookup(CHostLookup *pLookup, const char *pHostname, int Nettype)

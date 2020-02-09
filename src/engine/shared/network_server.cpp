@@ -10,27 +10,30 @@
 #include "config.h"
 
 
-bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser, CConfig *pConfig)
+bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CNetBan *pNetBan,
+	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
 
 	// open socket
-	m_Socket = net_udp_create(BindAddr, 0);
-	if(!m_Socket.type)
+	NETSOCKET Socket = net_udp_create(BindAddr, 0);
+	if(!Socket.type)
 		return false;
-
-	m_TokenManager.Init(m_Socket);
-	m_TokenCache.Init(m_Socket, &m_TokenManager);
-
+	
+	// init
 	m_pNetBan = pNetBan;
+	Init(Socket, pConfig, pConsole, pEngine);
+
+	m_TokenManager.Init(this);
+	m_TokenCache.Init(this, &m_TokenManager);
 
 	m_NumClients = 0;
 	SetMaxClients(MaxClients);
 	SetMaxClientsPerIP(MaxClientsPerIP);
 
 	for(int i = 0; i < NET_MAX_CLIENTS; i++)
-		m_aSlots[i].m_Connection.Init(m_Socket, true);
+		m_aSlots[i].m_Connection.Init(this, true);
 
 	m_pfnNewClient = pfnNewClient;
 	m_pfnDelClient = pfnDelClient;
@@ -38,7 +41,6 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 
 	// F-DDrace
 	m_ShutdownMessage[0] = '\0';
-	m_pConfig = pConfig;
 
 	return true;
 }
@@ -48,7 +50,7 @@ void CNetServer::Close()
 	for(int i = 0; i < NET_MAX_CLIENTS; i++)
 		Drop(i, m_ShutdownMessage[0] != '\0' ? m_ShutdownMessage : "Server shutdown");
 
-	net_udp_close(m_Socket);
+	Shutdown();
 }
 
 void CNetServer::Drop(int ClientID, const char *pReason)
@@ -90,20 +92,18 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 {
 	while(1)
 	{
-		NETADDR Addr;
-
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
 			return 1;
 
 		// TODO: empty the recvinfo
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE);
-
+		NETADDR Addr;
+		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data);
 		// no more packets for now
-		if(Bytes <= 0)
+		if(Result > 0)
 			break;
 
-		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
+		if(!Result)
 		{
 			// check for bans
 			char aBuf[128];
@@ -114,7 +114,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 				int Time = time_timestamp();
 				if(LastInfoQuery + 5 < Time)
 				{
-					CNetBase::SendControlMsg(m_Socket, &Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1);
+					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1);
 				}
 				continue;
 			}
@@ -165,7 +165,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 					if (Connlimit(Addr))
 					{
 						const char LimitMsg[] = "Too many connections in a short time";
-						CNetBase::SendControlMsg(m_Socket, &Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, str_length(LimitMsg) + 1);
+						CNetBase::SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, str_length(LimitMsg) + 1);
 						return 0; // failed to add client
 					}
 
@@ -173,7 +173,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 					if(m_NumClients >= m_MaxClients)
 					{
 						const char FullMsg[] = "This server is full";
-						CNetBase::SendControlMsg(m_Socket, &Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg));
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg));
 						continue;
 					}
 
@@ -194,7 +194,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 							{
 								char aBuf[128];
 								str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-								CNetBase::SendControlMsg(m_Socket, &Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1);
+								SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1);
 								return 0;
 							}
 						}
@@ -260,7 +260,7 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token)
 
 		if(Token != NET_TOKEN_NONE)
 		{
-			CNetBase::SendPacketConnless(m_Socket, &pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize);
+			SendPacketConnless(&pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize);
 		}
 		else
 		{
@@ -342,9 +342,9 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	{
 		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
 		{
-			if(m_aSpamConns[i].m_Time > Now - time_freq() * m_pConfig->m_SvConnlimitTime)
+			if(m_aSpamConns[i].m_Time > Now - time_freq() * CNetBase::Config()->m_SvConnlimitTime)
 			{
-				if(m_aSpamConns[i].m_Conns >= m_pConfig->m_SvConnlimit)
+				if(m_aSpamConns[i].m_Conns >= CNetBase::Config()->m_SvConnlimit)
 					return true;
 			}
 			else

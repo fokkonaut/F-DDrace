@@ -1964,13 +1964,13 @@ void CClient::Run()
 			mem_zero(&BindAddr, sizeof(BindAddr));
 			BindAddr.type = NETTYPE_ALL;
 		}
-		if(!m_NetClient.Open(BindAddr, BindAddr.port ? 0 : NETCREATE_FLAG_RANDOMPORT))
+		if(!m_NetClient.Open(BindAddr, Config(), Console(), Engine(), BindAddr.port ? 0 : NETCREATE_FLAG_RANDOMPORT))
 		{
 			dbg_msg("client", "couldn't open socket(net)");
 			return;
 		}
 		BindAddr.port = 0;
-		if(!m_ContactClient.Open(BindAddr, 0))
+		if(!m_ContactClient.Open(BindAddr, Config(), Console(), Engine(), 0))
 		{
 			dbg_msg("client", "couldn't open socket(contact)");
 			return;
@@ -2299,7 +2299,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_NetClient.ResetErrorString();
 
 	// try to start playback
-	m_DemoPlayer.SetListner(this);
+	m_DemoPlayer.SetListener(this);
 
 	const char *pError = m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType, GameClient()->NetVersion());
 	if(pError)

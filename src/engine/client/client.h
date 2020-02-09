@@ -52,7 +52,7 @@ public:
 };
 
 
-class CClient : public IClient, public CDemoPlayer::IListner
+class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
 	IEngine *m_pEngine;
@@ -203,6 +203,7 @@ public:
 	IEngineMasterServer *MasterServer() { return m_pMasterServer; }
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
+	IConsole *Console() { return m_pConsole; }
 	IStorage *Storage() { return m_pStorage; }
 
 	CClient();
