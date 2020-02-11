@@ -2426,6 +2426,24 @@ void CGameContext::RemoveCommandHook(const CCommandManager::CCommand *pCommand, 
 	pSelf->SendRemoveChatCommand(pCommand, -1);
 }
 
+void CGameContext::LegacyCommandCallback(IConsole::IResult *pResult, void *pContext)
+{
+	CCommandManager::SCommandContext *pComContext = (CCommandManager::SCommandContext *)pContext;
+	CGameContext *pSelf = (CGameContext *)pComContext->m_pContext;
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "/%s %s", pComContext->m_pCommand, pComContext->m_pArgs);
+
+	pSelf->ExecuteChatCommand(aBuf, pComContext->m_ClientID);
+}
+
+void CGameContext::RegisterLegacyDDRaceCommands()
+{
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) CommandManager()->AddCommand(name, help, params, LegacyCommandCallback, this);
+	#include "ddracechat.h"
+	#undef CHAT_COMMAND
+}
+
 void CGameContext::OnInit()
 {
 	// init everything
@@ -2500,8 +2518,9 @@ void CGameContext::OnInit()
 
 	m_pController = new CGameControllerDDRace(this);
 	((CGameControllerDDRace*)m_pController)->m_Teams.Reset();
-
 	m_pController->RegisterChatCommands(CommandManager());
+
+	RegisterLegacyDDRaceCommands();
 
 	m_TeeHistorianActive = Config()->m_SvTeeHistorian;
 	if(m_TeeHistorianActive)

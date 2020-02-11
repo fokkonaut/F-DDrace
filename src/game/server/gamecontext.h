@@ -151,6 +151,9 @@ class CGameContext : public IGameServer
 	static void NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
 	static void RemoveCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
 
+	static void LegacyCommandCallback(IConsole::IResult *pResult, void *pContext);
+	void RegisterLegacyDDRaceCommands();
+
 	// DDRace
 
 	static void ConRandomMap(IConsole::IResult *pResult, void *pUserData);
