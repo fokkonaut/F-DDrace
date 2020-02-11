@@ -952,7 +952,7 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 	}
 }
 
-class CVoteOptionServer *CGameContext::GetVoteOption(int Index)
+struct CVoteOptionServer *CGameContext::GetVoteOption(int Index)
 {
 	CVoteOptionServer *pCurrent;
 	for (pCurrent = m_pVoteOptionFirst;
