@@ -2410,8 +2410,12 @@ void CGameContext::OnConsoleInit()
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include <game/ddracecommands.h>
+	#undef CONSOLE_COMMAND
+
+	// Keep this for backwards compatibility
 	#define CHAT_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include "ddracechat.h"
+	#undef CHAT_COMMAND
 }
 
 void CGameContext::NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext)
@@ -2426,20 +2430,56 @@ void CGameContext::RemoveCommandHook(const CCommandManager::CCommand *pCommand, 
 	pSelf->SendRemoveChatCommand(pCommand, -1);
 }
 
+struct SLegacyCommandContext {
+	CGameContext *m_pGameContext;
+	IConsole::FCommandCallback m_pfnCallback;
+	void *m_pOriginalContext;
+};
+
 void CGameContext::LegacyCommandCallback(IConsole::IResult *pResult, void *pContext)
 {
 	CCommandManager::SCommandContext *pComContext = (CCommandManager::SCommandContext *)pContext;
-	CGameContext *pSelf = (CGameContext *)pComContext->m_pContext;
+	SLegacyCommandContext *pLegacyContext = (SLegacyCommandContext *)pComContext->m_pContext;
+	CGameContext *pSelf = pLegacyContext->m_pGameContext;
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "/%s %s", pComContext->m_pCommand, pComContext->m_pArgs);
+	//Do Spam protection
+	CPlayer *pPlayer = pSelf->m_apPlayers[pComContext->m_ClientID];
+	const int64 Now = pSelf->Server()->Tick();
+	const int64 TickSpeed = pSelf->Server()->TickSpeed();
 
-	pSelf->ExecuteChatCommand(aBuf, pComContext->m_ClientID);
+	if (pSelf->Config()->m_SvSpamprotection && !str_startswith(pComContext->m_pCommand, "timeout ")
+		&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + TickSpeed > Now
+		&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + TickSpeed > Now
+		&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + TickSpeed > Now
+		&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + TickSpeed > Now
+		)
+		return;
+
+	pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
+	pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
+
+	// Patch up the Result
+	pResult->m_ClientID = pComContext->m_ClientID;
+
+	// Set up the console output
+	pSelf->m_ChatResponseTargetID = pComContext->m_ClientID;
+	pSelf->Server()->RestrictRconOutput(pComContext->m_ClientID);
+
+	pLegacyContext->m_pfnCallback(pResult, pLegacyContext->m_pOriginalContext);
+
+	// Fix the console output
+	pSelf->m_ChatResponseTargetID = -1;
+	pSelf->Server()->RestrictRconOutput(-1);
 }
 
 void CGameContext::RegisterLegacyDDRaceCommands()
 {
-	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) CommandManager()->AddCommand(name, help, params, LegacyCommandCallback, this);
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) \
+	{ \
+		static SLegacyCommandContext Context = { this, callback, userdata}; \
+		CommandManager()->AddCommand(name, help, params, LegacyCommandCallback, &Context); \
+	}
+
 	#include "ddracechat.h"
 	#undef CHAT_COMMAND
 }
