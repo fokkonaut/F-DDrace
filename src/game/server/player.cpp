@@ -66,6 +66,8 @@ void CPlayer::Reset()
 	m_Halloween = false;
 	m_FirstPacket = true;
 
+	m_SendVoteIndex = -1;
+
 	if (GameServer()->Config()->m_Events)
 	{
 		time_t rawtime;

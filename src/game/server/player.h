@@ -120,6 +120,8 @@ public:
 
 	int m_LastInvited;
 
+	int m_SendVoteIndex;
+
 	// TODO: clean this up
 	struct TeeInfos
 	{

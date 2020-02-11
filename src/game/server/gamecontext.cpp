@@ -721,6 +721,9 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
+			// send vote options
+			ProgressVoteOptions(i);
+
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
 
@@ -947,6 +950,57 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 		else
 			m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
 	}
+}
+
+class CVoteOptionServer *CGameContext::GetVoteOption(int Index)
+{
+	CVoteOptionServer *pCurrent;
+	for (pCurrent = m_pVoteOptionFirst;
+			Index > 0 && pCurrent;
+			Index--, pCurrent = pCurrent->m_pNext);
+
+	if (Index > 0)
+		return 0;
+	return pCurrent;
+}
+
+void CGameContext::ProgressVoteOptions(int ClientID)
+{
+	CPlayer *pPl = m_apPlayers[ClientID];
+
+	if (pPl->m_SendVoteIndex == -1)
+		return;
+
+	//TODO: removing votes can cause this
+	dbg_assert(pPl->m_SendVoteIndex <= m_NumVoteOptions, "m_SendVoteIndex invalid");
+
+	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
+	int NumVotesToSend = min(Config()->m_SvVotesPerTick, VotesLeft);
+
+	if (!VotesLeft)
+	{
+		// player has up to date vote option list
+		return;
+	}
+
+	// build vote option list msg
+	int CurIndex = 0;
+
+	// get current vote option by index
+	CVoteOptionServer *pCurrent = GetVoteOption(pPl->m_SendVoteIndex);
+
+	// pack and send vote list packet
+	CMsgPacker Msg(NETMSGTYPE_SV_VOTEOPTIONLISTADD);
+	Msg.AddInt(NumVotesToSend);
+	while(pCurrent && CurIndex < NumVotesToSend)
+	{
+		Msg.AddString(pCurrent->m_aDescription, VOTE_DESC_LENGTH);
+		pCurrent = pCurrent->m_pNext;
+		CurIndex++;
+	}
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+
+	pPl->m_SendVoteIndex += NumVotesToSend;
 }
 
 void CGameContext::OnClientEnter(int ClientID)
@@ -1832,27 +1886,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
 
-			// send vote options
+			// send clear vote options
 			CNetMsg_Sv_VoteClearOptions ClearMsg;
 			Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
 
-			CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
-			while(pCurrent)
-			{
-				// count options for actual packet
-				int NumOptions = 0;
-				for(CVoteOptionServer *p = pCurrent; p && NumOptions < MAX_VOTE_OPTION_ADD; p = p->m_pNext, ++NumOptions);
-
-				// pack and send vote list packet
-				CMsgPacker Msg(NETMSGTYPE_SV_VOTEOPTIONLISTADD);
-				Msg.AddInt(NumOptions);
-				while(pCurrent && NumOptions--)
-				{
-					Msg.AddString(pCurrent->m_aDescription, VOTE_DESC_LENGTH);
-					pCurrent = pCurrent->m_pNext;
-				}
-				Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
-			}
+			// begin sending vote options
+			pPlayer->m_SendVoteIndex = 0;
 
 			// send tuning parameters to client
 			SendTuningParams(ClientID);
@@ -2170,11 +2209,6 @@ void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "added option '%s' '%s'", pOption->m_aDescription, pOption->m_aCommand);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-	// inform clients about added option
-	CNetMsg_Sv_VoteOptionAdd OptionMsg;
-	OptionMsg.m_pDescription = pOption->m_aDescription;
-	pSelf->Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, -1);
 }
 
 void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
@@ -2253,6 +2287,13 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_pVoteOptionFirst = 0;
 	pSelf->m_pVoteOptionLast = 0;
 	pSelf->m_NumVoteOptions = 0;
+
+	// reset sending of vote options
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(pSelf->m_apPlayers[i])
+			pSelf->m_apPlayers[i]->m_SendVoteIndex = 0;
+	}
 }
 
 void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
