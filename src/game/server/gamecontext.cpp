@@ -3592,16 +3592,16 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg)
 
 		int Found = 0;
 		if (pMsg[i+1] == '[' || pMsg[i+1] == ']' || pMsg[i+1] == '/')
-			Found |= 1<<0;
+			Found = 1;
 		else if (pMsg[i] == '[' || pMsg[i] == '/')
-			Found |= 1<<1;
+			Found = 2;
 		else if (pMsg[i] == ']')
-			Found |= 1<<2;
+			Found = 3;
 
 		if (Found)
 		{
 			s += ColorOffset;
-			const char *pColorCode = Found&1<<0 ? pSymbolColor : Found&1<<1 ? pValueColor : pTextColor;
+			const char *pColorCode = Found == 1 ? pSymbolColor : Found == 2 ? pValueColor : pTextColor;
 			str_append(aRet, pColorCode, sizeof(aRet));
 		}
 	}
