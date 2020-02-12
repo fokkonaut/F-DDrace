@@ -429,8 +429,10 @@ void CPlayer::Snap(int SnappingClient)
 
 	if ((m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && Server()->GetAuthedState(m_ClientID))
 	{
+		if (SnappingClient == m_ClientID)
+			m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+
 		TeeInfos pTeeInfos;
-		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
 		for (int p = 0; p < NUM_SKINPARTS; p++)
 		{
 			int BaseColor = m_RainbowColor * 0x010000;
