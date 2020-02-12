@@ -2536,6 +2536,12 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_Authed = AUTHED_NO;
 	m_aClients[DummyID].m_AuthTries = 0;
 	m_aClients[DummyID].m_pRconCmdToSend = 0;
+	m_aClients[DummyID].m_pMapListEntryToSend = 0;
+	m_aClients[DummyID].m_NoRconNote = false;
+	m_aClients[DummyID].m_Quitting = false;
+	m_aClients[DummyID].m_ShowIps = false;
+	m_aClients[DummyID].m_Traffic = 0;
+	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
 
 	m_NetServer.DummyDelete(DummyID);
