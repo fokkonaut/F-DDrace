@@ -368,13 +368,12 @@ int CNetConnection::Update()
 {
 	int64 Now = time_get();
 
-	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR)
+	if(State() == NET_CONNSTATE_OFFLINE || State() == NET_CONNSTATE_ERROR || State() == NET_CONNSTATE_DUMMY)
 		return 0;
 
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_TOKEN &&
-		State() != NET_CONNSTATE_DUMMY &&
 		(Now-m_LastRecvTime) > time_freq()*10)
 	{
 		m_State = NET_CONNSTATE_ERROR;
@@ -460,11 +459,10 @@ int CNetConnection::IsSeqInBackroom(int Seq, int Ack)
 void CNetConnection::DummyConnect()
 {
 	Reset();
-	ResetStats();
 	m_State = NET_CONNSTATE_DUMMY;
 }
 
 void CNetConnection::DummyDrop()
 {
-	m_State = NET_CONNSTATE_OFFLINE;
+	Reset();
 }
