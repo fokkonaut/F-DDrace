@@ -2489,10 +2489,20 @@ void CGameContext::LegacyCommandCallback(IConsole::IResult *pResult, void *pCont
 	// Set up the console output
 	pSelf->m_ChatResponseTargetID = pComContext->m_ClientID;
 	pSelf->Server()->RestrictRconOutput(pComContext->m_ClientID);
+	pSelf->Console()->SetFlagMask(CFGFLAG_CHAT);
+
+	int Authed = pSelf->Server()->GetAuthedState(pComContext->m_ClientID);
+	if (Authed)
+		pSelf->Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+	else
+		pSelf->Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+	pSelf->Console()->SetPrintOutputLevel(pSelf->m_ChatPrintCBIndex, 0);
 
 	pLegacyContext->m_pfnCallback(pResult, pLegacyContext->m_pOriginalContext);
 
 	// Fix the console output
+	pSelf->Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+	pSelf->Console()->SetFlagMask(CFGFLAG_SERVER);
 	pSelf->m_ChatResponseTargetID = -1;
 	pSelf->Server()->RestrictRconOutput(-1);
 }
