@@ -928,10 +928,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	{
 		return;
 	}
-	else if(Result == UNPACKMESSAGE_ANSWER)
-	{
-		SendMsg(&Packer, MSGFLAG_VITAL, ClientID);
-	}
 
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
@@ -950,6 +946,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			m_aClients[ClientID].m_Traffic = (Alpha * ((float)pPacket->m_DataSize / Diff)) + (1.0f - Alpha) * m_aClients[ClientID].m_Traffic;
 			m_aClients[ClientID].m_TrafficSince = Now;
 		}
+	}
+
+	if(Result == UNPACKMESSAGE_ANSWER)
+	{
+		SendMsg(&Packer, MSGFLAG_VITAL, ClientID);
 	}
 
 	if(Sys)
