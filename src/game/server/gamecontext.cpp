@@ -1283,7 +1283,42 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pMsg->m_pMessage[0] == '/')
 			{
-				ExecuteChatCommand(pMsg->m_pMessage, ClientID);
+				CPlayer* pPlayer = m_apPlayers[ClientID];
+
+				if (Config()->m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
+					&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + Server()->TickSpeed() > Server()->Tick()
+					&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + Server()->TickSpeed() > Server()->Tick()
+					)
+					return;
+
+				int64 Now = Server()->Tick();
+				pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
+				pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
+
+				m_ChatResponseTargetID = ClientID;
+				Server()->RestrictRconOutput(ClientID);
+				Console()->SetFlagMask(CFGFLAG_CHAT);
+
+				int Authed = Server()->GetAuthedState(ClientID);
+				if (Authed)
+					Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				else
+					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+				Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
+
+				Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
+				// m_apPlayers[ClientID] can be NULL, if the player used a
+				// timeout code and replaced another client.
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+
+				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+				Console()->SetFlagMask(CFGFLAG_SERVER);
+				m_ChatResponseTargetID = -1;
+				Server()->RestrictRconOutput(-1);
 			}
 			else if (!pPlayer->m_ShowName)
 			{
@@ -1851,17 +1886,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if (MsgID == NETMSGTYPE_CL_COMMAND)
 		{
 			CNetMsg_Cl_Command *pMsg = (CNetMsg_Cl_Command*)pRawMsg;
-			const CCommandManager::CCommand *pCom = CommandManager()->GetCommand(pMsg->m_Name);
-			if (pCom && pCom->m_pfnCallback)
-			{
-				CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
-			}
-			else
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "/%s %s", pMsg->m_Name, pMsg->m_Arguments);
-				ExecuteChatCommand(aBuf, ClientID);
-			}
+			CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
 		}
 	}
 	else
@@ -3825,46 +3850,6 @@ void CGameContext::SendTeamChange(int ClientID, int Team, bool Silent, int Coold
 	Msg.m_Silent = (int)Silent;
 	Msg.m_CooldownTick = CooldownTick;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ToClientID);
-}
-
-void CGameContext::ExecuteChatCommand(const char *pMessage, int ClientID)
-{
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-
-	if (Config()->m_SvSpamprotection && !str_startswith(pMessage + 1, "timeout ")
-		&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + Server()->TickSpeed() > Server()->Tick()
-		&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + Server()->TickSpeed() > Server()->Tick()
-		&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + Server()->TickSpeed() > Server()->Tick()
-		&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + Server()->TickSpeed() > Server()->Tick()
-		)
-		return;
-
-	int64 Now = Server()->Tick();
-	pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
-	pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
-
-	m_ChatResponseTargetID = ClientID;
-	Server()->RestrictRconOutput(ClientID);
-	Console()->SetFlagMask(CFGFLAG_CHAT);
-
-	int Authed = Server()->GetAuthedState(ClientID);
-	if (Authed)
-		Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
-	else
-		Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
-	Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
-
-	Console()->ExecuteLine(pMessage + 1, ClientID, false);
-	// m_apPlayers[ClientID] can be NULL, if the player used a
-	// timeout code and replaced another client.
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMessage);
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
-
-	Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-	Console()->SetFlagMask(CFGFLAG_SERVER);
-	m_ChatResponseTargetID = -1;
-	Server()->RestrictRconOutput(-1);
 }
 
 const char *CGameContext::GetWeaponName(int Weapon)

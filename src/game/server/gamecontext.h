@@ -486,9 +486,6 @@ public:
 	//instagib
 	void InstagibTick(int Type);
 
-	//chat commands
-	void ExecuteChatCommand(const char *pMessage, int ClientID);
-
 	//isdummy callback for console victim dummy
 	static void ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUser);
 
