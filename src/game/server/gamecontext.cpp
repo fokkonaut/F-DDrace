@@ -2474,7 +2474,7 @@ void CGameContext::LegacyCommandCallback(IConsole::IResult *pResult, void *pCont
 
 void CGameContext::RegisterLegacyDDRaceCommands()
 {
-	#define CHAT_COMMAND(name, params, flags, callback, userdata, help) \
+	#define CHAT_COMMAND(name, params, flags, callback, userdata, help, accesslevel) \
 	{ \
 		static SLegacyCommandContext Context = { this, callback, userdata}; \
 		CommandManager()->AddCommand(name, help, params, LegacyCommandCallback, &Context); \
