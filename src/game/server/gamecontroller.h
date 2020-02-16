@@ -136,6 +136,7 @@ public:
 	void StartRound();
 
 	virtual void RegisterChatCommands(CCommandManager *pManager);
+	//static void Com_Example(IConsole::IResult *pResult, void *pContext);
 
 	// F-DDrace
 
