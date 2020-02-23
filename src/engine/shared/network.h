@@ -212,6 +212,7 @@ class CNetBase
 	IOHANDLE m_DataLogSent;
 	IOHANDLE m_DataLogRecv;
 	CHuffman m_Huffman;
+	unsigned char m_aRequestTokenBuf[NET_TOKENREQUEST_DATASIZE];
 
 public:
 	CNetBase();

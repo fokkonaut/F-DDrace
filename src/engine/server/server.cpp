@@ -130,7 +130,7 @@ void CSnapIDPool::FreeID(int ID)
 {
 	if(ID < 0)
 		return;
-	dbg_assert(m_aIDs[ID].m_State == 1, "id is not alloced");
+	dbg_assert(m_aIDs[ID].m_State == 1, "id is not allocated");
 
 	m_InUsage--;
 	m_aIDs[ID].m_State = 2;
@@ -245,7 +245,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	int Minutes = pResult->NumArguments()>1 ? clamp(pResult->GetInteger(1), 0, 44640) : 30;
 	const char *pReason = pResult->NumArguments()>2 ? pResult->GetString(2) : "No reason given";
 
-	if(StrAllnum(pStr))
+	if(!str_is_number(pStr))
 	{
 		int ClientID = str_toint(pStr);
 		if(ClientID < 0 || ClientID >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
@@ -604,7 +604,7 @@ void CServer::DoSnapshot()
 	// create snapshots for all clients
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		// client must be ingame to recive snapshots
+		// client must be ingame to receive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME)
 			continue;
 
@@ -644,7 +644,7 @@ void CServer::DoSnapshot()
 			// save it the snapshot
 			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0);
 
-			// find snapshot that we can preform delta against
+			// find snapshot that we can perform delta against
 			EmptySnap.Clear();
 
 			{

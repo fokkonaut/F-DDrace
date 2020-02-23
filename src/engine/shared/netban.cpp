@@ -9,18 +9,6 @@
 #include "protocol.h"
 
 
-bool CNetBan::StrAllnum(const char *pStr)
-{
-	while(*pStr)
-	{
-		if(!(*pStr >= '0' && *pStr <= '9'))
-			return false;
-		pStr++;
-	}
-	return true;
-}
-
-
 CNetBan::CNetHash::CNetHash(const NETADDR *pAddr)
 {
 	if(pAddr->type==NETTYPE_IPV4)
@@ -474,7 +462,7 @@ bool CNetBan::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize, in
 	CNetHash aHash[17];
 	int Length = CNetHash::MakeHashArray(pAddr, aHash);
 
-	// check ban adresses
+	// check ban addresses
 	CBanAddr *pBan = m_BanAddrPool.Find(pAddr, &aHash[Length]);
 	if(pBan)
 	{
@@ -537,7 +525,7 @@ void CNetBan::ConUnban(IConsole::IResult *pResult, void *pUser)
 	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
 	const char *pSeparator = str_find(aBuf, "-");
 
-	if(StrAllnum(aBuf))
+	if(!str_is_number(aBuf))
 	{
 		pThis->UnbanByIndex(str_toint(aBuf));
 	}
