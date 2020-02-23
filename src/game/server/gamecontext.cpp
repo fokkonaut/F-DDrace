@@ -2820,6 +2820,7 @@ void CGameContext::OnInit()
 		m_aPoliceLevel[i] = PoliceLevel[i];
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
+	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling LogoutAccountsCallback
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, LogoutAccountsCallback, this);
 
 	m_LastAccSaveTick = Server()->Tick();
@@ -3339,17 +3340,15 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 		char aUsername[64];
 		str_copy(aUsername, pName, str_length(pName) - 3); // remove the .acc
 
-		int ID = pSelf->AddAccount();
-		pSelf->ReadAccountStats(ID, aUsername);
+		int ID = pSelf->GetAccount(aUsername);
+		if (ID < ACC_START)
+			return 0;
 
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
 
-		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->Config()->m_SvPort)
-		{
-			pSelf->Logout(ID);
-			dbg_msg("acc", "logged out account '%s'", aUsername);
-		}
+		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
+			pSelf->Logout(ID, true);
 		else
 			pSelf->FreeAccount(ID, true);
 	}
@@ -3524,7 +3523,7 @@ void CGameContext::WriteAccountStats(int ID)
 	AccFile.close();
 }
 
-void CGameContext::Logout(int ID)
+void CGameContext::Logout(int ID, bool Silent)
 {
 	if (m_Accounts[ID].m_ClientID >= 0)
 	{
@@ -3537,7 +3536,7 @@ void CGameContext::Logout(int ID)
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
 	WriteAccountStats(ID);
-	FreeAccount(ID);
+	FreeAccount(ID, Silent);
 }
 
 int CGameContext::GetAccount(const char* pUsername)

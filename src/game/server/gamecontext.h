@@ -347,11 +347,12 @@ public:
 	void UpdateTopAccounts(int Type);
 	void SetTopAccStats(int FromID);
 
+	int m_LogoutAccountsPort;
 	static int LogoutAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
 	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
-	void Logout(int ID);
+	void Logout(int ID, bool Silent = false);
 
 	int m_aTaserPrice[7];
 	int m_aPoliceLevel[5];
@@ -710,6 +711,7 @@ private:
 	static void ConSpinBotSpeed(IConsole::IResult* pResult, void* pUserData);
 	static void ConAimClosest(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);

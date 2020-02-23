@@ -1289,6 +1289,13 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 		pPlayer->ResetSkin(true);
 }
 
+void CGameContext::ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->m_LogoutAccountsPort = pResult->GetInteger(0);
+	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, pSelf->Config()->m_SvAccFilePath, LogoutAccountsCallback, pSelf);
+}
+
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
