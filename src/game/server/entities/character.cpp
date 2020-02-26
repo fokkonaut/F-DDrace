@@ -1418,6 +1418,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		// sending you back to lobby
 		m_pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
 		m_pPlayer->m_ShowName = true;
+		m_pPlayer->m_SurvivalDieTick = Server()->Tick();
 	}
 
 	// a nice sound

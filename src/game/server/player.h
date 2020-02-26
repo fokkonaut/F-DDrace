@@ -333,6 +333,7 @@ public:
 	//minigames
 	int m_Minigame;
 	int m_SurvivalState;
+	int m_SurvivalDieTick;
 };
 
 #endif
