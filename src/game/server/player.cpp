@@ -336,7 +336,7 @@ void CPlayer::Tick()
 			int Color = 0xff32;
 			if (p == SKINPART_MARKING)
 				Color *= -256;
-			str_copy(pTeeInfos.m_aaSkinPartNames[p], m_CurrentTeeInfos.m_aaSkinPartNames[p], 24);
+			str_copy(pTeeInfos.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
 			pTeeInfos.m_aUseCustomColors[p] = 1;
 			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
 		}
@@ -1223,16 +1223,16 @@ void CPlayer::UpdateInformation(int ClientID)
 	NewClientInfoMsg.m_ClientID = m_ClientID;
 	NewClientInfoMsg.m_Local = 0;
 	NewClientInfoMsg.m_Team = m_Team;
-	NewClientInfoMsg.m_pName = m_aCurrentName;
-	NewClientInfoMsg.m_pClan = m_aCurrentClan;
+	NewClientInfoMsg.m_pName = m_CurrentInfo.m_aName;
+	NewClientInfoMsg.m_pClan = m_CurrentInfo.m_aClan;
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(m_ClientID);
 	NewClientInfoMsg.m_Silent = 1;
 
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		NewClientInfoMsg.m_apSkinPartNames[p] = m_CurrentTeeInfos.m_aaSkinPartNames[p];
-		NewClientInfoMsg.m_aUseCustomColors[p] = m_CurrentTeeInfos.m_aUseCustomColors[p];
-		NewClientInfoMsg.m_aSkinPartColors[p] = m_CurrentTeeInfos.m_aSkinPartColors[p];
+		NewClientInfoMsg.m_apSkinPartNames[p] = m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 	}
 
 	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);

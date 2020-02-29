@@ -251,10 +251,6 @@ public:
 
 	//spooky ghost
 	bool m_SpookyGhost;
-	TeeInfos m_CurrentTeeInfos;
-
-	void ResetSkin(bool Unforce = false);
-	void SetSkin(int Skin, bool Force = false);
 
 	//no name fix
 	bool m_RemovedName;
@@ -326,10 +322,18 @@ public:
 
 	//fake information
 	void UpdateInformation(int ClientID = -1);
-	void SetName(const char *pName) { str_copy(m_aCurrentName, pName, MAX_NAME_LENGTH); };
-	void SetClan(const char *pClan) { str_copy(m_aCurrentClan, pClan, MAX_CLAN_LENGTH); };
-	char m_aCurrentName[MAX_NAME_LENGTH];
-	char m_aCurrentClan[MAX_CLAN_LENGTH];
+	void SetName(const char *pName) { str_copy(m_CurrentInfo.m_aName, pName, MAX_NAME_LENGTH); };
+	void SetClan(const char *pClan) { str_copy(m_CurrentInfo.m_aClan, pClan, MAX_CLAN_LENGTH); };
+
+	void ResetSkin(bool Unforce = false);
+	void SetSkin(int Skin, bool Force = false);
+
+	struct
+	{
+		char m_aName[MAX_NAME_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH];
+		TeeInfos m_TeeInfos;
+	} m_CurrentInfo;
 
 	//minigames
 	int m_Minigame;

@@ -448,7 +448,7 @@ void CGameContext::SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int
 
 	// F-DDrace
 	if (m_apPlayers[ClientID])
-		m_apPlayers[ClientID]->m_CurrentTeeInfos = pTeeInfos;
+		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = pTeeInfos;
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
@@ -1006,10 +1006,11 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 void CGameContext::OnClientEnter(int ClientID)
 {
 	// F-DDrace
-	str_copy(m_apPlayers[ClientID]->m_aCurrentName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
-	str_copy(m_apPlayers[ClientID]->m_aCurrentClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
+	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
+
 	m_apPlayers[ClientID]->Respawn();
-	m_apPlayers[ClientID]->m_CurrentTeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
 
 	// load score
 	{
@@ -1060,15 +1061,15 @@ void CGameContext::OnClientEnter(int ClientID)
 		ClientInfoMsg.m_ClientID = i;
 		ClientInfoMsg.m_Local = 0;
 		ClientInfoMsg.m_Team = m_apPlayers[i]->GetTeam();
-		ClientInfoMsg.m_pName = m_apPlayers[i]->m_aCurrentName;
-		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_aCurrentClan;
+		ClientInfoMsg.m_pName = m_apPlayers[i]->m_CurrentInfo.m_aName;
+		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_CurrentInfo.m_aClan;
 		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
 		ClientInfoMsg.m_Silent = false;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aaSkinPartNames[p];
-			ClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aUseCustomColors[p];
-			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_CurrentTeeInfos.m_aSkinPartColors[p];
+			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p];
+			ClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
+			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 		}
 		Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
 	}
