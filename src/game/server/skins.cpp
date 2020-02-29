@@ -112,9 +112,10 @@ CSkins::CSkins()
 {
 	for (int i = 0; i < NUM_SKINS; i++)
 	{
+		str_copy(m_Skins[i].m_aSkinName, pSkinName[i], 24);
+
 		for (int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			str_copy(m_Skins[i].m_aSkinName, pSkinName[i], 24);
 			str_copy(m_Skins[i].m_aaSkinPartNames[p], pSkinPartNames[i][p], 24);
 			m_Skins[i].m_aUseCustomColors[p] = pSkinCustomColor[i][p];
 			m_Skins[i].m_aSkinPartColors[p] = pSkinPartColor[i][p];
