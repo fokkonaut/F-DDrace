@@ -323,6 +323,26 @@ void CPlayer::Tick()
 	// dummy fake ping
 	if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing && Server()->Tick() % 200 == 0)
 		m_FakePing = 32 + rand() % 11;
+
+	// rainbow
+	if (Server()->Tick() % 2 == 0 && (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && GameServer()->Config()->m_SvAllowRainbow)
+	{
+		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+
+		TeeInfos pTeeInfos;
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			int BaseColor = m_RainbowColor * 0x010000;
+			int Color = 0xff32;
+			if (p == SKINPART_MARKING)
+				Color *= -256;
+			str_copy(pTeeInfos.m_aaSkinPartNames[p], m_CurrentTeeInfos.m_aaSkinPartNames[p], 24);
+			pTeeInfos.m_aUseCustomColors[p] = 1;
+			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
+		}
+
+		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
+	}
 }
 
 void CPlayer::PostTick()
@@ -425,26 +445,6 @@ void CPlayer::Snap(int SnappingClient)
 	if (AccUsed && GetAccID() < ACC_START)
 		Score = 0;
 	pPlayerInfo->m_Score = Score;
-
-	if ((m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && GameServer()->Config()->m_SvAllowRainbow)
-	{
-		if (SnappingClient == m_ClientID)
-			m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
-
-		TeeInfos pTeeInfos;
-		for (int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			int BaseColor = m_RainbowColor * 0x010000;
-			int Color = 0xff32;
-			if (p == SKINPART_MARKING)
-				Color *= -256;
-			str_copy(pTeeInfos.m_aaSkinPartNames[p], m_CurrentTeeInfos.m_aaSkinPartNames[p], 24);
-			pTeeInfos.m_aUseCustomColors[p] = 1;
-			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
-		}
-
-		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, SnappingClient);
-	}
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
 	{
