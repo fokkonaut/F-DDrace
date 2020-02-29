@@ -1052,15 +1052,13 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int ID = pSelf->GetCIDByName(pResult->GetString(0));
-	if (ID < 0)
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid client id");
-		return;
-	}
-
+	int ID = pResult->GetInteger(0);
 	CCharacter *pChr = pSelf->GetPlayerChar(ID);
 	CPlayer *pPlayer = pSelf->m_apPlayers[ID];
+
+	// first player vars
+	if (!pPlayer)
+		return;
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pResult->GetString(0));
@@ -1106,71 +1104,72 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	else if (pPlayer->m_HasTeeControl)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Tee Control: True");
 
-	if (pChr)
+	// then character vars
+	if (!pChr)
+		return;
+
+	if (pChr->HasFlag() == TEAM_RED)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Red");
+	if (pChr->HasFlag() == TEAM_BLUE)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Blue");
+	if (pChr->m_DeepFreeze)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: Deep");
+	else if (pChr->m_IsFrozen)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: True");
+	else if (pChr->m_FreezeTime)
 	{
-		if (pChr->HasFlag() == TEAM_RED)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Red");
-		if (pChr->HasFlag() == TEAM_BLUE)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Blue");
-		if (pChr->m_DeepFreeze)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: Deep");
-		else if (pChr->m_IsFrozen)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: True");
-		else if (pChr->m_FreezeTime)
-		{
-			str_format(aBuf, sizeof(aBuf), "Frozen: Freezetime: %d", pChr->m_FreezeTime);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		}
-		if (pChr->m_SuperJump)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "SuperJump: True");
-		if (pChr->m_EndlessHook)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Endless: True");
-		if (pChr->m_Jetpack)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Jetpack: True");
-		if (pChr->m_Rainbow)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Rainbow: True");
-		if (pChr->m_Atom)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Atom: True");
-		if (pChr->m_Trail)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Trail: True");
-		if (pChr->m_Bloody)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Bloody: True");
-		if (pChr->m_StrongBloody)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Strong Bloody: True");
-		if (pChr->m_Meteors > 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "Meteors: %d", pChr->m_Meteors);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		}
-		if (pChr->m_Passive)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Passive Mode: True");
-		if (pChr->m_PoliceHelper)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Police Helper: True");
-		for (int i = 0; i < NUM_WEAPONS; i++)
-		{
-			if (pChr->m_aSpreadWeapon[i])
-			{
-				str_format(aBuf, sizeof(aBuf), "Spread %s: True", pSelf->GetWeaponName(i));
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			}
-		}
-		if (pChr->m_Invisible)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invisibility: True");
-		if (pChr->m_HookPower != HOOK_NORMAL)
-		{
-			str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(pChr->m_HookPower));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		}
-		if (pChr->m_Item != -3)
-		{
-			str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetWeaponName(pChr->m_Item));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		}
-		if (pChr->m_DoorHammer)
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
-		str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
+		str_format(aBuf, sizeof(aBuf), "Frozen: Freezetime: %d", pChr->m_FreezeTime);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
+	if (pChr->m_SuperJump)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "SuperJump: True");
+	if (pChr->m_EndlessHook)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Endless: True");
+	if (pChr->m_Jetpack)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Jetpack: True");
+	if (pChr->m_Rainbow)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Rainbow: True");
+	if (pChr->m_Atom)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Atom: True");
+	if (pChr->m_Trail)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Trail: True");
+	if (pChr->m_Bloody)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Bloody: True");
+	if (pChr->m_StrongBloody)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Strong Bloody: True");
+	if (pChr->m_Meteors > 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "Meteors: %d", pChr->m_Meteors);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+	if (pChr->m_Passive)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Passive Mode: True");
+	if (pChr->m_PoliceHelper)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Police Helper: True");
+	for (int i = 0; i < NUM_WEAPONS; i++)
+	{
+		if (pChr->m_aSpreadWeapon[i])
+		{
+			str_format(aBuf, sizeof(aBuf), "Spread %s: True", pSelf->GetWeaponName(i));
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		}
+	}
+	if (pChr->m_Invisible)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invisibility: True");
+	if (pChr->m_HookPower != HOOK_NORMAL)
+	{
+		str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(pChr->m_HookPower));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+	if (pChr->m_Item != -3)
+	{
+		str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetWeaponName(pChr->m_Item));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+	if (pChr->m_DoorHammer)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
+	str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
