@@ -98,7 +98,6 @@ void CPickup::Tick()
 						break;
 
 					case POWERUP_ARMOR:
-						if (pChr->Team() == TEAM_SUPER) continue;
 						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 						{
 							if (pChr->IncreaseArmor(1))
@@ -107,6 +106,7 @@ void CPickup::Tick()
 								RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 							}
 						}
+						else if (pChr->Team() == TEAM_SUPER) continue;
 						else if (pChr->GetPlayer()->m_SpookyGhost)
 						{
 							for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
