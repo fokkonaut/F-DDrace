@@ -77,13 +77,13 @@ vec2 CProjectile::GetPos(float Time)
 			case WEAPON_SHOTGUN:
 				if (!m_TuneZone)
 				{
-					Curvature = GameServer()->Tuning()->m_DDraceShotgunCurvature;
-					Speed = GameServer()->Tuning()->m_DDraceShotgunSpeed;
+					Curvature = GameServer()->Tuning()->m_VanillaShotgunCurvature;
+					Speed = GameServer()->Tuning()->m_VanillaShotgunSpeed;
 				}
 				else
 				{
-					Curvature = GameServer()->TuningList()[m_TuneZone].m_DDraceShotgunCurvature;
-					Speed = GameServer()->TuningList()[m_TuneZone].m_DDraceShotgunSpeed;
+					Curvature = GameServer()->TuningList()[m_TuneZone].m_VanillaShotgunCurvature;
+					Speed = GameServer()->TuningList()[m_TuneZone].m_VanillaShotgunCurvature;
 				}
 				break;
 

@@ -595,7 +595,7 @@ void CCharacter::FireWeapon()
 							ProjStartPos,
 							vec2(cosf(a), sinf(a)) * Speed,
 							(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime),
-							false, false, 0, -1);
+							false, false, 0, -1, 0, 0, false, true);
 					}
 				}
 				else

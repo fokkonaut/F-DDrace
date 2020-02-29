@@ -2552,6 +2552,8 @@ void CGameContext::OnInit()
 		TuningList()[i] = TuningParams;
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
+		TuningList()[i].Set("shotgun_curvature", 0);
+		TuningList()[i].Set("shotgun_speed", 500);
 	}
 
 	for (int i = 0; i < NUM_TUNEZONES; i++)
@@ -2569,6 +2571,8 @@ void CGameContext::OnInit()
 	{
 		Tuning()->Set("gun_speed", 1400);
 		Tuning()->Set("gun_curvature", 0);
+		Tuning()->Set("shotgun_speed", 500);
+		Tuning()->Set("shotgun_curvature", 0);
 	}
 
 	if (Config()->m_SvDDRaceTuneReset)
@@ -3213,6 +3217,8 @@ void CGameContext::ResetTuning()
 	m_Tuning = TuningParams;
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
+	Tuning()->Set("shotgun_speed", 500);
+	Tuning()->Set("shotgun_curvature", 0);
 	SendTuningParams(-1);
 }
 
