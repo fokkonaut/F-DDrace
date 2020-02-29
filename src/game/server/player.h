@@ -126,6 +126,7 @@ public:
 	struct TeeInfos
 	{
 		// F-DDrace // for CSkins
+		// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
 		char m_aSkinName[24];
 
 		char m_aaSkinPartNames[NUM_SKINPARTS][24];

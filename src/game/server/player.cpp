@@ -166,7 +166,6 @@ void CPlayer::Reset()
 	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 
-	// this variable is used for CSkins and as an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinname
 	m_TeeInfos.m_aSkinName[0] = '\0';
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
