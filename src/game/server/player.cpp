@@ -426,7 +426,7 @@ void CPlayer::Snap(int SnappingClient)
 		Score = 0;
 	pPlayerInfo->m_Score = Score;
 
-	if ((m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && Server()->GetAuthedState(m_ClientID))
+	if ((m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && GameServer()->Config()->m_SvAllowRainbow)
 	{
 		if (SnappingClient == m_ClientID)
 			m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
