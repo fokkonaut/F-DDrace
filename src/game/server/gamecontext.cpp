@@ -3553,7 +3553,7 @@ int CGameContext::GetAccount(const char* pUsername)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (m_apPlayers[i] && !str_comp(m_Accounts[m_apPlayers[i]->GetAccID()].m_Username, pUsername))
+		if (m_apPlayers[i] && m_apPlayers[i]->GetAccID() >= ACC_START && !str_comp(m_Accounts[m_apPlayers[i]->GetAccID()].m_Username, pUsername))
 		{
 			ID = m_apPlayers[i]->GetAccID();
 			AccountLoggedIn = true;
