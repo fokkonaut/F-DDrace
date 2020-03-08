@@ -503,6 +503,14 @@ void CPlayer::Snap(int SnappingClient)
 			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
 		}
 	}
+
+	CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
+	if(!pExPlayerInfo)
+		return;
+
+	pExPlayerInfo->m_Flags = 0;
+	if(m_Afk)
+		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
 }
 
 void CPlayer::OnDisconnect()
