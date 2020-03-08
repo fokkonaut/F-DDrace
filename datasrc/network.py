@@ -8,7 +8,7 @@ Votes = Enum("VOTE", ["UNKNOWN", "START_OP", "START_KICK", "START_SPEC", "END_AB
 ChatModes = Enum("CHAT", ["NONE", "ALL", "TEAM", "WHISPER", "SINGLE"])
 RaceRecordTypes = Enum("RECORDTYPE", ["NONE", "PLAYER", "MAP"])
 
-PlayerFlags = Flags("PLAYERFLAG", ["ADMIN", "CHATTING", "SCOREBOARD", "READY", "DEAD", "WATCHING", "BOT", "AIM"])
+PlayerFlags = Flags("PLAYERFLAG", ["ADMIN", "CHATTING", "SCOREBOARD", "READY", "DEAD", "WATCHING", "BOT"])
 GameFlags = Flags("GAMEFLAG", ["TEAMS", "FLAGS", "SURVIVAL", "RACE"])
 GameStateFlags = Flags("GAMESTATEFLAG", ["WARMUP", "SUDDENDEATH", "ROUNDOVER", "GAMEOVER", "PAUSED", "STARTCOUNTDOWN"])
 CoreEventFlags = Flags("COREEVENTFLAG", ["GROUND_JUMP", "AIR_JUMP", "HOOK_ATTACH_PLAYER", "HOOK_ATTACH_GROUND", "HOOK_HIT_NOHOOK"])
@@ -24,7 +24,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
 
-ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK"])
+ExPlayerFlags = Flags("EXPLAYERFLAG", ["AIM", "AFK"])
 
 
 RawHeader = '''
@@ -501,5 +501,9 @@ Messages = [
 
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	NetMessageEx("Cl_ExPlayerInfo", "explayerinfo@ddnet.tw", [
+		NetIntAny("m_Flags"),
 	]),
 ]

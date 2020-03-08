@@ -400,8 +400,6 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 	if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
 		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
-	if (m_PlayerFlags&PLAYERFLAG_AIM)
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_AIM;
 
 	// realistic ping for dummies
 	if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing)
@@ -511,6 +509,8 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	pExPlayerInfo->m_Flags = 0;
+	if (m_Aim)
+		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
 	if(m_Afk)
 		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
 }
