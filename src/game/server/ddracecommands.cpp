@@ -97,9 +97,9 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
-		return;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	if (!CheckClientID(Victim))
+		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr && !pChr->m_Super)
 	{
@@ -116,14 +116,14 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	if (!CheckClientID(pResult->m_ClientID))
-		return;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	if (!CheckClientID(Victim))
+		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr && pChr->m_Super)
 	{
 		pChr->m_Super = false;
-		pChr->Teams()->SetForceCharacterTeam(pResult->m_ClientID, pChr->m_TeamBeforeSuper);
+		pChr->Teams()->SetForceCharacterTeam(Victim, pChr->m_TeamBeforeSuper);
 		if (pChr->m_Passive)
 			pSelf->SendTuningParams(Victim, pChr->m_TuneZone);
 	}
