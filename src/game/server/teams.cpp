@@ -223,6 +223,8 @@ bool CGameTeams::SetCharacterTeam(int ClientID, int Team)
 
 void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 {
+	int OldTeam = m_Core.Team(ClientID);
+
 	if (Team != m_Core.Team(ClientID))
 		ForceLeaveTeam(ClientID);
 	else
@@ -250,6 +252,11 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 			}
 		}
 	}
+
+	if (OldTeam != Team)
+		for (int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
+			if (GetPlayer(LoopClientID))
+				SendTeamsState(LoopClientID);
 }
 
 void CGameTeams::ForceLeaveTeam(int ClientID)
@@ -372,6 +379,22 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		Mask |= 1LL << i;
 	}
 	return Mask;
+}
+
+void CGameTeams::SendTeamsState(int ClientID)
+{
+	if (GameServer()->Config()->m_SvTeam == 3)
+		return;
+
+	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->m_ClientVersion < VERSION_FCLIENT)
+		return;
+
+	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
+
+	for(unsigned i = 0; i < MAX_CLIENTS; i++)
+		Msg.AddInt(m_Core.Team(i));
+
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 int CGameTeams::GetDDRaceState(CPlayer* Player)

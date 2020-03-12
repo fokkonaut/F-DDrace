@@ -71,6 +71,7 @@ public:
 
 	void Reset();
 
+	void SendTeamsState(int Cid);
 	void SetTeamLock(int Team, bool Lock);
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientID, bool Invited);

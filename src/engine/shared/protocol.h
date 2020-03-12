@@ -106,4 +106,10 @@ enum
 	MSGFLAG_NOSEND=16
 };
 
+enum
+{
+	VERSION_VANILLA = 0,
+	VERSION_FCLIENT = 2000,
+};
+
 #endif

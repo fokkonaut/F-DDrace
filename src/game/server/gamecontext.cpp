@@ -1894,6 +1894,23 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_ExPlayerInfo *pMsg = (CNetMsg_Cl_ExPlayerInfo *)pRawMsg;
 			pPlayer->m_Aim = (bool)pMsg->m_Flags&EXPLAYERFLAG_AIM;
 		}
+		else if (MsgID == NETMSGTYPE_CL_ISFCLIENT)
+		{
+			int Version = pUnpacker->GetInt();
+
+			if (pUnpacker->Error())
+			{
+				if (pPlayer->m_ClientVersion < VERSION_FCLIENT)
+					pPlayer->m_ClientVersion = VERSION_FCLIENT;
+			}
+			else if(pPlayer->m_ClientVersion < Version)
+				pPlayer->m_ClientVersion = Version;
+
+			dbg_msg("fclient", "%d using custom client %d", ClientID, pPlayer->m_ClientVersion);
+
+			//first update his teams state
+			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
+		}
 	}
 	else
 	{
