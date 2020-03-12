@@ -1410,6 +1410,15 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 			m_pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
 			m_pPlayer->SetSpectatorID(SPEC_PLAYER, pKiller ? Killer : GameServer()->GetRandomSurvivalPlayer(GameServer()->m_SurvivalGameState, m_pPlayer->GetCID()));
 
+			// update the ones that are watching you
+			for (int i = 0; i < MAX_CLIENTS; i++)
+			{
+				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+				if (i == m_pPlayer->GetCID() || !pPlayer || pPlayer->m_Minigame != MINIGAME_SURVIVAL || pPlayer->GetSpectatorID() != m_pPlayer->GetCID())
+					continue;
+				pPlayer->SetSpectatorID(SPEC_PLAYER, m_pPlayer->GetSpectatorID());
+			}
+
 			// printing a message that you died and informing about remaining players
 			char aKillMsg[128];
 			str_format(aKillMsg, sizeof(aKillMsg), "'%s' died\nAlive players: %d", Server()->ClientName(m_pPlayer->GetCID()), GameServer()->CountSurvivalPlayers(GameServer()->m_SurvivalGameState) -1 /* -1 because we have to exclude the currently dying*/);
