@@ -125,7 +125,7 @@ void CPickup::Tick()
 							{
 								if (pChr->GetWeaponGot(i))
 								{
-									if (!(pChr->m_FreezeTime && i == WEAPON_NINJA))
+									if (i == WEAPON_NINJA)
 									{
 										pChr->SetWeaponGot(i, false);
 										pChr->SetWeaponAmmo(i, 0);
