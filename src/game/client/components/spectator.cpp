@@ -122,10 +122,17 @@ CSpectator::CSpectator()
 
 void CSpectator::OnConsoleInit()
 {
+<<<<<<< HEAD
 	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector", AUTHED_NO);
 	Console()->Register("spectate", "ii", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode", AUTHED_NO);
 	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player", AUTHED_NO);
 	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player", AUTHED_NO);
+=======
+	Console()->Register("+spectate", "", CFGFLAG_CLIENT, ConKeySpectator, this, "Open spectator mode selector");
+	Console()->Register("spectate", "i[mode] i[target]", CFGFLAG_CLIENT, ConSpectate, this, "Switch spectator mode");
+	Console()->Register("spectate_next", "", CFGFLAG_CLIENT, ConSpectateNext, this, "Spectate the next player");
+	Console()->Register("spectate_previous", "", CFGFLAG_CLIENT, ConSpectatePrevious, this, "Spectate the previous player");
+>>>>>>> master
 }
 
 bool CSpectator::OnMouseMove(float x, float y)

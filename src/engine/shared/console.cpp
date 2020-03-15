@@ -113,6 +113,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				if(!Optional)
 				{
 					Error = 1;
+<<<<<<< HEAD
 					break;
 				}
 
@@ -124,6 +125,8 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 						break;
 					}
 					Command = NextParam(pFormat);
+=======
+>>>>>>> master
 				}
 				break;
 			}
@@ -184,8 +187,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 's') // validate string
 					pStr = str_skip_to_whitespace(pStr);
-				else if(Command == 'p')
-					pStr = str_skip_to_whitespace(pStr);
 
 				if(pStr[0] != 0) // check for end of string
 				{
@@ -199,6 +200,10 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				}
 			}
 		}
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 		// fetch next command
 		Command = NextParam(pFormat);
 	}
@@ -208,6 +213,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 
 char CConsole::NextParam(const char *&pFormat)
 {
+<<<<<<< HEAD
 	if (*pFormat)
 	{
 		pFormat++;
@@ -216,6 +222,16 @@ char CConsole::NextParam(const char *&pFormat)
 		{
 			// skip bracket contents
 			for (; *pFormat != ']'; pFormat++)
+=======
+	if(*pFormat)
+	{
+		pFormat++;
+
+		if(*pFormat == '[')
+		{
+			// skip bracket contents
+			for(; *pFormat != ']'; pFormat++)
+>>>>>>> master
 			{
 				if (!*pFormat)
 					return *pFormat;
@@ -878,6 +894,7 @@ CConsole::CConsole(int FlagMask)
 	m_pStorage = 0;
 
 	// register some basic commands
+<<<<<<< HEAD
 	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text", AUTHED_HELPER);
 	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file", AUTHED_ADMIN);
 
@@ -889,6 +906,16 @@ CConsole::CConsole(int FlagMask)
 	Register("cmdlist", "", CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for you", AUTHED_NO);
 
 	m_Cheated = false;
+=======
+	Register("echo", "r[text]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Echo, this, "Echo the text");
+	Register("exec", "r[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
+
+	Register("toggle", "s[config-option] i[value1] i[value2]", CFGFLAG_SERVER|CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
+	Register("+toggle", "s[config-option] i[value1] i[value2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
+
+	Register("mod_command", "s[command] ?i[access-level]", CFGFLAG_SERVER, ConModCommandAccess, this, "Specify command accessibility for moderators");
+	Register("mod_status", "", CFGFLAG_SERVER, ConModCommandStatus, this, "List all commands which are accessible for moderators");
+>>>>>>> master
 }
 
 CConsole::~CConsole()

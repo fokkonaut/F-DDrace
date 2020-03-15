@@ -51,7 +51,11 @@ void CConfigManager::Init(int FlagMask)
 	Reset();
 
 	if(m_pConsole)
+<<<<<<< HEAD
 		m_pConsole->Register("save_config", "?s", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file", AUTHED_ADMIN);
+=======
+		m_pConsole->Register("save_config", "?s[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file");
+>>>>>>> master
 }
 
 void CConfigManager::Reset()
@@ -80,7 +84,7 @@ void CConfigManager::Save(const char *pFilename)
 {
 	if(!m_pStorage)
 		return;
-		
+
 	if(!pFilename)
 		pFilename = SETTINGS_FILENAME ".cfg";
 	m_ConfigFile = m_pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
