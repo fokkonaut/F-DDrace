@@ -51,11 +51,7 @@ void CConfigManager::Init(int FlagMask)
 	Reset();
 
 	if(m_pConsole)
-<<<<<<< HEAD
-		m_pConsole->Register("save_config", "?s", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file", AUTHED_ADMIN);
-=======
-		m_pConsole->Register("save_config", "?s[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file");
->>>>>>> master
+		m_pConsole->Register("save_config", "?s[file]", CFGFLAG_SERVER|CFGFLAG_CLIENT|CFGFLAG_STORE, Con_SaveConfig, this, "Save config to file", AUTHED_ADMIN);
 }
 
 void CConfigManager::Reset()

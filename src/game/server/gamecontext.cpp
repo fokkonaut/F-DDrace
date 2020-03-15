@@ -2452,7 +2452,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("random_map", "?i[stars]", CFGFLAG_SERVER, ConRandomMap, this, "Random map", AUTHED_ADMIN);
 	Console()->Register("random_unfinished_map", "?i[stars]", CFGFLAG_SERVER, ConRandomUnfinishedMap, this, "Random unfinished map", AUTHED_ADMIN);
 
-<<<<<<< HEAD
 	// F-DDrace
 	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
@@ -2465,28 +2464,6 @@ void CGameContext::OnConsoleInit()
 	#define CHAT_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include "ddracechat.h"
 	#undef CHAT_COMMAND
-=======
-	Console()->Register("tune", "s[tuning] i[value]", CFGFLAG_SERVER, ConTuneParam, this, "Tune variable to value");
-	Console()->Register("tune_reset", "", CFGFLAG_SERVER, ConTuneReset, this, "Reset all tuning variables to defaults");
-	Console()->Register("tunes", "", CFGFLAG_SERVER, ConTunes, this, "List all tuning variables and their values");
-
-	Console()->Register("pause", "?i[seconds]", CFGFLAG_SERVER|CFGFLAG_STORE, ConPause, this, "Pause/unpause game");
-	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map");
-	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)");
-	Console()->Register("say", "r[text]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
-	Console()->Register("broadcast", "r[text]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message");
-	Console()->Register("set_team", "i[id] i[team] ?i[delay]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
-	Console()->Register("set_team_all", "i[team]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
-	Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams");
-	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
-	Console()->Register("lock_teams", "", CFGFLAG_SERVER, ConLockTeams, this, "Lock/unlock teams");
-	Console()->Register("force_teambalance", "", CFGFLAG_SERVER, ConForceTeamBalance, this, "Force team balance");
-
-	Console()->Register("add_vote", "s[option] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
-	Console()->Register("remove_vote", "s[option]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
-	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
-	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
->>>>>>> master
 }
 
 void CGameContext::NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext)

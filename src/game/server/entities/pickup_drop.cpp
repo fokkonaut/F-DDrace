@@ -417,7 +417,7 @@ void CPickupDrop::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO)
+	if (m_Type == POWERUP_AMMO || m_Weapon == WEAPON_LIGHTSABER)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)

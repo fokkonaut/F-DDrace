@@ -147,16 +147,9 @@ class CConsole : public IConsole
 
 	/*
 	This function will set pFormat to the next parameter (i,s,r,v,?) it contains and
-<<<<<<< HEAD
 	return the parameter; descriptions in brackets like [file] will be skipped;
 	returns '\0' if there is no next parameter; expects pFormat to point at a
 	parameter
-=======
-	return the parameter.
-	Descriptions in brackets like [file] will be skipped.
-	Returns '\0' if there is no next parameter.
-	Expects pFormat to point at a parameter.
->>>>>>> master
 	*/
 	char NextParam(const char *&pFormat);
 

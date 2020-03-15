@@ -166,13 +166,8 @@ void CFriends::Init()
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-<<<<<<< HEAD
-		pConsole->Register("add_friend", "ss", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend", AUTHED_NO);
-		pConsole->Register("remove_friend", "ss", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend", AUTHED_NO);
-=======
-		pConsole->Register("add_friend", "s[name] s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend");
-		pConsole->Register("remove_friend", "s[name] s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend");
->>>>>>> master
+		pConsole->Register("add_friend", "s[name] s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a friend", AUTHED_NO);
+		pConsole->Register("remove_friend", "s[name] s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a friend", AUTHED_NO);
 	}
 }
 
@@ -185,13 +180,8 @@ void CBlacklist::Init()
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-<<<<<<< HEAD
-		pConsole->Register("add_ignore", "ss", CFGFLAG_CLIENT, ConAddIgnore, this, "Ignore a player", AUTHED_NO);
-		pConsole->Register("remove_ignore", "ss", CFGFLAG_CLIENT, ConRemoveIgnore, this, "Stop ignoring a player", AUTHED_NO);
-=======
-		pConsole->Register("add_ignore", "s[name] s[clan]", CFGFLAG_CLIENT, ConAddIgnore, this, "Ignore a player");
-		pConsole->Register("remove_ignore", "s[name] s[clan]", CFGFLAG_CLIENT, ConRemoveIgnore, this, "Stop ignoring a player");
->>>>>>> master
+		pConsole->Register("add_ignore", "s[name] s[clan]", CFGFLAG_CLIENT, ConAddIgnore, this, "Ignore a player", AUTHED_NO);
+		pConsole->Register("remove_ignore", "s[name] s[clan]", CFGFLAG_CLIENT, ConRemoveIgnore, this, "Stop ignoring a player", AUTHED_NO);
 	}
 }
 

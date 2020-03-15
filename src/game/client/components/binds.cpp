@@ -268,17 +268,10 @@ void CBinds::OnConsoleInit()
 	if(pConfigManager)
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
-<<<<<<< HEAD
-	Console()->Register("bind", "sr", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command", AUTHED_NO);
-	Console()->Register("unbind", "s", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key", AUTHED_NO);
+	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command", AUTHED_NO);
+	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key", AUTHED_NO);
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys", AUTHED_NO);
 	Console()->Register("binds", "", CFGFLAG_CLIENT, ConBinds, this, "Show list of key bindings", AUTHED_NO);
-=======
-	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
-	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
-	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
-	Console()->Register("binds", "", CFGFLAG_CLIENT, ConBinds, this, "Show list of key bindings");
->>>>>>> master
 
 	// default bindings
 	SetDefaults();

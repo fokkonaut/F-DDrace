@@ -354,19 +354,11 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 	net_host_lookup("localhost", &m_LocalhostIPV4, NETTYPE_IPV4);
 	net_host_lookup("localhost", &m_LocalhostIPV6, NETTYPE_IPV6);
 
-<<<<<<< HEAD
-	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBan, this, "Ban IP (or IP range) for x minutes for any reason", AUTHED_ADMIN);
-	Console()->Register("unban", "s", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnban, this, "Unban IP/IP range/banlist entry", AUTHED_ADMIN);
+	Console()->Register("ban", "s[ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBan, this, "Ban IP (or IP range) for x minutes for any reason", AUTHED_ADMIN);
+	Console()->Register("unban", "s[ip|range]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnban, this, "Unban IP/IP range/banlist entry", AUTHED_ADMIN);
 	Console()->Register("unban_all", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries", AUTHED_ADMIN);
 	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBans, this, "Show banlist", AUTHED_ADMIN);
-	Console()->Register("bans_save", "s", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file", AUTHED_ADMIN);
-=======
-	Console()->Register("ban", "s[ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBan, this, "Ban IP (or IP range) for x minutes for any reason");
-	Console()->Register("unban", "s[ip|range]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnban, this, "Unban IP/IP range/banlist entry");
-	Console()->Register("unban_all", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries");
-	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBans, this, "Show banlist");
-	Console()->Register("bans_save", "s[file]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file");
->>>>>>> master
+	Console()->Register("bans_save", "s[file]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file", AUTHED_ADMIN);
 }
 
 void CNetBan::Update()

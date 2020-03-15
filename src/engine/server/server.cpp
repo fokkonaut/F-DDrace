@@ -157,11 +157,7 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* 
 	m_pServer = pServer;
 
 	// overwrites base command, todo: improve this
-<<<<<<< HEAD
-	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with IP/IP range/client id for x minutes for any reason", AUTHED_ADMIN);
-=======
-	Console()->Register("ban", "s[id|ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with IP/IP range/client id for x minutes for any reason");
->>>>>>> master
+	Console()->Register("ban", "s[id|ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with IP/IP range/client id for x minutes for any reason", AUTHED_ADMIN);
 }
 
 template<class T>
@@ -2275,14 +2271,13 @@ void CServer::RegisterCommands()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 	// register console commands
-<<<<<<< HEAD
-	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason", AUTHED_ADMIN);
+	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason", AUTHED_ADMIN);
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players", AUTHED_HELPER);
-	Console()->Register("shutdown", "?r", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
+	Console()->Register("shutdown", "?r[message]", CFGFLAG_SERVER, ConShutdown, this, "Shut down", AUTHED_ADMIN);
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon", AUTHED_HELPER);
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)", AUTHED_ADMIN);
 
-	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file", AUTHED_ADMIN);
+	Console()->Register("record", "?s[file]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file", AUTHED_ADMIN);
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording", AUTHED_ADMIN);
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map", AUTHED_ADMIN);
@@ -2295,17 +2290,6 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data", AUTHED_ADMIN);
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key", AUTHED_ADMIN);
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys", AUTHED_ADMIN);
-=======
-	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "List players");
-	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
-	Console()->Register("logout", "", CFGFLAG_SERVER|CFGFLAG_BASICACCESS, ConLogout, this, "Logout of rcon");
-
-	Console()->Register("record", "?s[file]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "Record to a file");
-	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
-
-	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map");
->>>>>>> master
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
@@ -2467,7 +2451,6 @@ int main(int argc, const char **argv) // ignore_convention
 
 	return Ret;
 }
-<<<<<<< HEAD
 
 // F-DDrace
 
@@ -2641,5 +2624,3 @@ void CServer::CreateTablesThread(void *pData)
 }
 
 #endif
-=======
->>>>>>> master
