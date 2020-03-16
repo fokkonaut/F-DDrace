@@ -489,7 +489,7 @@ void CGameContext::SendChatCommand(const CCommandManager::CCommand *pCommand, in
 void CGameContext::SendChatCommands(int ClientID)
 {
 	// F-DDrace
-	// Remove the clientside commands (expect w)
+	// Remove the clientside commands (expect w and whisper)
 	{
 		SendRemoveChatCommand("all", ClientID);
 		SendRemoveChatCommand("friend", ClientID);
@@ -497,7 +497,6 @@ void CGameContext::SendChatCommands(int ClientID)
 		SendRemoveChatCommand("mute", ClientID);
 		SendRemoveChatCommand("r", ClientID);
 		SendRemoveChatCommand("team", ClientID);
-		SendRemoveChatCommand("whisper", ClientID);
 	}
 
 	for(int i = 0; i < CommandManager()->CommandCount(); i++)
