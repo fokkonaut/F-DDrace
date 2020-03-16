@@ -395,26 +395,25 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
+	if (m_FreezeTime)
+	{
+		if (m_PainSoundTimer <= 0)
+		{
+			m_PainSoundTimer = 1 * Server()->TickSpeed();
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		}
+		return;
+	}
+
 	// check for ammo
 	if(!m_aWeapons[GetActiveWeapon()].m_Ammo)
 	{
-		if (m_FreezeTime)
+		// 125ms is a magical limit of how fast a human can click
+		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
+		if (m_LastNoAmmoSound + Server()->TickSpeed() <= Server()->Tick())
 		{
-			if (m_PainSoundTimer <= 0)
-			{
-				m_PainSoundTimer = 1 * Server()->TickSpeed();
-				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-			}
-		}
-		else
-		{
-			// 125ms is a magical limit of how fast a human can click
-			m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
-			if (m_LastNoAmmoSound + Server()->TickSpeed() <= Server()->Tick())
-			{
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-				m_LastNoAmmoSound = Server()->Tick();
-			}
+			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			m_LastNoAmmoSound = Server()->Tick();
 		}
 		return;
 	}
@@ -995,8 +994,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 	}
 	else
 	{
-		if (!m_FreezeTime)
-			m_aWeapons[Weapon].m_Ammo = Ammo;
+		m_aWeapons[Weapon].m_Ammo = Ammo;
 	}
 }
 
@@ -1018,9 +1016,7 @@ void CCharacter::GiveNinja()
 		m_aWeaponsBackup[WEAPON_NINJA][i] = -1;
 	}
 
-	if (!m_FreezeTime)
-		m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
-
+	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
 
 	if (m_ScrollNinja)
@@ -2793,10 +2789,6 @@ bool CCharacter::Freeze(float Seconds)
 		return false;
 	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
-		BackupWeapons(BACKUP_FREEZE);
-		for (int i = 0; i < NUM_WEAPONS; i++)
-			m_aWeapons[i].m_Ammo = 0;
-
 		if (m_FreezeTick == 0 || m_FirstFreezeTick == 0)
 			m_FirstFreezeTick = Server()->Tick();
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
@@ -2817,8 +2809,6 @@ bool CCharacter::UnFreeze()
 {
 	if (m_FreezeTime > 0)
 	{
-		LoadWeaponBackup(BACKUP_FREEZE);
-
 		if(!m_aWeapons[GetActiveWeapon()].m_Got)
 			SetActiveWeapon(WEAPON_GUN);
 		m_FreezeTime = 0;
@@ -3312,9 +3302,7 @@ void CCharacter::SetActiveWeapon(int Weapon)
 
 int CCharacter::GetWeaponAmmo(int Type)
 {
-	if (m_FreezeTime)
-		return m_aWeaponsBackup[Type][BACKUP_FREEZE];
-	else if (m_pPlayer->m_SpookyGhost)
+	if (m_pPlayer->m_SpookyGhost)
 		return m_aWeaponsBackup[Type][BACKUP_SPOOKY_GHOST];
 	return m_aWeapons[Type].m_Ammo;
 }
@@ -3323,13 +3311,6 @@ void CCharacter::SetWeaponAmmo(int Type, int Value)
 {
 	if (m_pPlayer->m_SpookyGhost)
 		m_aWeaponsBackup[Type][BACKUP_SPOOKY_GHOST] = Value;
-
-	if (m_FreezeTime)
-	{
-		m_aWeaponsBackup[Type][BACKUP_FREEZE] = Value;
-		return;
-	}
-
 	m_aWeapons[Type].m_Ammo = Value;
 }
 
@@ -3337,8 +3318,6 @@ void CCharacter::SetWeaponGot(int Type, bool Value)
 {
 	if (m_pPlayer->m_SpookyGhost)
 		m_aWeaponsBackupGot[Type][BACKUP_SPOOKY_GHOST] = Value;
-	if (m_FreezeTime)
-		m_aWeaponsBackupGot[Type][BACKUP_FREEZE] = Value;
 	m_aWeapons[Type].m_Got = Value;
 }
 
@@ -3526,8 +3505,7 @@ void CCharacter::VanillaMode(int FromID, bool Silent)
 			if (i != WEAPON_HAMMER)
 			{
 				m_aWeaponsBackup[i][j] = 10;
-				if (!m_FreezeTime)
-					m_aWeapons[i].m_Ammo = 10;
+				m_aWeapons[i].m_Ammo = 10;
 			}
 		}
 	}
@@ -3547,8 +3525,7 @@ void CCharacter::DDraceMode(int FromID, bool Silent)
 		for (int i = 0; i < NUM_WEAPONS; i++)
 		{
 			m_aWeaponsBackup[i][j] = -1;
-			if (!m_FreezeTime)
-				m_aWeapons[i].m_Ammo = -1;
+			m_aWeapons[i].m_Ammo = -1;
 		}
 	}
 	GameServer()->SendExtraMessage(DDRACE_MODE, m_pPlayer->GetCID(), true, FromID, Silent);

@@ -15,7 +15,7 @@
 
 enum Extra
 {
-	HOOK_NORMAL = 0,
+	HOOK_NORMAL,
 	JETPACK,
 	RAINBOW,
 	INF_RAINBOW,
@@ -49,7 +49,6 @@ enum Extra
 
 enum Backup
 {
-	BACKUP_FREEZE = 0,
 	BACKUP_SPOOKY_GHOST,
 	NUM_BACKUPS,
 };
