@@ -44,6 +44,7 @@ void CPickup::Reset(bool Destroy)
 
 void CPickup::Tick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if (m_Owner >= 0)
 	{
 		CCharacter* pChr = GameServer()->GetPlayerChar(m_Owner);
@@ -125,7 +126,7 @@ void CPickup::Tick()
 							{
 								if (pChr->GetWeaponGot(i))
 								{
-									if (i == WEAPON_NINJA)
+									if (i != WEAPON_NINJA)
 									{
 										pChr->SetWeaponGot(i, false);
 										pChr->SetWeaponAmmo(i, 0);
@@ -141,7 +142,7 @@ void CPickup::Tick()
 								pChr->SetLastWeapon(WEAPON_GUN);
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 							}
-							if (!pChr->m_FreezeTime && pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+							if (pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
 								pChr->SetActiveWeapon(WEAPON_HAMMER);
 						}
 						break;
