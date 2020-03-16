@@ -3321,21 +3321,24 @@ int CCharacter::GetWeaponAmmo(int Type)
 
 void CCharacter::SetWeaponAmmo(int Type, int Value)
 {
-	if (m_FreezeTime)
-		m_aWeaponsBackup[Type][BACKUP_FREEZE] = Value;
 	if (m_pPlayer->m_SpookyGhost)
 		m_aWeaponsBackup[Type][BACKUP_SPOOKY_GHOST] = Value;
 
-	if (!m_FreezeTime)
-		m_aWeapons[Type].m_Ammo = Value;
+	if (m_FreezeTime)
+	{
+		m_aWeaponsBackup[Type][BACKUP_FREEZE] = Value;
+		return;
+	}
+
+	m_aWeapons[Type].m_Ammo = Value;
 }
 
 void CCharacter::SetWeaponGot(int Type, bool Value)
 {
-	if (m_FreezeTime)
-		m_aWeaponsBackupGot[Type][BACKUP_FREEZE] = Value;
 	if (m_pPlayer->m_SpookyGhost)
 		m_aWeaponsBackupGot[Type][BACKUP_SPOOKY_GHOST] = Value;
+	if (m_FreezeTime)
+		m_aWeaponsBackupGot[Type][BACKUP_FREEZE] = Value;
 	m_aWeapons[Type].m_Got = Value;
 }
 
