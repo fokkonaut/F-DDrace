@@ -3018,10 +3018,6 @@ void CCharacter::FDDraceTick()
 	{
 		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
 		{
-			CCharacter *pChr = 0;
-			CFlag *pFlag = 0;
-			CPickupDrop *pPickup = 0;
-
 			vec2 Pos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 			vec2 Vel = vec2(0.f, 0.f);
 
@@ -3029,21 +3025,21 @@ void CCharacter::FDDraceTick()
 			{
 				case (CGameWorld::ENTTYPE_CHARACTER): 
 				{
-					pChr = (CCharacter*)m_TelekinesisEntity;
+					CCharacter *pChr = (CCharacter*)m_TelekinesisEntity;
 					pChr->Core()->m_Pos = Pos;
 					pChr->Core()->m_Vel = Vel;
 					break;
 				}
 				case (CGameWorld::ENTTYPE_FLAG):
 				{
-					pFlag = (CFlag *)m_TelekinesisEntity;
+					CFlag *pFlag = (CFlag *)m_TelekinesisEntity;
 					pFlag->SetPos(Pos);
 					pFlag->SetVel(Vel);
 					break;
 				}
 				case (CGameWorld::ENTTYPE_PICKUP_DROP):
 				{
-					pPickup = (CPickupDrop*)m_TelekinesisEntity;
+					CPickupDrop *pPickup = (CPickupDrop*)m_TelekinesisEntity;
 					pPickup->SetPos(Pos);
 					pPickup->SetVel(Vel);
 					break;
