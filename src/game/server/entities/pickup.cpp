@@ -44,7 +44,6 @@ void CPickup::Reset(bool Destroy)
 
 void CPickup::Tick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if (m_Owner >= 0)
 	{
 		CCharacter* pChr = GameServer()->GetPlayerChar(m_Owner);
@@ -298,10 +297,10 @@ void CPickup::Snap(int SnappingClient)
 		pP->m_Type = GameServer()->GetPickupType(m_Type, m_Subtype);
 	}
 
-	bool Gun = m_Type == WEAPON_PROJECTILE_RIFLE;
-	bool Plasma = m_Type == WEAPON_PLASMA_RIFLE || m_Type == WEAPON_LIGHTSABER || m_Type == WEAPON_TELE_RIFLE;
-	bool Heart = m_Type == WEAPON_HEART_GUN;
-	bool Grenade = m_Type == WEAPON_STRAIGHT_GRENADE || m_Type == WEAPON_BALL_GRENADE;
+	bool Gun = m_Subtype == WEAPON_PROJECTILE_RIFLE;
+	bool Plasma = m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_LIGHTSABER || m_Subtype == WEAPON_TELE_RIFLE;
+	bool Heart = m_Subtype == WEAPON_HEART_GUN;
+	bool Grenade = m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE;
 
 	if (Gun)
 	{
