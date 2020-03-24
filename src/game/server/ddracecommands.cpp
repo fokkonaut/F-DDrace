@@ -319,7 +319,7 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
-	int Tele = pResult->GetVictim();
+	int Tele = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientID;
 	int TeleTo = pResult->NumArguments() == 2 ? pResult->GetInteger(1) : pResult->m_ClientID;
 	if (pResult->NumArguments() < 2 && Tele != pResult->m_ClientID)
 		return;
