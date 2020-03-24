@@ -134,6 +134,8 @@ void CPickup::Tick()
 							pChr->SetNinjaActivationDir(vec2(0, 0));
 							pChr->SetNinjaActivationTick(-500);
 							pChr->SetNinjaCurrentMoveTime(0);
+							if (pChr->m_ScrollNinja)
+								pChr->ScrollNinja(false);
 							if (Sound)
 							{
 								pChr->SetLastWeapon(WEAPON_GUN);
