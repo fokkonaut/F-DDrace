@@ -50,7 +50,7 @@ void CPlasma::Move()
 
 void CPlasma::Reset()
 {
-
+	GameWorld()->DestroyEntity(this);
 }
 
 void CPlasma::Tick()
