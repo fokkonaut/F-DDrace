@@ -507,7 +507,7 @@ Messages = [
 		NetIntAny("m_Flags"),
 	]),
 
-	NetMessageEx("Cl_IsFClient", "isfclient@ddnet.tw", []),
+	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet.tw", []),
 
 	NetMessageEx("Sv_TeamsState", "teamstate@ddnet.tw", []),
 ]

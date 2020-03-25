@@ -1896,22 +1896,22 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_ExPlayerInfo *pMsg = (CNetMsg_Cl_ExPlayerInfo *)pRawMsg;
 			pPlayer->m_Aim = (bool)pMsg->m_Flags&EXPLAYERFLAG_AIM;
 		}
-		else if (MsgID == NETMSGTYPE_CL_ISFCLIENT)
+		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
 		{
 			int Version = pUnpacker->GetInt();
 
 			if (pUnpacker->Error())
 			{
-				if (pPlayer->m_ClientVersion < VERSION_FCLIENT_TEAMS)
-					pPlayer->m_ClientVersion = VERSION_FCLIENT_TEAMS;
+				if (pPlayer->m_DDraceVersion < VERSION_DDRACE_TEAMS)
+					pPlayer->m_DDraceVersion = VERSION_DDRACE_TEAMS;
 			}
-			else if(pPlayer->m_ClientVersion < Version)
-				pPlayer->m_ClientVersion = Version;
+			else if(pPlayer->m_DDraceVersion < Version)
+				pPlayer->m_DDraceVersion = Version;
 
-			dbg_msg("fclient", "%d using custom client %d", ClientID, pPlayer->m_ClientVersion);
+			dbg_msg("fclient", "%d using custom client. version: %x, ddrace: %d", ClientID, Server()->GetClientVersion(ClientID), pPlayer->m_DDraceVersion);
 
-			//first update his teams state
-			((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
+			if (pPlayer->m_DDraceVersion >= VERSION_DDRACE_TEAMS)
+				((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
 		}
 	}
 	else

@@ -233,7 +233,7 @@ public:
 
 	bool m_Aim;
 	bool m_Afk;
-	int m_ClientVersion;
+	int m_DDraceVersion;
 
 	// F-DDrace
 
