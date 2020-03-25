@@ -644,6 +644,31 @@ void CMenus::DoScrollbarOption(void *pID, int *pOption, const CUIRect *pRect, co
 	*pOption = Value;
 }
 
+void CMenus::DoScrollbarOptionLabeled(void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char* aLabels[], int Num, IScrollbarScale *pScale)
+{
+	int Value = clamp(*pOption, 0, Num - 1);
+	int Max = Num - 1;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, aLabels[Value]);
+
+	float FontSize = pRect->h*ms_FontmodHeight*0.8f;
+	
+	RenderTools()->DrawUIRect(pRect, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitLeft(5.0f, 0, &Label);
+	Label.VSplitRight(60.0f, &Label, &ScrollBar);
+	
+	Label.y += 2.0f;
+	UI()->DoLabel(&Label, aBuf, FontSize, CUI::ALIGN_LEFT);
+
+	ScrollBar.VMargin(4.0f, &ScrollBar);
+	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
+
+	*pOption = clamp(Value, 0, Max);
+}
+
 float CMenus::DoDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback)
 {
 	CUIRect View = *pRect;
@@ -831,7 +856,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 {
 	// layout
 	CUIRect Handle;
-	pRect->VSplitLeft(min(pRect->w/8.0f, 33.0f), &Handle, 0);
+	pRect->VSplitLeft(max(min(pRect->w/8.0f, 33.0f), pRect->h), &Handle, 0);
 	Handle.x += (pRect->w-Handle.w)*Current;
 	Handle.HMargin(5.0f, &Handle);
 

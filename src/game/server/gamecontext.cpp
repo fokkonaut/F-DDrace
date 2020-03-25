@@ -299,17 +299,20 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 
-	char aBufMode[32];
+	const char *pModeStr;
 	if(Mode == CHAT_WHISPER)
-		str_copy(aBufMode, "whisper", sizeof(aBufMode));
+		pModeStr = 0;
 	else if(Mode == CHAT_TEAM)
-		str_copy(aBufMode, "teamchat", sizeof(aBufMode));
-	else if (Mode == CHAT_SINGLE)
-		str_copy(aBufMode, "chat-single", sizeof(aBufMode));
+		pModeStr = "teamchat";
+	else if(Mode == CHAT_SINGLE)
+		pModeStr = "chat-single";
 	else
-		str_copy(aBufMode, "chat", sizeof(aBufMode));
+		pModeStr = "chat";
 
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, aBufMode, aBuf);
+	if(pModeStr)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, pModeStr, aBuf);
+	}
 
 
 	CNetMsg_Sv_Chat Msg;
