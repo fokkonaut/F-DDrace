@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
-#define GAME_VERSION "0.7.4, 5.7"
+#define GAME_VERSION "0.7.4, 5.8"
 #define GAME_NETVERSION "0.7 802f1be60a05665f"
 #define CLIENT_VERSION 0x0704
 #define SETTINGS_FILENAME "settings07"
