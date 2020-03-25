@@ -109,7 +109,7 @@ enum
 enum
 {
 	VERSION_VANILLA = 0,
-	VERSION_FCLIENT = 2000,
+	VERSION_FCLIENT_TEAMS = 2000,
 };
 
 #endif

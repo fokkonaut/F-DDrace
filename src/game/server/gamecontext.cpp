@@ -1902,8 +1902,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pUnpacker->Error())
 			{
-				if (pPlayer->m_ClientVersion < VERSION_FCLIENT)
-					pPlayer->m_ClientVersion = VERSION_FCLIENT;
+				if (pPlayer->m_ClientVersion < VERSION_FCLIENT_TEAMS)
+					pPlayer->m_ClientVersion = VERSION_FCLIENT_TEAMS;
 			}
 			else if(pPlayer->m_ClientVersion < Version)
 				pPlayer->m_ClientVersion = Version;
