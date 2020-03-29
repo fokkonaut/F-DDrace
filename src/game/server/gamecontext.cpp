@@ -1226,10 +1226,6 @@ void *CGameContext::UnpackMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			static CNetMsg_Cl_StartInfo Msg;
 
-			const char *apSkinPartNames[6];
-			int aUseCustomColors[6];
-			int aSkinPartColors[6];
-
 			Msg.m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			Msg.m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			Msg.m_Country = pUnpacker->GetInt();

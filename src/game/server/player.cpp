@@ -531,7 +531,6 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[SKINPART_FEET];
 
 
-		int m_Score = pPlayerInfo->m_Score;
 		int Latency = pPlayerInfo->m_Latency;
 		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
 		((int*)pPlayerInfo)[1] = m_ClientID;
