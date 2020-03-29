@@ -384,7 +384,8 @@ void CPlayer::Snap(int SnappingClient)
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, sizeof(CNetObj_PlayerInfo)));
+	int Size = Server()->IsSevendown(SnappingClient) ? 5*4 : sizeof(CNetObj_PlayerInfo);
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, Size));
 	if(!pPlayerInfo)
 		return;
 
@@ -449,7 +450,8 @@ void CPlayer::Snap(int SnappingClient)
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
 	{
-		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
+		int Size = Server()->IsSevendown(SnappingClient) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
+		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, Size));
 		if (!pSpectatorInfo)
 			return;
 
@@ -482,6 +484,15 @@ void CPlayer::Snap(int SnappingClient)
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
 		}
+
+		if (Server()->IsSevendown(SnappingClient))
+		{
+			int SpectatorID = pSpectatorInfo->m_SpectatorID;
+			vec2 Pos = vec2(pSpectatorInfo->m_X, pSpectatorInfo->m_Y);
+			((int*)pSpectatorInfo)[0] = SpectatorID;
+			((int*)pSpectatorInfo)[1] = Pos.x;
+			((int*)pSpectatorInfo)[2] = Pos.y;
+		}
 	}
 
 	// demo recording
@@ -493,27 +504,54 @@ void CPlayer::Snap(int SnappingClient)
 
 		pClientInfo->m_Local = 0;
 		pClientInfo->m_Team = m_Team;
-		StrToInts(pClientInfo->m_aName, 4, Server()->ClientName(m_ClientID));
-		StrToInts(pClientInfo->m_aClan, 3, Server()->ClientClan(m_ClientID));
+		StrToInts(pClientInfo->m_aName, 4, m_CurrentInfo.m_aName);
+		StrToInts(pClientInfo->m_aClan, 3, m_CurrentInfo.m_aClan);
 		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
 
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			StrToInts(pClientInfo->m_aaSkinPartNames[p], 6, m_TeeInfos.m_aaSkinPartNames[p]);
-			pClientInfo->m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
-			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+			StrToInts(pClientInfo->m_aaSkinPartNames[p], 6, m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p]);
+			pClientInfo->m_aUseCustomColors[p] = m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
+			pClientInfo->m_aSkinPartColors[p] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 		}
 	}
 
-	CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
-	if(!pExPlayerInfo)
-		return;
+	if(Server()->IsSevendown(SnappingClient))
+	{
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, m_ClientID, 17*4); // NETOBJTYPE_CLIENTINFO
+		if(!pClientInfo)
+			return;
 
-	pExPlayerInfo->m_Flags = 0;
-	if (m_Aim)
-		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
-	if(m_Afk)
-		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
+		StrToInts(&pClientInfo[0], 4, m_CurrentInfo.m_aName);
+		StrToInts(&pClientInfo[4], 3, m_CurrentInfo.m_aClan);
+		pClientInfo[7] = Server()->ClientCountry(m_ClientID);
+		StrToInts(&pClientInfo[8], 6, m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[SKINPART_BODY]);
+		pClientInfo[14] = m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[SKINPART_BODY];
+		pClientInfo[15] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[SKINPART_BODY];
+		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[SKINPART_FEET];
+
+
+		int m_Score = pPlayerInfo->m_Score;
+		int Latency = pPlayerInfo->m_Latency;
+		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
+		((int*)pPlayerInfo)[1] = m_ClientID;
+		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[3] = Score;
+		((int*)pPlayerInfo)[4] = Latency;
+	}
+
+	if (!Server()->IsSevendown(SnappingClient))
+	{
+		CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
+		if(!pExPlayerInfo)
+			return;
+
+		pExPlayerInfo->m_Flags = 0;
+		if (m_Aim)
+			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
+		if(m_Afk)
+			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
+	}
 }
 
 void CPlayer::OnDisconnect()
@@ -558,6 +596,17 @@ void CPlayer::OnDisconnect()
 	}
 }
 
+void CPlayer::TranslatePlayerFlags(CNetObj_PlayerInput *NewInput)
+{
+	if (!Server()->IsSevendown(m_ClientID))
+		return;
+
+	int PlayerFlags = 0;
+	if (NewInput->m_PlayerFlags&4) PlayerFlags |= PLAYERFLAG_CHATTING;
+	if (NewInput->m_PlayerFlags&8) PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+	NewInput->m_PlayerFlags = PlayerFlags;
+}
+
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	// F-DDrace
@@ -568,6 +617,8 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
+
+	TranslatePlayerFlags(NewInput);
 
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
@@ -593,6 +644,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
+
+	TranslatePlayerFlags(NewInput);
 
 	if(GameServer()->m_World.m_Paused)
 	{

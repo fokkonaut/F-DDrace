@@ -39,7 +39,7 @@ class CEcon
 	static void ConchainEconOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 
-	static int NewClientCallback(int ClientID, void *pUser);
+	static int NewClientCallback(int ClientID, bool Sevendown, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 public:

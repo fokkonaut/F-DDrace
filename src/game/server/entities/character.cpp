@@ -1685,6 +1685,29 @@ void CCharacter::Snap(int SnappingClient)
 			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
 		}
 	}
+
+	if(Server()->IsSevendown(SnappingClient))
+	{
+		int PlayerFlags = 0;
+		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_CHATTING) PlayerFlags |= 4;
+		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) PlayerFlags |= 8;
+
+		int Health = pCharacter->m_Health;
+		int Armor = pCharacter->m_Armor;
+		int AmmoCount = pCharacter->m_AmmoCount;
+		int Weapon = pCharacter->m_Weapon;
+		int Emote = pCharacter->m_Emote;
+		int AttackTick = pCharacter->m_AttackTick;
+
+		int Offset = sizeof(CNetObj_CharacterCore) / 4;
+		((int*)pCharacter)[Offset+0] = PlayerFlags;
+		((int*)pCharacter)[Offset+1] = Health;
+		((int*)pCharacter)[Offset+2] = Armor;
+		((int*)pCharacter)[Offset+3] = AmmoCount;
+		((int*)pCharacter)[Offset+4] = Weapon;
+		((int*)pCharacter)[Offset+5] = Emote;
+		((int*)pCharacter)[Offset+6] = AttackTick;
+	}
 }
 
 void CCharacter::PostSnap()

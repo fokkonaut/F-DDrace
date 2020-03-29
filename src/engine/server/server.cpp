@@ -629,7 +629,7 @@ void CServer::DoSnapshot()
 			int DeltaTick = -1;
 			int DeltaSize;
 
-			m_SnapshotBuilder.Init();
+			m_SnapshotBuilder.Init(m_aClients[i].m_Sevendown);
 
 			GameServer()->OnSnap(i);
 
@@ -714,7 +714,7 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
-int CServer::NewClientCallback(int ClientID, void *pUser)
+int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_AUTH;
@@ -731,6 +731,8 @@ int CServer::NewClientCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].Reset();
+	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
+	pThis->m_aClients[ClientID].m_MapChunk = 0;
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	return 0;
 }
@@ -786,9 +788,12 @@ void CServer::SendMap(int ClientID)
 	Msg.AddString(GetMapName(), 0);
 	Msg.AddInt(m_CurrentMapCrc);
 	Msg.AddInt(m_CurrentMapSize);
-	Msg.AddInt(m_MapChunksPerRequest);
-	Msg.AddInt(MAP_CHUNK_SIZE);
-	Msg.AddRaw(&m_CurrentMapSha256, sizeof(m_CurrentMapSha256));
+	if (!m_aClients[ClientID].m_Sevendown)
+	{
+		Msg.AddInt(m_MapChunksPerRequest);
+		Msg.AddInt(MAP_CHUNK_SIZE);
+		Msg.AddRaw(&m_CurrentMapSha256, sizeof(m_CurrentMapSha256));
+	}
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 }
 
@@ -961,7 +966,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_AUTH)
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(str_comp(pVersion, GameServer()->NetVersion()) != 0)
+				if(str_comp(pVersion, GameServer()->NetVersion()) != 0 && str_comp(pVersion, GameServer()->NetVersionSevendown()) != 0)
 				{
 					// wrong version
 					char aReason[256];
@@ -988,24 +993,33 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
-				int ChunkSize = MAP_CHUNK_SIZE;
+				int ChunkSize = m_aClients[ClientID].m_Sevendown ? 1024-128 : MAP_CHUNK_SIZE;
 
 				// send map chunks
 				for(int i = 0; i < m_MapChunksPerRequest && m_aClients[ClientID].m_MapChunk >= 0; ++i)
 				{
-					int Chunk = m_aClients[ClientID].m_MapChunk;
+					int Chunk = m_aClients[ClientID].m_Sevendown ? Unpacker.GetInt() : m_aClients[ClientID].m_MapChunk;
 					int Offset = Chunk * ChunkSize;
+					int Last = 0;
 
 					// check for last part
 					if(Offset+ChunkSize >= m_CurrentMapSize)
 					{
 						ChunkSize = m_CurrentMapSize-Offset;
+						Last = 1;
 						m_aClients[ClientID].m_MapChunk = -1;
 					}
 					else
 						m_aClients[ClientID].m_MapChunk++;
 
 					CMsgPacker Msg(NETMSG_MAP_DATA, true);
+					if (m_aClients[ClientID].m_Sevendown)
+					{
+						Msg.AddInt(Last);
+						Msg.AddInt(m_CurrentMapCrc);
+						Msg.AddInt(Chunk);
+						Msg.AddInt(ChunkSize);
+					}
 					Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
 					SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 

@@ -25,6 +25,8 @@ void CNetConnection::Reset()
 	m_Token = NET_TOKEN_NONE;
 	m_PeerToken = NET_TOKEN_NONE;
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_Sevendown = false;
+	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
 
 	m_Buffer.Init();
 
@@ -93,7 +95,7 @@ int CNetConnection::Flush()
 	// send of the packets
 	m_Construct.m_Ack = m_Ack;
 	m_Construct.m_Token = m_PeerToken;
-	m_pNetBase->SendPacket(&m_PeerAddr, &m_Construct);
+	m_pNetBase->SendPacket(&m_PeerAddr, &m_Construct, m_Sevendown, m_SecurityToken);
 
 	// update send times
 	m_LastSendTime = time_get();
@@ -107,8 +109,9 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 {
 	unsigned char *pChunkData;
 
-	// check if we have space for it, if not, flush the connection
-	if(m_Construct.m_DataSize + DataSize + NET_MAX_CHUNKHEADERSIZE > (int)sizeof(m_Construct.m_aChunkData) || m_Construct.m_NumChunks == NET_MAX_PACKET_CHUNKS)
+	// check if we have space for it, if not, flush the connection#
+	int SecurityTokenSize = m_Sevendown ? (int)sizeof(SECURITY_TOKEN) : 0;
+	if((m_Construct.m_DataSize + DataSize + NET_MAX_CHUNKHEADERSIZE > (int)sizeof(m_Construct.m_aChunkData) - SecurityTokenSize) || m_Construct.m_NumChunks == NET_MAX_PACKET_CHUNKS)
 		Flush();
 
 	// pack all the data
@@ -117,7 +120,7 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 	Header.m_Size = DataSize;
 	Header.m_Sequence = Sequence;
 	pChunkData = &m_Construct.m_aChunkData[m_Construct.m_DataSize];
-	pChunkData = Header.Pack(pChunkData);
+	pChunkData = Header.Pack(pChunkData, m_Sevendown ? 4 : 6);
 	mem_copy(pChunkData, pData, DataSize);
 	pChunkData += DataSize;
 
@@ -163,7 +166,7 @@ void CNetConnection::SendControl(int ControlMsg, const void *pExtra, int ExtraSi
 {
 	// send the control message
 	m_LastSendTime = time_get();
-	m_pNetBase->SendControlMsg(&m_PeerAddr, m_PeerToken, m_Ack, ControlMsg, pExtra, ExtraSize);
+	m_pNetBase->SendControlMsg(&m_PeerAddr, m_PeerToken, m_Ack, ControlMsg, pExtra, ExtraSize, m_Sevendown, m_SecurityToken);
 }
 
 void CNetConnection::SendPacketConnless(const char *pData, int DataSize)
@@ -230,8 +233,22 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, SECURITY_TOKEN SecurityToken)
 {
+	if (m_Sevendown && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
+	{
+		// supposed to have a valid token in this packet, check it
+		if (pPacket->m_DataSize < sizeof(m_SecurityToken))
+			return -1;
+		pPacket->m_DataSize -= sizeof(m_SecurityToken);
+		if (m_SecurityToken != *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize])
+		{
+			if(Config()->m_Debug)
+				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize]);
+			return -1;
+		}
+	}
+
 	// check if actual ack value is valid(own sequence..latest peer ack)
 	if(m_Sequence >= m_PeerAck)
 	{
@@ -247,7 +264,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 
 	int64 Now = time_get();
 
-	if(pPacket->m_Token == NET_TOKEN_NONE || pPacket->m_Token != m_Token)
+	if(!m_Sevendown && (pPacket->m_Token == NET_TOKEN_NONE || pPacket->m_Token != m_Token))
 		return 0;
 
 	// check if resend is requested
@@ -324,7 +341,29 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 						m_LastSendTime = Now;
 						m_LastRecvTime = Now;
 						m_LastUpdateTime = Now;
-						SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+						m_Sevendown = Sevendown;
+						if (m_Sevendown)
+						{
+							if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
+								&& pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
+								&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+							{
+								m_SecurityToken = SecurityToken;
+								if(Config()->m_Debug)
+									dbg_msg("security", "generated token %d", m_SecurityToken);
+							}
+							else
+							{
+								if(Config()->m_Debug)
+									dbg_msg("security", "token not supported by client (packet size %d)", pPacket->m_DataSize);
+								m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+							}
+							SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+						}
+						else
+						{
+							SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+						}
 						if(Config()->m_Debug)
 							dbg_msg("connection", "got connection, sending connect+accept");
 					}
@@ -425,12 +464,22 @@ int CNetConnection::Update()
 	else if(State() == NET_CONNSTATE_CONNECT)
 	{
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect every 500ms
-			SendControlWithToken(NET_CTRLMSG_CONNECT);
+		{
+			if (m_Sevendown)
+				SendControl(NET_CTRLMSG_CONNECT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+			else
+				SendControlWithToken(NET_CTRLMSG_CONNECT);
+		}
 	}
 	else if(State() == NET_CONNSTATE_PENDING)
 	{
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
-			SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+		{
+			if (m_Sevendown)
+				SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+			else
+				SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+		}
 	}
 
 	return 0;

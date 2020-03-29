@@ -145,10 +145,12 @@ class CSnapshotBuilder
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
 
+	bool m_Sevendown;
+
 public:
 	CSnapshotBuilder();
 
-	void Init();
+	void Init(bool Sevendown = false);
 	void Init(const CSnapshot *pSnapshot);
 	bool UnserializeSnap(const char *pSrcData, int SrcSize);
 

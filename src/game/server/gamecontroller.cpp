@@ -450,7 +450,8 @@ void IGameController::StartRound()
 
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData)));
+	int Size = Server()->IsSevendown(SnappingClient) ? 8*4 : sizeof(CNetObj_PlayerInfo);
+	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, Size));
 	if(!pGameData)
 		return;
 
@@ -474,13 +475,16 @@ void IGameController::Snap(int SnappingClient)
 		pGameData->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
 
 	// F-DDrace
-	CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
-	if (!pGameDataRace)
-		return;
+	if (!Server()->IsSevendown(SnappingClient))
+	{
+		CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
+		if (!pGameDataRace)
+			return;
 
-	pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
-	pGameDataRace->m_Precision = 0;
-	pGameDataRace->m_RaceFlags = 0;
+		pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
+		pGameDataRace->m_Precision = 0;
+		pGameDataRace->m_RaceFlags = 0;
+	}
 
 	// demo recording
 	if(SnappingClient == -1)
@@ -494,6 +498,20 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfo->m_TimeLimit = 0;
 		pGameInfo->m_MatchNum = 0;
 		pGameInfo->m_MatchCurrent = 0;
+	}
+
+	if (Server()->IsSevendown(SnappingClient))
+	{
+		int GameStateFlags = pGameData->m_GameStateFlags;
+		int GameStartTick = pGameData->m_GameStartTick;
+		((int*)pGameData)[0] = m_GameFlags;
+		((int*)pGameData)[1] = GameStateFlags;
+		((int*)pGameData)[2] = GameStartTick;
+		((int*)pGameData)[3] = 0;
+		((int*)pGameData)[4] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[5] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[6] = 0;
+		((int*)pGameData)[7] = m_RoundCount+1;
 	}
 }
 

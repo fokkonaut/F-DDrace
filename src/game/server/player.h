@@ -72,6 +72,7 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 
+	void TranslatePlayerFlags(CNetObj_PlayerInput *NewInput);
 	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnDisconnect();

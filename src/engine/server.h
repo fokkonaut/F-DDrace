@@ -46,13 +46,57 @@ public:
 	virtual void DummyJoin(int DummyID) = 0;
 	virtual void DummyLeave(int DummyID) = 0;
 
+	virtual bool IsSevendown(int ClientID) = 0;
+
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
+		int Result = 0;
+		T Tmp;
+		if (ClientID == -1)
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				if(ClientIngame(i))
+				{
+					mem_copy(&Tmp, pMsg, sizeof(T));
+					Result = SendPackMsgTranslate(&Tmp, Flags, i);
+				}
+		}
+		else
+		{
+			mem_copy(&Tmp, pMsg, sizeof(T));
+			Result = SendPackMsgTranslate(&Tmp, Flags, ClientID);
+		}
+		return Result;
+	}
+
+	template<class T>
+	int SendPackMsgTranslate(T *pMsg, int Flags, int ClientID)
+	{
+		return SendPackMsgOne(pMsg, Flags, ClientID);
+	}
+
+	template<class T>
+	int SendPackMsgOne(T *pMsg, int Flags, int ClientID)
+	{
 		CMsgPacker Packer(pMsg->MsgID(), false);
 		if(pMsg->Pack(&Packer))
+			return -1;
+		return SendMsg(&Packer, Flags, ClientID);
+	}
+
+	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
+	{
+		if (!IsSevendown(ClientID))
+			return SendPackMsgOne(pMsg, Flags, ClientID);
+
+		CMsgPacker Packer(pMsg->MsgID(), false);
+		Packer.AddInt((int)(pMsg->m_Mode == CHAT_TEAM));
+		Packer.AddInt(pMsg->m_ClientID);
+		Packer.AddString(pMsg->m_pMessage, -1);
+		if (Packer.Error() != 0)
 			return -1;
 		return SendMsg(&Packer, Flags, ClientID);
 	}
@@ -117,6 +161,7 @@ public:
 	virtual const char *GameType() const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *NetVersion() const = 0;
+	virtual const char *NetVersionSevendown() const = 0;
 
 	virtual void OnClientEngineJoin(int ClientID) = 0;
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;

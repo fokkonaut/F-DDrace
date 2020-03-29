@@ -332,13 +332,19 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_apPlayers[i] != 0) {
-				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS) {
-					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS) {
+			if(m_apPlayers[i] != 0)
+			{
+				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS)
+				{
+					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
-				} else {
-					if(Teams->Team(i) == GetDDRaceTeam(ChatterClientID) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS) {
+				}
+				else
+				{
+					if(Teams->Team(i) == GetDDRaceTeam(ChatterClientID) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
@@ -1212,9 +1218,58 @@ void CGameContext::OnClientAuth(int ClientID, int Level)
 	}
 }
 
+void *CGameContext::UnpackMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
+{
+	if (Server()->IsSevendown(ClientID))
+	{
+		if (MsgID == NETMSGTYPE_CL_STARTINFO)
+		{
+			static CNetMsg_Cl_StartInfo Msg;
+
+			const char *apSkinPartNames[6];
+			int aUseCustomColors[6];
+			int aSkinPartColors[6];
+
+			Msg.m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			Msg.m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			Msg.m_Country = pUnpacker->GetInt();
+
+			for (int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				Msg.m_apSkinPartNames[p] = "standard";
+				Msg.m_aUseCustomColors[p] = 0;
+				Msg.m_aSkinPartColors[p] = 0;
+			}
+
+			Msg.m_apSkinPartNames[SKINPART_BODY] = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			Msg.m_aUseCustomColors[SKINPART_BODY] = Msg.m_aUseCustomColors[SKINPART_FEET] = pUnpacker->GetInt();
+			Msg.m_aSkinPartColors[SKINPART_BODY] = pUnpacker->GetInt();
+			Msg.m_aSkinPartColors[SKINPART_FEET] = pUnpacker->GetInt();
+
+			return &Msg;
+		}
+		else if (MsgID == NETMSGTYPE_CL_SAY)
+		{
+			static CNetMsg_Cl_Say Msg;
+			Msg.m_Mode = pUnpacker->GetInt() ? CHAT_TEAM : CHAT_ALL;
+			Msg.m_pMessage = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
+			return &Msg;
+		}
+		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE)
+		{
+			static CNetMsg_Cl_SetSpectatorMode Msg;
+			Msg.m_SpectatorID = pUnpacker->GetInt();
+			Msg.m_SpecMode = Msg.m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
+			return &Msg;
+		}
+	}
+
+	return m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
-	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
+	void *pRawMsg = UnpackMsg(MsgID, pUnpacker, ClientID);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(m_TeeHistorianActive)
@@ -1225,9 +1280,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 	}
 
-	if(!pRawMsg)
+	if (!pRawMsg)
 	{
-		if(Config()->m_Debug)
+		if (Config()->m_Debug)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgID), MsgID, m_NetObjHandler.FailedMsgOn());
@@ -3117,6 +3172,7 @@ const CUuid CGameContext::GameUuid() const { return m_GameUuid; }
 const char *CGameContext::GameType() const { return m_pController && m_pController->GetGameType() ? m_pController->GetGameType() : ""; }
 const char *CGameContext::Version() const { return GAME_VERSION; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
+const char *CGameContext::NetVersionSevendown() const { return GAME_NETVERSION_SEVENDOWN; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 

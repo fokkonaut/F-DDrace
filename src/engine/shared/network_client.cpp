@@ -83,7 +83,7 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		{
 			if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0)
 			{
-				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, false))
 				{
 					if(!(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS))
 						m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
