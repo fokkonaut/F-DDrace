@@ -4,6 +4,7 @@
 #include <base/system.h>
 #include "config.h"
 #include "network.h"
+#include <string.h>
 
 
 void CNetConnection::ResetStats()
@@ -241,7 +242,9 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 		if ((unsigned)pPacket->m_DataSize < sizeof(m_SecurityToken))
 			return -1;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
-		if (m_SecurityToken != *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize])
+		SECURITY_TOKEN Token;
+		memcpy(&Token, &pPacket->m_aChunkData[pPacket->m_DataSize], sizeof(Token));
+		if (m_SecurityToken != Token)
 		{
 			if(Config()->m_Debug)
 				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize]);

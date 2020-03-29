@@ -150,8 +150,6 @@ if(NOT MSVC)
   # Control-flow protection. Should protect against ROP.
   add_c_compiler_flag_if_supported(OUR_FLAGS -fcf-protection)
 
-  add_c_compiler_flag_if_supported(OUR_FLAGS -fno-strict-aliasing)
-
   # Inaccurate floating point numbers cause problems on mingw-w64-gcc when
   # compiling for x86, might cause problems elsewhere. So don't store floats
   # in registers but keep them at higher accuracy.
