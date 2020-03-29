@@ -238,7 +238,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 	if (m_Sevendown && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
 		// supposed to have a valid token in this packet, check it
-		if (pPacket->m_DataSize < sizeof(m_SecurityToken))
+		if ((unsigned)pPacket->m_DataSize < sizeof(m_SecurityToken))
 			return -1;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
 		if (m_SecurityToken != *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize])
@@ -345,7 +345,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 						if (m_Sevendown)
 						{
 							if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-								&& pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
+								&& (unsigned)pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
 								&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 							{
 								m_SecurityToken = SecurityToken;

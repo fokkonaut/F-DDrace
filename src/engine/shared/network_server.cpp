@@ -295,7 +295,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 						{
 							m_NumClients++;
 							m_aSlots[i].m_Connection.SetToken(m_RecvUnpacker.m_Data.m_Token);
-							SECURITY_TOKEN SecurityToken = Sevendown ? m_TokenManager.GenerateToken(&Addr) : NET_SECURITY_TOKEN_UNSUPPORTED;
+							SECURITY_TOKEN SecurityToken = Sevendown ? m_TokenManager.GenerateToken(&Addr) : (int)NET_SECURITY_TOKEN_UNSUPPORTED;
 							m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Sevendown, SecurityToken);
 							if(m_pfnNewClient)
 								m_pfnNewClient(i, Sevendown, m_UserPtr);
