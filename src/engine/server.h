@@ -9,6 +9,7 @@
 #include "message.h"
 
 #include <generated/protocol.h>
+#include <engine/shared/protocol.h>
 
 class IServer : public IInterface
 {
