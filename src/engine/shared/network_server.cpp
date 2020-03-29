@@ -10,7 +10,6 @@
 #include "config.h"
 
 #include <engine/shared/protocol.h>
-#include <generated/protocol.h>
 
 static unsigned char MsgTypeFromSevendown(unsigned char Byte)
 {
