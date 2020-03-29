@@ -2243,7 +2243,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
+		str_format(aBuf, sizeof(aBuf), "'%s' finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		m_pPlayer->GiveXP(250, "finish the special race");
 
