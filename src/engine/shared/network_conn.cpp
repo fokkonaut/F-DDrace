@@ -247,7 +247,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 		if (m_SecurityToken != Token)
 		{
 			if(Config()->m_Debug)
-				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, *(SECURITY_TOKEN*)&pPacket->m_aChunkData[pPacket->m_DataSize]);
+				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, Token);
 			return -1;
 		}
 	}
