@@ -290,8 +290,8 @@ class NetMessage(NetObject):
 		return lines
 
 class NetObjectEx(NetObject):
-	def __init__(self, name, ex, variables):
-		NetObject.__init__(self, name, variables, ex=ex)
+	def __init__(self, name, ex, variables, fixup=True):
+		NetObject.__init__(self, name, variables, ex=ex, fixup=fixup)
 
 class NetEventEx(NetEvent):
 	def __init__(self, name, ex, variables):

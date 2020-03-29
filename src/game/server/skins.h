@@ -70,6 +70,9 @@ public:
 
 	int GetSkinID(const char *pSkin);
 	CPlayer::TeeInfos GetSkin(int Skin);
+
+	void SkinToSevendown(CPlayer::TeeInfos *pTeeInfos);
+	void SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos);
 };
 
 #endif

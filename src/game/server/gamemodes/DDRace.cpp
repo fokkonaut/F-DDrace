@@ -157,34 +157,53 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 	if (!pGameDataFlag)
 		return;
 
-	pGameDataFlag->m_FlagDropTickRed = 0;
+	int FlagDropTickRed = 0;
+	int FlagDropTickBlue = 0;
+	int FlagCarrierRed;
+	int FlagCarrierBlue;
+
 	if (m_apFlags[TEAM_RED])
 	{
 		if (m_apFlags[TEAM_RED]->IsAtStand())
-			pGameDataFlag->m_FlagCarrierRed = FLAG_ATSTAND;
+			FlagCarrierRed = FLAG_ATSTAND;
 		else if (m_apFlags[TEAM_RED]->GetCarrier() && m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer())
-			pGameDataFlag->m_FlagCarrierRed = m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer()->GetCID();
+			FlagCarrierRed = m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer()->GetCID();
 		else
 		{
-			pGameDataFlag->m_FlagCarrierRed = FLAG_TAKEN;
-			pGameDataFlag->m_FlagDropTickRed = m_apFlags[TEAM_RED]->GetDropTick();
+			FlagCarrierRed = FLAG_TAKEN;
+			FlagDropTickRed = m_apFlags[TEAM_RED]->GetDropTick();
 		}
 	}
 	else
-		pGameDataFlag->m_FlagCarrierRed = FLAG_MISSING;
-	pGameDataFlag->m_FlagDropTickBlue = 0;
+		FlagCarrierRed = FLAG_MISSING;
+
 	if (m_apFlags[TEAM_BLUE])
 	{
 		if (m_apFlags[TEAM_BLUE]->IsAtStand())
-			pGameDataFlag->m_FlagCarrierBlue = FLAG_ATSTAND;
+			FlagCarrierBlue = FLAG_ATSTAND;
 		else if (m_apFlags[TEAM_BLUE]->GetCarrier() && m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer())
-			pGameDataFlag->m_FlagCarrierBlue = m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCID();
+			FlagCarrierBlue = m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCID();
 		else
 		{
-			pGameDataFlag->m_FlagCarrierBlue = FLAG_TAKEN;
-			pGameDataFlag->m_FlagDropTickBlue = m_apFlags[TEAM_BLUE]->GetDropTick();
+			FlagCarrierBlue = FLAG_TAKEN;
+			FlagDropTickBlue = m_apFlags[TEAM_BLUE]->GetDropTick();
 		}
 	}
 	else
-		pGameDataFlag->m_FlagCarrierBlue = FLAG_MISSING;
+		FlagCarrierBlue = FLAG_MISSING;
+
+	if (Server()->IsSevendown(SnappingClient))
+	{
+		((int*)pGameDataFlag)[0] = 0;
+		((int*)pGameDataFlag)[1] = 0;
+		((int*)pGameDataFlag)[2] = FlagCarrierRed;
+		((int*)pGameDataFlag)[3] = FlagCarrierBlue;
+	}
+	else
+	{
+		pGameDataFlag->m_FlagCarrierRed = FlagCarrierRed;
+		pGameDataFlag->m_FlagCarrierBlue = FlagCarrierBlue;
+		pGameDataFlag->m_FlagDropTickRed = FlagDropTickRed;
+		pGameDataFlag->m_FlagDropTickBlue = FlagDropTickBlue;
+	}
 }

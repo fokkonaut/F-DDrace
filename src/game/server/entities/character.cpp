@@ -1189,6 +1189,8 @@ void CCharacter::TickDefered()
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
 	// F-DDrace
+	if (Server()->IsSevendown(m_pPlayer->GetCID()))
+		if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	if (m_Core.m_OnHookFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	if (m_Core.m_OnHookPlayer) OnPlayerHook();
 
@@ -1684,6 +1686,30 @@ void CCharacter::Snap(int SnappingClient)
 		{
 			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
 		}
+	}
+
+	if(Server()->IsSevendown(SnappingClient))
+	{
+		int PlayerFlags = 0;
+		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_CHATTING) PlayerFlags |= 4;
+		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) PlayerFlags |= 8;
+		if (m_pPlayer->m_Aim) PlayerFlags |= 16;
+
+		int Health = pCharacter->m_Health;
+		int Armor = pCharacter->m_Armor;
+		int AmmoCount = pCharacter->m_AmmoCount;
+		int Weapon = pCharacter->m_Weapon;
+		int Emote = pCharacter->m_Emote;
+		int AttackTick = pCharacter->m_AttackTick;
+
+		int Offset = sizeof(CNetObj_CharacterCore) / 4;
+		((int*)pCharacter)[Offset+0] = PlayerFlags;
+		((int*)pCharacter)[Offset+1] = Health;
+		((int*)pCharacter)[Offset+2] = Armor;
+		((int*)pCharacter)[Offset+3] = AmmoCount;
+		((int*)pCharacter)[Offset+4] = Weapon;
+		((int*)pCharacter)[Offset+5] = Emote;
+		((int*)pCharacter)[Offset+6] = AttackTick;
 	}
 }
 
@@ -2206,7 +2232,7 @@ void CCharacter::HandleTiles(int Index)
 						(*Account).m_Level
 					);
 
-				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg), m_pPlayer->GetCID(), false);
+				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
 		}
 	}
@@ -3077,7 +3103,7 @@ void CCharacter::FDDraceTick()
 				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
 					(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
-				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg), m_pPlayer->GetCID(), false);
+				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
 		}
 	}
@@ -3337,7 +3363,16 @@ void CCharacter::UpdateWeaponIndicator()
 		return;
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), " \n \n> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
+	if (Server()->IsSevendown(m_pPlayer->GetCID()))
+	{
+		char aSpaces[128];
+		str_format(aSpaces, sizeof(aSpaces), "                                                                                                                               ");
+		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aSpaces);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), " \n \n> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
+	}
 	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 }
 

@@ -450,37 +450,32 @@ void IGameController::StartRound()
 
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData)));
+	int Size = Server()->IsSevendown(SnappingClient) ? 8*4 : sizeof(CNetObj_PlayerInfo);
+	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, Size));
 	if(!pGameData)
 		return;
 
-	// F-DDrace
-	CCharacter* pSnappingChar = GameServer()->GetPlayerChar(SnappingClient);
-	CPlayer* pSnap = GameServer()->m_apPlayers[SnappingClient];
-	CCharacter* pSpectator = (pSnap && (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused())) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : pSnap->m_pControlledTee ? pSnap->m_pControlledTee->GetCharacter() : 0;
+	CPlayer *pSnap = GameServer()->m_apPlayers[SnappingClient];
+	CCharacter *pSnappingChar = GameServer()->GetPlayerChar(SnappingClient);
+	int GameStartTick = 0;
+	{
+		CCharacter *pSpectator = (pSnap && (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused())) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : pSnap->m_pControlledTee ? pSnap->m_pControlledTee->GetCharacter() : 0;
 
-	if (pSpectator && pSpectator->m_DDRaceState == DDRACE_STARTED)
-		pGameData->m_GameStartTick = pSpectator->m_StartTime;
-	else if (!pSpectator && pSnappingChar && pSnappingChar->m_DDRaceState == DDRACE_STARTED)
-		pGameData->m_GameStartTick = pSnappingChar->m_StartTime;
-	else
-		pGameData->m_GameStartTick = m_GameStartTick;
+		if (pSpectator && pSpectator->m_DDRaceState == DDRACE_STARTED)
+			GameStartTick = pSpectator->m_StartTime;
+		else if (!pSpectator && pSnappingChar && pSnappingChar->m_DDRaceState == DDRACE_STARTED)
+			GameStartTick = pSnappingChar->m_StartTime;
+		else
+			GameStartTick = m_GameStartTick;
+	}
 
-	pGameData->m_GameStateFlags = 0;
-	pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
-	if(m_SuddenDeath)
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
-	if (GameServer()->m_World.m_Paused)
-		pGameData->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-
-	// F-DDrace
-	CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
-	if (!pGameDataRace)
-		return;
-
-	pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
-	pGameDataRace->m_Precision = 0;
-	pGameDataRace->m_RaceFlags = 0;
+	int GameStateFlags = 0;
+	{
+		if(m_SuddenDeath)
+			GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
+		if (GameServer()->m_World.m_Paused)
+			GameStateFlags |= GAMESTATEFLAG_PAUSED;
+	}
 
 	// demo recording
 	if(SnappingClient == -1)
@@ -494,6 +489,74 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfo->m_TimeLimit = 0;
 		pGameInfo->m_MatchNum = 0;
 		pGameInfo->m_MatchCurrent = 0;
+	}
+
+	if (Server()->IsSevendown(SnappingClient))
+	{
+		((int*)pGameData)[0] = m_GameFlags;
+		((int*)pGameData)[1] = GameStateFlags;
+		((int*)pGameData)[2] = GameStartTick;
+		((int*)pGameData)[3] = 0;
+		((int*)pGameData)[4] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[5] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[6] = 0;
+		((int*)pGameData)[7] = m_RoundCount+1;
+
+		CNetObj_GameInfoEx *pGameInfoEx = (CNetObj_GameInfoEx *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFOEX, 0, sizeof(CNetObj_GameInfoEx));
+		if (!pGameInfoEx)
+			return;
+
+		pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
+		pGameInfoEx->m_Flags = 0
+			| GAMEINFOFLAG_GAMETYPE_RACE
+			| GAMEINFOFLAG_GAMETYPE_DDRACE
+			| GAMEINFOFLAG_GAMETYPE_DDNET
+			| GAMEINFOFLAG_RACE_RECORD_MESSAGE
+			| GAMEINFOFLAG_ALLOW_EYE_WHEEL
+			| GAMEINFOFLAG_ALLOW_HOOK_COLL
+			| GAMEINFOFLAG_BUG_DDRACE_GHOST
+			| GAMEINFOFLAG_BUG_DDRACE_INPUT
+			| GAMEINFOFLAG_PREDICT_DDRACE
+			| GAMEINFOFLAG_PREDICT_DDRACE_TILES
+			| GAMEINFOFLAG_ENTITIES_DDNET
+			| GAMEINFOFLAG_ENTITIES_DDRACE
+			| GAMEINFOFLAG_ENTITIES_RACE
+			| GAMEINFOFLAG_RACE
+			| GAMEINFOFLAG_DONT_MASK_ENTITIES;
+
+		if (pSnap->m_Minigame == MINIGAME_NONE)
+		{
+			pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
+
+			if (pSnap->m_ScoreMode == SCORE_TIME)
+				pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
+		}
+
+		if (!pSnappingChar)
+			return;
+
+		if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
+			pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
+
+		if (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS && pGameInfoEx->m_Flags&GAMEINFOFLAG_ALLOW_ZOOM)
+			pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
+	}
+	else
+	{
+		pGameData->m_GameStartTick = GameStartTick;
+		pGameData->m_GameStateFlags = GameStateFlags;
+		pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
+
+		if (!Server()->IsSevendown(SnappingClient))
+		{
+			CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
+			if (!pGameDataRace)
+				return;
+
+			pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
+			pGameDataRace->m_Precision = 0;
+			pGameDataRace->m_RaceFlags = 0;
+		}
 	}
 }
 

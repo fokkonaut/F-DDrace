@@ -72,6 +72,7 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 
+	void TranslatePlayerFlags(CNetObj_PlayerInput *NewInput);
 	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnDisconnect();
@@ -132,6 +133,16 @@ public:
 		char m_aaSkinPartNames[NUM_SKINPARTS][24];
 		int m_aUseCustomColors[NUM_SKINPARTS];
 		int m_aSkinPartColors[NUM_SKINPARTS];
+
+		// 0.6 info
+		struct Sevendown
+		{
+			char m_SkinName[24];
+			int m_UseCustomColor;
+			int m_ColorBody;
+			int m_ColorFeet;
+
+		} m_Sevendown;
 	} m_TeeInfos;
 
 	int m_PreviousDieTick;

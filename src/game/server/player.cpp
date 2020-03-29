@@ -384,72 +384,66 @@ void CPlayer::Snap(int SnappingClient)
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, sizeof(CNetObj_PlayerInfo)));
+	int Size = Server()->IsSevendown(SnappingClient) ? 5*4 : sizeof(CNetObj_PlayerInfo);
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, Size));
 	if(!pPlayerInfo)
 		return;
 
 	CPlayer *pSnapping = GameServer()->m_apPlayers[SnappingClient];
 
-	pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
-	if(Server()->GetAuthedState(m_ClientID))
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
-	if(m_IsReadyToPlay)
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
-	if(m_Paused)
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
-	if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
-	if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
-		pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
-
-	// realistic ping for dummies
-	if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing)
-		pPlayerInfo->m_Latency = m_FakePing;
-	else
-		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
+	int Latency = 0;
+	{
+		// realistic ping for dummies
+		if (m_IsDummy && GameServer()->Config()->m_SvFakeDummyPing)
+			Latency = m_FakePing;
+		else
+			Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
+	}
 	
 	int Score = 0;
-	bool AccUsed = true;
+	{
+		bool AccUsed = true;
 
-	// check for minigames first, then normal score modes, as minigames of course overwrite the wanted scoremodes
-	if (pSnapping->m_Minigame == MINIGAME_BLOCK)
-	{
-		Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
-	}
-	else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
-	{
-		Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
-	}
-	else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
-	{
-		Score = m_InstagibScore;
-		AccUsed = false;
-	}
-	else if (pSnapping->m_ScoreMode == SCORE_TIME)
-	{
-		// send 0 if times of others are not shown
-		if (SnappingClient != m_ClientID && GameServer()->Config()->m_SvHideScore)
-			Score = -1;
-		else
-			Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
-		AccUsed = false;
-	}
-	else if (pSnapping->m_ScoreMode == SCORE_LEVEL)
-	{
-		Score = GameServer()->m_Accounts[GetAccID()].m_Level;
-	}
-	else if (pSnapping->m_ScoreMode == SCORE_BLOCK_POINTS)
-	{
-		Score = GameServer()->m_Accounts[GetAccID()].m_BlockPoints;
-	}
+		// check for minigames first, then normal score modes, as minigames of course overwrite the wanted scoremodes
+		if (pSnapping->m_Minigame == MINIGAME_BLOCK)
+			Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
+		else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
+			Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
+		else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
+		{
+			Score = m_InstagibScore;
+			AccUsed = false;
+		}
+		else if (pSnapping->m_ScoreMode == SCORE_TIME)
+		{
+			// send 0 if times of others are not shown
+			if (SnappingClient != m_ClientID && GameServer()->Config()->m_SvHideScore)
+				Score = -1;
+			else
+				Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
+			AccUsed = false;
 
-	if (AccUsed && GetAccID() < ACC_START)
-		Score = 0;
-	pPlayerInfo->m_Score = Score;
+			if (Server()->IsSevendown(SnappingClient))
+			{
+				if (Score == -1)
+					Score = -9999;
+				else
+					Score = abs(m_Score) * -1;
+			}
+		}
+		else if (pSnapping->m_ScoreMode == SCORE_LEVEL)
+			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
+		else if (pSnapping->m_ScoreMode == SCORE_BLOCK_POINTS)
+			Score = GameServer()->m_Accounts[GetAccID()].m_BlockPoints;
+
+		if (AccUsed && GetAccID() < ACC_START)
+			Score = 0;
+	}
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
 	{
-		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
+		int Size = Server()->IsSevendown(m_ClientID) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
+		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, Size));
 		if (!pSpectatorInfo)
 			return;
 
@@ -470,17 +464,26 @@ void CPlayer::Snap(int SnappingClient)
 			}
 		}
 
-		pSpectatorInfo->m_SpecMode = SpecMode;
-		pSpectatorInfo->m_SpectatorID = SpectatorID;
-		if (m_pSpecFlag)
+		if (Server()->IsSevendown(m_ClientID))
 		{
-			pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
-			pSpectatorInfo->m_Y = m_pSpecFlag->GetPos().y;
+			((int*)pSpectatorInfo)[0] = SpectatorID;
+			((int*)pSpectatorInfo)[1] = m_ViewPos.x;
+			((int*)pSpectatorInfo)[2] = m_ViewPos.y;
 		}
 		else
 		{
-			pSpectatorInfo->m_X = m_ViewPos.x;
-			pSpectatorInfo->m_Y = m_ViewPos.y;
+			pSpectatorInfo->m_SpecMode = SpecMode;
+			pSpectatorInfo->m_SpectatorID = SpectatorID;
+			if (m_pSpecFlag)
+			{
+				pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
+				pSpectatorInfo->m_Y = m_pSpecFlag->GetPos().y;
+			}
+			else
+			{
+				pSpectatorInfo->m_X = m_ViewPos.x;
+				pSpectatorInfo->m_Y = m_ViewPos.y;
+			}
 		}
 	}
 
@@ -493,27 +496,70 @@ void CPlayer::Snap(int SnappingClient)
 
 		pClientInfo->m_Local = 0;
 		pClientInfo->m_Team = m_Team;
-		StrToInts(pClientInfo->m_aName, 4, Server()->ClientName(m_ClientID));
-		StrToInts(pClientInfo->m_aClan, 3, Server()->ClientClan(m_ClientID));
+		StrToInts(pClientInfo->m_aName, 4, m_CurrentInfo.m_aName);
+		StrToInts(pClientInfo->m_aClan, 3, m_CurrentInfo.m_aClan);
 		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
 
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			StrToInts(pClientInfo->m_aaSkinPartNames[p], 6, m_TeeInfos.m_aaSkinPartNames[p]);
-			pClientInfo->m_aUseCustomColors[p] = m_TeeInfos.m_aUseCustomColors[p];
-			pClientInfo->m_aSkinPartColors[p] = m_TeeInfos.m_aSkinPartColors[p];
+			StrToInts(pClientInfo->m_aaSkinPartNames[p], 6, m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p]);
+			pClientInfo->m_aUseCustomColors[p] = m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
+			pClientInfo->m_aSkinPartColors[p] = m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 		}
 	}
 
-	CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
-	if(!pExPlayerInfo)
-		return;
+	if(Server()->IsSevendown(SnappingClient))
+	{
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, m_ClientID, 17*4); // NETOBJTYPE_CLIENTINFO
+		if(!pClientInfo)
+			return;
 
-	pExPlayerInfo->m_Flags = 0;
-	if (m_Aim)
-		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
-	if(m_Afk)
-		pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
+		StrToInts(&pClientInfo[0], 4, m_CurrentInfo.m_aName);
+		StrToInts(&pClientInfo[4], 3, m_CurrentInfo.m_aClan);
+		pClientInfo[7] = Server()->ClientCountry(m_ClientID);
+		StrToInts(&pClientInfo[8], 6, m_SpookyGhost ? "ghost" : m_CurrentInfo.m_TeeInfos.m_Sevendown.m_SkinName);
+		pClientInfo[14] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_UseCustomColor;
+		pClientInfo[15] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorBody;
+		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorFeet;
+
+		int Team = m_Team;
+		if (Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
+			|| (GameServer()->Config()->m_SvHideMinigamePlayers && pSnapping->m_Minigame != m_Minigame)))
+			Team = TEAM_BLUE;
+
+		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
+		((int*)pPlayerInfo)[1] = m_ClientID;
+		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && !m_TeeControlMode ? Team : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[3] = Score;
+		((int*)pPlayerInfo)[4] = Latency;
+	}
+	else
+	{
+		pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
+		if(Server()->GetAuthedState(m_ClientID))
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
+		if(m_IsReadyToPlay)
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
+		if(m_Paused)
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_DEAD;
+		if(SnappingClient != -1 && (m_Team == TEAM_SPECTATORS || m_Paused) && (SnappingClient == m_SpectatorID))
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
+		if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
+
+		pPlayerInfo->m_Latency = Latency;
+		pPlayerInfo->m_Score = Score;
+
+		CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
+		if(!pExPlayerInfo)
+			return;
+
+		pExPlayerInfo->m_Flags = 0;
+		if (m_Aim)
+			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
+		if(m_Afk)
+			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
+	}
 }
 
 void CPlayer::OnDisconnect()
@@ -558,6 +604,19 @@ void CPlayer::OnDisconnect()
 	}
 }
 
+void CPlayer::TranslatePlayerFlags(CNetObj_PlayerInput *NewInput)
+{
+	if (!Server()->IsSevendown(m_ClientID))
+		return;
+
+	m_Aim = NewInput->m_PlayerFlags&16;
+
+	int PlayerFlags = 0;
+	if (NewInput->m_PlayerFlags&4) PlayerFlags |= PLAYERFLAG_CHATTING;
+	if (NewInput->m_PlayerFlags&8) PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+	NewInput->m_PlayerFlags = PlayerFlags;
+}
+
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	// F-DDrace
@@ -568,6 +627,8 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
+
+	TranslatePlayerFlags(NewInput);
 
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
@@ -593,6 +654,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
+
+	TranslatePlayerFlags(NewInput);
 
 	if(GameServer()->m_World.m_Paused)
 	{
@@ -651,7 +714,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 					pNotThis = m_pControlledTee->m_pCharacter;
 
 				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_CHARACTER, pNotThis);
-				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, pNotThis);
+				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, 0);
 				if(pChar || pFlag)
 				{
 					if(!pChar || (pFlag && pChar && distance(m_ViewPos, pFlag->GetPos()) < distance(m_ViewPos, pChar->GetPos())))
@@ -820,6 +883,9 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	// notify clients
 	GameServer()->SendTeamChange(m_ClientID, Team, !DoChatMsg, m_TeamChangeTick, -1);
 	GameServer()->UpdateHidePlayers(m_ClientID);
+
+	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+	GameServer()->SendJoinLeaveMessage(aBuf);
 }
 
 void CPlayer::TryRespawn()

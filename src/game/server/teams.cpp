@@ -386,10 +386,10 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (GameServer()->Config()->m_SvTeam == 3)
 		return;
 
-	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->m_apPlayers[ClientID]->m_DDraceVersion < VERSION_DDRACE_TEAMS)
+	if (!m_pGameContext->m_apPlayers[ClientID] || (m_pGameContext->m_apPlayers[ClientID]->m_DDraceVersion < VERSION_DDRACE_TEAMS && !Server()->IsSevendown(ClientID)))
 		return;
 
-	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
+	CMsgPacker Msg(Server()->IsSevendown(ClientID) ? 30 : NETMSGTYPE_SV_TEAMSSTATE);
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 		Msg.AddInt(m_Core.Team(i));

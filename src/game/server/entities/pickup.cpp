@@ -288,13 +288,20 @@ void CPickup::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), sizeof(CNetObj_Pickup)));
+		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
+		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));
 		if (!pP)
 			return;
 
 		pP->m_X = (int)m_Pos.x;
 		pP->m_Y = (int)m_Pos.y;
-		pP->m_Type = GameServer()->GetPickupType(m_Type, m_Subtype);
+		if (Server()->IsSevendown(SnappingClient))
+		{
+			pP->m_Type = m_Type;
+			((int*)pP)[3] = GameServer()->GetRealWeapon(m_Subtype);
+		}
+		else
+			pP->m_Type = GameServer()->GetPickupType(m_Type, m_Subtype);
 	}
 
 	bool Gun = m_Subtype == WEAPON_PROJECTILE_RIFLE;
@@ -327,7 +334,8 @@ void CPickup::Snap(int SnappingClient)
 	}
 	else if (Heart)
 	{
-		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID2, sizeof(CNetObj_Pickup)));
+		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
+		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID2, Size));
 		if (!pPickup)
 			return;
 

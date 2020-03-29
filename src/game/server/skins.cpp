@@ -139,3 +139,142 @@ CPlayer::TeeInfos CSkins::GetSkin(int Skin)
 		return m_Skins[SKIN_DEFAULT];
 	return m_Skins[Skin];
 }
+
+struct SevendownSkin
+{
+	char m_SkinName[64];
+	char m_apSkinPartNames[6][24];
+	int m_aUseCustomColors[6];
+	int m_aSkinPartColors[6];
+};
+
+enum
+{
+	NUM_SEVENDOWN_SKINS = 18
+};
+
+static SevendownSkin s_SevendownSkins[] = {
+{"default",{"standard","","","standard","standard","standard"},{1,0,0,1,1,0},{1798004,0,0,1799582,1869630,0}},
+{"bluekitty",{"kitty","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{8681144,-8229413,0,7885547,7885547,0}},
+{"bluestripe",{"standard","stripes","","standard","standard","standard"},{1,0,0,1,1,0},{10187898,0,0,750848,1944919,0}},
+{"brownbear",{"bear","bear","hair","standard","standard","standard"},{1,1,0,1,1,0},{1082745,-15634776,0,1082745,1147174,0}},
+{"cammo",{"standard","cammo2","","standard","standard","standard"},{1,1,0,1,1,0},{5334342,-11771603,0,750848,1944919,0}},
+{"cammostripes",{"standard","cammostripes","","standard","standard","standard"},{1,1,0,1,1,0},{5334342,-14840320,0,750848,1944919,0}},
+{"coala",{"koala","twinbelly","","standard","standard","standard"},{1,1,0,1,1,0},{184,-15397662,0,184,9765959,0}},
+{"limekitty",{"kitty","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{4612803,-12229920,0,3827951,3827951,0}},
+{"pinky",{"standard","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{15911355,-801066,0,15043034,15043034,0}},
+{"redbopp",{"standard","donny","unibop","standard","standard","standard"},{1,1,1,1,1,0},{16177260,-16590390,16177260,16177260,7624169,0}},
+{"redstripe",{"standard","stripe","","standard","standard","standard"},{1,0,0,1,1,0},{16307835,0,0,184,9765959,0}},
+{"saddo",{"standard","saddo","","standard","standard","standard"},{1,1,0,1,1,0},{7171455,-9685436,0,3640746,5792119,0}},
+{"toptri",{"standard","toptri","","standard","standard","standard"},{1,0,0,1,1,0},{6119331,0,0,3640746,5792119,0}},
+{"twinbop",{"standard","duodonny","twinbopp","standard","standard","standard"},{1,1,1,1,1,0},{15310519,-1600806,15310519,15310519,37600,0}},
+{"twintri",{"standard","twintri","","standard","standard","standard"},{1,1,1,1,1,0},{3447932,-14098717,0,185,9634888,0}},
+{"warpaint",{"standard","warpaint","","standard","standard","standard"},{1,0,0,1,1,0},{1944919,0,0,750337,1944919,0}},
+{"greensward",{"greensward","duodonny","","standard","standard","standard"},{1,1,0,0,0,0},{5635840,-11141356,65408,65408,65408,65408}},
+{"greyfox",{"greyfox_body","greyfox_marking","hair","standard","standard","standard"},{1,1,1,1,1,1},{1245401,1224736916,52,7864575,32,0}},
+};
+
+void CSkins::SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos)
+{
+	// reset to default skin
+	int Match = 0;
+	for(int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		str_copy(pTeeInfos->m_aaSkinPartNames[p], s_SevendownSkins[0].m_apSkinPartNames[p], 24);
+		pTeeInfos->m_aUseCustomColors[p] = s_SevendownSkins[0].m_aUseCustomColors[p];
+		pTeeInfos->m_aSkinPartColors[p] = s_SevendownSkins[0].m_aSkinPartColors[p];
+	}
+
+	// check for sevendown skin
+	for(int i = 0; i < NUM_SEVENDOWN_SKINS; i++)
+	{
+		if(!str_comp(pTeeInfos->m_Sevendown.m_SkinName, s_SevendownSkins[i].m_SkinName))
+		{
+			for(int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				str_copy(pTeeInfos->m_aaSkinPartNames[p], s_SevendownSkins[i].m_apSkinPartNames[p], 24);
+				pTeeInfos->m_aUseCustomColors[p] = s_SevendownSkins[i].m_aUseCustomColors[p];
+				pTeeInfos->m_aSkinPartColors[p] = s_SevendownSkins[i].m_aSkinPartColors[p];
+			}
+			Match = i;
+			break;
+		}
+	}
+
+	int CustomColors = pTeeInfos->m_Sevendown.m_UseCustomColor;
+	if(CustomColors)
+	{
+		pTeeInfos->m_aSkinPartColors[SKINPART_BODY] = pTeeInfos->m_Sevendown.m_ColorBody;
+		pTeeInfos->m_aSkinPartColors[SKINPART_MARKING] = 0x22FFFFFF;
+		pTeeInfos->m_aSkinPartColors[SKINPART_DECORATION] = pTeeInfos->m_Sevendown.m_ColorBody;
+		pTeeInfos->m_aSkinPartColors[SKINPART_HANDS] = pTeeInfos->m_Sevendown.m_ColorBody;
+		pTeeInfos->m_aSkinPartColors[SKINPART_FEET] = pTeeInfos->m_Sevendown.m_ColorFeet;
+	}
+	else
+	{
+		CPlayer::TeeInfos TeeInfos = GetSkin(GetSkinID(pTeeInfos->m_Sevendown.m_SkinName));
+		for (int p = 0; p < NUM_SKINPARTS-1; p++)
+			pTeeInfos->m_aSkinPartColors[p] = TeeInfos.m_aSkinPartColors[p];
+		CustomColors = 1;
+	}
+
+	for (int p = 0; p < NUM_SKINPARTS-1; p++)
+		pTeeInfos->m_aUseCustomColors[p] = s_SevendownSkins[Match].m_aUseCustomColors[p];
+}
+
+void CSkins::SkinToSevendown(CPlayer::TeeInfos *pTeeInfos)
+{
+	// reset to default skin
+	str_copy(pTeeInfos->m_Sevendown.m_SkinName, "default", sizeof(pTeeInfos->m_Sevendown.m_SkinName));
+	pTeeInfos->m_Sevendown.m_UseCustomColor = 0;
+	pTeeInfos->m_Sevendown.m_ColorBody = 0;
+	pTeeInfos->m_Sevendown.m_ColorFeet = 0;
+
+	// check for std skin
+	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
+	{
+		bool match = true;
+		for(int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			if(str_comp(pTeeInfos->m_aaSkinPartNames[p], s_SevendownSkins[s].m_apSkinPartNames[p])
+					|| pTeeInfos->m_aUseCustomColors[p] != s_SevendownSkins[s].m_aUseCustomColors[p]
+					|| (pTeeInfos->m_aUseCustomColors[p] && pTeeInfos->m_aSkinPartColors[p] != s_SevendownSkins[s].m_aSkinPartColors[p]))
+			{
+				match = false;
+				break;
+			}
+		}
+		if(match)
+		{
+			str_copy(pTeeInfos->m_Sevendown.m_SkinName, s_SevendownSkins[s].m_SkinName, sizeof(pTeeInfos->m_Sevendown.m_SkinName));
+			return;
+		}
+	}
+
+	// find closest match
+	int best_skin = 0;
+	int best_matches = -1;
+	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
+	{
+		int matches = 0;
+		for(int p = 0; p < 3; p++)
+			if(str_comp(pTeeInfos->m_aaSkinPartNames[p], s_SevendownSkins[s].m_apSkinPartNames[p]) == 0)
+				matches++;
+
+		if(matches > best_matches)
+		{
+			best_matches = matches;
+			best_skin = s;
+		}
+	}
+
+	str_copy(pTeeInfos->m_Sevendown.m_SkinName, s_SevendownSkins[best_skin].m_SkinName, sizeof(pTeeInfos->m_Sevendown.m_SkinName));
+	pTeeInfos->m_Sevendown.m_ColorBody = pTeeInfos->m_aUseCustomColors[SKINPART_BODY] ? pTeeInfos->m_aSkinPartColors[SKINPART_BODY] : 255;
+	pTeeInfos->m_Sevendown.m_ColorFeet = pTeeInfos->m_aUseCustomColors[SKINPART_FEET] ? pTeeInfos->m_aSkinPartColors[SKINPART_FEET] : 255;
+
+	int CustomColors = pTeeInfos->m_aUseCustomColors[SKINPART_BODY];
+	CPlayer::TeeInfos TeeInfos = GetSkin(GetSkinID(pTeeInfos->m_Sevendown.m_SkinName));
+	if (pTeeInfos->m_aSkinPartColors[SKINPART_BODY] == TeeInfos.m_aSkinPartColors[SKINPART_BODY])
+		CustomColors = false;
+	pTeeInfos->m_Sevendown.m_UseCustomColor = CustomColors;
+}

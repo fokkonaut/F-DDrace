@@ -167,7 +167,7 @@ void CNetTokenCache::SendPacketConnless(const NETADDR *pAddr, const void *pData,
 	TOKEN Token = GetToken(pAddr);
 	if(Token != NET_TOKEN_NONE)
 	{
-		m_pNetBase->SendPacketConnless(pAddr, Token, m_pTokenManager->GenerateToken(pAddr), pData, DataSize);
+		m_pNetBase->SendPacketConnless(pAddr, Token, m_pTokenManager->GenerateToken(pAddr), pData, DataSize, false);
 	}
 	else
 	{
@@ -267,7 +267,7 @@ void CNetTokenCache::AddToken(const NETADDR *pAddr, TOKEN Token, int TokenFLag)
 			// notify the user that the packet gets delivered
 			if(pInfo->m_pfnCallback)
 				pInfo->m_pfnCallback(pInfo->m_TrackID, pInfo->m_pCallbackUser);
-			m_pNetBase->SendPacketConnless(&(pInfo->m_Addr), Token, m_pTokenManager->GenerateToken(pAddr), pInfo->m_aData, pInfo->m_DataSize);
+			m_pNetBase->SendPacketConnless(&(pInfo->m_Addr), Token, m_pTokenManager->GenerateToken(pAddr), pInfo->m_aData, pInfo->m_DataSize, false);
 			CConnlessPacketInfo *pNext = pInfo->m_pNext;
 			if(pPrevInfo)
 				pPrevInfo->m_pNext = pNext;

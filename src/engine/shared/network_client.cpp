@@ -74,7 +74,8 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 
 		// TODO: empty the recvinfo
 		NETADDR Addr;
-		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data);
+		bool Sevendown;
+		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, &Sevendown);
 		// no more packets for now
 		if(Result > 0)
 			break;
@@ -83,7 +84,7 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		{
 			if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0)
 			{
-				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, false))
 				{
 					if(!(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS))
 						m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
@@ -137,7 +138,7 @@ int CNetClient::Send(CNetChunk *pChunk, TOKEN Token, CSendCBData *pCallbackData)
 
 		if(Token != NET_TOKEN_NONE)
 		{
-			SendPacketConnless(&pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize);
+			SendPacketConnless(&pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize, false);
 		}
 		else
 		{

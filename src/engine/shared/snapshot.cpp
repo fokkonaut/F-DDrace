@@ -6,6 +6,32 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
+#include <generated/protocol.h>
+
+static int ObjTypeToSevendown(int Seven)
+{
+	int Type;
+	if (Seven == 0 || Seven >= CSnapshot::OFFSET_UUID_TYPE)
+		Type = Seven;
+	else if(Seven >= NETOBJTYPE_PLAYERINPUT && Seven <= NETOBJTYPE_FLAG)
+		Type = Seven;
+	else if (Seven == NETOBJTYPE_GAMEDATA) // NETOBJTYPE_GAMEINFO in 0.6
+		Type = Seven;
+	else if(Seven >= NETOBJTYPE_GAMEDATAFLAG && Seven <= NETOBJTYPE_PLAYERINFO)
+		Type = Seven - 1;
+	else if (Seven == NETOBJTYPE_SPECTATORINFO)
+		Type = Seven;
+	else if(Seven >= NETEVENTTYPE_COMMON && Seven <= NETEVENTTYPE_DEATH)
+		Type = Seven - 3;
+	else if(Seven == NETEVENTTYPE_SOUNDWORLD)
+		Type = Seven - 2;
+	else if(Seven > 24)
+		Type = Seven - 24;
+	else
+		return -1;
+	return Type;
+}
+
 // CSnapshot
 
 const CSnapshotItem *CSnapshot::GetItem(int Index) const
@@ -578,10 +604,11 @@ CSnapshotBuilder::CSnapshotBuilder()
 	m_NumExtendedItemTypes = 0;
 }
 
-void CSnapshotBuilder::Init()
+void CSnapshotBuilder::Init(bool Sevendown)
 {
 	m_DataSize = 0;
 	m_NumItems = 0;
+	m_Sevendown = Sevendown;
 
 	for(int i = 0; i < m_NumExtendedItemTypes; i++)
 	{
@@ -767,6 +794,12 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	}
 
 	CSnapshotItem *pObj = (CSnapshotItem *)(m_aData + m_DataSize);
+
+	if(m_Sevendown)
+	{
+		Type = ObjTypeToSevendown(Type);
+		if(Type < 0) return pObj;
+	}
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->SetKey(Type, ID);

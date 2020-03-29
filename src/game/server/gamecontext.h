@@ -235,7 +235,7 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask = -1LL);
+	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask = -1LL, int SevendownAmount = 0);
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask = -1LL);
 	void CreateHammerHit(vec2 Pos, int64_t Mask = -1LL);
 	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1LL);
@@ -250,7 +250,7 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendSettings(int ClientID);
-	void SendSkinChange(CPlayer::TeeInfos pTeeInfos, int ClientID, int TargetID);
+	void SendSkinChange(CPlayer::TeeInfos TeeInfos, int ClientID, int TargetID);
 
 	// DDRace
 	void SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID);
@@ -308,7 +308,9 @@ public:
 	virtual const CUuid GameUuid() const;
 	virtual const char *GameType() const;
 	virtual const char *Version() const;
+	virtual const char *VersionSevendown() const;
 	virtual const char *NetVersion() const;
+	virtual const char *NetVersionSevendown() const;
 
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
@@ -317,7 +319,8 @@ public:
 	void ForceVote(int EnforcerID, bool Success);
 
 	// F-DDrace
-	
+	void SendJoinLeaveMessage(const char *pMessage);
+
 	//dummy
 	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1));
 	void ConnectDefaultDummies();
@@ -434,7 +437,7 @@ public:
 	const char* FormatMotd(const char* pMsg);
 
 	//acc broadcast
-	const char* FormatExperienceBroadcast(const char* pMsg);
+	const char* FormatExperienceBroadcast(const char* pMsg, int ClientID);
 
 	//extras
 	void SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special = 0);
@@ -744,6 +747,7 @@ private:
 	bool TryVoteMute(const NETADDR* pAddr, int Secs);
 	bool VoteMute(const NETADDR* pAddr, int Secs, const char* pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);
+	const char *GetWhisper(char *pStr, int *pTarget);
 
 public:
 	CLayers* Layers() { return &m_Layers; }
