@@ -81,12 +81,13 @@ void CPickup::Tick()
 			{
 				if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
 				bool Sound = false;
+				bool IsVanilla = pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || Config()->m_SvDropWeapons;
 				// player picked us up, is someone was hooking us, let them go
 				int RespawnTime = -1;
 				switch (m_Type)
 				{
 					case POWERUP_HEALTH:
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+						if (IsVanilla)
 						{
 							if (pChr->IncreaseHealth(1))
 							{
@@ -98,7 +99,7 @@ void CPickup::Tick()
 						break;
 
 					case POWERUP_ARMOR:
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+						if (IsVanilla)
 						{
 							if (pChr->IncreaseArmor(1))
 							{
@@ -151,7 +152,7 @@ void CPickup::Tick()
 							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Subtype) != WEAPON_GUN)
 								break;
 
-							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
+							if (IsVanilla && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
 								pChr->GiveWeapon(m_Subtype, false, 10);
 							else if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
 								pChr->GiveWeapon(m_Subtype);
@@ -182,7 +183,7 @@ void CPickup::Tick()
 
 						// activate ninja on target player
 						pChr->GiveNinja();
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+						if (IsVanilla)
 						{
 							RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
 
@@ -203,7 +204,7 @@ void CPickup::Tick()
 						{
 							//nothing here yet
 
-							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+							if (IsVanilla)
 								RespawnTime = g_pData->m_aPickups[POWERUP_WEAPON].m_Respawntime;
 
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
@@ -214,14 +215,17 @@ void CPickup::Tick()
 						break;
 				};
 
-				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+				if (IsVanilla)
 				{
 					if (RespawnTime >= 0)
 					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
-							pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
-						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+						{
+							char aBuf[256];
+							str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
+								pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
+							GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+						}
 						m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 					}
 				}
