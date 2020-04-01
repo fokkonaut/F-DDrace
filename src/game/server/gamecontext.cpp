@@ -3531,7 +3531,7 @@ void CGameContext::ResetTuning()
 void CGameContext::List(int ClientID, const char* pFilter)
 {
 	int Total = 0;
-	char aBuf[256];
+	char aBuf[128];
 	int Bufcnt = 0;
 	if (pFilter[0])
 		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
@@ -3546,7 +3546,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 			const char* pName = Server()->ClientName(i);
 			if (str_find_nocase(pName, pFilter) == NULL)
 				continue;
-			if (Bufcnt + str_length(pName) + 4 > 256)
+			if (Bufcnt + str_length(pName) + 4 > 128)
 			{
 				SendChatTarget(ClientID, aBuf);
 				Bufcnt = 0;
