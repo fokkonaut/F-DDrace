@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
-#define VERSION_RELEASE "5.9"
+#define VERSION_RELEASE "6.0"
 #define GAME_VERSION "0.7.4, " VERSION_RELEASE
 #define GAME_VERSION_SEVENDOWN "0.6.4, " VERSION_RELEASE
 #define GAME_NETVERSION "0.7 802f1be60a05665f"
