@@ -437,7 +437,7 @@ Messages = [
 
 	### Client messages
 	NetMessage("Cl_Say", [
-		NetIntRange("m_Mode", 0, 'NUM_CHATS-1'),
+		NetIntRange("m_Mode", 0, 'NUM_CHATS-2'), # -2 because CHAT_SINGLE was introduced in F-DDrace and should not get sent by a client
 		NetIntRange("m_Target", -1, 'MAX_CLIENTS-1'),
 		NetStringStrict("m_pMessage"),
 	], teehistorian=False),
