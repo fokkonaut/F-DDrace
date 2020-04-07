@@ -1247,7 +1247,7 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	if (pSelf->Config()->m_SvContactDiscord[0] != '\0')
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "You need to contact the admin, '%s', on Discord and pay him 5 euros as paysafecard in order to get VIP.", pSelf->Config()->m_SvContactDiscord);
+		str_format(aBuf, sizeof(aBuf), "You need to contact the admin, '%s', on Discord and pay him 5 euros in order to get VIP.", pSelf->Config()->m_SvContactDiscord);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 }
