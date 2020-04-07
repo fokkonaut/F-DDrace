@@ -44,14 +44,14 @@ CHAT_COMMAND("kill", "", CFGFLAG_CHAT, ConProtectedKill, this, "Kill yourself", 
 // F-DDrace
 
 //score
-CHAT_COMMAND("score", "?s", CFGFLAG_CHAT, ConScore, this, "Changes the displayed score in scoreboard", AUTHED_NO)
+CHAT_COMMAND("score", "?s[mode]", CFGFLAG_CHAT, ConScore, this, "Changes the displayed score in scoreboard", AUTHED_NO)
 
 //stats
-CHAT_COMMAND("stats", "?r", CFGFLAG_CHAT, ConStats, this, "Shows stats of player r", AUTHED_NO)
+CHAT_COMMAND("stats", "?r[player name]", CFGFLAG_CHAT, ConStats, this, "Shows stats of player r", AUTHED_NO)
 
 //info
 CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost", AUTHED_NO)
-CHAT_COMMAND("policeinfo", "?i", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
+CHAT_COMMAND("policeinfo", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
 CHAT_COMMAND("vipinfo", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP", AUTHED_NO)
 CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons", AUTHED_NO)
 CHAT_COMMAND("accountinfo", "", CFGFLAG_CHAT, ConAccountInfo, this, "Shows information about accounts", AUTHED_NO)
