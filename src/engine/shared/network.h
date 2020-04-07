@@ -451,9 +451,9 @@ public:
 
 class CNetRecvUnpacker
 {
-public:
 	bool m_Valid;
 
+public:
 	NETADDR m_Addr;
 	CNetConnection *m_pConnection;
 	int m_CurrentChunk;
@@ -462,6 +462,7 @@ public:
 	unsigned char m_aBuffer[NET_MAX_PACKETSIZE];
 
 	CNetRecvUnpacker() { Clear(); }
+	bool IsActive() { return m_Valid; }
 	void Clear();
 	void Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientID);
 	int FetchChunk(CNetChunk *pChunk);

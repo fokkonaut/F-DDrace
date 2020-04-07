@@ -174,6 +174,7 @@ class CCharacterCore
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2> >* m_pTeleOuts;
 public:
+	static const float PHYS_SIZE;
 	vec2 m_Pos;
 	vec2 m_Vel;
 	bool m_Hook;
