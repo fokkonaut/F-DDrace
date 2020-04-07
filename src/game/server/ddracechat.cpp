@@ -1170,6 +1170,8 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", (*Account).m_PoliceLevel, (*Account).m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} //fallthrough
 
 		case MINIGAME_BLOCK:
