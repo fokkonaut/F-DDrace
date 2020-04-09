@@ -3925,6 +3925,11 @@ void CGameContext::CreateSound(int Sound, int ClientID)
 	CreateSound(m_apPlayers[ClientID]->m_ViewPos, Sound, CmaskOne(ClientID));
 }
 
+void CGameContext::CreateSound(vec2 Pos, int Sound, int ClientID)
+{
+	CreateSound(Pos, Sound, CmaskOne(ClientID));
+}
+
 const char *CGameContext::FormatMotd(const char *pMsg)
 {
 	char aTemp[64];

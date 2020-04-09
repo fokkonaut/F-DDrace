@@ -1190,8 +1190,12 @@ void CCharacter::TickDefered()
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
 	// F-DDrace
-	if (Server()->IsSevendown(m_pPlayer->GetCID()))
-		if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (Server()->IsSevendown(i))
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, i);
+	}
 	if (m_Core.m_OnHookFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	if (m_Core.m_OnHookPlayer) OnPlayerHook();
 

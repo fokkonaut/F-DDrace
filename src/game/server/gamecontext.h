@@ -467,6 +467,7 @@ public:
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSound(int Sound, int ClientID);
+	void CreateSound(vec2 Pos, int Sound, int ClientID);
 
 	void UnsetTelekinesis(CEntity *pEntity);
 
