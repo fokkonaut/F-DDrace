@@ -3917,15 +3917,15 @@ void CGameContext::CreateSoundGlobal(int Sound)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (m_apPlayers[i])
-			CreateSound(m_apPlayers[i]->m_ViewPos, Sound, CmaskOne(i));
+			CreateSoundPlayer(Sound, i);
 }
 
-void CGameContext::CreateSound(int Sound, int ClientID)
+void CGameContext::CreateSoundPlayer(int Sound, int ClientID)
 {
 	CreateSound(m_apPlayers[ClientID]->m_ViewPos, Sound, CmaskOne(ClientID));
 }
 
-void CGameContext::CreateSound(vec2 Pos, int Sound, int ClientID)
+void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 {
 	CreateSound(Pos, Sound, CmaskOne(ClientID));
 }
@@ -4721,7 +4721,7 @@ void CGameContext::SendSurvivalBroadcast(const char *pMsg, bool Sound, bool IsIm
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL)
 		{
 			if (Sound)
-				CreateSound(SOUND_HOOK_NOATTACH, i);
+				CreateSoundPlayer(SOUND_HOOK_NOATTACH, i);
 
 			// show money broadcast instead of the wanted one if we are on a money tile
 			if (m_apPlayers[i]->GetCharacter() && m_apPlayers[i]->GetCharacter()->m_MoneyTile)
