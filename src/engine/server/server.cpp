@@ -549,6 +549,10 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	if(!pMsg)
 		return -1;
 
+	// drop invalid packet
+	if(ClientID != -1 && (ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CClient::STATE_EMPTY || m_aClients[ClientID].m_Quitting))
+		return 0;
+
 	mem_zero(&Packet, sizeof(CNetChunk));
 	Packet.m_ClientID = ClientID;
 	Packet.m_pData = pMsg->Data();
@@ -719,6 +723,13 @@ void CServer::DoSnapshot()
 int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
+
+	// Remove non human player on same slot
+	if(pThis->GameServer()->IsClientBot(ClientID))
+	{
+		pThis->GameServer()->OnClientDrop(ClientID, "removing dummy");
+	}
+
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_AUTH;
 	pThis->m_aClients[ClientID].m_aName[0] = 0;
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
@@ -735,6 +746,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
+
 	return 0;
 }
 

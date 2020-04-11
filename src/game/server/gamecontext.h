@@ -301,6 +301,7 @@ public:
 	virtual void OnClientEngineJoin(int ClientID);
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
 
+	virtual bool IsClientBot(int ClientID) const;
 	virtual bool IsClientReady(int ClientID) const;
 	virtual bool IsClientPlayer(int ClientID) const;
 	virtual bool IsClientSpectator(int ClientID) const;

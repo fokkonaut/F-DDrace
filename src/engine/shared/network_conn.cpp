@@ -361,26 +361,25 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 									dbg_msg("security", "token not supported by client (packet size %d)", pPacket->m_DataSize);
 								m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
 							}
-							SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+							SendControl(NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 						}
 						else
 						{
-							SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+							SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 						}
 						if(Config()->m_Debug)
-							dbg_msg("connection", "got connection, sending connect+accept");
+							dbg_msg("connection", "got connection, sending accept");
 					}
 				}
 				else if(State() == NET_CONNSTATE_CONNECT)
 				{
 					// connection made
-					if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
+					if(CtrlMsg == NET_CTRLMSG_ACCEPT)
 					{
 						m_LastRecvTime = Now;
-						SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 						m_State = NET_CONNSTATE_ONLINE;
 						if(Config()->m_Debug)
-							dbg_msg("connection", "got connect+accept, sending accept. connection online");
+							dbg_msg("connection", "got accept. connection online");
 					}
 				}
 			}
@@ -479,9 +478,9 @@ int CNetConnection::Update()
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
 		{
 			if (m_Sevendown)
-				SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
+				SendControl(NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 			else
-				SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
+				SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 		}
 	}
 
