@@ -1190,14 +1190,31 @@ void CCharacter::TickDefered()
 	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
 
 	// F-DDrace
-	if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
 	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (Server()->IsSevendown(i))
-				GameServer()->CreateSoundPlayerAt(m_Pos, SOUND_HOOK_ATTACH_PLAYER, i);
+		int Sound = -1;
+		if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
+			Sound = SOUND_HOOK_ATTACH_PLAYER;
+		else if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_GROUND)
+			Sound = SOUND_HOOK_ATTACH_GROUND;
+		else if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_HIT_NOHOOK)
+			Sound = SOUND_HOOK_NOATTACH;
+
+		if(Sound != -1)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if (Server()->IsSevendown(i) && (Sound == SOUND_HOOK_ATTACH_PLAYER || i != m_pPlayer->GetCID()))
+					GameServer()->CreateSoundPlayerAt(m_Pos, Sound, i);
+		}
 	}
-	if (m_Core.m_OnHookFlag) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	if (m_Core.m_OnHookPlayer) OnPlayerHook();
+
+	if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_FLAG)
+	{
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		m_TriggeredEvents &= ~COREEVENTFLAG_HOOK_ATTACH_FLAG;
+	}
+
+	if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
+		OnPlayerHook();
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{

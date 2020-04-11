@@ -108,9 +108,6 @@ void CCharacterCore::Reset()
 	m_Killer.m_Weapon = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 
-	m_OnHookFlag = false;
-	m_OnHookPlayer = false;
-
 	m_SpinBot = false;
 	m_SpinBotSpeed = 50;
 	m_SpinBotAngle = 0;
@@ -128,8 +125,6 @@ void CCharacterCore::Tick(bool UseInput)
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
 
 	m_TriggeredEvents = 0;
-	m_OnHookFlag = false;
-	m_OnHookPlayer = false;
 
 	// get ground state
 	bool Grounded = false;
@@ -305,7 +300,6 @@ void CCharacterCore::Tick(bool UseInput)
 							pCharCore->m_Killer.m_Weapon = -1;
 
 						pCharCore->m_Killer.m_ClientID = m_Id;
-						m_OnHookPlayer = true;
 					}
 				}
 			}
@@ -318,7 +312,7 @@ void CCharacterCore::Tick(bool UseInput)
 					ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
 					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 40.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
 					{
-						m_OnHookFlag = true;
+						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
 						m_HookState = HOOK_GRABBED;
 						if (i == TEAM_RED)
 							m_HookedPlayer = FLAG_RED;

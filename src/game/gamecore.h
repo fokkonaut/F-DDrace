@@ -223,9 +223,6 @@ public:
 	int m_UpdateFlagVel;
 	vec2 m_UFlagVel;
 
-	bool m_OnHookFlag;
-	bool m_OnHookPlayer;
-
 	struct KillerInfo
 	{
 		int m_ClientID;
