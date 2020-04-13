@@ -498,7 +498,7 @@ void IGameController::Snap(int SnappingClient)
 		((int*)pGameData)[2] = GameStartTick;
 		((int*)pGameData)[3] = 0;
 		((int*)pGameData)[4] = m_GameInfo.m_ScoreLimit;
-		((int*)pGameData)[5] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[5] = m_GameInfo.m_TimeLimit;
 		((int*)pGameData)[6] = 0;
 		((int*)pGameData)[7] = m_RoundCount+1;
 
