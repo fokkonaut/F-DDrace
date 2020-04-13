@@ -547,16 +547,13 @@ void IGameController::Snap(int SnappingClient)
 		pGameData->m_GameStateFlags = GameStateFlags;
 		pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
 
-		if (!Server()->IsSevendown(SnappingClient))
-		{
-			CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
-			if (!pGameDataRace)
-				return;
+		CNetObj_GameDataRace* pGameDataRace = static_cast<CNetObj_GameDataRace*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATARACE, 0, sizeof(CNetObj_GameDataRace)));
+		if (!pGameDataRace)
+			return;
 
-			pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
-			pGameDataRace->m_Precision = 0;
-			pGameDataRace->m_RaceFlags = 0;
-		}
+		pGameDataRace->m_BestTime = m_CurrentRecord == 0 ? -1 : m_CurrentRecord * 1000.0f;
+		pGameDataRace->m_Precision = 0;
+		pGameDataRace->m_RaceFlags = 0;
 	}
 }
 
