@@ -110,7 +110,7 @@ int CNetConnection::QueueChunkEx(int Flags, int DataSize, const void *pData, int
 {
 	unsigned char *pChunkData;
 
-	// check if we have space for it, if not, flush the connection#
+	// check if we have space for it, if not, flush the connection
 	int SecurityTokenSize = m_Sevendown ? (int)sizeof(SECURITY_TOKEN) : 0;
 	if((m_Construct.m_DataSize + DataSize + NET_MAX_CHUNKHEADERSIZE > (int)sizeof(m_Construct.m_aChunkData) - SecurityTokenSize) || m_Construct.m_NumChunks == NET_MAX_PACKET_CHUNKS)
 		Flush();

@@ -538,7 +538,7 @@ void IGameController::Snap(int SnappingClient)
 		if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
 			pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
 
-		if (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS && pGameInfoEx->m_Flags&GAMEINFOFLAG_ALLOW_ZOOM)
+		if ((pGameInfoEx->m_Flags&GAMEINFOFLAG_ALLOW_ZOOM) && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_TELE_RIFLE))
 			pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 	}
 	else
