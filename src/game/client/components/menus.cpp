@@ -857,7 +857,7 @@ float CMenus::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current)
 	// layout
 	CUIRect Handle;
 	pRect->VSplitLeft(max(min(pRect->w/8.0f, 33.0f), pRect->h), &Handle, 0);
-	Handle.x += (pRect->w-Handle.w)*Current;
+	Handle.x += (pRect->w-Handle.w)*clamp(Current, 0.0f, 1.0f);
 	Handle.HMargin(5.0f, &Handle);
 
 	CUIRect Rail;
@@ -1279,7 +1279,7 @@ void CMenus::RenderLoading(int WorkedAmount)
 	s_LastLoadRender = Now;
 	static int64 s_LoadingStart = Now;
 
-	Graphics()->Clear(0.45f, 0.45f, 0.45f);
+	m_pClient->StartRendering();
 	RenderBackground((Now-s_LoadingStart)/Freq);
 
 	CUIRect Screen = *UI()->Screen();
@@ -1512,12 +1512,15 @@ void CMenus::OnInit()
 	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
 	Console()->Chain("br_sort", ConchainServerbrowserSortingUpdate, this);
 	Console()->Chain("br_sort_order", ConchainServerbrowserSortingUpdate, this);
+	Console()->Chain("connect", ConchainConnect, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("snd_enable", ConchainUpdateMusicState, this);
 	Console()->Chain("snd_enable_music", ConchainUpdateMusicState, this);
 
 	RenderLoading(1);
+
+	ServerBrowser()->SetType(Config()->m_UiBrowserPage == PAGE_LAN ? IServerBrowser::TYPE_LAN : IServerBrowser::TYPE_INTERNET);
 }
 
 void CMenus::PopupMessage(const char *pTopic, const char *pBody, const char *pButton, int Next)
@@ -1553,12 +1556,11 @@ int CMenus::Render()
 			// else the increased rendering time at startup prevents
 			// the network from being pumped effectively.
 			ServerBrowser()->Refresh(IServerBrowser::REFRESHFLAG_INTERNET|IServerBrowser::REFRESHFLAG_LAN);
-			ServerBrowser()->SetType(Config()->m_UiBrowserPage == PAGE_LAN ? IServerBrowser::TYPE_LAN : IServerBrowser::TYPE_INTERNET);
 		}
 	}
 
 	// render background only if needed
-	if(Client()->State() != IClient::STATE_ONLINE && !m_pClient->m_pMapLayersBackGround->MenuMapLoaded())
+	if(IsBackgroundNeeded())
 		RenderBackground(Client()->LocalTime());
 
 	CUIRect TabBar, MainView;
@@ -2530,6 +2532,11 @@ bool CMenus::CheckHotKey(int Key) const
 	return !m_KeyReaderIsActive && !m_KeyReaderWasActive && !m_PrevCursorActive && !m_PopupActive &&
 		!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT) && !Input()->KeyIsPressed(KEY_LCTRL) && !Input()->KeyIsPressed(KEY_RCTRL) && !Input()->KeyIsPressed(KEY_LALT) && // no modifier
 		Input()->KeyIsPressed(Key) && !m_pClient->m_pGameConsole->IsConsoleActive();
+}
+
+bool CMenus::IsBackgroundNeeded() const
+{ 
+	return !m_pClient->m_InitComplete || (Client()->State() != IClient::STATE_ONLINE && !m_pClient->m_pMapLayersBackGround->MenuMapLoaded());
 }
 
 void CMenus::RenderBackground(float Time)

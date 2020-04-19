@@ -715,13 +715,14 @@ private:
 	void RenderServerbrowserInfoTab(CUIRect View);
 	void RenderServerbrowserFriendList(CUIRect View);
 	void RenderDetailInfo(CUIRect View, const CServerInfo *pInfo);
-	void RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int RowCount, vec4 TextColor = vec4(1,1,1,1));
+	void RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int RowCount, vec4 TextColor, vec4 TextOutlineColor);
 	void RenderServerbrowserServerDetail(CUIRect View, const CServerInfo *pInfo);
 	void RenderServerbrowserBottomBox(CUIRect View);
 	void RenderServerbrowserOverlay();
 	void RenderFilterHeader(CUIRect View, int FilterIndex);
 	int DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEntry, const CBrowserFilter *pFilter, bool Selected);
 	void RenderServerbrowser(CUIRect MainView);
+	static void ConchainConnect(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserSortingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -750,7 +751,7 @@ private:
 	bool DoResolutionList(CUIRect* pRect, CListBox* pListBox,
 						  const sorted_array<CVideoMode>& lModes);
 
-	// found in menu_callback.cpp
+	// found in menus_callback.cpp
 	float RenderSettingsControlsMouse(CUIRect View);
 	float RenderSettingsControlsJoystick(CUIRect View);
 	float RenderSettingsControlsMovement(CUIRect View);
@@ -781,6 +782,7 @@ private:
 public:
 	void InitLoading(int TotalWorkAmount);
 	void RenderLoading(int WorkedAmount = 0);
+	bool IsBackgroundNeeded() const;
 
 	struct CSwitchTeamInfo
 	{
