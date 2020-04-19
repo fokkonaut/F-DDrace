@@ -373,8 +373,8 @@ int CDataFileReader::GetFileItemSize(int Index) const
 {
 	if(!m_pDataFile) { return 0; }
 	if(Index == m_pDataFile->m_Header.m_NumItems-1)
-		return m_pDataFile->m_Header.m_ItemSize-m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
-	return m_pDataFile->m_Info.m_pItemOffsets[Index+1]-m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
+		return m_pDataFile->m_Header.m_ItemSize-m_pDataFile->m_Info.m_pItemOffsets[Index];
+	return m_pDataFile->m_Info.m_pItemOffsets[Index+1]-m_pDataFile->m_Info.m_pItemOffsets[Index];
 }
 
 int CDataFileReader::GetItemSize(int Index) const
