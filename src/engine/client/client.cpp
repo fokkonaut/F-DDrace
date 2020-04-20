@@ -1994,7 +1994,9 @@ void CClient::Run()
 	GameClient()->OnInit();
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "version %s", GameClient()->NetVersion());
+	str_format(aBuf, sizeof(aBuf), "netversion %s", GameClient()->NetVersion());
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
+	str_format(aBuf, sizeof(aBuf), "game version %s", GameClient()->Version());
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf);
 
 	//
