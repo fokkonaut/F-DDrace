@@ -207,4 +207,5 @@ MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CF
 MACRO_CONFIG_INT(SvClanProtection, sv_clan_protection, 1, 0, 1, CFGFLAG_SERVER, "Whether players have to use greensward skin for Chilli.* clantag", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 0, 0, 1, CFGFLAG_SERVER, "Whether your tee bounces while moving in freeze", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowRainbow, sv_allow_rainbow, 0, 0, 1, CFGFLAG_SERVER, "Whether rainbow can be used (may cause client disconnects)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 50, 1, 100, CFGFLAG_SERVER, "64 player id <-> vanilla id players map update rate", AUTHED_ADMIN)
 #endif

@@ -49,6 +49,14 @@ void CPlayer::Reset()
 
 	// F-DDrace
 
+	// pIdMap[0] = m_ClientID means that the id 0 of your fake map equals m_ClientID, which means you are always id 0 for yourself
+	int *pIdMap = Server()->GetIdMap(m_ClientID);
+	for (int i = 0;i < VANILLA_MAX_CLIENTS;i++)
+	{
+		pIdMap[i] = -1;
+	}
+	//pIdMap[0] = m_ClientID;
+
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
 	m_Sent1stAfkWarning = 0;
@@ -170,7 +178,10 @@ void CPlayer::Reset()
 	m_TeeInfos.m_aSkinName[0] = '\0';
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
 		m_HidePlayerTeam[i] = TEAM_RED;
+		m_aSameIP[i] = false;
+	}
 
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;
@@ -379,13 +390,60 @@ void CPlayer::PostPostTick()
 		TryRespawn();
 }
 
+void CPlayer::SendConnect(int ClientID, int FakeID)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+
+	int Team = pPlayer->m_Team;
+	if (Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && pPlayer->m_IsDummy)
+		|| (GameServer()->Config()->m_SvHideMinigamePlayers && m_Minigame != pPlayer->m_Minigame)))
+		Team = TEAM_BLUE;
+
+	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientID = FakeID;
+	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Team = Team;
+	NewClientInfoMsg.m_pName = pPlayer->m_CurrentInfo.m_aName;
+	NewClientInfoMsg.m_pClan = pPlayer->m_CurrentInfo.m_aClan;
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+	NewClientInfoMsg.m_Silent = 1;
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		NewClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
+	}
+
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+}
+
+void CPlayer::SendDisconnect(int ClientID, int FakeID)
+{
+	if (!GameServer()->m_apPlayers[ClientID])
+		return;
+
+	CNetMsg_Sv_ClientDrop ClientDropMsg;
+	ClientDropMsg.m_ClientID = FakeID;
+	ClientDropMsg.m_pReason = "";
+	ClientDropMsg.m_Silent = 1;
+
+	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+}
+
 void CPlayer::Snap(int SnappingClient)
 {
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
+	int id = m_ClientID;
+	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
+		return;
+
 	int Size = Server()->IsSevendown(SnappingClient) ? 5*4 : sizeof(CNetObj_PlayerInfo);
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, m_ClientID, Size));
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, Size));
 	if(!pPlayerInfo)
 		return;
 
@@ -464,7 +522,17 @@ void CPlayer::Snap(int SnappingClient)
 			}
 		}
 
-		if (Server()->IsSevendown(m_ClientID))
+		bool Sevendown = Server()->IsSevendown(m_ClientID);
+		if (SpecMode != SPEC_FREEVIEW && SpectatorID >= 0)
+		{
+			if (!Server()->Translate(SpectatorID, m_ClientID))
+			{
+				SpectatorID = -1;
+				SpecMode = SPEC_FREEVIEW;
+			}
+		}
+
+		if (Sevendown)
 		{
 			((int*)pSpectatorInfo)[0] = SpectatorID;
 			((int*)pSpectatorInfo)[1] = m_ViewPos.x;
@@ -510,7 +578,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(Server()->IsSevendown(SnappingClient))
 	{
-		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, m_ClientID, 17*4); // NETOBJTYPE_CLIENTINFO
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, id, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
 
@@ -528,7 +596,7 @@ void CPlayer::Snap(int SnappingClient)
 			Team = TEAM_BLUE;
 
 		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
-		((int*)pPlayerInfo)[1] = m_ClientID;
+		((int*)pPlayerInfo)[1] = id;
 		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && !m_TeeControlMode ? Team : TEAM_SPECTATORS;
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
@@ -550,7 +618,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Latency = Latency;
 		pPlayerInfo->m_Score = Score;
 
-		CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, m_ClientID, sizeof(CNetObj_ExPlayerInfo)));
+		CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, id, sizeof(CNetObj_ExPlayerInfo)));
 		if(!pExPlayerInfo)
 			return;
 
@@ -560,6 +628,46 @@ void CPlayer::Snap(int SnappingClient)
 		if(m_Afk)
 			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
 	}
+}
+
+void CPlayer::FakeSnap()
+{
+	int FakeID = VANILLA_MAX_CLIENTS - 1;
+
+	if (Server()->IsSevendown(m_ClientID))
+	{
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, FakeID, 17*4); // NETOBJTYPE_CLIENTINFO
+		if(!pClientInfo)
+			return;
+
+		StrToInts(&pClientInfo[0], 4, " ");
+		StrToInts(&pClientInfo[4], 3, "");
+		StrToInts(&pClientInfo[8], 6, "default");
+	}
+}
+
+void CPlayer::SetFakeID()
+{
+	int FakeID = 0;
+	NETADDR Addr, Addr2;
+	Server()->GetClientAddr(m_ClientID, &Addr);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
+			continue;
+
+		Server()->GetClientAddr(i, &Addr2);
+		if (net_addr_comp_noport(&Addr, &Addr2) == 0)
+		{
+			FakeID++;
+			m_aSameIP[i] = true;
+			GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = true;
+		}
+	}
+	m_FakeID = FakeID;
+
+	int *pIdMap = Server()->GetIdMap(m_ClientID);
+	pIdMap[m_FakeID] = m_ClientID;
 }
 
 void CPlayer::OnDisconnect()
@@ -594,6 +702,7 @@ void CPlayer::OnDisconnect()
 		if (GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = TEAM_RED;
+			GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = false;
 
 			if (GameServer()->m_apPlayers[i]->m_TeeControlForcedID == m_ClientID)
 			{
@@ -881,11 +990,14 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	GameServer()->OnClientTeamChange(m_ClientID);
 
 	// notify clients
-	GameServer()->SendTeamChange(m_ClientID, Team, !DoChatMsg, m_TeamChangeTick, -1);
+	GameServer()->SendTeamChange(m_ClientID, Team, true, m_TeamChangeTick, -1);
 	GameServer()->UpdateHidePlayers(m_ClientID);
 
-	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-	GameServer()->SendJoinLeaveMessage(aBuf);
+	if (DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+	}
 }
 
 void CPlayer::TryRespawn()

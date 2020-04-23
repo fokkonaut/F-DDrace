@@ -51,9 +51,52 @@ void CEventHandler::Snap(int SnappingClient)
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
 			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, vec2(ev->m_X, ev->m_Y)) < 1500.0f)
 			{
-				void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
-				if(d)
-					mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+				if (m_aTypes[i] == NETEVENTTYPE_DEATH)
+				{
+					CNetEvent_Death *pDeath = (CNetEvent_Death *)&m_aData[m_aOffsets[i]];
+					// save real id
+					int ClientID = pDeath->m_ClientID;
+
+					// translate id
+					int id = pDeath->m_ClientID;
+					if (!GameServer()->Server()->Translate(id, SnappingClient))
+						continue;
+					pDeath->m_ClientID = id;
+
+					// create event
+					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
+					if(d)
+						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+
+					// reset id for others
+					pDeath->m_ClientID = ClientID;
+				}
+				else if (m_aTypes[i] == NETEVENTTYPE_DAMAGE)
+				{
+					CNetEvent_Damage *pDamage = (CNetEvent_Damage *)&m_aData[m_aOffsets[i]];
+					// save real id
+					int ClientID = pDamage->m_ClientID;
+
+					// translate id
+					int id = pDamage->m_ClientID;
+					if (!GameServer()->Server()->Translate(id, SnappingClient))
+						continue;
+					pDamage->m_ClientID = id;
+
+					// create event
+					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
+					if(d)
+						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+
+					// reset id for others
+					pDamage->m_ClientID = ClientID;
+				}
+				else
+				{
+					void* d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
+					if (d)
+						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+				}
 			}
 		}
 	}
