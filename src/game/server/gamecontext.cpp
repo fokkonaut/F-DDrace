@@ -1,4 +1,4 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+﻿/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
@@ -380,6 +380,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	}
 	else // Mode == CHAT_WHISPER
 	{
+		if (!Server()->IsSevendown(ChatterClientID))
+			if (!Server()->ReverseTranslate(To, ChatterClientID))
+				return;
+
 		if (To < 0 || To >= MAX_CLIENTS || !Server()->ClientIngame(To))
 		{
 			char aBuf[32];
@@ -391,27 +395,42 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// send to the clients
 		Msg.m_TargetID = To;
 
-		if (Server()->IsSevendown(ChatterClientID))
+		if (Server()->Translate(Msg.m_TargetID, ChatterClientID) && Server()->Translate(Msg.m_ClientID, ChatterClientID))
 		{
-			CMsgPacker Msg(NETMSGTYPE_SV_CHAT);
-			Msg.AddInt(2); // CHAT_WHISPER_SEND
-			Msg.AddInt(To);
-			Msg.AddString(aText, -1);
-			Server()->SendMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			if (Server()->IsSevendown(ChatterClientID))
+			{
+				CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
+				Msg2.AddInt(2); // CHAT_WHISPER_SEND
+				Msg2.AddInt(Msg.m_TargetID);
+				Msg2.AddString(Msg.m_pMessage, -1);
+				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, ChatterClientID);
+			}
+			else
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 		}
-		else
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 
-		if (Server()->IsSevendown(To))
+		// reset client ids
+		Msg.m_TargetID = To;
+		Msg.m_ClientID = ChatterClientID;
+
+		if (Server()->Translate(Msg.m_ClientID, To) && Server()->Translate(Msg.m_TargetID, To))
 		{
-			CMsgPacker Msg(NETMSGTYPE_SV_CHAT);
-			Msg.AddInt(3); // CHAT_WHISPER_RECV
-			Msg.AddInt(ChatterClientID);
-			Msg.AddString(aText, -1);
-			Server()->SendMsg(&Msg, MSGFLAG_VITAL, To);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(ChatterClientID), aText);
+			Msg.m_pMessage = aBuf;
+			Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
+
+			if (Server()->IsSevendown(To))
+			{
+				CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
+				Msg2.AddInt(3); // CHAT_WHISPER_RECV
+				Msg2.AddInt(Msg.m_ClientID);
+				Msg2.AddString(Msg.m_pMessage, -1);
+				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
+			}
+			else
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 		}
-		else
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 	}
 }
 
@@ -485,7 +504,7 @@ void CGameContext::SendSettings(int ClientID)
 	Msg.m_SpecVote = Config()->m_SvVoteSpectate;
 	Msg.m_TeamLock = m_LockTeams != 0;
 	Msg.m_TeamBalance = 0;
-	Msg.m_PlayerSlots = Config()->m_SvPlayerSlots;
+	Msg.m_PlayerSlots = clamp(Config()->m_SvPlayerSlots, 0, (int)VANILLA_MAX_CLIENTS);
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
@@ -1104,6 +1123,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID), MAX_NAME_LENGTH);
 	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
+	m_apPlayers[ClientID]->SetFakeID();
 
 	m_apPlayers[ClientID]->Respawn();
 
@@ -1125,10 +1145,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
 	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
-	NewClientInfoMsg.m_Silent = false;
-
-	if(Config()->m_SvSilentSpectatorMode && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
-		NewClientInfoMsg.m_Silent = true;
+	NewClientInfoMsg.m_Silent = 1;
 
 	for(int p = 0; p < NUM_SKINPARTS; p++)
 	{
@@ -1154,7 +1171,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		ClientInfoMsg.m_pName = m_apPlayers[i]->m_CurrentInfo.m_aName;
 		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_CurrentInfo.m_aClan;
 		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
-		ClientInfoMsg.m_Silent = false;
+		ClientInfoMsg.m_Silent = 1;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
 			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p];
@@ -1184,7 +1201,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChatSevendown(aBuf);
+		SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
@@ -1206,6 +1223,22 @@ void CGameContext::OnClientEnter(int ClientID)
 
 		// send chat commands
 		SendChatCommands(ClientID);
+
+		CNetMsg_Sv_ClientInfo FakeInfo;
+		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
+		FakeInfo.m_Local = 0;
+		FakeInfo.m_Team = TEAM_SPECTATORS;
+		FakeInfo.m_pName = " ";
+		FakeInfo.m_pClan = "";
+		FakeInfo.m_Country = -1;
+		FakeInfo.m_Silent = 1;
+		for(int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			FakeInfo.m_apSkinPartNames[p] = "standard";
+			FakeInfo.m_aUseCustomColors[p] = 0;
+			FakeInfo.m_aSkinPartColors[p] = 0;
+		}
+		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, ClientID);
 	}
 }
 
@@ -1271,9 +1304,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		CNetMsg_Sv_ClientDrop Msg;
 		Msg.m_ClientID = ClientID;
 		Msg.m_pReason = pReason;
-		Msg.m_Silent = false;
-		if(Config()->m_SvSilentSpectatorMode && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
-			Msg.m_Silent = true;
+		Msg.m_Silent = 1;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
 
 		if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
@@ -1283,7 +1314,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 				str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
 			else
 				str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
-			SendChatSevendown(aBuf);
+			SendChat(-1, CHAT_ALL, -1, aBuf);
 		}
 	}
 
@@ -1403,13 +1434,6 @@ const char *CGameContext::GetWhisper(char* pStr, int* pTarget)
 		Victim = -1;
 	*pTarget = Victim;
 	return pStr;
-}
-
-void CGameContext::SendChatSevendown(const char *pMessage)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (m_apPlayers[i] && Server()->IsSevendown(i))
-			SendChatTarget(i, pMessage);
 }
 
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
@@ -1978,6 +2002,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			CNetMsg_Cl_SetSpectatorMode* pMsg = &Msg;
+
+			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID >= 0)
+				if (!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))
+					return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 
@@ -3383,6 +3411,9 @@ void CGameContext::OnSnap(int ClientID)
 		if(m_apPlayers[i])
 			m_apPlayers[i]->Snap(ClientID);
 	}
+
+	if (ClientID > -1)
+		m_apPlayers[ClientID]->FakeSnap();
 }
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
