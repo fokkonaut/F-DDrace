@@ -1903,8 +1903,8 @@ int CServer::Run()
 					m_RunServer = false;
 			}
 
-			// wait for incomming data
-			m_NetServer.Wait(5);
+			// wait for incoming data
+			m_NetServer.Wait(clamp(int((TickStartTime(m_CurrentGameTick+1)-time_get())*1000/time_freq()), 1, 1000/SERVER_TICK_SPEED));
 		}
 	}
 	// disconnect all clients on shutdown
