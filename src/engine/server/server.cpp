@@ -283,7 +283,7 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_Regi
 	m_pGameServer = 0;
 
 	m_CurrentGameTick = 0;
-	m_RunServer = 1;
+	m_RunServer = true;
 
 	m_pCurrentMapData = 0;
 	m_CurrentMapSize = 0;
@@ -293,7 +293,7 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_Regi
 	m_pLastMapEntry = 0;
 	m_pMapListHeap = 0;
 
-	m_MapReload = 0;
+	m_MapReload = false;
 
 	m_RconClientID = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -1804,21 +1804,14 @@ int CServer::Run()
 
 	// start game
 	{
-		int64 ReportTime = time_get();
-		int ReportInterval = 3;
-
-		m_Lastheartbeat = 0;
 		m_GameStartTime = time_get();
 
 		while(m_RunServer)
 		{
-			int64 t = time_get();
-			int NewTicks = 0;
-
-			// load new map TODO: don't poll this
-			if(str_comp(Config()->m_SvMap, m_aCurrentMap) != 0 || m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) //	force reload to make sure the ticks stay within a valid range
+			// load new map
+			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) //	force reload to make sure the ticks stay within a valid range
 			{
-				m_MapReload = 0;
+				m_MapReload = false;
 
 				// load map
 				if(LoadMap(Config()->m_SvMap))
@@ -1853,10 +1846,12 @@ int CServer::Run()
 				}
 			}
 
-			while(t > TickStartTime(m_CurrentGameTick+1))
+			int64 Now = time_get();
+			bool NewTicks = false;
+			while(Now > TickStartTime(m_CurrentGameTick+1))
 			{
 				m_CurrentGameTick++;
-				NewTicks++;
+				NewTicks = true;
 
 				// apply new input
 				for(int c = 0; c < MAX_CLIENTS; c++)
@@ -1895,31 +1890,6 @@ int CServer::Run()
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
 
 			PumpNetwork();
-
-			if(ReportTime < time_get())
-			{
-				if(Config()->m_Debug)
-				{
-					/*
-					static NETSTATS prev_stats;
-					NETSTATS stats;
-					netserver_stats(net, &stats);
-
-					perf_next();
-
-					if(config.dbg_pref)
-						perf_dump(&rootscope);
-
-					dbg_msg("server", "send=%8d recv=%8d",
-						(stats.send_bytes - prev_stats.send_bytes)/reportinterval,
-						(stats.recv_bytes - prev_stats.recv_bytes)/reportinterval);
-
-					prev_stats = stats;
-					*/
-				}
-
-				ReportTime += time_freq()*ReportInterval;
-			}
 
 			if(Config()->m_SvShutdownWhenEmpty)
 			{
@@ -2081,7 +2051,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
 	str_copy(((CServer*)pUser)->m_NetServer.m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_NetServer.m_ShutdownMessage));
-	((CServer *)pUser)->m_RunServer = 0;
+	((CServer *)pUser)->m_RunServer = false;
 }
 
 void CServer::LogoutClient(int ClientID, const char *pReason)
@@ -2368,7 +2338,7 @@ void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConMapReload(IConsole::IResult *pResult, void *pUser)
 {
-	((CServer *)pUser)->m_MapReload = 1;
+	((CServer *)pUser)->m_MapReload = true;
 }
 
 void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
@@ -2531,6 +2501,16 @@ void CServer::ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent,
 	}
 }
 
+void CServer::ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() >= 1)
+	{
+		CServer *pThis = static_cast<CServer *>(pUserData);
+		pThis->m_MapReload = str_comp(pThis->Config()->m_SvMap, pThis->m_aCurrentMap) != 0;
+	}
+}
+
 void CServer::ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	((CServer *)pUserData)->ConchainRconPasswordChangeGeneric(AUTHED_ADMIN, ((CServer*)pUserData)->Config()->m_SvRconPassword, pResult);
@@ -2582,6 +2562,7 @@ void CServer::RegisterCommands()
 	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
 
+	Console()->Chain("sv_map", ConchainMapUpdate, this);
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);

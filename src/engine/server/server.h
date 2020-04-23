@@ -186,13 +186,11 @@ public:
 	IEngineMap *m_pMap;
 
 	int64 m_GameStartTime;
-	int m_RunServer;
-	int m_MapReload;
+	bool m_RunServer;
+	bool m_MapReload;
 	int m_RconClientID;
 	int m_RconAuthLevel;
 	int m_PrintCBIndex;
-
-	int64 m_Lastheartbeat;
 
 	int m_RconRestrict;
 
@@ -324,6 +322,8 @@ public:
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConShowIps(IConsole::IResult* pResult, void* pUser);
 	void ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult);
