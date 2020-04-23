@@ -71,6 +71,7 @@ public:
 	void PostTick();
 	void PostPostTick();
 	void Snap(int SnappingClient);
+	void FakeSnap();
 
 	void TranslatePlayerFlags(CNetObj_PlayerInput *NewInput);
 	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
@@ -355,6 +356,13 @@ public:
 	int m_Minigame;
 	int m_SurvivalState;
 	int m_SurvivalDieTick;
+
+	// 128p
+	void SendConnect(int ClientID, int FakeID);
+	void SendDisconnect(int ClientID, int FakeID);
+	void SetFakeID();
+	int m_FakeID;
+	bool m_aSameIP[MAX_CLIENTS];
 };
 
 #endif

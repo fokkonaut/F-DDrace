@@ -192,6 +192,11 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 	else
 		FlagCarrierBlue = FLAG_MISSING;
 
+	if (SnappingClient > -1 && FlagCarrierRed >= 0 && !Server()->Translate(FlagCarrierRed, SnappingClient))
+		FlagCarrierRed = FLAG_TAKEN;
+	if (SnappingClient > -1 && FlagCarrierBlue >= 0 && !Server()->Translate(FlagCarrierBlue, SnappingClient))
+		FlagCarrierBlue = FLAG_TAKEN;
+
 	if (Server()->IsSevendown(SnappingClient))
 	{
 		((int*)pGameDataFlag)[0] = 0;
