@@ -3163,7 +3163,7 @@ void CCharacter::FDDraceTick()
 			m_pTeeControlCursor->SetPos(CursorPos);
 		}
 	}
-	Config()->m_SvTestingCommands = 1;
+
 	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_TELE_RIFLE && (m_LastTeleRifle + Server()->TickSpeed() * Config()->m_SvTeleRifleDelay+1 > Server()->Tick()))
 	{
 		char aBuf[64];
