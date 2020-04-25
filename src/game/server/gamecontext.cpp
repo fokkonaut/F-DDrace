@@ -372,7 +372,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	else if (Mode == CHAT_SINGLE)
 	{
 		// send to the clients
-		Msg.m_TargetID = To;
 		Msg.m_Mode = CHAT_ALL;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 		if (ChatterClientID >= 0)

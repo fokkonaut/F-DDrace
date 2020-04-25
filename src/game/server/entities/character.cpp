@@ -406,7 +406,8 @@ void CCharacter::FireWeapon()
 	}
 
 	// check for ammo
-	if(!m_aWeapons[GetActiveWeapon()].m_Ammo)
+	if(!m_aWeapons[GetActiveWeapon()].m_Ammo ||
+		(GetActiveWeapon() == WEAPON_TELE_RIFLE && m_LastTeleRifle + Server()->TickSpeed() * Config()->m_SvTeleRifleDelay > Server()->Tick()))
 	{
 		// 125ms is a magical limit of how fast a human can click
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
@@ -798,6 +799,8 @@ void CCharacter::FireWeapon()
 				GameServer()->CreatePlayerSpawn(NewPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+
+				m_LastTeleRifle = Server()->Tick();
 			} break;
 
 			case WEAPON_PROJECTILE_RIFLE:
@@ -3053,6 +3056,8 @@ void CCharacter::FDDraceInit()
 	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
 
 	m_LastTouchedSwitcher = -1;
+
+	m_LastTeleRifle = Now;
 }
 
 void CCharacter::FDDraceTick()
@@ -3157,6 +3162,18 @@ void CCharacter::FDDraceTick()
 			vec2 CursorPos = vec2(pControlledTee->GetPos().x + pControlledTee->GetInput().m_TargetX, pControlledTee->GetPos().y + pControlledTee->GetInput().m_TargetY);
 			m_pTeeControlCursor->SetPos(CursorPos);
 		}
+	}
+	Config()->m_SvTestingCommands = 1;
+	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_TELE_RIFLE && (m_LastTeleRifle + Server()->TickSpeed() * Config()->m_SvTeleRifleDelay+1 > Server()->Tick()))
+	{
+		char aBuf[64];
+		int Seconds = Config()->m_SvTeleRifleDelay - ((Server()->Tick() - m_LastTeleRifle) / Server()->TickSpeed());
+
+		if (Seconds <= 0)
+			str_format(aBuf, sizeof(aBuf), "[Teleport unlocked]", Seconds);
+		else
+			str_format(aBuf, sizeof(aBuf), "[Next teleport: %ds]", Seconds);
+		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
 }
 

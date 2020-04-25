@@ -391,6 +391,8 @@ public:
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
 
+	int64 m_LastTeleRifle;
+
 	//weapon indicator
 	void UpdateWeaponIndicator();
 
