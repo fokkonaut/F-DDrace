@@ -604,7 +604,7 @@ void CPlayer::Snap(int SnappingClient)
 	else
 	{
 		pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
-		if(Server()->GetAuthedState(m_ClientID))
+		if(Server()->GetAuthedState(m_ClientID) && GameServer()->Config()->m_SvAuthedHighlighted)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
 		if(m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
