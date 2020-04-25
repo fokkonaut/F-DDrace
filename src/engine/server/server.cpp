@@ -1164,12 +1164,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
-			char aName[64] = {};
+			// we dont use the username thing yet, so unpack the empty username first
 			if (m_aClients[ClientID].m_Sevendown)
-				str_copy(aName, Unpacker.GetString(CUnpacker::SANITIZE_CC), sizeof(aName));
+				Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			const char *pAuth = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-
-			if(!str_utf8_check(pAuth) || (aName[0] && !str_utf8_check(aName)))
+			if(!str_utf8_check(pAuth))
 				return;
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
@@ -1179,9 +1178,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				// oy removed the usernames...
 				// use "name:password" format until we establish new extended netmsg
-				const char *pDelim = nullptr;
-				if (!m_aClients[ClientID].m_Sevendown)
-					pDelim = str_find(pAuth, ":");
+				char aName[64] = {};
+				const char *pDelim = str_find(pAuth, ":");
 				const char *pPw = nullptr;
 				if(!pDelim)
 					pPw = pAuth;
