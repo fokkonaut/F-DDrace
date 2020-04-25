@@ -1961,7 +1961,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Only %d active players are allowed", Config()->m_SvMaxClients - Config()->m_SvSpectatorSlots);
+				str_format(aBuf, sizeof(aBuf), "Only %d active players are allowed", Config()->m_SvPlayerSlots);
 				SendBroadcast(aBuf, ClientID);
 			}
 		}

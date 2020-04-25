@@ -21,6 +21,9 @@ class IGameController
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
+	// activity
+	void DoActivityCheck();
+
 	// map
 	char m_aMapWish[128];
 

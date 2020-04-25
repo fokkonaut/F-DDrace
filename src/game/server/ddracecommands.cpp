@@ -1066,7 +1066,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pResult->GetString(0));
+	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pSelf->Server()->ClientName(ID));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	if (pSelf->Server()->GetAuthedState(ID))
 	{
