@@ -2177,7 +2177,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else if(pPlayer->m_DDraceVersion < Version)
 				pPlayer->m_DDraceVersion = Version;
 
-			dbg_msg("fclient", "%d using custom client. version: %x, ddrace: %d", ClientID, Server()->GetClientVersion(ClientID), pPlayer->m_DDraceVersion);
+			dbg_msg("ddrace", "%d using custom client. version: %x, ddrace: %d", ClientID, Server()->GetClientVersion(ClientID), pPlayer->m_DDraceVersion);
 
 			if (pPlayer->m_DDraceVersion >= VERSION_DDRACE_TEAMS)
 				((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
