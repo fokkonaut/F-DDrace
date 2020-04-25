@@ -3164,13 +3164,13 @@ void CCharacter::FDDraceTick()
 		}
 	}
 
-	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_TELE_RIFLE && (m_LastTeleRifle + Server()->TickSpeed() * Config()->m_SvTeleRifleDelay+1 > Server()->Tick()))
+	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_TELE_RIFLE && (m_LastTeleRifle + Server()->TickSpeed() * (Config()->m_SvTeleRifleDelay+1) > Server()->Tick()))
 	{
 		char aBuf[64];
 		int Seconds = Config()->m_SvTeleRifleDelay - ((Server()->Tick() - m_LastTeleRifle) / Server()->TickSpeed());
 
 		if (Seconds <= 0)
-			str_format(aBuf, sizeof(aBuf), "[Teleport unlocked]", Seconds);
+			str_copy(aBuf, "[Teleport unlocked]", sizeof(aBuf));
 		else
 			str_format(aBuf, sizeof(aBuf), "[Next teleport: %ds]", Seconds);
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
