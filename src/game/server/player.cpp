@@ -19,7 +19,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool 
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
-	m_Team = AsSpec ? TEAM_SPECTATORS : TEAM_RED;
+	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam(ClientID);
 	m_DebugDummy = DebugDummy;
 	Reset();
 }

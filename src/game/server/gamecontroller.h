@@ -137,6 +137,7 @@ public:
 
 	void ResetGame();
 	void StartRound();
+	int GetStartTeam(int NotThisID);
 
 	virtual void RegisterChatCommands(CCommandManager *pManager);
 	//static void Com_Example(IConsole::IResult *pResult, void *pContext);

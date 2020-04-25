@@ -687,6 +687,29 @@ const char* IGameController::GetTeamName(int Team)
 	return "spectators";
 }
 
+int IGameController::GetStartTeam(int NotThisID)
+{
+	if(Config()->m_SvTournamentMode)
+		return TEAM_SPECTATORS;
+
+	int aNumplayers[2] = {0,0};
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(GameServer()->m_apPlayers[i] && i != NotThisID)
+		{
+			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
+				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
+		}
+	}
+
+	int Team = TEAM_RED;
+
+	if(CanJoinTeam(Team, NotThisID))
+		return Team;
+	return TEAM_SPECTATORS;
+}
+
+
 void IGameController::RegisterChatCommands(CCommandManager *pManager)
 {
 	//pManager->AddCommand("test", "Test the command system", "r", Com_Example, this);
