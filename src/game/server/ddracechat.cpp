@@ -1251,12 +1251,6 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail, spreadgun, spinbot, aimclosest");
 	pSelf->SendChatTarget(pResult->m_ClientID, "You can use '/room' to invite other players to the room.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money more per second.");
-	if (pSelf->Config()->m_SvContactDiscord[0] != '\0')
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "You need to contact the admin, '%s', on Discord and pay him 5 euros in order to get VIP.", pSelf->Config()->m_SvContactDiscord);
-		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	}
 }
 
 void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData)
