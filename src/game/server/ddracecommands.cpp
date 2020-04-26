@@ -1462,11 +1462,11 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (*Account).m_ExpireDateVIP);
+	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (int)(*Account).m_ExpireDateVIP);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_TeleRifle);
+	str_format(aBuf, sizeof(aBuf), "Tele Rifle: %d", (*Account).m_TeleRifle);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (*Account).m_ExpireDateTeleRifle);
+	str_format(aBuf, sizeof(aBuf), "Expire Date Tele Rifle: %d", (int)(*Account).m_ExpireDateTeleRifle);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
