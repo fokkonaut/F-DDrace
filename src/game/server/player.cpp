@@ -1420,6 +1420,7 @@ void CPlayer::SetExpireDate(int Item)
 	switch (Item)
 	{
 	case ITEM_VIP: Days = ITEM_EXPIRE_VIP; break;
+	case ITEM_TELE_RIFLE: Days = ITEM_EXPIRE_TELE_RIFLE; break;
 	default: return;
 	}
 
@@ -1431,6 +1432,7 @@ void CPlayer::SetExpireDate(int Item)
 	switch (Item)
 	{
 	case ITEM_VIP: (*Account).m_ExpireDateVIP = mktime(&ExpireDate); break;
+	case ITEM_TELE_RIFLE: (*Account).m_ExpireDateTeleRifle = mktime(&ExpireDate); break;
 	}
 }
 
@@ -1480,8 +1482,14 @@ bool CPlayer::IsExpiredItem(int Item)
 		{
 		case ITEM_VIP:
 			{
-				(*Account).m_VIP = 0;
+				(*Account).m_VIP = false;
 				(*Account).m_ExpireDateVIP = 0;
+				break;
+			}
+		case ITEM_TELE_RIFLE:
+			{
+				(*Account).m_TeleRifle = false;
+				(*Account).m_ExpireDateTeleRifle = 0;
 				break;
 			}
 		}
