@@ -394,6 +394,8 @@ public:
 		int m_KillingSpreeRecord;
 		int m_Euros;
 		time_t m_ExpireDateVIP;
+		bool m_TeleRifle;
+		time_t m_ExpireDateTeleRifle;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -435,6 +437,8 @@ public:
 		ACC_KILLING_SPREE_RECORD,
 		ACC_EUROS,
 		ACC_EXPIRE_DATE_VIP,
+		ACC_TELE_RIFLE,
+		ACC_EXPIRE_DATE_TELE_RIFLE,
 		NUM_ACCOUNT_VARIABLES
 	};
 

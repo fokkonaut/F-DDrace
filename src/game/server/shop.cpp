@@ -3,7 +3,7 @@
 #include "shop.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 11, 9, 9, 9, 10, 9, 14, 17 };
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 11, 9, 9, 9, 10, 9, 11, 14, 17 };
 
 CShop::CShop(CGameContext *pGameServer)
 {
@@ -28,6 +28,7 @@ CShop::CShop(CGameContext *pGameServer)
 	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
 	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
+	AddItem("Tele Rifle", 1, 10, TIME_20_DAYS, "Tele Rifle lets you teleport to your cursor", true);
 
 	static char aaBuf[NUM_POLICE_LEVELS][32];
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
@@ -210,6 +211,7 @@ const char *CShop::GetTimeMessage(int Time)
 	case TIME_DISCONNECT: return "You own this item until\nyou disconnect.";
 	case TIME_FOREVER: return "You own this item forever.";
 	case TIME_30_DAYS: return "You own this item for 30 days.";
+	case TIME_20_DAYS: return "You own this item for 20 days.";
 	}
 	return "Unknown";
 }
@@ -275,7 +277,7 @@ void CShop::SendWindow(int ClientID, int Item)
 			"Level: %d\n"
 			"Price: %d%s\n"
 			"Time: %s\n\n"
-			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, m_aItems[Item].m_IsEuro ? " Euro" : "", GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
+			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, m_aItems[Item].m_IsEuro ? " Euros" : "", GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
 	}
 	else
 	{
@@ -340,7 +342,8 @@ void CShop::BuyItem(int ClientID, int Item)
 		|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
 		|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
 		|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
-		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS))
+		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
+		|| (Item == ITEM_TELE_RIFLE			&& (*Account).m_TeleRifle))
 	{
 		bool UseThe = false;
 
@@ -386,7 +389,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
 
 	// apply a message to the history
-	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euro" : "money", m_aItems[ItemID].m_pName);
+	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", m_aItems[ItemID].m_pName);
 	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg, m_aItems[ItemID].m_IsEuro);
 
 	// give us the bought item
@@ -399,7 +402,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	case ITEM_POLICE:			(*Account).m_PoliceLevel++; break;
 	case ITEM_SPOOKY_GHOST:		(*Account).m_SpookyGhost = true; break;
 	case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
-	case ITEM_VIP:				(*Account).m_VIP = 1; pPlayer->SetExpireDate(Item); break;
+	case ITEM_VIP:				(*Account).m_VIP = true; pPlayer->SetExpireDate(Item); break;
 	case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
 		// fallthrough
 	case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;
@@ -408,5 +411,6 @@ void CShop::BuyItem(int ClientID, int Item)
 								(*Account).m_SpawnWeapon[Weapon]++; break;
 	case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
 	case ITEM_TASER:			(*Account).m_TaserLevel++; break;
+	case ITEM_TELE_RIFLE:		(*Account).m_TeleRifle = true; pPlayer->SetExpireDate(Item); break;
 	}
 }

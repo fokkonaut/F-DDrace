@@ -22,6 +22,7 @@ enum Items
 	ITEM_SPAWN_RIFLE,
 	ITEM_NINJAJETPACK,
 	ITEM_TASER,
+	ITEM_TELE_RIFLE,
 	NUM_ITEMS_LIST,
 
 	POLICE_RANK_1 = NUM_ITEMS_LIST,
@@ -46,6 +47,7 @@ enum Time
 	TIME_DISCONNECT,
 	TIME_FOREVER,
 	TIME_30_DAYS,
+	TIME_20_DAYS,
 };
 
 enum States
@@ -59,6 +61,7 @@ enum Expire
 {
 	// days until item expired
 	ITEM_EXPIRE_VIP = 30,
+	ITEM_EXPIRE_TELE_RIFLE = 20,
 };
 
 

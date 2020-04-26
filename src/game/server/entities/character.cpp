@@ -3061,6 +3061,8 @@ void CCharacter::FDDraceInit()
 	m_LastTouchedSwitcher = -1;
 
 	m_LastTeleRifle = Now;
+	if ((*Account).m_TeleRifle)
+		GiveWeapon(WEAPON_TELE_RIFLE, false);
 }
 
 void CCharacter::FDDraceTick()
@@ -3253,7 +3255,8 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER)
+	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
+		|| WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER || WeaponID == WEAPON_TELE_RIFLE)
 		return;
 
 	int Count = 0;
@@ -3335,7 +3338,7 @@ void CCharacter::DropLoot()
 		for (int i = 0; i < 2; i++)
 		{
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon(rand() % NUM_WEAPONS, true, Dir);
+			DropWeapon(rand() % NUM_VANILLA_WEAPONS, true, Dir);
 		}
 	}
 }

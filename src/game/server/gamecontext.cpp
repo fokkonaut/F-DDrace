@@ -3767,6 +3767,8 @@ int CGameContext::AddAccount()
 	Account.m_KillingSpreeRecord = 0;
 	Account.m_Euros = 0;
 	Account.m_ExpireDateVIP = 0;
+	Account.m_TeleRifle = false;
+	Account.m_ExpireDateTeleRifle = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3821,6 +3823,8 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
 		case ACC_EUROS:						m_Accounts[ID].m_Euros = atoi(pData); break;
 		case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoi(pData); break;
+		case ACC_TELE_RIFLE:				m_Accounts[ID].m_TeleRifle = atoi(pData); break;
+		case ACC_EXPIRE_DATE_TELE_RIFLE:	m_Accounts[ID].m_ExpireDateTeleRifle = atoi(pData); break;
 		}
 	}
 }
@@ -3869,6 +3873,8 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_KillingSpreeRecord << "\n";
 		AccFile << m_Accounts[ID].m_Euros << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
+		AccFile << m_Accounts[ID].m_TeleRifle << "\n";
+		AccFile << m_Accounts[ID].m_ExpireDateTeleRifle << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

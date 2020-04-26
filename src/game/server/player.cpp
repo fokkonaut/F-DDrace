@@ -1368,16 +1368,22 @@ void CPlayer::OnLogin()
 	{
 		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && (*Account).m_TaserLevel >= 1)
 			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
+
+		if ((*Account).m_TeleRifle)
+			m_pCharacter->GiveWeapon(WEAPON_TELE_RIFLE, false);
 	}
 
-	if (IsExpiredItem(ITEM_VIP))
+	for (int i = 0; i < NUM_ITEMS; i++)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop->GetItemName(ITEM_VIP));
-		GameServer()->SendChatTarget(m_ClientID, aBuf);
+		if (IsExpiredItem(i))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop->GetItemName(i));
+			GameServer()->SendChatTarget(m_ClientID, aBuf);
+		}
 	}
 
-	// has vip from the old system, remove it and give him 5€
+	// has vip from the old system, remove it and give him 5 euros
 	if ((*Account).m_VIP && (*Account).m_ExpireDateVIP == 0)
 	{
 		(*Account).m_VIP = 0;
@@ -1392,6 +1398,9 @@ void CPlayer::OnLogout()
 	{
 		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
 			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
+
+		if (m_pCharacter->GetWeaponGot(WEAPON_TELE_RIFLE))
+			m_pCharacter->GiveWeapon(WEAPON_TELE_RIFLE, true);
 
 		m_pCharacter->UnsetSpookyGhost();
 	}
