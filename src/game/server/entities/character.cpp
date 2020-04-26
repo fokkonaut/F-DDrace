@@ -782,6 +782,9 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_TELE_RIFLE:
 			{
+				// drop flag before teleporting, so it cannot get trapped in some rooms
+				DropFlag();
+
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 				vec2 NewPos = CursorPos;
