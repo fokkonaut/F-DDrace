@@ -1460,9 +1460,41 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Killing Spree Record: %d", (*Account).m_KillingSpreeRecord);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (*Account).m_ExpireDateVIP);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->FreeAccount(ID);
+}
+
+void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		return;
+	}
+
+	int Euros = pResult->GetInteger(1);
+	char aBuf[64];
+	pSelf->m_Accounts[ID].m_Euros += Euros;
+
+	if (pSelf->m_Accounts[ID].m_ClientID >= 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "You %s %d euros", Euros >= 0 ? "got" : "lost", Euros);
+		pSelf->SendChatTarget(pSelf->m_Accounts[ID].m_ClientID, aBuf);
+	}
+
+	str_format(aBuf, sizeof(aBuf), "%d euros given to account '%s'", Euros, pSelf->m_Accounts[ID].m_Username);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+		pSelf->Logout(ID);
 }
 
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)

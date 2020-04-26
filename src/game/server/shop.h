@@ -44,7 +44,8 @@ enum Time
 {
 	TIME_DEATH,
 	TIME_DISCONNECT,
-	TIME_FOREVER
+	TIME_FOREVER,
+	TIME_30_DAYS,
 };
 
 enum States
@@ -52,6 +53,12 @@ enum States
 	STATE_NONE = 0,
 	STATE_OPENED_WINDOW,
 	STATE_CONFIRM
+};
+
+enum Expire
+{
+	// days until item expired
+	ITEM_EXPIRE_VIP = 30,
 };
 
 
@@ -69,9 +76,10 @@ private:
 		int m_Price;
 		int m_Time;
 		const char *m_pDescription;
+		bool m_IsEuro;
 	} m_aItems[NUM_ITEMS];
 
-	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription);
+	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false);
 	void ShopWindow(int ClientID, int Dir);
 
 	const char *GetHeadline(int Item);
@@ -109,6 +117,8 @@ public:
 	void OnPageChange(int ClientID, int Dir) { ShopWindow(ClientID, Dir); };
 	bool IsInShop(int ClientID) { return m_InShop[ClientID]; };
 	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; };
+
+	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; };
 };
 
 #endif

@@ -1299,14 +1299,17 @@ int CPlayer::GetAccID()
 	return 0;
 }
 
-void CPlayer::MoneyTransaction(int Amount, const char *pDescription)
+void CPlayer::MoneyTransaction(int Amount, const char *pDescription, bool IsEuro)
 {
 	if (GetAccID() < ACC_START)
 		return;
 
 	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
 
-	(*Account).m_Money += Amount;
+	if (IsEuro)
+		(*Account).m_Euros += Amount;
+	else
+		(*Account).m_Money += Amount;
 
 	if (!pDescription[0])
 		return;
@@ -1366,6 +1369,21 @@ void CPlayer::OnLogin()
 		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && (*Account).m_TaserLevel >= 1)
 			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
 	}
+
+	if (IsExpiredItem(ITEM_VIP))
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop->GetItemName(ITEM_VIP));
+		GameServer()->SendChatTarget(m_ClientID, aBuf);
+	}
+
+	// has vip from the old system, remove it and give him 5€
+	if ((*Account).m_VIP && (*Account).m_ExpireDateVIP == 0)
+	{
+		(*Account).m_VIP = 0;
+		MoneyTransaction(5, "", true);
+		GameServer()->SendChatTarget(m_ClientID, "[WARNING] Due to an update your VIP was removed. You got 5 Euros back, saved in your account. Go to the shop and buy VIP again.");
+	}
 }
 
 void CPlayer::OnLogout()
@@ -1377,6 +1395,90 @@ void CPlayer::OnLogout()
 
 		m_pCharacter->UnsetSpookyGhost();
 	}
+}
+
+void CPlayer::SetExpireDate(int Item)
+{
+	if (GetAccID() < ACC_START)
+		return;
+
+	time_t Now;
+	struct tm ExpireDate;
+	time(&Now);
+	ExpireDate = *localtime(&Now);
+
+	int Days;
+	switch (Item)
+	{
+	case ITEM_VIP: Days = ITEM_EXPIRE_VIP; break;
+	default: return;
+	}
+
+	const time_t ONE_DAY = 24 * 60 * 60;
+	time_t DateSeconds = mktime(&ExpireDate) + (Days * ONE_DAY);
+	ExpireDate = *localtime(&DateSeconds);
+
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	switch (Item)
+	{
+	case ITEM_VIP: (*Account).m_ExpireDateVIP = mktime(&ExpireDate); break;
+	}
+}
+
+bool CPlayer::IsExpiredItem(int Item)
+{
+	if (GetAccID() < ACC_START)
+		return false;
+
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	int ExpireDays;
+	time_t tmp;
+
+	switch (Item)
+	{
+	case ITEM_VIP:
+		{
+			if (!(*Account).m_VIP)
+				return false;
+
+			tmp = (*Account).m_ExpireDateVIP;
+			ExpireDays = ITEM_EXPIRE_VIP;
+			break;
+		}
+	default:
+		return false;
+	}
+
+	struct tm AccDate;
+	AccDate = *localtime(&tmp);
+
+	time_t Now;
+	struct tm ExpireDate;
+	time(&Now);
+	ExpireDate = *localtime(&Now);
+
+	ExpireDate.tm_year = AccDate.tm_year;
+	ExpireDate.tm_mon = AccDate.tm_mon;
+	ExpireDate.tm_mday = AccDate.tm_mday;
+
+	double Seconds = difftime(Now, mktime(&ExpireDate));
+	const time_t ONE_DAY = 24 * 60 * 60;
+	int Days = Seconds / ONE_DAY;
+
+	if (Days >= ExpireDays)
+	{
+		switch (Item)
+		{
+		case ITEM_VIP:
+			{
+				(*Account).m_VIP = 0;
+				(*Account).m_ExpireDateVIP = 0;
+				break;
+			}
+		}
+		return true;
+	}
+	return false;
 }
 
 bool CPlayer::IsHooked(int Power)

@@ -22,7 +22,7 @@ CShop::CShop(CGameContext *pGameServer)
 	AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
 	AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
 	AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
-	AddItem("VIP", 1, -1, TIME_FOREVER, "VIP gives you some benefits, check '/vipinfo'.");
+	AddItem("VIP", 1, 5, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.", true);
 	AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
@@ -54,7 +54,7 @@ void CShop::Reset(int ClientID)
 	m_BackgroundItem[ClientID] = 0;
 }
 
-void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription)
+void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro)
 {
 	for (int i = 0; i < NUM_ITEMS; i++)
 	{
@@ -65,6 +65,7 @@ void CShop::AddItem(const char *pName, int Level, int Price, int Time, const cha
 			m_aItems[i].m_Price = Price;
 			m_aItems[i].m_Time = Time;
 			m_aItems[i].m_pDescription = pDescription;
+			m_aItems[i].m_IsEuro = IsEuro;
 			m_aItems[i].m_Used = true;
 			break;
 		}
@@ -208,6 +209,7 @@ const char *CShop::GetTimeMessage(int Time)
 	case TIME_DEATH: return "You own this item until you die.";
 	case TIME_DISCONNECT: return "You own this item until\nyou disconnect.";
 	case TIME_FOREVER: return "You own this item forever.";
+	case TIME_30_DAYS: return "You own this item for 30 days.";
 	}
 	return "Unknown";
 }
@@ -271,9 +273,9 @@ void CShop::SendWindow(int ClientID, int Item)
 		str_format(aMsg, sizeof(aMsg),
 			"%s\n\n"
 			"Level: %d\n"
-			"Price: %d\n"
+			"Price: %d%s\n"
 			"Time: %s\n\n"
-			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
+			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, m_aItems[Item].m_IsEuro ? " Euro" : "", GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
 	}
 	else
 	{
@@ -356,13 +358,6 @@ void CShop::BuyItem(int ClientID, int Item)
 		return;
 	}
 
-	// vip cant be bought ingame
-	if (Item == ITEM_VIP)
-	{
-		m_pGameServer->SendChatTarget(ClientID, "VIP can only be bought using real money. Check '/vipinfo'");
-		return;
-	}
-
 	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
 	if (Item == ITEM_RAINBOW)
 	{
@@ -371,7 +366,8 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 
 	// check for the correct price
-	if ((*Account).m_Money < m_aItems[ItemID].m_Price)
+	if ((m_aItems[ItemID].m_IsEuro && (*Account).m_Euros < m_aItems[ItemID].m_Price)
+		|| (!m_aItems[ItemID].m_IsEuro && (*Account).m_Money < m_aItems[ItemID].m_Price))
 	{
 		m_pGameServer->SendChatTarget(ClientID, "You don't have enough money");
 		return;
@@ -390,8 +386,8 @@ void CShop::BuyItem(int ClientID, int Item)
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
 
 	// apply a message to the history
-	str_format(aMsg, sizeof(aMsg), "-%d money, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_pName);
-	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg);
+	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euro" : "money", m_aItems[ItemID].m_pName);
+	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg, m_aItems[ItemID].m_IsEuro);
 
 	// give us the bought item
 	int Weapon = -1;
@@ -403,7 +399,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	case ITEM_POLICE:			(*Account).m_PoliceLevel++; break;
 	case ITEM_SPOOKY_GHOST:		(*Account).m_SpookyGhost = true; break;
 	case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
-	case ITEM_VIP: break;
+	case ITEM_VIP:				(*Account).m_VIP = 1; pPlayer->SetExpireDate(Item); break;
 	case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
 		// fallthrough
 	case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;

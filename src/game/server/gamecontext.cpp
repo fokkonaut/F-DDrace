@@ -3765,6 +3765,8 @@ int CGameContext::AddAccount()
 	Account.m_InstagibDeaths = 0;
 	Account.m_TaserLevel = 0;
 	Account.m_KillingSpreeRecord = 0;
+	Account.m_Euros = 0;
+	Account.m_ExpireDateVIP = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3817,6 +3819,8 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_INSTAGIB_DEATHS:			m_Accounts[ID].m_InstagibDeaths = atoi(pData); break;
 		case ACC_TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(pData); break;
 		case ACC_KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
+		case ACC_EUROS:						m_Accounts[ID].m_Euros = atoi(pData); break;
+		case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoi(pData); break;
 		}
 	}
 }
@@ -3863,6 +3867,8 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_InstagibDeaths << "\n";
 		AccFile << m_Accounts[ID].m_TaserLevel << "\n";
 		AccFile << m_Accounts[ID].m_KillingSpreeRecord << "\n";
+		AccFile << m_Accounts[ID].m_Euros << "\n";
+		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -3875,8 +3881,8 @@ void CGameContext::Logout(int ID, bool Silent)
 	{
 		if (m_apPlayers[m_Accounts[ID].m_ClientID])
 		{
-			m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
 			SendChatTarget(m_Accounts[ID].m_ClientID, "Successfully logged out");
+			m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
 		}
 	}
 	m_Accounts[ID].m_LoggedIn = false;

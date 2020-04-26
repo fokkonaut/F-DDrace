@@ -1172,6 +1172,13 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", (*Account).m_PoliceLevel, (*Account).m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+			// dont expose euros to other players than you
+			if (ID == pResult->m_ClientID)
+			{
+				str_format(aBuf, sizeof(aBuf), "Euros [%d]", (*Account).m_Euros);
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			}
 		} //fallthrough
 
 		case MINIGAME_BLOCK:
@@ -1460,9 +1467,8 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
 	pSelf->WriteAccountStats(ID);
 
-	pSelf->m_apPlayers[pResult->m_ClientID]->OnLogin();
-
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully logged in");
+	pSelf->m_apPlayers[pResult->m_ClientID]->OnLogin();
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
@@ -1605,6 +1611,8 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	str_format(aBuf, sizeof(aBuf), "Money: %llu", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	for (int i = 0; i < 5; i++)

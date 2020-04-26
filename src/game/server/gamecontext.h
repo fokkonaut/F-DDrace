@@ -392,6 +392,8 @@ public:
 		int m_InstagibDeaths;
 		int m_TaserLevel;
 		int m_KillingSpreeRecord;
+		int m_Euros;
+		time_t m_ExpireDateVIP;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -431,6 +433,8 @@ public:
 		ACC_INSTAGIB_DEATHS,
 		ACC_TASER_LEVEL,
 		ACC_KILLING_SPREE_RECORD,
+		ACC_EUROS,
+		ACC_EXPIRE_DATE_VIP,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -678,7 +682,6 @@ private:
 	static void ConPlayerClan(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerSkin(IConsole::IResult* pResult, void* pUserData);
 
-	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 
@@ -720,6 +723,8 @@ private:
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccAddEuros(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);

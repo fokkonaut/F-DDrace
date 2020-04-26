@@ -310,11 +310,13 @@ public:
 
 	//account
 	int GetAccID();
-	void MoneyTransaction(int Amount, const char* pDescription = "");
+	void MoneyTransaction(int Amount, const char* pDescription = "", bool IsEuro = false);
 	void GiveXP(int Amount, const char* pMessage = "");
 	void GiveBlockPoints(int Amount);
 	void OnLogin();
 	void OnLogout();
+	void SetExpireDate(int Item);
+	bool IsExpiredItem(int Item);
 
 	//room key
 	bool m_HasRoomKey;
