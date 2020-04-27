@@ -803,7 +803,9 @@ void CCharacter::FireWeapon()
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
-				m_LastTeleRifle = Server()->Tick();
+				// dont start the counter if we didnt teleport
+				if (NewPos != m_Pos)
+					m_LastTeleRifle = Server()->Tick();
 			} break;
 
 			case WEAPON_PROJECTILE_RIFLE:
