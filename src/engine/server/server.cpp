@@ -250,6 +250,8 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 		int ClientID = str_toint(pStr);
 		if(ClientID < 0 || ClientID >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid client id)");
+		else if (pThis->Server()->m_aClients[ClientID].m_State == CServer::CClient::STATE_DUMMY)
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (can't ban dummies)");
 		else
 			pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason);
 	}
