@@ -1210,7 +1210,7 @@ void CCharacter::TickDefered()
 		if(Sound != -1)
 		{
 			for (int i = 0; i < MAX_CLIENTS; i++)
-				if (Server()->IsSevendown(i) && (Sound == SOUND_HOOK_ATTACH_PLAYER || i != m_pPlayer->GetCID()))
+				if (GameServer()->m_apPlayers[i] && Server()->IsSevendown(i) && (Sound == SOUND_HOOK_ATTACH_PLAYER || i != m_pPlayer->GetCID()))
 					GameServer()->CreateSoundPlayerAt(m_Pos, Sound, i);
 		}
 	}

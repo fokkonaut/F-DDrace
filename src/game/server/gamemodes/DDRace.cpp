@@ -153,7 +153,7 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 {
 	IGameController::Snap(SnappingClient);
 
-	CNetObj_GameDataFlag* pGameDataFlag = static_cast<CNetObj_GameDataFlag*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATAFLAG, 0, sizeof(CNetObj_GameDataFlag)));
+	CNetObj_GameDataFlag *pGameDataFlag = static_cast<CNetObj_GameDataFlag*>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATAFLAG, 0, sizeof(CNetObj_GameDataFlag)));
 	if (!pGameDataFlag)
 		return;
 

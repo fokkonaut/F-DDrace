@@ -320,7 +320,7 @@ public:
 	void ForceVote(int EnforcerID, bool Success);
 
 	// F-DDrace
-	void SendJoinLeaveMessage(const char *pMessage);
+	void SendChatSevendown(const char *pMessage);
 
 	//dummy
 	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1));

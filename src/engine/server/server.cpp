@@ -2724,8 +2724,8 @@ void CServer::DummyJoin(int DummyID)
 
 	m_NetServer.DummyInit(DummyID);
 	m_aClients[DummyID].m_State = CClient::STATE_DUMMY;
-
 	m_aClients[DummyID].m_Authed = AUTHED_NO;
+	m_aClients[DummyID].m_Sevendown = false;
 
 	str_copy(m_aClients[DummyID].m_aName, pNames[DummyID], MAX_NAME_LENGTH);
 	str_copy(m_aClients[DummyID].m_aClan, pClans[DummyID], MAX_CLAN_LENGTH);
@@ -2749,6 +2749,7 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_Traffic = 0;
 	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
+	m_aClients[DummyID].m_Sevendown = false;
 
 	m_NetServer.DummyDelete(DummyID);
 }

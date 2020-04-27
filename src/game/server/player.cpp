@@ -884,8 +884,11 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	GameServer()->SendTeamChange(m_ClientID, Team, !DoChatMsg, m_TeamChangeTick, -1);
 	GameServer()->UpdateHidePlayers(m_ClientID);
 
-	str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
-	GameServer()->SendJoinLeaveMessage(aBuf);
+	if (DoChatMsg)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(m_ClientID), GameServer()->m_pController->GetTeamName(Team));
+		GameServer()->SendChatSevendown(aBuf);
+	}
 }
 
 void CPlayer::TryRespawn()

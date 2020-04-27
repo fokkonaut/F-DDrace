@@ -287,7 +287,7 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 	Msg.m_Mode = CHAT_ALL;
 	Msg.m_ClientID = -1;
 	Msg.m_pMessage = pText;
-	Msg.m_TargetID = To;
+	Msg.m_TargetID = -1;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
 }
 
@@ -1169,9 +1169,12 @@ void CGameContext::OnClientEnter(int ClientID)
 	// F-DDrace
 	UpdateHidePlayers();
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-	SendJoinLeaveMessage(aBuf);
+	if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
+		SendChatSevendown(aBuf);
+	}
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
@@ -1182,15 +1185,17 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_apPlayers[ClientID]->CheckClanProtection();
 
-	if (!Server()->IsSevendown(ClientID))
+	if (Server()->IsSevendown(ClientID))
+	{
+		((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
+	}
+	else
 	{
 		m_pController->UpdateGameInfo(ClientID);
 
 		// send chat commands
 		SendChatCommands(ClientID);
 	}
-	else
-		((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1259,14 +1264,17 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 		if(Config()->m_SvSilentSpectatorMode && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS)
 			Msg.m_Silent = true;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, -1);
-	}
 
-	char aBuf[128];
-	if(pReason && *pReason)
-		str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
-	else
-		str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
-	SendJoinLeaveMessage(aBuf);
+		if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
+		{
+			char aBuf[128];
+			if (pReason && *pReason)
+				str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
+			else
+				str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
+			SendChatSevendown(aBuf);
+		}
+	}
 
 	delete m_apPlayers[ClientID];
 	m_apPlayers[ClientID] = 0;
@@ -1386,7 +1394,7 @@ const char *CGameContext::GetWhisper(char* pStr, int* pTarget)
 	return pStr;
 }
 
-void CGameContext::SendJoinLeaveMessage(const char *pMessage)
+void CGameContext::SendChatSevendown(const char *pMessage)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (m_apPlayers[i] && Server()->IsSevendown(i))
