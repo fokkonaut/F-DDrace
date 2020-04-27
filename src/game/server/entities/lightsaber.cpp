@@ -35,11 +35,13 @@ void CLightsaber::Reset()
 void CLightsaber::Extend()
 {
 	m_Extending = true;
+	m_Retracting = false;
 }
 
 void CLightsaber::Retract()
 {
 	m_Retracting = true;
+	m_Extending = false;
 }
 
 void CLightsaber::PlaySound()
