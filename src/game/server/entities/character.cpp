@@ -433,7 +433,7 @@ void CCharacter::FireWeapon()
 			Spread[i] += 0.05f;
 
 	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? Config()->m_SvNumSpreadShots : 1;
-	if (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
+	if (m_pPlayer->m_Minigame != MINIGAME_NONE || (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
 		NumShots = 1;
 	bool Sound = true;
 
