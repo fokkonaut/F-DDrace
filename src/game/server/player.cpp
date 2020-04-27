@@ -1333,7 +1333,6 @@ bool CPlayer::IsExpiredItem(int Item)
 		return false;
 
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
-	int ExpireDays;
 	time_t tmp;
 
 	switch (Item)
@@ -1344,7 +1343,6 @@ bool CPlayer::IsExpiredItem(int Item)
 				return false;
 
 			tmp = (*Account).m_ExpireDateVIP;
-			ExpireDays = ITEM_EXPIRE_VIP;
 			break;
 		}
 	default:
@@ -1367,7 +1365,7 @@ bool CPlayer::IsExpiredItem(int Item)
 	const time_t ONE_DAY = 24 * 60 * 60;
 	int Days = Seconds / ONE_DAY;
 
-	if (Days >= ExpireDays)
+	if (Days >= 0)
 	{
 		switch (Item)
 		{
