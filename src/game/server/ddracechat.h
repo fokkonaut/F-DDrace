@@ -48,6 +48,7 @@ CHAT_COMMAND("score", "?s[mode]", CFGFLAG_CHAT, ConScore, this, "Changes the dis
 
 //stats
 CHAT_COMMAND("stats", "?r[player name]", CFGFLAG_CHAT, ConStats, this, "Shows stats of player r", AUTHED_NO)
+CHAT_COMMAND("account", "", CFGFLAG_CHAT, ConAccount, this, "Shows information about your account", AUTHED_NO)
 
 //info
 CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost", AUTHED_NO)

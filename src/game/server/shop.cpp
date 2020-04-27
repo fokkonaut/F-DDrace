@@ -337,13 +337,14 @@ void CShop::BuyItem(int ClientID, int Item)
 		|| (Item == ITEM_POLICE				&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
 		|| (Item == ITEM_SPOOKY_GHOST		&& (*Account).m_SpookyGhost)
 		|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
-		|| (Item == ITEM_VIP				&& (*Account).m_VIP)
+		//|| (Item == ITEM_VIP				&& (*Account).m_VIP) // vip can be bought unlimited times
 		|| (Item == ITEM_SPAWN_SHOTGUN		&& (*Account).m_SpawnWeapon[0] == 5)
 		|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
 		|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
 		|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
 		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
-		|| (Item == ITEM_TELE_RIFLE			&& (*Account).m_TeleRifle))
+		//|| (Item == ITEM_TELE_RIFLE			&& (*Account).m_TeleRifle) // tele rifle can be bought unlimited times
+		)
 	{
 		bool UseThe = false;
 

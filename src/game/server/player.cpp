@@ -1302,7 +1302,9 @@ void CPlayer::SetExpireDate(int Item)
 	if (GetAccID() < ACC_START)
 		return;
 
-	time_t Now;
+	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+
+	time_t Now, tmp;
 	struct tm ExpireDate;
 	time(&Now);
 	ExpireDate = *localtime(&Now);
@@ -1310,16 +1312,37 @@ void CPlayer::SetExpireDate(int Item)
 	int Days;
 	switch (Item)
 	{
-	case ITEM_VIP: Days = ITEM_EXPIRE_VIP; break;
-	case ITEM_TELE_RIFLE: Days = ITEM_EXPIRE_TELE_RIFLE; break;
-	default: return;
+	case ITEM_VIP:
+		{
+			tmp = (*Account).m_ExpireDateVIP;
+			Days = ITEM_EXPIRE_VIP;
+			break;
+		}
+	case ITEM_TELE_RIFLE:
+		{
+			tmp = (*Account).m_ExpireDateTeleRifle;
+			Days = ITEM_EXPIRE_TELE_RIFLE;
+			break;
+		}
+	default:
+		return;
+	}
+
+	// add another x days if we have the item already
+	if (tmp != 0)
+	{
+		struct tm AccDate;
+		AccDate = *localtime(&tmp);
+
+		ExpireDate.tm_year = AccDate.tm_year;
+		ExpireDate.tm_mon = AccDate.tm_mon;
+		ExpireDate.tm_mday = AccDate.tm_mday;
 	}
 
 	const time_t ONE_DAY = 24 * 60 * 60;
 	time_t DateSeconds = mktime(&ExpireDate) + (Days * ONE_DAY);
 	ExpireDate = *localtime(&DateSeconds);
 
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
 	switch (Item)
 	{
 	case ITEM_VIP: (*Account).m_ExpireDateVIP = mktime(&ExpireDate); break;

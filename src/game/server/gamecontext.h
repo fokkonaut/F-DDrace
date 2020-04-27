@@ -363,6 +363,8 @@ public:
 	int m_aNeededXP[MAX_LEVEL + 1];
 	int m_LastAccSaveTick;
 
+	const char *GetDate(time_t Time);
+
 	struct AccountInfo
 	{
 		int m_Port;
@@ -623,6 +625,7 @@ private:
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccount(IConsole::IResult* pResult, void* pUserData);
 
 	void SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type);
 	static void ConTop5Level(IConsole::IResult* pResult, void* pUserData);

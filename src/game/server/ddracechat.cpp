@@ -1143,6 +1143,47 @@ void CGameContext::ConScore(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	char aBuf[128];
+	struct tm AccDate;
+	time_t tmp;
+	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "--- Account Info ---");
+	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	if ((*Account).m_VIP)
+	{
+		tmp = (*Account).m_ExpireDateVIP;
+		str_format(aBuf, sizeof(aBuf), "VIP: until %s", pSelf->GetDate(tmp));
+	}
+	else
+		str_copy(aBuf, "VIP: not bought", sizeof(aBuf));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	if ((*Account).m_TeleRifle)
+	{
+		tmp = (*Account).m_ExpireDateTeleRifle;
+		str_format(aBuf, sizeof(aBuf), "Tele Rifle: until %s", pSelf->GetDate(tmp));
+	}
+	else
+		str_copy(aBuf, "Tele Rifle: not bought", sizeof(aBuf));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+}
+
 void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

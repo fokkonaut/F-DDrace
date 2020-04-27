@@ -3908,6 +3908,17 @@ void CGameContext::FreeAccount(int ID, bool Silent)
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 
+const char *CGameContext::GetDate(time_t Time)
+{
+	time_t tmp = Time;
+	struct tm Date = *localtime(&tmp);
+
+	static char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%d.%d.%d", Date.tm_mday, Date.tm_mon+1, Date.tm_year+1900);
+
+	return aBuf;
+}
+
 int CGameContext::GetNextClientID(bool Inverted)
 {
 	if (!Inverted)
