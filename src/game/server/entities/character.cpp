@@ -3308,11 +3308,9 @@ void CCharacter::DropLoot()
 	if (!Config()->m_SvDropsOnDeath)
 		return;
 
-	if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL)
+	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
+		|| m_pPlayer->m_Minigame != MINIGAME_SURVIVAL && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
 	{
-		if (m_pPlayer->m_SurvivalState <= SURVIVAL_LOBBY)
-			return;
-
 		// drop 0 to 5 armor and hearts
 		DropPickup(POWERUP_HEALTH, rand() % 6);
 		DropPickup(POWERUP_ARMOR, rand() % 6);
