@@ -1157,7 +1157,6 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
-	struct tm AccDate;
 	time_t tmp;
 	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
