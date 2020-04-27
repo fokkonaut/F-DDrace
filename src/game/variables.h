@@ -207,4 +207,5 @@ MACRO_CONFIG_INT(SvClanProtection, sv_clan_protection, 1, 0, 1, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 0, 0, 1, CFGFLAG_SERVER, "Whether your tee bounces while moving in freeze", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowRainbow, sv_allow_rainbow, 0, 0, 1, CFGFLAG_SERVER, "Whether rainbow can be used (may cause client disconnects)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SERVER, "Whether authed players are highlighted in the scoreboard", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAllowSevendown, sv_allow_sevendown, 0, 0, 1, CFGFLAG_SERVER, "Allows sevendown", AUTHED_ADMIN)
 #endif

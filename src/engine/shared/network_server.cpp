@@ -265,6 +265,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 			}
 			else
 			{
+				if (!CNetBase::Config()->m_SvAllowSevendown)
+				{
+					const char UnableMsg[] = "Unable to connect to the server";
+					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, UnableMsg, sizeof(UnableMsg), *pSevendown, NET_SECURITY_TOKEN_UNSUPPORTED);
+					continue;
+				}
+
 				if (!(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS) && (mem_comp(m_RecvUnpacker.m_aBuffer, NET_HEADER_EXTENDED, sizeof(NET_HEADER_EXTENDED)) != 0))
 					if (!((unsigned)m_RecvUnpacker.m_Data.m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(SECURITY_TOKEN)
 						&& !mem_comp(&m_RecvUnpacker.m_Data.m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC))))
@@ -278,7 +285,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 					if (Connlimit(Addr))
 					{
 						const char LimitMsg[] = "Too many connections in a short time";
-						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, str_length(LimitMsg) + 1, *pSevendown, NET_SECURITY_TOKEN_UNSUPPORTED);
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, NET_SECURITY_TOKEN_UNSUPPORTED);
 						continue; // failed to add client
 					}
 

@@ -1545,6 +1545,9 @@ void CServer::PumpNetwork()
 				int SrvBrwsToken;
 				if (Sevendown)
 				{
+					if (!Config()->m_SvAllowSevendown)
+						continue;
+
 					int ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
 					SrvBrwsToken = ((unsigned char*)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
 					SrvBrwsToken |= ExtraToken << 8;
@@ -1943,6 +1946,13 @@ void CServer::ConTestingCommands(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer*)pUser)->Config()->m_SvTestingCommands);
+	((CServer*)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
+void CServer::ConAllowSevendown(IConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer*)pUser)->Config()->m_SvAllowSevendown);
 	((CServer*)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
@@ -2636,6 +2646,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfigManager->RestoreStrings();
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Turns testing commands aka cheats on/off", AUTHED_ADMIN);
+	pConsole->Register("sv_allow_sevendown", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Allows sevendown", AUTHED_ADMIN);
 
 	pEngine->InitLogfile();
 

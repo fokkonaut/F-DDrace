@@ -107,7 +107,7 @@ void CRegister::RegisterUpdate(int Nettype)
 	int64 Now = time_get();
 	int64 Freq = time_freq();
 
-	if(!m_pConfig->m_SvRegister)
+	if(!m_pConfig->m_SvRegister || (m_Sevendown && !m_pConfig->m_SvAllowSevendown))
 		return;
 
 	m_pMasterServer->Update();
