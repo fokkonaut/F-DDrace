@@ -3,7 +3,7 @@
 #include "shop.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 7, 9, 9, 9, 10, 9, 7, 14, 17 };
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 5, 14, 17 };
 
 CShop::CShop(CGameContext *pGameServer)
 {
@@ -22,13 +22,13 @@ CShop::CShop(CGameContext *pGameServer)
 	AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
 	AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
 	AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
-	AddItem("VIP", 1, 5, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.", true);
+	AddItem("VIP", 1, 5, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.", true);
 	AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
 	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-	AddItem("Tele Rifle", 1, 10, TIME_20_DAYS, "Tele Rifle lets you teleport to your cursor.\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.", true);
+	AddItem("Tele Rifle", 1, 10, TIME_20_DAYS, "Tele Rifle lets you teleport to your cursor.", true);
 
 	static char aaBuf[NUM_POLICE_LEVELS][32];
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
@@ -277,7 +277,15 @@ void CShop::SendWindow(int ClientID, int Item)
 			"Level: %d\n"
 			"Price: %d%s\n"
 			"Time: %s\n\n"
-			"%s", GetHeadline(Item), m_aItems[Item].m_Level, m_aItems[Item].m_Price, m_aItems[Item].m_IsEuro ? " Euros" : "", GetTimeMessage(m_aItems[Item].m_Time), m_aItems[Item].m_pDescription);
+			"%s%s",
+			GetHeadline(Item),
+			m_aItems[Item].m_Level,
+			m_aItems[Item].m_Price,
+			m_aItems[Item].m_IsEuro ? " Euros" : "",
+			GetTimeMessage(m_aItems[Item].m_Time),
+			m_aItems[Item].m_pDescription,
+			m_aItems[Item].m_IsEuro ? "\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.\n\nCheck '/account' for your details." : ""
+		);
 	}
 	else
 	{
