@@ -1264,6 +1264,14 @@ void CPlayer::OnLogin()
 			m_pCharacter->GiveWeapon(WEAPON_TELE_RIFLE, false);
 	}
 
+	// has vip from the old system, remove it and give him 5 euros
+	if ((*Account).m_VIP && (*Account).m_ExpireDateVIP == 0)
+	{
+		(*Account).m_VIP = 0;
+		MoneyTransaction(5, "", true);
+		GameServer()->SendChatTarget(m_ClientID, "[WARNING] Due to an update your VIP was removed. You got 5 Euros back, saved in your account. Go to the shop and buy VIP again.");
+	}
+
 	for (int i = 0; i < NUM_ITEMS; i++)
 	{
 		if (IsExpiredItem(i))
@@ -1272,14 +1280,6 @@ void CPlayer::OnLogin()
 			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop->GetItemName(i));
 			GameServer()->SendChatTarget(m_ClientID, aBuf);
 		}
-	}
-
-	// has vip from the old system, remove it and give him 5 euros
-	if ((*Account).m_VIP && (*Account).m_ExpireDateVIP == 0)
-	{
-		(*Account).m_VIP = 0;
-		MoneyTransaction(5, "", true);
-		GameServer()->SendChatTarget(m_ClientID, "[WARNING] Due to an update your VIP was removed. You got 5 Euros back, saved in your account. Go to the shop and buy VIP again.");
 	}
 }
 
