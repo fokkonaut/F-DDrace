@@ -2567,10 +2567,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if (!Config()->m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
-				m_Core.m_HookState = HOOK_RETRACTED;
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-				m_Core.m_HookPos = m_Core.m_Pos;
+				ReleaseHook();
 			}
 			if (Config()->m_SvTeleportLoseWeapons)
 			{
@@ -2596,10 +2593,7 @@ void CCharacter::HandleTiles(int Index)
 
 				if (!Config()->m_SvTeleportHoldHook)
 				{
-					m_Core.m_HookedPlayer = -1;
-					m_Core.m_HookState = HOOK_RETRACTED;
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-					m_Core.m_HookPos = m_Core.m_Pos;
+					ReleaseHook();
 				}
 
 				return;
@@ -2614,10 +2608,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if (!Config()->m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
-				m_Core.m_HookState = HOOK_RETRACTED;
-				GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-				m_Core.m_HookPos = m_Core.m_Pos;
+				ReleaseHook();
 			}
 		}
 		return;
@@ -2756,7 +2747,6 @@ void CCharacter::DDraceTick()
 
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
-
 
 void CCharacter::DDracePostCoreTick()
 {
@@ -2977,10 +2967,7 @@ void CCharacter::Rescue()
 			m_Pos = m_PrevSavePos;
 			m_PrevPos = m_PrevSavePos;
 			m_Core.m_Vel = vec2(0, 0);
-			m_Core.m_HookedPlayer = -1;
-			m_Core.m_HookState = HOOK_RETRACTED;
-			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
-			m_Core.m_HookPos = m_Core.m_Pos;
+			ReleaseHook();
 			UnFreeze();
 		}
 	}
@@ -3470,6 +3457,14 @@ void CCharacter::OnPlayerHook()
 		new CAtom(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
 	if (pHookedTee->GetPlayer()->IsHooked(TRAIL) && !pHookedTee->m_Trail)
 		new CTrail(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
+}
+
+void CCharacter::ReleaseHook()
+{
+	m_Core.m_HookedPlayer = -1;
+	m_Core.m_HookState = HOOK_RETRACTED;
+	GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
+	m_Core.m_HookPos = m_Core.m_Pos;
 }
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)
