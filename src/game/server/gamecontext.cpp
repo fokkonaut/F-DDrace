@@ -67,6 +67,7 @@ void CGameContext::Construct(int Resetting)
 		m_NumMutes = 0;
 		m_NumVoteMutes = 0;
 		m_pShop = 0;
+		m_NumRegisterBans = 0;
 	}
 
 	m_aDeleteTempfile[0] = 0;
@@ -903,6 +904,16 @@ void CGameContext::OnTick()
 		{
 			m_NumVoteMutes--;
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
+		}
+	}
+	for (int i = 0; i < m_NumRegisterBans; i++)
+	{
+		// either reset if expired or if ip did not get muted reset it after REGISTER_BAN_DELAY seconds
+		if ((m_aRegisterBans[i].m_Expire > 0 && m_aRegisterBans[i].m_Expire <= Server()->Tick())
+			|| (Server()->Tick() > m_aRegisterBans[i].m_LastAttempt + REGISTER_BAN_DELAY * Server()->TickSpeed()))
+		{
+			m_NumRegisterBans--;
+			m_aRegisterBans[i] = m_aRegisterBans[m_NumRegisterBans];
 		}
 	}
 

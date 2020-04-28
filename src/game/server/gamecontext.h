@@ -740,6 +740,9 @@ private:
 	{
 		MAX_MUTES = 32,
 		MAX_VOTE_MUTES = 32,
+
+		MAX_REGISTER_BANS = 256,
+		REGISTER_BAN_DELAY = 60 * 60 * 12, // 12 hours
 	};
 	struct CMute
 	{
@@ -762,7 +765,21 @@ private:
 	bool TryVoteMute(const NETADDR* pAddr, int Secs);
 	bool VoteMute(const NETADDR* pAddr, int Secs, const char* pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);
+
 	const char *GetWhisper(char *pStr, int *pTarget);
+
+	struct CRegisterBan
+	{
+		NETADDR m_Addr;
+		int m_Expire;
+		int m_NumRegistrations;
+		int64 m_LastAttempt;
+	};
+
+	CRegisterBan m_aRegisterBans[MAX_REGISTER_BANS];
+	int m_NumRegisterBans;
+	int ProcessRegisterBan(int ClientID);
+	bool TryRegisterBan(const NETADDR *pAddr, int Secs);
 
 public:
 	CLayers* Layers() { return &m_Layers; }

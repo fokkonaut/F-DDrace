@@ -450,8 +450,8 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason)
 		m_aMutes[m_NumMutes].m_Addr = *pAddr;
 		m_aMutes[m_NumMutes].m_Expire = Server()->Tick()
 						+ Secs * Server()->TickSpeed();
-		m_NumMutes++;
 		str_copy(m_aMutes[m_NumMutes].m_aReason, pReason, sizeof(m_aMutes[m_NumMutes].m_aReason));
+		m_NumMutes++;
 		return true;
 	}
 	// no free slot found

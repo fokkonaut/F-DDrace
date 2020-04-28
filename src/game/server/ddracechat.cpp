@@ -1344,6 +1344,77 @@ void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserD
 		pSelf->SendChatTarget(pResult->m_ClientID, "Weapon indicator disabled");
 }
 
+bool CGameContext::TryRegisterBan(const NETADDR *pAddr, int Secs)
+{
+	// find a matching register ban for this ip, update expiration time if found
+	for(int i = 0; i < m_NumRegisterBans; i++)
+	{
+		if(net_addr_comp_noport(&m_aRegisterBans[i].m_Addr, pAddr) == 0)
+		{
+			m_aRegisterBans[i].m_LastAttempt = Server()->Tick();
+			m_aRegisterBans[i].m_NumRegistrations++;
+
+			if (m_aRegisterBans[i].m_NumRegistrations > Config()->m_SvMaxRegistrationsPerIP)
+			{
+				m_aRegisterBans[i].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+				return true;
+			}
+			return false;
+		}
+	}
+
+	// nothing to update create new one
+	if(m_NumRegisterBans < MAX_REGISTER_BANS)
+	{
+		m_aRegisterBans[m_NumRegisterBans].m_Addr = *pAddr;
+		m_aRegisterBans[m_NumRegisterBans].m_Expire = 0;
+		m_aRegisterBans[m_NumRegisterBans].m_NumRegistrations = 1;
+		m_aRegisterBans[m_NumRegisterBans].m_LastAttempt = Server()->Tick();
+		m_NumRegisterBans++;
+		return false;
+	}
+	// no free slot found
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "regban", "register ban array is full");
+	return false;
+}
+
+int CGameContext::ProcessRegisterBan(int ClientID)
+{
+	if(!m_apPlayers[ClientID])
+		return 0;
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int RegisterBanned = 0;
+
+	for(int i = 0; i < m_NumRegisterBans; i++)
+	{
+		if(net_addr_comp_noport(&Addr, &m_aRegisterBans[i].m_Addr) == 0)
+		{
+			RegisterBanned = (m_aRegisterBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			break;
+		}
+	}
+
+	if (RegisterBanned > 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You are not permitted to register accounts for the next %d seconds.", RegisterBanned);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	if (TryRegisterBan(&Addr, REGISTER_BAN_DELAY))
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You have been banned from registering accounts for %d seconds", REGISTER_BAN_DELAY);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	return 0;
+}
+
 void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1421,7 +1492,12 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	}
 
 	// we reset the account again and read it again to get the correct values
-	pSelf->FreeAccount(ID);
+	pSelf->FreeAccount(ID, true);
+
+	// process register spam protection before really adding the account
+	if (pSelf->ProcessRegisterBan(pResult->m_ClientID))
+		return;
+
 	ID = pSelf->AddAccount();
 
 	str_copy(pSelf->m_Accounts[ID].m_Password, aPassword, sizeof(pSelf->m_Accounts[ID].m_Password));
