@@ -1832,9 +1832,15 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_Money < 1000000)
+	if (pChr->m_FreezeTime)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 1.000.000 money to use this command");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while frozen");
+		return;
+	}
+
+	if (pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_Money < 2000000)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 2.000.000 money to use this command");
 		return;
 	}
 
