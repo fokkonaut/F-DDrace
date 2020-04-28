@@ -68,6 +68,7 @@ CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays 
 CHAT_COMMAND("money", "", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions", AUTHED_NO)
 
 CHAT_COMMAND("room", "s[invite/kick] r[name]", CFGFLAG_CHAT, ConRoom, this, "Invite or kick player r from the room", AUTHED_NO)
+CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn", AUTHED_NO)
 
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar", AUTHED_NO)

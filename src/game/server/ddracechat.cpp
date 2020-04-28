@@ -1168,19 +1168,19 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	{
 		tmp = (*Account).m_ExpireDateVIP;
 		str_format(aBuf, sizeof(aBuf), "VIP: until %s", pSelf->GetDate(tmp));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
-		str_copy(aBuf, "VIP: not bought", sizeof(aBuf));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientID, "VIP: not bought");
 
 	if ((*Account).m_TeleRifle)
 	{
 		tmp = (*Account).m_ExpireDateTeleRifle;
 		str_format(aBuf, sizeof(aBuf), "Tele Rifle: until %s", pSelf->GetDate(tmp));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
-		str_copy(aBuf, "Tele Rifle: not bought", sizeof(aBuf));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pSelf->SendChatTarget(pResult->m_ClientID, "Tele Rifle: not bought");
 }
 
 void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
@@ -1810,6 +1810,46 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 		str_format(aBuf, sizeof(aBuf), "You kicked '%s' out of room", pSelf->Server()->ClientName(pChr->GetPlayer()->GetCID()));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
+}
+
+void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if (!pPlayer || !pChr)
+		return;
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	if (pPlayer->m_Minigame != MINIGAME_NONE)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command in minigames");
+		return;
+	}
+
+	if (pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_Money < 1000000)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 1.000.000 money to use this command");
+		return;
+	}
+
+	vec2 Pos = pSelf->Collision()->GetRandomTile(ENTITY_SPAWN);
+	if (Pos == vec2(-1, -1))
+		return;
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "You lost 50.000 money for teleporting to spawn");
+	pPlayer->MoneyTransaction(-50000, "-50000 (teleported to spawn)");
+	pChr->Core()->m_Pos = Pos;
+
+	// create death effect and do a nice sound when teleporting to spawn
+	int64_t TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pResult->m_ClientID);
+	pSelf->CreateDeath(Pos, pResult->m_ClientID, TeamMask);
+	pSelf->CreateSound(Pos, SOUND_WEAPON_SPAWN, TeamMask);
 }
 
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
