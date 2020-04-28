@@ -39,7 +39,7 @@ CHAT_COMMAND("time", "", CFGFLAG_CHAT, ConTime, this, "Privately shows you your 
 CHAT_COMMAND("r", "", CFGFLAG_CHAT, ConRescue, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)", AUTHED_NO)
 CHAT_COMMAND("rescue", "", CFGFLAG_CHAT, ConRescue, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)", AUTHED_NO)
 
-CHAT_COMMAND("kill", "", CFGFLAG_CHAT, ConProtectedKill, this, "Kill yourself", AUTHED_NO)
+CHAT_COMMAND("kill", "", CFGFLAG_CHAT, ConProtectedKill, this, "Kill yourself when kill protection is enabled", AUTHED_NO)
 
 // F-DDrace
 
