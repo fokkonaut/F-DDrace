@@ -1811,6 +1811,12 @@ int CServer::Run()
 				GameServer()->OnTick();
 			}
 
+			// master server stuff
+			m_Register.RegisterUpdate(m_NetServer.NetType());
+			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
+
+			PumpNetwork();
+
 			// snap game
 			if(NewTicks)
 			{
@@ -1824,12 +1830,6 @@ int CServer::Run()
 				m_Fifo.Update();
 #endif
 			}
-
-			// master server stuff
-			m_Register.RegisterUpdate(m_NetServer.NetType());
-			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
-
-			PumpNetwork();
 
 			if(ReportTime < time_get())
 			{
