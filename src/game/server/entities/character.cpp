@@ -782,9 +782,6 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_TELE_RIFLE:
 			{
-				// drop flag before teleporting, so it cannot get trapped in some rooms
-				DropFlag();
-
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 				vec2 NewPos = CursorPos;
@@ -797,15 +794,21 @@ void CCharacter::FireWeapon()
 					else
 						NewPos = m_Pos;
 				}
+
+				if (NewPos != m_Pos)
+				{
+					// dont start the counter if we didnt teleport
+					m_LastTeleRifle = Server()->Tick();
+
+					// drop flag before teleporting, so it cannot get trapped in some rooms
+					DropFlag();
+				}
+
 				m_Core.m_Pos = NewPos;
 
 				GameServer()->CreatePlayerSpawn(NewPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-
-				// dont start the counter if we didnt teleport
-				if (NewPos != m_Pos)
-					m_LastTeleRifle = Server()->Tick();
 			} break;
 
 			case WEAPON_PROJECTILE_RIFLE:
