@@ -1161,6 +1161,8 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "--- Account Info ---");
+	str_format(aBuf, sizeof(aBuf), "Account Name: %s", (*Account).m_Username);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
