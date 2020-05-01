@@ -1283,6 +1283,9 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 {
+	// drop armor, hearts and weapons
+	DropLoot(Weapon);
+
 	// reset if killed by the game or if not killed by a player or deathtile while unfrozen
 	if (Weapon == WEAPON_GAME || (!m_FreezeTime && Weapon != WEAPON_PLAYER && Weapon != WEAPON_WORLD))
 	{
@@ -1316,9 +1319,6 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		if (m_pPlayer->m_TeeControllerID != -1)
 			GameServer()->m_apPlayers[m_pPlayer->m_TeeControllerID]->ResumeFromTeeControl();
 	}
-
-	// drop armor, hearts and weapons
-	DropLoot();
 
 	CPlayer *pKiller = (Killer >= 0 && Killer != m_pPlayer->GetCID() && GameServer()->m_apPlayers[Killer]) ? GameServer()->m_apPlayers[Killer] : 0;
 
@@ -3307,9 +3307,9 @@ void CCharacter::DropPickup(int Type, int Amount)
 	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 }
 
-void CCharacter::DropLoot()
+void CCharacter::DropLoot(int Weapon)
 {
-	if (!Config()->m_SvDropsOnDeath)
+	if (!Config()->m_SvDropsOnDeath || Weapon == WEAPON_GAME)
 		return;
 
 	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)

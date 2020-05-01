@@ -118,7 +118,7 @@ public:
 	void DropFlag();
 	void DropWeapon(int WeaponID, bool OnDeath, float Dir = -3);
 	void DropPickup(int Type, int Amount = 1);
-	void DropLoot();
+	void DropLoot(int Weapon);
 
 	void SetAvailableWeapon(int PreferedWeapon = WEAPON_GUN);
 	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
