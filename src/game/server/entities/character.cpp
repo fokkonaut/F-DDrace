@@ -3034,12 +3034,17 @@ void CCharacter::FDDraceInit()
 
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 	if (m_pPlayer->m_Minigame == MINIGAME_NONE)
+	{
 		for (int i = 0; i < 3; i++)
 			if ((*Account).m_SpawnWeapon[i])
 			{
 				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
 				m_aSpawnWeaponActive[i] = true;
 			}
+
+		if ((*Account).m_TeleRifle)
+			GiveWeapon(WEAPON_TELE_RIFLE, false);
+	}
 
 	m_HasFinishedSpecialRace = false;
 	m_SpawnTick = Now;
@@ -3053,8 +3058,6 @@ void CCharacter::FDDraceInit()
 	m_LastTouchedSwitcher = -1;
 
 	m_LastTeleRifle = Now;
-	if ((*Account).m_TeleRifle)
-		GiveWeapon(WEAPON_TELE_RIFLE, false);
 }
 
 void CCharacter::FDDraceTick()
