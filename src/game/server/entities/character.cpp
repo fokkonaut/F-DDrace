@@ -799,9 +799,10 @@ void CCharacter::FireWeapon()
 				{
 					// dont start the counter if we didnt teleport
 					m_LastTeleRifle = Server()->Tick();
-
 					// drop flag before teleporting, so it cannot get trapped in some rooms
 					DropFlag();
+					// release hook
+					ReleaseHook(false);
 				}
 
 				m_Core.m_Pos = NewPos;
@@ -3476,12 +3477,13 @@ void CCharacter::OnPlayerHook()
 		new CTrail(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
 }
 
-void CCharacter::ReleaseHook()
+void CCharacter::ReleaseHook(bool Other)
 {
 	m_Core.m_HookedPlayer = -1;
 	m_Core.m_HookState = HOOK_RETRACTED;
-	GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 	m_Core.m_HookPos = m_Core.m_Pos;
+	if (Other)
+		GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 }
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)

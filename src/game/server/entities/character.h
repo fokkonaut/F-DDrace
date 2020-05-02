@@ -428,7 +428,7 @@ public:
 	bool m_IsFrozen;
 
 	void OnPlayerHook();
-	void ReleaseHook();
+	void ReleaseHook(bool Other = true);
 
 	int m_LastTouchedSwitcher;
 
