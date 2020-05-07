@@ -377,6 +377,13 @@ void CShop::BuyItem(int ClientID, int Item)
 		return;
 	}
 
+	// check police lvl 3 for taser
+	if (Item == ITEM_TASER && (*Account).m_PoliceLevel < 3)
+	{
+		m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license.");
+		return;
+	}
+
 	// check for the correct price
 	if ((m_aItems[ItemID].m_IsEuro && (*Account).m_Euros < m_aItems[ItemID].m_Price)
 		|| (!m_aItems[ItemID].m_IsEuro && (*Account).m_Money < m_aItems[ItemID].m_Price))
