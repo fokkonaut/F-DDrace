@@ -171,7 +171,6 @@ public:
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int IdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -355,8 +354,6 @@ public:
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
-
-	virtual int *GetIdMap(int ClientID);
 
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);

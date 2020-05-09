@@ -7,9 +7,6 @@
 #include "gamecontroller.h"
 #include "gameworld.h"
 #include "player.h"
-#include <algorithm>
-#include <utility>
-#include <engine/shared/config.h>
 
 
 //////////////////////////////////////////////////
@@ -164,136 +161,6 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-bool distCompare(std::pair<float,int> a, std::pair<float,int> b)
-{
-	return (a.first < b.first);
-}
-
-void CGameWorld::UpdatePlayerMaps()
-{
-	if (Server()->Tick() % Config()->m_SvMapUpdateRate != 0) return;
-
-	std::pair<float,int> Dist[MAX_CLIENTS];
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
-		int *pMap = Server()->GetIdMap(i);
-
-		// compute reverse map
-		int rMap[MAX_CLIENTS];
-
-		// compute distances
-		for (int j = 0; j < MAX_CLIENTS; j++)
-		{
-			rMap[j] = -1;
-
-			Dist[j].second = j;
-			if (!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
-			{
-				Dist[j].first = 1e10;
-				continue;
-			}
-
-			// set distance for same ip players to very close, so we always send it
-			if (GameServer()->m_apPlayers[i]->m_aSameIP[j])
-			{
-				Dist[j].first = 0;
-				continue;
-			}
-
-			CCharacter* ch = GameServer()->m_apPlayers[j]->GetCharacter();
-			if (!ch)
-			{
-				Dist[j].first = 1e8;
-				continue;
-			}
-			// copypasted chunk from character.cpp Snap() follows
-			CCharacter* SnapChar = GameServer()->GetPlayerChar(i);
-			if(SnapChar && !SnapChar->m_Super &&
-				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
-				!ch->CanCollide(i)
-			)
-				Dist[j].first = 1e7;
-			else
-				Dist[j].first = 0;
-
-			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
-		}
-
-		// always send the player himself
-		Dist[i].first = 0;
-
-		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-		{
-			if (pMap[j] == -1) continue;
-			// the ip check here so we keep the ones with the same ip so we can set the rMap[j] below on the second run of this function
-			if (GameServer()->m_apPlayers[i]->m_aSameIP[pMap[j]]) continue;
-			if (Dist[pMap[j]].first > 5e9) pMap[j] = -1;
-			else rMap[pMap[j]] = j;
-		}
-
-		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
-
-		// get amount of same ip players
-		int SameIP = 0;
-		for (int j = 0; j < MAX_CLIENTS; j++)
-		{
-			if (GameServer()->m_apPlayers[i]->m_aSameIP[j])
-			{
-				SameIP++;
-
-				// manually insert players with same ip, they wont get inserted by the algorithm
-				// set rMap[j] on the second run of this function, so we can first send disconnect of the tee before
-				int FakeID = GameServer()->m_apPlayers[j]->m_FakeID;
-				if (pMap[FakeID] == j)
-					rMap[j] = FakeID;
-				pMap[FakeID] = j;
-			}
-		}
-
-		int Mapc = SameIP;
-		int Demand = 0;
-		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
-		{
-			int k = Dist[j].second;
-			// skip player with same ip, manually inserted it already
-			if (GameServer()->m_apPlayers[i]->m_aSameIP[k]) continue;
-			if (rMap[k] != -1 || Dist[j].first > 5e9) continue;
-			while (Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1) Mapc++;
-			if (Mapc < VANILLA_MAX_CLIENTS - 1)
-				pMap[Mapc] = k;
-			else
-				Demand++;
-		}
-		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
-		{
-			int k = Dist[j].second;
-			// skip player with same ip, manually inserted it already
-			if (GameServer()->m_apPlayers[i]->m_aSameIP[k]) continue;
-			if (rMap[k] != -1 && Demand-- > 0)
-				pMap[rMap[k]] = -1;
-		}
-
-		if (!Server()->IsSevendown(i))
-		{
-			for (int j = 0; j < MAX_CLIENTS; j++)
-			{
-				int id = j;
-				if (rMap[j] != -1 && !Server()->Translate(id, i))
-					GameServer()->m_apPlayers[i]->SendDisconnect(j, rMap[j]);
-			}
-			for (int j = 0; j < MAX_CLIENTS; j++)
-			{
-				int id = j;
-				if (rMap[j] == -1 && Server()->Translate(id, i))
-					GameServer()->m_apPlayers[i]->SendConnect(j, id);
-			}
-		}
-
-		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-	}
-}
-
 void CGameWorld::Tick()
 {
 	if(m_ResetRequested)
@@ -331,8 +198,6 @@ void CGameWorld::Tick()
 	}
 
 	RemoveEntities();
-
-	UpdatePlayerMaps();
 
 	int StrongWeakID = 0;
 	for (CCharacter* pChar = (CCharacter*)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter*)pChar->TypeNext())

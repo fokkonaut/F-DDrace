@@ -10,7 +10,6 @@
 
 #include <generated/protocol.h>
 #include <engine/shared/protocol.h>
-#include <base/math.h>
 
 class IServer : public IInterface
 {
@@ -44,8 +43,6 @@ public:
 	// F-DDrace
 	virtual void GetClientAddr(int ClientID, NETADDR* pAddr) = 0;
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
-
-	virtual int *GetIdMap(int ClientID) = 0;
 
 	virtual void DummyJoin(int DummyID) = 0;
 	virtual void DummyLeave(int DummyID) = 0;
@@ -91,22 +88,11 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
-	char msgbuf[1000];
-
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
-		// 128 player translation
-		if (pMsg->m_Mode != CHAT_WHISPER && pMsg->m_ClientID >= 0 && !Translate(pMsg->m_ClientID, ClientID))
-		{
-			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
-			pMsg->m_pMessage = msgbuf;
-			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
-		}
-
 		if (!IsSevendown(ClientID))
 			return SendPackMsgOne(pMsg, Flags, ClientID);
 
-		// 0.6 chat message translation
 		CMsgPacker Packer(pMsg->MsgID(), false);
 		Packer.AddInt((int)(pMsg->m_Mode == CHAT_TEAM));
 		Packer.AddInt(pMsg->m_ClientID);
@@ -114,66 +100,6 @@ public:
 		if (Packer.Error() != 0)
 			return -1;
 		return SendMsg(&Packer, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_KillMsg *pMsg, int Flags, int ClientID)
-	{
-		if (!Translate(pMsg->m_Victim, ClientID)) return 0;
-		if (!Translate(pMsg->m_Killer, ClientID)) pMsg->m_Killer = pMsg->m_Victim;
-		return SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_Emoticon *pMsg, int Flags, int ClientID)
-	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_Team *pMsg, int Flags, int ClientID)
-	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_SkinChange *pMsg, int Flags, int ClientID)
-	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_ClientInfo *pMsg, int Flags, int ClientID)
-	{
-		return (Flags&MSGFLAG_NO_TRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	int SendPackMsgTranslate(CNetMsg_Sv_ClientDrop *pMsg, int Flags, int ClientID)
-	{
-		return (Flags&MSGFLAG_NO_TRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
-	}
-
-	// TODO: Messages VOTESET and RACEFINISH are not translated
-
-	bool Translate(int& Target, int Client)
-	{
-		int *pMap = GetIdMap(Client);
-		bool Found = false;
-		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		{
-			if (Target == pMap[i])
-			{
-				Target = i;
-				Found = true;
-				break;
-			}
-		}
-		return Found;
-	}
-
-	bool ReverseTranslate(int& Target, int Client)
-	{
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
-		int *pMap = GetIdMap(Client);
-		if (pMap[Target] == -1)
-			return false;
-		Target = pMap[Target];
-		return true;
 	}
 
 	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
