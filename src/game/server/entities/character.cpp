@@ -389,7 +389,7 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
-	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
+	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo && !m_FreezeTime)
 		WillFire = true;
 
 	if(!WillFire)
