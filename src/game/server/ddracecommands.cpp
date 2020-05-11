@@ -1501,7 +1501,7 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	// new entry for the donations file, so we keep track of every donation
 	char aMsg[256];
 	time_t Now = time(0);
-	str_format(aMsg, sizeof(aMsg), "Account '%s' donated %d Euros on %s", pSelf->m_Accounts[ID].m_Username, Euros, pSelf->GetDate(Now));
+	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s'", pSelf->GetDate(Now), Euros, pSelf->m_Accounts[ID].m_Username);
 	pSelf->Console()->Format(aBuf, sizeof(aBuf), "donation", aMsg);
 
 	std::ofstream DonationsFile("donations.txt", std::ios_base::app | std::ios_base::out);
