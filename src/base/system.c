@@ -2711,19 +2711,9 @@ int str_utf8_decode(const char **ptr)
 
 int str_check_special_chars(const char *pStr)
 {
-	char aAllowedCharSet[64] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	while(*pStr)
 	{
-		int UnallowedChar = 1;
-		for (int j = 0; j < str_length(aAllowedCharSet); j++)
-		{
-			if (*pStr == aAllowedCharSet[j])
-			{
-				UnallowedChar = 0;
-				break;
-			}
-		}
-		if (UnallowedChar)
+		if (!((*pStr >= 'a' && *pStr <= 'z') || (*pStr >= 'A' && *pStr <= 'Z') || (*pStr >= '0' && *pStr <= '9')))
 			return 0;
 		pStr++;
 	}
