@@ -1815,6 +1815,22 @@ int str_utf8_encode(char *ptr, int chr);
 int str_utf8_check(const char *str);
 
 /*
+	Function: str_check_special_chars
+		Checks if a strings contains any characters except letters or numbers.
+
+	Parameters:
+		pStr - Pointer to a string.
+
+	Returns:
+		0 - invalid characters found.
+		1 - only valid characters found.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+int str_check_special_chars(const char *pStr);
+
+/*
 	Function: secure_random_init
 		Initializes the secure random module.
 		You *MUST* check the return value of this function.

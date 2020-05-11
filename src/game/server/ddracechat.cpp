@@ -1443,29 +1443,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	char aAllowedCharSet[64] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-	bool UnallowedChar = false;
-
-	for (int i = 0; i < str_length(aUsername); i++)
-	{
-		bool NoUnallowedChars = false;
-
-		for (int j = 0; j < str_length(aAllowedCharSet); j++)
-		{
-			if (aUsername[i] == aAllowedCharSet[j])
-			{
-				NoUnallowedChars = true;
-				break;
-			}
-		}
-
-		if (!NoUnallowedChars)
-		{
-			UnallowedChar = true;
-			break;
-		}
-	}
-	if (UnallowedChar)
+	if (str_check_special_chars(aUsername) == 0)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Your username can only consist of letters and numbers");
 		return;
@@ -1504,6 +1482,8 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 
 	str_copy(pSelf->m_Accounts[ID].m_Password, aPassword, sizeof(pSelf->m_Accounts[ID].m_Password));
 	str_copy(pSelf->m_Accounts[ID].m_Username, aUsername, sizeof(pSelf->m_Accounts[ID].m_Username));
+
+
 	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
 
 	// also update topaccounts
