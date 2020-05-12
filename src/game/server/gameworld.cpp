@@ -279,14 +279,16 @@ void CGameWorld::UpdatePlayerMaps()
 			for (int j = 0; j < MAX_CLIENTS; j++)
 			{
 				int id = j;
-				if (rMap[j] != -1 && !Server()->Translate(id, i))
-					GameServer()->m_apPlayers[i]->SendDisconnect(j, rMap[j]);
-			}
-			for (int j = 0; j < MAX_CLIENTS; j++)
-			{
-				int id = j;
-				if (rMap[j] == -1 && Server()->Translate(id, i))
-					GameServer()->m_apPlayers[i]->SendConnect(j, id);
+				if (!Server()->Translate(id, i))
+				{
+					if (rMap[j] != -1)
+						GameServer()->m_apPlayers[i]->SendDisconnect(j, rMap[j]);
+				}
+				else
+				{
+					if (rMap[j] == -1)
+						GameServer()->m_apPlayers[i]->SendConnect(j, id);
+				}
 			}
 		}
 
