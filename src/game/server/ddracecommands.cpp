@@ -1504,7 +1504,9 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s'", pSelf->GetDate(Now), Euros, pSelf->m_Accounts[ID].m_Username);
 	pSelf->Console()->Format(aBuf, sizeof(aBuf), "donation", aMsg);
 
-	std::ofstream DonationsFile("donations.txt", std::ios_base::app | std::ios_base::out);
+	char aFile[256];
+	str_format(aFile, sizeof(aFile), "%s/donations.txt", pSelf->Config()->m_SvDonationFilePath);
+	std::ofstream DonationsFile(aFile, std::ios_base::app | std::ios_base::out);
 	DonationsFile << aBuf << "\n";
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
