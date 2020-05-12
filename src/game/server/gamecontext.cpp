@@ -3925,7 +3925,7 @@ const char *CGameContext::GetDate(time_t Time)
 	struct tm Date = *localtime(&tmp);
 
 	static char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%s%d.%s%d.%d", Date.tm_mday < 10 ? "0" : "", Date.tm_mday, (Date.tm_mon+1) < 10 ? "0" : "", Date.tm_mon+1, Date.tm_year+1900);
+	str_format(aBuf, sizeof(aBuf), "%02d.%02d.%d", Date.tm_mday, Date.tm_mon+1, Date.tm_year+1900);
 
 	return aBuf;
 }
