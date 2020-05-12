@@ -5,7 +5,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 #include <game/server/entities/character.h>
-#include <fstream>
 
 bool CheckClientID(int ClientID);
 
@@ -1498,16 +1497,7 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "%d euros given to account '%s'", Euros, pSelf->m_Accounts[ID].m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-	// new entry for the donations file, so we keep track of every donation
-	char aMsg[256];
-	time_t Now = time(0);
-	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s'", pSelf->GetDate(Now), Euros, pSelf->m_Accounts[ID].m_Username);
-	pSelf->Console()->Format(aBuf, sizeof(aBuf), "donation", aMsg);
-
-	char aFile[256];
-	str_format(aFile, sizeof(aFile), "%s/donations.txt", pSelf->Config()->m_SvDonationFilePath);
-	std::ofstream DonationsFile(aFile, std::ios_base::app | std::ios_base::out);
-	DonationsFile << aBuf << "\n";
+	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->Logout(ID);

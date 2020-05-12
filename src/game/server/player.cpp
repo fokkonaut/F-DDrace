@@ -1198,7 +1198,10 @@ void CPlayer::MoneyTransaction(int Amount, const char *pDescription, bool IsEuro
 	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
 
 	if (IsEuro)
+	{
 		(*Account).m_Euros += Amount;
+		GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID());
+	}
 	else
 		(*Account).m_Money += Amount;
 

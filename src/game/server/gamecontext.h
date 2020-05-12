@@ -90,6 +90,12 @@ enum
 	NUM_POLICE_LEVELS = 5,
 };
 
+enum
+{
+	TYPE_DONATION,
+	TYPE_PURCHASE
+};
+
 
 enum
 {
@@ -364,6 +370,7 @@ public:
 	int m_LastAccSaveTick;
 
 	const char *GetDate(time_t Time);
+	void WriteDonationFile(int Type, int Amount, int ID);
 
 	struct AccountInfo
 	{
