@@ -30,7 +30,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_PrevPos = m_Pos;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_SnapPos = m_Pos;
-	m_DDraceMode = true;
+	m_DDraceMode = GameServer()->m_apPlayers[Owner]->m_Gamemode == GAMEMODE_DDRACE;
 
 	for (int i = 0; i < 4; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -43,24 +43,21 @@ CPickupDrop::~CPickupDrop()
 		Server()->SnapFreeID(m_aID[i]);
 }
 
-void CPickupDrop::Reset(bool Erase, bool Picked)
+void CPickupDrop::Reset(bool Picked)
 {
-	if (Erase)
+	if (m_Type == POWERUP_WEAPON)
 	{
-		if (m_Type == POWERUP_WEAPON)
-		{
-			CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
-			if (pOwner)
-				for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
-					if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
-						pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
-		}
-		else
-		{
-			for (unsigned i = 0; i < GameServer()->m_vPickupDropLimit.size(); i++)
-				if (GameServer()->m_vPickupDropLimit[i] == this)
-					GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin() + i);
-		}
+		CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
+		if (pOwner)
+			for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
+				if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
+					pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
+	}
+	else
+	{
+		for (unsigned i = 0; i < GameServer()->m_vPickupDropLimit.size(); i++)
+			if (GameServer()->m_vPickupDropLimit[i] == this)
+				GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin() + i);
 	}
 
 	if (!Picked)
@@ -75,9 +72,6 @@ void CPickupDrop::Tick()
 	m_pOwner = 0;
 	if (m_Owner != -1 && GameServer()->GetPlayerChar(m_Owner))
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
-
-	if (GameServer()->m_apPlayers[m_Owner])
-		m_DDraceMode = GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE;
 
 	if (m_Owner >= 0 && !GameServer()->m_apPlayers[m_Owner] && Config()->m_SvDestroyDropsOnLeave)
 	{
@@ -158,7 +152,7 @@ void CPickupDrop::Pickup()
 		else if (m_Type == POWERUP_ARMOR)
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 
-		Reset(true, true);
+		Reset(true);
 	}
 }
 

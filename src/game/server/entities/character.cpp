@@ -3252,16 +3252,13 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
-	{
-		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false, false);
-		m_pPlayer->m_vWeaponLimit[WeaponID].erase(m_pPlayer->m_vWeaponLimit[WeaponID].begin());
-	}
+		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
 
 	bool IsTeleWeapon = (WeaponID == WEAPON_GUN && m_HasTeleGun) || (WeaponID == WEAPON_GRENADE && m_HasTeleGrenade) || (WeaponID == WEAPON_LASER && m_HasTeleLaser);
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *Weapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, (WeaponID == WEAPON_HAMMER && m_DoorHammer));
-	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(Weapon);
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, (WeaponID == WEAPON_HAMMER && m_DoorHammer));
+	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
 	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon && (WeaponID != WEAPON_HAMMER || !m_DoorHammer))
 	{
@@ -3286,13 +3283,11 @@ void CCharacter::DropPickup(int Type, int Amount)
 	for (int i = 0; i < Amount; i++)
 	{
 		if (GameServer()->m_vPickupDropLimit.size() == (unsigned)Config()->m_SvMaxPickupDrops)
-		{
-			GameServer()->m_vPickupDropLimit[0]->Reset(false, false);
-			GameServer()->m_vPickupDropLimit.erase(GameServer()->m_vPickupDropLimit.begin());
-		}
+			GameServer()->m_vPickupDropLimit[0]->Reset(false);
+
 		float Dir = ((rand() % 50 - 25) * 0.1); // in a range of -2.5 to +2.5
-		CPickupDrop *PickupDrop = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir);
-		GameServer()->m_vPickupDropLimit.push_back(PickupDrop);
+		CPickupDrop *pPickupDrop = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir);
+		GameServer()->m_vPickupDropLimit.push_back(pPickupDrop);
 	}
 	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 }

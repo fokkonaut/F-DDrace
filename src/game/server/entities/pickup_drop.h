@@ -12,8 +12,8 @@ public:
 		int Lifetime = 300, int Bullets = -1, bool SpreadWeapon = false, bool Jetpack = false, bool TeleWeapon = false, bool DoorHammer = false);
 	virtual ~CPickupDrop();
 
-	void Reset(bool Erase, bool Picked);
-	virtual void Reset() { Reset(true, false); };
+	void Reset(bool Picked);
+	virtual void Reset() { Reset(false); };
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
