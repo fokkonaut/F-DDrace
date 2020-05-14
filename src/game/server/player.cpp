@@ -1319,7 +1319,7 @@ void CPlayer::MoneyTransaction(int Amount, const char *pDescription, bool IsEuro
 	if (IsEuro)
 	{
 		(*Account).m_Euros += Amount;
-		GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID());
+		GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID(), pDescription);
 	}
 	else
 		(*Account).m_Money += Amount;
@@ -1390,7 +1390,7 @@ void CPlayer::OnLogin()
 	if ((*Account).m_VIP && (*Account).m_ExpireDateVIP == 0)
 	{
 		(*Account).m_VIP = 0;
-		MoneyTransaction(5, "", true);
+		MoneyTransaction(5, "Had VIP from the old system", true);
 		GameServer()->SendChatTarget(m_ClientID, "[WARNING] Due to an update your VIP was removed. You got 5 Euros back, saved in your account. Go to the shop and buy VIP again.");
 	}
 

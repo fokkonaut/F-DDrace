@@ -370,7 +370,7 @@ public:
 	int m_LastAccSaveTick;
 
 	const char *GetDate(time_t Time);
-	void WriteDonationFile(int Type, int Amount, int ID);
+	void WriteDonationFile(int Type, int Amount, int ID, const char *pDescription);
 
 	struct AccountInfo
 	{

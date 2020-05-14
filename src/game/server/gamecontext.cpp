@@ -3962,12 +3962,12 @@ const char *CGameContext::GetDate(time_t Time)
 	return aBuf;
 }
 
-void CGameContext::WriteDonationFile(int Type, int Amount, int ID)
+void CGameContext::WriteDonationFile(int Type, int Amount, int ID, const char *pDescription)
 {
 	const char* pFrom = Type == TYPE_DONATION ? "donation" : Type == TYPE_PURCHASE ? "purchase" : "";
 	char aBuf[256], aMsg[256];
 	time_t Now = time(0);
-	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s'", GetDate(Now), Amount, m_Accounts[ID].m_Username);
+	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s', Description: '%s'", GetDate(Now), Amount, m_Accounts[ID].m_Username, pDescription);
 	Console()->Format(aBuf, sizeof(aBuf), pFrom, aMsg);
 
 	char aFile[256];
