@@ -650,18 +650,29 @@ void CPlayer::SetFakeID()
 	int FakeID = 0;
 	NETADDR Addr, Addr2;
 	Server()->GetClientAddr(m_ClientID, &Addr);
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	while (1)
 	{
-		if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
-			continue;
-
-		Server()->GetClientAddr(i, &Addr2);
-		if (net_addr_comp_noport(&Addr, &Addr2) == 0)
+		bool Break = true;
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			FakeID++;
-			m_aSameIP[i] = true;
-			GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = true;
+			if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
+				continue;
+
+			Server()->GetClientAddr(i, &Addr2);
+			if (net_addr_comp_noport(&Addr, &Addr2) == 0)
+			{
+				if (GameServer()->m_apPlayers[i]->m_FakeID == FakeID)
+				{
+					FakeID++;
+					Break = false;
+				}
+				m_aSameIP[i] = true;
+				GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = true;
+			}
 		}
+
+		if (Break)
+			break;
 	}
 	m_FakeID = FakeID;
 
