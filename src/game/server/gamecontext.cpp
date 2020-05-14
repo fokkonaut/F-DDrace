@@ -1154,7 +1154,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		NewClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aSkinPartColors[p];
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	// handled in CGameWorld::UpdatePlayerMaps()
+	/*for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == ClientID || !m_apPlayers[i] || (!Server()->ClientIngame(i) && !m_apPlayers[i]->IsDummy()))
 			continue;
@@ -1179,7 +1180,7 @@ void CGameContext::OnClientEnter(int ClientID)
 			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 		}
 		Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-	}
+	}*/
 
 	// local info
 	NewClientInfoMsg.m_Local = 1;
