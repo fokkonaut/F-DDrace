@@ -78,7 +78,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			pHit->m_GotLasered = true;
 		}
 	}
-	pHit->TakeDamage(vec2(0.f, 0.f), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetRealWeapon(m_Type)].m_Damage, m_Owner, m_Type);
+	pHit->TakeDamage(vec2(0.f, 0.f), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetWeaponType(m_Type)].m_Damage, m_Owner, m_Type);
 	return true;
 }
 

@@ -148,7 +148,7 @@ void CPickup::Tick()
 					case POWERUP_WEAPON:
 						if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 						{
-							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Subtype) != WEAPON_GUN)
+							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
 								break;
 
 							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
@@ -298,7 +298,7 @@ void CPickup::Snap(int SnappingClient)
 		if (Server()->IsSevendown(SnappingClient))
 		{
 			pP->m_Type = m_Type;
-			((int*)pP)[3] = GameServer()->GetRealWeapon(m_Subtype);
+			((int*)pP)[3] = GameServer()->GetWeaponType(m_Subtype);
 		}
 		else
 			pP->m_Type = GameServer()->GetPickupType(m_Type, m_Subtype);

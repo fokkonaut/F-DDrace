@@ -469,7 +469,8 @@ public:
 	void SendMotd(const char* pMsg, int ClientID);
 
 	const char* GetWeaponName(int Weapon);
-	int GetRealWeapon(int Weapon);
+	int GetWeaponType(int Weapon);
+	int GetProjectileType(int Weapon);
 	int GetPickupType(int Type, int Subtype);
 
 	const char* GetMinigameName(int Minigame);

@@ -567,8 +567,7 @@ void CCharacter::FireWeapon()
 							-1,//SoundImpact
 							0,
 							0,
-							(m_Spooky || m_pPlayer->m_SpookyGhost),
-							m_pPlayer->m_Gamemode == GAMEMODE_VANILLA
+							(m_Spooky || m_pPlayer->m_SpookyGhost)
 						);
 					}
 
@@ -595,7 +594,7 @@ void CCharacter::FireWeapon()
 							ProjStartPos,
 							vec2(cosf(a), sinf(a)) * Speed,
 							(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime),
-							false, false, 0, -1, 0, 0, false, true);
+							false, false, 0, -1, 0, 0, false);
 					}
 				}
 				else
@@ -635,8 +634,7 @@ void CCharacter::FireWeapon()
 					SOUND_GRENADE_EXPLODE,//SoundImpact
 					0,//Layer
 					0,//Number
-					false,//Spooky
-					GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE//FakeTuning
+					false//Spooky
 				);
 
 				if (Sound)
@@ -894,7 +892,7 @@ void CCharacter::FireWeapon()
 	}
 
 	//spooky ghost
-	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetRealWeapon(GetActiveWeapon()) == WEAPON_GUN)
+	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN)
 	{
 		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		{
@@ -985,7 +983,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 	if (W != -1)
 		m_aSpawnWeaponActive[W] = false;
 
-	if (m_pPlayer->m_SpookyGhost && GameServer()->GetRealWeapon(Weapon) != WEAPON_GUN)
+	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
 
 	if (Weapon == WEAPON_NINJA)
@@ -1410,7 +1408,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 			pKiller->FixForNoName(FIX_SET_NAME_ONLY);
 
 		m_pPlayer->m_KillMsgFix.m_Killer = Killer;
-		m_pPlayer->m_KillMsgFix.m_Weapon = GameServer()->GetRealWeapon(Weapon);
+		m_pPlayer->m_KillMsgFix.m_Weapon = GameServer()->GetWeaponType(Weapon);
 		m_pPlayer->m_KillMsgFix.m_ModeSpecial = ModeSpecial;
 		m_pPlayer->FixForNoName(FIX_KILL_MSG);
 	}
@@ -1419,7 +1417,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		CNetMsg_Sv_KillMsg Msg;
 		Msg.m_Killer = Killer;
 		Msg.m_Victim = m_pPlayer->GetCID();
-		Msg.m_Weapon = GameServer()->GetRealWeapon(Weapon);
+		Msg.m_Weapon = GameServer()->GetWeaponType(Weapon);
 		Msg.m_ModeSpecial = ModeSpecial;
 		// only send kill message to players in the same minigame
 		for (int i = 0; i < MAX_CLIENTS; i++)
@@ -1665,7 +1663,7 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_Armor = 0;
 	pCharacter->m_TriggeredEvents = m_TriggeredEvents;
 
-	pCharacter->m_Weapon = GameServer()->GetRealWeapon(m_ActiveWeapon);
+	pCharacter->m_Weapon = GameServer()->GetWeaponType(m_ActiveWeapon);
 	pCharacter->m_AttackTick = m_AttackTick;
 
 	pCharacter->m_Direction = m_Input.m_Direction;
@@ -3339,7 +3337,7 @@ void CCharacter::SetSpookyGhost()
 
 	BackupWeapons(BACKUP_SPOOKY_GHOST);
 	for (int i = 0; i < NUM_WEAPONS; i++)
-		if (GameServer()->GetRealWeapon(i) != WEAPON_GUN)
+		if (GameServer()->GetWeaponType(i) != WEAPON_GUN)
 			m_aWeapons[i].m_Got = false;
 	m_pPlayer->m_ShowName = false;
 	m_pPlayer->SetSkin(SKIN_SPOOKY_GHOST);

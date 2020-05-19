@@ -7,7 +7,7 @@
 CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec, bool OnlyShowOwner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_STABLE_PROJECTILE, Pos)
 {
-	m_Type = GameServer()->GetRealWeapon(Type);
+	m_Type = GameServer()->GetWeaponType(Type);
 	m_Pos = Pos;
 	m_LastResetPos = Pos;
 	m_Owner = Owner;

@@ -173,7 +173,7 @@ int CPickupDrop::IsCharacterNear()
 			bool IsTeleWeapon = (m_Weapon == WEAPON_GUN && pChr->m_HasTeleGun) || (m_Weapon == WEAPON_GRENADE && pChr->m_HasTeleGrenade) || (m_Weapon == WEAPON_LASER && pChr->m_HasTeleLaser);
 
 			if (
-				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetRealWeapon(m_Weapon) != WEAPON_GUN)
+				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Weapon) != WEAPON_GUN)
 				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_DoorHammer && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
 				|| (m_Jetpack && (pChr->m_Jetpack || !pChr->GetWeaponGot(WEAPON_GUN)))
 				|| (m_SpreadWeapon && (pChr->m_aSpreadWeapon[m_Weapon] || !pChr->GetWeaponGot(m_Weapon)))
@@ -447,7 +447,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		if (Server()->IsSevendown(SnappingClient))
 		{
 			pP->m_Type = m_Type;
-			((int*)pP)[3] = GameServer()->GetRealWeapon(m_Weapon);
+			((int*)pP)[3] = GameServer()->GetWeaponType(m_Weapon);
 		}
 		else
 			pP->m_Type = GameServer()->GetPickupType(m_Type, m_Weapon);

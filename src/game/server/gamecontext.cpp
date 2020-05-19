@@ -782,6 +782,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -4312,7 +4313,7 @@ const char *CGameContext::GetWeaponName(int Weapon)
 	return "Unknown";
 }
 
-int CGameContext::GetRealWeapon(int Weapon)
+int CGameContext::GetWeaponType(int Weapon)
 {
 	switch (Weapon)
 	{
@@ -4338,6 +4339,20 @@ int CGameContext::GetRealWeapon(int Weapon)
 	return Weapon;
 }
 
+int CGameContext::GetProjectileType(int Weapon)
+{
+	switch (Weapon)
+	{
+	case WEAPON_STRAIGHT_GRENADE:
+		return WEAPON_GRENADE;
+	case WEAPON_PROJECTILE_RIFLE:
+		return WEAPON_GUN;
+	case WEAPON_BALL_GRENADE:
+		return WEAPON_GRENADE;
+	}
+	return Weapon;
+}
+
 int CGameContext::GetPickupType(int Type, int Subtype)
 {
 	if (Type == POWERUP_NINJA)
@@ -4345,7 +4360,7 @@ int CGameContext::GetPickupType(int Type, int Subtype)
 	if (Type != POWERUP_WEAPON)
 		return Type;
 
-	Subtype = GetRealWeapon(Subtype);
+	Subtype = GetWeaponType(Subtype);
 	switch (Subtype)
 	{
 	case WEAPON_GUN:

@@ -20,8 +20,7 @@ public:
 		int SoundImpact,
 		int Layer = 0,
 		int Number = 0,
-		bool Spooky = false,
-		bool FakeTuning = false
+		bool Spooky = false
 	);
 
 	vec2 GetPos(float Time);
@@ -51,15 +50,16 @@ private:
 	bool m_Spooky;
 
 	bool m_FakeTuning;
+	bool m_DDrace;
 	vec2 m_LastResetPos;
 	int m_LastResetTick;
 	bool m_CalculatedVel;
-	int m_VelX;
-	int m_VelY;
+	vec2 m_Vel;
 
 	virtual void TickDefered();
 	void CalculateVel();
-	void GetTunings(float* Curvature, float* Speed);
+	void GetOriginalTunings(float *pCurvature, float *pSpeed);
+	void GetTunings(float *pCurvature, float *pSpeed);
 
 public:
 

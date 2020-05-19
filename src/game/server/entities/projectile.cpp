@@ -25,8 +25,7 @@ CProjectile::CProjectile
 	int SoundImpact,
 	int Layer,
 	int Number,
-	bool Spooky,
-	bool FakeTuning
+	bool Spooky
 )
 	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, Pos)
 {
@@ -49,7 +48,10 @@ CProjectile::CProjectile
 	// F-DDrace
 	m_Spooky = Spooky;
 
-	m_FakeTuning = FakeTuning;
+	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
+	m_DDrace = !GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE;
+	m_FakeTuning = m_TuneZone || !m_DDrace || m_Type == WEAPON_STRAIGHT_GRENADE;
+
 	m_LastResetPos = Pos;
 	m_LastResetTick = Server()->Tick();
 	m_CalculatedVel = false;
@@ -69,49 +71,47 @@ vec2 CProjectile::GetPos(float Time)
 	float Curvature;
 	float Speed;
 	GetTunings(&Curvature, &Speed);
+	CTuningParams *pTuning = &GameServer()->TuningList()[m_TuneZone];
 
-	if (m_FakeTuning)
+	if(m_TuneZone)
 	{
-		switch (m_Type)
+		switch(m_Type)
 		{
-			case WEAPON_SHOTGUN:
-				if (!m_TuneZone)
-				{
-					Curvature = GameServer()->Tuning()->m_VanillaShotgunCurvature;
-					Speed = GameServer()->Tuning()->m_VanillaShotgunSpeed;
-				}
-				else
-				{
-					Curvature = GameServer()->TuningList()[m_TuneZone].m_VanillaShotgunCurvature;
-					Speed = GameServer()->TuningList()[m_TuneZone].m_VanillaShotgunCurvature;
-				}
-				break;
+		case WEAPON_GRENADE:
+			Curvature = pTuning->m_GrenadeCurvature;
+			Speed = pTuning->m_GrenadeSpeed;
+			break;
 
-			case WEAPON_GUN:
-				if (!m_TuneZone)
-				{
-					Curvature = GameServer()->Tuning()->m_VanillaGunCurvature;
-					Speed = GameServer()->Tuning()->m_VanillaGunSpeed;
-				}
-				else
-				{
-					Curvature = GameServer()->TuningList()[m_TuneZone].m_VanillaGunCurvature;
-					Speed = GameServer()->TuningList()[m_TuneZone].m_VanillaGunSpeed;
-				}
-				break;
+		case WEAPON_SHOTGUN:
+			if (m_DDrace)
+			{
+				Curvature = pTuning->m_ShotgunCurvature;
+				Speed = pTuning->m_ShotgunSpeed;
+			}
+			else
+			{
+				Curvature = pTuning->m_VanillaShotgunCurvature;
+				Speed = pTuning->m_VanillaShotgunSpeed;
+			}
+			break;
 
-			case WEAPON_STRAIGHT_GRENADE:
-				if (!m_TuneZone)
-				{
-					Curvature = 0;
-					Speed = GameServer()->Tuning()->m_StraightGrenadeSpeed;
-				}
-				else
-				{
-					Curvature = 0;
-					Speed = GameServer()->TuningList()[m_TuneZone].m_StraightGrenadeSpeed;
-				}
-				break;
+		case WEAPON_GUN:
+			if (m_DDrace)
+			{
+				Curvature = pTuning->m_GunCurvature;
+				Speed = pTuning->m_GunSpeed;
+			}
+			else
+			{
+				Curvature = pTuning->m_VanillaGunCurvature;
+				Speed = pTuning->m_VanillaGunSpeed;
+			}
+			break;
+
+		case WEAPON_STRAIGHT_GRENADE:
+			Curvature = 0;
+			Speed = pTuning->m_StraightGrenadeSpeed;
+			break;
 		}
 	}
 
@@ -157,7 +157,7 @@ void CProjectile::Tick()
 	{
 		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 	}
-	else if (m_Owner >= 0 && (GameServer()->GetRealWeapon(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath))
+	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath))
 	{
 		GameWorld()->DestroyEntity(this);
 		return;
@@ -185,7 +185,7 @@ void CProjectile::Tick()
 		{
 			if (!m_Explosive)
 			{
-				pTargetChr->TakeDamage(m_Direction * max(0.001f, m_Force), m_Direction*-1, g_pData->m_Weapons.m_aId[GameServer()->GetRealWeapon(m_Type)].m_Damage, m_Owner, m_Type);
+				pTargetChr->TakeDamage(m_Direction * max(0.001f, m_Force), m_Direction*-1, g_pData->m_Weapons.m_aId[GameServer()->GetProjectileType(m_Type)].m_Damage, m_Owner, m_Type);
 			}
 			if (m_Spooky)
 			{
@@ -252,9 +252,9 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if (m_Type == WEAPON_GUN || m_Type == WEAPON_PROJECTILE_RIFLE)
+		else if (GameServer()->GetProjectileType(m_Type) == WEAPON_GUN)
 		{
-			if (pOwnerChar && (pOwnerChar->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE || m_Type == WEAPON_PROJECTILE_RIFLE))
+			if (pOwnerChar && (pOwnerChar->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE || m_Type != WEAPON_GUN))
 				GameServer()->CreateDamage(m_CurPos, m_Owner, m_Direction, 1, 0, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : -1LL, 10);
 			GameWorld()->DestroyEntity(this);
 			return;
@@ -311,11 +311,7 @@ void CProjectile::TickPaused()
 
 void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 {
-	int Weapon = GameServer()->GetRealWeapon(m_Type);
-	if (m_Type == WEAPON_PROJECTILE_RIFLE)
-		Weapon = WEAPON_GUN;
-
-	pProj->m_Type = Weapon;
+	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
 
 	// F-DDrace
 	if (m_FakeTuning)
@@ -325,8 +321,8 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 
 		pProj->m_X = (int)m_LastResetPos.x;
 		pProj->m_Y = (int)m_LastResetPos.y;
-		pProj->m_VelX = m_VelX;
-		pProj->m_VelY = m_VelY;
+		pProj->m_VelX = m_Vel.x;
+		pProj->m_VelY = m_Vel.y;
 		pProj->m_StartTick = m_LastResetTick;
 	}
 	else
@@ -390,62 +386,84 @@ void CProjectile::CalculateVel()
 	float Time = (Server()->Tick() - m_LastResetTick) / (float)Server()->TickSpeed();
 	float Curvature;
 	float Speed;
-	GetTunings(&Curvature, &Speed);
+	GetOriginalTunings(&Curvature, &Speed);
 
-	m_VelX = ((m_CurPos.x - m_LastResetPos.x) / Time / Speed) * 100;
-	m_VelY = ((m_CurPos.y - m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
+	m_Vel.x = ((m_CurPos.x - m_LastResetPos.x) / Time / Speed) * 100;
+	m_Vel.y = ((m_CurPos.y - m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
 
 	m_CalculatedVel = true;
 }
 
-void CProjectile::GetTunings(float* Curvature, float* Speed)
+void CProjectile::GetOriginalTunings(float *pCurvature, float *pSpeed)
 {
-	*Curvature = 0;
-	*Speed = 0;
+	*pCurvature = 0;
+	*pSpeed = 0;
+	CTuningParams *pTuning = GameServer()->Tuning();
 
-	int Weapon = GameServer()->GetRealWeapon(m_Type);
-	if (m_Type == WEAPON_PROJECTILE_RIFLE)
-		Weapon = WEAPON_GUN;
-
-	switch (Weapon)
+	switch (GameServer()->GetProjectileType(m_Type))
 	{
 	case WEAPON_GRENADE:
-		if (!m_TuneZone)
-		{
-			*Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
-			*Speed = GameServer()->Tuning()->m_GrenadeSpeed;
-		}
-		else
-		{
-			*Curvature = GameServer()->TuningList()[m_TuneZone].m_GrenadeCurvature;
-			*Speed = GameServer()->TuningList()[m_TuneZone].m_GrenadeSpeed;
-		}
+		*pCurvature = pTuning->m_GrenadeCurvature;
+		*pSpeed = pTuning->m_GrenadeSpeed;
 		break;
 
 	case WEAPON_SHOTGUN:
-		if (!m_TuneZone)
+		*pCurvature = pTuning->m_ShotgunCurvature;
+		*pSpeed = pTuning->m_ShotgunSpeed;
+		break;
+
+	case WEAPON_GUN:
+		*pCurvature = pTuning->m_GunCurvature;
+		*pSpeed = pTuning->m_GunSpeed;
+		break;
+	}
+}
+
+void CProjectile::GetTunings(float *pCurvature, float *pSpeed)
+{
+	*pCurvature = 0;
+	*pSpeed = 0;
+	CTuningParams *pTuning = GameServer()->Tuning();
+
+	switch (m_Type)
+	{
+	case WEAPON_GRENADE:
+		*pCurvature = pTuning->m_GrenadeCurvature;
+		*pSpeed = pTuning->m_GrenadeSpeed;
+		break;
+
+	case WEAPON_SHOTGUN:
+		if (m_DDrace)
 		{
-			*Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
-			*Speed = GameServer()->Tuning()->m_ShotgunSpeed;
+			*pCurvature = pTuning->m_ShotgunCurvature;
+			*pSpeed = pTuning->m_ShotgunSpeed;
 		}
 		else
 		{
-			*Curvature = GameServer()->TuningList()[m_TuneZone].m_ShotgunCurvature;
-			*Speed = GameServer()->TuningList()[m_TuneZone].m_ShotgunSpeed;
+			*pCurvature = pTuning->m_VanillaShotgunCurvature;
+			*pSpeed = pTuning->m_VanillaShotgunSpeed;
 		}
 		break;
 
 	case WEAPON_GUN:
-		if (!m_TuneZone)
+		if (m_DDrace)
 		{
-			*Curvature = GameServer()->Tuning()->m_GunCurvature;
-			*Speed = GameServer()->Tuning()->m_GunSpeed;
+			*pCurvature = pTuning->m_GunCurvature;
+			*pSpeed = pTuning->m_GunSpeed;
 		}
 		else
 		{
-			*Curvature = GameServer()->TuningList()[m_TuneZone].m_GunCurvature;
-			*Speed = GameServer()->TuningList()[m_TuneZone].m_GunSpeed;
+			*pCurvature = pTuning->m_VanillaGunCurvature;
+			*pSpeed = pTuning->m_VanillaGunSpeed;
 		}
 		break;
+
+	case WEAPON_STRAIGHT_GRENADE:
+		*pCurvature = 0;
+		*pSpeed = pTuning->m_StraightGrenadeSpeed;
+		break;
+
+	default:
+		GetOriginalTunings(pCurvature, pSpeed);
 	}
 }

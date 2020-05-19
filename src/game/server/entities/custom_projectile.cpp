@@ -137,7 +137,7 @@ void CCustomProjectile::HitCharacter()
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 	else
-		pHit->TakeDamage(vec2(0, 0), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetRealWeapon(m_Type)].m_Damage, m_Owner, m_Type);
+		pHit->TakeDamage(vec2(0, 0), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetWeaponType(m_Type)].m_Damage, m_Owner, m_Type);
 
 	if (m_Type == WEAPON_HEART_GUN)
 	{
