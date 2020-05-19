@@ -49,8 +49,8 @@ CProjectile::CProjectile
 	m_Spooky = Spooky;
 
 	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
-	m_DDrace = !GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE;
-	m_FakeTuning = m_TuneZone || !m_DDrace || m_Type == WEAPON_STRAIGHT_GRENADE;
+	m_DDrace = !GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
+	m_DefaultTuning = !m_TuneZone && m_DDrace && m_Type != WEAPON_STRAIGHT_GRENADE;
 
 	m_LastResetPos = Pos;
 	m_LastResetTick = Server()->Tick();
@@ -315,7 +315,15 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
 
 	// F-DDrace
-	if (m_FakeTuning)
+	if (m_DefaultTuning)
+	{
+		pProj->m_X = (int)m_Pos.x;
+		pProj->m_Y = (int)m_Pos.y;
+		pProj->m_VelX = (int)(m_Direction.x * 100.0f);
+		pProj->m_VelY = (int)(m_Direction.y * 100.0f);
+		pProj->m_StartTick = m_StartTick;
+	}
+	else
 	{
 		if (!m_CalculatedVel)
 			CalculateVel();
@@ -325,14 +333,6 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 		pProj->m_VelX = m_Vel.x;
 		pProj->m_VelY = m_Vel.y;
 		pProj->m_StartTick = m_LastResetTick;
-	}
-	else
-	{
-		pProj->m_X = (int)m_Pos.x;
-		pProj->m_Y = (int)m_Pos.y;
-		pProj->m_VelX = (int)(m_Direction.x * 100.0f);
-		pProj->m_VelY = (int)(m_Direction.y * 100.0f);
-		pProj->m_StartTick = m_StartTick;
 	}
 }
 

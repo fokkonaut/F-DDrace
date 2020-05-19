@@ -907,14 +907,6 @@ void CGameContext::ConSpookyGhost(IConsole::IResult* pResult, void* pUserData)
 	if (pChr) pChr->SpookyGhost(!pChr->GetPlayer()->m_HasSpookyGhost, pResult->m_ClientID);
 }
 
-void CGameContext::ConSpooky(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->Spooky(!pChr->m_Spooky, pResult->m_ClientID);
-}
-
 void CGameContext::ConAddMeteor(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

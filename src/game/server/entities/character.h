@@ -22,7 +22,6 @@ enum Extra
 	ATOM,
 	TRAIL,
 	SPOOKY_GHOST,
-	SPOOKY,
 	METEOR,
 	INF_METEOR,
 	PASSIVE,
@@ -374,7 +373,6 @@ public:
 	bool m_aSpreadWeapon[NUM_WEAPONS];
 	CEntity* m_TelekinesisEntity;
 	CLightsaber* m_pLightsaber;
-	bool m_Spooky;
 	bool m_AlwaysTeleWeapon;
 	bool m_DoorHammer;
 

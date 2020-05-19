@@ -567,7 +567,7 @@ void CCharacter::FireWeapon()
 							-1,//SoundImpact
 							0,
 							0,
-							(m_Spooky || m_pPlayer->m_SpookyGhost)
+							m_pPlayer->m_SpookyGhost
 						);
 					}
 
@@ -699,9 +699,9 @@ void CCharacter::FireWeapon()
 					false,					//freeze
 					false,					//explosive
 					false,					//unfreeze
-					(m_Spooky || m_pPlayer->m_SpookyGhost),//bloody
-					(m_Spooky || m_pPlayer->m_SpookyGhost),//ghost
-					(m_Spooky || m_pPlayer->m_SpookyGhost),//spooky
+					m_pPlayer->m_SpookyGhost,//bloody
+					m_pPlayer->m_SpookyGhost,//ghost
+					m_pPlayer->m_SpookyGhost,//spooky
 					WEAPON_HEART_GUN		//type
 				);
 				if (Sound)
@@ -835,7 +835,7 @@ void CCharacter::FireWeapon()
 					SOUND_GRENADE_EXPLODE,//SoundImpact
 					0,
 					0,
-					(m_Spooky || m_pPlayer->m_SpookyGhost)
+					m_pPlayer->m_SpookyGhost
 				);
 
 				if (Sound)
@@ -3528,12 +3528,6 @@ void CCharacter::SpookyGhost(bool Set, int FromID, bool Silent)
 	GameServer()->SendExtraMessage(SPOOKY_GHOST, m_pPlayer->GetCID(), Set, FromID, Silent);
 	if (!Silent && Set)
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "For more info, say '/spookyghostinfo'");
-}
-
-void CCharacter::Spooky(bool Set, int FromID, bool Silent)
-{
-	m_Spooky = Set;
-	GameServer()->SendExtraMessage(SPOOKY, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
 void CCharacter::Meteor(bool Set, int FromID, bool Infinite, bool Silent)

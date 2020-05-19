@@ -473,7 +473,7 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 	Msg.m_Emoticon = Emoticon;
 	if (m_apPlayers[ClientID])
 	{
-		if (m_apPlayers[ClientID]->m_SpookyGhost || (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_Spooky))
+		if (m_apPlayers[ClientID]->m_SpookyGhost)
 			Msg.m_Emoticon = EMOTICON_GHOST;
 		else if (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->GetActiveWeapon() == WEAPON_HEART_GUN)
 			Msg.m_Emoticon = EMOTICON_HEARTS;
@@ -2092,7 +2092,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						pChr->SetEmoteType(EMOTE_NORMAL);
 						break;
 				}
-				if (pPlayer->m_SpookyGhost || pChr->m_Spooky)
+				if (pPlayer->m_SpookyGhost)
 					pChr->SetEmoteType(EMOTE_SURPRISE);
 				else if (pChr->GetActiveWeapon() == WEAPON_HEART_GUN)
 					pChr->SetEmoteType(EMOTE_HAPPY);
@@ -4459,8 +4459,6 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Trail";
 	case SPOOKY_GHOST:
 		return "Spooky Ghost";
-	case SPOOKY:
-		return "Spooky Mode";
 	case METEOR:
 		return "Meteor";
 	case INF_METEOR:
