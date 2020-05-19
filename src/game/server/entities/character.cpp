@@ -793,6 +793,9 @@ void CCharacter::FireWeapon()
 						NewPos = m_Pos;
 				}
 
+				if (GameServer()->Collision()->IntersectLineTeleRifleStop(m_Pos, NewPos, 0, 0))
+					NewPos = m_Pos;
+
 				if (NewPos != m_Pos)
 				{
 					// dont start the counter if we didnt teleport

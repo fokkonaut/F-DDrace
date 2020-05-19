@@ -240,7 +240,6 @@ public:
 	int m_UpdateAngle;
 
 	int m_Id;
-	bool m_pReset;
 	class CCollision* Collision() { return m_pCollision; }
 
 	vec2 m_LastVel;

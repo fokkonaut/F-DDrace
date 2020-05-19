@@ -253,10 +253,9 @@ void CCharacterCore::Tick(bool UseInput)
 		{
 			m_HookState = HOOK_RETRACT_START;
 			NewPos = m_Pos + normalize(NewPos-m_Pos) * m_pWorld->m_Tuning.m_HookLength;
-			m_pReset = true;
 		}
 
-		// make sure that the hook doesn't go though the ground
+		// make sure that the hook doesn't go through the ground
 		bool GoingToHitGround = false;
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
@@ -270,9 +269,8 @@ void CCharacterCore::Tick(bool UseInput)
 				GoingThroughTele = true;
 			else
 				GoingToHitGround = true;
-			m_pReset = true;
 		}
-
+		
 		// Check against other players first
 		if(m_Hook && m_pWorld && m_pWorld->m_Tuning.m_PlayerHooking)
 		{
@@ -308,8 +306,7 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				for (int i = 0; i < 2; i++)
 				{
-					vec2 ClosestPoint;
-					ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
+					vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
 					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 40.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
 					{
 						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
