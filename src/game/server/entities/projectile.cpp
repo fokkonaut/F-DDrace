@@ -71,10 +71,11 @@ vec2 CProjectile::GetPos(float Time)
 	float Curvature;
 	float Speed;
 	GetTunings(&Curvature, &Speed);
-	CTuningParams *pTuning = &GameServer()->TuningList()[m_TuneZone];
 
 	if(m_TuneZone)
 	{
+		CTuningParams *pTuning = &GameServer()->TuningList()[m_TuneZone];
+
 		switch(m_Type)
 		{
 		case WEAPON_GRENADE:
@@ -425,45 +426,23 @@ void CProjectile::GetTunings(float *pCurvature, float *pSpeed)
 	*pSpeed = 0;
 	CTuningParams *pTuning = GameServer()->Tuning();
 
-	switch (m_Type)
+	if (m_Type == WEAPON_SHOTGUN && !m_DDrace)
 	{
-	case WEAPON_GRENADE:
-		*pCurvature = pTuning->m_GrenadeCurvature;
-		*pSpeed = pTuning->m_GrenadeSpeed;
-		break;
-
-	case WEAPON_SHOTGUN:
-		if (m_DDrace)
-		{
-			*pCurvature = pTuning->m_ShotgunCurvature;
-			*pSpeed = pTuning->m_ShotgunSpeed;
-		}
-		else
-		{
-			*pCurvature = pTuning->m_VanillaShotgunCurvature;
-			*pSpeed = pTuning->m_VanillaShotgunSpeed;
-		}
-		break;
-
-	case WEAPON_GUN:
-		if (m_DDrace)
-		{
-			*pCurvature = pTuning->m_GunCurvature;
-			*pSpeed = pTuning->m_GunSpeed;
-		}
-		else
-		{
-			*pCurvature = pTuning->m_VanillaGunCurvature;
-			*pSpeed = pTuning->m_VanillaGunSpeed;
-		}
-		break;
-
-	case WEAPON_STRAIGHT_GRENADE:
+		*pCurvature = pTuning->m_VanillaShotgunCurvature;
+		*pSpeed = pTuning->m_VanillaShotgunSpeed;
+	}
+	else if (m_Type == WEAPON_GUN && !m_DDrace)
+	{
+		*pCurvature = pTuning->m_VanillaGunCurvature;
+		*pSpeed = pTuning->m_VanillaGunSpeed;
+	}
+	else if (m_Type == WEAPON_STRAIGHT_GRENADE)
+	{
 		*pCurvature = 0;
 		*pSpeed = pTuning->m_StraightGrenadeSpeed;
-		break;
-
-	default:
+	}
+	else
+	{
 		GetOriginalTunings(pCurvature, pSpeed);
 	}
 }

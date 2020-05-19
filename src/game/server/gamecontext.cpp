@@ -746,6 +746,14 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	else
 		Tuning = m_aTuningList[Zone];
 
+	// set projectile tunings to normal ones, if they are different in zones for example its handled in CProjectile
+	Tuning.m_GrenadeCurvature = m_Tuning.m_GrenadeCurvature;
+	Tuning.m_GrenadeSpeed = m_Tuning.m_GrenadeSpeed;
+	Tuning.m_ShotgunCurvature = m_Tuning.m_ShotgunCurvature;
+	Tuning.m_ShotgunSpeed = m_Tuning.m_ShotgunSpeed;
+	Tuning.m_GunCurvature = m_Tuning.m_GunCurvature;
+	Tuning.m_GunSpeed = m_Tuning.m_GunSpeed;
+
 	// F-DDrace
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (pChr)
