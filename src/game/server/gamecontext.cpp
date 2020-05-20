@@ -2167,7 +2167,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// F-DDrace
 			pPlayer->CheckClanProtection();
 
-			if (pPlayer->m_SpookyGhost || pPlayer->m_TeeInfos.m_aSkinName[0] != '\0')
+			if (pPlayer->m_SpookyGhost || pPlayer->m_TeeInfos.m_ForcedSkin != SKIN_NONE)
 				return;
 
 			// update all clients

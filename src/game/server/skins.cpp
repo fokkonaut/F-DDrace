@@ -176,6 +176,9 @@ static SevendownSkin s_SevendownSkins[] = {
 
 void CSkins::SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos)
 {
+	if (GetSkinID(pTeeInfos->m_aSkinName) == SKIN_SPOOKY_GHOST)
+		return;
+
 	// reset to default skin
 	int Match = 0;
 	for(int p = 0; p < NUM_SKINPARTS; p++)

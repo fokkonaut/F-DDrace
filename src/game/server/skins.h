@@ -8,6 +8,7 @@
 
 enum Skins
 {
+	SKIN_NONE = -1,
 	SKIN_BEAVER,
 	SKIN_BLUEKITTY,
 	SKIN_BLUESTRIPE,
