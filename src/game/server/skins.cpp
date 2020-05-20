@@ -197,6 +197,10 @@ void CSkins::SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos)
 	// check for sevendown skin
 	for(int i = 0; i < NUM_SEVENDOWN_SKINS; i++)
 	{
+		// skip spooky ghost skin for comparison
+		if (i == 18)
+			continue;
+
 		if(!str_comp(pTeeInfos->m_Sevendown.m_SkinName, s_SevendownSkins[i].m_SkinName))
 		{
 			for(int p = 0; p < NUM_SKINPARTS; p++)
@@ -240,6 +244,10 @@ void CSkins::SkinToSevendown(CPlayer::TeeInfos *pTeeInfos)
 	// check for std skin
 	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
 	{
+		// skip spooky ghost skin for comparison if its manually set by player and not forced
+		if (s == 18 && GetSkinID(pTeeInfos->m_aSkinName) != SKIN_SPOOKY_GHOST)
+			continue;
+
 		bool match = true;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
@@ -263,6 +271,10 @@ void CSkins::SkinToSevendown(CPlayer::TeeInfos *pTeeInfos)
 	int best_matches = -1;
 	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
 	{
+		// skip spooky ghost skin for comparison if its manually set by player and not forced
+		if (s == 18 && GetSkinID(pTeeInfos->m_aSkinName) != SKIN_SPOOKY_GHOST)
+			continue;
+
 		int matches = 0;
 		for(int p = 0; p < 3; p++)
 			if(str_comp(pTeeInfos->m_aaSkinPartNames[p], s_SevendownSkins[s].m_apSkinPartNames[p]) == 0)
