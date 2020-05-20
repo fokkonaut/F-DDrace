@@ -72,6 +72,7 @@ public:
 	int GetSkinID(const char *pSkin);
 	CPlayer::TeeInfos GetSkin(int Skin);
 
+	void TranslateSkin(CPlayer::TeeInfos *pTeeInfos, bool Sevendown);
 	void SkinToSevendown(CPlayer::TeeInfos *pTeeInfos);
 	void SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos);
 };

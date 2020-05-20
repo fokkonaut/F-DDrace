@@ -130,7 +130,7 @@ int CSkins::GetSkinID(const char *pSkin)
 	for (int i = 0; i < NUM_SKINS; i++)
 		if (!str_comp_nocase(pSkin, m_Skins[i].m_aSkinName))
 			return i;
-	return -1;
+	return SKIN_NONE;
 }
 
 CPlayer::TeeInfos CSkins::GetSkin(int Skin)
@@ -138,6 +138,14 @@ CPlayer::TeeInfos CSkins::GetSkin(int Skin)
 	if (Skin < 0 || Skin >= NUM_SKINS)
 		return m_Skins[SKIN_DEFAULT];
 	return m_Skins[Skin];
+}
+
+void CSkins::TranslateSkin(CPlayer::TeeInfos *pTeeInfos, bool Sevendown)
+{
+	if (Sevendown)
+		SkinFromSevendown(pTeeInfos);
+	else
+		SkinToSevendown(pTeeInfos);
 }
 
 struct SevendownSkin
@@ -150,7 +158,7 @@ struct SevendownSkin
 
 enum
 {
-	NUM_SEVENDOWN_SKINS = 18
+	NUM_SEVENDOWN_SKINS = 19
 };
 
 static SevendownSkin s_SevendownSkins[] = {
@@ -172,13 +180,11 @@ static SevendownSkin s_SevendownSkins[] = {
 {"warpaint",{"standard","warpaint","","standard","standard","standard"},{1,0,0,1,1,0},{1944919,0,0,750337,1944919,0}},
 {"greensward",{"greensward","duodonny","","standard","standard","standard"},{1,1,0,0,0,0},{5635840,-11141356,65408,65408,65408,65408}},
 {"greyfox",{"greyfox_body","greyfox_marking","hair","standard","standard","standard"},{1,1,1,1,1,1},{1245401,1224736916,52,7864575,32,0}},
+{"ghost",{"spiky","tricircular","","standard","standard","colorable"},{1,1,1,1,1,1},{255,-16777016,255,184,9765959,255}},
 };
 
 void CSkins::SkinFromSevendown(CPlayer::TeeInfos *pTeeInfos)
 {
-	if (GetSkinID(pTeeInfos->m_aSkinName) == SKIN_SPOOKY_GHOST)
-		return;
-
 	// reset to default skin
 	int Match = 0;
 	for(int p = 0; p < NUM_SKINPARTS; p++)

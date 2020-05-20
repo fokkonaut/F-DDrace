@@ -480,7 +480,7 @@ public:
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
 
-	CSkins m_pSkins;
+	CSkins m_Skins;
 	class CShop *m_pShop;
 
 

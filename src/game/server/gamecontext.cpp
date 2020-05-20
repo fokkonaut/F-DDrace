@@ -523,12 +523,13 @@ void CGameContext::SendSkinChange(CPlayer::TeeInfos TeeInfos, int ClientID, int 
 	// F-DDrace
 	if (m_apPlayers[ClientID])
 	{
-		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
-
-		if (Server()->IsSevendown(ClientID))
-			m_pSkins.SkinFromSevendown(&m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos);
+		// forced skins always need to get translated from 0.7 to 0.6
+		if (m_Skins.GetSkinID(TeeInfos.m_aSkinName) != SKIN_NONE)
+			m_Skins.SkinToSevendown(&TeeInfos);
 		else
-			m_pSkins.SkinToSevendown(&m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos);
+			m_Skins.TranslateSkin(&TeeInfos, Server()->IsSevendown(ClientID));
+
+		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
 	}
 }
 
@@ -2261,10 +2262,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			pPlayer->m_TeeInfos.m_Sevendown = Sevendown;
 
-			if(Server()->IsSevendown(ClientID))
-				m_pSkins.SkinFromSevendown(&pPlayer->m_TeeInfos);
-			else
-				m_pSkins.SkinToSevendown(&pPlayer->m_TeeInfos);
+			m_Skins.TranslateSkin(&pPlayer->m_TeeInfos, Server()->IsSevendown(ClientID));
 
 			// send clear vote options
 			CNetMsg_Sv_VoteClearOptions ClearMsg;
@@ -2884,6 +2882,7 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
+	Config()->m_SvAllowSevendown = 1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
@@ -4136,8 +4135,8 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
-	pDummy->m_TeeInfos = m_pSkins.GetSkin(SKIN_DUMMY);
-	m_pSkins.SkinToSevendown(&pDummy->m_TeeInfos);
+	pDummy->m_TeeInfos = m_Skins.GetSkin(SKIN_DUMMY);
+	m_Skins.SkinToSevendown(&pDummy->m_TeeInfos);
 
 	OnClientEnter(DummyID);
 

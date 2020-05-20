@@ -176,6 +176,7 @@ void CPlayer::Reset()
 	m_HasRoomKey = false;
 
 	m_TeeInfos.m_ForcedSkin = SKIN_NONE;
+	m_TeeInfos.m_aSkinName[0] = '\0';
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -584,7 +585,7 @@ void CPlayer::Snap(int SnappingClient)
 		StrToInts(&pClientInfo[0], 4, m_CurrentInfo.m_aName);
 		StrToInts(&pClientInfo[4], 3, m_CurrentInfo.m_aClan);
 		pClientInfo[7] = Server()->ClientCountry(m_ClientID);
-		StrToInts(&pClientInfo[8], 6, m_SpookyGhost ? "ghost" : m_CurrentInfo.m_TeeInfos.m_Sevendown.m_SkinName);
+		StrToInts(&pClientInfo[8], 6, m_CurrentInfo.m_TeeInfos.m_Sevendown.m_SkinName);
 		pClientInfo[14] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_UseCustomColor;
 		pClientInfo[15] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorBody;
 		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorFeet;
@@ -1594,7 +1595,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 	if (m_SpookyGhost)
 		return;
 
-	GameServer()->SendSkinChange(GameServer()->m_pSkins.GetSkin(Skin), m_ClientID, -1);
+	GameServer()->SendSkinChange(GameServer()->m_Skins.GetSkin(Skin), m_ClientID, -1);
 }
 
 void CPlayer::ResetSkin(bool Unforce)
