@@ -3252,8 +3252,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| WeaponID == WEAPON_NINJA || WeaponID == WEAPON_TASER || WeaponID == WEAPON_TELE_RIFLE)
+	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || (WeaponID == WEAPON_NINJA && !m_ScrollNinja))
 		return;
 
 	int Count = 0;
@@ -3266,24 +3265,24 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
 
-	bool IsTeleWeapon = (WeaponID == WEAPON_GUN && m_HasTeleGun) || (WeaponID == WEAPON_GRENADE && m_HasTeleGrenade) || (WeaponID == WEAPON_LASER && m_HasTeleLaser);
+	int Special = GetWeaponSpecial(WeaponID);
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), m_aSpreadWeapon[WeaponID], (WeaponID == WEAPON_GUN && m_Jetpack), IsTeleWeapon, (WeaponID == WEAPON_HAMMER && m_DoorHammer));
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
-	if ((WeaponID != WEAPON_GUN || !m_Jetpack) && !m_aSpreadWeapon[WeaponID] && !IsTeleWeapon && (WeaponID != WEAPON_HAMMER || !m_DoorHammer))
+	if (Special == 0)
 	{
 		GiveWeapon(WeaponID, true);
 		SetWeapon(WEAPON_GUN);
 	}
-	if (m_aSpreadWeapon[WeaponID])
+	if (Special&SPECIAL_SPREADWEAPON)
 		SpreadWeapon(WeaponID, false, -1, OnDeath);
-	if (WeaponID == WEAPON_GUN && m_Jetpack)
+	if (Special&SPECIAL_JETPACK)
 		Jetpack(false, -1, OnDeath);
-	if (IsTeleWeapon)
+	if (Special&SPECIAL_TELEWEAPON)
 		TeleWeapon(WeaponID, false, -1, OnDeath);
-	if (WeaponID == WEAPON_HAMMER && m_DoorHammer)
+	if (Special&SPECIAL_DOORHAMMER)
 		DoorHammer(false, -1, OnDeath);
 }
 
@@ -3325,12 +3324,32 @@ void CCharacter::DropLoot(int Weapon)
 	}
 	else if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 	{
-		for (int i = 0; i < 2; i++)
+		for (int i = 0; i < 4; i++)
 		{
+			int Weapon = rand() % NUM_WEAPONS;
+			if ((Weapon == WEAPON_GUN || Weapon == WEAPON_HAMMER) && GetWeaponSpecial(Weapon) == 0)
+				continue;
+
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon(rand() % NUM_VANILLA_WEAPONS, true, Dir);
+			DropWeapon(Weapon, true, Dir);
 		}
 	}
+}
+
+int CCharacter::GetWeaponSpecial(int Type)
+{
+	int Special = 0;
+	if (Type == WEAPON_GUN && m_Jetpack)
+		Special |= SPECIAL_JETPACK;
+	if (m_aSpreadWeapon[Type])
+		Special |= SPECIAL_SPREADWEAPON;
+	if ((Type == WEAPON_GUN && m_HasTeleGun) || (Type == WEAPON_GRENADE && m_HasTeleGrenade) || (Type == WEAPON_LASER && m_HasTeleLaser))
+		Special |= SPECIAL_TELEWEAPON;
+	if (Type == WEAPON_HAMMER && m_DoorHammer)
+		Special |= SPECIAL_DOORHAMMER;
+	if (Type == WEAPON_NINJA && m_ScrollNinja)
+		Special |= SPECIAL_SCROLLNINJA;
+	return Special;
 }
 
 void CCharacter::SetSpookyGhost()

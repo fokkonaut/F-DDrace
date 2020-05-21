@@ -11,17 +11,14 @@
 #include <game/server/player.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon,
-	int Lifetime, int Bullets, bool SpreadWeapon, bool Jetpack, bool TeleWeapon, bool DoorHammer)
+	int Lifetime, int Bullets, int Special)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize)
 {
 	m_Type = Type;
 	m_Weapon = Weapon;
 	m_Lifetime = Server()->TickSpeed() * Lifetime;
 	m_Pos = GameServer()->GetPlayerChar(Owner)->GetPos();
-	m_SpreadWeapon = SpreadWeapon;
-	m_Jetpack = Jetpack;
-	m_TeleWeapon = TeleWeapon;
-	m_DoorHammer = DoorHammer;
+	m_Special = Special;
 	m_Bullets = Bullets;
 	m_Owner = Owner;
 	m_Vel = vec2(5*Direction, -5);
@@ -116,7 +113,7 @@ void CPickupDrop::Pickup()
 		if (m_Type == POWERUP_WEAPON)
 		{
 			// only give the weapon if its not an extra
-			if (!m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_DoorHammer)
+			if (m_Special == 0)
 			{
 				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1
 					&& m_Weapon != WEAPON_HAMMER && m_Weapon != WEAPON_TELEKINESIS && m_Weapon != WEAPON_LIGHTSABER)
@@ -127,14 +124,16 @@ void CPickupDrop::Pickup()
 
 			GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Weapon);
 
-			if (m_Jetpack)
+			if (m_Special&SPECIAL_JETPACK)
 				pChr->Jetpack();
-			if (m_SpreadWeapon)
+			if (m_Special&SPECIAL_SPREADWEAPON)
 				pChr->SpreadWeapon(m_Weapon);
-			if (m_TeleWeapon)
+			if (m_Special&SPECIAL_TELEWEAPON)
 				pChr->TeleWeapon(m_Weapon);
-			if (m_DoorHammer)
+			if (m_Special&SPECIAL_DOORHAMMER)
 				pChr->DoorHammer();
+			if (m_Special&SPECIAL_SCROLLNINJA)
+				pChr->ScrollNinja();
 
 			if (m_Weapon == WEAPON_SHOTGUN || m_Weapon == WEAPON_LASER || m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_TELE_RIFLE || m_Weapon == WEAPON_PROJECTILE_RIFLE)
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
@@ -170,15 +169,22 @@ int CPickupDrop::IsCharacterNear()
 
 		if (m_Type == POWERUP_WEAPON)
 		{
-			bool IsTeleWeapon = (m_Weapon == WEAPON_GUN && pChr->m_HasTeleGun) || (m_Weapon == WEAPON_GRENADE && pChr->m_HasTeleGrenade) || (m_Weapon == WEAPON_LASER && pChr->m_HasTeleLaser);
+			int ChrSpecial = pChr->GetWeaponSpecial(m_Weapon);
+			bool AcceptSpecial = true;
+
+			if (
+				(m_Special&SPECIAL_JETPACK && (ChrSpecial&SPECIAL_JETPACK || !pChr->GetWeaponGot(WEAPON_GUN)))
+				|| (m_Special&SPECIAL_SPREADWEAPON && (ChrSpecial&SPECIAL_SPREADWEAPON || !pChr->GetWeaponGot(m_Weapon)))
+				|| (m_Special&SPECIAL_TELEWEAPON && (ChrSpecial& SPECIAL_TELEWEAPON || !pChr->GetWeaponGot(m_Weapon)))
+				|| (m_Special&SPECIAL_DOORHAMMER && (ChrSpecial&SPECIAL_DOORHAMMER || !pChr->GetWeaponGot(WEAPON_HAMMER)))
+				|| (m_Special&SPECIAL_SCROLLNINJA && ChrSpecial&SPECIAL_SCROLLNINJA)
+				)
+				AcceptSpecial = false;
 
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Weapon) != WEAPON_GUN)
-				|| (pChr->GetWeaponGot(m_Weapon) && !m_SpreadWeapon && !m_Jetpack && !m_TeleWeapon && !m_DoorHammer && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
-				|| (m_Jetpack && (pChr->m_Jetpack || !pChr->GetWeaponGot(WEAPON_GUN)))
-				|| (m_SpreadWeapon && (pChr->m_aSpreadWeapon[m_Weapon] || !pChr->GetWeaponGot(m_Weapon)))
-				|| (m_TeleWeapon && (IsTeleWeapon || !pChr->GetWeaponGot(m_Weapon)))
-				|| (m_DoorHammer && (pChr->m_DoorHammer || !pChr->GetWeaponGot(WEAPON_HAMMER)))
+				|| (pChr->GetWeaponGot(m_Weapon) && m_Special == 0 && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
+				|| (m_Special != 0 && !AcceptSpecial)
 				)
 				continue;
 		}
@@ -453,17 +459,17 @@ void CPickupDrop::Snap(int SnappingClient)
 			pP->m_Type = GameServer()->GetPickupType(m_Type, m_Weapon);
 	}
 
-	bool Gun = (m_Weapon == WEAPON_GUN && (m_Jetpack || m_TeleWeapon)) || m_Weapon == WEAPON_PROJECTILE_RIFLE || (m_Weapon == WEAPON_HAMMER && m_DoorHammer);
-	bool Plasma = m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_TeleWeapon);
+	bool Gun = (m_Weapon == WEAPON_GUN && (m_Special&SPECIAL_JETPACK || m_Special&SPECIAL_TELEWEAPON)) || m_Weapon == WEAPON_PROJECTILE_RIFLE || (m_Weapon == WEAPON_HAMMER && m_Special&SPECIAL_DOORHAMMER);
+	bool Plasma = m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_Special&SPECIAL_TELEWEAPON);
 	bool Heart = m_Weapon == WEAPON_HEART_GUN;
-	bool Grenade = m_Weapon == WEAPON_STRAIGHT_GRENADE || m_Weapon == WEAPON_BALL_GRENADE || (m_Weapon == WEAPON_GRENADE && m_TeleWeapon);
+	bool Grenade = m_Weapon == WEAPON_STRAIGHT_GRENADE || m_Weapon == WEAPON_BALL_GRENADE || (m_Weapon == WEAPON_GRENADE && m_Special&SPECIAL_TELEWEAPON);
 
 	int ExtraBulletOffset = 30;
 	int SpreadOffset = -20;
-	if (m_SpreadWeapon && (Gun || Plasma || Heart || Grenade))
+	if (m_Special&SPECIAL_SPREADWEAPON && (Gun || Plasma || Heart || Grenade))
 		ExtraBulletOffset = 50;
 
-	if (m_SpreadWeapon)
+	if (m_Special&SPECIAL_SPREADWEAPON)
 	{
 		for (int i = 1; i < 4; i++)
 		{

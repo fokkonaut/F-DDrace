@@ -9,7 +9,7 @@ class CPickupDrop : public CEntity
 {
 public:
 	CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon = WEAPON_GUN,
-		int Lifetime = 300, int Bullets = -1, bool SpreadWeapon = false, bool Jetpack = false, bool TeleWeapon = false, bool DoorHammer = false);
+		int Lifetime = 300, int Bullets = -1, int Special = 0);
 	virtual ~CPickupDrop();
 
 	void Reset(bool Picked);
@@ -41,10 +41,7 @@ private:
 	int m_Lifetime;
 	int m_Bullets;
 	int m_PickupDelay;
-	bool m_SpreadWeapon;
-	bool m_Jetpack;
-	bool m_TeleWeapon;
-	bool m_DoorHammer;
+	int m_Special;
 	vec2 m_PrevPos;
 	vec2 m_SnapPos;
 

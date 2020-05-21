@@ -52,6 +52,15 @@ enum Backup
 	NUM_BACKUPS,
 };
 
+enum WeaponSpecial
+{
+	SPECIAL_JETPACK = 1<<0,
+	SPECIAL_SPREADWEAPON = 1<<1,
+	SPECIAL_TELEWEAPON = 1<<2,
+	SPECIAL_DOORHAMMER = 1<<3,
+	SPECIAL_SCROLLNINJA = 1<<4,
+};
+
 class CGameTeams;
 
 class CCharacter : public CEntity
@@ -390,6 +399,9 @@ public:
 	int64 m_RoomAntiSpamTick;
 
 	int64 m_LastTeleRifle;
+
+	// returns bitwise specials on weapons
+	int GetWeaponSpecial(int Type);
 
 	//weapon indicator
 	void UpdateWeaponIndicator();
