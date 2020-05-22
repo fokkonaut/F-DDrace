@@ -3326,15 +3326,20 @@ void CCharacter::DropLoot(int Weapon)
 	}
 	else if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 	{
-		for (int i = 0; i < 4; i++)
+		// up two normal weapons
+		for (int i = 0; i < 2; i++)
 		{
-			int Weapon = rand() % NUM_WEAPONS;
+			int Weapon = rand() % NUM_VANILLA_WEAPONS;
 			if ((Weapon == WEAPON_GUN || Weapon == WEAPON_HAMMER) && GetWeaponSpecial(Weapon) == 0)
 				continue;
 
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
 			DropWeapon(Weapon, true, Dir);
 		}
+
+		// up to one extra weapon
+		float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
+		DropWeapon((rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS, true, Dir);
 	}
 }
 
