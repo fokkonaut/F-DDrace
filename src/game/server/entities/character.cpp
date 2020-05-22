@@ -360,7 +360,6 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_LASER
 		|| GetActiveWeapon() == WEAPON_PLASMA_RIFLE
 		|| GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE
-		|| GetActiveWeapon() == WEAPON_PORTAL_RIFLE
 		|| GetActiveWeapon() ==	WEAPON_TASER
 		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
 		|| GetActiveWeapon() == WEAPON_BALL_GRENADE
@@ -786,7 +785,7 @@ void CCharacter::FireWeapon()
 				if (!Found || !PortalPos || GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0))
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-					break;
+					return;
 				}
 
 				for (int i = 0; i < NUM_PORTALS; i++)
