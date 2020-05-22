@@ -133,6 +133,9 @@ void CPortal::Snap(int SnappingClient)
 		pObj->m_StartTick = Server()->Tick();
 	}
 	
+	if (!m_pLinkedPortal)
+		return;
+
 	for(int i = 0; i < NUM_PARTICLES; i++)
 	{
 		float RandomRadius = frandom()*(Radius-4.0f);
