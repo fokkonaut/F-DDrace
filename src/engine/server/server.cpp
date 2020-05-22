@@ -448,6 +448,7 @@ int CServer::Init()
 		m_aClients[i].m_ShowIps = false;
 		m_aClients[i].m_Traffic = 0;
 		m_aClients[i].m_TrafficSince = 0;
+		m_aClients[i].m_Sevendown = false;
 	}
 
 	m_AnnouncementLastLine = 0;
