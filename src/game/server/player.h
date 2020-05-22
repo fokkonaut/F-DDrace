@@ -6,6 +6,7 @@
 #include "alloc.h"
 
 #include "entities/pickup_drop.h"
+#include "entities/portal.h"
 #include <vector>
 
 enum NoNameFix
@@ -39,6 +40,12 @@ enum Dummymode
 	DUMMYMODE_SHOP_DUMMY = 99,
 };
 
+enum Portals
+{
+	PORTAL_FIRST,
+	PORTAL_SECOND,
+	NUM_PORTALS
+};
 
 enum
 {
@@ -300,6 +307,8 @@ public:
 	bool m_InfRainbow;
 	int m_InfMeteors;
 	bool m_HasSpookyGhost;
+
+	CPortal *m_pPortal[NUM_PORTALS];
 
 	//teecontrol
 	void SetTeeControl(CPlayer *pVictim);

@@ -190,6 +190,9 @@ void CPlayer::Reset()
 	m_HasTeeControl = false;
 	m_TeeControlForcedID = -1;
 	m_ClanProtectionPunished = false;
+
+	for (int i = 0; i < NUM_PORTALS; i++)
+		m_pPortal[i] = 0;
 }
 
 void CPlayer::Tick()
@@ -1383,8 +1386,8 @@ void CPlayer::OnLogin()
 		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && (*Account).m_TaserLevel >= 1)
 			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
 
-		if ((*Account).m_TeleRifle)
-			m_pCharacter->GiveWeapon(WEAPON_TELE_RIFLE, false);
+		if ((*Account).m_PortalRifle)
+			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false);
 	}
 
 	// has vip from the old system, remove it and give him 5 euros
@@ -1413,8 +1416,8 @@ void CPlayer::OnLogout()
 		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
 			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
 
-		if (m_pCharacter->GetWeaponGot(WEAPON_TELE_RIFLE))
-			m_pCharacter->GiveWeapon(WEAPON_TELE_RIFLE, true);
+		if (m_pCharacter->GetWeaponGot(WEAPON_PORTAL_RIFLE))
+			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
 
 		m_pCharacter->UnsetSpookyGhost();
 	}
@@ -1441,10 +1444,10 @@ void CPlayer::SetExpireDate(int Item)
 			Days = ITEM_EXPIRE_VIP;
 			break;
 		}
-	case ITEM_TELE_RIFLE:
+	case ITEM_PORTAL_RIFLE:
 		{
-			tmp = (*Account).m_ExpireDateTeleRifle;
-			Days = ITEM_EXPIRE_TELE_RIFLE;
+			tmp = (*Account).m_ExpireDatePortalRifle;
+			Days = ITEM_EXPIRE_PORTAL_RIFLE;
 			break;
 		}
 	default:
@@ -1469,7 +1472,7 @@ void CPlayer::SetExpireDate(int Item)
 	switch (Item)
 	{
 	case ITEM_VIP: (*Account).m_ExpireDateVIP = mktime(&ExpireDate); break;
-	case ITEM_TELE_RIFLE: (*Account).m_ExpireDateTeleRifle = mktime(&ExpireDate); break;
+	case ITEM_PORTAL_RIFLE: (*Account).m_ExpireDatePortalRifle = mktime(&ExpireDate); break;
 	}
 }
 
@@ -1521,10 +1524,10 @@ bool CPlayer::IsExpiredItem(int Item)
 				(*Account).m_ExpireDateVIP = 0;
 				break;
 			}
-		case ITEM_TELE_RIFLE:
+		case ITEM_PORTAL_RIFLE:
 			{
-				(*Account).m_TeleRifle = false;
-				(*Account).m_ExpireDateTeleRifle = 0;
+				(*Account).m_PortalRifle = false;
+				(*Account).m_ExpireDatePortalRifle = 0;
 				break;
 			}
 		}

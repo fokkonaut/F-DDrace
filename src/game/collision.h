@@ -125,7 +125,7 @@ public:
 	// F-DDrace
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
-	int IntersectLineTeleRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
 
 	class CConfig *m_pConfig;
 

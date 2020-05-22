@@ -28,7 +28,7 @@ CShop::CShop(CGameContext *pGameServer)
 	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
 	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-	AddItem("Tele Rifle", 1, 10, TIME_20_DAYS, "Tele Rifle lets you teleport to your cursor.", true);
+	AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
 
 	static char aaBuf[NUM_POLICE_LEVELS][32];
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
@@ -351,7 +351,7 @@ void CShop::BuyItem(int ClientID, int Item)
 		|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
 		|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
 		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
-		//|| (Item == ITEM_TELE_RIFLE			&& (*Account).m_TeleRifle) // tele rifle can be bought unlimited times
+		//|| (Item == ITEM_PORTAL_RIFLE		&& (*Account).m_PortalRifle) // portal rifle can be bought unlimited times
 		)
 	{
 		bool UseThe = false;
@@ -427,6 +427,6 @@ void CShop::BuyItem(int ClientID, int Item)
 								(*Account).m_SpawnWeapon[Weapon]++; break;
 	case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
 	case ITEM_TASER:			(*Account).m_TaserLevel++; break;
-	case ITEM_TELE_RIFLE:		(*Account).m_TeleRifle = true; pPlayer->SetExpireDate(Item); break;
+	case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item); break;
 	}
 }

@@ -3791,8 +3791,8 @@ int CGameContext::AddAccount()
 	Account.m_KillingSpreeRecord = 0;
 	Account.m_Euros = 0;
 	Account.m_ExpireDateVIP = 0;
-	Account.m_TeleRifle = false;
-	Account.m_ExpireDateTeleRifle = 0;
+	Account.m_PortalRifle = false;
+	Account.m_ExpireDatePortalRifle = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3847,8 +3847,8 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
 		case ACC_EUROS:						m_Accounts[ID].m_Euros = atoi(pData); break;
 		case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoi(pData); break;
-		case ACC_TELE_RIFLE:				m_Accounts[ID].m_TeleRifle = atoi(pData); break;
-		case ACC_EXPIRE_DATE_TELE_RIFLE:	m_Accounts[ID].m_ExpireDateTeleRifle = atoi(pData); break;
+		case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
+		case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
 		}
 	}
 }
@@ -3897,8 +3897,8 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_KillingSpreeRecord << "\n";
 		AccFile << m_Accounts[ID].m_Euros << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
-		AccFile << m_Accounts[ID].m_TeleRifle << "\n";
-		AccFile << m_Accounts[ID].m_ExpireDateTeleRifle << "\n";
+		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
+		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -4309,8 +4309,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Telekinesis";
 	case WEAPON_LIGHTSABER:
 		return "Lightsaber";
-	case WEAPON_TELE_RIFLE:
-		return "Tele Rifle";
+	case WEAPON_PORTAL_RIFLE:
+		return "Portal Rifle";
 	case WEAPON_PROJECTILE_RIFLE:
 		return "Projectile Rifle";
 	case WEAPON_BALL_GRENADE:
@@ -4335,7 +4335,7 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_NINJA;
 	case WEAPON_LIGHTSABER:
 		return WEAPON_GUN;
-	case WEAPON_TELE_RIFLE:
+	case WEAPON_PORTAL_RIFLE:
 		return WEAPON_LASER;
 	case WEAPON_PROJECTILE_RIFLE:
 		return WEAPON_LASER;

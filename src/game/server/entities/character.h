@@ -49,7 +49,7 @@ enum Extra
 enum Backup
 {
 	BACKUP_SPOOKY_GHOST,
-	NUM_BACKUPS,
+	NUM_BACKUPS
 };
 
 enum WeaponSpecial
@@ -398,7 +398,9 @@ public:
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
 
-	int64 m_LastTeleRifle;
+	int64 m_LastLinkedPortals;
+	vec2 m_PortalToTelePos;
+	bool m_PortalToTele;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

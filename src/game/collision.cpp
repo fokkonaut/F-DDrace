@@ -1320,7 +1320,7 @@ vec2 CCollision::GetRandomTile(int Index)
 	return vec2(-1, -1);
 }
 
-int CCollision::IntersectLineTeleRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
+int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
@@ -1331,14 +1331,15 @@ int CCollision::IntersectLineTeleRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutColli
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		if (GetIndex(Nx, Ny) == TILE_TELE_RIFLE_STOP
-			|| GetFIndex(Nx, Ny) == TILE_TELE_RIFLE_STOP)
+		if (GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			return TILE_TELE_RIFLE_STOP;
+			if (GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
+				return TILE_PORTAL_RIFLE_STOP;
+			return GetCollisionAt(Pos.x, Pos.y);
 		}
 		Last = Pos;
 	}

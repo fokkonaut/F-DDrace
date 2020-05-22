@@ -253,7 +253,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 			pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
 			pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
 			pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
-			pChr->GiveWeapon(WEAPON_TELE_RIFLE, Remove, Amount);
+			pChr->GiveWeapon(WEAPON_PORTAL_RIFLE, Remove, Amount);
 			pChr->GiveWeapon(WEAPON_PROJECTILE_RIFLE, Remove, Amount);
 			pChr->GiveWeapon(WEAPON_BALL_GRENADE, Remove, Amount);
 
@@ -776,16 +776,16 @@ void CGameContext::ConUnLightsaber(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LIGHTSABER, true);
 }
 
-void CGameContext::ConTeleRifle(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConPortalRifle(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, false);
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_RIFLE, false);
 }
 
-void CGameContext::ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConUnPortalRifle(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, true);
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_RIFLE, true);
 }
 
 void CGameContext::ConProjectileRifle(IConsole::IResult* pResult, void* pUserData)
@@ -1456,9 +1456,9 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (int)(*Account).m_ExpireDateVIP);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Tele Rifle: %d", (*Account).m_TeleRifle);
+	str_format(aBuf, sizeof(aBuf), "Portal Rifle: %d", (*Account).m_PortalRifle);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire Date Tele Rifle: %d", (int)(*Account).m_ExpireDateTeleRifle);
+	str_format(aBuf, sizeof(aBuf), "Expire Date Portal Rifle: %d", (int)(*Account).m_ExpireDatePortalRifle);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)

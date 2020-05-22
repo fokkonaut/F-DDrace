@@ -403,8 +403,8 @@ public:
 		int m_KillingSpreeRecord;
 		int m_Euros;
 		time_t m_ExpireDateVIP;
-		bool m_TeleRifle;
-		time_t m_ExpireDateTeleRifle;
+		bool m_PortalRifle;
+		time_t m_ExpireDatePortalRifle;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -446,8 +446,8 @@ public:
 		ACC_KILLING_SPREE_RECORD,
 		ACC_EUROS,
 		ACC_EXPIRE_DATE_VIP,
-		ACC_TELE_RIFLE,
-		ACC_EXPIRE_DATE_TELE_RIFLE,
+		ACC_PORTAL_RIFLE,
+		ACC_EXPIRE_DATE_PORTAL_RIFLE,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -671,8 +671,8 @@ private:
 	static void ConUnTelekinesis(IConsole::IResult* pResult, void* pUserData);
 	static void ConLightsaber(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnLightsaber(IConsole::IResult* pResult, void* pUserData);
-	static void ConTeleRifle(IConsole::IResult* pResult, void* pUserData);
-	static void ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConPortalRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnPortalRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConProjectileRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnProjectileRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConBallGrenade(IConsole::IResult* pResult, void* pUserData);

@@ -311,10 +311,10 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_LIGHTSABER;
 	}
-	else if (Index == ENTITY_TELE_RIFLE)
+	else if (Index == ENTITY_PORTAL_RIFLE)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_TELE_RIFLE;
+		SubType = WEAPON_PORTAL_RIFLE;
 	}
 	else if (Index == ENTITY_PROJECTILE_RIFLE)
 	{
@@ -538,7 +538,7 @@ void IGameController::Snap(int SnappingClient)
 		if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
 			pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
 
-		if ((pGameInfoEx->m_Flags&GAMEINFOFLAG_ALLOW_ZOOM) && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_TELE_RIFLE))
+		if ((pGameInfoEx->m_Flags&GAMEINFOFLAG_ALLOW_ZOOM) && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE))
 			pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 	}
 	else

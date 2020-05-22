@@ -18,6 +18,7 @@
 #include "pickup_drop.h"
 #include "atom.h"
 #include "trail.h"
+#include "portal.h"
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
 
@@ -359,7 +360,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_LASER
 		|| GetActiveWeapon() == WEAPON_PLASMA_RIFLE
 		|| GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE
-		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
+		|| GetActiveWeapon() == WEAPON_PORTAL_RIFLE
 		|| GetActiveWeapon() ==	WEAPON_TASER
 		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
 		|| GetActiveWeapon() == WEAPON_BALL_GRENADE
@@ -407,7 +408,7 @@ void CCharacter::FireWeapon()
 
 	// check for ammo
 	if(!m_aWeapons[GetActiveWeapon()].m_Ammo ||
-		(GetActiveWeapon() == WEAPON_TELE_RIFLE && m_LastTeleRifle + Server()->TickSpeed() * Config()->m_SvTeleRifleDelay > Server()->Tick()))
+		(GetActiveWeapon() == WEAPON_PORTAL_RIFLE && m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick()))
 	{
 		// 125ms is a magical limit of how fast a human can click
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
@@ -778,39 +779,31 @@ void CCharacter::FireWeapon()
 				}
 			} break;
 
-			case WEAPON_TELE_RIFLE:
+			case WEAPON_PORTAL_RIFLE:
 			{
-				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-
-				vec2 NewPos = CursorPos;
-				if (!Config()->m_SvTeleRifleAllowBlocks)
+				vec2 PortalPos;
+				bool Found = GetNearestAirPos(CursorPos, m_Pos, &PortalPos);
+				if (!Found || !PortalPos || GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0))
 				{
-					vec2 PossiblePos;
-					bool Found = GetNearestAirPos(CursorPos, m_Pos, &PossiblePos);
-					if (Found && PossiblePos)
-						NewPos = PossiblePos;
-					else
-						NewPos = m_Pos;
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					break;
 				}
 
-				if (GameServer()->Collision()->IntersectLineTeleRifleStop(m_Pos, NewPos, 0, 0))
-					NewPos = m_Pos;
-
-				if (NewPos != m_Pos)
+				for (int i = 0; i < NUM_PORTALS; i++)
 				{
-					// dont start the counter if we didnt teleport
-					m_LastTeleRifle = Server()->Tick();
-					// drop flag before teleporting, so it cannot get trapped in some rooms
-					DropFlag();
-					// release hook
-					ReleaseHook(false);
+					if (!m_pPlayer->m_pPortal[i])
+					{
+						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID());
+						if (i == PORTAL_SECOND)
+						{
+							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);
+							m_pPlayer->m_pPortal[PORTAL_SECOND]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_FIRST]);
+							m_LastLinkedPortals = Server()->Tick();
+						}
+						break;
+					}
 				}
 
-				m_Core.m_Pos = NewPos;
-
-				GameServer()->CreatePlayerSpawn(NewPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
 
 			case WEAPON_PROJECTILE_RIFLE:
@@ -1138,6 +1131,13 @@ void CCharacter::Tick()
 		int Flag = m_Core.m_UpdateFlagAtStand == FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
+	}
+
+	if (m_PortalToTele)
+	{
+		Core()->m_Pos = m_PortalToTelePos;
+		m_PortalToTelePos = vec2(0, 0);
+		m_PortalToTele = false;
 	}
 
 	// handle Weapons
@@ -3044,8 +3044,8 @@ void CCharacter::FDDraceInit()
 				m_aSpawnWeaponActive[i] = true;
 			}
 
-		if ((*Account).m_TeleRifle)
-			GiveWeapon(WEAPON_TELE_RIFLE, false);
+		if ((*Account).m_PortalRifle)
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false);
 	}
 
 	m_HasFinishedSpecialRace = false;
@@ -3059,7 +3059,9 @@ void CCharacter::FDDraceInit()
 
 	m_LastTouchedSwitcher = -1;
 
-	m_LastTeleRifle = Now;
+	m_LastLinkedPortals = Now;
+	m_PortalToTele = false;
+	m_PortalToTelePos = vec2(0, 0);
 }
 
 void CCharacter::FDDraceTick()
@@ -3166,15 +3168,15 @@ void CCharacter::FDDraceTick()
 		}
 	}
 
-	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_TELE_RIFLE && (m_LastTeleRifle + Server()->TickSpeed() * (Config()->m_SvTeleRifleDelay+1) > Server()->Tick()))
+	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick()))
 	{
 		char aBuf[64];
-		int Seconds = Config()->m_SvTeleRifleDelay - ((Server()->Tick() - m_LastTeleRifle) / Server()->TickSpeed());
+		int Seconds = Config()->m_SvPortalRifleDelay - ((Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed());
 
 		if (Seconds <= 0)
-			str_copy(aBuf, "[Teleport unlocked]", sizeof(aBuf));
+			str_copy(aBuf, "[Portals unlocked]", sizeof(aBuf));
 		else
-			str_format(aBuf, sizeof(aBuf), "[Next teleport: %ds]", Seconds);
+			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds);
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
 }
@@ -3672,7 +3674,7 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
-	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_TELE_RIFLE)
+	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_PORTAL_RIFLE)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
