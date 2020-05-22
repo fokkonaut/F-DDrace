@@ -3255,7 +3255,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		return;
 
 	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || ((WeaponID == WEAPON_TASER || WeaponID == WEAPON_PORTAL_RIFLE) && !OnDeath))
+		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || WeaponID == WEAPON_TASER || (WeaponID == WEAPON_PORTAL_RIFLE && !OnDeath))
 		return;
 
 	int Count = 0;
