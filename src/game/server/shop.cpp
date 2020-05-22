@@ -3,7 +3,7 @@
 #include "shop.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 5, 14, 17 };
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 3, 14, 17 };
 
 CShop::CShop(CGameContext *pGameServer)
 {
@@ -174,7 +174,7 @@ const char *CShop::FormatMotd(const char *pMsg, int Item)
 	char aTemp[64];
 	char aTemp2[64];
 	char aPage[64];
-	static char aRet[512];
+	static char aRet[900];
 
 	int Page = Item;
 	if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5) Page = ITEM_POLICE;
