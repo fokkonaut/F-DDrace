@@ -19,7 +19,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 		m_aID[i] = Server()->SnapNewID();
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_aLastUse[i] = 0;
+		m_aArrived[i] = false;
 
 	GameWorld()->InsertEntity(this);
 	CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner);
@@ -71,6 +71,13 @@ void CPortal::Tick()
 
 void CPortal::PlayerEnter()
 {
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChr = GameServer()->GetPlayerChar(i);
+		if (pChr && m_aArrived[i] && distance(pChr->Core()->m_Pos, m_Pos) > Config()->m_SvPortalRadius+pChr->GetProximityRadius())
+			m_aArrived[i] = false;
+	}
+
 	CCharacter *apEnts[MAX_CLIENTS];
 	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
@@ -79,7 +86,7 @@ void CPortal::PlayerEnter()
 		CCharacter *pChr = apEnts[i];
 		int ID = pChr->GetPlayer()->GetCID();
 
-		if (!m_pLinkedPortal || m_aLastUse[ID] > Server()->Tick() - Server()->TickSpeed() * 2)
+		if (!m_pLinkedPortal || m_aArrived[ID])
 			continue;
 
 		int64_t TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, ID);
@@ -93,7 +100,7 @@ void CPortal::PlayerEnter()
 
 		GameServer()->CreatePlayerSpawn(m_pLinkedPortal->m_Pos, TeamMask);
 
-		m_pLinkedPortal->m_aLastUse[ID] = m_aLastUse[ID] = Server()->Tick();
+		m_pLinkedPortal->m_aArrived[ID] = true;
 	}
 }
 

@@ -19,7 +19,7 @@ class CPortal : public CEntity
 	CPortal *m_pLinkedPortal;
 
 	int m_Owner;
-	int m_aLastUse[MAX_CLIENTS];
+	bool m_aArrived[MAX_CLIENTS];
 	int m_aID[NUM_IDS];
 
 	void PlayerEnter();
