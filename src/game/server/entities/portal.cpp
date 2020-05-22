@@ -88,6 +88,7 @@ void CPortal::PlayerEnter()
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);
 		pChr->ReleaseHook();
 
+		pChr->m_DDRaceState = DDRACE_CHEAT;
 		pChr->m_PortalToTele = true;
 		pChr->m_PortalToTelePos = m_pLinkedPortal->m_Pos;
 
