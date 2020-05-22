@@ -788,6 +788,10 @@ void CCharacter::FireWeapon()
 					return;
 				}
 
+				// dont allow to place portals too close to other tees
+				if (GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID()))
+					return;
+
 				for (int i = 0; i < NUM_PORTALS; i++)
 				{
 					if (!m_pPlayer->m_pPortal[i])
