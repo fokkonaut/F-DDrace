@@ -782,15 +782,13 @@ void CCharacter::FireWeapon()
 			{
 				vec2 PortalPos;
 				bool Found = GetNearestAirPos(CursorPos, m_Pos, &PortalPos);
-				if (!Found || !PortalPos || GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0))
+				if (!Found || !PortalPos
+					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID())) // dont allow to place portals too close to other tees
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 					return;
 				}
-
-				// dont allow to place portals too close to other tees
-				if (GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID()))
-					return;
 
 				for (int i = 0; i < NUM_PORTALS; i++)
 				{
