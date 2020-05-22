@@ -272,7 +272,7 @@ int CSaveTee::LoadString(char* String)
 	default:
 		dbg_msg("load", "failed to load tee-string");
 		dbg_msg("load", "loaded %d vars", Num);
-		return Num+1; // never 0 here
+		return Num + 1; // never 0 here
 	}
 }
 
@@ -312,6 +312,7 @@ int CSaveTeam::save(int Team)
 
 		m_NumSwitchers = m_pController->GameServer()->Collision()->m_NumSwitchers;
 		m_TeamLocked = Teams->TeamLocked(Team);
+		m_Practice = Teams->IsPractice(Team);
 
 		SavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
@@ -378,6 +379,8 @@ int CSaveTeam::load(int Team)
 
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);
+	if(m_Practice)
+		pTeams->EnablePractice(Team);
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
@@ -426,25 +429,24 @@ CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 
 char* CSaveTeam::GetString()
 {
-	str_format(m_String, sizeof(m_String), "%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked);
+	str_format(m_aString, sizeof(m_aString), "%d\t%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked, m_Practice);
 
-	for (int i = 0; i<m_MembersCount; i++)
+	for(int i = 0; i < m_MembersCount; i++)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "\n%s", SavedTees[i].GetString());
 		str_append(m_String, aBuf, sizeof(m_String));
 	}
 
-	if(m_NumSwitchers)
+	if(m_Switchers && m_NumSwitchers)
+	{
 		for(int i=1; i < m_NumSwitchers+1; i++)
 		{
 			char aBuf[64];
-			if (m_Switchers)
-			{
-				str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
-				str_append(m_String, aBuf, sizeof(m_String));
-			}
+			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_pSwitchers[i].m_EndTime, m_pSwitchers[i].m_Type);
+			str_append(m_aString, aBuf, sizeof(m_aString));
 		}
+	}
 
 	return m_String;
 }
@@ -482,11 +484,18 @@ int CSaveTeam::LoadString(const char* String)
 	if(StrSize < sizeof(TeamStats))
 	{
 		str_copy(TeamStats, CopyPos, StrSize);
-		int Num = sscanf(TeamStats, "%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked);
-		if(Num != 4)
+		int Num = sscanf(TeamStats, "%d\t%d\t%d\t%d\t%d", &m_TeamState, &m_MembersCount, &m_NumSwitchers, &m_TeamLocked, &m_Practice);
+		switch(Num) // Don't forget to update this when you save / load more / less.
 		{
-			dbg_msg("load", "failed to load teamstats");
-			dbg_msg("load", "loaded %d vars", Num);
+			case 4:
+				m_Practice = false;
+				// fallthrough
+			case 5:
+				break;
+			default:
+				dbg_msg("load", "failed to load teamstats");
+				dbg_msg("load", "loaded %d vars", Num);
+				return Num + 1; // never 0 here
 		}
 	}
 	else
