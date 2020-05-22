@@ -399,8 +399,6 @@ public:
 	int64 m_RoomAntiSpamTick;
 
 	int64 m_LastLinkedPortals;
-	vec2 m_PortalToTelePos;
-	bool m_PortalToTele;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

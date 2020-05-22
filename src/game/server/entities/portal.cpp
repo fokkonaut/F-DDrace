@@ -86,11 +86,10 @@ void CPortal::PlayerEnter()
 
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask);
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);
-		pChr->ReleaseHook();
 
+		pChr->ReleaseHook();
+		pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
 		pChr->m_DDRaceState = DDRACE_CHEAT;
-		pChr->m_PortalToTele = true;
-		pChr->m_PortalToTelePos = m_pLinkedPortal->m_Pos;
 
 		GameServer()->CreatePlayerSpawn(m_pLinkedPortal->m_Pos, TeamMask);
 

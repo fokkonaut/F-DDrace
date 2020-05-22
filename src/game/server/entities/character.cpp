@@ -1136,13 +1136,6 @@ void CCharacter::Tick()
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
 	}
 
-	if (m_PortalToTele)
-	{
-		Core()->m_Pos = m_PortalToTelePos;
-		m_PortalToTelePos = vec2(0, 0);
-		m_PortalToTele = false;
-	}
-
 	// handle Weapons
 	HandleWeapons();
 
@@ -3063,8 +3056,6 @@ void CCharacter::FDDraceInit()
 	m_LastTouchedSwitcher = -1;
 
 	m_LastLinkedPortals = Now;
-	m_PortalToTele = false;
-	m_PortalToTelePos = vec2(0, 0);
 }
 
 void CCharacter::FDDraceTick()
