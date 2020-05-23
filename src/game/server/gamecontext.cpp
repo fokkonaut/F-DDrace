@@ -4208,10 +4208,10 @@ void CGameContext::SetV3Offset(int X, int Y)
 	Config()->m_V3OffsetY = Y;
 }
 
-void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText)
+void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int Seconds)
 {
 	Pos.y -= 40.0 * 2.5;
-	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * 3, pText, (int)(strlen(pText)));
+	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * Seconds, pText, (int)(strlen(pText)));
 }
 
 void CGameContext::UpdateHidePlayers(int UpdateID)

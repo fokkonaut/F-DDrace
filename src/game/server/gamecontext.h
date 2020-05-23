@@ -478,7 +478,7 @@ public:
 
 	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
 
-	void CreateLaserText(vec2 Pos, int Owner, const char* pText);
+	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
 
 	CSkins m_Skins;
 	class CShop *m_pShop;

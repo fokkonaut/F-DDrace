@@ -406,8 +406,7 @@ void CCharacter::FireWeapon()
 	}
 
 	// check for ammo
-	if(!m_aWeapons[GetActiveWeapon()].m_Ammo ||
-		(GetActiveWeapon() == WEAPON_PORTAL_RIFLE && m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick()))
+	if(!m_aWeapons[GetActiveWeapon()].m_Ammo)
 	{
 		// 125ms is a magical limit of how fast a human can click
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
@@ -784,7 +783,10 @@ void CCharacter::FireWeapon()
 				bool Found = GetNearestAirPos(CursorPos, m_Pos, &PortalPos);
 				if (!Found || !PortalPos
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID())) // dont allow to place portals too close to other tees
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID()) // dont allow to place portals too close to other tees
+					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
+					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
+					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 					return;
