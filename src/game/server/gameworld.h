@@ -211,6 +211,7 @@ public:
 
 	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
 	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1);
+	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types);
 };
 
 #endif

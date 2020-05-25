@@ -602,3 +602,28 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEnti
 
 	return 0;
 }
+
+int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types)
+{
+	int Num = 0;
+
+	for (int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if (!(Types&1<<i))
+			continue;
+
+		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
+		{
+			if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
+			{
+				if(ppEnts)
+					ppEnts[Num] = pEnt;
+				Num++;
+				if(Num == Max)
+					break;
+			}
+		}
+	}
+
+	return Num;
+}

@@ -20,6 +20,8 @@ public:
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
 	void SetVel(vec2 Vel) { m_Vel = Vel; };
 
+	CCharacter *GetOwner() { return m_pOwner; };
+
 private:
 	static int const ms_PhysSize = 14;
 
@@ -32,7 +34,7 @@ private:
 	vec2 m_Vel;
 
 	int64_t m_TeamMask;
-	CCharacter* m_pOwner;
+	CCharacter *m_pOwner;
 	int m_Owner;
 
 	bool m_DDraceMode;

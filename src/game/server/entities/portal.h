@@ -4,6 +4,7 @@
 #define GAME_SERVER_ENTITIES_PORTAL_H
 
 #include <game/server/entity.h>
+#include <vector>
 
 enum
 {
@@ -19,9 +20,9 @@ class CPortal : public CEntity
 	CPortal *m_pLinkedPortal;
 
 	int m_Owner;
-	bool m_aTeleported[MAX_CLIENTS];
 	int m_aID[NUM_IDS];
 
+	std::vector<CEntity*> m_vTeleported;
 	void PlayerEnter();
 
 public:

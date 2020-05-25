@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include "portal.h"
+#include "flag.h"
 #include <engine/shared/config.h>
 
 CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner)
@@ -17,9 +18,6 @@ CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 
 	for (int i = 0; i < NUM_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_aTeleported[i] = false;
 
 	GameWorld()->InsertEntity(this);
 	CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner);
@@ -71,36 +69,83 @@ void CPortal::Tick()
 
 void CPortal::PlayerEnter()
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	if (!m_pLinkedPortal)
+		return;
+
+	for (unsigned i = 0; i < m_vTeleported.size(); i++)
 	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(i);
-		if (pChr && m_aTeleported[i] && distance(pChr->Core()->m_Pos, m_Pos) > Config()->m_SvPortalRadius+pChr->GetProximityRadius())
-			m_aTeleported[i] = false;
+		CEntity *pEnt = m_vTeleported[i];
+		vec2 Pos;
+		if (pEnt)
+		{
+			Pos = pEnt->GetPos();
+			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+				Pos = ((CCharacter *)pEnt)->Core()->m_Pos;
+		}
+
+		if (!pEnt || (distance(Pos, m_Pos) > Config()->m_SvPortalRadius + pEnt->GetProximityRadius()))
+			m_vTeleported.erase(m_vTeleported.begin() + i);
 	}
 
-	CCharacter *apEnts[MAX_CLIENTS];
-	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
+	CEntity *apEnts[128];
+	int Num = GameWorld()->FindEntitiesTypes(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, 128, Types);
 
 	for (int i = 0; i < Num; i++)
 	{
-		CCharacter *pChr = apEnts[i];
-		int ID = pChr->GetPlayer()->GetCID();
-
-		if (!m_pLinkedPortal || m_aTeleported[ID])
+		// continue when we just got teleported, so we dont keep teleporting back and forth
+		if (std::find(m_vTeleported.begin(), m_vTeleported.end(), apEnts[i]) != m_vTeleported.end())
 			continue;
 
-		int64_t TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, ID);
+		// dont allow travelling when touching the portal through a wall
+		if (GameServer()->Collision()->IntersectLine(m_Pos, apEnts[i]->GetPos(), 0, 0))
+			continue;
+
+		CCharacter *pOwner = 0;
+		CCharacter *pChr = 0;
+		CFlag *pFlag = 0;
+		CPickupDrop *pPickup = 0;
+
+		switch (apEnts[i]->GetObjType())
+		{
+		case CGameWorld::ENTTYPE_CHARACTER:
+			{
+				pChr = (CCharacter *)apEnts[i];
+				pChr->ReleaseHook();
+				pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
+				pChr->m_DDRaceState = DDRACE_CHEAT;
+				pOwner = pChr;
+				break;
+			}
+		case CGameWorld::ENTTYPE_FLAG:
+			{
+				pFlag = (CFlag *)apEnts[i];
+				pFlag->SetPos(m_pLinkedPortal->m_Pos);
+				if (pFlag->GetCarrier())
+					pOwner = pFlag->GetCarrier();
+				else if (pFlag->GetLastCarrier())
+					pOwner = pFlag->GetLastCarrier();
+				break;
+			}
+		case CGameWorld::ENTTYPE_PICKUP_DROP:
+			{
+				pPickup = (CPickupDrop *)apEnts[i];
+				pPickup->SetPos(m_pLinkedPortal->m_Pos);
+				if (pPickup->GetOwner())
+					pOwner = pPickup->GetOwner();
+				break;
+			}
+		}
+
+		int ID = pOwner ? pOwner->GetPlayer()->GetCID() : -1;
+		int64_t TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, ID) : -1LL;
 
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask);
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);
-
-		pChr->ReleaseHook();
-		pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
-		pChr->m_DDRaceState = DDRACE_CHEAT;
-
 		GameServer()->CreatePlayerSpawn(m_pLinkedPortal->m_Pos, TeamMask);
 
-		m_pLinkedPortal->m_aTeleported[ID] = m_aTeleported[ID] = true;
+		m_pLinkedPortal->m_vTeleported.push_back(apEnts[i]);
+		m_vTeleported.push_back(apEnts[i]);
 	}
 }
 
