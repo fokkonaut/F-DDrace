@@ -380,7 +380,7 @@ public:
 	bool m_ScrollNinja;
 	int m_HookPower;
 	bool m_aSpreadWeapon[NUM_WEAPONS];
-	CEntity* m_TelekinesisEntity;
+	CEntity* m_pTelekinesisEntity;
 	CLightsaber* m_pLightsaber;
 	bool m_AlwaysTeleWeapon;
 	bool m_DoorHammer;

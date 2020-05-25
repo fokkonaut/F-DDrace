@@ -4251,9 +4251,9 @@ void CGameContext::UnsetTelekinesis(CEntity *pEntity)
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CCharacter *pChr = GetPlayerChar(i);
-		if (pChr && pChr->m_TelekinesisEntity == pEntity)
+		if (pChr && pChr->m_pTelekinesisEntity == pEntity)
 		{
-			pChr->m_TelekinesisEntity = 0;
+			pChr->m_pTelekinesisEntity = 0;
 			break; // can break here, every entity can only be picked by one player using telekinesis at the time
 		}
 	}
