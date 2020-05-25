@@ -6,6 +6,7 @@
 #include "portal.h"
 #include "flag.h"
 #include <engine/shared/config.h>
+#include <algorithm>
 
 CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTAL, Pos)
