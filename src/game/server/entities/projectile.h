@@ -49,6 +49,7 @@ private:
 
 	bool m_Spooky;
 
+	bool IsDefaultTuning();
 	bool m_DefaultTuning;
 	bool m_DDrace;
 	vec2 m_LastResetPos;
