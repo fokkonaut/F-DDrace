@@ -1297,6 +1297,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		if (GameServer()->Collision()->m_pSwitchers[m_LastTouchedSwitcher].m_ClientID[Team()] == m_Core.m_Killer.m_ClientID)
 			CountKill = false;
 	}
+	if (m_LastTouchedPortalBy == m_Core.m_Killer.m_ClientID)
+		CountKill = false;
 
 	// if no killer exists its a selfkill
 	if (m_Core.m_Killer.m_ClientID == -1)
@@ -3054,6 +3056,7 @@ void CCharacter::FDDraceInit()
 	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
 
 	m_LastTouchedSwitcher = -1;
+	m_LastTouchedPortalBy = -1;
 
 	m_LastLinkedPortals = Now;
 }

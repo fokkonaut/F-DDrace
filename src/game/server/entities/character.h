@@ -441,6 +441,7 @@ public:
 	void ReleaseHook(bool Other = true);
 
 	int m_LastTouchedSwitcher;
+	int m_LastTouchedPortalBy;
 
 
 	/////////dummymode variables

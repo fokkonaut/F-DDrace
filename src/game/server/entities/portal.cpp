@@ -116,6 +116,10 @@ void CPortal::PlayerEnter()
 				pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
 				pChr->m_DDRaceState = DDRACE_CHEAT;
 				pOwner = pChr;
+
+				pChr->Core()->m_Killer.m_ClientID = m_Owner;
+				pChr->Core()->m_Killer.m_Weapon = -1;
+				pChr->m_LastTouchedPortalBy = m_Owner;
 				break;
 			}
 		case CGameWorld::ENTTYPE_FLAG:
