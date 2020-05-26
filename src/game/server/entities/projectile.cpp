@@ -58,26 +58,6 @@ CProjectile::CProjectile
 	m_CurPos = GetPos((Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed());
 
 	GameWorld()->InsertEntity(this);
-	Config()->m_SvTestingCommands = 1;
-}
-
-bool CProjectile::IsDefaultTuning()
-{
-	if (!m_TuneZone)
-		return true;
-
-	CTuningParams *pProjTuning = &GameServer()->TuningList()[m_TuneZone];
-	CTuningParams *pDefaultTuning = GameServer()->Tuning();
-	switch (m_Type)
-	{
-	case WEAPON_GUN:
-		return pProjTuning->m_GunCurvature == pDefaultTuning->m_GunCurvature && pProjTuning->m_GunSpeed == pDefaultTuning->m_GunSpeed;
-	case WEAPON_SHOTGUN:
-		return pProjTuning->m_ShotgunCurvature == pDefaultTuning->m_ShotgunCurvature && pProjTuning->m_ShotgunSpeed == pDefaultTuning->m_ShotgunSpeed;
-	case WEAPON_GRENADE:
-		return pProjTuning->m_GrenadeCurvature == pDefaultTuning->m_GrenadeCurvature && pProjTuning->m_GrenadeSpeed == pDefaultTuning->m_GrenadeSpeed;
-	}
-	return true;
 }
 
 void CProjectile::Reset()
@@ -465,4 +445,23 @@ void CProjectile::GetTunings(float *pCurvature, float *pSpeed)
 	{
 		GetOriginalTunings(pCurvature, pSpeed);
 	}
+}
+
+bool CProjectile::IsDefaultTuning()
+{
+	if (!m_TuneZone)
+		return true;
+
+	CTuningParams *pProjTuning = &GameServer()->TuningList()[m_TuneZone];
+	CTuningParams *pDefaultTuning = GameServer()->Tuning();
+	switch (m_Type)
+	{
+	case WEAPON_GUN:
+		return pProjTuning->m_GunCurvature == pDefaultTuning->m_GunCurvature && pProjTuning->m_GunSpeed == pDefaultTuning->m_GunSpeed;
+	case WEAPON_SHOTGUN:
+		return pProjTuning->m_ShotgunCurvature == pDefaultTuning->m_ShotgunCurvature && pProjTuning->m_ShotgunSpeed == pDefaultTuning->m_ShotgunSpeed;
+	case WEAPON_GRENADE:
+		return pProjTuning->m_GrenadeCurvature == pDefaultTuning->m_GrenadeCurvature && pProjTuning->m_GrenadeSpeed == pDefaultTuning->m_GrenadeSpeed;
+	}
+	return true;
 }
