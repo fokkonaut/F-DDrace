@@ -398,7 +398,7 @@ void CProjectile::GetTunings(float *pCurvature, float *pSpeed)
 	}
 	else
 	{
-		GetOriginalTunings(pCurvature, pSpeed, (bool)m_TuneZone);
+		GetOriginalTunings(pCurvature, pSpeed, m_TuneZone);
 	}
 }
 
