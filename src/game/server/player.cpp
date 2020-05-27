@@ -1494,6 +1494,14 @@ bool CPlayer::IsExpiredItem(int Item)
 			tmp = (*Account).m_ExpireDateVIP;
 			break;
 		}
+	case ITEM_PORTAL_RIFLE:
+		{
+			if (!(*Account).m_PortalRifle)
+				return false;
+
+			tmp = (*Account).m_ExpireDatePortalRifle;
+			break;
+		}
 	default:
 		return false;
 	}
