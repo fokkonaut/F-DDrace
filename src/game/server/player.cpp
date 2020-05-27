@@ -1387,7 +1387,7 @@ void CPlayer::OnLogin()
 			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
 
 		if ((*Account).m_PortalRifle)
-			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false);
+			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
 	}
 
 	// has vip from the old system, remove it and give him 5 euros

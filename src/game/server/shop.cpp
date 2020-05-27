@@ -427,6 +427,7 @@ void CShop::BuyItem(int ClientID, int Item)
 								(*Account).m_SpawnWeapon[Weapon]++; break;
 	case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
 	case ITEM_TASER:			(*Account).m_TaserLevel++; break;
-	case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item); break;
+	case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item);
+								if (pPlayer->GetCharacter()) pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE); break;
 	}
 }
