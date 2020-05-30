@@ -429,7 +429,7 @@ CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 
 char* CSaveTeam::GetString()
 {
-	str_format(m_aString, sizeof(m_aString), "%d\t%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked, m_Practice);
+	str_format(m_String, sizeof(m_String), "%d\t%d\t%d\t%d\t%d", m_TeamState, m_MembersCount, m_NumSwitchers, m_TeamLocked, m_Practice);
 
 	for(int i = 0; i < m_MembersCount; i++)
 	{
@@ -443,8 +443,8 @@ char* CSaveTeam::GetString()
 		for(int i=1; i < m_NumSwitchers+1; i++)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_pSwitchers[i].m_EndTime, m_pSwitchers[i].m_Type);
-			str_append(m_aString, aBuf, sizeof(m_aString));
+			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_Switchers[i].m_Status, m_Switchers[i].m_EndTime, m_Switchers[i].m_Type);
+			str_append(m_String, aBuf, sizeof(m_String));
 		}
 	}
 
