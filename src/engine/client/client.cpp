@@ -1238,6 +1238,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket)
 				m_MapdownloadAmount = 0;
 				m_MapdownloadTotalsize = -1;
 
+				Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 				Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 
 				// load map
