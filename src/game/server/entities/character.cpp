@@ -3181,12 +3181,14 @@ void CCharacter::FDDraceTick()
 		char aBuf[64];
 		int Seconds = Config()->m_SvPortalRifleDelay - ((Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed());
 
-		if (Seconds <= 1)
+		if (Seconds <= 0)
 			str_copy(aBuf, "[Portals unlocked]", sizeof(aBuf));
 		else
-			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds-1);
+			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds);
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
+
+	Config()->m_SvTestingCommands = 1;
 }
 
 void CCharacter::HandleLastIndexTiles()
