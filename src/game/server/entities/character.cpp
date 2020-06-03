@@ -3187,8 +3187,6 @@ void CCharacter::FDDraceTick()
 			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds);
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
-
-	Config()->m_SvTestingCommands = 1;
 }
 
 void CCharacter::HandleLastIndexTiles()
