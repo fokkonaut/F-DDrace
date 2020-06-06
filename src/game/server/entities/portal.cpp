@@ -55,9 +55,9 @@ void CPortal::Tick()
 	if (m_Owner != -1 && !GameServer()->m_apPlayers[m_Owner])
 		m_Owner = -1;
 
-	if (m_Owner != -1&& !GameServer()->GetPlayerChar(m_Owner))
+	if (m_Owner != -1 && !GameServer()->GetPlayerChar(m_Owner))
 		Reset();
-
+	 
 	if ((m_LinkedTick == 0 && m_StartTick < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonation)
 		|| (m_LinkedTick != 0 && m_LinkedTick < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonationLinked))
 	{
