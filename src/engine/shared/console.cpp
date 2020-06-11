@@ -481,10 +481,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
 						}
 
-						// always set the victim to yourself when a helper executes, so helpers can only give stuff to theirselves
-						if (m_AccessLevel == ACCESS_LEVEL_HELPER)
-							Result.SetVictim(CResult::VICTIM_ME);
-
 						if (Result.GetVictim() == CResult::VICTIM_ME)
 							Result.SetVictim(ClientID);
 
