@@ -397,6 +397,9 @@ void CPlayer::PostPostTick()
 
 void CPlayer::SendConnect(int ClientID, int FakeID)
 {
+	if (Server()->IsSevendown(m_ClientID))
+		return;
+
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if (!pPlayer)
 		return;
@@ -427,6 +430,9 @@ void CPlayer::SendConnect(int ClientID, int FakeID)
 
 void CPlayer::SendDisconnect(int ClientID, int FakeID)
 {
+	if (Server()->IsSevendown(m_ClientID))
+		return;
+
 	if (!GameServer()->m_apPlayers[ClientID])
 		return;
 
