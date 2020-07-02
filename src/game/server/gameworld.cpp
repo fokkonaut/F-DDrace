@@ -171,6 +171,92 @@ bool distCompare(std::pair<float,int> a, std::pair<float,int> b)
 
 void CGameWorld::UpdatePlayerMaps()
 {
+	if (Server()->Tick() % Config()->m_SvMapUpdateRate != 0)
+		return;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
+		int *pMap = Server()->GetIdMap(i);
+
+		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
+
+		int rMap[MAX_CLIENTS];
+		for (int j = 0; j < MAX_CLIENTS; j++)
+			rMap[j] = -1;
+		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
+			if (pMap[j] != -1)
+				rMap[pMap[j]] = j;
+
+		for (int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if (i == j)
+				continue;
+
+			CPlayer *pChecked = GameServer()->m_apPlayers[j];
+
+			if (!Server()->ClientIngame(j) || !pChecked || !pChecked->GetCharacter())
+			{
+				if (rMap[j] != -1)
+				{
+					pPlayer->SendDisconnect(j, rMap[j]);
+					pMap[rMap[j]] = -1;
+					rMap[j] = -1;
+				}
+				continue;
+			}
+
+			// use the CEntity NetworkClipped function, not from CCharacter because that one includes the ShowAll check
+			if (rMap[j] == -1 && ((pChecked->GetCharacter() && !((CEntity *)pChecked->GetCharacter())->NetworkClipped(i)) || pPlayer->m_aSameIP[j]))
+			{
+				int Free = -1;
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-1; k++)
+				{
+					if (pMap[k] == -1 || (pPlayer->m_aSameIP[j] && k == GameServer()->m_apPlayers[j]->m_FakeID))
+					{
+						Free = k;
+						break;
+					}
+				}
+
+				if (Free != -1)
+				{
+					if (pMap[Free] == -1)
+					{
+						pPlayer->SendConnect(j, Free);
+					}
+					else if (pMap[Free] != j)
+					{
+						pPlayer->SendDisconnect(pMap[Free], Free);
+						pPlayer->SendConnect(j, Free);
+					}
+					rMap[pMap[Free]] = -1;
+					pMap[Free] = j;
+					rMap[j] = Free;
+				}
+				else
+				{
+					for (int k = 0; k < MAX_CLIENTS; k++)
+					{
+						if (rMap[k] != -1 && !pPlayer->m_aSameIP[k] && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i))
+						{
+							pPlayer->SendDisconnect(k, rMap[k]);
+							rMap[j] = rMap[k];
+							pMap[rMap[j]] = j;
+							rMap[k] = -1;
+							pPlayer->SendConnect(j, rMap[j]);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+/*void CGameWorld::UpdatePlayerMaps()
+{
 	if (Server()->Tick() % Config()->m_SvMapUpdateRate != 0) return;
 
 	std::pair<float,int> Dist[MAX_CLIENTS];
@@ -294,7 +380,7 @@ void CGameWorld::UpdatePlayerMaps()
 
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 	}
-}
+}*/
 
 void CGameWorld::Tick()
 {
