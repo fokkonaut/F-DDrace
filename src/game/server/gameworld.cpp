@@ -211,7 +211,7 @@ void CGameWorld::UpdatePlayerMaps()
 			CCharacter* SnapChar = GameServer()->GetPlayerChar(i);
 			if(SnapChar && !SnapChar->m_Super &&
 				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
-				!ch->CanCollide(i)
+				!ch->CanCollide(i, false)
 			)
 				Dist[j].first = 1e7;
 			else
