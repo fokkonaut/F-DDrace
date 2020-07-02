@@ -208,7 +208,7 @@ void CGameWorld::UpdatePlayerMaps()
 			}
 
 			// use the CEntity NetworkClipped function, not from CCharacter because that one includes the ShowAll check
-			if (rMap[j] == -1 && ((pChecked->GetCharacter() && !((CEntity *)pChecked->GetCharacter())->NetworkClipped(i)) || pPlayer->m_aSameIP[j]))
+			if (rMap[j] == -1 && ((pChecked->GetCharacter() && (!((CEntity *)pChecked->GetCharacter())->NetworkClipped(i)) || GameServer()->CountConnectedPlayers(false) < VANILLA_MAX_CLIENTS-1) || pPlayer->m_aSameIP[j]))
 			{
 				int Free = -1;
 				for (int k = 0; k < VANILLA_MAX_CLIENTS-1; k++)
