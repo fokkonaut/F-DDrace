@@ -199,7 +199,7 @@ void CGameWorld::UpdatePlayerMaps()
 			int Free = -1;
 			for (int k = 0; k < VANILLA_MAX_CLIENTS-1; k++)
 			{
-				if (pMap[k] == -1 || (pPlayer->m_aSameIP[j] && k == GameServer()->m_apPlayers[j]->m_FakeID))
+				if (pMap[k] != i && (pMap[k] == -1 || (pPlayer->m_aSameIP[j] && k == GameServer()->m_apPlayers[j]->m_FakeID)))
 				{
 					Free = k;
 					break;
@@ -239,7 +239,7 @@ void CGameWorld::UpdatePlayerMaps()
 				{
 					for (int k = 0; k < MAX_CLIENTS; k++)
 					{
-						if (rMap[k] != -1 && !pPlayer->m_aSameIP[k] && GameServer()->GetPlayerChar(k) && ((CEntity *)GameServer()->GetPlayerChar(k))->NetworkClipped(i))
+						if (k != i && rMap[k] != -1 && !pPlayer->m_aSameIP[k] && GameServer()->GetPlayerChar(k) && ((CEntity *)GameServer()->GetPlayerChar(k))->NetworkClipped(i))
 						{
 							pPlayer->SendDisconnect(k, rMap[k]);
 							rMap[j] = rMap[k];
