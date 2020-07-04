@@ -429,8 +429,12 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	CMsgPacker Msg(Server()->IsSevendown(ClientID) ? 30 : NETMSGTYPE_SV_TEAMSSTATE);
 
-	for(unsigned i = 0; i < MAX_CLIENTS; i++)
-		Msg.AddInt(m_Core.Team(i));
+	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
+	{
+		int id = i;
+		Server()->Translate(id, ClientID);
+		Msg.AddInt(m_Core.Team(id));
+	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
