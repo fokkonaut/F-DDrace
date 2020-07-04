@@ -230,8 +230,8 @@ void CGameWorld::UpdatePlayerMaps()
 					{
 						pPlayer->SendDisconnect(pMap[Free], Free);
 						pPlayer->SendConnect(j, Free);
+						rMap[pMap[Free]] = -1;
 					}
-					rMap[pMap[Free]] = -1;
 					pMap[Free] = j;
 					rMap[j] = Free;
 				}
