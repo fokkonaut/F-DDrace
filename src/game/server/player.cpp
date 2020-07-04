@@ -358,6 +358,9 @@ void CPlayer::Tick()
 			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
 		}
 
+		pTeeInfos.m_Sevendown.m_UseCustomColor = 1;
+		pTeeInfos.m_Sevendown.m_ColorBody = pTeeInfos.m_Sevendown.m_ColorFeet = pTeeInfos.m_aSkinPartColors[SKINPART_BODY];
+
 		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
 	}
 }
