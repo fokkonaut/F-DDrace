@@ -95,7 +95,7 @@ public:
 
 	enum
 	{
-		MAX_RCONCMD_SEND=4,
+		MAX_RCONCMD_SEND=4, // TODO: this was 16 before, but the server somehow lost connection to master and couldnt find back on rcon login
 		MAX_MAPLISTENTRY_SEND = 32,
 		MIN_MAPLIST_CLIENTVERSION=0x0703,	// todo 0.8: remove me
 		MAX_RCONCMD_RATIO=8,
