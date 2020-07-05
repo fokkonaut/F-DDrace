@@ -1082,7 +1082,7 @@ void CPlayer::TryRespawn()
 
 	if (GameServer()->Config()->m_SvTeam == 3)
 	{
-		int NewTeam = 0;
+		int NewTeam = 1;
 		for (; NewTeam < TEAM_SUPER; NewTeam++)
 			if (Controller->m_Teams.Count(NewTeam) == 0)
 				break;
