@@ -4584,6 +4584,81 @@ const char* CGameContext::GetMinigameCommand(int Minigame)
 	return "unknown";
 }
 
+void CGameContext::SetMinigame(int ClientID, int Minigame)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+
+	char aMsg[128];
+
+	// check whether minigame is disabled
+	if (Minigame != MINIGAME_NONE && m_aMinigameDisabled[Minigame])
+	{
+		SendChatTarget(ClientID, "This minigame is disabled");
+		return;
+	}
+
+	// check if we are already in a minigame
+	if (pPlayer->m_Minigame == Minigame)
+	{
+		// you can't leave when you're not in a minigame
+		if (Minigame == MINIGAME_NONE)
+			SendChatTarget(ClientID, "You are not in a minigame");
+		else
+		{
+			str_format(aMsg, sizeof(aMsg), "You are already in minigame '%s'", GetMinigameName(Minigame));
+			SendChatTarget(ClientID, aMsg);
+		}
+		return;
+	}
+
+	// leave minigame
+	if (Minigame == MINIGAME_NONE)
+	{
+		str_format(aMsg, sizeof(aMsg), "'%s' left the minigame '%s'", Server()->ClientName(ClientID), GetMinigameName(pPlayer->m_Minigame));
+		SendChat(-1, CHAT_ALL, -1, aMsg);
+
+		//reset everything
+		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
+		{
+			pPlayer->m_Gamemode = Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
+			pPlayer->m_ShowName = true;
+		}
+	}
+	// join minigame
+	else if (pPlayer->m_Minigame == MINIGAME_NONE)
+	{
+		str_format(aMsg, sizeof(aMsg), "'%s' joined the minigame '%s', use '/%s' to join aswell", Server()->ClientName(ClientID), GetMinigameName(Minigame), GetMinigameCommand(Minigame));
+		SendChat(-1, CHAT_ALL, -1, aMsg);
+		SendChatTarget(ClientID, "Say '/leave' to join the normal area again");
+
+		//set minigame required stuff
+		((CGameControllerDDRace*)m_pController)->m_Teams.SetCharacterTeam(pPlayer->GetCID(), 0);
+
+		if (Minigame == MINIGAME_SURVIVAL)
+		{
+			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
+			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
+		}
+	}
+	else
+	{
+		// you can't join minigames if you are already in another mingame
+		SendChatTarget(ClientID, "You have to leave first in order to join another minigame");
+		return;
+	}
+
+	pPlayer->KillCharacter(WEAPON_GAME);
+	pPlayer->m_Minigame = Minigame;
+
+	UpdateHidePlayers();
+
+	// Update the gameinfo, add or remove GAMEFLAG_RACE as wanted (in minigames we disable it to properly show the scores)
+	m_pController->UpdateGameInfo(ClientID);
+}
+
 void CGameContext::SurvivalTick()
 {
 	// if there are no spawn tiles, we cant play the game

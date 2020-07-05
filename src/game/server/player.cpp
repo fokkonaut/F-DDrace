@@ -1178,6 +1178,13 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
 	}
 	else if (m_LastPlaytime < time_get() - time_freq() * GameServer()->Config()->m_SvMaxAfkVoteTime)
 	{
+		// automatically leave minigame when player is afk
+		if (m_Minigame != MINIGAME_NONE)
+		{
+			GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE);
+			GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");
+		}
+
 		m_Afk = true;
 		return;
 	}

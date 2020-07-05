@@ -2034,14 +2034,9 @@ void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aMinigames);
 }
 
-void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int Minigame)
+void CGameContext::PreSetMinigame(IConsole::IResult *pResult, void *pUserData, int Minigame)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CPlayer* pPlayer = m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-	char aMsg[128];
 
 	// admins can enable or disable minigames with /<minigame> <enable/disable>
 	if (pResult->NumArguments() && pSelf->Server()->GetAuthedState(pResult->m_ClientID) && Minigame != MINIGAME_NONE)
@@ -2053,6 +2048,7 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 			Disable = true;
 		else return;
 
+		char aMsg[128];
 		str_format(aMsg, sizeof(aMsg), "Minigame '%s' %s%sd", pSelf->GetMinigameName(Minigame), (pSelf->m_aMinigameDisabled[Minigame] == Disable ? "is already " : ""), pResult->GetString(0));
 		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
 
@@ -2060,101 +2056,38 @@ void CGameContext::SetMinigame(IConsole::IResult *pResult, void *pUserData, int 
 		return;
 	}
 
-	// check whether minigame is disabled
-	if (Minigame != MINIGAME_NONE && pSelf->m_aMinigameDisabled[Minigame])
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "This minigame is disabled");
-		return;
-	}
-
-	// check if we are already in a minigame
-	if (pPlayer->m_Minigame == Minigame)
-	{
-		// you can't leave when you're not in a minigame
-		if (Minigame == MINIGAME_NONE)
-			pSelf->SendChatTarget(pResult->m_ClientID, "You are not in a minigame");
-		else
-		{
-			str_format(aMsg, sizeof(aMsg), "You are already in minigame '%s'", pSelf->GetMinigameName(Minigame));
-			pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
-		}
-		return;
-	}
-
-	// leave minigame
-	if (Minigame == MINIGAME_NONE)
-	{
-		str_format(aMsg, sizeof(aMsg), "'%s' left the minigame '%s'", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->GetMinigameName(pPlayer->m_Minigame));
-		pSelf->SendChat(-1, CHAT_ALL, -1, aMsg);
-
-		//reset everything
-		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
-		{
-			pPlayer->m_Gamemode = pSelf->Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
-			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
-			pPlayer->m_ShowName = true;
-		}
-	}
 	// join minigame
-	else if (pPlayer->m_Minigame == MINIGAME_NONE)
-	{
-		str_format(aMsg, sizeof(aMsg), "'%s' joined the minigame '%s', use '/%s' to join aswell", pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->GetMinigameName(Minigame), pSelf->GetMinigameCommand(Minigame));
-		pSelf->SendChat(-1, CHAT_ALL, -1, aMsg);
-		pSelf->SendChatTarget(pResult->m_ClientID, "Say '/leave' to join the normal area again");
-
-		//set minigame required stuff
-		((CGameControllerDDRace*)pSelf->m_pController)->m_Teams.SetCharacterTeam(pPlayer->GetCID(), 0);
-
-		if (Minigame == MINIGAME_SURVIVAL)
-		{
-			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
-			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
-		}
-	}
-	else
-	{
-		// you can't join minigames if you are already in another mingame
-		pSelf->SendChatTarget(pResult->m_ClientID, "You have to leave first in order to join another minigame");
-		return;
-	}
-
-	pPlayer->KillCharacter(WEAPON_GAME);
-	pPlayer->m_Minigame = Minigame;
-
-	pSelf->UpdateHidePlayers();
-
-	// Update the gameinfo, add or remove GAMEFLAG_RACE as wanted (in minigames we disable it to properly show the scores)
-	pSelf->m_pController->UpdateGameInfo(pResult->m_ClientID);
+	pSelf->SetMinigame(pResult->m_ClientID, Minigame);
 }
 
 void CGameContext::ConLeaveMinigame(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult, pUserData, MINIGAME_NONE);
+	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_NONE);
 }
 
 void CGameContext::ConJoinBlock(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult, pUserData, MINIGAME_BLOCK);
+	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_BLOCK);
 }
 
 void CGameContext::ConJoinSurvival(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult, pUserData, MINIGAME_SURVIVAL);
+	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_SURVIVAL);
 }
 
 void CGameContext::ConJoinBoomFNG(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_BOOMFNG);
+	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_BOOMFNG);
 }
 
 void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
+	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)

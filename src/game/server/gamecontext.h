@@ -496,6 +496,8 @@ public:
 	//minigames disabled
 	bool m_aMinigameDisabled[NUM_MINIGAMES];
 
+	void SetMinigame(int ClientID, int Minigame);
+
 	//survival
 	void SurvivalTick();
 	void SetPlayerSurvivalState(int State);
@@ -624,7 +626,7 @@ private:
 	static void ConRoom(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpawn(IConsole::IResult* pResult, void* pUserData);
 
-	void SetMinigame(IConsole::IResult* pResult, void* pUserData, int Minigame);
+	void PreSetMinigame(IConsole::IResult *pResult, void *pUserData, int Minigame);
 	static void ConMinigames(IConsole::IResult* pResult, void* pUserData);
 	static void ConLeaveMinigame(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinBlock(IConsole::IResult* pResult, void* pUserData);
