@@ -2269,7 +2269,7 @@ void CCharacter::HandleTiles(int Index)
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_PoliceLevel) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_Level < MAX_LEVEL ? aPlusXP : "",
+						(*Account).m_XP, GameServer()->GetNeededXP((*Account).m_Level), aPlusXP,
 						(*Account).m_Level
 					);
 
@@ -3132,7 +3132,7 @@ void CCharacter::FDDraceTick()
 	{
 		CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-		if (m_pPlayer->GetAccID() >= ACC_START && (*Account).m_Level < MAX_LEVEL)
+		if (m_pPlayer->GetAccID() >= ACC_START)
 		{
 			if (!m_MoneyTile)
 			{
@@ -3148,7 +3148,7 @@ void CCharacter::FDDraceTick()
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
-					(*Account).m_XP, GameServer()->m_aNeededXP[(*Account).m_Level], (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+					(*Account).m_XP, GameServer()->GetNeededXP((*Account).m_Level), (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
@@ -3435,7 +3435,6 @@ int CCharacter::GetSpawnWeaponIndex(int Weapon)
 void CCharacter::UpdateWeaponIndicator()
 {
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
-		|| (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_Level < MAX_LEVEL)
 		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN)
 		|| GameServer()->m_pShop->IsInShop(m_pPlayer->GetCID()))
 		return;

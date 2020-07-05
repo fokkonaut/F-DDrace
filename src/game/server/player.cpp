@@ -1361,14 +1361,9 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 		return;
 
 	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
-	if ((*Account).m_Level >= MAX_LEVEL)
-		return;
+	(*Account).m_XP += Amount;
 
 	char aBuf[256];
-
-	while ((*Account).m_XP + Amount > GameServer()->m_aNeededXP[MAX_LEVEL])
-		Amount--;
-	(*Account).m_XP += Amount;
 
 	if (pMessage[0])
 	{
@@ -1376,7 +1371,7 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 
-	if ((*Account).m_XP >= GameServer()->m_aNeededXP[(*Account).m_Level])
+	if ((*Account).m_XP >= GameServer()->GetNeededXP((*Account).m_Level))
 	{
 		(*Account).m_Level++;
 

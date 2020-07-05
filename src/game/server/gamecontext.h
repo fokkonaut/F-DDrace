@@ -85,7 +85,8 @@ enum Top5
 enum
 {
 	ACC_START = 1, // account ids start with 1, 0 means not logged in
-	MAX_LEVEL = 100,
+	DIFFERENCE_XP_END = 100,
+	OVER_LVL_100_XP = 2000000,
 	NUM_TASER_LEVELS = 7,
 	NUM_POLICE_LEVELS = 5,
 };
@@ -366,7 +367,8 @@ public:
 
 	int m_aTaserPrice[7];
 	int m_aPoliceLevel[5];
-	int m_aNeededXP[MAX_LEVEL + 1];
+	int m_aNeededXP[DIFFERENCE_XP_END];
+	int GetNeededXP(int Level);
 	int m_LastAccSaveTick;
 
 	const char *GetDate(time_t Time);

@@ -1304,9 +1304,9 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : (*Account).m_Level >= MAX_LEVEL ? " (max)" : "");
+			str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->m_aNeededXP[(*Account).m_Level]);
+			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->GetNeededXP((*Account).m_Level));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
