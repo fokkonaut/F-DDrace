@@ -3450,7 +3450,8 @@ bool CGameContext::IsClientSpectator(int ClientID) const
 const CUuid CGameContext::GameUuid() const { return m_GameUuid; }
 const char *CGameContext::GameType() const { return m_pController && m_pController->GetGameType() ? m_pController->GetGameType() : ""; }
 const char *CGameContext::Version() const { return GAME_VERSION; }
-const char* CGameContext::VersionSevendown() const { return GAME_VERSION_SEVENDOWN; }
+const char *CGameContext::VersionSevendown() const { return GAME_VERSION_SEVENDOWN; }
+const char *CGameContext::VersionSevendownDisabled() const { return GAME_VERSION_SEVENDOWN_DISABLED; }
 const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 const char *CGameContext::NetVersionSevendown() const { return GAME_NETVERSION_SEVENDOWN; }
 
