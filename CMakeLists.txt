@@ -1662,6 +1662,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamemodes/gamemode.h
   gameworld.cpp
   gameworld.h
+  mask128.h
   player.cpp
   player.h
   save.cpp

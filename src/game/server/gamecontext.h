@@ -29,6 +29,9 @@ typedef unsigned __int64 uint64_t;
 #else
 #include <stdint.h>
 #endif
+
+#include "mask128.h"
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -242,12 +245,12 @@ public:
 	CVoteOptionServer *m_pVoteOptionLast;
 
 	// helper functions
-	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, int64_t Mask = -1LL, int SevendownAmount = 0);
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask = -1LL);
-	void CreateHammerHit(vec2 Pos, int64_t Mask = -1LL);
-	void CreatePlayerSpawn(vec2 Pos, int64_t Mask = -1LL);
-	void CreateDeath(vec2 Pos, int Who, int64_t Mask = -1LL);
-	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1LL);
+	void CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, Mask128 Mask = Mask128(), int SevendownAmount = 0);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, Mask128 Mask = Mask128());
+	void CreateHammerHit(vec2 Pos, Mask128 Mask = Mask128());
+	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask = Mask128());
+	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
+	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
 	// network
 	void SendChatTarget(int To, const char* pText);
@@ -817,9 +820,9 @@ public:
 	int m_ChatPrintCBIndex;
 };
 
-inline int64_t CmaskAll() { return -1LL; }
-inline int64_t CmaskOne(int ClientID) { return 1LL<<ClientID; }
-inline int64_t CmaskUnset(int64_t Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
-inline int64_t CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(int64_t Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline Mask128 CmaskAll() { return Mask128(); }
+inline Mask128 CmaskOne(int ClientID) { return Mask128(ClientID); }
+inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
+inline Mask128 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
+inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
 #endif

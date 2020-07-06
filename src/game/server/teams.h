@@ -13,7 +13,7 @@ class CGameTeams
 	bool m_TeeFinished[MAX_CLIENTS];
 	bool m_TeamLocked[MAX_CLIENTS];
 	bool m_IsSaving[MAX_CLIENTS];
-	uint64_t m_Invited[MAX_CLIENTS];
+	Mask128 m_Invited[MAX_CLIENTS];
 	bool m_Practice[MAX_CLIENTS];
 
 	class CGameContext * m_pGameContext;
@@ -62,7 +62,7 @@ public:
 	void ChangeTeamState(int Team, int State);
 	void onChangeTeamState(int Team, int State, int OldState);
 
-	int64_t TeamMask(int Team, int ExceptID = -1, int Asker = -1);
+	Mask128 TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 
 	int Count(int Team) const;
 
@@ -108,7 +108,7 @@ public:
 
 	bool IsInvited(int Team, int ClientID)
 	{
-		return m_Invited[Team] & 1LL << ClientID;
+		return m_Invited[Team] & Mask128(ClientID);
 	}
 
 	void SetFinished(int ClientID, bool finished)

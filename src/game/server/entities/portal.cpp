@@ -39,7 +39,7 @@ void CPortal::Reset()
 			GameServer()->m_apPlayers[m_Owner]->m_pPortal[i] = 0;
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	int64_t TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner) : -1LL;
+	Mask128 TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner) : Mask128();
 	GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
 	GameWorld()->DestroyEntity(this);
 }
@@ -143,7 +143,7 @@ void CPortal::PlayerEnter()
 		}
 
 		int ID = pOwner ? pOwner->GetPlayer()->GetCID() : -1;
-		int64_t TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, ID) : -1LL;
+		Mask128 TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, ID) : Mask128();
 
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask);
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);
@@ -164,7 +164,7 @@ void CPortal::Snap(int SnappingClient)
 		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 		if (pOwner)
 		{
-			int64_t TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+			Mask128 TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
 			if (!CmaskIsSet(TeamMask, SnappingClient))
 				return;
 		}

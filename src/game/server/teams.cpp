@@ -365,9 +365,9 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
+Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 {
-	int64_t Mask = 0;
+	Mask128 Mask = Mask128(-1);
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -419,7 +419,7 @@ int64_t CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			}
 		}
 
-		Mask |= 1LL << i;
+		Mask |= CmaskOne(i);
 	}
 	return Mask;
 }
@@ -703,9 +703,9 @@ void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
 	{
 		if(Invited)
-			m_Invited[Team] |= 1ULL << ClientID;
+			m_Invited[Team] |= CmaskOne(ClientID);
 		else
-			m_Invited[Team] &= ~(1ULL << ClientID);
+			m_Invited[Team] &= ~CmaskOne(ClientID);
 	}
 }
 

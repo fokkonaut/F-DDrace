@@ -1932,7 +1932,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 	pChr->ReleaseHook();
 
 	// create death effect and do a nice sound when teleporting to spawn
-	int64_t TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pResult->m_ClientID);
+	Mask128 TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pResult->m_ClientID);
 	pSelf->CreateDeath(Pos, pResult->m_ClientID, TeamMask);
 	pSelf->CreateSound(Pos, SOUND_WEAPON_SPAWN, TeamMask);
 }

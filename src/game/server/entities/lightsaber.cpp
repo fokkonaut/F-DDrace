@@ -82,7 +82,7 @@ void CLightsaber::Tick()
 	else
 		m_Pos = m_pOwner->GetPos();
 
-	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : -1LL;
+	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : Mask128();
 
 	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 		m_EvalTick = Server()->Tick();

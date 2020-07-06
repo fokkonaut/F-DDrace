@@ -454,7 +454,7 @@ void CLaserText::Snap(int SnappingClient)
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwner && pSnapChar)
 	{
-		int64_t TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+		Mask128 TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
 		if (!CmaskIsSet(TeamMask, SnappingClient))
 			return;
 	}

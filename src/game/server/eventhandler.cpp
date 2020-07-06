@@ -19,7 +19,7 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 }
 
-void *CEventHandler::Create(int Type, int Size, int64_t Mask)
+void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
 {
 	if(m_NumEvents == MAX_EVENTS)
 		return 0;

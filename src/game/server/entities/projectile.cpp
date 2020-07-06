@@ -96,7 +96,7 @@ void CProjectile::Tick()
 	if (m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
+	Mask128 TeamMask = Mask128();
 	bool IsWeaponCollide = false;
 	if
 		(
@@ -124,9 +124,9 @@ void CProjectile::Tick()
 		if (m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : Mask128());
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : Mask128());
 		}
 		else if (m_Freeze)
 		{
@@ -211,7 +211,7 @@ void CProjectile::Tick()
 		else if (GameServer()->GetProjectileType(m_Type) == WEAPON_GUN)
 		{
 			if (pOwnerChar && (pOwnerChar->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE || m_Type != WEAPON_GUN))
-				GameServer()->CreateDamage(m_CurPos, m_Owner, m_Direction, 1, 0, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : -1LL, 10);
+				GameServer()->CreateDamage(m_CurPos, m_Owner, m_Direction, 1, 0, (pTargetChr && m_Owner == pTargetChr->GetPlayer()->GetCID()), m_Owner != -1 ? TeamMask : CmaskAll(), 10);
 			GameWorld()->DestroyEntity(this);
 			return;
 		}
@@ -231,16 +231,16 @@ void CProjectile::Tick()
 			if (m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			int64_t TeamMask = -1LL;
+			Mask128 TeamMask = Mask128();
 			if (pOwnerChar && pOwnerChar->IsAlive())
 			{
 				TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : Mask128());
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : Mask128());
 		}
 		GameWorld()->DestroyEntity(this);
 		return;
@@ -302,7 +302,7 @@ void CProjectile::Snap(int SnappingClient)
 		return;
 
 	CCharacter* pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
+	Mask128 TeamMask = Mask128();
 
 	if (m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);

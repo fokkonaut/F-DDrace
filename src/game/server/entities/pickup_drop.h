@@ -4,6 +4,7 @@
 #define GAME_SERVER_ENTITIES_PICKUP_DROP_H
 
 #include <game/server/entity.h>
+#include "mask128.h"
 
 class CPickupDrop : public CEntity
 {
@@ -33,7 +34,7 @@ private:
 
 	vec2 m_Vel;
 
-	int64_t m_TeamMask;
+	Mask128 m_TeamMask;
 	CCharacter *m_pOwner;
 	int m_Owner;
 
