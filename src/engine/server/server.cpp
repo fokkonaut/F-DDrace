@@ -1335,8 +1335,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 		pPacker->AddInt(Token);
 	}
 
-	const char *pVersion = Config()->m_SvAllowSevendown ? GameServer()->VersionSevendown() : GameServer()->VersionSevendownDisabled();
-	pPacker->AddString(pVersion, 32);
+	pPacker->AddString(GameServer()->Version(), 32);
 	
 	if(Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
 	{

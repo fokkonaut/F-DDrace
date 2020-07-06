@@ -238,7 +238,6 @@ public:
 	virtual const char *GameType() const = 0;
 	virtual const char *Version() const = 0;
 	virtual const char *VersionSevendown() const = 0;
-	virtual const char *VersionSevendownDisabled() const = 0;
 	virtual const char *NetVersion() const = 0;
 	virtual const char *NetVersionSevendown() const = 0;
 

@@ -317,7 +317,6 @@ public:
 	virtual const char *GameType() const;
 	virtual const char *Version() const;
 	virtual const char *VersionSevendown() const;
-	virtual const char *VersionSevendownDisabled() const;
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionSevendown() const;
 
