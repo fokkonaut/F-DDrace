@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <utility>
 #include <engine/shared/config.h>
+#include "gamemodes/DDRace.h"
 
 
 //////////////////////////////////////////////////
@@ -231,6 +232,9 @@ void CGameWorld::UpdatePlayerMaps()
 						pPlayer->SendDisconnect(pMap[Free], Free);
 						pPlayer->SendConnect(j, Free);
 						rMap[pMap[Free]] = -1;
+
+						if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
+							((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
 					}
 					pMap[Free] = j;
 					rMap[j] = Free;
@@ -246,6 +250,9 @@ void CGameWorld::UpdatePlayerMaps()
 							pMap[rMap[j]] = j;
 							rMap[k] = -1;
 							pPlayer->SendConnect(j, rMap[j]);
+
+							if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
+								((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
 							break;
 						}
 					}
