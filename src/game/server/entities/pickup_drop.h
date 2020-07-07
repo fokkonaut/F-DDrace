@@ -4,7 +4,7 @@
 #define GAME_SERVER_ENTITIES_PICKUP_DROP_H
 
 #include <game/server/entity.h>
-#include "mask128.h"
+#include <game/server/mask128.h>
 
 class CPickupDrop : public CEntity
 {
