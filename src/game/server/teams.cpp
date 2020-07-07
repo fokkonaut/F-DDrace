@@ -437,7 +437,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
 		int id = i;
-		Server()->Translate(id, ClientID);
+		Server()->ReverseTranslate(id, ClientID);
 		Msg.AddInt(m_Core.Team(id));
 	}
 
