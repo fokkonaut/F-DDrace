@@ -92,6 +92,9 @@ enum
 	OVER_LVL_100_XP = 2000000,
 	NUM_TASER_LEVELS = 7,
 	NUM_POLICE_LEVELS = 5,
+
+	// update this one with every acc change you do
+	ACC_CURRENT_VERSION = 1,
 };
 
 enum
@@ -409,10 +412,12 @@ public:
 		time_t m_ExpireDateVIP;
 		bool m_PortalRifle;
 		time_t m_ExpireDatePortalRifle;
+		int m_Version;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
 	// make sure these are in the same order as the variables above
+	// if you add another variable make sure to change the ACC_CURRENT_VERSION in this file
 	enum AccountVariables
 	{
 		ACC_PORT,
@@ -452,6 +457,7 @@ public:
 		ACC_EXPIRE_DATE_VIP,
 		ACC_PORTAL_RIFLE,
 		ACC_EXPIRE_DATE_PORTAL_RIFLE,
+		ACC_VERSION,
 		NUM_ACCOUNT_VARIABLES
 	};
 

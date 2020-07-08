@@ -3795,6 +3795,7 @@ int CGameContext::AddAccount()
 	Account.m_ExpireDateVIP = 0;
 	Account.m_PortalRifle = false;
 	Account.m_ExpireDatePortalRifle = 0;
+	Account.m_Version = ACC_CURRENT_VERSION;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3851,6 +3852,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoi(pData); break;
 		case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
 		case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
+		case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
 		}
 	}
 }
@@ -3901,6 +3903,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
 		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
+		AccFile << m_Accounts[ID].m_Version << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
