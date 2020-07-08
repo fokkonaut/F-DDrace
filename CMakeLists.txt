@@ -1126,6 +1126,7 @@ set(EXPECTED_DATA
   ui/icons/friend.png
   ui/icons/level.png
   ui/icons/menu.png
+  ui/icons/network.png
   ui/icons/sidebar.png
   ui/icons/timer_clock.png
   ui/icons/tools.png

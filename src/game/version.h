@@ -8,6 +8,7 @@
 #define GAME_NETVERSION "0.7 802f1be60a05665f"
 #define GAME_NETVERSION_SEVENDOWN "0.6 626fce9a778df4d4"
 #define CLIENT_VERSION 0x0705
+#define PREV_CLIENT_VERSION 0x0704
 #define SETTINGS_FILENAME "settings07"
 static const char GAME_RELEASE_VERSION[8] = "0.7.5";
 #endif
