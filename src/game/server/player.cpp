@@ -103,6 +103,7 @@ void CPlayer::Reset()
 	m_DDraceVersion = VERSION_VANILLA;
 	m_ShowOthers = GameServer()->Config()->m_SvShowOthersDefault;
 	m_ShowAll = GameServer()->Config()->m_SvShowAllDefault;
+	m_ShowDistance = vec2(2000, 1500);
 	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 

@@ -525,6 +525,11 @@ Messages = [
 		NetIntAny("m_Test"),
 	]),
 
+	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+	]),
+
 	NetMessageEx("Cl_ExPlayerInfo", "explayerinfo@ddnet.tw", [
 		NetIntAny("m_Flags"),
 	]),

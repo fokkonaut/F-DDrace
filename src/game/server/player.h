@@ -223,6 +223,7 @@ public:
 	bool IsPlaying();
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 	int m_KillMe;

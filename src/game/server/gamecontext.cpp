@@ -1990,6 +1990,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
+		else if (MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
+		{
+			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
+			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 		{
 			CNetMsg_Cl_SetSpectatorMode Msg;
