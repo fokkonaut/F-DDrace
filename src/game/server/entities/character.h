@@ -81,8 +81,8 @@ public:
 	virtual void Snap(int SnappingClient);
 	virtual void PostSnap();
 
-	virtual int NetworkClipped(int SnappingClient);
-	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos);
+	virtual int NetworkClipped(int SnappingClient, bool CheckShowAll = true);
+	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll = true);
 
 	bool IsGrounded();
 

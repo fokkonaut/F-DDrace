@@ -1761,14 +1761,14 @@ void CCharacter::PostSnap()
 
 // DDRace
 
-int CCharacter::NetworkClipped(int SnappingClient)
+int CCharacter::NetworkClipped(int SnappingClient, bool CheckShowAll)
 {
-	return NetworkClipped(SnappingClient, m_Pos);
+	return NetworkClipped(SnappingClient, m_Pos, CheckShowAll);
 }
 
-int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos)
+int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll)
 {
-	if (SnappingClient == -1 || GameServer()->m_apPlayers[SnappingClient]->m_ShowAll)
+	if (SnappingClient == -1 || (CheckShowAll && GameServer()->m_apPlayers[SnappingClient]->m_ShowAll))
 		return 0;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
