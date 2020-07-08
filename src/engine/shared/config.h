@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_CONFIG_H
 
 #include <engine/config.h>
+#include <game/version.h>
 
 class CConfig
 {
