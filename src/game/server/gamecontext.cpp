@@ -1531,7 +1531,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				char aChatText[256];
 				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
 				SendChat(-1, CHAT_ALL, -1, aChatText);
-				pPlayer->SetName(pName);
+				pPlayer->SetName(Server()->ClientName(ClientID));
 
 				// reload scores
 				{
@@ -1547,7 +1547,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(str_comp(Server()->ClientClan(ClientID), pClan))
 			{
 				Server()->SetClientClan(ClientID, pClan);
-				pPlayer->SetClan(pClan);
+				pPlayer->SetClan(Server()->ClientClan(ClientID));
 				UpdateInfo = true;
 			}
 
