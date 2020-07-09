@@ -1446,9 +1446,80 @@ const char *CGameContext::GetWhisper(char* pStr, int* pTarget)
 	return pStr;
 }
 
+void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
+{
+	if (Server()->IsSevendown(ClientID))
+	{
+		CPlayer *pPlayer = m_apPlayers[ClientID];
+		static char s_aRawMsg[1024];
+		bool ProcessedMsg = true;
+
+		if (MsgID == NETMSGTYPE_CL_STARTINFO)
+		{
+			CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)s_aRawMsg;
+
+			for (int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				pMsg->m_apSkinPartNames[p] = "";
+				pMsg->m_aUseCustomColors[p] = 0;
+				pMsg->m_aSkinPartColors[p] = 0;
+			}
+			CPlayer::TeeInfos::Sevendown Sevendown = { "", 0, 0, 0};
+
+			pMsg->m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			pMsg->m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			pMsg->m_Country = pUnpacker->GetInt();
+
+			if (Server()->IsSevendown(ClientID))
+			{
+				str_copy(Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Sevendown.m_SkinName));
+				Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
+				Sevendown.m_ColorBody = pUnpacker->GetInt();
+				Sevendown.m_ColorFeet = pUnpacker->GetInt();
+			}
+			else
+			{
+				for(int p = 0; p < NUM_SKINPARTS; p++) pMsg->m_apSkinPartNames[p] = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+				for(int p = 0; p < NUM_SKINPARTS; p++) pMsg->m_aUseCustomColors[p] = pUnpacker->GetInt() ? 1 : 0;
+				for(int p = 0; p < NUM_SKINPARTS; p++) pMsg->m_aSkinPartColors[p] = pUnpacker->GetInt();
+			}
+
+			pPlayer->m_TeeInfos.m_Sevendown = Sevendown;
+		}
+		else if (MsgID == NETMSGTYPE_CL_SAY)
+		{
+			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)s_aRawMsg;
+
+			pMsg->m_Mode = pUnpacker->GetInt() ? CHAT_TEAM : CHAT_ALL;
+			pMsg->m_pMessage = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
+			pMsg->m_Target = -1;
+		}
+		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE)
+		{
+			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)s_aRawMsg;
+
+			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
+			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
+		}
+		else
+		{
+			ProcessedMsg = false;
+		}
+
+		if (ProcessedMsg)
+		{
+			if (pUnpacker->Error())
+				return 0;
+			return s_aRawMsg;
+		}
+	}
+
+	return m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
-	void *pRawMsg = 0;
+	void *pRawMsg = PreProcessMsg(MsgID, pUnpacker, ClientID);
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(m_TeeHistorianActive)
@@ -1459,44 +1530,22 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 	}
 
-	if (MsgID != NETMSGTYPE_CL_STARTINFO && MsgID != NETMSGTYPE_CL_SAY && MsgID != NETMSGTYPE_CL_SETSPECTATORMODE)
+	if (!pRawMsg)
 	{
-		pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
-		if (!pRawMsg)
+		if (Config()->m_Debug)
 		{
-			if (Config()->m_Debug)
-			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgID), MsgID, m_NetObjHandler.FailedMsgOn());
-				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
-			}
-			return;
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "dropped weird message '%s' (%d), failed on '%s'", m_NetObjHandler.GetMsgName(MsgID), MsgID, m_NetObjHandler.FailedMsgOn());
+			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
 		}
+		return;
 	}
 
 	if(Server()->ClientIngame(ClientID))
 	{
 		if(MsgID == NETMSGTYPE_CL_SAY)
 		{
-			CNetMsg_Cl_Say Msg;
-
-			if (Server()->IsSevendown(ClientID))
-			{
-				Msg.m_Mode = pUnpacker->GetInt() ? CHAT_TEAM : CHAT_ALL;
-				Msg.m_pMessage = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
-				Msg.m_Target = -1;
-			}
-			else
-			{
-				Msg.m_Mode = clamp(pUnpacker->GetInt(), 0, NUM_CHATS-2);
-				Msg.m_Target = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS-1);
-				Msg.m_pMessage = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
-			}
-
-			if (pUnpacker->Error())
-				return;
-
-			CNetMsg_Cl_Say *pMsg = &Msg;
+			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
 
 			// trim right and set maximum length to 128 utf8-characters
 			int Length = 0;
@@ -1997,26 +2046,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 		{
-			CNetMsg_Cl_SetSpectatorMode Msg;
+			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
 
 			if(Config()->m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode+Server()->TickSpeed()/4 > Server()->Tick())
 				return;
-
-			if (Server()->IsSevendown(ClientID))
-			{
-				Msg.m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS-1);
-				Msg.m_SpecMode = Msg.m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
-			}
-			else
-			{
-				Msg.m_SpecMode = clamp(pUnpacker->GetInt(), 0, NUM_SPECMODES-1);
-				Msg.m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS-1);
-			}
-
-			if (pUnpacker->Error())
-				return;
-
-			CNetMsg_Cl_SetSpectatorMode* pMsg = &Msg;
 
 			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID >= 0)
 				if (!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))
@@ -2220,38 +2253,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pPlayer->m_IsReadyToEnter)
 				return;
 
-			CNetMsg_Cl_StartInfo Msg;
-
-			for (int p = 0; p < NUM_SKINPARTS; p++)
-			{
-				Msg.m_apSkinPartNames[p] = "";
-				Msg.m_aUseCustomColors[p] = 0;
-				Msg.m_aSkinPartColors[p] = 0;
-			}
-			CPlayer::TeeInfos::Sevendown Sevendown = { "", 0, 0, 0};
-
-			Msg.m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-			Msg.m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-			Msg.m_Country = pUnpacker->GetInt();
-
-			if (Server()->IsSevendown(ClientID))
-			{
-				str_copy(Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Sevendown.m_SkinName));
-				Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
-				Sevendown.m_ColorBody = pUnpacker->GetInt();
-				Sevendown.m_ColorFeet = pUnpacker->GetInt();
-			}
-			else
-			{
-				for(int p = 0; p < NUM_SKINPARTS; p++) Msg.m_apSkinPartNames[p] = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
-				for(int p = 0; p < NUM_SKINPARTS; p++) Msg.m_aUseCustomColors[p] = pUnpacker->GetInt() ? 1 : 0;
-				for(int p = 0; p < NUM_SKINPARTS; p++) Msg.m_aSkinPartColors[p] = pUnpacker->GetInt();
-			}
-
-			if (pUnpacker->Error())
-				return;
-
-			CNetMsg_Cl_StartInfo *pMsg = &Msg;
+			CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
 			// set start infos
@@ -2265,7 +2267,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
-			pPlayer->m_TeeInfos.m_Sevendown = Sevendown;
 
 			m_Skins.TranslateSkin(&pPlayer->m_TeeInfos, Server()->IsSevendown(ClientID));
 
