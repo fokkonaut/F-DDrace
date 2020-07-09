@@ -1024,6 +1024,8 @@ static inline int MsgFromSevendown(int Msg, bool System)
 	{
 		if(Msg >= 17 && Msg <= 20)
 			Msg = NETMSGTYPE_CL_SAY + Msg - 17;
+		else if (Msg == 21)
+			Msg = NETMSGTYPE_CL_SKINCHANGE;
 		else if(Msg == 22)
 			Msg = NETMSGTYPE_CL_KILL;
 		else if(Msg >= 23 && Msg <= 25)

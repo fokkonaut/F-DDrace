@@ -1456,6 +1456,9 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		if (MsgID == NETMSGTYPE_CL_STARTINFO)
 		{
+			if(pPlayer->m_IsReadyToEnter)
+				return 0;
+
 			CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)s_aRawMsg;
 
 			for (int p = 0; p < NUM_SKINPARTS; p++)
@@ -1491,6 +1494,78 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
 			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
+		}
+		else if (MsgID == NETMSGTYPE_CL_SKINCHANGE)
+		{
+			if(pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*Config()->m_SvInfoChangeDelay > Server()->Tick())
+				return 0;
+
+			CNetMsg_Cl_SkinChange *pMsg = (CNetMsg_Cl_SkinChange *)s_aRawMsg;
+
+			const char *pName = "";
+			const char *pClan = "";
+			int Country = -1;
+
+			pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
+			Country = pUnpacker->GetInt();
+
+			CPlayer::TeeInfos::Sevendown Sevendown = { "", 0, 0, 0 };
+
+			str_copy(Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Sevendown.m_SkinName));
+			Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
+			Sevendown.m_ColorBody = pUnpacker->GetInt();
+			Sevendown.m_ColorFeet = pUnpacker->GetInt();
+
+			pPlayer->m_TeeInfos.m_Sevendown = Sevendown;
+			m_Skins.SkinFromSevendown(&pPlayer->m_TeeInfos);
+
+			for (int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				pMsg->m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
+				pMsg->m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+				pMsg->m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+			}
+
+			bool UpdateInfo = false;
+
+			// set infos
+			char aOldName[MAX_NAME_LENGTH];
+			str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
+			Server()->SetClientName(ClientID, pName);
+			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
+			{
+				char aChatText[256];
+				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
+				SendChat(-1, CHAT_ALL, -1, aChatText);
+				pPlayer->SetName(pName);
+
+				// reload scores
+				{
+					Score()->PlayerData(ClientID)->Reset();
+					Score()->LoadScore(ClientID);
+					Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
+					m_apPlayers[ClientID]->m_Score = !Score()->PlayerData(ClientID)->m_BestTime ? -1 : Score()->PlayerData(ClientID)->m_BestTime;
+				}
+
+				UpdateInfo = true;
+			}
+
+			if(str_comp(Server()->ClientClan(ClientID), pClan))
+			{
+				Server()->SetClientClan(ClientID, pClan);
+				pPlayer->SetClan(pClan);
+				UpdateInfo = true;
+			}
+
+			if(Server()->ClientCountry(ClientID) != Country)
+			{
+				Server()->SetClientCountry(ClientID, Country);
+				UpdateInfo = true;
+			}
+
+			if (UpdateInfo)
+				pPlayer->UpdateInformation();
 		}
 		else
 		{
@@ -2181,7 +2256,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_SKINCHANGE)
 		{
-			if(pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*5 > Server()->Tick())
+			if(pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*Config()->m_SvInfoChangeDelay > Server()->Tick())
 				return;
 
 			pPlayer->m_LastChangeInfo = Server()->Tick();
