@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+/*#include <gtest/gtest.h>
 
 #include <engine/message.h>
 #include <engine/shared/protocol_ex.h>
@@ -112,4 +112,4 @@ TEST(Ex, WhatIsKnown)
 	EXPECT_EQ(g_UuidManager.UnpackUuid(&Unpacker, &Uuid), (int)NETMSG_MYOWNMESSAGE);
 	EXPECT_STREQ(Unpacker.GetString(CUnpacker::SANITIZE_CC), "system-message-my-own-message@heinrich5991.de");
 	EXPECT_FALSE(Unpacker.Error());
-}
+}*/
