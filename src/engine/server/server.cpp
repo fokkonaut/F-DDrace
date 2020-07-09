@@ -568,8 +568,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven
 				MsgId -= 4;
 			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 				MsgId -= 4;
-			else if(MsgId > 24)
-				MsgId -= 24;
+			else if(MsgId > NUM_NETMSGTYPES)
+				MsgId -= NUM_NETMSGTYPES;
 			else
 				return true;
 		}
@@ -583,8 +583,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven
 				;
 			else if (MsgId == NETMSGTYPE_SV_TEAMSSTATE)
 				MsgId = 30;
-			else if(MsgId > 24)
-				MsgId -= 24;
+			else if(MsgId > NUM_NETMSGTYPES)
+				MsgId -= NUM_NETMSGTYPES;
 			else
 				return true;
 		}
@@ -659,7 +659,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 
 		// write message to demo recorder
 		if(!(Flags&MSGFLAG_NORECORD))
-			m_DemoRecorder.RecordMessage(Pack.Data(), Pack.Size());
+			m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
 
 		if(!(Flags&MSGFLAG_NOSEND))
 			m_NetServer.Send(&Packet);

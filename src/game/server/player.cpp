@@ -592,7 +592,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(Server()->IsSevendown(SnappingClient))
 	{
-		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, id, 17*4); // NETOBJTYPE_CLIENTINFO
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETMSGTYPES, id, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
 
@@ -650,7 +650,7 @@ void CPlayer::FakeSnap()
 	{
 		int FakeID = VANILLA_MAX_CLIENTS - 1;
 
-		int *pClientInfo = (int*)Server()->SnapNewItem(11 + 24, FakeID, 17*4); // NETOBJTYPE_CLIENTINFO
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETMSGTYPES, FakeID, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
 

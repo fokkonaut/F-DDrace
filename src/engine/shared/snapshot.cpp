@@ -25,8 +25,8 @@ static int ObjTypeToSevendown(int Seven)
 		Type = Seven - 3;
 	else if(Seven == NETEVENTTYPE_SOUNDWORLD)
 		Type = Seven - 2;
-	else if(Seven > 24)
-		Type = Seven - 24;
+	else if(Seven >= NUM_NETMSGTYPES)
+		Type = Seven - NUM_NETMSGTYPES;
 	else
 		return -1;
 	return Type;
