@@ -132,16 +132,7 @@ void CDragger::Drag()
 				Target->Core()->m_Vel = ClampVel(Target->m_MoveRestrictions, Temp);
 
 				// F-DDrace
-				if (m_Layer == LAYER_SWITCH && m_Number)
-				{
-					int SwitchID = GameServer()->Collision()->m_pSwitchers[m_Number].m_ClientID[Target->Team()];
-					if (SwitchID >= 0 && GameServer()->m_apPlayers[SwitchID])
-					{
-						Target->Core()->m_Killer.m_ClientID = SwitchID;
-						Target->Core()->m_Killer.m_Weapon = -1;
-						Target->m_LastTouchedSwitcher = m_Number;
-					}
-				}
+				Target->SetLastTouchedSwitcher(m_Number);
 			}
 		}
 	}

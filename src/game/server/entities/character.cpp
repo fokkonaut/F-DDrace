@@ -3246,6 +3246,20 @@ void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 	UpdateWeaponIndicator();
 }
 
+void CCharacter::SetLastTouchedSwitcher(int Number)
+{
+	if (Number <= 0)
+		return;
+
+	int SwitchID = GameServer()->Collision()->m_pSwitchers[Number].m_ClientID[Team()];
+	if (SwitchID >= 0 && GameServer()->m_apPlayers[SwitchID])
+	{
+		Core()->m_Killer.m_ClientID = SwitchID;
+		Core()->m_Killer.m_Weapon = -1;
+		m_LastTouchedSwitcher = Number;
+	}
+}
+
 void CCharacter::DropFlag()
 {
 	for (int i = 0; i < 2; i++)

@@ -39,16 +39,7 @@ bool CLight::HitCharacter()
 		Char->Freeze();
 
 		// F-DDrace
-		if (m_Layer == LAYER_SWITCH && m_Number)
-		{
-			int SwitchID = GameServer()->Collision()->m_pSwitchers[m_Number].m_ClientID[Char->Team()];
-			if (SwitchID >= 0 && GameServer()->m_apPlayers[SwitchID])
-			{
-				Char->Core()->m_Killer.m_ClientID = SwitchID;
-				Char->Core()->m_Killer.m_Weapon = -1;
-				Char->m_LastTouchedSwitcher = m_Number;
-			}
-		}
+		Char->SetLastTouchedSwitcher(m_Number);
 	}
 	return true;
 }

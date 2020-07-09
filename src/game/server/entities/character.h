@@ -442,6 +442,7 @@ public:
 	void OnPlayerHook();
 	void ReleaseHook(bool Other = true);
 
+	void SetLastTouchedSwitcher(int Number);
 	int m_LastTouchedSwitcher;
 	int m_LastTouchedPortalBy;
 
