@@ -546,6 +546,64 @@ bool CServer::ClientIngame(int ClientID) const
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && (m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_DUMMY);
 }
 
+static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sevendown)
+{
+	int MsgId = pMsg->m_MsgID;
+	Packer.Reset();
+	if(Sevendown)
+	{
+		if(pMsg->m_System)
+		{
+			if(MsgId >= NETMSG_MAP_CHANGE && MsgId <= NETMSG_MAP_DATA)
+				;
+			else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
+				MsgId -= 1;
+			else if(MsgId == NETMSG_RCON_AUTH_ON || MsgId == NETMSG_RCON_AUTH_OFF)
+				MsgId = 10;
+			else if (MsgId == NETMSG_RCON_LINE)
+				MsgId = 11;
+			else if (MsgId == NETMSG_RCON_CMD_ADD || MsgId == NETMSG_RCON_CMD_REM)
+				MsgId += 11;
+			else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
+				MsgId -= 4;
+			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
+				MsgId -= 4;
+			else if(MsgId > 24)
+				MsgId -= 24;
+			else
+				return true;
+		}
+		else
+		{
+			if(MsgId >= NETMSGTYPE_SV_MOTD && MsgId <= NETMSGTYPE_SV_CHAT)
+				;
+			else if(MsgId == NETMSGTYPE_SV_KILLMSG)
+				MsgId -= 1;
+			else if(MsgId >= NETMSGTYPE_SV_TUNEPARAMS && MsgId <= NETMSGTYPE_SV_VOTESTATUS)
+				;
+			else if (MsgId == NETMSGTYPE_SV_TEAMSSTATE)
+				MsgId = 30;
+			else if(MsgId > 24)
+				MsgId -= 24;
+			else
+				return true;
+		}
+	}
+
+	if(MsgId < OFFSET_UUID)
+	{
+		Packer.AddInt((MsgId<<1)|(pMsg->m_System?1:0));
+	}
+	else
+	{
+		Packer.AddInt((0<<1)|(pMsg->m_System?1:0)); // NETMSG_EX, NETMSGTYPE_EX
+		g_UuidManager.PackUuid(MsgId, &Packer);
+	}
+	Packer.AddRaw(pMsg->Data(), pMsg->Size());
+
+	return false;
+}
+
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
 	CNetChunk Packet;
@@ -557,37 +615,56 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
-	Packet.m_ClientID = ClientID;
-	Packet.m_pData = pMsg->Data();
-	Packet.m_DataSize = pMsg->Size();
-
 	if(Flags&MSGFLAG_VITAL)
 		Packet.m_Flags |= NETSENDFLAG_VITAL;
 	if(Flags&MSGFLAG_FLUSH)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
-	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
-		m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
-
-	if(!(Flags&MSGFLAG_NOSEND))
+	if(ClientID < 0)
 	{
-		if(ClientID == -1)
+		CPacker Pack6, Pack7;
+		if(RepackMsg(pMsg, Pack6, true))
+			return -1;
+		if(RepackMsg(pMsg, Pack7, false))
+			return -1;
+
+		// write message to demo recorder
+		if(!(Flags&MSGFLAG_NORECORD))
+			m_DemoRecorder.RecordMessage(Pack7.Data(), Pack7.Size());
+
+		if(!(Flags&MSGFLAG_NOSEND))
 		{
-			// broadcast
-			unsigned char MsgType = *(unsigned char*)Packet.m_pData;
-			int i;
-			for(i = 0; i < MAX_CLIENTS; i++)
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
 				if(m_aClients[i].m_State == CClient::STATE_INGAME && !m_aClients[i].m_Quitting)
 				{
+					CPacker *Pack = m_aClients[i].m_Sevendown ? &Pack6 : &Pack7;
+					Packet.m_pData = Pack->Data();
+					Packet.m_DataSize = Pack->Size();
 					Packet.m_ClientID = i;
 					m_NetServer.Send(&Packet);
-					*(unsigned char*)Packet.m_pData = MsgType;
 				}
+			}
 		}
-		else
+	}
+	else
+	{
+		CPacker Pack;
+		if(RepackMsg(pMsg, Pack, m_aClients[ClientID].m_Sevendown))
+			return -1;
+
+		Packet.m_ClientID = ClientID;
+		Packet.m_pData = Pack.Data();
+		Packet.m_DataSize = Pack.Size();
+
+		// write message to demo recorder
+		if(!(Flags&MSGFLAG_NORECORD))
+			m_DemoRecorder.RecordMessage(Pack.Data(), Pack.Size());
+
+		if(!(Flags&MSGFLAG_NOSEND))
 			m_NetServer.Send(&Packet);
 	}
+
 	return 0;
 }
 
@@ -932,6 +1009,32 @@ void CServer::UpdateClientMapListEntries()
 	}
 }
 
+static inline int MsgFromSevendown(int Msg, bool System)
+{
+	if(System)
+	{
+		if(Msg == NETMSG_INFO)
+			;
+		else if(Msg >= 14 && Msg <= 24)
+			Msg = NETMSG_READY + Msg - 14;
+		else
+			return -1;
+	}
+	else
+	{
+		if(Msg >= 17 && Msg <= 20)
+			Msg = NETMSGTYPE_CL_SAY + Msg - 17;
+		else if(Msg == 22)
+			Msg = NETMSGTYPE_CL_KILL;
+		else if(Msg >= 23 && Msg <= 25)
+			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 23;
+		else
+			return -1;
+	}
+
+	return Msg;
+}
+
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientID = pPacket->m_ClientID;
@@ -946,6 +1049,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer, m_pConfig->m_Debug);
 	if(Result == UNPACKMESSAGE_ERROR)
+	{
+		return;
+	}
+
+	if(m_aClients[ClientID].m_Sevendown && (Msg = MsgFromSevendown(Msg, Sys)) < 0)
 	{
 		return;
 	}

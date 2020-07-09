@@ -12,76 +12,6 @@
 #include <engine/shared/protocol.h>
 #include <mastersrv/mastersrv.h>
 
-static unsigned char MsgTypeFromSevendown(unsigned char Byte)
-{
-	unsigned char Sevendown = Byte>>1;
-	unsigned char Msg;
-	if (Byte&1)
-	{
-		if(Sevendown == 1)
-			Msg = NETMSG_INFO;
-		else if(Sevendown >= 14 && Sevendown <= 24)
-			Msg = NETMSG_READY + Sevendown - 14;
-		else
-			return 0;
-	}
-	else
-	{
-		if(Sevendown >= 17 && Sevendown <= 20)
-			Msg = NETMSGTYPE_CL_SAY + Sevendown - 17;
-		else if(Sevendown == 22)
-			Msg = NETMSGTYPE_CL_KILL;
-		else if(Sevendown >= 23 && Sevendown <= 25)
-			Msg = NETMSGTYPE_CL_EMOTICON + Sevendown - 23;
-		else
-			return 0;
-	}
-	return (Msg<<1) | (Byte&1);
-}
-
-static unsigned char MsgTypeToSevendown(unsigned char Byte)
-{
-	unsigned char Seven = Byte>>1;
-	unsigned char Msg;
-	if (Byte&1)
-	{
-		if(Seven >= NETMSG_MAP_CHANGE && Seven <= NETMSG_MAP_DATA)
-			Msg = Seven;
-		else if(Seven >= NETMSG_CON_READY && Seven <= NETMSG_INPUTTIMING)
-			Msg = Seven - 1;
-		else if(Seven == NETMSG_RCON_AUTH_ON || Seven == NETMSG_RCON_AUTH_OFF)
-			Msg = 10;
-		else if (Seven == NETMSG_RCON_LINE)
-			Msg = 11;
-		else if (Seven == NETMSG_RCON_CMD_ADD || Seven == NETMSG_RCON_CMD_REM)
-			Msg = Seven + 11;
-		else if(Seven >= NETMSG_AUTH_CHALLANGE && Seven <= NETMSG_AUTH_RESULT)
-			Msg = Seven - 4;
-		else if(Seven >= NETMSG_PING && Seven <= NETMSG_ERROR)
-			Msg = Seven - 4;
-		else if(Seven > 24)
-			Msg = Seven - 24;
-		else
-			return 0;
-	}
-	else
-	{
-		if(Seven >= NETMSGTYPE_SV_MOTD && Seven <= NETMSGTYPE_SV_CHAT)
-			Msg = Seven;
-		else if(Seven == NETMSGTYPE_SV_KILLMSG)
-			Msg = Seven - 1;
-		else if(Seven >= NETMSGTYPE_SV_TUNEPARAMS && Seven <= NETMSGTYPE_SV_VOTESTATUS)
-			Msg = Seven;
-		else if (Seven == 30)
-			Msg = 30;
-		else if(Seven > 24)
-			Msg = Seven - 24;
-		else
-			return 0;
-	}
-	return (Msg<<1) | (Byte&1);
-}
-
 bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CNetBan *pNetBan,
 	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
 {
@@ -191,11 +121,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 	{
 		// check for a chunk
 		if(m_RecvUnpacker.IsActive() && m_RecvUnpacker.FetchChunk(pChunk))
-		{
-			if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sevendown)
-				*(unsigned char*)pChunk->m_pData = MsgTypeFromSevendown(*(unsigned char*)pChunk->m_pData);
 			return 1;
-		}
 
 		// TODO: empty the recvinfo
 		NETADDR Addr;
@@ -422,13 +348,6 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token, bool Sevendown)
 		dbg_assert(pChunk->m_ClientID >= 0, "errornous client id");
 		dbg_assert(pChunk->m_ClientID < NET_MAX_CLIENTS, "errornous client id");
 		dbg_assert(m_aSlots[pChunk->m_ClientID].m_Connection.State() != NET_CONNSTATE_OFFLINE, "errornous client id");
-
-		if(m_aSlots[pChunk->m_ClientID].m_Connection.m_Sevendown)
-		{
-			unsigned int MsgType = MsgTypeToSevendown(*(unsigned char*)pChunk->m_pData);
-			if (MsgType == 0) return 0;
-			*(unsigned char*)pChunk->m_pData = MsgType;
-		}
 
 		if(pChunk->m_Flags&NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
