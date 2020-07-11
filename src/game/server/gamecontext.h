@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
-#include "skins.h"
 #include "shop.h"
 
 #include "eventhandler.h"
@@ -263,7 +262,7 @@ public:
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendSettings(int ClientID);
-	void SendSkinChange(CPlayer::TeeInfos TeeInfos, int ClientID, int TargetID);
+	void SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID);
 
 	// DDRace
 	void SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID);
@@ -491,9 +490,7 @@ public:
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
 
-	CSkins m_Skins;
 	class CShop *m_pShop;
-
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);

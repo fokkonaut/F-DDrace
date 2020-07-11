@@ -1675,12 +1675,12 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   score/sql_score.h
   shop.cpp
   shop.h
-  skins.cpp
-  skins.h
   teams.cpp
   teams.h
   teehistorian.cpp
   teehistorian.h
+  teeinfo.cpp
+  teeinfo.h
 )
 set(GAME_GENERATED_SERVER
   src/generated/server_data.cpp

@@ -16,6 +16,7 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "teeinfo.h"
 #include "gamecontext.h"
 #include "player.h"
 
@@ -508,7 +509,7 @@ void CGameContext::SendSettings(int ClientID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::SendSkinChange(CPlayer::TeeInfos TeeInfos, int ClientID, int TargetID)
+void CGameContext::SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID)
 {
 	CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientID = ClientID;
@@ -522,15 +523,7 @@ void CGameContext::SendSkinChange(CPlayer::TeeInfos TeeInfos, int ClientID, int 
 
 	// F-DDrace
 	if (m_apPlayers[ClientID])
-	{
-		// forced skins always need to get translated from 0.7 to 0.6
-		if (m_Skins.GetSkinID(TeeInfos.m_aSkinName) != SKIN_NONE)
-			m_Skins.SkinToSevendown(&TeeInfos);
-		else
-			m_Skins.TranslateSkin(&TeeInfos, Server()->IsSevendown(ClientID));
-
 		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
-	}
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
@@ -1472,10 +1465,14 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			pMsg->m_Country = pUnpacker->GetInt();
 
-			str_copy(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName));
-			pPlayer->m_TeeInfos.m_Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
-			pPlayer->m_TeeInfos.m_Sevendown.m_ColorBody = pUnpacker->GetInt();
-			pPlayer->m_TeeInfos.m_Sevendown.m_ColorFeet = pUnpacker->GetInt();
+			char aSkinName[24];
+			str_copy(aSkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aSkinName));
+			int UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
+			int ColorBody = pUnpacker->GetInt();
+			int ColorFeet = pUnpacker->GetInt();
+
+			CTeeInfo Info(aSkinName, UseCustomColor, ColorBody, ColorFeet);
+			pPlayer->m_TeeInfos = Info;
 		}
 		else if (MsgID == NETMSGTYPE_CL_SAY)
 		{
@@ -1499,23 +1496,25 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			CNetMsg_Cl_SkinChange *pMsg = (CNetMsg_Cl_SkinChange *)s_aRawMsg;
 
+			for (int p = 0; p < NUM_SKINPARTS; p++)
+			{
+				pMsg->m_apSkinPartNames[p] = "";
+				pMsg->m_aUseCustomColors[p] = 0;
+				pMsg->m_aSkinPartColors[p] = 0;
+			}
+
 			const char *pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			const char *pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			int Country = pUnpacker->GetInt();
 
-			str_copy(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName));
-			pPlayer->m_TeeInfos.m_Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
-			pPlayer->m_TeeInfos.m_Sevendown.m_ColorBody = pUnpacker->GetInt();
-			pPlayer->m_TeeInfos.m_Sevendown.m_ColorFeet = pUnpacker->GetInt();
+			char aSkinName[24];
+			str_copy(aSkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(aSkinName));
+			int UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
+			int ColorBody = pUnpacker->GetInt();
+			int ColorFeet = pUnpacker->GetInt();
 
-			m_Skins.SkinFromSevendown(&pPlayer->m_TeeInfos);
-
-			for (int p = 0; p < NUM_SKINPARTS; p++)
-			{
-				pMsg->m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_aaSkinPartNames[p];
-				pMsg->m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
-				pMsg->m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
-			}
+			CTeeInfo Info(aSkinName, UseCustomColor, ColorBody, ColorFeet);
+			pPlayer->m_TeeInfos = Info;
 
 			bool UpdateInfo = false;
 
@@ -2251,6 +2250,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
 
+			pPlayer->m_TeeInfos.Translate(Server()->IsSevendown(ClientID));
+
 			// F-DDrace
 			pPlayer->CheckClanProtection();
 
@@ -2316,7 +2317,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pPlayer->m_TeeInfos.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
 			}
 
-			m_Skins.TranslateSkin(&pPlayer->m_TeeInfos, Server()->IsSevendown(ClientID));
+			pPlayer->m_TeeInfos.Translate(Server()->IsSevendown(ClientID));
 
 			// send clear vote options
 			CNetMsg_Sv_VoteClearOptions ClearMsg;
@@ -2936,6 +2937,8 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
+
+	Config()->m_SvAllowSevendown = 1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
@@ -4196,9 +4199,7 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
 		pDummy->m_Minigame = -1;
 
-	pDummy->m_TeeInfos = m_Skins.GetSkin(SKIN_DUMMY);
-	m_Skins.SkinToSevendown(&pDummy->m_TeeInfos);
-
+	pDummy->m_TeeInfos = CTeeInfo(SKIN_DUMMY);
 	OnClientEnter(DummyID);
 
 	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);

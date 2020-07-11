@@ -178,7 +178,6 @@ void CPlayer::Reset()
 	m_HasRoomKey = false;
 
 	m_TeeInfos.m_ForcedSkin = SKIN_NONE;
-	m_TeeInfos.m_aSkinName[0] = '\0';
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -347,22 +346,22 @@ void CPlayer::Tick()
 	{
 		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
 
-		TeeInfos pTeeInfos;
+		CTeeInfo Info;
 		for (int p = 0; p < NUM_SKINPARTS; p++)
 		{
 			int BaseColor = m_RainbowColor * 0x010000;
 			int Color = 0xff32;
 			if (p == SKINPART_MARKING)
 				Color *= -256;
-			str_copy(pTeeInfos.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
-			pTeeInfos.m_aUseCustomColors[p] = 1;
-			pTeeInfos.m_aSkinPartColors[p] = BaseColor + Color;
+			str_copy(Info.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
+			Info.m_aUseCustomColors[p] = 1;
+			Info.m_aSkinPartColors[p] = BaseColor + Color;
 		}
 
-		pTeeInfos.m_Sevendown.m_UseCustomColor = 1;
-		pTeeInfos.m_Sevendown.m_ColorBody = pTeeInfos.m_Sevendown.m_ColorFeet = pTeeInfos.m_aSkinPartColors[SKINPART_BODY];
+		Info.m_Sevendown.m_UseCustomColor = 1;
+		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = Info.m_aSkinPartColors[SKINPART_BODY];
 
-		GameServer()->SendSkinChange(pTeeInfos, m_ClientID, -1);
+		GameServer()->SendSkinChange(Info, m_ClientID, -1);
 	}
 }
 
@@ -1610,7 +1609,7 @@ void CPlayer::UpdateInformation(int ClientID)
 
 void CPlayer::SetSkin(int Skin, bool Force)
 {
-	if (Skin < 0 || Skin >= NUM_SKINS)
+	if (Skin <= SKIN_NONE || Skin >= NUM_SKINS)
 		return;
 
 	if (Force)
@@ -1619,7 +1618,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 	if (m_SpookyGhost)
 		return;
 
-	GameServer()->SendSkinChange(GameServer()->m_Skins.GetSkin(Skin), m_ClientID, -1);
+	GameServer()->SendSkinChange(CTeeInfo(Skin), m_ClientID, -1);
 }
 
 void CPlayer::ResetSkin(bool Unforce)

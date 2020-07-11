@@ -9,6 +9,8 @@
 #include "entities/portal.h"
 #include <vector>
 
+#include "teeinfo.h"
+
 enum NoNameFix
 {
 	FIX_SET_NAME_ONLY = 0,
@@ -131,30 +133,7 @@ public:
 
 	int m_SendVoteIndex;
 
-	// TODO: clean this up
-	struct TeeInfos
-	{
-		// F-DDrace // for CSkins
-		// this variable is used an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinid
-		int m_ForcedSkin;
-
-		// this is to get the skin id from a string containing the name, for example while setting a skin from rcon
-		char m_aSkinName[24];
-
-		char m_aaSkinPartNames[NUM_SKINPARTS][24];
-		int m_aUseCustomColors[NUM_SKINPARTS];
-		int m_aSkinPartColors[NUM_SKINPARTS];
-
-		// 0.6 info
-		struct Sevendown
-		{
-			char m_SkinName[24];
-			int m_UseCustomColor;
-			int m_ColorBody;
-			int m_ColorFeet;
-
-		} m_Sevendown;
-	} m_TeeInfos;
+	CTeeInfo m_TeeInfos;
 
 	int m_PreviousDieTick;
 	int m_DieTick;
@@ -363,7 +342,7 @@ public:
 	{
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
-		TeeInfos m_TeeInfos;
+		CTeeInfo m_TeeInfos;
 	} m_CurrentInfo;
 
 	//minigames
