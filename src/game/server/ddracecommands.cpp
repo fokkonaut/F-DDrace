@@ -1462,6 +1462,8 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Expire Date Portal Rifle: %d", (int)(*Account).m_ExpireDatePortalRifle);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Version: %d", (*Account).m_Version);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->FreeAccount(ID);
