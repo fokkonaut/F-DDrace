@@ -1467,18 +1467,15 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				pMsg->m_aUseCustomColors[p] = 0;
 				pMsg->m_aSkinPartColors[p] = 0;
 			}
-			CPlayer::TeeInfos::Sevendown Sevendown = { "", 0, 0, 0};
 
 			pMsg->m_pName = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			pMsg->m_pClan = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			pMsg->m_Country = pUnpacker->GetInt();
 
-			str_copy(Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(Sevendown.m_SkinName));
-			Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
-			Sevendown.m_ColorBody = pUnpacker->GetInt();
-			Sevendown.m_ColorFeet = pUnpacker->GetInt();
-
-			pPlayer->m_TeeInfos.m_Sevendown = Sevendown;
+			str_copy(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName, pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES), sizeof(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName));
+			pPlayer->m_TeeInfos.m_Sevendown.m_UseCustomColor = pUnpacker->GetInt() ? 1 : 0;
+			pPlayer->m_TeeInfos.m_Sevendown.m_ColorBody = pUnpacker->GetInt();
+			pPlayer->m_TeeInfos.m_Sevendown.m_ColorFeet = pUnpacker->GetInt();
 		}
 		else if (MsgID == NETMSGTYPE_CL_SAY)
 		{
