@@ -120,7 +120,6 @@ CTeeInfo::CTeeInfo(const char *pSkin)
 			return;
 		}
 	}
-	*this = CTeeInfo(SKIN_DEFAULT);
 }
 
 void CTeeInfo::Translate(bool Sevendown)

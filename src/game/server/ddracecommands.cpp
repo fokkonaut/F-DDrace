@@ -1280,7 +1280,7 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 		char aInteger[4];
 		str_format(aInteger, sizeof(aInteger), "%d", pResult->GetInteger(1));
 
-		if (pFrom && Info.m_SkinID == -1 && !str_comp_nocase(aInteger, pResult->GetString(1)))
+		if (pFrom && !str_comp_nocase(aInteger, pResult->GetString(1)))
 			pSelf->SendSkinChange(pFrom->m_TeeInfos, Victim, -1);
 		else
 			pPlayer->SetSkin(Info.m_SkinID, true);

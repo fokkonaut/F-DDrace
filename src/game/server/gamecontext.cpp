@@ -2938,8 +2938,6 @@ void CGameContext::OnInit()
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
 
-	Config()->m_SvAllowSevendown = 1;
-
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
