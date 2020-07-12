@@ -83,16 +83,16 @@ public:
 	// skin id for when skin got set by rcon
 	int m_SkinID = SKIN_NONE;
 
-    CTeeInfo() = default;
+	CTeeInfo() = default;
 
 	// This constructor will assume all arrays are of length 6
-    CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors);
-    CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
+	CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors);
+	CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	CTeeInfo(int SkinID);
 	CTeeInfo(const char *pSkin);
 
 	void Translate(bool Sevendown);
-    void FromSevendown();
-    void ToSevendown();
+	void FromSevendown();
+	void ToSevendown();
 };
 #endif //GAME_SERVER_TEEINFO_H
