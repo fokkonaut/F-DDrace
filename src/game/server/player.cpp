@@ -177,7 +177,7 @@ void CPlayer::Reset()
 	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 
-	m_TeeInfos.m_ForcedSkin = SKIN_NONE;
+	m_ForcedSkin = SKIN_NONE;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -358,9 +358,7 @@ void CPlayer::Tick()
 			Info.m_aSkinPartColors[p] = BaseColor + Color;
 		}
 
-		Info.m_Sevendown.m_UseCustomColor = 1;
-		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = Info.m_aSkinPartColors[SKINPART_BODY];
-
+		Info.ToSevendown();
 		GameServer()->SendSkinChange(Info, m_ClientID, -1);
 	}
 }
@@ -1613,7 +1611,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 		return;
 
 	if (Force)
-		m_TeeInfos.m_ForcedSkin = Skin;
+		m_ForcedSkin = Skin;
 
 	if (m_SpookyGhost)
 		return;
@@ -1624,12 +1622,12 @@ void CPlayer::SetSkin(int Skin, bool Force)
 void CPlayer::ResetSkin(bool Unforce)
 {
 	if (Unforce)
-		m_TeeInfos.m_ForcedSkin = SKIN_NONE;
+		m_ForcedSkin = SKIN_NONE;
 
 	if (m_SpookyGhost)
 		SetSkin(SKIN_SPOOKY_GHOST);
-	else if (m_TeeInfos.m_ForcedSkin != SKIN_NONE)
-		SetSkin(m_TeeInfos.m_ForcedSkin, true);
+	else if (m_ForcedSkin != SKIN_NONE)
+		SetSkin(m_ForcedSkin, true);
 	else
 		GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
 }

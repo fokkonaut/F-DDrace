@@ -106,7 +106,7 @@ CTeeInfo::CTeeInfo(int SkinID)
 		m_aSkinPartColors[i] = s_Skins[SkinID].m_aSkinPartColors[i];
 	}
 
-	m_ForcedSkin = SkinID;
+	m_SkinID = SkinID;
 	ToSevendown();
 }
 
@@ -193,7 +193,7 @@ void CTeeInfo::ToSevendown()
 	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
 	{
 		// skip spooky ghost skin for comparison if its manually set by player and not forced
-		if (s == SKIN_SPOOKY_GHOST && m_ForcedSkin != SKIN_SPOOKY_GHOST)
+		if (s == SKIN_SPOOKY_GHOST && m_SkinID != SKIN_SPOOKY_GHOST)
 			continue;
 
 		bool match = true;
@@ -220,7 +220,7 @@ void CTeeInfo::ToSevendown()
 	for(int s = 0; s < NUM_SEVENDOWN_SKINS; s++)
 	{
 		// skip spooky ghost skin for comparison if its manually set by player and not forced
-		if (s == SKIN_SPOOKY_GHOST && m_ForcedSkin != SKIN_SPOOKY_GHOST)
+		if (s == SKIN_SPOOKY_GHOST && m_SkinID != SKIN_SPOOKY_GHOST)
 			continue;
 
 		int matches = 0;

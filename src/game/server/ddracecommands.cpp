@@ -1273,17 +1273,17 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 
 	if (pResult->NumArguments() > 1)
 	{
-		CTeeInfo Info = CTeeInfo(pResult->GetString(1));
+		CTeeInfo Info(pResult->GetString(1));
 		Info.ToSevendown();
 
 		CPlayer* pFrom = pSelf->m_apPlayers[pResult->GetInteger(1)];
 		char aInteger[4];
 		str_format(aInteger, sizeof(aInteger), "%d", pResult->GetInteger(1));
 
-		if (pFrom && Info.m_ForcedSkin == -1 && !str_comp_nocase(aInteger, pResult->GetString(1)))
+		if (pFrom && Info.m_SkinID == -1 && !str_comp_nocase(aInteger, pResult->GetString(1)))
 			pSelf->SendSkinChange(pFrom->m_TeeInfos, Victim, -1);
 		else
-			pPlayer->SetSkin(Info.m_ForcedSkin, true);
+			pPlayer->SetSkin(Info.m_SkinID, true);
 	}
 	else
 		pPlayer->ResetSkin(true);

@@ -80,8 +80,8 @@ public:
 
 	} m_Sevendown;
 
-	// this variable is used an indicator for whether our skin is forced by an admin using rcon. if yes, the variable contains the forced skinid
-	int m_ForcedSkin = SKIN_NONE;
+	// skin id for when skin got set by rcon
+	int m_SkinID = SKIN_NONE;
 
     CTeeInfo() = default;
 

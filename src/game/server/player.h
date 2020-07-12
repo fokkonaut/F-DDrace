@@ -345,6 +345,8 @@ public:
 		CTeeInfo m_TeeInfos;
 	} m_CurrentInfo;
 
+	int m_ForcedSkin;
+
 	//minigames
 	int m_Minigame;
 	int m_SurvivalState;
