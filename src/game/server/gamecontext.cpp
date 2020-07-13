@@ -1553,8 +1553,13 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
 		{
-			((CServer *)Server())->m_aClients[ClientID].m_Version = pUnpacker->GetInt();
+			int Version = pUnpacker->GetInt();
+			((CServer *)Server())->m_aClients[ClientID].m_Version = Version;
 			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+
+			//autoban known bot versions
+			if(Config()->m_SvBannedVersions[0] != '\0' && IsVersionBanned(Version))
+				Server()->Kick(ClientID, "unsupported client");
 			return 0;
 		}
 		else
@@ -3637,6 +3642,14 @@ void CGameContext::ResetTuning()
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_curvature", 0);
 	SendTuningParams(-1);
+}
+
+bool CGameContext::IsVersionBanned(int Version)
+{
+	char aVersion[16];
+	str_format(aVersion, sizeof(aVersion), "%d", Version);
+
+	return str_in_list(Config()->m_SvBannedVersions, ",", aVersion);
 }
 
 void CGameContext::List(int ClientID, const char* pFilter)

@@ -787,6 +787,7 @@ private:
 	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);
 
 	void GetWhisper(char *pStr, int *pTarget);
+	bool IsVersionBanned(int Version);
 
 	struct CRegisterBan
 	{
