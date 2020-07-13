@@ -786,7 +786,7 @@ private:
 	bool VoteMute(const NETADDR* pAddr, int Secs, const char* pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);
 
-	const char *GetWhisper(char *pStr, int *pTarget);
+	void GetWhisper(char *pStr, int *pTarget);
 
 	struct CRegisterBan
 	{
