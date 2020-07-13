@@ -1354,7 +1354,7 @@ void CGameContext::OnClientAuth(int ClientID, int Level)
 	}
 }
 
-void CGameContext::GetWhisper(char* pStr, int* pTarget)
+const char *CGameContext::GetWhisper(char *pStr, int *pTarget)
 {
 	char *pName;
 	int Error = 0;
@@ -1432,6 +1432,7 @@ void CGameContext::GetWhisper(char* pStr, int* pTarget)
 	if (Error)
 		Victim = -1;
 	*pTarget = Victim;
+	return pStr;
 }
 
 void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
@@ -1657,8 +1658,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + WhisperOffset, 256);
 					Mode = CHAT_WHISPER;
-					GetWhisper(&*aWhisperMsg, &Target);
-					SendChat(ClientID, Mode, Target, aWhisperMsg, ClientID);
+					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &Target);
+					SendChat(ClientID, Mode, Target, pMsg->m_pMessage, ClientID);
 				}
 				else
 				{
