@@ -1030,6 +1030,8 @@ static inline int MsgFromSevendown(int Msg, bool System)
 			Msg = NETMSGTYPE_CL_KILL;
 		else if(Msg >= 23 && Msg <= 25)
 			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 23;
+		else if (Msg == 26)
+			Msg = NETMSGTYPE_CL_ISDDRACE;
 		else
 			return -1;
 	}
@@ -1337,7 +1339,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
 
 						// TODO: Check if we want to send all maps to all rcon clients
-						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION)
+						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION && !m_aClients[ClientID].m_Sevendown)
 							m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
 
 						GameServer()->OnClientAuth(ClientID, AuthLevel);
@@ -2158,8 +2160,15 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 				}
-					str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%x name='%s' score=%d %s", i, aAddrStr,
-						pThis->m_aClients[i].m_Version, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
+
+				char aVersion[16];
+				if (pThis->m_aClients[i].m_Sevendown)
+					str_format(aVersion, sizeof(aVersion), "%d", pThis->m_aClients[i].m_Version);
+				else
+					str_format(aVersion, sizeof(aVersion), "%x", pThis->m_aClients[i].m_Version);
+
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d name='%s' score=%d %s", i, aAddrStr,
+						aVersion, (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);

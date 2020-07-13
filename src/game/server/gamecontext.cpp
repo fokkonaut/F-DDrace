@@ -1216,11 +1216,7 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_apPlayers[ClientID]->CheckClanProtection();
 
-	if (Server()->IsSevendown(ClientID))
-	{
-		((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
-	}
-	else
+	if (!Server()->IsSevendown(ClientID))
 	{
 		m_pController->UpdateGameInfo(ClientID);
 
@@ -1555,6 +1551,12 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (UpdateInfo)
 				pPlayer->UpdateInformation();
+		}
+		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
+		{
+			((CServer *)Server())->m_aClients[ClientID].m_Version = pUnpacker->GetInt();
+			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+			return 0;
 		}
 		else
 		{
