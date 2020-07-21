@@ -284,6 +284,7 @@ public:
 	//extras
 	int m_RainbowSpeed;
 	int m_RainbowColor;
+	void RainbowTick();
 
 	bool m_InfRainbow;
 	int m_InfMeteors;

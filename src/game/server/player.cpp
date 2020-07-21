@@ -342,25 +342,7 @@ void CPlayer::Tick()
 		m_FakePing = 32 + rand() % 11;
 
 	// rainbow
-	if (Server()->Tick() % 2 == 0 && (m_InfRainbow || IsHooked(RAINBOW) || (m_pCharacter && m_pCharacter->m_Rainbow)) && GameServer()->Config()->m_SvAllowRainbow)
-	{
-		m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
-
-		CTeeInfo Info;
-		for (int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			int BaseColor = m_RainbowColor * 0x010000;
-			int Color = 0xff32;
-			if (p == SKINPART_MARKING)
-				Color *= -256;
-			str_copy(Info.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
-			Info.m_aUseCustomColors[p] = 1;
-			Info.m_aSkinPartColors[p] = BaseColor + Color;
-		}
-
-		Info.ToSevendown();
-		GameServer()->SendSkinChange(Info, m_ClientID, -1);
-	}
+	RainbowTick();
 }
 
 void CPlayer::PostTick()
@@ -1312,6 +1294,33 @@ void CPlayer::SpectatePlayerName(const char* pName)
 }
 
 // F-DDrace
+
+void CPlayer::RainbowTick()
+{
+	if (Server()->Tick() % 6 != 0 || (!m_InfRainbow && !IsHooked(RAINBOW) && !(m_pCharacter && m_pCharacter->m_Rainbow)))
+		return;
+
+	m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
+
+	CTeeInfo Info;
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		int BaseColor = m_RainbowColor * 0x010000;
+		int Color = 0xff32;
+		if (p == SKINPART_MARKING)
+			Color *= -256;
+		str_copy(Info.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
+		Info.m_aUseCustomColors[p] = 1;
+		Info.m_aSkinPartColors[p] = BaseColor + Color;
+	}
+
+	Info.ToSevendown();
+
+	// only send rainbow updates to people close to you, to reduce network traffic
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (GameServer()->m_apPlayers[i] && m_pCharacter && !((CEntity *)m_pCharacter)->NetworkClipped(i))
+			GameServer()->SendSkinChange(Info, m_ClientID, i);
+}
 
 void CPlayer::FixForNoName(int ID)
 {

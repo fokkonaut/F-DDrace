@@ -370,13 +370,6 @@ void CShop::BuyItem(int ClientID, int Item)
 		return;
 	}
 
-	// TEMPORARY, RAINBOW IS NOT OPTIMIZED YET, CRASHES SERVER, SO NOT POSSIBLE TO BUY
-	if (Item == ITEM_RAINBOW)
-	{
-		m_pGameServer->SendChatTarget(ClientID, "Rainbow is currently disabled.");
-		return;
-	}
-
 	// check police lvl 3 for taser
 	if (Item == ITEM_TASER && (*Account).m_PoliceLevel < 3)
 	{
