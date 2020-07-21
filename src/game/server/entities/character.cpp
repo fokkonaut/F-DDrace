@@ -1201,20 +1201,20 @@ void CCharacter::TickDefered()
 
 	// F-DDrace
 	{
-		int Sound = -1;
-		if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
-			Sound = SOUND_HOOK_ATTACH_PLAYER;
-		else if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_GROUND)
-			Sound = SOUND_HOOK_ATTACH_GROUND;
-		else if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_HIT_NOHOOK)
-			Sound = SOUND_HOOK_NOATTACH;
+		int Events = m_Core.m_TriggeredEvents;
+		int CID = m_pPlayer->GetCID();
 
-		if(Sound != -1)
-		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-				if (GameServer()->m_apPlayers[i] && Server()->IsSevendown(i) && (Sound == SOUND_HOOK_ATTACH_PLAYER || i != m_pPlayer->GetCID()))
-					GameServer()->CreateSoundPlayerAt(m_Pos, Sound, i);
-		}
+		Mask128 TeamMask = Teams()->TeamMask(Team(), -1, CID);
+		// Some sounds are triggered client-side for the acting player
+		// so we need to avoid duplicating them
+		Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID);
+		// Some are triggered client-side but only on Sixup
+		Mask128 TeamMaskExceptSelfIfNotSevendown = !Server()->IsSevendown(CID) ? TeamMaskExceptSelf : TeamMask;
+
+		if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
+		if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMaskExceptSelfIfNotSevendown);
+		if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
+		if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
 	}
 
 	if(m_Core.m_TriggeredEvents&COREEVENTFLAG_HOOK_ATTACH_FLAG)
