@@ -1293,7 +1293,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	}
 
 	bool CountKill = true;
-	if (GameServer()->Collision()->m_pSwitchers)
+	if (GameServer()->Collision()->m_pSwitchers && m_LastTouchedSwitcher != -1)
 	{
 		if (GameServer()->Collision()->m_pSwitchers[m_LastTouchedSwitcher].m_ClientID[Team()] == m_Core.m_Killer.m_ClientID)
 			CountKill = false;
