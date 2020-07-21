@@ -1122,15 +1122,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
 				int ChunkSize = m_aClients[ClientID].m_Sevendown ? 1024-128 : MAP_CHUNK_SIZE;
-				int Chunk;
-				if (m_aClients[ClientID].m_Sevendown)
-					Chunk = Unpacker.GetInt();
 
 				// send map chunks
 				for(int i = 0; i < m_MapChunksPerRequest && m_aClients[ClientID].m_MapChunk >= 0; ++i)
 				{
-					if (!m_aClients[ClientID].m_Sevendown)
-						Chunk = m_aClients[ClientID].m_MapChunk;
+					int Chunk = m_aClients[ClientID].m_Sevendown ? Unpacker.GetInt() : m_aClients[ClientID].m_MapChunk;
 					int Offset = Chunk * ChunkSize;
 					int Last = 0;
 
