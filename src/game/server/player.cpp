@@ -1037,7 +1037,7 @@ void CPlayer::TryRespawn()
 	}
 	else if (m_Dummymode == DUMMYMODE_SHOP_DUMMY)
 	{
-		if (GameServer()->Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
+		if (GameServer()->Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
 			Index = ENTITY_SHOP_DUMMY_SPAWN;
 		else
 			Index = TILE_SHOP;
@@ -1064,7 +1064,7 @@ void CPlayer::TryRespawn()
 		Index = ENTITY_SPAWN_BLUE;
 	}
 
-	if (GameServer()->Collision()->GetRandomTile(Index) == vec2(-1, -1))
+	if (!GameServer()->Collision()->TileUsed(Index))
 		Index = ENTITY_SPAWN;
 
 	if (m_ForceSpawnPos == vec2(-1, -1) && !GameServer()->m_pController->CanSpawn(&SpawnPos, Index))

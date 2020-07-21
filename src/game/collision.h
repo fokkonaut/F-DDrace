@@ -123,6 +123,7 @@ public:
 	int m_NumSwitchers;
 
 	// F-DDrace
+	bool TileUsed(int Index) { return GetRandomTile(Index) != vec2(-1, -1); }
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
 	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);

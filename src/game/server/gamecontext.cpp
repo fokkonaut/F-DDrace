@@ -3210,7 +3210,7 @@ void CGameContext::OnInit()
 	// F-DDrace
 
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
-	m_aMinigameDisabled[MINIGAME_BLOCK] = Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) == vec2(-1, -1);
+	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
@@ -4210,9 +4210,9 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	pDummy->m_ForceSpawnPos = Pos;
 	pDummy->m_Afk = false; // players are marked as afk when they first enter. dummies dont send real inputs, thats why we need to make them non-afk again
 
-	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
+	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		pDummy->m_Minigame = MINIGAME_BLOCK;
-	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN) != vec2(-1, -1))
+	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
 		pDummy->m_Minigame = -1;
 
 	pDummy->m_TeeInfos = CTeeInfo(SKIN_DUMMY);
@@ -4242,7 +4242,7 @@ int CGameContext::GetShopDummy()
 
 void CGameContext::ConnectDefaultDummies()
 {
-	if (GetShopDummy() == -1 && Collision()->GetRandomTile(TILE_SHOP) != vec2(-1, -1))
+	if (GetShopDummy() == -1 && Collision()->TileUsed(TILE_SHOP))
 		ConnectDummy(DUMMYMODE_SHOP_DUMMY);
 
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
@@ -4261,7 +4261,7 @@ void CGameContext::ConnectDefaultDummies()
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 	}
 
-	if (Collision()->GetRandomTile(TILE_MINIGAME_BLOCK) != vec2(-1, -1))
+	if (Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 }
 
@@ -4741,7 +4741,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 void CGameContext::SurvivalTick()
 {
 	// if there are no spawn tiles, we cant play the game
-	if (!m_aMinigameDisabled[MINIGAME_SURVIVAL] && (Collision()->GetRandomTile(TILE_SURVIVAL_LOBBY) == vec2(-1, -1) || Collision()->GetRandomTile(TILE_SURVIVAL_SPAWN) == vec2(-1, -1) || Collision()->GetRandomTile(TILE_SURVIVAL_DEATHMATCH) == vec2(-1, -1)))
+	if (!m_aMinigameDisabled[MINIGAME_SURVIVAL] && (!Collision()->TileUsed(TILE_SURVIVAL_LOBBY) || !Collision()->TileUsed(TILE_SURVIVAL_SPAWN) || !Collision()->TileUsed(TILE_SURVIVAL_DEATHMATCH)))
 	{
 		m_aMinigameDisabled[MINIGAME_SURVIVAL] = true;
 		return;
@@ -4996,7 +4996,7 @@ void CGameContext::InstagibTick(int Type)
 	Type = Type == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG;
 
 	// if there are no spawn tiles, we cant play the game
-	if (!m_aMinigameDisabled[Type] && Collision()->GetRandomTile(Type == MINIGAME_INSTAGIB_BOOMFNG ? ENTITY_SPAWN_RED : ENTITY_SPAWN_BLUE) == vec2(-1, -1))
+	if (!m_aMinigameDisabled[Type] && !Collision()->TileUsed(Type == MINIGAME_INSTAGIB_BOOMFNG ? ENTITY_SPAWN_RED : ENTITY_SPAWN_BLUE))
 	{
 		m_aMinigameDisabled[Type] = true;
 		return;
