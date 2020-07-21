@@ -288,6 +288,8 @@ public:
 	void SendMapListEntryRem(const CMapListEntry *pMapListEntry, int ClientID);
 	void UpdateClientMapListEntries();
 
+	void SendMapData(int ClientID, int Chunk);
+
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	void SendServerInfo(int ClientID);
