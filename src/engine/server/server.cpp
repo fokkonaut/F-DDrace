@@ -1039,31 +1039,6 @@ static inline int MsgFromSevendown(int Msg, bool System)
 	return Msg;
 }
 
-void CServer::SendMapData(int ClientID, int Chunk)
-{
-	unsigned int ChunkSize = 1024-128;
-	unsigned int Offset = Chunk * ChunkSize;
-	int Last = 0;
-
-	// drop faulty map data requests
-	if(Chunk < 0 || Offset > m_CurrentMapSize)
-		return;
-
-	if(Offset+ChunkSize >= m_CurrentMapSize)
-	{
-		ChunkSize = m_CurrentMapSize-Offset;
-		Last = 1;
-	}
-
-	CMsgPacker Msg(NETMSG_MAP_DATA, true);
-	Msg.AddInt(Last);
-	Msg.AddInt(m_CurrentMapCrc);
-	Msg.AddInt(Chunk);
-	Msg.AddInt(ChunkSize);
-	Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
-	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
-}
-
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientID = pPacket->m_ClientID;
@@ -1146,25 +1121,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
-				if (m_aClients[ClientID].m_Sevendown)
-				{
-					int Chunk = Unpacker.GetInt();
-					if (Chunk != m_aClients[ClientID].m_MapChunk)
-					{
-						SendMapData(ClientID, Chunk);
-						return;
-					}
-
-					if (Chunk == 0)
-					{
-						for (int i = 0; i < 15; i++)
-							SendMapData(ClientID, i);
-					}
-					SendMapData(ClientID, 15 + m_aClients[ClientID].m_MapChunk);
-					m_aClients[ClientID].m_MapChunk++;
-					return;
-				}
-
 				int ChunkSize = m_aClients[ClientID].m_Sevendown ? 1024-128 : MAP_CHUNK_SIZE;
 
 				// send map chunks
