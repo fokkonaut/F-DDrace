@@ -178,7 +178,8 @@ void CCustomProjectile::Snap(int SnappingClient)
 	}
 	else if (m_Type == WEAPON_HEART_GUN)
 	{
-		CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), sizeof(CNetObj_Pickup)));
+		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
+		CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));
 		if (!pPickup)
 			return;
 
