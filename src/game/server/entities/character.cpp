@@ -1476,6 +1476,9 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		Passive(false, -1, true);
 	UnsetSpookyGhost();
 
+	// unset skin specific stuff
+	m_pPlayer->ResetSkin();
+
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
