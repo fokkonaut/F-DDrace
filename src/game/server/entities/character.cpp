@@ -3077,7 +3077,7 @@ void CCharacter::FDDraceTick()
 {
 	// fake tune collision
 	{
-		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius()*2, this);
+		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius()*2 + 10.f, this);
 		m_FakeTuneCollision = (!m_Super && (m_Solo || m_Passive)) || (pChr && !pChr->m_Super && (pChr->m_Solo || pChr->m_Passive || (Team() != pChr->Team() && m_pPlayer->m_ShowOthers)));
 
 		if (m_FakeTuneCollision != m_OldFakeTuneCollision)
