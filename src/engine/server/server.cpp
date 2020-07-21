@@ -1122,15 +1122,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
 				int ChunkSize = m_aClients[ClientID].m_Sevendown ? 1024-128 : MAP_CHUNK_SIZE;
-				int Chunk;
-				if (m_aClients[ClientID].m_Sevendown)
-					Chunk = Unpacker.GetInt();
+				int RequestedChunk = m_aClients[ClientID].m_Sevendown ? Unpacker.GetInt() : -1;
 
 				// send map chunks
 				for(int i = 0; i < m_MapChunksPerRequest && m_aClients[ClientID].m_MapChunk >= 0; ++i)
 				{
-					if (!m_aClients[ClientID].m_Sevendown)
-						Chunk = m_aClients[ClientID].m_MapChunk;
+					int Chunk = m_aClients[ClientID].m_Sevendown ? RequestedChunk : m_aClients[ClientID].m_MapChunk;
 					int Offset = Chunk * ChunkSize;
 					int Last = 0;
 
@@ -1156,8 +1153,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					{
 						Msg.AddInt(Last);
 						Msg.AddInt(m_CurrentMapCrc);
-						Msg.AddInt(Chunk);
+						Msg.AddInt(RequestedChunk);
 						Msg.AddInt(ChunkSize);
+
+						RequestedChunk++;
 					}
 					Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
 					SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
