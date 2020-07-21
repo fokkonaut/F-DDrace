@@ -1556,6 +1556,9 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			int Version = pUnpacker->GetInt();
 			((CServer *)Server())->m_aClients[ClientID].m_Version = Version;
+
+			dbg_msg("ddrace", "%d using custom client. version: %d", ClientID, Version);
+
 			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
 
 			//autoban known bot versions
