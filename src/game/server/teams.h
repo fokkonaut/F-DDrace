@@ -62,7 +62,7 @@ public:
 	void ChangeTeamState(int Team, int State);
 	void onChangeTeamState(int Team, int State, int OldState);
 
-	Mask128 TeamMask(int Team, int ExceptID = -1, int Asker = -1);
+	Mask128 TeamMask(int Team, int ExceptID = -1, int Asker = -1, bool SevendownOnly = false);
 
 	int Count(int Team) const;
 

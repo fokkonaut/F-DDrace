@@ -365,7 +365,7 @@ bool CGameTeams::TeamFinished(int Team)
 	return true;
 }
 
-Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
+Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker, bool SevendownOnly)
 {
 	Mask128 Mask = Mask128(-1);
 
@@ -375,6 +375,9 @@ Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 			continue; // Explicitly excluded
 		if (!GetPlayer(i))
 			continue; // Player doesn't exist
+
+		if (SevendownOnly && !Server()->IsSevendown(i))
+			continue; // sevendown only because 0.7 clients handle hook sounds clientside so we exclude them
 
 		if (!(GetPlayer(i)->GetTeam() == -1 || GetPlayer(i)->IsPaused()))
 		{ // Not spectator
