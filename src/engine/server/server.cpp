@@ -2104,15 +2104,15 @@ int CServer::MapListEntryCallback(const char *pFilename, int IsDir, int DirType,
 void CServer::ConTestingCommands(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer*)pUser)->Config()->m_SvTestingCommands);
-	((CServer*)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvTestingCommands);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
-void CServer::ConAllowSevendown(IConsole::IResult *pResult, void *pUser)
+void CServer::ConRescue(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer*)pUser)->Config()->m_SvAllowSevendown);
-	((CServer*)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvRescue);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
@@ -2823,7 +2823,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pConfigManager->RestoreStrings();
 
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Turns testing commands aka cheats on/off", AUTHED_ADMIN);
-	pConsole->Register("sv_allow_sevendown", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Allows sevendown", AUTHED_ADMIN);
+	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pServer, "Allow /rescue command so players can teleport themselves out of freeze", AUTHED_ADMIN);
 
 	pEngine->InitLogfile();
 
