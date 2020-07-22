@@ -276,7 +276,6 @@ public:
 
 	bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
 
-	void SendMapData(int ClientID, int Chunk);
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
