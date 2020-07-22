@@ -1638,7 +1638,11 @@ void CPlayer::ResetSkin(bool Unforce)
 	else if (m_ForcedSkin != SKIN_NONE)
 		SetSkin(m_ForcedSkin, true);
 	else
-		GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
+	{
+		// dont send skin updates if its not needed
+		if (mem_comp(&m_CurrentInfo.m_TeeInfos, &m_TeeInfos, sizeof(CTeeInfo)) != 0)
+			GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
+	}
 }
 
 void CPlayer::SetTeeControl(CPlayer *pVictim)
