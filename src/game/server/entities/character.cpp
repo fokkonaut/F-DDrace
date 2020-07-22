@@ -3519,9 +3519,9 @@ void CCharacter::OnPlayerHook()
 		return;
 
 	// set hook extra stuff
-	if (pHookedTee->GetPlayer()->IsHooked(ATOM) && !pHookedTee->m_Atom)
+	if (m_HookPower == ATOM && !pHookedTee->m_Atom)
 		new CAtom(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
-	if (pHookedTee->GetPlayer()->IsHooked(TRAIL) && !pHookedTee->m_Trail)
+	if (m_HookPower == TRAIL && !pHookedTee->m_Trail)
 		new CTrail(GameWorld(), pHookedTee->m_Pos, m_Core.m_HookedPlayer);
 }
 
