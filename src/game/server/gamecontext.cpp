@@ -3971,7 +3971,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
 		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
-		AccFile << m_Accounts[ID].m_Version << "\n";
+		AccFile << ACC_CURRENT_VERSION << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
