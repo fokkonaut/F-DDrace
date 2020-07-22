@@ -511,6 +511,16 @@ void CGameContext::SendSettings(int ClientID)
 
 void CGameContext::SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID)
 {
+	// F-DDrace
+	if (m_apPlayers[ClientID])
+	{
+		// dont send skin updates if its not needed
+		if (mem_comp(&TeeInfos, &m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos, sizeof(CTeeInfo)) == 0)
+			return;
+
+		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
+	}
+
 	CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientID = ClientID;
 	for(int p = 0; p < NUM_SKINPARTS; p++)
@@ -520,10 +530,6 @@ void CGameContext::SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID)
 		Msg.m_aSkinPartColors[p] = TeeInfos.m_aSkinPartColors[p];
 	}
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, TargetID);
-
-	// F-DDrace
-	if (m_apPlayers[ClientID])
-		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
