@@ -346,7 +346,10 @@ public:
 	int GetDDRaceTeam(int ClientID);
 	int64 m_NonEmptySince;
 	int64 m_LastMapVote;
-	void ForceVote(int EnforcerID, bool Success);
+
+	// Checks if player can vote and notify them about the reason
+	bool RateLimitPlayerVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID);
 
 	// F-DDrace
 
