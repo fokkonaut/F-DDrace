@@ -2197,11 +2197,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 		{
-			if (m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (m_VoteKick || m_VoteSpec))
-			{
-				SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
-				return;
-			}
 			if (pPlayer->m_LastKill && pPlayer->m_LastKill + Server()->TickSpeed() * Config()->m_SvKillDelay > Server()->Tick())
 				return;
 			if (pPlayer->IsPaused())
@@ -2210,6 +2205,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CCharacter* pChr = pPlayer->GetCharacter();
 			if (!pChr)
 				return;
+
+			if (pChr->m_DrawEditor.Active())
+			{
+				pChr->m_DrawEditor.OnPlayerKill();
+				return;
+			}
+
+			if (m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (m_VoteKick || m_VoteSpec))
+			{
+				SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
+				return;
+			}
 
 			//Kill Protection
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
@@ -2947,6 +2954,7 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
+	Config()->m_SvTestingCommands = 1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);

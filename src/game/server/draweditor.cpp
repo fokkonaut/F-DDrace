@@ -187,11 +187,12 @@ void CDrawEditor::SendWindow()
 	str_copy(aMsg,
 		"DrawEditor\n\n"
 		"     Controls:\n\n"
-		"Object picker: Hold space, shoot left/right\n"
+		"Object picker: Hold SPACE + shoot left/right\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n"
 		"Change angle of wall: A/D\n"
-		"Change length of wall: TAB + A/D\n\n"
+		"Change length of wall: TAB + A/D\n"
+		"Toggle position rounding: kill\n\n"
 		"     Objects:\n\n", sizeof(aMsg));
 
 	for (int i = 0; i < NUM_DRAW_MODES; i++)
@@ -233,12 +234,21 @@ int CDrawEditor::GetCID()
 	return m_pCharacter->GetPlayer()->GetCID();
 }
 
+void CDrawEditor::OnPlayerKill()
+{
+	m_RoundPos = !m_RoundPos;
+}
+
 void CDrawEditor::OnWeaponSwitch()
 {
 	if (Active())
 		SetPreview();
-	else
+	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
 		RemovePreview();
+	else
+		return;
+
+	dbg_msg("hi", "tuneees");
 
 	GameServer()->SendTuningParams(GetCID(), m_pCharacter->m_TuneZone);
 }
