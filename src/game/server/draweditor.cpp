@@ -74,7 +74,7 @@ void CDrawEditor::OnPlayerFire()
 	}
 
 	CCollision *pCol = GameServer()->Collision();
-	int Index = pCol->GetMapIndex(m_Pos);
+	//int Index = pCol->GetMapIndex(m_Pos);
 	if (pCol->CheckPoint(m_Pos)/* || pCol->IsSwitch(Index) != TILE_SWITCH_PLOT || pCol->GetSwitchNumber(Index) != PLOTID_TEST*/)
 		return;
 
