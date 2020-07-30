@@ -376,19 +376,20 @@ void CCharacter::FireWeapon()
 	if (!Config()->m_SvDeepfly && GetActiveWeapon() == WEAPON_HAMMER && m_DeepFreeze)
 		return;
 
+	bool ClickedFire = false;
+
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 	{
 		WillFire = true;
-
-		m_DrawEditor.OnPlayerFire();
+		ClickedFire = true;
 	}
 
 	// shop window
 	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
 	{
-		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+		if (ClickedFire)
 			GameServer()->m_pShop->OnPageChange(m_pPlayer->GetCID(), GetAimDir());
 		return;
 	}
@@ -426,7 +427,11 @@ void CCharacter::FireWeapon()
 	m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
 
 	if (m_DrawEditor.Active())
+	{
+		if(ClickedFire)
+			m_DrawEditor.OnPlayerFire();
 		return;
+	}
 
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
