@@ -2305,11 +2305,6 @@ void CCharacter::HandleTiles(int Index)
 	// special finish
 	if (!m_HasFinishedSpecialRace && m_DDRaceState != DDRACE_CHEAT && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
 	{
-		if (m_DDRaceState == DDRACE_STARTED)
-		{
-			Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
-		}
-
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "'%s' finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
