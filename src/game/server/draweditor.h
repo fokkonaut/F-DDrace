@@ -11,6 +11,7 @@ class CCharacter;
 // do not re-sort modes, order is important for SetDrawMode()
 enum DrawMode
 {
+	DRAW_UNINITIALIZED = -1,
 	DRAW_HEART,
 	DRAW_SHIELD,
 	DRAW_HAMMER,

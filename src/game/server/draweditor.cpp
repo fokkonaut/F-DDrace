@@ -12,18 +12,12 @@ IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 CDrawEditor::CDrawEditor(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
-
-	// default options
-	m_Entity = CGameWorld::ENTTYPE_PICKUP;
+	m_DrawMode = DRAW_UNINITIALIZED;
+	SetDrawMode(DRAW_HEART);
 	m_RoundPos = true;
-	m_Data.m_Pickup.m_Type = POWERUP_HEALTH;
-	m_Data.m_Pickup.m_SubType = 0;
-
-	m_DrawMode = DRAW_HEART;
 	m_Erasing = false;
 	m_Selecting = false;
 	m_EditStartTick = 0;
-	m_pPreview = 0;
 }
 
 bool CDrawEditor::Active()
@@ -165,11 +159,14 @@ void CDrawEditor::SetDrawMode(int Mode)
 		m_Data.m_Laser.m_Length = 3;
 	}
 
-	m_DrawMode = Mode;
+	if (m_DrawMode != DRAW_UNINITIALIZED)
+	{
+		// update the preview entity
+		RemovePreview();
+		SetPreview();
+	}
 
-	// update the preview entity
-	RemovePreview();
-	SetPreview();
+	m_DrawMode = Mode;
 }
 
 CEntity *CDrawEditor::CreateEntity(bool Preview)
