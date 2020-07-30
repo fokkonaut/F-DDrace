@@ -1296,6 +1296,8 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 {
+	m_DrawEditor.OnPlayerDeath();
+
 	// drop armor, hearts and weapons
 	DropLoot(Weapon);
 

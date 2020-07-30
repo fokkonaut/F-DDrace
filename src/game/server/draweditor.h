@@ -75,6 +75,7 @@ public:
 
 	void OnPlayerFire();
 	void OnWeaponSwitch();
+	void OnPlayerDeath();
 	void OnInput(CNetObj_PlayerInput* pNewInput);
 
 	// used in snap functions of available entities to draw, returns true if the SnappingClient is not able to see the preview

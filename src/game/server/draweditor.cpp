@@ -245,6 +245,11 @@ void CDrawEditor::OnWeaponSwitch()
 	GameServer()->SendTuningParams(GetCID(), m_pCharacter->m_TuneZone);
 }
 
+void CDrawEditor::OnPlayerDeath()
+{
+	RemovePreview();
+}
+
 void CDrawEditor::SetPreview()
 {
 	if (m_pPreview)
