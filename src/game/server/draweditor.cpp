@@ -248,8 +248,6 @@ void CDrawEditor::OnWeaponSwitch()
 	else
 		return;
 
-	dbg_msg("hi", "tuneees");
-
 	GameServer()->SendTuningParams(GetCID(), m_pCharacter->m_TuneZone);
 }
 
