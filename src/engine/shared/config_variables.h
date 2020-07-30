@@ -85,7 +85,7 @@ MACRO_CONFIG_STR(SvHostname, sv_hostname, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, 
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER|CFGFLAG_MASTER, "Address to bind the client/server to", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPort, sv_port, 8303, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvExternalPort, sv_external_port, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "External port to report to the master servers", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvMap, sv_map, 128, "Multimap", CFGFLAG_SAVE|CFGFLAG_SERVER, "Map to use on the server", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvMap, sv_map, 128, "BlmapChill", CFGFLAG_SAVE|CFGFLAG_SERVER, "Map to use on the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, 64, 1, MAX_CLIENTS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Maximum number of clients that are allowed on a server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxClientsPerIP, sv_max_clients_per_ip, 4, 1, MAX_CLIENTS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Maximum number of clients with the same IP that can connect to the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMapDownloadSpeed, sv_map_download_speed, 8, 1, 16, CFGFLAG_SAVE|CFGFLAG_SERVER, "Number of map data packages a client gets on each request", AUTHED_ADMIN)
