@@ -116,17 +116,18 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		if (m_EditStartTick == 0)
 			m_EditStartTick = Server()->Tick();
 
+		bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
+		int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
+
 		if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 		{
 			// change length
-			m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)pNewInput->m_Direction/10, 0.f, 10.f);
+			m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.f, 10.f);
 			((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
 		}
 		else
 		{
 			// change rotation
-			bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
-			int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
 			m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
 			((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
 		}
