@@ -367,7 +367,7 @@ bool CGameTeams::TeamFinished(int Team)
 
 Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker, bool SevendownOnly)
 {
-	Mask128 Mask = Mask128(-1);
+	Mask128 Mask = CmaskNone();
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
