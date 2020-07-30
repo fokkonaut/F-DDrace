@@ -181,6 +181,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	case CGameWorld::ENTTYPE_DOOR:
 		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Laser.m_Angle, 32 * m_Data.m_Laser.m_Length, 0, !Preview);
 	}
+	return 0;
 }
 
 void CDrawEditor::SendWindow()
