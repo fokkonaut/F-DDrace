@@ -90,7 +90,8 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 	}
 	else
 	{
-		GameServer()->SendMotd("", GetCID());
+		if (m_Selecting)
+			GameServer()->SendMotd("", GetCID());
 		m_Selecting = false;
 	}
 
