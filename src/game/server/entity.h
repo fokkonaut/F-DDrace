@@ -152,6 +152,9 @@ public:
 	int GetObjType() { return m_ObjType; };
 	void SetPos(vec2 Pos) { m_Pos = Pos; }
 
+	// used for entities inside of plots, created by the draw editor, otherwise its 0
+	int m_PlotID;
+
 	// character drawing right now, only he can see the preview
 	int m_BrushCID;
 };

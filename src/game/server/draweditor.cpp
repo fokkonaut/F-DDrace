@@ -4,6 +4,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 
+#define PLOTID_TEST 1
+
 CGameContext *CDrawEditor::GameServer() const { return m_pCharacter->GameServer(); }
 IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 
@@ -73,10 +75,11 @@ void CDrawEditor::OnPlayerFire()
 
 	CCollision *pCol = GameServer()->Collision();
 	int Index = pCol->GetMapIndex(m_Pos);
-	if (pCol->CheckPoint(m_Pos))
+	if (pCol->CheckPoint(m_Pos)/* || pCol->IsSwitch(Index) != TILE_SWITCH_PLOT || pCol->GetSwitchNumber(Index) != PLOTID_TEST*/)
 		return;
 
 	CEntity *pEntity = CreateEntity();
+	pEntity->m_PlotID = PLOTID_TEST;
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
@@ -104,7 +107,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR);
 		CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
 
-		if (pEntity)
+		if (pEntity && pEntity->m_PlotID == PLOTID_TEST)
 		{
 			GameServer()->m_World.DestroyEntity(pEntity);
 			m_pCharacter->SetAttackTick(Server()->Tick());
