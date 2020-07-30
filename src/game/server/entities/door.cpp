@@ -59,8 +59,11 @@ void CDoor::ResetCollision(bool Remove)
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y)
 				|| GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
+		{
 			break;
+		}
 		else if (m_Collision)
+		{
 			if (!Remove)
 				GameServer()->Collision()->SetDCollisionAt(
 						m_Pos.x + (m_Direction.x * i),
@@ -70,6 +73,7 @@ void CDoor::ResetCollision(bool Remove)
 				GameServer()->Collision()->UnsetDCollisionAt(
 						m_Pos.x + (m_Direction.x * i),
 						m_Pos.y + (m_Direction.y * i));
+		}
 	}
 }
 
