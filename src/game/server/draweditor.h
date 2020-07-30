@@ -38,7 +38,7 @@ class CDrawEditor
 
 	bool m_Erasing;
 	bool m_Selecting;
-	int64 m_RotateStartTick;
+	int64 m_EditStartTick;
 
 	void SendWindow();
 	const char *GetMode(int Mode);

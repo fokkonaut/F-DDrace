@@ -30,10 +30,16 @@ CDoor::~CDoor()
 void CDoor::SetDirection(float Rotation)
 {
 	m_Direction = vec2(sin(Rotation), cos(Rotation));
-	UpdateRotation();
+	Update();
 }
 
-void CDoor::UpdateRotation()
+void CDoor::SetLength(int Length)
+{
+	m_Length = Length;
+	Update();
+}
+
+void CDoor::Update()
 {
 	vec2 To = m_Pos + normalize(m_Direction) * m_Length;
 	GameServer()->Collision()->IntersectNoLaser(m_Pos, To, &this->m_To, 0);
@@ -85,7 +91,7 @@ void CDoor::Reset()
 void CDoor::Tick()
 {
 	if (m_PrevPos != m_Pos)
-		UpdateRotation();
+		Update();
 	m_PrevPos = m_Pos;
 }
 

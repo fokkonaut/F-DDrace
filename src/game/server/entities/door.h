@@ -17,7 +17,7 @@ class CDoor: public CEntity
 	// F-DDrace
 	vec2 m_PrevPos;
 	bool m_Collision; // used for draw editor preview
-	void UpdateRotation();
+	void Update();
 
 public:
 	void Open(int Tick, bool ActivatedTeam[]);
@@ -27,6 +27,7 @@ public:
 			int Number, bool Collision = true);
 
 	void SetDirection(float Rotation);
+	void SetLength(int Length);
 	virtual ~CDoor();
 
 	virtual void Reset();

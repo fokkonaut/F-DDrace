@@ -22,7 +22,7 @@ CDrawEditor::CDrawEditor(CCharacter *pChr)
 	m_DrawMode = DRAW_HEART;
 	m_Erasing = false;
 	m_Selecting = false;
-	m_RotateStartTick = 0;
+	m_EditStartTick = 0;
 	m_pPreview = 0;
 }
 
@@ -119,16 +119,26 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 
 	if (pNewInput->m_Direction != 0 && m_Entity == CGameWorld::ENTTYPE_DOOR)
 	{
-		if (m_RotateStartTick == 0)
-			m_RotateStartTick = Server()->Tick();
+		if (m_EditStartTick == 0)
+			m_EditStartTick = Server()->Tick();
 
-		bool Faster = m_RotateStartTick < Server()->Tick() - Server()->TickSpeed();
-		int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
-		m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
-		((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+		if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+		{
+			// change length
+			m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)pNewInput->m_Direction/10, 0.f, 10.f);
+			((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
+		}
+		else
+		{
+			// change rotation
+			bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
+			int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
+			m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
+			((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+		}
 	}
 	else
-		m_RotateStartTick = 0;
+		m_EditStartTick = 0;
 }
 
 void CDrawEditor::SetDrawMode(int Mode)
@@ -182,7 +192,8 @@ void CDrawEditor::SendWindow()
 		"Object picker: Hold space, shoot left/right\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n"
-		"Change angle of wall: A/D\n\n"
+		"Change angle of wall: A/D\n"
+		"Change length of wall: TAB + A/D\n\n"
 		"     Objects:\n\n", sizeof(aMsg));
 
 	for (int i = 0; i < NUM_DRAW_MODES; i++)
