@@ -19,6 +19,9 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 
 	m_MarkedForDestroy = false;
 	m_Pos = Pos;
+
+	// F-DDrace
+	m_BrushCID = -1;
 }
 
 CEntity::~CEntity()

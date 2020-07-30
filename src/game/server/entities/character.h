@@ -13,6 +13,8 @@
 #include "lightsaber.h"
 #include "stable_projectile.h"
 
+#include <game/server/draweditor.h>
+
 enum Extra
 {
 	HOOK_NORMAL,
@@ -355,6 +357,8 @@ public:
 	void SetCorePos(vec2 Pos) { m_Core.m_Pos = Pos; };
 	void SetCoreVel(vec2 Vel) { m_Core.m_Vel = Vel; };
 
+	void SetAttackTick(int AttackTick) { m_AttackTick = AttackTick; }
+
 	//last tile
 	int m_LastIndexTile;
 	int m_LastIndexFrontTile;
@@ -386,21 +390,19 @@ public:
 	CLightsaber* m_pLightsaber;
 	bool m_AlwaysTeleWeapon;
 	bool m_DoorHammer;
-
 	bool m_FakeTuneCollision;
 	bool m_OldFakeTuneCollision;
 	bool m_Passive;
 	CPickup* m_pPassiveShield;
-
 	int m_Item;
 	CPickup* m_pItem;
-
 	bool m_PoliceHelper;
-
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
-
 	int64 m_LastLinkedPortals;
+
+	// editor
+	CDrawEditor m_DrawEditor;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);
@@ -445,6 +447,8 @@ public:
 	void SetLastTouchedSwitcher(int Number);
 	int m_LastTouchedSwitcher;
 	int m_LastTouchedPortalBy;
+
+	vec2 m_CursorPos;
 
 
 	/////////dummymode variables

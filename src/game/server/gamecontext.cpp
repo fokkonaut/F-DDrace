@@ -757,7 +757,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction && !Server()->IsSevendown(ClientID)) || pChr->GetPlayer()->m_TeeControllerID != -1)
+		if ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction && !Server()->IsSevendown(ClientID)) || pChr->GetPlayer()->m_TeeControllerID != -1 || pChr->m_DrawEditor.Active())
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;
@@ -4393,6 +4393,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Projectile Rifle";
 	case WEAPON_BALL_GRENADE:
 		return "Ball Greande";
+	case WEAPON_DRAW_EDITOR:
+		return "Draw Editor";
 	}
 	return "Unknown";
 }
@@ -4419,6 +4421,8 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_LASER;
 	case WEAPON_BALL_GRENADE:
 		return WEAPON_GRENADE;
+	case WEAPON_DRAW_EDITOR:
+		return WEAPON_NINJA;
 	}
 	return Weapon;
 }

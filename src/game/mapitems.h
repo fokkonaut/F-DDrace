@@ -217,6 +217,8 @@ enum
 
 	TILE_PORTAL_RIFLE_STOP = 189,
 	//End of higher tiles
+	TILE_SWITCH_PLOT = 192, // this one is just for switch layer because it can be mapped from the clientside with different indices
+
 	//Layers
 	LAYER_GAME=0,
 	LAYER_FRONT,
@@ -469,6 +471,9 @@ public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	int m_Number;
+
+	// F-DDrace
+	int m_Usage;
 };
 
 class CTuneTile

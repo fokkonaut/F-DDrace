@@ -70,6 +70,7 @@ MACRO_TUNING_PARAM(LightsaberFireDelay, lightsaber_fire_delay, 500, "Delay of us
 MACRO_TUNING_PARAM(PortalRifleFireDelay, portalrifle_fire_delay, 125, "Delay of using portal rifle")
 MACRO_TUNING_PARAM(ProjectileRifleFireDelay, projectile_rifle_fire_delay, 100, "Delay of firing projectile rifle")
 MACRO_TUNING_PARAM(BallGrenadeFireDelay, ball_grenade_fire_delay, 600, "Delay of firing ball grenade")
+MACRO_TUNING_PARAM(EditorFireDelay, editor_fire_delay, 0, "UNUSED") // unused, just to not break the order here
 
 MACRO_TUNING_PARAM(StraightGrenadeSpeed, straight_grenade_speed, 750.0f, "Straight grenade speed")
 MACRO_TUNING_PARAM(StraightGrenadeLifetime, straight_grenade_lifetime, 5.0f, "Straight grenade lifetime")

@@ -150,6 +150,10 @@ public:
 	int m_Layer;
 
 	int GetObjType() { return m_ObjType; };
+	void SetPos(vec2 Pos) { m_Pos = Pos; }
+
+	// character drawing right now, only he can see the preview
+	int m_BrushCID;
 };
 
 #endif

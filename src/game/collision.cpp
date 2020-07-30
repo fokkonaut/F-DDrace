@@ -128,7 +128,8 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 			{
 				if ((Index >= TILE_JUMP && Index <= TILE_BONUS)
 					|| Index == TILE_ALLOW_TELE_GUN
-					|| Index == TILE_ALLOW_BLUE_TELE_GUN)
+					|| Index == TILE_ALLOW_BLUE_TELE_GUN
+					|| Index == TILE_SWITCH_PLOT)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -1141,6 +1142,27 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 	m_pDoor[Ny * m_Width + Nx].m_Index = Type;
 	m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
 	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
+	m_pDoor[Ny * m_Width + Nx].m_Usage++;
+}
+
+void CCollision::UnsetDCollisionAt(float x, float y)
+{
+	if(!m_pDoor)
+		return;
+	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
+	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
+
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0)
+		return;
+
+	m_pDoor[Ny * m_Width + Nx].m_Usage--;
+
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0)
+	{
+		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
+		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;
+		m_pDoor[Ny * m_Width + Nx].m_Number = 0;
+	}
 }
 
 int CCollision::GetDTileIndex(int Index)

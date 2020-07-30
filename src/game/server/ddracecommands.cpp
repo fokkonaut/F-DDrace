@@ -822,6 +822,18 @@ void CGameContext::ConScrollNinja(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->ScrollNinja(!pChr->m_ScrollNinja, pResult->m_ClientID);
 }
 
+void CGameContext::ConDrawEditor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_DRAW_EDITOR, false);
+}
+
+void CGameContext::ConUnDrawEditor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_DRAW_EDITOR, true);
+}
+
 void CGameContext::ConInfiniteJumps(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

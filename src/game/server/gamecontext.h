@@ -690,9 +690,12 @@ private:
 	static void ConUnBallGrenade(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
-	static void ConGun(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnHammer(IConsole::IResult* pResult, void* pUserData);
+	static void ConGun(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnGun(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConDrawEditor(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnDrawEditor(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConScrollNinja(IConsole::IResult* pResult, void* pUserData);
 

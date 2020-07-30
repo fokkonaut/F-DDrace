@@ -10,16 +10,24 @@ class CDoor: public CEntity
 {
 	vec2 m_To;
 	int m_EvalTick;
-	void ResetCollision();
+	void ResetCollision(bool Remove = false);
 	int m_Length;
 	vec2 m_Direction;
+
+	// F-DDrace
+	vec2 m_PrevPos;
+	bool m_Collision; // used for draw editor preview
+	void UpdateRotation();
 
 public:
 	void Open(int Tick, bool ActivatedTeam[]);
 	void Open(int Team);
 	void Close(int Team);
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-			int Number);
+			int Number, bool Collision = true);
+
+	void SetDirection(float Rotation);
+	virtual ~CDoor();
 
 	virtual void Reset();
 	virtual void Tick();

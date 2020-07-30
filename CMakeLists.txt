@@ -1609,6 +1609,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
+  draweditor.cpp
+  draweditor.h
   entities/atom.cpp
   entities/atom.h
   entities/character.cpp

@@ -55,7 +55,7 @@ MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
 CCharacter::CCharacter(CGameWorld *pWorld)
-: CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), ms_PhysSize)
+: CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), ms_PhysSize), m_DrawEditor(this)
 {
 	m_Health = 0;
 	m_Armor = 0;
@@ -289,7 +289,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if (m_ReloadTimer != 0 || m_QueuedWeapon == -1 || (m_aWeapons[WEAPON_NINJA].m_Got && !m_ScrollNinja) || !m_aWeapons[m_QueuedWeapon].m_Got)
+	if (m_ReloadTimer != 0 || m_QueuedWeapon == -1 || (m_aWeapons[WEAPON_NINJA].m_Got && !m_ScrollNinja) || !m_aWeapons[m_QueuedWeapon].m_Got || m_DrawEditor.Selecting())
 		return;
 
 	// switch Weapon
@@ -379,7 +379,11 @@ void CCharacter::FireWeapon()
 	// check if we gonna fire
 	bool WillFire = false;
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	{
 		WillFire = true;
+
+		m_DrawEditor.OnPlayerFire();
+	}
 
 	// shop window
 	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
@@ -421,7 +425,8 @@ void CCharacter::FireWeapon()
 	// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
 	m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
 
-	vec2 CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
+	if (m_DrawEditor.Active())
+		return;
 
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
@@ -714,7 +719,7 @@ void CCharacter::FireWeapon()
 				if (!m_pTelekinesisEntity)
 				{
 					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
-					CEntity *pEntity = GameWorld()->ClosestEntityTypes(CursorPos, 20.f, Types, this, m_pPlayer->GetCID());
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(m_CursorPos, 20.f, Types, this, m_pPlayer->GetCID());
 
 					CCharacter *pChr = 0;
 					CFlag *pFlag = 0;
@@ -780,7 +785,7 @@ void CCharacter::FireWeapon()
 			case WEAPON_PORTAL_RIFLE:
 			{
 				vec2 PortalPos;
-				bool Found = GetNearestAirPos(CursorPos, m_Pos, &PortalPos);
+				bool Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
 				if (!Found || !PortalPos
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID()) // dont allow to place portals too close to other tees
@@ -940,6 +945,8 @@ void CCharacter::HandleWeapons()
 	// fire Weapon, if wanted
 	FireWeapon();
 
+	//
+
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[GetActiveWeapon()].m_Ammoregentime;
 	if (GetActiveWeapon() == WEAPON_HEART_GUN || GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE)
@@ -1056,6 +1063,14 @@ void CCharacter::SetEmote(int Emote, int Tick)
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
+	if (m_DrawEditor.Active())
+	{
+		m_DrawEditor.OnInput(pNewInput);
+		pNewInput->m_Direction = 0;
+		pNewInput->m_Jump = 0;
+		pNewInput->m_Hook = 0;
+	}
+
 	// check for changes
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();
@@ -3077,6 +3092,9 @@ void CCharacter::FDDraceInit()
 
 void CCharacter::FDDraceTick()
 {
+	// set cursorpos
+	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
+
 	// fake tune collision
 	{
 		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius()*2 + 10.f, this);
@@ -3093,29 +3111,28 @@ void CCharacter::FDDraceTick()
 	{
 		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
 		{
-			vec2 Pos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 			vec2 Vel = vec2(0.f, 0.f);
 
 			switch (m_pTelekinesisEntity->GetObjType())
 			{
 				case (CGameWorld::ENTTYPE_CHARACTER): 
 				{
-					CCharacter *pChr = (CCharacter*)m_pTelekinesisEntity;
-					pChr->Core()->m_Pos = Pos;
+					CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
+					pChr->Core()->m_Pos = m_CursorPos;
 					pChr->Core()->m_Vel = Vel;
 					break;
 				}
 				case (CGameWorld::ENTTYPE_FLAG):
 				{
 					CFlag *pFlag = (CFlag *)m_pTelekinesisEntity;
-					pFlag->SetPos(Pos);
+					pFlag->SetPos(m_CursorPos);
 					pFlag->SetVel(Vel);
 					break;
 				}
 				case (CGameWorld::ENTTYPE_PICKUP_DROP):
 				{
-					CPickupDrop *pPickup = (CPickupDrop*)m_pTelekinesisEntity;
-					pPickup->SetPos(Pos);
+					CPickupDrop *pPickup = (CPickupDrop *)m_pTelekinesisEntity;
+					pPickup->SetPos(m_CursorPos);
 					pPickup->SetVel(Vel);
 					break;
 				}
@@ -3173,10 +3190,7 @@ void CCharacter::FDDraceTick()
 	{
 		CCharacter *pControlledTee = m_pPlayer->m_pControlledTee->GetCharacter();
 		if (pControlledTee)
-		{
-			vec2 CursorPos = vec2(pControlledTee->GetPos().x + pControlledTee->GetInput().m_TargetX, pControlledTee->GetPos().y + pControlledTee->GetInput().m_TargetY);
-			m_pTeeControlCursor->SetPos(CursorPos);
-		}
+			m_pTeeControlCursor->SetPos(pControlledTee->m_CursorPos);
 	}
 
 	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick()))
@@ -3190,6 +3204,9 @@ void CCharacter::FDDraceTick()
 			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds);
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
+
+	// update the editor
+	m_DrawEditor.Tick();
 }
 
 void CCharacter::HandleLastIndexTiles()
@@ -3414,6 +3431,7 @@ void CCharacter::SetActiveWeapon(int Weapon)
 {
 	m_ActiveWeapon = Weapon;
 	UpdateWeaponIndicator();
+	m_DrawEditor.OnWeaponSwitch();
 }
 
 int CCharacter::GetWeaponAmmo(int Type)

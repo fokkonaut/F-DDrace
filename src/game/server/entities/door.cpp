@@ -8,18 +8,35 @@
 #include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-		int Number) :
+		int Number, bool Collision) :
 		CEntity(pGameWorld, CGameWorld::ENTTYPE_DOOR, Pos)
 {
 	m_Number = Number;
 	m_Pos = Pos;
+	m_PrevPos = m_Pos;
+	m_Collision = Collision;
 	m_Length = Length;
-	m_Direction = vec2(sin(Rotation), cos(Rotation));
-	vec2 To = Pos + normalize(m_Direction) * m_Length;
-
-	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, 0);
+	
+	SetDirection(Rotation);
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
+}
+
+CDoor::~CDoor()
+{
+	ResetCollision(true);
+}
+
+void CDoor::SetDirection(float Rotation)
+{
+	m_Direction = vec2(sin(Rotation), cos(Rotation));
+	UpdateRotation();
+}
+
+void CDoor::UpdateRotation()
+{
+	vec2 To = m_Pos + normalize(m_Direction) * m_Length;
+	GameServer()->Collision()->IntersectNoLaser(m_Pos, To, &this->m_To, 0);
 }
 
 void CDoor::Open(int Tick, bool ActivatedTeam[])
@@ -27,7 +44,7 @@ void CDoor::Open(int Tick, bool ActivatedTeam[])
 	m_EvalTick = Server()->Tick();
 }
 
-void CDoor::ResetCollision()
+void CDoor::ResetCollision(bool Remove)
 {
 	for (int i = 0; i < m_Length - 1; i++)
 	{
@@ -37,11 +54,16 @@ void CDoor::ResetCollision()
 				|| GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y)
 				|| GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
 			break;
-		else
-			GameServer()->Collision()->SetDCollisionAt(
-					m_Pos.x + (m_Direction.x * i),
-					m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0/*Flags*/,
-					m_Number);
+		else if (m_Collision)
+			if (!Remove)
+				GameServer()->Collision()->SetDCollisionAt(
+						m_Pos.x + (m_Direction.x * i),
+						m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0/*Flags*/,
+						m_Number);
+			else
+				GameServer()->Collision()->UnsetDCollisionAt(
+						m_Pos.x + (m_Direction.x * i),
+						m_Pos.y + (m_Direction.y * i));
 	}
 }
 
@@ -62,7 +84,9 @@ void CDoor::Reset()
 
 void CDoor::Tick()
 {
-
+	if (m_PrevPos != m_Pos)
+		UpdateRotation();
+	m_PrevPos = m_Pos;
 }
 
 void CDoor::Snap(int SnappingClient)
@@ -70,6 +94,13 @@ void CDoor::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient, m_Pos)
 			&& NetworkClipped(SnappingClient, m_To))
 		return;
+
+	if (m_BrushCID != -1)
+	{
+		CCharacter *pBrushChr = GameServer()->GetPlayerChar(m_BrushCID);
+		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
+			return;
+	}
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
 			NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
@@ -83,7 +114,7 @@ void CDoor::Snap(int SnappingClient)
 	CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 
-	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS
 				|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
 			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());

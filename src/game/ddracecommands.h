@@ -77,6 +77,9 @@ CONSOLE_COMMAND("gun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConGun,
 CONSOLE_COMMAND("unhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnHammer, this, "Takes the hammer from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("ungun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnGun, this, "Takes the gun from player v", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("draweditor", "?v[id]", CFGFLAG_SERVER, ConDrawEditor, this, "Gives the editor to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("undraweditor", "?v[id]", CFGFLAG_SERVER, ConUnDrawEditor, this, "Takes the editor from player v", AUTHED_ADMIN)
+
 CONSOLE_COMMAND("scrollninja", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConScrollNinja, this, "Gives a ninja to player v", AUTHED_ADMIN)
 
 //dummy

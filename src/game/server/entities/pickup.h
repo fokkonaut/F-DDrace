@@ -12,6 +12,8 @@ class CPickup : public CEntity
 public:
 	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1);
 
+	virtual ~CPickup();
+
 	void Reset(bool Destroy);
 	virtual void Reset() { Reset(false); };
 	virtual void Tick();

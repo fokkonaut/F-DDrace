@@ -28,6 +28,11 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	GameWorld()->InsertEntity(this);
 }
 
+CPickup::~CPickup()
+{
+	Server()->SnapFreeID(m_ID2);
+}
+
 void CPickup::Reset(bool Destroy)
 {
 	if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0 && Config()->m_SvVanillaModeStart)
@@ -36,14 +41,15 @@ void CPickup::Reset(bool Destroy)
 		m_SpawnTick = -1;
 
 	if (Destroy)
-	{
-		Server()->SnapFreeID(m_ID2);
 		GameWorld()->DestroyEntity(this);
-	}
 }
 
 void CPickup::Tick()
 {
+	// no affect on players, just a preview for the brushing client
+	if (m_BrushCID != -1)
+		return;
+
 	if (m_Owner >= 0)
 	{
 		CCharacter* pChr = GameServer()->GetPlayerChar(m_Owner);
@@ -240,6 +246,13 @@ void CPickup::Snap(int SnappingClient)
 {
 	if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
 		return;
+
+	if (m_BrushCID != -1)
+	{
+		CCharacter *pBrushChr = GameServer()->GetPlayerChar(m_BrushCID);
+		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
+			return;
+	}
 
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
 	CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);

@@ -18,7 +18,6 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
-	void SetPos(vec2 Pos) { m_Pos = Pos; };
 	void SetVel(vec2 Vel) { m_Vel = Vel; };
 
 	CCharacter *GetOwner() { return m_pOwner; };
