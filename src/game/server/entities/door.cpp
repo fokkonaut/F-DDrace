@@ -65,14 +65,9 @@ void CDoor::ResetCollision(bool Remove)
 		else if (m_Collision)
 		{
 			if (!Remove)
-				GameServer()->Collision()->SetDCollisionAt(
-						m_Pos.x + (m_Direction.x * i),
-						m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0/*Flags*/,
-						m_Number);
+				GameServer()->Collision()->SetDCollisionAt(CurrentPos.x, CurrentPos.y, TILE_STOPA, 0/*Flags*/, m_Number);
 			else
-				GameServer()->Collision()->UnsetDCollisionAt(
-						m_Pos.x + (m_Direction.x * i),
-						m_Pos.y + (m_Direction.y * i));
+				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos.x, CurrentPos.y);
 		}
 	}
 }

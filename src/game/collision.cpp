@@ -283,8 +283,8 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
-			int TeleNumber = GetDTileNumber(ModMapIndex);
-			if(pfnSwitchActive(TeleNumber, pUser))
+			int SwitchNumber = GetDTileNumber(ModMapIndex);
+			if(pfnSwitchActive(SwitchNumber, pUser))
 			{
 				int Tile = GetDTileIndex(ModMapIndex);
 				int Flags = GetDTileFlags(ModMapIndex);
@@ -1141,8 +1141,12 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 
 	m_pDoor[Ny * m_Width + Nx].m_Index = Type;
 	m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
-	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
-	m_pDoor[Ny * m_Width + Nx].m_Usage++;
+
+	if (m_pDoor[Ny * m_Width + Nx].m_Number == 0)
+		m_pDoor[Ny * m_Width + Nx].m_Number = Number;
+
+	if (Number == 0)
+		m_pDoor[Ny * m_Width + Nx].m_Usage++;
 }
 
 void CCollision::UnsetDCollisionAt(float x, float y)
@@ -1157,7 +1161,7 @@ void CCollision::UnsetDCollisionAt(float x, float y)
 
 	m_pDoor[Ny * m_Width + Nx].m_Usage--;
 
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0)
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number == 0)
 	{
 		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
 		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;

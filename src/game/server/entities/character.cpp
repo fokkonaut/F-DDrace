@@ -464,6 +464,11 @@ void CCharacter::FireWeapon()
 					for (int i = 0; i < Num; i++)
 					{
 						CDoor* pDoor = apEnts[i];
+
+						// disallow doorhammer on walls, they are no doors
+						if (pDoor->m_PlotID)
+							continue;
+
 						if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
 						{
 							bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
