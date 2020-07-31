@@ -955,8 +955,6 @@ void CCharacter::HandleWeapons()
 	// fire Weapon, if wanted
 	FireWeapon();
 
-	//
-
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[GetActiveWeapon()].m_Ammoregentime;
 	if (GetActiveWeapon() == WEAPON_HEART_GUN || GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE)
