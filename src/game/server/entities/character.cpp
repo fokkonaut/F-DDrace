@@ -2312,6 +2312,25 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
+	// money xp bomb
+	if (!m_GotMoneyXPBomb && m_DDRaceState == DDRACE_STARTED && (m_TileIndex == TILE_MONEY_XP_BOMB || m_TileFIndex == TILE_MONEY_XP_BOMB))
+	{
+		if (m_pPlayer->GetAccID() < ACC_START)
+		{
+			if (Server()->Tick() % 50 == 0)
+				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
+			return;
+		}
+
+		CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+		const char* pMsg = "money xp bomb tile";
+		m_pPlayer->MoneyTransaction(500, pMsg);
+		m_pPlayer->GiveXP(2500, pMsg);
+
+		m_GotMoneyXPBomb = true;
+	}
+
 	// special finish
 	if (!m_HasFinishedSpecialRace && m_DDRaceState != DDRACE_CHEAT && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
 	{
@@ -3088,6 +3107,7 @@ void CCharacter::FDDraceInit()
 	}
 
 	m_HasFinishedSpecialRace = false;
+	m_GotMoneyXPBomb = false;
 	m_SpawnTick = Now;
 	m_MoneyTile = false;
 	m_GotLasered = false;

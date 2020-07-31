@@ -438,6 +438,9 @@ public:
 	// special race
 	bool m_HasFinishedSpecialRace;
 
+	// money xp bomb
+	bool m_GotMoneyXPBomb;
+
 	// true if the character is constantly getting freezed by Freeze() function, e.g. on a freeze tile or while deepfrozen
 	bool m_IsFrozen;
 
