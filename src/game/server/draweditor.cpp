@@ -157,7 +157,7 @@ void CDrawEditor::SetDrawMode(int Mode)
 	else if (Mode == DRAW_WALL)
 	{
 		m_Entity = CGameWorld::ENTTYPE_DOOR;
-		m_Data.m_Laser.m_Angle = 0;
+		m_Data.m_Laser.m_Angle = 90 * pi / 180;
 		m_Data.m_Laser.m_Length = 3;
 	}
 
