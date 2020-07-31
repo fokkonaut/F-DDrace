@@ -6,6 +6,9 @@
 
 #define PLOTID_TEST 1
 
+static float s_MaxLength = 10.f;
+static float s_DefaultAngle = 90 * pi / 180;
+
 CGameContext *CDrawEditor::GameServer() const { return m_pCharacter->GameServer(); }
 IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 
@@ -121,17 +124,9 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
 
 		if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
-		{
-			// change length
-			m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.f, 10.f);
-			((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
-		}
+			AddLength(Add);
 		else
-		{
-			// change rotation
-			m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
-			((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
-		}
+			AddAngle(Add);
 	}
 	else
 		m_EditStartTick = 0;
@@ -157,7 +152,7 @@ void CDrawEditor::SetDrawMode(int Mode)
 	else if (Mode == DRAW_WALL)
 	{
 		m_Entity = CGameWorld::ENTTYPE_DOOR;
-		m_Data.m_Laser.m_Angle = 90 * pi / 180;
+		m_Data.m_Laser.m_Angle = s_DefaultAngle;
 		m_Data.m_Laser.m_Length = 3;
 	}
 
@@ -194,7 +189,8 @@ void CDrawEditor::SendWindow()
 		"Eraser: Right mouse\n"
 		"Change angle of wall: A/D\n"
 		"Change length of wall: TAB + A/D\n"
-		"Toggle position rounding: kill\n\n"
+		"Toggle position rounding: kill\n"
+		"Add 45 degree steps: TAB + kill\n\n"
 		"     Objects:\n\n", sizeof(aMsg));
 
 	for (int i = 0; i < NUM_DRAW_MODES; i++)
@@ -238,7 +234,29 @@ int CDrawEditor::GetCID()
 
 void CDrawEditor::OnPlayerKill()
 {
-	m_RoundPos = !m_RoundPos;
+	if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+	{
+		if (m_Entity == CGameWorld::ENTTYPE_DOOR)
+		{
+			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
+				m_Data.m_Laser.m_Angle = s_DefaultAngle;
+			AddAngle(45);
+		}
+	}
+	else
+		m_RoundPos = !m_RoundPos;
+}
+
+void CDrawEditor::AddAngle(int Add)
+{
+	m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
+	((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+}
+
+void CDrawEditor::AddLength(int Add)
+{
+	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.f, s_MaxLength);
+	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
 }
 
 void CDrawEditor::OnWeaponSwitch()
