@@ -95,7 +95,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		m_Selecting = false;
 	}
 
-	if (pNewInput->m_Hook && !m_Selecting)
+	if (pNewInput->m_Hook && !m_Selecting && !m_pCharacter->m_FreezeTime)
 	{
 		m_Erasing = true;
 
