@@ -778,9 +778,7 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 
 int net_addr_comp(const NETADDR *a, const NETADDR *b)
 {
-	if(mem_comp(a->ip, b->ip, sizeof(a->ip)) == 0 && a->port == b->port && a->type == b->type)
-		return 0;
-	return -1;
+	return mem_comp(a, b, sizeof(NETADDR));
 }
 
 int net_addr_comp_noport(const NETADDR* a, const NETADDR* b)
