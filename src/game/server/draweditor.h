@@ -32,6 +32,8 @@ class CDrawEditor
 	int GetCID();
 
 	CEntity *CreateEntity(bool Preview = false);
+
+	void SetAngle(float Angle);
 	void AddAngle(int Add);
 	void AddLength(int Add);
 

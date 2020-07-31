@@ -239,10 +239,7 @@ void CDrawEditor::OnPlayerKill()
 		if (m_Entity == CGameWorld::ENTTYPE_DOOR)
 		{
 			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
-			{
-				m_Data.m_Laser.m_Angle = s_DefaultAngle;
-				((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
-			}
+				SetAngle(s_DefaultAngle);
 			else
 				AddAngle(45);
 		}
@@ -251,10 +248,15 @@ void CDrawEditor::OnPlayerKill()
 		m_RoundPos = !m_RoundPos;
 }
 
+void CDrawEditor::SetAngle(float Angle)
+{
+	m_Data.m_Laser.m_Angle = Angle;
+	((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+}
+
 void CDrawEditor::AddAngle(int Add)
 {
-	m_Data.m_Laser.m_Angle = ((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
-	((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+	SetAngle(((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180);
 }
 
 void CDrawEditor::AddLength(int Add)
