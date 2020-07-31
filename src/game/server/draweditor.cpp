@@ -240,7 +240,8 @@ void CDrawEditor::OnPlayerKill()
 		{
 			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
 				m_Data.m_Laser.m_Angle = s_DefaultAngle;
-			AddAngle(45);
+			else
+				AddAngle(45);
 		}
 	}
 	else
