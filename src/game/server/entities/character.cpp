@@ -2313,7 +2313,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// money xp bomb
-	if (!m_GotMoneyXPBomb && m_DDRaceState == DDRACE_STARTED && (m_TileIndex == TILE_MONEY_XP_BOMB || m_TileFIndex == TILE_MONEY_XP_BOMB))
+	if (!m_GotMoneyXPBomb && (m_TileIndex == TILE_MONEY_XP_BOMB || m_TileFIndex == TILE_MONEY_XP_BOMB))
 	{
 		if (m_pPlayer->GetAccID() < ACC_START)
 		{
@@ -2321,8 +2321,6 @@ void CCharacter::HandleTiles(int Index)
 				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
 			return;
 		}
-
-		CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 		const char* pMsg = "money xp bomb tile";
 		m_pPlayer->MoneyTransaction(500, pMsg);
