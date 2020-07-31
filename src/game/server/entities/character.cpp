@@ -2322,9 +2322,9 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		}
 
-		const char* pMsg = "money xp bomb tile";
-		m_pPlayer->MoneyTransaction(500, pMsg);
-		m_pPlayer->GiveXP(2500, pMsg);
+		m_pPlayer->MoneyTransaction(500);
+		m_pPlayer->GiveXP(2500);
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money xp bomb)");
 
 		m_GotMoneyXPBomb = true;
 	}
