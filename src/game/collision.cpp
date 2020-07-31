@@ -288,7 +288,14 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 			{
 				int Tile = GetDTileIndex(ModMapIndex);
 				int Flags = GetDTileFlags(ModMapIndex);
-				Restrictions |= ::GetMoveRestrictions(d, Tile, Flags, Extra);
+				//Restrictions |= ::GetMoveRestrictions(d, Tile, Flags, Extra);
+
+				// F-DDrace
+				int DoorRestrictions = 0|::GetMoveRestrictions(d, Tile, Flags, Extra);
+				Restrictions |= DoorRestrictions;
+
+				if (DoorRestrictions&CANTMOVE_DOWN)
+					Restrictions |= CANTMOVE_DOWN_LASERDOOR;
 			}
 		}
 	}
