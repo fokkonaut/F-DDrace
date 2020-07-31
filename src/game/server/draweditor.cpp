@@ -239,7 +239,10 @@ void CDrawEditor::OnPlayerKill()
 		if (m_Entity == CGameWorld::ENTTYPE_DOOR)
 		{
 			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
+			{
 				m_Data.m_Laser.m_Angle = s_DefaultAngle;
+				((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+			}
 			else
 				AddAngle(45);
 		}
