@@ -181,17 +181,27 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 void CDrawEditor::SendWindow()
 {
 	char aMsg[900];
-	str_copy(aMsg,
+	char aExtraOptions[256] = { 0 };
+
+	switch (m_Entity)
+	{
+	case CGameWorld::ENTTYPE_DOOR:
+		str_format(aExtraOptions, sizeof(aExtraOptions), "%s",
+			"Change angle of wall: A/D\n"
+			"Change length of wall: TAB + A/D\n"
+			"Add 45 degree steps: TAB + kill\n"
+		); break;
+	}
+
+	str_format(aMsg, sizeof(aMsg),
 		"DrawEditor\n\n"
 		"     Controls:\n\n"
 		"Object picker: Hold SPACE + shoot left/right\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n"
-		"Change angle of wall: A/D\n"
-		"Change length of wall: TAB + A/D\n"
 		"Toggle position rounding: kill\n"
-		"Add 45 degree steps: TAB + kill\n\n"
-		"     Objects:\n\n", sizeof(aMsg));
+		"%s"
+		"\n     Objects:\n\n", aExtraOptions);
 
 	for (int i = 0; i < NUM_DRAW_MODES; i++)
 	{

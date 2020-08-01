@@ -76,13 +76,13 @@ public:
 	void Tick();
 
 	bool Active();
-	bool Selecting() { return m_Selecting; }
+	bool Selecting() { return Active() && m_Selecting; }
 
 	void OnPlayerFire();
 	void OnWeaponSwitch();
 	void OnPlayerDeath();
 	void OnPlayerKill();
-	void OnInput(CNetObj_PlayerInput* pNewInput);
+	void OnInput(CNetObj_PlayerInput *pNewInput);
 
 	// used in snap functions of available entities to draw, returns true if the SnappingClient is not able to see the preview
 	bool OnSnapPreview(int SnappingClient);
