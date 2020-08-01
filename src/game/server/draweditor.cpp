@@ -261,7 +261,7 @@ void CDrawEditor::AddAngle(int Add)
 
 void CDrawEditor::AddLength(int Add)
 {
-	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.f, s_MaxLength);
+	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.1f, s_MaxLength);
 	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
 }
 
