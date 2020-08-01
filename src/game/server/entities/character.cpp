@@ -3297,7 +3297,7 @@ void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 
 void CCharacter::SetLastTouchedSwitcher(int Number)
 {
-	if (Number <= 0)
+	if (Number <= 0 || Team() == TEAM_SUPER)
 		return;
 
 	int SwitchID = GameServer()->Collision()->m_pSwitchers[Number].m_ClientID[Team()];
