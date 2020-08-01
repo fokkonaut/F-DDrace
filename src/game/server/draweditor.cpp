@@ -115,7 +115,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 	else
 		m_Erasing = false;
 
-	if (pNewInput->m_Direction != 0 && m_Entity == CGameWorld::ENTTYPE_DOOR)
+	if (pNewInput->m_Direction != 0 && m_DrawMode == DRAW_WALL)
 	{
 		if (m_EditStartTick == 0)
 			m_EditStartTick = Server()->Tick();
@@ -183,14 +183,13 @@ void CDrawEditor::SendWindow()
 	char aMsg[900];
 	char aExtraOptions[256] = { 0 };
 
-	switch (m_Entity)
+	if (m_DrawMode == DRAW_WALL)
 	{
-	case CGameWorld::ENTTYPE_DOOR:
 		str_format(aExtraOptions, sizeof(aExtraOptions), "%s",
 			"Change angle of wall: A/D\n"
 			"Change length of wall: TAB + A/D\n"
 			"Add 45 degree steps: TAB + kill\n"
-		); break;
+		);
 	}
 
 	str_format(aMsg, sizeof(aMsg),
@@ -246,7 +245,7 @@ void CDrawEditor::OnPlayerKill()
 {
 	if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 	{
-		if (m_Entity == CGameWorld::ENTTYPE_DOOR)
+		if (m_DrawMode == DRAW_WALL)
 		{
 			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
 				SetAngle(s_DefaultAngle);
