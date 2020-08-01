@@ -102,7 +102,7 @@ void CPortal::PlayerEnter()
 		if (GameServer()->Collision()->IntersectLine(m_Pos, apEnts[i]->GetPos(), 0, 0))
 			continue;
 
-		CCharacter *pOwner = 0;
+		CCharacter *pAffectedChr = 0;
 		CCharacter *pChr = 0;
 		CFlag *pFlag = 0;
 		CPickupDrop *pPickup = 0;
@@ -112,10 +112,14 @@ void CPortal::PlayerEnter()
 		case CGameWorld::ENTTYPE_CHARACTER:
 			{
 				pChr = (CCharacter *)apEnts[i];
+				pAffectedChr = pChr;
+
+				if (!pAffectedChr->CanCollide(m_Owner, false))
+					continue;
+
 				pChr->ReleaseHook();
 				pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
 				pChr->m_DDRaceState = DDRACE_CHEAT;
-				pOwner = pChr;
 
 				pChr->Core()->m_Killer.m_ClientID = m_Owner;
 				pChr->Core()->m_Killer.m_Weapon = -1;
@@ -127,9 +131,9 @@ void CPortal::PlayerEnter()
 				pFlag = (CFlag *)apEnts[i];
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
 				if (pFlag->GetCarrier())
-					pOwner = pFlag->GetCarrier();
+					pAffectedChr = pFlag->GetCarrier();
 				else if (pFlag->GetLastCarrier())
-					pOwner = pFlag->GetLastCarrier();
+					pAffectedChr = pFlag->GetLastCarrier();
 				break;
 			}
 		case CGameWorld::ENTTYPE_PICKUP_DROP:
@@ -137,13 +141,13 @@ void CPortal::PlayerEnter()
 				pPickup = (CPickupDrop *)apEnts[i];
 				pPickup->SetPos(m_pLinkedPortal->m_Pos);
 				if (pPickup->GetOwner())
-					pOwner = pPickup->GetOwner();
+					pAffectedChr = pPickup->GetOwner();
 				break;
 			}
 		}
 
-		int ID = pOwner ? pOwner->GetPlayer()->GetCID() : -1;
-		Mask128 TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, ID) : Mask128();
+		int ID = pAffectedChr ? pAffectedChr->GetPlayer()->GetCID() : -1;
+		Mask128 TeamMask = pAffectedChr ? pAffectedChr->Teams()->TeamMask(pAffectedChr->Team(), -1, ID) : Mask128();
 
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask);
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);

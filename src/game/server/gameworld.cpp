@@ -500,7 +500,7 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
@@ -512,7 +512,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (p == pNotThis)
 			continue;
 
-		if (CollideWith != -1 && !p->CanCollide(CollideWith))
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);

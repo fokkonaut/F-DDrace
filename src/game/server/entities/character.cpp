@@ -798,7 +798,7 @@ void CCharacter::FireWeapon()
 				bool Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
 				if (!Found || !PortalPos
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID()) // dont allow to place portals too close to other tees
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| (distance(PortalPos, m_Pos) > 2000.f)
