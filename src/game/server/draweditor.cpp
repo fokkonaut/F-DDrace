@@ -181,25 +181,20 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 void CDrawEditor::SendWindow()
 {
 	char aMsg[900];
-	char aExtraOptions[256] = { 0 };
+	char aExtraOptions[256];
 
-	if (m_DrawMode == DRAW_WALL)
-	{
-		str_format(aExtraOptions, sizeof(aExtraOptions), "%s",
-			"Change angle of wall: A/D\n"
-			"Change length of wall: TAB + A/D\n"
-			"Add 45 degree steps: TAB + kill\n"
-		);
-	}
+	str_format(aExtraOptions, sizeof(aExtraOptions), "     %s options:\n\n"
+		"Change angle of wall: A/D\n"
+		"Change length of wall: TAB + A/D\n"
+		"Add 45 degree steps: TAB + kill\n", GetMode(DRAW_WALL));
 
 	str_format(aMsg, sizeof(aMsg),
-		"DrawEditor\n\n"
 		"     Controls:\n\n"
 		"Object picker: Hold SPACE + shoot left/right\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n"
 		"Toggle position rounding: kill\n"
-		"%s"
+		"\n%s"
 		"\n     Objects:\n\n", aExtraOptions);
 
 	for (int i = 0; i < NUM_DRAW_MODES; i++)
