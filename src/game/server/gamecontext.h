@@ -752,7 +752,6 @@ private:
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
-	static void ConAccVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccAddEuros(IConsole::IResult* pResult, void* pUserData);
 

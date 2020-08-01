@@ -1358,33 +1358,6 @@ void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Logout(ID);
 }
 
-void CGameContext::ConAccVIP(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext* pSelf = (CGameContext*)pUserData;
-	
-	int ID = pSelf->GetAccount(pResult->GetString(0));
-	if (ID < ACC_START)
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
-		return;
-	}
-
-	char aBuf[64];
-	pSelf->m_Accounts[ID].m_VIP = !pSelf->m_Accounts[ID].m_VIP;
-
-	if (pSelf->m_Accounts[ID].m_ClientID >= 0)
-	{
-		str_format(aBuf, sizeof(aBuf), "You %s VIP", pSelf->m_Accounts[ID].m_VIP ? "got" : "lost");
-		pSelf->SendChatTarget(pSelf->m_Accounts[ID].m_ClientID, aBuf);
-	}
-
-	str_format(aBuf, sizeof(aBuf), "VIP for account '%s' has been %s", pSelf->m_Accounts[ID].m_Username, pSelf->m_Accounts[ID].m_VIP ? "enabled" : "disabled");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-
-	if (!pSelf->m_Accounts[ID].m_LoggedIn)
-		pSelf->Logout(ID);
-}
-
 void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

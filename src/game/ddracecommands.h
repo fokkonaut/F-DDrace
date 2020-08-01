@@ -145,7 +145,6 @@ CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Ma
 CONSOLE_COMMAND("acc_logout_port", "i[port]", CFGFLAG_SERVER, ConAccLogoutPort, this, "Logs out all accounts with last port i", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_logout", "s[username]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)
-CONSOLE_COMMAND("acc_vip", "s[username]", CFGFLAG_SERVER, ConAccVIP, this, "Enables or disables vip for account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_add_euros", "s[username] i[amount]", CFGFLAG_SERVER, ConAccAddEuros, this, "Adds i euros to account s", AUTHED_ADMIN)
 #undef CONSOLE_COMMAND
