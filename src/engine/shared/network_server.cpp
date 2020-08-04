@@ -94,24 +94,6 @@ int CNetServer::Update()
 	return 0;
 }
 
-int CNetServer::GetClientSlot(const NETADDR &Addr)
-{
-	int Slot = -1;
-
-	for(int i = 0; i < Config()->m_SvMaxClients; i++)
-	{
-		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE &&
-			m_aSlots[i].m_Connection.State() != NET_CONNSTATE_ERROR &&
-			net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
-
-		{
-			Slot = i;
-		}
-	}
-
-	return Slot;
-}
-
 SECURITY_TOKEN CNetServer::GetSecurityToken(const NETADDR &Addr)
 {
 	SHA256_CTX Sha256;

@@ -533,7 +533,6 @@ public:
 
 	char m_ShutdownMessage[128];
 
-	int GetClientSlot(const NETADDR &Addr);
 	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
 	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
 };
