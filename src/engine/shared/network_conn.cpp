@@ -6,6 +6,10 @@
 #include "network.h"
 #include <string.h>
 
+static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
+{
+	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
+}
 
 void CNetConnection::ResetStats()
 {
@@ -234,21 +238,37 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, SECURITY_TOKEN SecurityToken)
+void CNetConnection::DirectInit(const NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
 {
-	if (Sevendown && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
+	Reset();
+
+	m_State = NET_CONNSTATE_ONLINE;
+
+	m_PeerAddr = *pAddr;
+	mem_zero(m_ErrorString, sizeof(m_ErrorString));
+
+	int64 Now = time_get();
+	m_LastSendTime = Now;
+	m_LastRecvTime = Now;
+	m_LastUpdateTime = Now;
+
+	m_SecurityToken = SecurityToken;
+	m_Sevendown = true;
+}
+
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown)
+{
+	if (Sevendown && State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
 		// supposed to have a valid token in this packet, check it
-		if ((unsigned)pPacket->m_DataSize < sizeof(m_SecurityToken))
-			return -1;
+		if (pPacket->m_DataSize < (int)sizeof(m_SecurityToken))
+			return 0;
 		pPacket->m_DataSize -= sizeof(m_SecurityToken);
-		SECURITY_TOKEN Token;
-		memcpy(&Token, &pPacket->m_aChunkData[pPacket->m_DataSize], sizeof(Token));
-		if (m_SecurityToken != Token)
+		if (m_SecurityToken != ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]))
 		{
 			if(Config()->m_Debug)
-				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, Token);
-			return -1;
+				dbg_msg("security", "token mismatch, expected %d got %d", m_SecurityToken, ToSecurityToken(&pPacket->m_aChunkData[pPacket->m_DataSize]));
+			return 0;
 		}
 	}
 
@@ -345,28 +365,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 						m_LastRecvTime = Now;
 						m_LastUpdateTime = Now;
 						m_Sevendown = Sevendown;
-						if (m_Sevendown)
-						{
-							if (m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN
-								&& (unsigned)pPacket->m_DataSize >= 1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)
-								&& !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
-							{
-								m_SecurityToken = SecurityToken;
-								if(Config()->m_Debug)
-									dbg_msg("security", "generated token %d", m_SecurityToken);
-							}
-							else
-							{
-								if(Config()->m_Debug)
-									dbg_msg("security", "token not supported by client (packet size %d)", pPacket->m_DataSize);
-								m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
-							}
-							SendControl(NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
-						}
-						else
-						{
-							SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
-						}
+						SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 						if(Config()->m_Debug)
 							dbg_msg("connection", "got connection, sending accept");
 					}
@@ -466,22 +465,12 @@ int CNetConnection::Update()
 	else if(State() == NET_CONNSTATE_CONNECT)
 	{
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect every 500ms
-		{
-			if (m_Sevendown)
-				SendControl(NET_CTRLMSG_CONNECT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
-			else
-				SendControlWithToken(NET_CTRLMSG_CONNECT);
-		}
+			SendControlWithToken(NET_CTRLMSG_CONNECT);
 	}
 	else if(State() == NET_CONNSTATE_PENDING)
 	{
 		if(time_get()-m_LastSendTime > time_freq()/2) // send a new connect/accept every 500ms
-		{
-			if (m_Sevendown)
-				SendControl(NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
-			else
-				SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
-		}
+			SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 	}
 
 	return 0;

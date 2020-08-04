@@ -391,7 +391,7 @@ public:
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 	void SendPacketConnless(const char *pData, int DataSize);
 
@@ -416,6 +416,7 @@ public:
 	void DummyDrop();
 
 	bool m_Sevendown;
+	void DirectInit(const NETADDR *pAddr, SECURITY_TOKEN SecurityToken);
 };
 
 class CConsoleNetConnection
@@ -495,6 +496,7 @@ class CNetServer : public CNetBase
 	};
 
 	CSpamConn m_aSpamConns[NET_CONNLIMIT_IPS];
+	unsigned char m_SecurityTokenSeed[16];
 
 	CNetRecvUnpacker m_RecvUnpacker;
 
@@ -531,6 +533,8 @@ public:
 
 	char m_ShutdownMessage[128];
 
+	int GetClientSlot(const NETADDR &Addr);
+	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
 	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
 };
 
