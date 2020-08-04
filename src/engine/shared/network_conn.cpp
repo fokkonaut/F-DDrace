@@ -238,7 +238,7 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
-void CNetConnection::DirectInit(const NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
+void CNetConnection::DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown)
 {
 	Reset();
 
@@ -253,7 +253,9 @@ void CNetConnection::DirectInit(const NETADDR *pAddr, SECURITY_TOKEN SecurityTok
 	m_LastUpdateTime = Now;
 
 	m_SecurityToken = SecurityToken;
-	m_Sevendown = true;
+	m_Token = pPacket->m_Token;
+	m_PeerToken = pPacket->m_ResponseToken;
+	m_Sevendown = Sevendown;
 }
 
 int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown)

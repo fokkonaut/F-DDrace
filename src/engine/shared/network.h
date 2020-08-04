@@ -416,7 +416,7 @@ public:
 	void DummyDrop();
 
 	bool m_Sevendown;
-	void DirectInit(const NETADDR *pAddr, SECURITY_TOKEN SecurityToken);
+	void DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown);
 };
 
 class CConsoleNetConnection

@@ -327,16 +327,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 					{
 						m_NumClients++;
-						if (*pSevendown)
-						{
-							m_aSlots[i].m_Connection.DirectInit(&Addr, SecurityToken);
-						}
-						else
-						{
-							m_aSlots[i].m_Connection.SetToken(m_RecvUnpacker.m_Data.m_Token);
-							m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown);
-
-						}
+						m_aSlots[i].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown);
 						if(m_pfnNewClient)
 							m_pfnNewClient(i, *pSevendown, m_UserPtr);
 
