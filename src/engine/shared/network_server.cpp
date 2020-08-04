@@ -191,6 +191,8 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 								pChunk->m_ClientID = i;
 								pChunk->m_DataSize = m_RecvUnpacker.m_Data.m_DataSize;
 								pChunk->m_pData = m_RecvUnpacker.m_Data.m_aChunkData;
+								if (*pSevendown)
+									mem_copy(pChunk->m_aExtraData, m_RecvUnpacker.m_Data.m_aExtraData, sizeof(pChunk->m_aExtraData));
 								if(pResponseToken)
 									*pResponseToken = NET_TOKEN_NONE;
 								return 1;
@@ -258,68 +260,71 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 				}
 			}
 
-			if(AcceptConnect)
+			if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
 			{
-				if (Connlimit(Addr))
+				if(AcceptConnect)
 				{
-					const char LimitMsg[] = "Too many connections in a short time";
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, SecurityToken);
-					continue; // failed to add client
-				}
-
-				// check if there are free slots
-				if(m_NumClients >= m_MaxClients)
-				{
-					const char FullMsg[] = "This server is full";
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), *pSevendown, SecurityToken);
-					continue;
-				}
-
-				// only allow a specific number of players with the same ip
-				NETADDR ThisAddr = Addr, OtherAddr;
-				int FoundAddr = 1;
-				ThisAddr.port = 0;
-
-				bool Continue = false;
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
-				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-						continue;
-
-					OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
-					OtherAddr.port = 0;
-					if(!net_addr_comp(&ThisAddr, &OtherAddr))
+					if (Connlimit(Addr))
 					{
-						if(FoundAddr++ >= m_MaxClientsPerIP)
+						const char LimitMsg[] = "Too many connections in a short time";
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, SecurityToken);
+						continue; // failed to add client
+					}
+
+					// check if there are free slots
+					if(m_NumClients >= m_MaxClients)
+					{
+						const char FullMsg[] = "This server is full";
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), *pSevendown, SecurityToken);
+						continue;
+					}
+
+					// only allow a specific number of players with the same ip
+					NETADDR ThisAddr = Addr, OtherAddr;
+					int FoundAddr = 1;
+					ThisAddr.port = 0;
+
+					bool Continue = false;
+					for(int i = 0; i < NET_MAX_CLIENTS; i++)
+					{
+						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+							continue;
+
+						OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
+						OtherAddr.port = 0;
+						if(!net_addr_comp(&ThisAddr, &OtherAddr))
 						{
-							char aBuf[128];
-							str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-							SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, SecurityToken);
-							Continue = true;
-							break;
+							if(FoundAddr++ >= m_MaxClientsPerIP)
+							{
+								char aBuf[128];
+								str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
+								SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, SecurityToken);
+								Continue = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if(Continue)
-					continue;
+					if(Continue)
+						continue;
 
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
-				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+					for(int i = 0; i < NET_MAX_CLIENTS; i++)
 					{
-						m_NumClients++;
-						m_aSlots[i].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown);
-						if(m_pfnNewClient)
-							m_pfnNewClient(i, *pSevendown, m_UserPtr);
-
-						if (Config()->m_Debug)
+						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 						{
-							char aAddrStr[NETADDR_MAXSTRSIZE];
-							net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-							dbg_msg("security", "client accepted %s", aAddrStr);
+							m_NumClients++;
+							m_aSlots[i].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown);
+							if(m_pfnNewClient)
+								m_pfnNewClient(i, *pSevendown, m_UserPtr);
+
+							if (Config()->m_Debug)
+							{
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+								dbg_msg("security", "client accepted %s", aAddrStr);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
