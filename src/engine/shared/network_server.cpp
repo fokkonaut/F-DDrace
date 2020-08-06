@@ -228,11 +228,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 			else
 			{
 				if (!CNetBase::Config()->m_SvAllowSevendown)
-				{
-					const char UnableMsg[] = "0.6 connections are not accepted at this time";
-					SendControlMsg(&Addr, 0, 0, NET_CTRLMSG_CLOSE, UnableMsg, sizeof(UnableMsg), true);
 					continue;
-				}
 
 				if(ControlMsg == NET_CTRLMSG_CONNECT)
 				{
