@@ -787,6 +787,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -3158,7 +3159,7 @@ void CGameContext::OnInit()
 				dbg_msg("game layer", "found no player hooking tile");
 			}
 
-			if (Index >= ENTITY_OFFSET)
+			if (Index > ENTITY_OFFSET)
 			{
 				m_pController->OnEntity(Index, Pos, LAYER_GAME, pTiles[y * pTileMap->m_Width + x].m_Flags);
 			}
@@ -3194,7 +3195,7 @@ void CGameContext::OnInit()
 					m_Tuning.Set("player_hooking", 0);
 					dbg_msg("front layer", "found no player hooking tile");
 				}
-				if (Index >= ENTITY_OFFSET)
+				if (Index > ENTITY_OFFSET)
 				{
 					m_pController->OnEntity(Index, Pos, LAYER_FRONT, pFront[y * pTileMap->m_Width + x].m_Flags);
 				}
@@ -3204,7 +3205,7 @@ void CGameContext::OnInit()
 				Index = pSwitch[y * pTileMap->m_Width + x].m_Type;
 				// TODO: Add off by default door here
 				// if (Index == TILE_DOOR_OFF)
-				if (Index >= ENTITY_OFFSET)
+				if (Index > ENTITY_OFFSET)
 				{
 					m_pController->OnEntity(Index, Pos, LAYER_SWITCH, pSwitch[y * pTileMap->m_Width + x].m_Flags, pSwitch[y * pTileMap->m_Width + x].m_Number);
 				}
@@ -3874,6 +3875,7 @@ int CGameContext::AddAccount()
 	Account.m_PortalRifle = false;
 	Account.m_ExpireDatePortalRifle = 0;
 	Account.m_Version = ACC_CURRENT_VERSION;
+	Account.m_PlotID = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3931,6 +3933,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
 		case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
 		case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
+		case ACC_PLOTID:					m_Accounts[ID].m_PlotID = atoi(pData); break;
 		}
 	}
 }
@@ -3982,6 +3985,7 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
 		AccFile << ACC_CURRENT_VERSION << "\n";
+		AccFile << m_Accounts[ID].m_PlotID << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}

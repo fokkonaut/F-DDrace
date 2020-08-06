@@ -21,7 +21,7 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_Pos = Pos;
 
 	// F-DDrace
-	m_PlotID = 0;
+	m_PlotID = -1;
 	m_BrushCID = -1;
 }
 

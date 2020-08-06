@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
+#include <game/server/plot.h>
 #include "shop.h"
 
 #include "eventhandler.h"
@@ -350,6 +351,8 @@ public:
 	int GetAccount(const char* pUsername);
 	void FreeAccount(int ID, bool Silent = false);
 
+	std::vector<CPlot> m_Plots;
+
 	struct TopAccounts
 	{
 		int m_Level;
@@ -413,6 +416,7 @@ public:
 		bool m_PortalRifle;
 		time_t m_ExpireDatePortalRifle;
 		int m_Version;
+		int m_PlotID;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -458,6 +462,7 @@ public:
 		ACC_PORTAL_RIFLE,
 		ACC_EXPIRE_DATE_PORTAL_RIFLE,
 		ACC_VERSION,
+		ACC_PLOTID,
 		NUM_ACCOUNT_VARIABLES
 	};
 

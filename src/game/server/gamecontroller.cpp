@@ -167,14 +167,17 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	x=(Pos.x-16.0f)/32.0f;
 	y=(Pos.y-16.0f)/32.0f;
 	int sides[8];
-	sides[0]=GameServer()->Collision()->Entity(x,y+1, Layer);
-	sides[1]=GameServer()->Collision()->Entity(x+1,y+1, Layer);
-	sides[2]=GameServer()->Collision()->Entity(x+1,y, Layer);
-	sides[3]=GameServer()->Collision()->Entity(x+1,y-1, Layer);
-	sides[4]=GameServer()->Collision()->Entity(x,y-1, Layer);
-	sides[5]=GameServer()->Collision()->Entity(x-1,y-1, Layer);
-	sides[6]=GameServer()->Collision()->Entity(x-1,y, Layer);
-	sides[7]=GameServer()->Collision()->Entity(x-1,y+1, Layer);
+	vec2 sidepos[8];
+	sidepos[0]=vec2(x,y+1);
+	sidepos[1]=vec2(x+1,y+1);
+	sidepos[2]=vec2(x+1,y);
+	sidepos[3]=vec2(x+1,y-1);
+	sidepos[4]=vec2(x,y-1);
+	sidepos[5]=vec2(x-1,y-1);
+	sidepos[6]=vec2(x-1,y);
+	sidepos[7]=vec2(x-1,y+1);
+	for (int i = 0; i < 8; i++)
+		sides[i] = GameServer()->Collision()->Entity(sidepos[i].x, sidepos[i].y, Layer);
 
 	if(Index == ENTITY_DOOR)
 	{
@@ -188,6 +191,27 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 					Pos, //Pos
 					pi / 4 * i, //Rotation
 					32 * 3 + 32 *(sides[i] - ENTITY_LASER_SHORT) * 3, //Length
+					Number //Number
+				);
+			}
+		}
+	}
+	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_PLOT_DOOR
+		&& GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos)) == 0
+		&& GameServer()->Collision()->GetSwitchNumber(GameServer()->Collision()->GetMapIndex(Pos)) > 0)
+	{
+		for(int i = 0; i < 8;i++)
+		{
+			vec2 Pos2 = vec2(sidepos[i].x*32.f+16.f, sidepos[i].y*32.f+16.f);
+			int Delay = GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos2));
+			if (sides[i] == TILE_SWITCH_PLOT_DOOR && Delay > 0)
+			{
+				new CDoor
+				(
+					&GameServer()->m_World, //GameWorld
+					Pos, //Pos
+					pi / 4 * i, //Rotation
+					32 * Delay, //Length
 					Number //Number
 				);
 			}

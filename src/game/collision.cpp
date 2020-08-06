@@ -60,6 +60,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 {
 	Dest();
 	m_NumSwitchers = 0;
+	m_NumPlots = 0;
 	m_pLayers = pLayers;
 	m_pConfig = pConfig;
 	m_Width = m_pLayers->GameLayer()->m_Width;
@@ -114,22 +115,29 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		int Index;
 		if (m_pSwitch)
 		{
-			if (m_pSwitch[i].m_Number > m_NumSwitchers)
+			Index = m_pSwitch[i].m_Type;
+			bool IsPlot = IsPlotTile(Index);
+
+			if (IsPlot && m_pSwitch[i].m_Number > m_NumPlots)
+				m_NumPlots = m_pSwitch[i].m_Number;
+
+			if (!IsPlot && m_pSwitch[i].m_Number > m_NumSwitchers)
 				m_NumSwitchers = m_pSwitch[i].m_Number;
 
 			if (m_pSwitch[i].m_Number)
+			{
 				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
+				if (IsPlot)
+					m_pDoor[i].m_Index = Index;
+			}
 			else
 				m_pDoor[i].m_Number = 0;
-
-			Index = m_pSwitch[i].m_Type;
 
 			if (Index <= TILE_NPH_START)
 			{
 				if ((Index >= TILE_JUMP && Index <= TILE_BONUS)
 					|| Index == TILE_ALLOW_TELE_GUN
-					|| Index == TILE_ALLOW_BLUE_TELE_GUN
-					|| Index == TILE_SWITCH_PLOT)
+					|| Index == TILE_ALLOW_BLUE_TELE_GUN)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
@@ -137,11 +145,25 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		}
 	}
 
+	// F-DDrace
+	if (m_pSwitch && m_pDoor)
+	{
+		// loop over the map again and correctly set the plot numbers
+		for (int i = 0; i < m_Width * m_Height; i++)
+		{
+			if (IsPlotTile(m_pDoor[i].m_Index) && m_pDoor[i].m_Number > 0)
+			{
+				m_pDoor[i].m_Number += m_NumSwitchers;
+				m_pSwitch[i].m_Number += m_NumSwitchers;
+			}
+		}
+	}
+
 	if (m_NumSwitchers)
 	{
-		m_pSwitchers = new SSwitchers[m_NumSwitchers + 1];
+		m_pSwitchers = new SSwitchers[m_NumSwitchers + m_NumPlots + 1];
 
-		for (int i = 0; i < m_NumSwitchers + 1; ++i)
+		for (int i = 0; i < m_NumSwitchers + m_NumPlots + 1; ++i)
 		{
 			m_pSwitchers[i].m_Initial = true;
 			for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -1381,4 +1403,21 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 	if (pOutBeforeCollision)
 		* pOutBeforeCollision = Pos1;
 	return 0;
+}
+
+bool CCollision::IsPlotTile(int Index)
+{
+	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;
+}
+
+int CCollision::GetPlotID(int Index)
+{
+	if (Index >= 0 && m_pSwitch && m_pSwitch[Index].m_Type == TILE_SWITCH_PLOT && m_pSwitch[Index].m_Number > 0)
+		return m_pSwitch[Index].m_Number - m_NumSwitchers;
+	return 0;
+}
+
+int CCollision::GetSwitchIDByPlotID(int PlotID)
+{
+	return PlotID + m_NumSwitchers;
 }

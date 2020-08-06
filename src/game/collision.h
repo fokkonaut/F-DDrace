@@ -124,13 +124,18 @@ public:
 	int m_NumSwitchers;
 
 	// F-DDrace
+	class CConfig *m_pConfig;
 	bool TileUsed(int Index) { return GetRandomTile(Index) != vec2(-1, -1); }
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
 	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
 	void UnsetDCollisionAt(float x, float y);
 
-	class CConfig *m_pConfig;
+	// plots
+	bool IsPlotTile(int Index);
+	int GetPlotID(int Index);
+	int GetSwitchIDByPlotID(int PlotID);
+	int m_NumPlots;
 
 private:
 
@@ -140,6 +145,7 @@ private:
 	class CSwitchTile* m_pSwitch;
 	class CTuneTile* m_pTune;
 	class CDoorTile* m_pDoor;
+
 	struct SSwitchers
 	{
 		bool m_Status[MAX_CLIENTS];
@@ -153,6 +159,7 @@ private:
 
 public:
 
+	// access to plots: PlotID + m_NumSwitchers && PlotID < m_NumPlots + 1
 	SSwitchers* m_pSwitchers;
 };
 

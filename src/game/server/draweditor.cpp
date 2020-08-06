@@ -3,8 +3,7 @@
 #include <game/server/entities/door.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
-
-#define PLOTID_TEST 1
+#include <engine/shared/config.h>
 
 static float s_MaxLength = 10.f;
 static float s_DefaultAngle = 90 * pi / 180;
@@ -26,6 +25,23 @@ CDrawEditor::CDrawEditor(CCharacter *pChr)
 bool CDrawEditor::Active()
 {
 	return m_pCharacter->GetActiveWeapon() == WEAPON_DRAW_EDITOR;
+}
+
+bool CDrawEditor::CanPlace()
+{
+	CCollision *pCol = GameServer()->Collision();
+	int TilePlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
+	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID > 0 && TilePlotID == GetPlotID()) || Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvFreeDrawLevel));
+}
+
+bool CDrawEditor::CanRemove(CEntity *pEnt)
+{
+	return CanPlace() && pEnt && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvFreeDrawLevel);
+}
+
+int CDrawEditor::GetPlotID()
+{
+	return GameServer()->m_Accounts[m_pCharacter->GetPlayer()->GetAccID()].m_PlotID;
 }
 
 void CDrawEditor::Tick()
@@ -70,13 +86,12 @@ void CDrawEditor::OnPlayerFire()
 		return;
 	}
 
-	CCollision *pCol = GameServer()->Collision();
-	//int Index = pCol->GetMapIndex(m_Pos);
-	if (pCol->CheckPoint(m_Pos)/* || pCol->IsSwitch(Index) != TILE_SWITCH_PLOT || pCol->GetSwitchNumber(Index) != PLOTID_TEST*/)
+	if (!CanPlace())
 		return;
 
 	CEntity *pEntity = CreateEntity();
-	pEntity->m_PlotID = PLOTID_TEST;
+	CCollision *pCol = GameServer()->Collision();
+	pEntity->m_PlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
@@ -105,7 +120,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR);
 		CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
 
-		if (pEntity && pEntity->m_PlotID == PLOTID_TEST)
+		if (CanRemove(pEntity))
 		{
 			GameServer()->m_World.DestroyEntity(pEntity);
 			m_pCharacter->SetAttackTick(Server()->Tick());

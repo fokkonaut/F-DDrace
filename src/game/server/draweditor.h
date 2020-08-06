@@ -37,6 +37,10 @@ class CDrawEditor
 	void AddAngle(int Add);
 	void AddLength(int Add);
 
+	bool CanPlace();
+	bool CanRemove(CEntity *pEnt);
+	int GetPlotID();
+
 	vec2 m_Pos;
 	int m_Entity;
 	bool m_RoundPos;

@@ -35,8 +35,6 @@ enum
 
 	// game layer tiles
 	ENTITY_OFFSET=255-16*4,
-
-	ENTITY_NULL=ENTITY_OFFSET,
 	ENTITY_SPAWN,
 	ENTITY_SPAWN_RED,
 	ENTITY_SPAWN_BLUE,
@@ -218,7 +216,11 @@ enum
 
 	TILE_PORTAL_RIFLE_STOP = 189,
 	//End of higher tiles
-	TILE_SWITCH_PLOT = 192, // this one is just for switch layer because it can be mapped from the clientside with different indices
+
+	// Switch layer only for plots
+	TILE_SWITCH_PLOT = 192, // plot size; delay=0: small, delay=1: big
+	TILE_SWITCH_PLOT_DOOR, // door lenght in blocks: delay
+	TILE_SWITCH_PLOT_TOTELE, // totele plot position
 
 	//Layers
 	LAYER_GAME=0,
