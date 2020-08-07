@@ -2015,6 +2015,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (Price <= 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You need to enter a valid price");
+			return;
+		}
+
 		pPlayer->m_PlotAuctionPrice = Price;
 
 		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money (plot expires on %s). Use '/plot buy %d %s' to buy the plot",
