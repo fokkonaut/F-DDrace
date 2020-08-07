@@ -316,13 +316,13 @@ void CShop::SendWindow(int ClientID, int Item)
 		else if (IsType(TYPE_SHOP_PLOT))
 		{
 			int Size = m_pGameServer->m_aPlots[Item].m_Size;
-			bool Owned = m_pGameServer->m_aPlots[Item].m_aOwner[0] != '\0';
+			bool Owned = m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0;
 			str_format(aDescription, sizeof(aDescription),
 				"Size: %s\n"
 				"Owner: %s\n"
 				"Rented until: %s",
 				Size == 0 ? "small" : Size == 1 ? "big" : "?",
-				Owned ? m_pGameServer->m_aPlots[Item].m_aOwner : "for sale",
+				Owned ? m_pGameServer->m_aPlots[Item].m_aDisplayName : "for sale",
 				Owned ? m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate) : "for sale");
 		}
 
@@ -438,7 +438,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	else if (IsType(TYPE_SHOP_PLOT))
 	{
 		int OwnPlotID = m_pGameServer->GetPlotID(pPlayer->GetAccID());
-		if (m_pGameServer->m_aPlots[Item].m_aOwner[0] != '\0')
+		if (m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0)
 		{
 			m_pGameServer->SendChatTarget(ClientID, "This plot is already sold to someone else");
 			return;

@@ -1022,7 +1022,7 @@ void CGameContext::OnTick()
 		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
 			InstagibTick(i);
 
-	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 60) != 0)
+	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 30) != 0)
 		ExpirePlots();
 
 #ifdef CONF_DEBUG

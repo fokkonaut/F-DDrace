@@ -221,7 +221,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		int PlotID = GameServer()->Collision()->GetPlotBySwitch(Number);
 		GameServer()->m_aPlots[PlotID].m_ToTele = Pos;
-		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->GetSwitchDelay(Number);
+		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos));
 	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
 	{
