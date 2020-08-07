@@ -129,7 +129,7 @@ void CPickup::Tick()
 						{
 							for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 							{
-								if (pChr->GetWeaponGot(i))
+								if (pChr->GetWeaponGot(i) && i != WEAPON_DRAW_EDITOR)
 								{
 									pChr->SetWeaponGot(i, false);
 									pChr->SetWeaponAmmo(i, 0);
