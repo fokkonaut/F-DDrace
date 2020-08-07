@@ -351,6 +351,7 @@ public:
 	void InitPlots();
 	void ReadPlotStats(int ID);
 	void WritePlotStats(int ID);
+	void SetPlotInfo(int PlotID, int AccID);
 
 	void SetExpireDate(time_t *pDate, int Days);
 	bool IsExpired(time_t Date);

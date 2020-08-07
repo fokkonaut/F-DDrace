@@ -1450,7 +1450,12 @@ void CPlayer::OnLogout()
 		m_pCharacter->UnsetSpookyGhost();
 
 		// cancel current plot auction
-		m_PlotAuctionPrice = 0;
+		if (m_PlotAuctionPrice != 0)
+		{
+			m_PlotAuctionPrice = 0;
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", Server()->ClientName(m_ClientID));
+		}
 	}
 }
 

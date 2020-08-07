@@ -1945,7 +1945,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	if (!pChr)
 		return;
 
-	char aBuf[128];
+	char aBuf[256];
 	const char *pCommand = pResult->GetString(0);
 	int Price = max(0, pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 0); // clamp price to 0
 	const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
@@ -1996,34 +1996,17 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSeller->MoneyTransaction(Price, "sold plot");
 			pSeller->m_PlotAuctionPrice = 0;
 
-			str_copy(pSelf->m_aPlots[PlotID].m_aOwner, pSelf->m_Accounts[pPlayer->GetAccID()].m_Username, sizeof(pSelf->m_aPlots[PlotID].m_aOwner));
-			str_copy(pSelf->m_aPlots[PlotID].m_aDisplayName, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastPlayerName, sizeof(pSelf->m_aPlots[PlotID].m_aDisplayName));
-			pSelf->WritePlotStats(PlotID);
+			pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
+		}
+		else
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "The price you entered does not match the offer");
 		}
 	}
-
-	// check for the important commands
-	if (OwnPlotID == 0)
+	else if (OwnPlotID == 0)
 	{
+		// check for the important commands
 		pSelf->SendChatTarget(pResult->m_ClientID, "You need a plot to use this command");
-		return;
-	}
-	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
-		return;
-	}
-
-	// commands
-	if (!str_comp_nocase(pCommand, "edit"))
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
-		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
-		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
-	}
-	else if (!str_comp_nocase(pCommand, "clear"))
-	{
-		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
 	}
 	else if (!str_comp_nocase(pCommand, "sell"))
 	{
@@ -2035,10 +2018,23 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		pPlayer->m_PlotAuctionPrice = Price;
 
-		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);
 		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money (plot expires on %s). Use '/plot buy %d %s' to buy the plot",
-				pOwnName, OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate), pOwnName, Price);
+			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate), Price, pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+	}
+	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
+	}
+	else if (!str_comp_nocase(pCommand, "edit"))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
+		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
+		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
+	}
+	else if (!str_comp_nocase(pCommand, "clear"))
+	{
+		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
 	}
 }
 

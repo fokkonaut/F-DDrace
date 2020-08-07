@@ -3866,6 +3866,16 @@ int CGameContext::GetPlotID(int AccID)
 	return 0;
 }
 
+void CGameContext::SetPlotInfo(int PlotID, int AccID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || AccID < ACC_START)
+		return;
+
+	str_copy(m_aPlots[PlotID].m_aOwner, m_Accounts[AccID].m_Username, sizeof(m_aPlots[PlotID].m_aOwner));
+	str_copy(m_aPlots[PlotID].m_aDisplayName, m_Accounts[AccID].m_aLastPlayerName, sizeof(m_aPlots[PlotID].m_aDisplayName));
+	WritePlotStats(PlotID);
+}
+
 void CGameContext::ExpirePlots()
 {
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
