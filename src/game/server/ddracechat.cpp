@@ -1991,6 +1991,9 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		{
 			int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
 
+			str_format(aBuf, sizeof(aBuf), "Plot %d has been bought by '%s'", PlotID, pSelf->Server()->ClientName(pResult->m_ClientID));
+			pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+
 			// a message to you
 			str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", PlotID, pName);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
