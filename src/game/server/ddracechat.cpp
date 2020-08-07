@@ -1969,6 +1969,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (ID == pResult->m_ClientID)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't buy your own plot");
+			return;
+		}
+
 		if (!pSeller->m_PlotAuctionPrice)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player doesn't sell a plot");
@@ -2018,6 +2024,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (pPlayer->GetAccID() < ACC_START)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+			return;
+		}
+
+		if (pPlayer->m_PlotAuctionPrice != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You already sell your plot");
 			return;
 		}
 
