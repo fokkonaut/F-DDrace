@@ -2023,8 +2023,11 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		pPlayer->m_PlotAuctionPrice = Price;
 
-		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money (plot expires on %s). Use '/plot buy %d %s' to buy the plot",
-			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate), Price, pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "'%s' started an auction on plot %d for %d money (plot expires on %s)",
+			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate));
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "Use '/plot buy %d %s' to buy the plot", Price, pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
