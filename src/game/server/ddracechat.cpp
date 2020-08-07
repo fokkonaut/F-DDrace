@@ -1952,7 +1952,6 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
 	int OwnPlotID = pSelf->GetPlotID(OwnAccID);
-	CGameContext::AccountInfo *Account = &pSelf->m_Accounts[OwnAccID];
 
 	if (!str_comp_nocase(pCommand, "buy"))
 	{
