@@ -171,8 +171,9 @@ void CCharacter::HandleJetpack()
 	if (FullAuto && (m_LatestInput.m_Fire & 1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
-	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
-		return;
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+		if (GameServer()->m_pShop[i]->CanChangePage(m_pPlayer->GetCID()))
+			return;
 
 	if (!WillFire)
 		return;
@@ -387,11 +388,14 @@ void CCharacter::FireWeapon()
 	}
 
 	// shop window
-	if (GameServer()->m_pShop->CanChangePage(m_pPlayer->GetCID()))
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
 	{
-		if (ClickedFire)
-			GameServer()->m_pShop->OnPageChange(m_pPlayer->GetCID(), GetAimDir());
-		return;
+		if (GameServer()->m_pShop[i]->CanChangePage(m_pPlayer->GetCID()))
+		{
+			if (ClickedFire)
+				GameServer()->m_pShop[i]->OnPageChange(m_pPlayer->GetCID(), GetAimDir());
+			return;
+		}
 	}
 
 	if(FullAuto && (m_LatestInput.m_Fire&1) && m_aWeapons[GetActiveWeapon()].m_Ammo && !m_FreezeTime)
@@ -456,23 +460,27 @@ void CCharacter::FireWeapon()
 		{
 			case WEAPON_HAMMER:
 			{
-				if (m_DoorHammer)
+				// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
+				CDoor* apDoors[12];
+				int NumDoors = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apDoors, 12, CGameWorld::ENTTYPE_DOOR);
+				for (int i = 0; i < NumDoors; i++)
 				{
-					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
-					CDoor* apEnts[12];
-					int Num = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apEnts, 12, CGameWorld::ENTTYPE_DOOR);
-					for (int i = 0; i < Num; i++)
+					CDoor* pDoor = apDoors[i];
+
+					if ((pDoor->m_PlotID > 0 && pDoor->m_PlotID != GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PlotID) // plot door
+						|| (pDoor->m_PlotID == -1 && !m_DoorHammer) // normal doorhammer
+						|| pDoor->m_Number == 0) // number 0 is forbidden
+						continue;
+
+					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
 					{
-						CDoor* pDoor = apEnts[i];
-
-						// disallow doorhammer on walls, they are no doors AND on doors with no number
-						if (pDoor->m_PlotID || !pDoor->m_Number)
-							continue;
-
-						if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
+						bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
+						if (pDoor->m_PlotID > 0)
 						{
-							bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
-
+							GameServer()->SetPlotDoorStatus(pDoor->m_PlotID, !Status);
+						}
+						else
+						{
 							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = !Status;
 							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
 							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = Status ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
@@ -2198,10 +2206,14 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	//shop
-	if (m_TileIndex == TILE_SHOP || m_TileFIndex == TILE_SHOP)
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
 	{
-		if (m_LastIndexTile != TILE_SHOP && m_LastIndexFrontTile != TILE_SHOP)
-			GameServer()->m_pShop->OnShopEnter(m_pPlayer->GetCID());
+		int Index = i == TYPE_SHOP_NORMAL ? TILE_SHOP : i == TYPE_SHOP_PLOT ? TILE_PLOT_SHOP : -1;
+		if (m_TileIndex == Index || m_TileFIndex == Index)
+		{
+			if (m_LastIndexTile != Index && m_LastIndexFrontTile != Index)
+				GameServer()->m_pShop[i]->OnShopEnter(m_pPlayer->GetCID());
+		}
 	}
 
 	// helper only
@@ -3112,7 +3124,8 @@ void CCharacter::FDDraceInit()
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
 
-	GameServer()->m_pShop->Reset(m_pPlayer->GetCID());
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+		GameServer()->m_pShop[i]->Reset(m_pPlayer->GetCID());
 
 	m_LastTouchedSwitcher = -1;
 	m_LastTouchedPortalBy = -1;
@@ -3241,8 +3254,12 @@ void CCharacter::FDDraceTick()
 
 void CCharacter::HandleLastIndexTiles()
 {
-	if (m_TileIndex != TILE_SHOP && m_TileFIndex != TILE_SHOP)
-		GameServer()->m_pShop->OnShopLeave(m_pPlayer->GetCID());
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	{
+		int Index = i == TYPE_SHOP_NORMAL ? TILE_SHOP : i == TYPE_SHOP_PLOT ? TILE_PLOT_SHOP : -1;
+		if (m_TileIndex != Index && m_TileFIndex != Index)
+			GameServer()->m_pShop[i]->OnShopLeave(m_pPlayer->GetCID());
+	}
 
 	if (m_MoneyTile)
 	{
@@ -3251,6 +3268,21 @@ void CCharacter::HandleLastIndexTiles()
 			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
 			m_MoneyTile = false;
 		}
+	}
+}
+
+int CCharacter::GetCurrentTilePlotID()
+{
+	return GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
+}
+
+void CCharacter::TeleOutOfPlot(int PlotID)
+{
+	int TilePlotID = GetCurrentTilePlotID();
+	if (TilePlotID > 0 && PlotID > 0 && TilePlotID == PlotID)
+	{
+		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+		GiveWeapon(WEAPON_DRAW_EDITOR, true);
 	}
 }
 
@@ -3307,6 +3339,11 @@ void CCharacter::SetLastTouchedSwitcher(int Number)
 		Core()->m_Killer.m_Weapon = -1;
 		m_LastTouchedSwitcher = Number;
 	}
+}
+
+bool CCharacter::IsFreeDraw()
+{
+	return Server()->GetAuthedState(m_pPlayer->GetCID()) >= Config()->m_SvFreeDrawLevel;
 }
 
 void CCharacter::DropFlag()
@@ -3499,9 +3536,11 @@ int CCharacter::GetSpawnWeaponIndex(int Weapon)
 void CCharacter::UpdateWeaponIndicator()
 {
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
-		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN)
-		|| GameServer()->m_pShop->IsInShop(m_pPlayer->GetCID()))
+		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+		if (GameServer()->m_pShop[i]->IsInShop(m_pPlayer->GetCID()))
+			return;
 
 	char aBuf[256];
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))

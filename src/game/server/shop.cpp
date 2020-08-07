@@ -1,47 +1,77 @@
 // made by fokkonaut
 
 #include "shop.h"
+#include "gamecontext.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
 int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 3, 14, 17 };
 
-CShop::CShop(CGameContext *pGameServer)
+CShop::CShop(CGameContext *pGameServer, int Type)
 {
 	m_pGameServer = pGameServer;
 	m_pServer = m_pGameServer->Server();
+	m_Type = Type;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		Reset(i);
 
 	m_aItems[0].m_Used = true; // item 0 is technically PAGE_MAIN, so we dont want to get conflicts there
-	for (int i = 1; i < NUM_ITEMS; i++)
+	for (int i = 1; i < MAX_PLOTS; i++)
 		m_aItems[i].m_Used = false;
 
-	AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
-	AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
-	AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
-	AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
-	AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
-	AddItem("VIP", 1, 5, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.", true);
-	AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
-	AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
-	AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
-	AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
-	AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-	AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
-
-	static char aaBuf[NUM_POLICE_LEVELS][32];
-	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
+	if (IsType(TYPE_SHOP_NORMAL))
 	{
-		str_format(aaBuf[i], sizeof(aaBuf[i]), "Police Rank %d", i+1);
-		AddItem(aaBuf[i], m_pGameServer->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
+		m_NumItems = NUM_ITEMS;
+		m_NumItemsList = NUM_ITEMS_LIST;
+
+		AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
+		AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
+		AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
+		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
+		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
+		AddItem("VIP", 1, 5, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.", true);
+		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+		AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
+		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
+		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
+		AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
+
+		static char aaBuf[NUM_POLICE_LEVELS][32];
+		for (int i = 0; i < NUM_POLICE_LEVELS; i++)
+		{
+			str_format(aaBuf[i], sizeof(aaBuf[i]), "Police Rank %d", i+1);
+			AddItem(aaBuf[i], m_pGameServer->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
+		}
+
+		static char aaBuf2[NUM_TASER_LEVELS][32];
+		for (int i = 0; i < NUM_TASER_LEVELS; i++)
+		{
+			str_format(aaBuf2[i], sizeof(aaBuf2[i]), "Taser Level %d", i+1);
+			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, m_pGameServer->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
+		}
 	}
-
-	static char aaBuf2[NUM_TASER_LEVELS][32];
-	for (int i = 0; i < NUM_TASER_LEVELS; i++)
+	else if (IsType(TYPE_SHOP_PLOT))
 	{
-		str_format(aaBuf2[i], sizeof(aaBuf2[i]), "Taser Level %d", i+1);
-		AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, m_pGameServer->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
+		m_NumItems = m_NumItemsList = m_pGameServer->Collision()->m_NumPlots + 1;
+
+		int Size;
+		static char aaName[MAX_PLOTS][32];
+		int Level;
+		int Price;
+		static char aaDescription[MAX_PLOTS][64];
+		for (int i = 0; i < m_NumItems; i++)
+		{
+			Size = m_pGameServer->m_aPlots[i].m_Size;
+			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i+1);
+			Level = (Size + 1) * 20;
+			Price = (Size + 1) * 50000;
+			str_format(aaDescription[i], sizeof(aaDescription[i]),
+				"Size: %s\n"
+				"Owner: %s",
+				Size == 0 ? "small" : Size == 1 ? "big" : "?", m_pGameServer->m_aPlots[i].m_aOwner[0] ? m_pGameServer->m_aPlots[i].m_aOwner : "for sale");
+			AddItem(aaName[i], Level, Price, TIME_7_DAYS, aaDescription[i]);
+		}
 	}
 }
 
@@ -57,7 +87,7 @@ void CShop::Reset(int ClientID)
 
 void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro)
 {
-	for (int i = 0; i < NUM_ITEMS; i++)
+	for (int i = 0; i < m_NumItems; i++)
 	{
 		if (!m_aItems[i].m_Used)
 		{
@@ -78,13 +108,13 @@ void CShop::OnShopEnter(int ClientID)
 	if (m_InShop[ClientID])
 		return;
 
-	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID))
+	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID, m_Type))
 	{
 		CCharacter* pChr = m_pGameServer->GetPlayerChar(ClientID);
 
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", m_pServer->ClientName(ClientID));
-		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, aBuf);
+		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, m_Type, ClientID), CHAT_SINGLE, ClientID, aBuf);
 	}
 
 	m_InShop[ClientID] = true;
@@ -97,9 +127,9 @@ void CShop::OnShopLeave(int ClientID)
 
 	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
 
-	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID))
+	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID, m_Type))
 	{
-		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
+		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, m_Type, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
 		m_AntiSpamTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 5;
 	}
 
@@ -148,7 +178,7 @@ bool CShop::CanChangePage(int ClientID)
 
 const char *CShop::GetHeadline(int Item)
 {
-	if (Item < ITEM_RAINBOW || Item > NUM_ITEMS)
+	if (Item < ITEM_RAINBOW || Item >= m_NumItems)
 		return "Unknown";
 
 	static char aRet[64];
@@ -177,15 +207,19 @@ const char *CShop::FormatMotd(const char *pMsg, int Item)
 	static char aRet[900];
 
 	int Page = Item;
-	if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5) Page = ITEM_POLICE;
-	else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7) Page = ITEM_TASER;
-	else if (Item == -1) Page = NUM_ITEMS_LIST;
+	if (Item == -1) Page = NUM_ITEMS_LIST;
 	else if (Item == -2) Page = NUM_ITEMS_LIST+1;
+	else if (IsType(TYPE_SHOP_NORMAL))
+	{
+		if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5) Page = ITEM_POLICE;
+		else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7) Page = ITEM_TASER;
+	}
 
 	str_format(aPage, sizeof(aPage), "~ %d ~", Page);
 
+	int NumNewLines = IsType(TYPE_SHOP_NORMAL) ? pNumNewLines[Page] : IsType(TYPE_SHOP_PLOT) ? 10 : 0;
 	aTemp[0] = 0;
-	for (int i = 0; i < pNumNewLines[Page]; i++)
+	for (int i = 0; i < NumNewLines; i++)
 	{
 		str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
 		str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
@@ -212,6 +246,7 @@ const char *CShop::GetTimeMessage(int Time)
 	case TIME_FOREVER: return "You own this item forever.";
 	case TIME_30_DAYS: return "You own this item for 30 days.";
 	case TIME_20_DAYS: return "You own this item for 20 days.";
+	case TIME_7_DAYS: return "You own this item for 7 days.";
 	}
 	return "Unknown";
 }
@@ -227,7 +262,12 @@ void CShop::Tick(int ClientID)
 	if (m_InShop[ClientID])
 	{
 		if (m_pServer->Tick() % 50 == 0)
-			m_pGameServer->SendBroadcast("~ S H O P ~", ClientID, false);
+		{
+			if (IsType(TYPE_SHOP_NORMAL))
+				m_pGameServer->SendBroadcast("~ S H O P ~", ClientID, false);
+			else if (IsType(TYPE_SHOP_PLOT))
+				m_pGameServer->SendBroadcast("~ P L O T - S H O P ~", ClientID, false);
+		}
 	}
 }
 
@@ -242,26 +282,30 @@ void CShop::ShopWindow(int ClientID, int Dir)
 	else if (Dir == 1)
 	{
 		m_WindowPage[ClientID]++;
-		if (m_WindowPage[ClientID] >= NUM_ITEMS_LIST)
+		if (m_WindowPage[ClientID] >= m_NumItemsList)
 			m_WindowPage[ClientID] = PAGE_MAIN;
 	}
 	else if (Dir == -1)
 	{
 		m_WindowPage[ClientID]--;
 		if (m_WindowPage[ClientID] < PAGE_MAIN)
-			m_WindowPage[ClientID] = NUM_ITEMS_LIST-1;
+			m_WindowPage[ClientID] = m_NumItemsList-1;
 	}
 
 	m_BackgroundItem[ClientID] = m_WindowPage[ClientID];
-	if (m_WindowPage[ClientID] == ITEM_POLICE)
+
+	if (IsType(TYPE_SHOP_NORMAL))
 	{
-		CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-		m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + (*Account).m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
-	}
-	else if (m_WindowPage[ClientID] == ITEM_TASER)
-	{
-		CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-		m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + (*Account).m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
+		if (m_WindowPage[ClientID] == ITEM_POLICE)
+		{
+			CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
+			m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + (*Account).m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
+		}
+		else if (m_WindowPage[ClientID] == ITEM_TASER)
+		{
+			CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
+			m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + (*Account).m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
+		}
 	}
 
 	SendWindow(ClientID, m_BackgroundItem[ClientID]);
@@ -325,7 +369,7 @@ void CShop::EndPurchase(int ClientID, bool Cancelled)
 
 void CShop::BuyItem(int ClientID, int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS_LIST)
+	if (Item < ITEM_RAINBOW || Item >= m_NumItemsList)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "Invalid item");
 		return;
@@ -336,45 +380,68 @@ void CShop::BuyItem(int ClientID, int Item)
 	CGameContext::AccountInfo *Account = &m_pGameServer->m_Accounts[pPlayer->GetAccID()];
 
 	char aMsg[128];
+	int ItemID = Item;
 
-	int ItemID = Item == ITEM_POLICE || Item == ITEM_TASER ? m_BackgroundItem[ClientID] : Item;
-
-	// Check whether we have the item already
-	if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
-		|| (Item == ITEM_BLOODY				&& (pChr->m_Bloody || pChr->m_StrongBloody))
-		|| (Item == ITEM_POLICE				&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
-		|| (Item == ITEM_SPOOKY_GHOST		&& (*Account).m_SpookyGhost)
-		|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
-		//|| (Item == ITEM_VIP				&& (*Account).m_VIP) // vip can be bought unlimited times
-		|| (Item == ITEM_SPAWN_SHOTGUN		&& (*Account).m_SpawnWeapon[0] == 5)
-		|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
-		|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
-		|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
-		|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
-		//|| (Item == ITEM_PORTAL_RIFLE		&& (*Account).m_PortalRifle) // portal rifle can be bought unlimited times
-		)
+	if (IsType(TYPE_SHOP_NORMAL))
 	{
-		bool UseThe = false;
+		if (Item == ITEM_POLICE || Item == ITEM_TASER)
+			ItemID = m_BackgroundItem[ClientID];
 
-		switch (Item)
+		// Check whether we have the item already
+		if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
+			|| (Item == ITEM_BLOODY				&& (pChr->m_Bloody || pChr->m_StrongBloody))
+			|| (Item == ITEM_POLICE				&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
+			|| (Item == ITEM_SPOOKY_GHOST		&& (*Account).m_SpookyGhost)
+			|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
+			//|| (Item == ITEM_VIP				&& (*Account).m_VIP) // vip can be bought unlimited times
+			|| (Item == ITEM_SPAWN_SHOTGUN		&& (*Account).m_SpawnWeapon[0] == 5)
+			|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
+			|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
+			|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
+			|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
+			//|| (Item == ITEM_PORTAL_RIFLE		&& (*Account).m_PortalRifle) // portal rifle can be bought unlimited times
+			)
 		{
-		case ITEM_POLICE:															m_pGameServer->SendChatTarget(ClientID, "You already have the highest police rank"); break;
-		case ITEM_SPAWN_SHOTGUN: case ITEM_SPAWN_GRENADE: case ITEM_SPAWN_RIFLE:	m_pGameServer->SendChatTarget(ClientID, "You already have the maximum amount of bullets"); break;
-		case ITEM_TASER:															m_pGameServer->SendChatTarget(ClientID, "You already have the maximum taser level"); break;
-		case ITEM_SPOOKY_GHOST: case ITEM_ROOM_KEY:									UseThe = true;
-			// fallthrough
-		default:
-			str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[ItemID].m_pName);
-			m_pGameServer->SendChatTarget(ClientID, aMsg);
-		}
-		return;
-	}
+			bool UseThe = false;
 
-	// check police lvl 3 for taser
-	if (Item == ITEM_TASER && (*Account).m_PoliceLevel < 3)
+			switch (Item)
+			{
+			case ITEM_POLICE:															m_pGameServer->SendChatTarget(ClientID, "You already have the highest police rank"); break;
+			case ITEM_SPAWN_SHOTGUN: case ITEM_SPAWN_GRENADE: case ITEM_SPAWN_RIFLE:	m_pGameServer->SendChatTarget(ClientID, "You already have the maximum amount of bullets"); break;
+			case ITEM_TASER:															m_pGameServer->SendChatTarget(ClientID, "You already have the maximum taser level"); break;
+			case ITEM_SPOOKY_GHOST: case ITEM_ROOM_KEY:									UseThe = true;
+				// fallthrough
+			default:
+				str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[ItemID].m_pName);
+				m_pGameServer->SendChatTarget(ClientID, aMsg);
+			}
+			return;
+		}
+
+		// check police lvl 3 for taser
+		if (Item == ITEM_TASER && (*Account).m_PoliceLevel < 3)
+		{
+			m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
+			return;
+		}
+	}
+	else if (IsType(TYPE_SHOP_PLOT))
 	{
-		m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license.");
-		return;
+		if (m_pGameServer->m_aPlots[Item].m_aOwner[0])
+		{
+			m_pGameServer->SendChatTarget(ClientID, "This plot is already sold to someone else");
+			return;
+		}
+		else if ((*Account).m_PlotID == Item)
+		{
+			m_pGameServer->SendChatTarget(ClientID, "You already own that plot");
+			return;
+		}
+		else if ((*Account).m_PlotID != 0)
+		{
+			m_pGameServer->SendChatTarget(ClientID, "You already own another plot");
+			return;
+		}
 	}
 
 	// check for the correct price
@@ -401,28 +468,38 @@ void CShop::BuyItem(int ClientID, int Item)
 	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", m_aItems[ItemID].m_pName);
 	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg, m_aItems[ItemID].m_IsEuro);
 
-	// give us the bought item
-	int Weapon = -1;
 
-	switch (Item)
+	if (IsType(TYPE_SHOP_NORMAL))
 	{
-	case ITEM_RAINBOW:			pChr->Rainbow(true, -1, true); break;
-	case ITEM_BLOODY:			pChr->Bloody(true, -1, true); break;
-	case ITEM_POLICE:			(*Account).m_PoliceLevel++; break;
-	case ITEM_SPOOKY_GHOST:		(*Account).m_SpookyGhost = true; break;
-	case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
-	case ITEM_VIP:				(*Account).m_VIP = true; pPlayer->SetExpireDate(Item); break;
-	case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
-		// fallthrough
-	case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;
-		// fallthrough
-	case ITEM_SPAWN_RIFLE:		if (Weapon == -1) Weapon = 2;
-								(*Account).m_SpawnWeapon[Weapon]++; break;
-	case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
-	case ITEM_TASER:			(*Account).m_TaserLevel++; break;
-	case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item);
-								if (pPlayer->GetCharacter())
-									pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);
-								break;
+		// give us the bought item
+		int Weapon = -1;
+
+		switch (Item)
+		{
+		case ITEM_RAINBOW:			pChr->Rainbow(true, -1, true); break;
+		case ITEM_BLOODY:			pChr->Bloody(true, -1, true); break;
+		case ITEM_POLICE:			(*Account).m_PoliceLevel++; break;
+		case ITEM_SPOOKY_GHOST:		(*Account).m_SpookyGhost = true; break;
+		case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
+		case ITEM_VIP:				(*Account).m_VIP = true; pPlayer->SetExpireDate(Item); break;
+		case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
+			// fallthrough
+		case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;
+			// fallthrough
+		case ITEM_SPAWN_RIFLE:		if (Weapon == -1) Weapon = 2;
+									(*Account).m_SpawnWeapon[Weapon]++; break;
+		case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
+		case ITEM_TASER:			(*Account).m_TaserLevel++; break;
+		case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item);
+									if (pPlayer->GetCharacter())
+										pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);
+									break;
+		}
+	}
+	else if (IsType(TYPE_SHOP_PLOT))
+	{
+		(*Account).m_PlotID = Item;
+		m_pGameServer->SetPlotInfo(pPlayer->GetAccID());
+		// set expire date
 	}
 }

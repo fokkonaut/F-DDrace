@@ -31,12 +31,14 @@ bool CDrawEditor::CanPlace()
 {
 	CCollision *pCol = GameServer()->Collision();
 	int TilePlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
-	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID > 0 && TilePlotID == GetPlotID()) || Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvFreeDrawLevel));
+	// check for TilePlotID > 0 here, because plots start at id 1
+	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID > 0 && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
 {
-	return CanPlace() && pEnt && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvFreeDrawLevel);
+	// check whether pEnt->m_PlotID >= 0 because -1 would mean its a map object, so we dont wanna be able to remove it
+	return CanPlace() && pEnt && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || m_pCharacter->IsFreeDraw());
 }
 
 int CDrawEditor::GetPlotID()
@@ -89,9 +91,15 @@ void CDrawEditor::OnPlayerFire()
 	if (!CanPlace())
 		return;
 
+	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
+	if (PlotID > 0 && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= (unsigned)GameServer()->Config()->m_SvMaxObjectsPerPlot)
+		return;
+
 	CEntity *pEntity = CreateEntity();
-	CCollision *pCol = GameServer()->Collision();
-	pEntity->m_PlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
+	pEntity->m_PlotID = PlotID;
+
+	if (PlotID > 0)
+		GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
@@ -122,6 +130,11 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 
 		if (CanRemove(pEntity))
 		{
+			if (pEntity->m_PlotID > 0)
+				for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
+					if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
+						GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+
 			GameServer()->m_World.DestroyEntity(pEntity);
 			m_pCharacter->SetAttackTick(Server()->Tick());
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
@@ -287,9 +300,22 @@ void CDrawEditor::AddLength(int Add)
 void CDrawEditor::OnWeaponSwitch()
 {
 	if (Active())
+	{
 		SetPreview();
+
+		int PlotID = GetPlotID();
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (GameServer()->GetPlayerChar(i) && i != GetCID() && m_pCharacter->GetCurrentTilePlotID() == PlotID)
+				GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
+
+		GameServer()->SetPlotDoorStatus(PlotID, true);
+	}
 	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
+	{
 		RemovePreview();
+
+		m_pCharacter->TeleOutOfPlot(GetPlotID());
+	}
 	else
 		return;
 

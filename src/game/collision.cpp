@@ -124,12 +124,8 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 			if (!IsPlot && m_pSwitch[i].m_Number > m_NumSwitchers)
 				m_NumSwitchers = m_pSwitch[i].m_Number;
 
-			if (m_pSwitch[i].m_Number)
-			{
+			if (!IsPlot && m_pSwitch[i].m_Number)
 				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
-				if (IsPlot)
-					m_pDoor[i].m_Index = Index;
-			}
 			else
 				m_pDoor[i].m_Number = 0;
 
@@ -151,10 +147,12 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		// loop over the map again and correctly set the plot numbers
 		for (int i = 0; i < m_Width * m_Height; i++)
 		{
-			if (IsPlotTile(m_pDoor[i].m_Index) && m_pDoor[i].m_Number > 0)
+			if (IsPlotTile(m_pSwitch[i].m_Type) && m_pSwitch[i].m_Number > 0)
 			{
-				m_pDoor[i].m_Number += m_NumSwitchers;
-				m_pSwitch[i].m_Number += m_NumSwitchers;
+				m_pSwitch[i].m_Number = GetSwitchByPlot(m_pSwitch[i].m_Number);
+
+				if (m_pSwitch[i].m_Type == TILE_SWITCH_PLOT_DOOR)
+					m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
 			}
 		}
 	}
@@ -1386,7 +1384,8 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		if (GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
+		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP;
+		if (GameLayerBlocked || GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
@@ -1394,7 +1393,9 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 				* pOutBeforeCollision = Last;
 			if (GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
 				return TILE_PORTAL_RIFLE_STOP;
-			return GetCollisionAt(Pos.x, Pos.y);
+			if (GameLayerBlocked)
+				return GetIndex(Nx, Ny);
+			return 0;
 		}
 		Last = Pos;
 	}
@@ -1417,7 +1418,12 @@ int CCollision::GetPlotID(int Index)
 	return 0;
 }
 
-int CCollision::GetSwitchIDByPlotID(int PlotID)
+int CCollision::GetSwitchByPlot(int PlotID)
 {
 	return PlotID + m_NumSwitchers;
+}
+
+int CCollision::GetPlotBySwitch(int SwitchID)
+{
+	return SwitchID - m_NumSwitchers;
 }

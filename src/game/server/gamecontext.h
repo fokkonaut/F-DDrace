@@ -12,7 +12,6 @@
 
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
-#include <game/server/plot.h>
 #include "shop.h"
 
 #include "eventhandler.h"
@@ -340,18 +339,29 @@ public:
 	void ConnectDefaultDummies();
 	void SetV3Offset(int X = -1, int Y = -1);
 
-	bool IsShopDummy(int ClientID);
-	int GetShopDummy();
+	bool IsShopDummy(int ClientID, int Type = -1);
+	int GetShopDummy(int Type = -1);
 
 	int GetNextClientID(bool Inverted = false);
 
 	void UpdateHidePlayers(int UpdateID = -1);
 
+	// plots
+	struct SPlot
+	{
+		char m_aOwner[24];
+		int m_Size;
+		vec2 m_ToTele;
+		std::vector<CEntity *> m_vObjects;
+	} m_aPlots[MAX_PLOTS];
+
+	void SetPlotDoorStatus(int PlotID, bool Close);
+	void SetPlotInfo(int AccID);
+	void ClearPlot(int PlotID);
+
 	//account
 	int GetAccount(const char* pUsername);
 	void FreeAccount(int ID, bool Silent = false);
-
-	std::vector<CPlot> m_Plots;
 
 	struct TopAccounts
 	{
@@ -367,7 +377,7 @@ public:
 	void SetTopAccStats(int FromID);
 
 	int m_LogoutAccountsPort;
-	static int LogoutAccountsCallback(const char* pName, int IsDir, int StorageType, void* pUser);
+	static int InitAccounts(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
 	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
@@ -495,7 +505,7 @@ public:
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
 
-	class CShop *m_pShop;
+	class CShop *m_pShop[NUM_SHOP_TYPES];
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);
@@ -668,6 +678,8 @@ private:
 	static void ConSpinBotVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConAimClosestVIP(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
+
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
 
@@ -762,6 +774,7 @@ private:
 
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
+	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

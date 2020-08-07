@@ -67,7 +67,8 @@ void CGameContext::Construct(int Resetting)
 		m_pScore = 0;
 		m_NumMutes = 0;
 		m_NumVoteMutes = 0;
-		m_pShop = 0;
+		for (int i = 0; i < NUM_SHOP_TYPES; i++)
+			m_pShop[i] = 0;
 		m_NumRegisterBans = 0;
 	}
 
@@ -77,9 +78,6 @@ void CGameContext::Construct(int Resetting)
 
 	m_pRandomMapResult = nullptr;
 	m_pMapVoteResult = nullptr;
-
-	// F-DDrace
-	m_pShop = 0;
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -101,8 +99,11 @@ CGameContext::~CGameContext()
 
 	if (m_pScore)
 		delete m_pScore;
-	if (m_pShop)
-		delete m_pShop;
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	{
+		if (m_pShop[i])
+			delete m_pShop[i];
+	}
 }
 
 void CGameContext::Clear()
@@ -838,7 +839,8 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->PostTick();
 
 			// F-DDrace
-			m_pShop->Tick(i);
+			for (int j = 0; j < NUM_SHOP_TYPES; j++)
+				m_pShop[j]->Tick(i);
 		}
 	}
 
@@ -2000,9 +2002,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					if (m_pShop->IsInShop(ClientID))
-						m_pShop->OnKeyPress(ClientID, pMsg->m_Vote);
-					else
+					bool InShop = false;
+					for (int i = 0; i < NUM_SHOP_TYPES; i++)
+					{
+						if (m_pShop[i]->IsInShop(ClientID))
+						{
+							m_pShop[i]->OnKeyPress(ClientID, pMsg->m_Vote);
+							InShop = true;
+						}
+					}
+					
+					if (!InShop)
 						pChr->DropFlag();
 				}
 			}
@@ -2015,9 +2025,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					if (m_pShop->IsInShop(ClientID))
-						m_pShop->OnKeyPress(ClientID, pMsg->m_Vote);
-					else
+					bool InShop = false;
+					for (int i = 0; i < NUM_SHOP_TYPES; i++)
+					{
+						if (m_pShop[i]->IsInShop(ClientID))
+						{
+							m_pShop[i]->OnKeyPress(ClientID, pMsg->m_Vote);
+							InShop = true;
+						}
+					}
+
+					if (!InShop)
 						pChr->DropWeapon(pChr->GetActiveWeapon(), false);
 				}
 			}
@@ -3124,6 +3142,14 @@ void CGameContext::OnInit()
 	Collision()->m_vTiles.clear();
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
+	for (int i = 0; i < MAX_PLOTS; i++)
+	{
+		m_aPlots[i].m_aOwner[0] = 0;
+		m_aPlots[i].m_Size = 0;
+		m_aPlots[i].m_ToTele = vec2(-1, -1);
+		m_aPlots[i].m_vObjects.clear();
+	}
+
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
 		for (int x = 0; x < pTileMap->m_Width; x++)
@@ -3251,14 +3277,17 @@ void CGameContext::OnInit()
 		m_aPoliceLevel[i] = PoliceLevel[i];
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
-	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling LogoutAccountsCallback
-	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, LogoutAccountsCallback, this);
+	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
+	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
 	m_LastAccSaveTick = Server()->Tick();
 
-	if (m_pShop)
-		delete m_pShop;
-	m_pShop = new CShop(this);
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	{
+		if (m_pShop[i])
+			delete m_pShop[i];
+		m_pShop[i] = new CShop(this, i);
+	}
 
 
 #ifdef CONF_DEBUG
@@ -3429,8 +3458,11 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;
-	delete m_pShop;
-	m_pShop = 0;
+	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	{
+		delete m_pShop[i];
+		m_pShop[i] = 0;
+	}
 	Clear();
 }
 
@@ -3782,7 +3814,7 @@ void CGameContext::UpdateTopAccounts(int Type)
 	}
 }
 
-int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
 
@@ -3797,7 +3829,10 @@ int CGameContext::LogoutAccountsCallback(const char *pName, int IsDir, int Stora
 
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
+		// insert plot info
+		pSelf->SetPlotInfo(ID);
 
+		// logout account if needed
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
 			pSelf->Logout(ID, true);
 		else
@@ -3832,6 +3867,14 @@ void CGameContext::SetTopAccStats(int FromID)
 	str_copy(Account.m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 	str_copy(Account.m_aAccountName, m_Accounts[FromID].m_Username, sizeof(Account.m_aAccountName));
 	m_TopAccounts.push_back(Account);
+}
+
+void CGameContext::SetPlotInfo(int AccID)
+{
+	int PlotID = m_Accounts[AccID].m_PlotID;
+	if (PlotID <= 0)
+		return;
+	str_copy(m_aPlots[PlotID].m_aOwner, m_Accounts[AccID].m_aLastPlayerName, sizeof(m_aPlots[PlotID].m_aOwner));
 }
 
 int CGameContext::AddAccount()
@@ -3875,7 +3918,7 @@ int CGameContext::AddAccount()
 	Account.m_PortalRifle = false;
 	Account.m_ExpireDatePortalRifle = 0;
 	Account.m_Version = ACC_CURRENT_VERSION;
-	Account.m_PlotID = 0;
+	Account.m_PlotID = 1;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -3933,7 +3976,6 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
 		case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
 		case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
-		case ACC_PLOTID:					m_Accounts[ID].m_PlotID = atoi(pData); break;
 		}
 	}
 }
@@ -4075,6 +4117,26 @@ void CGameContext::WriteDonationFile(int Type, int Amount, int ID, const char *p
 	str_format(aFile, sizeof(aFile), "%s/donations.txt", Config()->m_SvDonationFilePath);
 	std::ofstream DonationsFile(aFile, std::ios_base::app | std::ios_base::out);
 	DonationsFile << aBuf << "\n";
+}
+
+void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || !Collision()->m_pSwitchers)
+		return;
+
+	int Switch = Collision()->GetSwitchByPlot(PlotID);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
+}
+
+void CGameContext::ClearPlot(int PlotID)
+{
+	if (PlotID > 0 && PlotID <= Collision()->m_NumPlots)
+	{
+		for (unsigned i = 0; i < m_aPlots[PlotID].m_vObjects.size(); i++)
+			m_World.DestroyEntity(m_aPlots[PlotID].m_vObjects[i]);
+		m_aPlots[PlotID].m_vObjects.clear();
+	}
 }
 
 int CGameContext::GetNextClientID(bool Inverted)
@@ -4235,9 +4297,24 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);
 }
 
-bool CGameContext::IsShopDummy(int ClientID)
+bool CGameContext::IsShopDummy(int ClientID, int Type)
 {
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_SHOP_DUMMY;
+	if (Type == -1)
+	{
+		for (int i = 0; i < NUM_SHOP_TYPES; i++)
+			if (IsShopDummy(ClientID, i))
+				return true;
+		return false;
+	}
+	return m_apPlayers[ClientID] && ((Type == TYPE_SHOP_NORMAL && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_SHOP_DUMMY) || (Type == TYPE_SHOP_PLOT && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY));
+}
+
+int CGameContext::GetShopDummy(int Type)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (IsShopDummy(i, Type))
+			return i;
+	return -1;
 }
 
 void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUser)
@@ -4246,17 +4323,9 @@ void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUs
 	*IsDummy = pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_IsDummy;
 }
 
-int CGameContext::GetShopDummy()
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (IsShopDummy(i))
-			return i;
-	return -1;
-}
-
 void CGameContext::ConnectDefaultDummies()
 {
-	if (GetShopDummy() == -1 && Collision()->TileUsed(TILE_SHOP))
+	if (GetShopDummy(TYPE_SHOP_NORMAL) == -1 && Collision()->TileUsed(TILE_SHOP))
 		ConnectDummy(DUMMYMODE_SHOP_DUMMY);
 
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
@@ -4277,6 +4346,9 @@ void CGameContext::ConnectDefaultDummies()
 
 	if (Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
+
+	if (Collision()->TileUsed(TILE_PLOT_SHOP))
+		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY);
 }
 
 void CGameContext::SetV3Offset(int X, int Y)

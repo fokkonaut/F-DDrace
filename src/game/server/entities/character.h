@@ -139,7 +139,6 @@ public:
 	void Atom(bool Set = true, int FromID = -1, bool Silent = false);
 	void Trail(bool Set = true, int FromID = -1, bool Silent = false);
 	void SpookyGhost(bool Set = true, int FromID = -1, bool Silent = false);
-	void Spooky(bool Set = true, int FromID = -1, bool Silent = false);
 	void Meteor(bool Set = true, int FromID = -1, bool Infinite = false, bool Silent = false);
 	void Passive(bool Set = true, int FromID = -1, bool Silent = false);
 	void VanillaMode(int FromID = -1, bool Silent = false);
@@ -403,6 +402,10 @@ public:
 
 	// editor
 	CDrawEditor m_DrawEditor;
+	bool IsFreeDraw();
+
+	int GetCurrentTilePlotID();
+	void TeleOutOfPlot(int PlotID);
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

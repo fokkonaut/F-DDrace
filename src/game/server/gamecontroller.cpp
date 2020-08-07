@@ -196,9 +196,8 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			}
 		}
 	}
-	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_PLOT_DOOR
-		&& GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos)) == 0
-		&& GameServer()->Collision()->GetSwitchNumber(GameServer()->Collision()->GetMapIndex(Pos)) > 0)
+	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_PLOT_DOOR && Number > 0
+		&& GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos)) == 0)
 	{
 		for(int i = 0; i < 8;i++)
 		{
@@ -206,7 +205,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			int Delay = GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos2));
 			if (sides[i] == TILE_SWITCH_PLOT_DOOR && Delay > 0)
 			{
-				new CDoor
+				CDoor *pDoor = new CDoor
 				(
 					&GameServer()->m_World, //GameWorld
 					Pos, //Pos
@@ -214,8 +213,15 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 					32 * Delay, //Length
 					Number //Number
 				);
+				pDoor->m_PlotID = GameServer()->Collision()->GetPlotBySwitch(Number);
 			}
 		}
+	}
+	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_PLOT_TOTELE && Number > 0)
+	{
+		int PlotID = GameServer()->Collision()->GetPlotBySwitch(Number);
+		GameServer()->m_aPlots[PlotID].m_ToTele = Pos;
+		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->GetSwitchDelay(Number);
 	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
 	{

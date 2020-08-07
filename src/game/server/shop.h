@@ -4,7 +4,9 @@
 #define GAME_SHOP_H
 
 #include <engine/shared/protocol.h>
-#include "gamecontext.h"
+#include <game/mapitems.h>
+
+class CGameContext;
 
 enum Items
 {
@@ -48,6 +50,7 @@ enum Time
 	TIME_FOREVER,
 	TIME_30_DAYS,
 	TIME_20_DAYS,
+	TIME_7_DAYS,
 };
 
 enum States
@@ -62,6 +65,14 @@ enum Expire
 	// days until item expired
 	ITEM_EXPIRE_VIP = 30,
 	ITEM_EXPIRE_PORTAL_RIFLE = 20,
+	ITEM_EXPIRE_PLOT = 7,
+};
+
+enum Types
+{
+	TYPE_SHOP_NORMAL,
+	TYPE_SHOP_PLOT,
+	NUM_SHOP_TYPES
 };
 
 
@@ -80,7 +91,7 @@ private:
 		int m_Time;
 		const char *m_pDescription;
 		bool m_IsEuro;
-	} m_aItems[NUM_ITEMS];
+	} m_aItems[MAX_PLOTS];
 
 	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false);
 	void ShopWindow(int ClientID, int Dir);
@@ -104,9 +115,13 @@ private:
 
 	int m_BackgroundItem[MAX_CLIENTS];
 
+	int m_NumItems;
+	int m_NumItemsList;
+	int m_Type;
+
 public:
 
-	CShop(CGameContext *pGameServer);
+	CShop(CGameContext *pGameServer, int Type);
 	void Tick(int ClientID);
 
 	void Reset(int ClientID);
@@ -122,6 +137,9 @@ public:
 	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; };
 
 	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; };
+
+	int GetType() { return m_Type; }
+	bool IsType(int Type) { return m_Type == Type; }
 };
 
 #endif

@@ -93,6 +93,8 @@ CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_TEST,
 CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says a chat message as player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("teecontrol", "?v[id] ?i[forcedid]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 
+CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
+
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
 

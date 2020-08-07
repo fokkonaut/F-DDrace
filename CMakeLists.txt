@@ -1705,8 +1705,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   mask128.h
   player.cpp
   player.h
-  plot.cpp
-  plot.h
   save.cpp
   save.h
   score.h

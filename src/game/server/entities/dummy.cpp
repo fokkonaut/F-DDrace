@@ -4004,10 +4004,18 @@ void CCharacter::DummyTick()
 			}
 		}
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY) // shop dummy
+	else if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY) // shop dummy
 	{
+		int Type;
+		if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY)
+			Type = TYPE_SHOP_NORMAL;
+		else if (m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY)
+			Type = TYPE_SHOP_PLOT;
+		else
+			return;
+
 		CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
-		if (pChr && GameServer()->m_pShop->IsInShop(pChr->GetPlayer()->GetCID()))
+		if (pChr && GameServer()->m_pShop[Type]->IsInShop(pChr->GetPlayer()->GetCID()))
 		{
 			m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
 			m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
@@ -4015,7 +4023,7 @@ void CCharacter::DummyTick()
 			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
 		}
 
-		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0 && !GameServer()->m_pShop->IsInShop(m_pPlayer->GetCID()))
+		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0 && !GameServer()->m_pShop[Type]->IsInShop(m_pPlayer->GetCID()))
 		{
 			Die();
 			return;

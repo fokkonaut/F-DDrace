@@ -642,7 +642,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int Col
 	return pClosest;
 }
 
-int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideWith)
+int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith)
 {
 	// Find other players
 	float ClosestRange = 0.f;
@@ -654,7 +654,7 @@ int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideW
 		if (p == pNotThis)
 			continue;
 
-		if (!GameServer()->IsShopDummy(p->GetPlayer()->GetCID()))
+		if (!GameServer()->IsShopDummy(p->GetPlayer()->GetCID(), Type))
 			continue;
 
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, false))
@@ -668,7 +668,7 @@ int CGameWorld::GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int CollideW
 		}
 	}
 
-	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetShopDummy();
+	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetShopDummy(Type);
 }
 
 CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith)

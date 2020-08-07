@@ -40,6 +40,7 @@ enum Dummymode
 	DUMMYMODE_CHILLBOCK5_POLICE = 31,
 	DUMMYMODE_BLMAPCHILL_POLICE = 32,
 	DUMMYMODE_SHOP_DUMMY = 99,
+	DUMMYMODE_PLOT_SHOP_DUMMY = 98,
 };
 
 enum Portals
@@ -311,6 +312,8 @@ public:
 	void OnLogout();
 	void SetExpireDate(int Item);
 	bool IsExpiredItem(int Item);
+
+	int m_PlotAuctionPrice;
 
 	//room key
 	bool m_HasRoomKey;

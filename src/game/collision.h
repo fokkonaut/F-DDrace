@@ -134,7 +134,8 @@ public:
 	// plots
 	bool IsPlotTile(int Index);
 	int GetPlotID(int Index);
-	int GetSwitchIDByPlotID(int PlotID);
+	int GetSwitchByPlot(int PlotID);
+	int GetPlotBySwitch(int SwitchID);
 	int m_NumPlots;
 
 private:

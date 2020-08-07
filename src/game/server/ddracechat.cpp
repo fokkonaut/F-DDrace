@@ -1937,6 +1937,106 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 	pSelf->CreateSound(Pos, SOUND_WEAPON_SPAWN, TeamMask);
 }
 
+void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if (!pChr)
+		return;
+
+	char aBuf[128];
+	const char *pCommand = pResult->GetString(0);
+	int Price = max(0, pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 0); // clamp price to 0
+	const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
+	CGameContext::AccountInfo *Account = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
+
+	if (!str_comp_nocase(pCommand, "buy"))
+	{
+		if (pPlayer->GetAccID() < ACC_START)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+			return;
+		}
+
+		int ID = pSelf->GetCIDByName(pName);
+		CPlayer *pSeller = pSelf->m_apPlayers[ID];
+		if (ID == -1 || !pSeller)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player doesn't exists");
+			return;
+		}
+
+		if (!pSeller->m_PlotAuctionPrice)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player doesn't sell a plot");
+			return;
+		}
+
+		if (pSeller->m_PlotAuctionPrice == Price)
+		{
+			CGameContext::AccountInfo *SellerAcc = &pSelf->m_Accounts[pSeller->GetAccID()];
+
+			// a message to you
+			str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", (*SellerAcc).m_PlotID, pName);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+			// and one to the seller
+			str_format(aBuf, sizeof(aBuf), "%s bought your plot", pSelf->Server()->ClientName(pResult->m_ClientID));
+			pSelf->SendChatTarget(ID, aBuf);
+
+			// get money from buyer
+			str_format(aBuf, sizeof(aBuf), "bought plot %d", (*SellerAcc).m_PlotID);
+			pPlayer->MoneyTransaction(-Price, aBuf);
+			(*Account).m_PlotID = (*SellerAcc).m_PlotID;
+
+			// give money to seller
+			pSeller->MoneyTransaction(Price, "sold plot");
+			(*SellerAcc).m_PlotID = 0;
+			pSeller->m_PlotAuctionPrice = 0;
+		}
+	}
+
+	// check for the important commands
+	if ((*Account).m_PlotID == 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need a plot to use this command");
+		return;
+	}
+	else if (pChr->GetCurrentTilePlotID() != (*Account).m_PlotID)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
+		return;
+	}
+
+	// commands
+	if (!str_comp_nocase(pCommand, "edit"))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
+		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
+		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
+	}
+	else if (!str_comp_nocase(pCommand, "clear"))
+	{
+		pSelf->ClearPlot(pSelf->m_Accounts[pPlayer->GetAccID()].m_PlotID);
+	}
+	else if (!str_comp_nocase(pCommand, "sell"))
+	{
+		if (pPlayer->GetAccID() < ACC_START)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+			return;
+		}
+
+		pPlayer->m_PlotAuctionPrice = Price;
+
+		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);
+		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money, use '/plot buy %d %s' to buy the plot",
+				pOwnName, (*Account).m_PlotID, Price, pOwnName, Price);
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+	}
+}
+
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

@@ -194,6 +194,8 @@ void CPlayer::Reset()
 
 	for (int i = 0; i < NUM_PORTALS; i++)
 		m_pPortal[i] = 0;
+
+	m_PlotAuctionPrice = 0;
 }
 
 void CPlayer::Tick()
@@ -289,7 +291,10 @@ void CPlayer::Tick()
 	if (m_pCharacter)
 	{
 		if (m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
-			GameServer()->m_pShop->ResetMotdTick(m_ClientID);
+		{
+			for (int i = 0; i < NUM_SHOP_TYPES; i++)
+				GameServer()->m_pShop[i]->ResetMotdTick(m_ClientID);
+		}
 		else
 			m_pCharacter->m_NumGhostShots = 0;
 
@@ -1024,6 +1029,10 @@ void CPlayer::TryRespawn()
 		else
 			Index = TILE_SHOP;
 	}
+	else if (m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY)
+	{
+		Index = TILE_PLOT_SHOP;
+	}
 	else if (m_Minigame == MINIGAME_BLOCK || m_Dummymode == DUMMYMODE_V3_BLOCKER)
 	{
 		Index = TILE_MINIGAME_BLOCK;
@@ -1422,7 +1431,7 @@ void CPlayer::OnLogin()
 		if (IsExpiredItem(i))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop->GetItemName(i));
+			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop[TYPE_SHOP_NORMAL]->GetItemName(i));
 			GameServer()->SendChatTarget(m_ClientID, aBuf);
 		}
 	}
@@ -1439,6 +1448,9 @@ void CPlayer::OnLogout()
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
 
 		m_pCharacter->UnsetSpookyGhost();
+
+		// cancel current plot auction
+		m_PlotAuctionPrice = 0;
 	}
 }
 

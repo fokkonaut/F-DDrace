@@ -1304,7 +1304,7 @@ void CGameContext::ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->m_LogoutAccountsPort = pResult->GetInteger(0);
-	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, pSelf->Config()->m_SvAccFilePath, LogoutAccountsCallback, pSelf);
+	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, pSelf->Config()->m_SvAccFilePath, InitAccounts, pSelf);
 }
 
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
@@ -1582,4 +1582,22 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 	}
 	if (ForcedID != -2)
 		pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, ForcedID, pResult->m_ClientID);
+}
+
+void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	int PlotID = pResult->GetInteger(0);
+	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
+		return;
+
+	pChr->Core()->m_Pos = pSelf->m_aPlots[PlotID].m_ToTele;
+	pChr->SetPos(pSelf->m_aPlots[PlotID].m_ToTele);
+	pChr->m_PrevPos = pSelf->m_aPlots[PlotID].m_ToTele;
+	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
