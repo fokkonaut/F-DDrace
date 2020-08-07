@@ -1975,6 +1975,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (OwnPlotID > 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You already have a plot");
+			return;
+		}
+
 		if (pSeller->m_PlotAuctionPrice == Price)
 		{
 			int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
