@@ -43,7 +43,7 @@ bool CDrawEditor::CanRemove(CEntity *pEnt)
 
 int CDrawEditor::GetPlotID()
 {
-	return GameServer()->m_Accounts[m_pCharacter->GetPlayer()->GetAccID()].m_PlotID;
+	return GameServer()->GetPlotID(m_pCharacter->GetPlayer()->GetAccID());
 }
 
 void CDrawEditor::Tick()

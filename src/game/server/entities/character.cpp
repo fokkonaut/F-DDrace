@@ -467,7 +467,7 @@ void CCharacter::FireWeapon()
 				{
 					CDoor* pDoor = apDoors[i];
 
-					if ((pDoor->m_PlotID > 0 && pDoor->m_PlotID != GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PlotID) // plot door
+					if ((pDoor->m_PlotID > 0 && pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID())) // plot door
 						|| (pDoor->m_PlotID == -1 && !m_DoorHammer) // normal doorhammer
 						|| pDoor->m_Number == 0) // number 0 is forbidden
 						continue;

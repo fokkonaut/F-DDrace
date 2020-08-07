@@ -87,6 +87,7 @@ enum Top5
 enum
 {
 	ACC_START = 1, // account ids start with 1, 0 means not logged in
+	PLOT_START = 1,
 	DIFFERENCE_XP_END = 100,
 	OVER_LVL_100_XP = 2000000,
 	NUM_TASER_LEVELS = 7,
@@ -347,17 +348,36 @@ public:
 	void UpdateHidePlayers(int UpdateID = -1);
 
 	// plots
+	void InitPlots();
+	void ReadPlotStats(int ID);
+	void WritePlotStats(int ID);
+
+	void SetExpireDate(time_t *pDate, int Days);
+	bool IsExpired(time_t Date);
+
 	struct SPlot
 	{
-		char m_aOwner[24];
+		char m_aOwner[32];
+		char m_aDisplayName[32];
+		time_t m_ExpireDate;
+
 		int m_Size;
 		vec2 m_ToTele;
 		std::vector<CEntity *> m_vObjects;
 	} m_aPlots[MAX_PLOTS];
 
+	enum PlotVariables
+	{
+		PLOT_OWNER_ACC_USERNAME,
+		PLOT_DISPLAY_NAME,
+		PLOT_EXPIRE_DATE,
+		NUM_PLOT_VARIABLES
+	};
+
 	void SetPlotDoorStatus(int PlotID, bool Close);
-	void SetPlotInfo(int AccID);
 	void ClearPlot(int PlotID);
+	int GetPlotID(int AccID);
+	void ExpirePlots();
 
 	//account
 	int GetAccount(const char* pUsername);
@@ -426,7 +446,6 @@ public:
 		bool m_PortalRifle;
 		time_t m_ExpireDatePortalRifle;
 		int m_Version;
-		int m_PlotID;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -472,7 +491,6 @@ public:
 		ACC_PORTAL_RIFLE,
 		ACC_EXPIRE_DATE_PORTAL_RIFLE,
 		ACC_VERSION,
-		ACC_PLOTID,
 		NUM_ACCOUNT_VARIABLES
 	};
 

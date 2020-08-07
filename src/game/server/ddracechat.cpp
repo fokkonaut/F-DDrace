@@ -1949,7 +1949,10 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	const char *pCommand = pResult->GetString(0);
 	int Price = max(0, pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 0); // clamp price to 0
 	const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	CGameContext::AccountInfo *Account = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
+
+	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
+	int OwnPlotID = pSelf->GetPlotID(OwnAccID);
+	CGameContext::AccountInfo *Account = &pSelf->m_Accounts[OwnAccID];
 
 	if (!str_comp_nocase(pCommand, "buy"))
 	{
@@ -1975,10 +1978,10 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		if (pSeller->m_PlotAuctionPrice == Price)
 		{
-			CGameContext::AccountInfo *SellerAcc = &pSelf->m_Accounts[pSeller->GetAccID()];
+			int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
 
 			// a message to you
-			str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", (*SellerAcc).m_PlotID, pName);
+			str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", PlotID, pName);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 			// and one to the seller
@@ -1986,24 +1989,26 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(ID, aBuf);
 
 			// get money from buyer
-			str_format(aBuf, sizeof(aBuf), "bought plot %d", (*SellerAcc).m_PlotID);
+			str_format(aBuf, sizeof(aBuf), "bought plot %d", PlotID);
 			pPlayer->MoneyTransaction(-Price, aBuf);
-			(*Account).m_PlotID = (*SellerAcc).m_PlotID;
 
 			// give money to seller
 			pSeller->MoneyTransaction(Price, "sold plot");
-			(*SellerAcc).m_PlotID = 0;
 			pSeller->m_PlotAuctionPrice = 0;
+
+			str_copy(pSelf->m_aPlots[PlotID].m_aOwner, pSelf->m_Accounts[pPlayer->GetAccID()].m_Username, sizeof(pSelf->m_aPlots[PlotID].m_aOwner));
+			str_copy(pSelf->m_aPlots[PlotID].m_aDisplayName, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastPlayerName, sizeof(pSelf->m_aPlots[PlotID].m_aDisplayName));
+			pSelf->WritePlotStats(PlotID);
 		}
 	}
 
 	// check for the important commands
-	if ((*Account).m_PlotID == 0)
+	if (OwnPlotID == 0)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You need a plot to use this command");
 		return;
 	}
-	else if (pChr->GetCurrentTilePlotID() != (*Account).m_PlotID)
+	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
 		return;
@@ -2018,7 +2023,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	}
 	else if (!str_comp_nocase(pCommand, "clear"))
 	{
-		pSelf->ClearPlot(pSelf->m_Accounts[pPlayer->GetAccID()].m_PlotID);
+		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
 	}
 	else if (!str_comp_nocase(pCommand, "sell"))
 	{
@@ -2031,8 +2036,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pPlayer->m_PlotAuctionPrice = Price;
 
 		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);
-		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money, use '/plot buy %d %s' to buy the plot",
-				pOwnName, (*Account).m_PlotID, Price, pOwnName, Price);
+		str_format(aBuf, sizeof(aBuf), "%s started an auction on plot %d for %d money (plot expires on %s). Use '/plot buy %d %s' to buy the plot",
+				pOwnName, OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate), pOwnName, Price);
 		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 }

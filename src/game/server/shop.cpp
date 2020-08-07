@@ -55,21 +55,24 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 	{
 		m_NumItems = m_NumItemsList = m_pGameServer->Collision()->m_NumPlots + 1;
 
+		bool Owned;
 		int Size;
 		static char aaName[MAX_PLOTS][32];
 		int Level;
 		int Price;
 		static char aaDescription[MAX_PLOTS][64];
-		for (int i = 0; i < m_NumItems; i++)
+		for (int i = PLOT_START; i < m_NumItems; i++)
 		{
+			Owned = m_pGameServer->m_aPlots[i].m_aOwner[0] != '\0';
 			Size = m_pGameServer->m_aPlots[i].m_Size;
-			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i+1);
+			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i);
 			Level = (Size + 1) * 20;
 			Price = (Size + 1) * 50000;
 			str_format(aaDescription[i], sizeof(aaDescription[i]),
 				"Size: %s\n"
-				"Owner: %s",
-				Size == 0 ? "small" : Size == 1 ? "big" : "?", m_pGameServer->m_aPlots[i].m_aOwner[0] ? m_pGameServer->m_aPlots[i].m_aOwner : "for sale");
+				"Owner: %s"
+				"Free on, if owner doesn't pay again: %s",
+				Size == 0 ? "small" : Size == 1 ? "big" : "?", Owned ? m_pGameServer->m_aPlots[i].m_aOwner : "for sale", Owned ? m_pGameServer->GetDate(m_pGameServer->m_aPlots[i].m_ExpireDate) : "now");
 			AddItem(aaName[i], Level, Price, TIME_7_DAYS, aaDescription[i]);
 		}
 	}
@@ -427,17 +430,18 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(TYPE_SHOP_PLOT))
 	{
-		if (m_pGameServer->m_aPlots[Item].m_aOwner[0])
+		int OwnPlotID = m_pGameServer->GetPlotID(pPlayer->GetAccID());
+		if (m_pGameServer->m_aPlots[Item].m_aOwner[0] != '\0')
 		{
 			m_pGameServer->SendChatTarget(ClientID, "This plot is already sold to someone else");
 			return;
 		}
-		else if ((*Account).m_PlotID == Item)
+		else if (OwnPlotID == Item)
 		{
 			m_pGameServer->SendChatTarget(ClientID, "You already own that plot");
 			return;
 		}
-		else if ((*Account).m_PlotID != 0)
+		else if (OwnPlotID != 0)
 		{
 			m_pGameServer->SendChatTarget(ClientID, "You already own another plot");
 			return;
@@ -498,8 +502,9 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(TYPE_SHOP_PLOT))
 	{
-		(*Account).m_PlotID = Item;
-		m_pGameServer->SetPlotInfo(pPlayer->GetAccID());
-		// set expire date
+		m_pGameServer->SetExpireDate(&m_pGameServer->m_aPlots[Item].m_ExpireDate, ITEM_EXPIRE_PLOT);
+		str_copy(m_pGameServer->m_aPlots[Item].m_aOwner, m_pGameServer->m_Accounts[pPlayer->GetAccID()].m_Username, sizeof(m_pGameServer->m_aPlots[Item].m_aOwner));
+		str_copy(m_pGameServer->m_aPlots[Item].m_aDisplayName, m_pGameServer->m_Accounts[pPlayer->GetAccID()].m_aLastPlayerName, sizeof(m_pGameServer->m_aPlots[Item].m_aDisplayName));
+		m_pGameServer->WritePlotStats(Item);
 	}
 }

@@ -153,10 +153,11 @@ MACRO_CONFIG_INT(SvVotesPerTick, sv_votes_per_tick, 5, 1, 15, CFGFLAG_SERVER, "N
 
 // account
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 0, 0, 1, CFGFLAG_SERVER, "Whether accounts are activated or deactivated", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path were the server searches the .acc files", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path where the server searches the account files", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAccSaveInterval, sv_acc_save_interval, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between account saves", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxRegistrationsPerIP, sv_max_registrations_per_ip, 2, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 12 hours", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvDonationFilePath, sv_donation_file_path, 128, "data", CFGFLAG_SERVER, "The path were the server searches the for the donation file", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvDonationFilePath, sv_donation_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the for the donation file", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvPlotFilePath, sv_plot_file_path, 128, "data/plots", CFGFLAG_SERVER, "The path where the server searches the plot files", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvExpMsgColorText, sv_exp_msg_color_text, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Text color for the experience broadcast", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Symbol color for the experience broadcast", AUTHED_ADMIN)

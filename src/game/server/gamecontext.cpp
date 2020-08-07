@@ -1009,6 +1009,8 @@ void CGameContext::OnTick()
 		dbg_msg("acc", "automatic account saving...");
 		for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
 			WriteAccountStats(i);
+		for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+			WritePlotStats(i);
 		m_LastAccSaveTick = Server()->Tick();
 	}
 
@@ -1019,6 +1021,9 @@ void CGameContext::OnTick()
 	for (int i = 0; i < 2; i++)
 		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
 			InstagibTick(i);
+
+	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 60) != 0)
+		ExpirePlots();
 
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3142,13 +3147,7 @@ void CGameContext::OnInit()
 	Collision()->m_vTiles.clear();
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
-	for (int i = 0; i < MAX_PLOTS; i++)
-	{
-		m_aPlots[i].m_aOwner[0] = 0;
-		m_aPlots[i].m_Size = 0;
-		m_aPlots[i].m_ToTele = vec2(-1, -1);
-		m_aPlots[i].m_vObjects.clear();
-	}
+	InitPlots();
 
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
@@ -3443,6 +3442,9 @@ void CGameContext::OnShutdown(bool FullShutdown)
 {
 	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
 		Logout(i);
+
+	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+		WritePlotStats(i);
 
 	if (FullShutdown)
 		Score()->OnShutdown();
@@ -3799,6 +3801,129 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 
 // F-DDrace
 
+void CGameContext::InitPlots()
+{
+	for (int i = 0; i < MAX_PLOTS; i++)
+	{
+		m_aPlots[i].m_aOwner[0] = 0;
+		m_aPlots[i].m_aDisplayName[0] = 0;
+		m_aPlots[i].m_ExpireDate = 0;
+		m_aPlots[i].m_Size = 0;
+		m_aPlots[i].m_ToTele = vec2(-1, -1);
+		m_aPlots[i].m_vObjects.clear();
+
+		if (i > 0 && i < Collision()->m_NumPlots + 1)
+			ReadPlotStats(i);
+	}
+	ExpirePlots();
+}
+
+void CGameContext::ReadPlotStats(int ID)
+{
+	std::string data;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s/%d.plot", Config()->m_SvPlotFilePath, ID);
+	std::fstream PlotFile(aBuf);
+
+	for (int i = 0; i < NUM_PLOT_VARIABLES; i++)
+	{
+		getline(PlotFile, data);
+		const char *pData = data.c_str();
+
+		switch (i)
+		{
+		case PLOT_OWNER_ACC_USERNAME:		str_copy(m_aPlots[ID].m_aOwner, pData, sizeof(m_aPlots[ID].m_aOwner)); break;
+		case PLOT_DISPLAY_NAME:				str_copy(m_aPlots[ID].m_aDisplayName, pData, sizeof(m_aPlots[ID].m_aDisplayName)); break;
+		case PLOT_EXPIRE_DATE:				m_aPlots[ID].m_ExpireDate = atoi(pData); break;
+		}
+	}
+}
+
+void CGameContext::WritePlotStats(int ID)
+{
+	std::string data;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s/%d.plot", Config()->m_SvPlotFilePath, ID);
+	std::ofstream PlotFile(aBuf);
+
+	if (PlotFile.is_open())
+	{
+		PlotFile << m_aPlots[ID].m_aOwner << "\n";
+		PlotFile << m_aPlots[ID].m_aDisplayName << "\n";
+		PlotFile << m_aPlots[ID].m_ExpireDate << "\n";
+	}
+	PlotFile.close();
+}
+
+int CGameContext::GetPlotID(int AccID)
+{
+	if (AccID < ACC_START)
+		return 0;
+
+	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+		if (str_comp(m_Accounts[AccID].m_Username, m_aPlots[i].m_aOwner) == 0)
+			return i;
+	return 0;
+}
+
+void CGameContext::ExpirePlots()
+{
+	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+	{
+		if (IsExpired(m_aPlots[i].m_ExpireDate))
+		{
+			m_aPlots[i].m_aOwner[0] = '\0';
+			m_aPlots[i].m_ExpireDate = 0;
+		}
+	}
+}
+
+void CGameContext::SetExpireDate(time_t *pDate, int Days)
+{
+	time_t Now;
+	struct tm ExpireDate;
+	time(&Now);
+	ExpireDate = *localtime(&Now);
+
+	// add another x days if we have the item already
+	if (*pDate != 0)
+	{
+		struct tm AccDate;
+		AccDate = *localtime(pDate);
+
+		ExpireDate.tm_year = AccDate.tm_year;
+		ExpireDate.tm_mon = AccDate.tm_mon;
+		ExpireDate.tm_mday = AccDate.tm_mday;
+	}
+
+	const time_t ONE_DAY = 24 * 60 * 60;
+	time_t DateSeconds = mktime(&ExpireDate) + (Days * ONE_DAY);
+	ExpireDate = *localtime(&DateSeconds);
+	
+	*pDate = mktime(&ExpireDate);
+}
+
+bool CGameContext::IsExpired(time_t Date)
+{
+	struct tm AccDate;
+	AccDate = *localtime(&Date);
+
+	time_t Now;
+	struct tm ExpireDate;
+	time(&Now);
+	ExpireDate = *localtime(&Now);
+
+	ExpireDate.tm_year = AccDate.tm_year;
+	ExpireDate.tm_mon = AccDate.tm_mon;
+	ExpireDate.tm_mday = AccDate.tm_mday;
+
+	double Seconds = difftime(Now, mktime(&ExpireDate));
+	const time_t ONE_DAY = 24 * 60 * 60;
+	int Days = Seconds / ONE_DAY;
+
+	return Days >= 0;
+}
+
 void CGameContext::UpdateTopAccounts(int Type)
 {
 	// update top accounts with all currently online accs so we get correct and up-to-date information
@@ -3829,8 +3954,6 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
-		// insert plot info
-		pSelf->SetPlotInfo(ID);
 
 		// logout account if needed
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
@@ -3867,14 +3990,6 @@ void CGameContext::SetTopAccStats(int FromID)
 	str_copy(Account.m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 	str_copy(Account.m_aAccountName, m_Accounts[FromID].m_Username, sizeof(Account.m_aAccountName));
 	m_TopAccounts.push_back(Account);
-}
-
-void CGameContext::SetPlotInfo(int AccID)
-{
-	int PlotID = m_Accounts[AccID].m_PlotID;
-	if (PlotID <= 0)
-		return;
-	str_copy(m_aPlots[PlotID].m_aOwner, m_Accounts[AccID].m_aLastPlayerName, sizeof(m_aPlots[PlotID].m_aOwner));
 }
 
 int CGameContext::AddAccount()
@@ -3918,7 +4033,6 @@ int CGameContext::AddAccount()
 	Account.m_PortalRifle = false;
 	Account.m_ExpireDatePortalRifle = 0;
 	Account.m_Version = ACC_CURRENT_VERSION;
-	Account.m_PlotID = 1;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4027,7 +4141,6 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
 		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
 		AccFile << ACC_CURRENT_VERSION << "\n";
-		AccFile << m_Accounts[ID].m_PlotID << "\n";
 
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
