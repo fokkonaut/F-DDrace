@@ -3882,8 +3882,10 @@ void CGameContext::ExpirePlots()
 	{
 		if (IsExpired(m_aPlots[i].m_ExpireDate))
 		{
-			m_aPlots[i].m_aOwner[0] = '\0';
+			m_aPlots[i].m_aOwner[0] = 0;
+			m_aPlots[i].m_aDisplayName[0] = 0;
 			m_aPlots[i].m_ExpireDate = 0;
+			ClearPlot(i);
 		}
 	}
 }
