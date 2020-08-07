@@ -218,6 +218,7 @@ void CDrawEditor::SendWindow()
 
 	str_format(aMsg, sizeof(aMsg),
 		"     Controls:\n\n"
+		"Stop editing: Switch weapon\n"
 		"Object picker: Hold SPACE + shoot left/right\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n"
