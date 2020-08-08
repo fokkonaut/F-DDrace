@@ -313,7 +313,9 @@ public:
 	void SetExpireDate(int Item);
 	bool IsExpiredItem(int Item);
 
+	// plot
 	int m_PlotAuctionPrice;
+	bool m_PlotSpawn;
 
 	//room key
 	bool m_HasRoomKey;

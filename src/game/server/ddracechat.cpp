@@ -1942,14 +1942,52 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	CCharacter *pChr = pPlayer->GetCharacter();
-	if (!pChr)
+	if (!pPlayer)
 		return;
 
-	char aBuf[256];
 	const char *pCommand = pResult->GetString(0);
-	int Price = max(0, pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 0); // clamp price to 0
+	bool Help = !str_comp_nocase(pCommand, "help");
+	if (pResult->NumArguments() == 0 || (Help && pResult->NumArguments() == 1))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, buy, spawn");
+		pSelf->SendChatTarget(pResult->m_ClientID, "For detailed info, type '/plot help <command>'");
+		return;
+	}
+	else if (Help)
+	{
+		pCommand = pResult->GetString(1);
+		if (!str_comp_nocase(pCommand, "edit"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot edit");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Hold SPACE while editing for more control infos");
+		}
+		else if (!str_comp_nocase(pCommand, "clear"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot clear");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Clears all objects of your plot");
+		}
+		else if (!str_comp_nocase(pCommand, "sell"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot sell <price>");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Starts an auction for your plot, everyone can buy it using the sell command");
+		}
+		else if (!str_comp_nocase(pCommand, "buy"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot buy <price> <playername>");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Buys a plot if the given player is running a plot auction");
+		}
+		else if (!str_comp_nocase(pCommand, "spawn"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot spawn");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Lets you respawn at your plot");
+		}
+		return;
+	}
+
+	int Price = pResult->NumArguments() > 1 ? max(1, str_toint(pResult->GetString(1))) : 0; // clamp price to 0
 	const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
+	char aBuf[256];
 	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
 	int OwnPlotID = pSelf->GetPlotID(OwnAccID);
 
@@ -2054,6 +2092,18 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	else if (!str_comp_nocase(pCommand, "clear"))
 	{
 		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
+	}
+	else if (!str_comp_nocase(pCommand, "spawn"))
+	{
+		pPlayer->m_PlotSpawn = !pPlayer->m_PlotSpawn;
+		if (pPlayer->m_PlotSpawn)
+			pSelf->SendChatTarget(pResult->m_ClientID, "You will now respawn at your plot");
+		else
+			pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer respawn at your plot");
+	}
+	else if (!pChr)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be alive to edit your plot");
 	}
 	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
 	{

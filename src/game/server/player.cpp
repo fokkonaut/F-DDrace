@@ -196,6 +196,7 @@ void CPlayer::Reset()
 		m_pPortal[i] = 0;
 
 	m_PlotAuctionPrice = 0;
+	m_PlotSpawn = false;
 }
 
 void CPlayer::Tick()
@@ -1015,7 +1016,7 @@ void CPlayer::TryRespawn()
 		return;
 
 	vec2 SpawnPos;
-
+	bool PlotSpawn = false;
 	int Index = ENTITY_SPAWN;
 
 	if (m_ForceSpawnPos != vec2(-1, -1))
@@ -1054,12 +1055,24 @@ void CPlayer::TryRespawn()
 	{
 		Index = ENTITY_SPAWN_BLUE;
 	}
+	else if (m_PlotSpawn)
+	{
+		int PlotID = GameServer()->GetPlotID(GetAccID());
+		if (PlotID > 0)
+		{
+			SpawnPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+			PlotSpawn = true;
+		}
+	}
 
-	if (!GameServer()->Collision()->TileUsed(Index))
-		Index = ENTITY_SPAWN;
+	if (!PlotSpawn)
+	{
+		if (!GameServer()->Collision()->TileUsed(Index))
+			Index = ENTITY_SPAWN;
 
-	if (m_ForceSpawnPos == vec2(-1, -1) && !GameServer()->m_pController->CanSpawn(&SpawnPos, Index))
-		return;
+		if (m_ForceSpawnPos == vec2(-1, -1) && !GameServer()->m_pController->CanSpawn(&SpawnPos, Index))
+			return;
+	}
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 
