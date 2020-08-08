@@ -40,46 +40,21 @@ void CStableProjectile::CalculateVel()
 	float Curvature = 0;
 	float Speed = 0;
 
-	int TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	switch(m_Type)
 	{
 		case WEAPON_GRENADE:
-			if (!TuneZone)
-			{
-				Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
-				Speed = GameServer()->Tuning()->m_GrenadeSpeed;
-			}
-			else
-			{
-				Curvature = GameServer()->TuningList()[TuneZone].m_GrenadeCurvature;
-				Speed = GameServer()->TuningList()[TuneZone].m_GrenadeSpeed;
-			}
+			Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
+			Speed = GameServer()->Tuning()->m_GrenadeSpeed;
 			break;
 
 		case WEAPON_SHOTGUN:
-			if (!TuneZone)
-			{
-				Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
-				Speed = GameServer()->Tuning()->m_ShotgunSpeed;
-			}
-			else
-			{
-				Curvature = GameServer()->TuningList()[TuneZone].m_ShotgunCurvature;
-				Speed = GameServer()->TuningList()[TuneZone].m_ShotgunSpeed;
-			}
+			Curvature = GameServer()->Tuning()->m_ShotgunCurvature;
+			Speed = GameServer()->Tuning()->m_ShotgunSpeed;
 			break;
 
 		case WEAPON_GUN:
-			if (!TuneZone)
-			{
-				Curvature = GameServer()->Tuning()->m_GunCurvature;
-				Speed = GameServer()->Tuning()->m_GunSpeed;
-			}
-			else
-			{
-				Curvature = GameServer()->TuningList()[TuneZone].m_GunCurvature;
-				Speed = GameServer()->TuningList()[TuneZone].m_GunSpeed;
-			}
+			Curvature = GameServer()->Tuning()->m_GunCurvature;
+			Speed = GameServer()->Tuning()->m_GunSpeed;
 			break;
 	}
 
