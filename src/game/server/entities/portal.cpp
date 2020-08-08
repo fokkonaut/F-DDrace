@@ -154,7 +154,6 @@ void CPortal::PlayerEnter()
 		GameServer()->CreatePlayerSpawn(m_pLinkedPortal->m_Pos, TeamMask);
 
 		m_pLinkedPortal->m_vTeleported.push_back(apEnts[i]);
-		m_vTeleported.push_back(apEnts[i]);
 	}
 }
 
