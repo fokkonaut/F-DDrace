@@ -2051,6 +2051,10 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		str_format(aBuf, sizeof(aBuf), "Use '/plot buy %d %s' to buy the plot", Price, pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
+	else if (!str_comp_nocase(pCommand, "clear"))
+	{
+		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
+	}
 	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
@@ -2060,10 +2064,6 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
 		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
 		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
-	}
-	else if (!str_comp_nocase(pCommand, "clear"))
-	{
-		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
 	}
 }
 
