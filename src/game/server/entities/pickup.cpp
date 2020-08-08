@@ -141,13 +141,13 @@ void CPickup::Tick()
 							pChr->SetNinjaCurrentMoveTime(0);
 							if (pChr->m_ScrollNinja)
 								pChr->ScrollNinja(false);
+							if (pChr->GetActiveWeapon() >= WEAPON_SHOTGUN && pChr->GetActiveWeapon() != WEAPON_DRAW_EDITOR)
+								pChr->SetActiveWeapon(WEAPON_HAMMER);
 							if (Sound)
 							{
 								pChr->SetLastWeapon(WEAPON_GUN);
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
 							}
-							if (pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
-								pChr->SetActiveWeapon(WEAPON_HAMMER);
 						}
 						break;
 
