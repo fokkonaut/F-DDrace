@@ -404,8 +404,8 @@ public:
 	void WriteAccountStats(int ID);
 	void Logout(int ID, bool Silent = false);
 
-	int m_aTaserPrice[7];
-	int m_aPoliceLevel[5];
+	int m_aTaserPrice[NUM_TASER_LEVELS];
+	int m_aPoliceLevel[NUM_POLICE_LEVELS];
 	int m_aNeededXP[DIFFERENCE_XP_END];
 	int GetNeededXP(int Level);
 	int m_LastAccSaveTick;
