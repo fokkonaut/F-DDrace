@@ -1306,8 +1306,12 @@ void CPlayer::SpectatePlayerName(const char* pName)
 
 void CPlayer::RainbowTick()
 {
-	if (Server()->Tick() % 6 != 0 || (!m_InfRainbow && !IsHooked(RAINBOW) && !(m_pCharacter && m_pCharacter->m_Rainbow)))
+	bool IsRainbowHooked = IsHooked(RAINBOW);
+	if (Server()->Tick() % 6 != 0 || (!m_InfRainbow && !IsRainbowHooked && !(m_pCharacter && m_pCharacter->m_Rainbow)))
 		return;
+
+	if (m_pCharacter && IsRainbowHooked)
+		m_pCharacter->m_IsRainbowHooked = true;
 
 	m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
 

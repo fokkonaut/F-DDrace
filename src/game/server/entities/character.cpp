@@ -3079,6 +3079,7 @@ void CCharacter::FDDraceInit()
 	m_StrongBloody = false;
 	m_ScrollNinja = false;
 	m_HookPower = HOOK_NORMAL;
+	m_IsRainbowHooked = false;
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aSpreadWeapon[i] = false;
 	m_FakeTuneCollision = false;
@@ -3256,6 +3257,12 @@ void CCharacter::FDDraceTick()
 
 	// update the editor
 	m_DrawEditor.Tick();
+
+	if (m_IsRainbowHooked && !m_pPlayer->IsHooked(RAINBOW))
+	{
+		m_IsRainbowHooked = false;
+		m_pPlayer->ResetSkin();
+	}
 }
 
 void CCharacter::HandleLastIndexTiles()

@@ -383,7 +383,6 @@ public:
 	bool m_StrongBloody;
 	bool m_Invisible;
 	bool m_ScrollNinja;
-	int m_HookPower;
 	bool m_aSpreadWeapon[NUM_WEAPONS];
 	CEntity* m_pTelekinesisEntity;
 	CLightsaber* m_pLightsaber;
@@ -399,6 +398,9 @@ public:
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
 	int64 m_LastLinkedPortals;
+
+	int m_HookPower;
+	bool m_IsRainbowHooked;
 
 	// editor
 	CDrawEditor m_DrawEditor;
