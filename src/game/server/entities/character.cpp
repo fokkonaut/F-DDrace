@@ -2216,6 +2216,12 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
+	//flags not allowed on plots, resetting them
+	if (HasFlag() != -1 && GetCurrentTilePlotID() > 0)
+	{
+		Controller->ForceFlagOwner(-1, HasFlag());
+	}
+
 	// helper only
 	if ((m_TileIndex == TILE_HELPERS_ONLY) || (m_TileFIndex == TILE_HELPERS_ONLY))
 	{
