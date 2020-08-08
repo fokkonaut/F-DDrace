@@ -1949,7 +1949,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	bool Help = !str_comp_nocase(pCommand, "help");
 	if (pResult->NumArguments() == 0 || (Help && pResult->NumArguments() == 1))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, buy, spawn");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, cancel, buy, spawn");
 		pSelf->SendChatTarget(pResult->m_ClientID, "For detailed info, type '/plot help <command>'");
 		return;
 	}
@@ -1980,6 +1980,11 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot spawn");
 			pSelf->SendChatTarget(pResult->m_ClientID, "Lets you respawn at your plot");
+		}
+		else if (!str_comp_nocase(pCommand, "cancel"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot cancel");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Cancels the current running auction on your plot");
 		}
 		return;
 	}
@@ -2088,6 +2093,16 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		str_format(aBuf, sizeof(aBuf), "Use '/plot buy %d %s' to buy the plot", Price, pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+	}
+	else if (!str_comp_nocase(pCommand, "cancel"))
+	{
+		// cancel current plot auction
+		if (pPlayer->m_PlotAuctionPrice != 0)
+		{
+			pPlayer->m_PlotAuctionPrice = 0;
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", pSelf->Server()->ClientName(pResult->m_ClientID));
+		}
 	}
 	else if (!str_comp_nocase(pCommand, "clear"))
 	{
