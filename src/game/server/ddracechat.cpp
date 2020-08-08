@@ -1949,7 +1949,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	bool Help = !str_comp_nocase(pCommand, "help");
 	if (pResult->NumArguments() == 0 || (Help && pResult->NumArguments() == 1))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, cancel, buy, spawn");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, cancel, buy, swap, spawn");
 		pSelf->SendChatTarget(pResult->m_ClientID, "For detailed info, type '/plot help <command>'");
 		return;
 	}
@@ -1986,11 +1986,15 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot cancel");
 			pSelf->SendChatTarget(pResult->m_ClientID, "Cancels the current running auction on your plot");
 		}
+		else if (!str_comp_nocase(pCommand, "swap"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot swap <playername>");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Swaps plot with given player");
+		}
 		return;
 	}
 
 	int Price = pResult->NumArguments() > 1 ? max(1, str_toint(pResult->GetString(1))) : 0; // clamp price to 0
-	const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
 	char aBuf[256];
 	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
@@ -2004,6 +2008,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		const char *pName = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 		int ID = pSelf->GetCIDByName(pName);
 		CPlayer *pSeller = pSelf->m_apPlayers[ID];
 		if (ID == -1 || !pSeller)
@@ -2116,6 +2121,62 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "You will now respawn at your plot");
 		else
 			pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer respawn at your plot");
+	}
+	else if (!str_comp_nocase(pCommand, "swap"))
+	{
+		if (pPlayer->GetAccID() < ACC_START)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+			return;
+		}
+
+		const char *pSwapName = pResult->GetString(1);
+		int ID = pSelf->GetCIDByName(pSwapName);
+		CPlayer * pSwap = pSelf->m_apPlayers[ID];
+		if (ID == -1 || !pSwap)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player doesn't exists");
+			return;
+		}
+
+		if (ID == pResult->m_ClientID)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't swap with yourself");
+			return;
+		}
+
+		int SwapAccID = pSwap->GetAccID();
+		int SwapPlotID = pSelf->GetPlotID(SwapAccID);
+		if (SwapPlotID == 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This player doesn't own a plot");
+			return;
+		}
+
+		str_copy(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username, sizeof(pPlayer->m_aPlotSwapUsername));
+		
+		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);
+		if (!str_comp_nocase(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username)
+			&& !str_comp_nocase(pSwap->m_aPlotSwapUsername, pSelf->m_Accounts[OwnAccID].m_Username))
+		{
+			pSelf->SetPlotInfo(OwnPlotID, SwapAccID);
+			pSelf->SetPlotInfo(SwapPlotID, OwnAccID);
+			pPlayer->m_aPlotSwapUsername[0] = 0;
+			pSwap->m_aPlotSwapUsername[0] = 0;
+
+			str_format(aBuf, sizeof(aBuf), "You swapped plots with '%s'", pSwapName);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "You swapped plots with '%s'", pOwnName);
+			pSelf->SendChatTarget(ID, aBuf);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Offer to swap plots was sent to '%s'", pSwapName);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "'%s' has offered to swap plots with you, type '/plot swap %s' to swap", pOwnName, pOwnName);
+			pSelf->SendChatTarget(ID, aBuf);
+		}
 	}
 	else if (!pChr)
 	{

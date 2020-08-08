@@ -72,7 +72,7 @@ CHAT_COMMAND("room", "s[invite/kick] r[name]", CFGFLAG_CHAT, ConRoom, this, "Inv
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)
 
 //plots
-CHAT_COMMAND("plot", "?s[command] ?s[price/helpcmd] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)
+CHAT_COMMAND("plot", "?s[command] ?s[price/helpcmd/swapname] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)
 
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar", AUTHED_NO)

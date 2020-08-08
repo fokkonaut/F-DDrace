@@ -315,6 +315,7 @@ public:
 
 	// plot
 	int m_PlotAuctionPrice;
+	char m_aPlotSwapUsername[32];
 	bool m_PlotSpawn;
 
 	//room key

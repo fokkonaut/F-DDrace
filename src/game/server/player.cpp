@@ -196,6 +196,7 @@ void CPlayer::Reset()
 		m_pPortal[i] = 0;
 
 	m_PlotAuctionPrice = 0;
+	m_aPlotSwapUsername[0] = 0;
 	m_PlotSpawn = false;
 }
 
