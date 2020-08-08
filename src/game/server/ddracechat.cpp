@@ -2107,6 +2107,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	else if (!str_comp_nocase(pCommand, "clear"))
 	{
 		pSelf->ClearPlot(pSelf->GetPlotID(OwnAccID));
+		pSelf->SendChatTarget(pResult->m_ClientID, "All objects of your plot have been removed");
 	}
 	else if (!str_comp_nocase(pCommand, "spawn"))
 	{
