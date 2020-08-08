@@ -16,8 +16,6 @@ private:
 	int m_DropTick;
 	int m_GrabTick;
 
-	int m_DropFreezeTick;
-
 	CCharacter *m_pCarrier;
 	CCharacter *m_pLastCarrier;
 

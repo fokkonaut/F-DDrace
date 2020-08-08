@@ -38,7 +38,6 @@ void CFlag::Reset(bool Init)
 	m_Vel = vec2(0,0);
 	m_DropTick = 0;
 	m_GrabTick = 0;
-	m_DropFreezeTick = 0;
 	m_TeleCheckpoint = 0;
 	m_SoundTick = 0;
 	m_CanPlaySound = true;
@@ -79,7 +78,6 @@ void CFlag::Drop(int Dir)
 {
 	PlaySound(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
-	m_DropFreezeTick = Server()->Tick();
 	if (m_pCarrier)
 		GameServer()->SendBroadcast("", m_pCarrier->GetPlayer()->GetCID(), false);
 	m_pLastCarrier = m_pCarrier;
@@ -122,7 +120,7 @@ void CFlag::Tick()
 			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL))
 				continue;
 
-			if (m_pCarrier == apCloseCCharacters[i] || (m_pLastCarrier == apCloseCCharacters[i] && (m_DropFreezeTick + Server()->TickSpeed() * 2) > Server()->Tick()))
+			if (m_pCarrier == apCloseCCharacters[i] || (m_pLastCarrier == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
 				continue;
 
 			// take the flag
