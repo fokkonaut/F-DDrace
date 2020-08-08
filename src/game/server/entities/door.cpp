@@ -57,8 +57,8 @@ void CDoor::ResetCollision(bool Remove)
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
-				|| GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y)
-				|| GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
+				|| GameServer()->Collision()->GetTile(CurrentPos.x, CurrentPos.y)
+				|| GameServer()->Collision()->GetFTile(CurrentPos.x, CurrentPos.y))
 		{
 			break;
 		}
