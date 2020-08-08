@@ -3035,7 +3035,7 @@ void CGameContext::OnInit()
 		Config()->m_SvOldTeleportHook = 0;
 		Config()->m_SvOldTeleportWeapons = 0;
 		Config()->m_SvTeleportHoldHook = 0;
-		Config()->m_SvTeam = 1;
+		//Config()->m_SvTeam = 1;
 		Config()->m_SvShowOthersDefault = 0;
 
 		if (Collision()->m_NumSwitchers > 0)
