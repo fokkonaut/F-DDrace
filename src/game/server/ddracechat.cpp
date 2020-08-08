@@ -2156,8 +2156,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		str_copy(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username, sizeof(pPlayer->m_aPlotSwapUsername));
 		
 		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);
-		if (!str_comp_nocase(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username)
-			&& !str_comp_nocase(pSwap->m_aPlotSwapUsername, pSelf->m_Accounts[OwnAccID].m_Username))
+		if (str_comp(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username) == 0
+			&& str_comp(pSwap->m_aPlotSwapUsername, pSelf->m_Accounts[OwnAccID].m_Username) == 0)
 		{
 			pSelf->SetPlotInfo(OwnPlotID, SwapAccID);
 			pSelf->SetPlotInfo(SwapPlotID, OwnAccID);
