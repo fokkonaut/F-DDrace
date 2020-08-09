@@ -1166,14 +1166,12 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
 
+	if (m_pDoor[Ny * m_Width + Nx].m_Number != 0 && Number == 0)
+		return;
+
 	m_pDoor[Ny * m_Width + Nx].m_Index = Type;
 	m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
-
-	if (m_pDoor[Ny * m_Width + Nx].m_Number == 0)
-		m_pDoor[Ny * m_Width + Nx].m_Number = Number;
-
-	if (Number == 0)
-		m_pDoor[Ny * m_Width + Nx].m_Usage++;
+	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 }
 
 void CCollision::UnsetDCollisionAt(float x, float y)
@@ -1183,17 +1181,11 @@ void CCollision::UnsetDCollisionAt(float x, float y)
 	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
 	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0)
+	if (m_pDoor[Ny * m_Width + Nx].m_Number != 0)
 		return;
 
-	m_pDoor[Ny * m_Width + Nx].m_Usage--;
-
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number == 0)
-	{
-		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
-		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;
-		m_pDoor[Ny * m_Width + Nx].m_Number = 0;
-	}
+	m_pDoor[Ny * m_Width + Nx].m_Index = 0;
+	m_pDoor[Ny * m_Width + Nx].m_Flags = 0;
 }
 
 int CCollision::GetDTileIndex(int Index)

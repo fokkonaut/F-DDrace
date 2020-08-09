@@ -476,9 +476,6 @@ public:
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	int m_Number;
-
-	// F-DDrace
-	int m_Usage;
 };
 
 class CTuneTile
