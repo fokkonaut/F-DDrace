@@ -314,6 +314,8 @@ public:
 	bool IsExpiredItem(int Item);
 
 	// plot
+	void CancelPlotAuction();
+	void CancelPlotSwap();
 	int m_PlotAuctionPrice;
 	char m_aPlotSwapUsername[32];
 	bool m_PlotSpawn;

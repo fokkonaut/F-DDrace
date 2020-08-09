@@ -2078,6 +2078,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (pPlayer->m_aPlotSwapUsername[0] != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't sell your plot while you want to swap your plot, use '/plot cancel' to cancel it");
+			return;
+		}
+
 		if (pPlayer->m_PlotAuctionPrice != 0)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You already sell your plot");
@@ -2090,6 +2096,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		pPlayer->CancelPlotSwap();
+
 		pPlayer->m_PlotAuctionPrice = Price;
 
 		str_format(aBuf, sizeof(aBuf), "'%s' started an auction on plot %d for %d money (plot expires on %s)",
@@ -2101,13 +2109,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	}
 	else if (!str_comp_nocase(pCommand, "cancel"))
 	{
-		// cancel current plot auction
-		if (pPlayer->m_PlotAuctionPrice != 0)
-		{
-			pPlayer->m_PlotAuctionPrice = 0;
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", pSelf->Server()->ClientName(pResult->m_ClientID));
-		}
+		pPlayer->CancelPlotAuction();
+		pPlayer->CancelPlotSwap();
 	}
 	else if (!str_comp_nocase(pCommand, "clear"))
 	{
@@ -2127,6 +2130,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (pPlayer->GetAccID() < ACC_START)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+			return;
+		}
+
+		if (pPlayer->m_PlotAuctionPrice != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can't swap your plot while your plot auction is running, use '/plot cancel' to cancel it");
 			return;
 		}
 
@@ -2153,6 +2162,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		pPlayer->CancelPlotAuction();
 		str_copy(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username, sizeof(pPlayer->m_aPlotSwapUsername));
 		
 		const char *pOwnName = pSelf->Server()->ClientName(pResult->m_ClientID);

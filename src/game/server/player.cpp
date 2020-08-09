@@ -1467,14 +1467,29 @@ void CPlayer::OnLogout()
 
 		m_pCharacter->UnsetSpookyGhost();
 
-		// cancel current plot auction
-		if (m_PlotAuctionPrice != 0)
-		{
-			m_PlotAuctionPrice = 0;
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", Server()->ClientName(m_ClientID));
-		}
+		CancelPlotAuction();
+		CancelPlotSwap();
 	}
+}
+
+void CPlayer::CancelPlotAuction()
+{
+	if (m_PlotAuctionPrice == 0)
+		return;
+
+	m_PlotAuctionPrice = 0;
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", Server()->ClientName(m_ClientID));
+	GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+}
+
+void CPlayer::CancelPlotSwap()
+{
+	if (m_aPlotSwapUsername[0] == 0)
+		return;
+
+	m_aPlotSwapUsername[0] = 0;
+	GameServer()->SendChat(-1, CHAT_ALL, -1, "Your plot swap offer got cancelled");
 }
 
 void CPlayer::SetExpireDate(int Item)
