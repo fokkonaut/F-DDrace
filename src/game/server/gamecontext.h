@@ -793,7 +793,9 @@ private:
 
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
+	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

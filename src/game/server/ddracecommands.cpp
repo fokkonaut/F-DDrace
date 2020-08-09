@@ -1601,3 +1601,16 @@ void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 	pChr->m_PrevPos = pSelf->m_aPlots[PlotID].m_ToTele;
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
+
+void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int PlotID = pResult->GetInteger(0);
+	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
+		return;
+
+	char aBuf[32];
+	str_format(aBuf, sizeof(aBuf), "Cleared plot %d", PlotID);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->ClearPlot(PlotID);
+}
