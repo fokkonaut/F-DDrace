@@ -2078,12 +2078,6 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pPlayer->m_aPlotSwapUsername[0] != 0)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You can't sell your plot while you want to swap your plot, use '/plot cancel' to cancel it");
-			return;
-		}
-
 		if (pPlayer->m_PlotAuctionPrice != 0)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You already sell your plot");
@@ -2097,7 +2091,6 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		}
 
 		pPlayer->CancelPlotSwap();
-
 		pPlayer->m_PlotAuctionPrice = Price;
 
 		str_format(aBuf, sizeof(aBuf), "'%s' started an auction on plot %d for %d money (plot expires on %s)",
@@ -2130,12 +2123,6 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (pPlayer->GetAccID() < ACC_START)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
-			return;
-		}
-
-		if (pPlayer->m_PlotAuctionPrice != 0)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You can't swap your plot while your plot auction is running, use '/plot cancel' to cancel it");
 			return;
 		}
 
