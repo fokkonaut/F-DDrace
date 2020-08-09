@@ -1016,8 +1016,7 @@ void CPlayer::TryRespawn()
 	if (m_Team == TEAM_SPECTATORS)
 		return;
 
-	vec2 SpawnPos;
-	bool PlotSpawn = false;
+	vec2 SpawnPos = vec2(-1, -1);
 	int Index = ENTITY_SPAWN;
 
 	if (m_ForceSpawnPos != vec2(-1, -1))
@@ -1060,13 +1059,10 @@ void CPlayer::TryRespawn()
 	{
 		int PlotID = GameServer()->GetPlotID(GetAccID());
 		if (PlotID > 0)
-		{
 			SpawnPos = GameServer()->m_aPlots[PlotID].m_ToTele;
-			PlotSpawn = true;
-		}
 	}
 
-	if (!PlotSpawn)
+	if (SpawnPos == vec2(-1, -1))
 	{
 		if (!GameServer()->Collision()->TileUsed(Index))
 			Index = ENTITY_SPAWN;
