@@ -277,7 +277,7 @@ int CRegister::RegisterProcessPacket(CNetChunk *pPacket, TOKEN Token)
 			m_pNetServer->AddToken(&pPacket->m_Address, Token);
 		return 1;
 	}
-	else if(pPacket->m_DataSize == sizeof(SERVERBROWSE_FWERROR) &&
+	else if(!m_Sevendown && pPacket->m_DataSize == sizeof(SERVERBROWSE_FWERROR) &&
 		mem_comp(pPacket->m_pData, SERVERBROWSE_FWERROR, sizeof(SERVERBROWSE_FWERROR)) == 0)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, "ERROR: the master server reports that clients can not connect to this server.");
