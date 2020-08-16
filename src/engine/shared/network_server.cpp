@@ -99,7 +99,7 @@ SECURITY_TOKEN CNetServer::GetSecurityToken(const NETADDR &Addr)
 	SHA256_CTX Sha256;
 	sha256_init(&Sha256);
 	sha256_update(&Sha256, (unsigned char*)m_SecurityTokenSeed, sizeof(m_SecurityTokenSeed));
-	sha256_update(&Sha256, (unsigned char*)&Addr, sizeof(Addr)); //omit port, bad idea?
+	sha256_update(&Sha256, (unsigned char*)&Addr, sizeof(Addr));
 
 	SECURITY_TOKEN SecurityToken = ToSecurityToken(sha256_finish(&Sha256).data);
 

@@ -509,7 +509,8 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(TYPE_SHOP_PLOT))
 	{
-		m_pGameServer->SetExpireDate(&m_pGameServer->m_aPlots[Item].m_ExpireDate, ITEM_EXPIRE_PLOT);
+		int Days = m_pGameServer->m_aPlots[Item].m_Size == 0 ? ITEM_EXPIRE_PLOT_SMALL : m_pGameServer->m_aPlots[Item].m_Size == 1 ? ITEM_EXPIRE_PLOT_BIG : 0;
+		m_pGameServer->SetExpireDate(&m_pGameServer->m_aPlots[Item].m_ExpireDate, Days);
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "The plot will expire on %s", m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate));
 		m_pGameServer->SendChatTarget(ClientID, aBuf);
