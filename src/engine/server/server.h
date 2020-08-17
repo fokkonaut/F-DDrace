@@ -295,7 +295,7 @@ public:
 
 	void SendServerInfo(int ClientID);
 	void GenerateServerInfo(CPacker *pPacker, int Token);
-	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool SendClients = true);
+	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool SendClients);
 
 	void PumpNetwork();
 
