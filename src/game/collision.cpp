@@ -157,7 +157,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		}
 	}
 
-	if (m_NumSwitchers)
+	if (m_NumSwitchers || m_NumPlots)
 	{
 		m_pSwitchers = new SSwitchers[m_NumSwitchers + m_NumPlots + 1];
 
