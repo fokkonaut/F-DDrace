@@ -302,6 +302,9 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_Regi
 
 	m_RconPasswordSet = 0;
 
+	m_ServerInfoFirstRequest = 0;
+	m_ServerInfoNumRequests = 0;
+
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
@@ -1517,7 +1520,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	}
 }
 
-void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
+void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool SendClients)
 {
 	CPacker p;
 	char aBuf[128];
@@ -1615,6 +1618,12 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
 
 	RESET();
 
+	if (!SendClients)
+	{
+		SEND(pp.Size());
+		return;
+	}
+
 	pPrefix = SERVERBROWSE_INFO_EXTENDED_MORE;
 	PrefixSize = sizeof(SERVERBROWSE_INFO_EXTENDED_MORE);
 
@@ -1674,7 +1683,7 @@ void CServer::SendServerInfo(int ClientID)
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
 				if (m_aClients[i].m_Sevendown)
-					SendServerInfoSevendown(m_NetServer.ClientAddr(i), -1);
+					SendServerInfoSevendown(m_NetServer.ClientAddr(i), -1, true);
 				else
 					SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, i);
 			}
@@ -1683,7 +1692,7 @@ void CServer::SendServerInfo(int ClientID)
 	else if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State != CClient::STATE_EMPTY)
 	{
 		if (m_aClients[ClientID].m_Sevendown)
-			SendServerInfoSevendown(m_NetServer.ClientAddr(ClientID), -1);
+			SendServerInfoSevendown(m_NetServer.ClientAddr(ClientID), -1, true);
 		else
 			SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 	}
@@ -1726,10 +1735,27 @@ void CServer::PumpNetwork()
 					if (!Config()->m_SvAllowSevendown)
 						continue;
 
+					bool SendClients = true;
+					if(Config()->m_SvServerInfoPerSecond)
+					{
+						SendClients = m_ServerInfoNumRequests <= Config()->m_SvServerInfoPerSecond;
+						const int64 Now = Tick();
+
+						if (Now <= m_ServerInfoFirstRequest + TickSpeed())
+						{
+							m_ServerInfoNumRequests++;
+						}
+						else
+						{
+							m_ServerInfoNumRequests = 1;
+							m_ServerInfoFirstRequest = Now;
+						}
+					}
+
 					int ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
 					SrvBrwsToken = ((unsigned char*)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
 					SrvBrwsToken |= ExtraToken << 8;
-					SendServerInfoSevendown(&Packet.m_Address, SrvBrwsToken);
+					SendServerInfoSevendown(&Packet.m_Address, SrvBrwsToken, SendClients);
 				}
 				else
 				{
@@ -1954,6 +1980,7 @@ int CServer::Run()
 
 					m_GameStartTime = time_get();
 					m_CurrentGameTick = 0;
+					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit();
 				}
