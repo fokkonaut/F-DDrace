@@ -305,11 +305,14 @@ void CDrawEditor::OnWeaponSwitch()
 		SetPreview();
 
 		int PlotID = GetPlotID();
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (GameServer()->GetPlayerChar(i) && i != GetCID() && m_pCharacter->GetCurrentTilePlotID() == PlotID)
-				GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
+		if (m_pCharacter->GetCurrentTilePlotID() == PlotID)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if (GameServer()->GetPlayerChar(i) && i != GetCID())
+					GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
 
-		GameServer()->SetPlotDoorStatus(PlotID, true);
+			GameServer()->SetPlotDoorStatus(PlotID, true);
+		}
 	}
 	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
 	{
