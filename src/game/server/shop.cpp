@@ -58,13 +58,15 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 		static char aaName[MAX_PLOTS][32];
 		int Level;
 		int Price;
+		int Time;
 		for (int i = PLOT_START; i < m_NumItems; i++)
 		{
 			Size = m_pGameServer->m_aPlots[i].m_Size;
 			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i);
 			Level = (Size + 1) * 20;
 			Price = (Size + 1) * 50000;
-			AddItem(aaName[i], Level, Price, TIME_7_DAYS, "");
+			Time = Size == 0 ? TIME_7_DAYS : Size == 1 ? TIME_5_DAYS : -1;
+			AddItem(aaName[i], Level, Price, Time, "");
 		}
 	}
 }
@@ -241,6 +243,7 @@ const char *CShop::GetTimeMessage(int Time)
 	case TIME_30_DAYS: return "You own this item for 30 days.";
 	case TIME_20_DAYS: return "You own this item for 20 days.";
 	case TIME_7_DAYS: return "You own this item for 7 days.";
+	case TIME_5_DAYS: return "You own this item for 5 days.";
 	}
 	return "Unknown";
 }

@@ -51,6 +51,7 @@ enum Time
 	TIME_30_DAYS,
 	TIME_20_DAYS,
 	TIME_7_DAYS,
+	TIME_5_DAYS,
 };
 
 enum States
