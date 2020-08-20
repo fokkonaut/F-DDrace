@@ -410,7 +410,7 @@ public:
 	int GetNeededXP(int Level);
 	int m_LastAccSaveTick;
 
-	const char *GetDate(time_t Time);
+	const char *GetDate(time_t Time, bool ShowTime = true);
 	void WriteDonationFile(int Type, int Amount, int ID, const char *pDescription);
 
 	struct AccountInfo

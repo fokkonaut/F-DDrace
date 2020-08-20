@@ -4220,13 +4220,20 @@ void CGameContext::FreeAccount(int ID, bool Silent)
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 
-const char *CGameContext::GetDate(time_t Time)
+const char *CGameContext::GetDate(time_t Time, bool ShowTime)
 {
 	time_t tmp = Time;
 	struct tm Date = *localtime(&tmp);
 
-	static char aBuf[16];
+	static char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "%02d.%02d.%d", Date.tm_mday, Date.tm_mon+1, Date.tm_year+1900);
+
+	if (ShowTime)
+	{
+		char aTime[64];
+		str_format(aTime, sizeof(aTime), " (%02d:%02d)", Date.tm_hour, Date.tm_min);
+		str_append(aBuf, aTime, sizeof(aBuf));
+	}
 
 	return aBuf;
 }
@@ -4236,7 +4243,7 @@ void CGameContext::WriteDonationFile(int Type, int Amount, int ID, const char *p
 	const char* pFrom = Type == TYPE_DONATION ? "donation" : Type == TYPE_PURCHASE ? "purchase" : "";
 	char aBuf[256], aMsg[256];
 	time_t Now = time(0);
-	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s', Description: '%s'", GetDate(Now), Amount, m_Accounts[ID].m_Username, pDescription);
+	str_format(aMsg, sizeof(aMsg), "Date: %s, Euros: %d, Account: '%s', Description: '%s'", GetDate(Now, false), Amount, m_Accounts[ID].m_Username, pDescription);
 	Console()->Format(aBuf, sizeof(aBuf), pFrom, aMsg);
 
 	char aFile[256];
