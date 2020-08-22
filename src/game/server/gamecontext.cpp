@@ -789,7 +789,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
-	Config()->m_SvTestingCommands = 1;
+	Config()->m_SvAllowSevendown = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -1531,7 +1531,8 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char aOldName[MAX_NAME_LENGTH];
 			str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 			Server()->SetClientName(ClientID, pName);
-			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
+			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0
+				&& str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, aOldName) == 0) // check that we dont have a name on right now set by an admin
 			{
 				char aChatText[256];
 				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
@@ -1549,7 +1550,8 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				UpdateInfo = true;
 			}
 
-			if(str_comp(Server()->ClientClan(ClientID), pClan))
+			if(str_comp(Server()->ClientClan(ClientID), pClan)
+				&& str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID)) == 0) // check that we dont have a clan on right now set by an admin)
 			{
 				Server()->SetClientClan(ClientID, pClan);
 				pPlayer->SetClan(Server()->ClientClan(ClientID));
