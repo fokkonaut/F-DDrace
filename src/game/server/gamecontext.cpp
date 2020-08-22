@@ -4073,7 +4073,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 		case ACC_CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(pData); break;
 		case ACC_LEVEL:						m_Accounts[ID].m_Level = atoi(pData); break;
 		case ACC_XP:						m_Accounts[ID].m_XP = atoi(pData); break;
-		case ACC_MONEY:						m_Accounts[ID].m_Money = atoi(pData); break;
+		case ACC_MONEY:						m_Accounts[ID].m_Money = atoll(pData); break;
 		case ACC_KILLS:						m_Accounts[ID].m_Kills = atoi(pData); break;
 		case ACC_DEATHS:					m_Accounts[ID].m_Deaths = atoi(pData); break;
 		case ACC_POLICE_LEVEL:				m_Accounts[ID].m_PoliceLevel = atoi(pData); break;

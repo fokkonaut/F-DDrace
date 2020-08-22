@@ -305,7 +305,7 @@ public:
 
 	//account
 	int GetAccID();
-	void MoneyTransaction(int Amount, const char* pDescription = "", bool IsEuro = false);
+	void MoneyTransaction(int64 Amount, const char* pDescription = "", bool IsEuro = false);
 	void GiveXP(int Amount, const char* pMessage = "");
 	void GiveBlockPoints(int Amount);
 	void OnLogin();

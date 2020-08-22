@@ -1360,7 +1360,7 @@ int CPlayer::GetAccID()
 	return 0;
 }
 
-void CPlayer::MoneyTransaction(int Amount, const char *pDescription, bool IsEuro)
+void CPlayer::MoneyTransaction(int64 Amount, const char *pDescription, bool IsEuro)
 {
 	if (GetAccID() < ACC_START)
 		return;

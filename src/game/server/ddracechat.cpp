@@ -1735,6 +1735,7 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	int64 Money = atoll(pResult->GetString(0));
 	int ID = pSelf->GetCIDByName(pResult->GetString(1));
 	CPlayer* pTo = pSelf->m_apPlayers[ID];
 	if (ID == -1 || !pTo)
@@ -1752,28 +1753,28 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "That player is not logged in");
 		return;
 	}
-	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_Money < pResult->GetInteger(0))
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_Money < Money)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
 		return;
 	}
-	if (pResult->GetInteger(0) <= 0)
+	if (Money <= 0)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't pay nothing");
 		return;
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "paid %d money to '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pTo->GetCID()));
-	pPlayer->MoneyTransaction(-pResult->GetInteger(0), aBuf);
+	str_format(aBuf, sizeof(aBuf), "paid %llu money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	pPlayer->MoneyTransaction(-Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "got %d money from '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pResult->m_ClientID));
-	pTo->MoneyTransaction(pResult->GetInteger(0), aBuf);
+	str_format(aBuf, sizeof(aBuf), "got %llu money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	pTo->MoneyTransaction(Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You paid %d money to '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "You paid %llu money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You got %d money from '%s'", pResult->GetInteger(0), pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "You got %llu money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
