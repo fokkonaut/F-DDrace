@@ -336,7 +336,7 @@ void CCharacter::HandleWeaponSwitch()
 
 	// F-DDrace
 	// client keep sending the direct weapon input, and for the draweditor this is bad because weaponswitch means you exit the editor, means it automatically switches
-	// back to the wanted weapon after you entered the editor, so we only allow setting the wanted weapon when we dont have it set already AND if we have that weapon
+	// back to the wanted weapon after you entered the editor, so we only allow setting the directly wanted weapon when its not the same as the last request
 	if (m_DrawEditor.Active() && m_LatestInput.m_WantedWeapon)
 	{
 		static int s_LastWantedWeapon = 0;
