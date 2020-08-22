@@ -1481,7 +1481,9 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 
 	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID, "");
 
-	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+	if (pSelf->m_Accounts[ID].m_LoggedIn)
+		pSelf->WriteAccountStats(ID);
+	else
 		pSelf->Logout(ID);
 }
 
