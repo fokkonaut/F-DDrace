@@ -585,9 +585,9 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo[15] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorBody;
 		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorFeet;
 
-		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
+		((int*)pPlayerInfo)[0] = (int)((m_ClientID == SnappingClient && (!m_pControlledTee || m_Paused)) || (m_TeeControllerID == SnappingClient && !pSnapping->m_Paused));
 		((int*)pPlayerInfo)[1] = id;
-		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && !m_TeeControlMode ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && (!m_TeeControlMode || m_pControlledTee) ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
 	}
@@ -674,7 +674,7 @@ void CPlayer::SetFakeID()
 int CPlayer::GetHidePlayerTeam(int Asker)
 {
 	CPlayer *pAsker = GameServer()->m_apPlayers[Asker];
-	if (m_Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
+	if (m_TeeControllerID != Asker && m_Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
 		|| (GameServer()->Config()->m_SvHideMinigamePlayers && pAsker->m_Minigame != m_Minigame)))
 		return TEAM_BLUE;
 	return m_Team;
@@ -741,13 +741,14 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 	// F-DDrace
 	if (m_pControlledTee && !m_Paused && !TeeControlled)
 	{
+		TranslatePlayerFlags(NewInput);
 		m_pControlledTee->OnPredictedInput(NewInput, true);
 		return;
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
-
-	TranslatePlayerFlags(NewInput);
+	else
+		TranslatePlayerFlags(NewInput);
 
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
@@ -764,17 +765,18 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 	// F-DDrace
 	if (m_pControlledTee && !m_Paused && !TeeControlled)
 	{
+		TranslatePlayerFlags(NewInput);
 		m_pControlledTee->OnDirectInput(NewInput, true);
 		return;
 	}
 	else if (m_TeeControllerID != -1 && !TeeControlled)
 		return;
+	else
+		TranslatePlayerFlags(NewInput);
 
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
 	AfkVoteTimer(NewInput);
-
-	TranslatePlayerFlags(NewInput);
 
 	if(GameServer()->m_World.m_Paused)
 	{

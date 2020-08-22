@@ -3617,7 +3617,7 @@ int CCharacter::GetAliveState()
 
 void CCharacter::SetTeeControlCursor()
 {
-	if (m_pTeeControlCursor || !m_pPlayer->m_pControlledTee)
+	if (m_pTeeControlCursor || !m_pPlayer->m_pControlledTee || Server()->IsSevendown(m_pPlayer->GetCID()))
 		return;
 
 	m_pTeeControlCursor = new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_pPlayer->GetCID(), vec2(), false, true);

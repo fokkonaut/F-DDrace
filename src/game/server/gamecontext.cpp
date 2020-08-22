@@ -759,7 +759,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction && !Server()->IsSevendown(ClientID)) || pChr->GetPlayer()->m_TeeControllerID != -1 || pChr->m_DrawEditor.Active())
+		if (pChr->m_DrawEditor.Active() || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;
@@ -2076,15 +2076,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (pPlayer->m_HasTeeControl && !pPlayer->IsPaused())
 			{
 				bool SetTeeControl = pMsg->m_Team == TEAM_SPECTATORS;
-				if (!SetTeeControl)
+				if (!SetTeeControl || (pPlayer->m_TeeControlMode && SetTeeControl))
 					pPlayer->UnsetTeeControl();
-				pPlayer->m_TeeControlMode = SetTeeControl;
-				SendTeamChange(ClientID, SetTeeControl ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
-				SendChatTarget(ClientID, pPlayer->m_TeeControlMode ? "You are now using the tee controller" : "You are no longer using the tee controller");
-				if (pPlayer->GetCharacter())
-					SendTuningParams(ClientID, pPlayer->GetCharacter()->m_TuneZone);
-				if (pPlayer->m_TeeControlForcedID != -1 && SetTeeControl)
-					pPlayer->SetTeeControl(m_apPlayers[pPlayer->m_TeeControlForcedID]);
+				if (pPlayer->m_TeeControlMode != SetTeeControl)
+				{
+					pPlayer->m_TeeControlMode = SetTeeControl;
+					SendChatTarget(ClientID, pPlayer->m_TeeControlMode ? "You are now using the tee controller" : "You are no longer using the tee controller");
+					SendTeamChange(ClientID, SetTeeControl ? TEAM_SPECTATORS : pPlayer->GetTeam(), true, Server()->Tick(), ClientID);
+					if (pPlayer->GetCharacter() && !Server()->IsSevendown(ClientID))
+						SendTuningParams(ClientID, pPlayer->GetCharacter()->m_TuneZone);
+					if (pPlayer->m_TeeControlForcedID != -1 && SetTeeControl)
+						pPlayer->SetTeeControl(m_apPlayers[pPlayer->m_TeeControlForcedID]);
+				}
 				return;
 			}
 
@@ -2984,6 +2987,7 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
+	Config()->m_SvAllowSevendown = 1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
