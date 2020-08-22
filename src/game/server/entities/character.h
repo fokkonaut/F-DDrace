@@ -191,6 +191,9 @@ private:
 	int m_EmoteType;
 	int m_EmoteStop;
 
+	// F-DDrace
+	int m_LastWantedWeapon;
+
 	// last tick that the player took any action ie some input
 	int m_LastAction;
 	int m_LastNoAmmoSound;
