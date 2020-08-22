@@ -1040,9 +1040,6 @@ void CCharacter::GiveAllWeapons()
 
 void CCharacter::GiveNinja()
 {
-	if (!m_ScrollNinja && !m_aWeapons[WEAPON_NINJA].m_Got && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
-		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
 		m_aWeaponsBackupGot[WEAPON_NINJA][i] = true;
@@ -1059,6 +1056,9 @@ void CCharacter::GiveNinja()
 	if (GetActiveWeapon() != WEAPON_NINJA)
 		m_LastWeapon = GetActiveWeapon();
 	SetActiveWeapon(WEAPON_NINJA);
+
+	if (!m_aWeapons[WEAPON_NINJA].m_Got && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
+		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 }
 
 void CCharacter::RemoveNinja()

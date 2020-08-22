@@ -486,7 +486,7 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
 	// include ninja, client doesnt auto switch to ninja on pickup
-	if (Weapon > NUM_VANILLA_WEAPONS)
+	if (Weapon >= NUM_VANILLA_WEAPONS-1)
 	{
 		if (GetPlayerChar(ClientID))
 			GetPlayerChar(ClientID)->SetWeapon(Weapon);

@@ -122,8 +122,6 @@ void CPickupDrop::Pickup()
 				pChr->GiveWeapon(m_Weapon, false, m_Bullets);
 			}
 
-			GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Weapon);
-
 			if (m_Special&SPECIAL_JETPACK)
 				pChr->Jetpack();
 			if (m_Special&SPECIAL_SPREADWEAPON)
@@ -134,6 +132,8 @@ void CPickupDrop::Pickup()
 				pChr->DoorHammer();
 			if (m_Special&SPECIAL_SCROLLNINJA)
 				pChr->ScrollNinja();
+
+			GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Weapon);
 
 			if (m_Weapon == WEAPON_SHOTGUN || m_Weapon == WEAPON_LASER || m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_PORTAL_RIFLE || m_Weapon == WEAPON_PROJECTILE_RIFLE)
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
