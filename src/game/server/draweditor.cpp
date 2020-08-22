@@ -318,7 +318,10 @@ void CDrawEditor::OnWeaponSwitch()
 	{
 		RemovePreview();
 
-		m_pCharacter->TeleOutOfPlot(GetPlotID());
+		int PlotID = GetPlotID();
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (GameServer()->GetPlayerChar(i))
+				GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
 	}
 	else
 		return;
