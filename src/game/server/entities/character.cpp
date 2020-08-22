@@ -3410,6 +3410,8 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		TeleWeapon(WeaponID, false, -1, OnDeath);
 	if (Special&SPECIAL_DOORHAMMER)
 		DoorHammer(false, -1, OnDeath);
+	if (Special&SPECIAL_SCROLLNINJA)
+		ScrollNinja(false, -1, OnDeath);
 }
 
 void CCharacter::DropPickup(int Type, int Amount)
