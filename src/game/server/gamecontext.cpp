@@ -4179,7 +4179,7 @@ void CGameContext::Logout(int ID, bool Silent)
 
 void CGameContext::LogoutAllAccounts()
 {
-	int Amount = m_Accounts.size();
+	unsigned int Amount = m_Accounts.size();
 	for (unsigned int i = ACC_START; i < Amount; i++)
 		Logout(ACC_START);
 	dbg_msg("acc", "logged out all accounts");
