@@ -334,6 +334,17 @@ void CCharacter::HandleWeaponSwitch()
 		}
 	}
 
+	// F-DDrace
+	// client keep sending the direct weapon input, and for the draweditor this is bad because weaponswitch means you exit the editor, means it automatically switches
+	// back to the wanted weapon after you entered the editor, so we only allow setting the wanted weapon when we dont have it set already AND if we have that weapon
+	if (m_DrawEditor.Active() && m_LatestInput.m_WantedWeapon)
+	{
+		static int s_LastWantedWeapon = 0;
+		if (m_Input.m_WantedWeapon == s_LastWantedWeapon)
+			m_LatestInput.m_WantedWeapon = 0; // pretend we dont have a direct weapon selection
+		s_LastWantedWeapon = m_Input.m_WantedWeapon;
+	}
+
 	// Direct Weapon selection
 	if(m_LatestInput.m_WantedWeapon)
 		WantedWeapon = m_Input.m_WantedWeapon-1;
@@ -3331,14 +3342,22 @@ void CCharacter::LoadWeaponBackup(int Type)
 void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 {
 	if (GetWeaponGot(PreferedWeapon))
-		SetWeapon(PreferedWeapon);
-	else for (int i = 0; i < NUM_WEAPONS; i++)
 	{
-		if (i != WEAPON_NINJA)
-			if (GetWeaponGot(i))
-				SetWeapon(i);
+		SetWeapon(PreferedWeapon);
+		return;
 	}
-	UpdateWeaponIndicator();
+
+	for (int i = 0; i < NUM_WEAPONS; i++)
+	{
+		if (i == WEAPON_NINJA)
+			continue;
+
+		if (GetWeaponGot(i))
+		{
+			SetWeapon(i);
+			break;
+		}
+	}
 }
 
 void CCharacter::SetLastTouchedSwitcher(int Number)
