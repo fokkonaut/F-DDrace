@@ -252,6 +252,7 @@ public:
 
 	//hide players
 	int m_HidePlayerTeam[MAX_CLIENTS];
+	int GetHidePlayerTeam(int Asker);
 
 	//gamemodes
 	int m_Gamemode;

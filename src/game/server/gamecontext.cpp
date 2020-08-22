@@ -4529,11 +4529,7 @@ void CGameContext::UpdateHidePlayers(int UpdateID)
 		if (i == UpdateID || !m_apPlayers[i] || m_apPlayers[UpdateID]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[i]->m_IsDummy)
 			continue;
 
-		int Team = TEAM_RED;
-
-		if ((Config()->m_SvHideDummies && m_apPlayers[UpdateID]->m_IsDummy)
-			|| (Config()->m_SvHideMinigamePlayers && m_apPlayers[UpdateID]->m_Minigame != m_apPlayers[i]->m_Minigame))
-			Team = TEAM_BLUE;
+		int Team = m_apPlayers[UpdateID]->GetHidePlayerTeam(i);
 
 		// only update the team when its not the same as before
 		if (m_apPlayers[i]->m_HidePlayerTeam[UpdateID] == Team)

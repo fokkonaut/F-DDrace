@@ -394,15 +394,10 @@ void CPlayer::SendConnect(int ClientID, int FakeID)
 	if (!pPlayer)
 		return;
 
-	int Team = pPlayer->m_Team;
-	if (Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && pPlayer->m_IsDummy)
-		|| (GameServer()->Config()->m_SvHideMinigamePlayers && m_Minigame != pPlayer->m_Minigame)))
-		Team = TEAM_BLUE;
-
 	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientID = FakeID;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = Team;
+	NewClientInfoMsg.m_Team = pPlayer->GetHidePlayerTeam(m_ClientID);
 	NewClientInfoMsg.m_pName = pPlayer->m_CurrentInfo.m_aName;
 	NewClientInfoMsg.m_pClan = pPlayer->m_CurrentInfo.m_aClan;
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
@@ -590,14 +585,9 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo[15] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorBody;
 		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorFeet;
 
-		int Team = m_Team;
-		if (Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
-			|| (GameServer()->Config()->m_SvHideMinigamePlayers && pSnapping->m_Minigame != m_Minigame)))
-			Team = TEAM_BLUE;
-
 		((int*)pPlayerInfo)[0] = (int)(m_ClientID == SnappingClient);
 		((int*)pPlayerInfo)[1] = id;
-		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && !m_TeeControlMode ? Team : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && !m_TeeControlMode ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
 	}
@@ -679,6 +669,15 @@ void CPlayer::SetFakeID()
 
 	int *pIdMap = Server()->GetIdMap(m_ClientID);
 	pIdMap[m_FakeID] = m_ClientID;
+}
+
+int CPlayer::GetHidePlayerTeam(int Asker)
+{
+	CPlayer *pAsker = GameServer()->m_apPlayers[Asker];
+	if (m_Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
+		|| (GameServer()->Config()->m_SvHideMinigamePlayers && pAsker->m_Minigame != m_Minigame)))
+		return TEAM_BLUE;
+	return m_Team;
 }
 
 void CPlayer::OnDisconnect()
