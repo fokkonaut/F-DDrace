@@ -382,7 +382,7 @@ public:
 
 	//account
 	int GetAccount(const char* pUsername);
-	void FreeAccount(int ID, bool Silent = false);
+	void FreeAccount(int ID);
 
 	struct TopAccounts
 	{
@@ -403,6 +403,7 @@ public:
 	void ReadAccountStats(int ID, const char* pName);
 	void WriteAccountStats(int ID);
 	void Logout(int ID, bool Silent = false);
+	void LogoutAllAccounts();
 
 	int m_aTaserPrice[NUM_TASER_LEVELS];
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];

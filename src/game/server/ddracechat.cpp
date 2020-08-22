@@ -1570,7 +1570,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	}
 
 	// we reset the account again and read it again to get the correct values
-	pSelf->FreeAccount(ID, true);
+	pSelf->FreeAccount(ID);
 
 	// process register spam protection before really adding the account
 	if (pSelf->ProcessRegisterBan(pResult->m_ClientID))

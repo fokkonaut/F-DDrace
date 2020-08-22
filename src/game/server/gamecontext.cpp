@@ -3315,9 +3315,6 @@ void CGameContext::DeleteTempfile()
 
 void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 {
-	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
-		Logout(i);
-
 	char aConfig[128];
 	char aTemp[128];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", Config()->m_SvMap);
@@ -3443,8 +3440,7 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 void CGameContext::OnShutdown(bool FullShutdown)
 {
-	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
-		Logout(i);
+	LogoutAllAccounts();
 
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
@@ -3974,7 +3970,7 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
 			pSelf->Logout(ID, true);
 		else
-			pSelf->FreeAccount(ID, true);
+			pSelf->FreeAccount(ID);
 	}
 
 	return 0;
@@ -4175,7 +4171,18 @@ void CGameContext::Logout(int ID, bool Silent)
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
 	WriteAccountStats(ID);
-	FreeAccount(ID, Silent);
+
+	if (!Silent)
+		dbg_msg("acc", "logged out account '%s'", m_Accounts[ID].m_Username);
+	FreeAccount(ID);
+}
+
+void CGameContext::LogoutAllAccounts()
+{
+	int Amount = m_Accounts.size();
+	for (unsigned int i = ACC_START; i < Amount; i++)
+		Logout(ACC_START);
+	dbg_msg("acc", "logged out all accounts");
 }
 
 int CGameContext::GetNeededXP(int Level)
@@ -4215,10 +4222,8 @@ int CGameContext::GetAccount(const char* pUsername)
 	return ID;
 }
 
-void CGameContext::FreeAccount(int ID, bool Silent)
+void CGameContext::FreeAccount(int ID)
 {
-	if (!Silent)
-		dbg_msg("acc", "freed account %d", ID);
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 
