@@ -320,7 +320,6 @@ void CShop::SendWindow(int ClientID, int Item)
 		{
 			char aOwner[32];
 			char aRented[64];
-			int Size = m_pGameServer->m_aPlots[Item].m_Size;
 			bool Owned = m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0;
 
 			if (Owned)

@@ -32,7 +32,7 @@ bool CDrawEditor::CanPlace()
 	CCollision *pCol = GameServer()->Collision();
 	int TilePlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
 	// check for TilePlotID > 0 here, because plots start at id 1
-	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID > 0 && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
+	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
@@ -60,6 +60,17 @@ void CDrawEditor::Tick()
 
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
+
+	if (Server()->Tick() % Server()->TickSpeed() == 0)
+	{
+		int PlotID = m_pCharacter->GetCurrentTilePlotID();
+		if (PlotID == GetPlotID())
+		{
+			char aBuf[32];
+			str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
+			GameServer()->SendBroadcast(aBuf, GetCID(), false);
+		}
+	}
 }
 
 void CDrawEditor::OnPlayerFire()
@@ -92,13 +103,13 @@ void CDrawEditor::OnPlayerFire()
 		return;
 
 	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
-	if (PlotID > 0 && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+	if (PlotID >= PLOT_START && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
 		return;
 
 	CEntity *pEntity = CreateEntity();
 	pEntity->m_PlotID = PlotID;
 
-	if (PlotID > 0)
+	if (PlotID >= PLOT_START)
 		GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
