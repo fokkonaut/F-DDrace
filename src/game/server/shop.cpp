@@ -213,7 +213,7 @@ const char *CShop::FormatMotd(const char *pMsg, int Item)
 
 	str_format(aPage, sizeof(aPage), "~ %d ~", Page);
 
-	int NumNewLines = (IsType(TYPE_SHOP_NORMAL) || Page <= 0) ? pNumNewLines[Page] : IsType(TYPE_SHOP_PLOT) ? 9 : 0;
+	int NumNewLines = (IsType(TYPE_SHOP_NORMAL) || Page <= 0) ? pNumNewLines[Page] : IsType(TYPE_SHOP_PLOT) ? 8 : 0;
 	aTemp[0] = 0;
 	for (int i = 0; i < NumNewLines; i++)
 	{
@@ -318,15 +318,30 @@ void CShop::SendWindow(int ClientID, int Item)
 			str_copy(aDescription, m_aItems[Item].m_pDescription, sizeof(aDescription));
 		else if (IsType(TYPE_SHOP_PLOT))
 		{
+			char aOwner[32];
+			char aRented[64];
 			int Size = m_pGameServer->m_aPlots[Item].m_Size;
 			bool Owned = m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0;
+
+			if (Owned)
+			{
+				str_format(aOwner, sizeof(aOwner), "'%s'", m_pGameServer->m_aPlots[Item].m_aDisplayName);
+				str_format(aRented, sizeof(aRented), "Rented until: %s", m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate));
+			}
+			else
+			{
+				str_copy(aOwner, "for sale", sizeof(aOwner));
+				str_copy(aRented, "", sizeof(aRented));
+			}
+
 			str_format(aDescription, sizeof(aDescription),
 				"Size: %s\n"
+				"Max. objects: %d\n"
 				"Owner: %s\n"
-				"Rented until: %s",
-				Size == 0 ? "small" : Size == 1 ? "big" : "?",
-				Owned ? m_pGameServer->m_aPlots[Item].m_aDisplayName : "for sale",
-				Owned ? m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate) : "for sale");
+				"%s",
+				m_pGameServer->GetPlotSizeString(Item),
+				m_pGameServer->GetMaxPlotObjects(Item),
+				aOwner, aRented);
 		}
 
 		str_format(aMsg, sizeof(aMsg),

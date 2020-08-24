@@ -354,6 +354,7 @@ public:
 	void SetPlotInfo(int PlotID, int AccID);
 
 	unsigned int GetMaxPlotObjects(int PlotID);
+	const char *GetPlotSizeString(int PlotID);
 
 	void SetExpireDate(time_t *pDate, int Days);
 	bool IsExpired(time_t Date);

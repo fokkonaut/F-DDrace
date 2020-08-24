@@ -3889,8 +3889,21 @@ unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
 	case 1: return Config()->m_SvMaxObjectsPlotBig;
 	}
 
-	// shouldn't happen
 	return 0;
+}
+
+const char *CGameContext::GetPlotSizeString(int PlotID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+		return "Unknown";
+
+	switch (m_aPlots[PlotID].m_Size)
+	{
+	case 0: return "small";
+	case 1: return "big";
+	}
+
+	return "Unkown";
 }
 
 void CGameContext::ExpirePlots()
