@@ -270,7 +270,7 @@ public:
 
 	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
 
-	void List(int ClientID, const char* filter);
+	void List(int ClientID, const char* filter); // ClientID -1 prints to console, otherwise to chat
 
 	void SendGameMsg(int GameMsgID, int ClientID);
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID);
@@ -740,6 +740,7 @@ private:
 	static void ConScrollNinja(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConSound(IConsole::IResult* pResult, void* pUserData);
+	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);
@@ -753,7 +754,7 @@ private:
 	static void ConPlayerSkin(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlayerInfo(IConsole::IResult* pResult, void* pUserData);
-	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
+	static void ConListRcon(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConItem(IConsole::IResult* pResult, void* pUserData);
 	static void ConInvisible(IConsole::IResult* pResult, void* pUserData);

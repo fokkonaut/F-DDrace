@@ -3705,6 +3705,15 @@ bool CGameContext::IsVersionBanned(int Version)
 
 void CGameContext::List(int ClientID, const char* pFilter)
 {
+	#define SEND(str) \
+		do \
+		{ \
+			if (ClientID == -1) \
+				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", str); \
+			else \
+				SendChatTarget(ClientID, str); \
+		} while(0)
+
 	int Total = 0;
 	char aBuf[128];
 	int Bufcnt = 0;
@@ -3712,7 +3721,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 		str_format(aBuf, sizeof(aBuf), "Listing players with \"%s\" in name:", pFilter);
 	else
 		str_format(aBuf, sizeof(aBuf), "Listing all players:");
-	SendChatTarget(ClientID, aBuf);
+	SEND(aBuf);
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (m_apPlayers[i])
@@ -3723,7 +3732,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 				continue;
 			if (Bufcnt + str_length(pName) + 4 > 128)
 			{
-				SendChatTarget(ClientID, aBuf);
+				SEND(aBuf);
 				Bufcnt = 0;
 			}
 			if (Bufcnt != 0)
@@ -3739,9 +3748,10 @@ void CGameContext::List(int ClientID, const char* pFilter)
 		}
 	}
 	if (Bufcnt != 0)
-		SendChatTarget(ClientID, aBuf);
+		SEND(aBuf);
 	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
-	SendChatTarget(ClientID, aBuf);
+	SEND(aBuf);
+	#undef SEND
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

@@ -1183,6 +1183,16 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CGameContext::ConListRcon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	char zerochar = 0;
+	if(pResult->NumArguments() > 0)
+		pSelf->List(-1, pResult->GetString(0));
+	else
+		pSelf->List(-1, &zerochar);
+}
+
 void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

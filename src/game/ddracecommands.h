@@ -99,6 +99,7 @@ CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "C
 
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
+CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
 
 //client information
 CONSOLE_COMMAND("player_name", "v[id] ?r[name]", CFGFLAG_SERVER, ConPlayerName, this, "Sets name of player v", AUTHED_ADMIN)
@@ -107,7 +108,7 @@ CONSOLE_COMMAND("player_skin", "v[id] ?r[skin]", CFGFLAG_SERVER, ConPlayerSkin, 
 
 //info
 CONSOLE_COMMAND("playerinfo", "i[id]", CFGFLAG_SERVER, ConPlayerInfo, this, "Shows information about the player with client id i", AUTHED_ADMIN)
-CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
+CONSOLE_COMMAND("list", "?s[filter]", CFGFLAG_SERVER, ConListRcon, this, "List connected players with optional case-insensitive substring matching filter", AUTHED_ADMIN)
 
 //extras
 CONSOLE_COMMAND("item", "v[id] i[item]", CFGFLAG_SERVER, ConItem, this, "Gives player v item i (-3=none, -2=heart, -1=armor, 0 and up=weapon id)", AUTHED_ADMIN)
