@@ -207,7 +207,8 @@ MACRO_CONFIG_INT(SvPortalDetonation, sv_portal_detonation, 10, 0, 60, CFGFLAG_SE
 
 // draw editor
 MACRO_CONFIG_INT(SvFreeDrawLevel, sv_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER|CFGFLAG_GAME, "Required auth level to use draw editor everywhere", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvMaxObjectsPerPlot, sv_max_objects_per_plot, 50, 1, 500, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within one plot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvMaxObjectsPlotSmall, sv_max_objects_plot_small, 50, 1, 150, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within a small plot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvMaxObjectsPlotBig, sv_max_objects_plot_big, 150, 1, 500, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within a big plot", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)

@@ -3878,6 +3878,21 @@ void CGameContext::SetPlotInfo(int PlotID, int AccID)
 	WritePlotStats(PlotID);
 }
 
+unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+		return 0;
+
+	switch (m_aPlots[PlotID].m_Size)
+	{
+	case 0: return Config()->m_SvMaxObjectsPlotSmall;
+	case 1: return Config()->m_SvMaxObjectsPlotBig;
+	}
+
+	// shouldn't happen
+	return 0;
+}
+
 void CGameContext::ExpirePlots()
 {
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)

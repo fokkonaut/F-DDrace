@@ -353,6 +353,8 @@ public:
 	void WritePlotStats(int ID);
 	void SetPlotInfo(int PlotID, int AccID);
 
+	unsigned int GetMaxPlotObjects(int PlotID);
+
 	void SetExpireDate(time_t *pDate, int Days);
 	bool IsExpired(time_t Date);
 

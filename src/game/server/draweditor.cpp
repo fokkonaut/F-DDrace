@@ -92,7 +92,7 @@ void CDrawEditor::OnPlayerFire()
 		return;
 
 	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
-	if (PlotID > 0 && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= (unsigned)GameServer()->Config()->m_SvMaxObjectsPerPlot)
+	if (PlotID > 0 && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
 		return;
 
 	CEntity *pEntity = CreateEntity();
