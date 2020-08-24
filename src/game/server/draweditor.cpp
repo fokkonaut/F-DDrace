@@ -67,7 +67,7 @@ void CDrawEditor::Tick()
 		if (PlotID == GetPlotID())
 		{
 			char aBuf[32];
-			str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
+			str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
 			GameServer()->SendBroadcast(aBuf, GetCID(), false);
 		}
 	}
