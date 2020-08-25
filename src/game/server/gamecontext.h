@@ -542,7 +542,7 @@ public:
 	//minigames disabled
 	bool m_aMinigameDisabled[NUM_MINIGAMES];
 
-	void SetMinigame(int ClientID, int Minigame);
+	bool SetMinigame(int ClientID, int Minigame);
 
 	//survival
 	void SurvivalTick();

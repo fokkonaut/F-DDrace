@@ -1178,13 +1178,7 @@ void CPlayer::AfkVoteTimer(CNetObj_PlayerInput* NewTarget)
 	}
 	else if (m_LastPlaytime < time_get() - time_freq() * GameServer()->Config()->m_SvMaxAfkVoteTime)
 	{
-		// automatically leave minigame when player is afk
-		if (m_Minigame != MINIGAME_NONE)
-		{
-			GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE);
-			GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");
-		}
-
+		OnSetAfk();
 		m_Afk = true;
 		return;
 	}
@@ -1719,4 +1713,18 @@ bool CPlayer::CheckClanProtection()
 
 	m_ClanProtectionPunished = true;
 	return true;
+}
+
+void CPlayer::OnSetAfk()
+{
+	// leave current minigame
+	if (GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE))
+		GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");
+
+	// exit plot editor
+	if (m_pCharacter && m_pCharacter->m_DrawEditor.Active())
+	{
+		m_pCharacter->SetAvailableWeapon();
+		GameServer()->SendChatTarget(m_ClientID, "You automatically exited the plot editor because you were afk for too long");
+	}
 }

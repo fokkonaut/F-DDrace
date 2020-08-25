@@ -3348,7 +3348,7 @@ void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 
 	for (int i = 0; i < NUM_WEAPONS; i++)
 	{
-		if (i == WEAPON_NINJA)
+		if (i == WEAPON_NINJA || (i == WEAPON_DRAW_EDITOR && m_DrawEditor.Active()))
 			continue;
 
 		if (GetWeaponGot(i))

@@ -336,6 +336,9 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
+	// automatic actions when player enters afk mode
+	void OnSetAfk();
+
 	// clan protection
 	bool m_ClanProtectionPunished;
 	bool CheckClanProtection();
