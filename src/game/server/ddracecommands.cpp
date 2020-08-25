@@ -1626,3 +1626,40 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
 	pSelf->ClearPlot(PlotID);
 }
+
+void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+
+	int NewID = pSelf->GetAccount(pResult->GetString(0));
+	if (NewID < ACC_START)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		return;
+	}
+
+	int PlotID = pResult->GetInteger(1);
+	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid plot id");
+		return;
+	}
+
+	int OldID = pSelf->GetAccIDByUsername(pSelf->m_aPlots[PlotID].m_aOwner);
+	if (OldID >= ACC_START)
+		pSelf->SendChatTarget(pSelf->m_Accounts[OldID].m_ClientID, "You lost your plot");
+
+	char aBuf[128];
+	if (pSelf->m_Accounts[NewID].m_ClientID >= 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "You are now owner of plot %d", PlotID);
+		pSelf->SendChatTarget(pSelf->m_Accounts[NewID].m_ClientID, aBuf);
+	}
+
+	if (pSelf->m_aPlots[PlotID].m_ExpireDate == 0)
+		pSelf->SetPlotExpire(PlotID);
+	pSelf->SetPlotInfo(PlotID, NewID);
+
+	str_format(aBuf, sizeof(aBuf), "Changed owner of plot %d from '%s' to '%s'", PlotID, pSelf->m_Accounts[OldID].m_Username, pSelf->m_Accounts[NewID].m_Username);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}

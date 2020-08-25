@@ -352,6 +352,7 @@ public:
 	void ReadPlotStats(int ID);
 	void WritePlotStats(int ID);
 	void SetPlotInfo(int PlotID, int AccID);
+	void SetPlotExpire(int PlotID);
 
 	unsigned int GetMaxPlotObjects(int PlotID);
 	const char *GetPlotSizeString(int PlotID);
@@ -802,6 +803,7 @@ private:
 
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
+	static void ConPlotOwner(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

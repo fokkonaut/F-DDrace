@@ -3888,6 +3888,15 @@ void CGameContext::SetPlotInfo(int PlotID, int AccID)
 	WritePlotStats(PlotID);
 }
 
+void CGameContext::SetPlotExpire(int PlotID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+		return;
+
+	int Days = m_aPlots[PlotID].m_Size == 0 ? ITEM_EXPIRE_PLOT_SMALL : m_aPlots[PlotID].m_Size == 1 ? ITEM_EXPIRE_PLOT_BIG : 0;
+	SetExpireDate(&m_aPlots[PlotID].m_ExpireDate, Days);
+}
+
 unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
 {
 	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
