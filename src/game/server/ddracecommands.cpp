@@ -1645,8 +1645,14 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	if (pSelf->GetPlotID(NewID) != 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account owns a plot already");
+		return;
+	}
+
 	int OldID = pSelf->GetAccIDByUsername(pSelf->m_aPlots[PlotID].m_aOwner);
-	if (OldID >= ACC_START)
+	if (pSelf->m_Accounts[OldID].m_ClientID >= 0)
 		pSelf->SendChatTarget(pSelf->m_Accounts[OldID].m_ClientID, "You lost your plot");
 
 	char aBuf[128];
