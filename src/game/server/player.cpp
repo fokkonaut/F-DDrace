@@ -1718,8 +1718,11 @@ bool CPlayer::CheckClanProtection()
 void CPlayer::OnSetAfk()
 {
 	// leave current minigame
-	if (GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE))
+	if (m_Minigame != MINIGAME_NONE)
+	{
+		GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE);
 		GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");
+	}
 
 	// exit plot editor
 	if (m_pCharacter && m_pCharacter->m_DrawEditor.Active())

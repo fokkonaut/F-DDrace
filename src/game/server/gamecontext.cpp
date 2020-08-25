@@ -4930,11 +4930,11 @@ const char* CGameContext::GetMinigameCommand(int Minigame)
 	return "unknown";
 }
 
-bool CGameContext::SetMinigame(int ClientID, int Minigame)
+void CGameContext::SetMinigame(int ClientID, int Minigame)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer)
-		return false;
+		return;
 
 	char aMsg[128];
 
@@ -4942,7 +4942,7 @@ bool CGameContext::SetMinigame(int ClientID, int Minigame)
 	if (Minigame != MINIGAME_NONE && m_aMinigameDisabled[Minigame])
 	{
 		SendChatTarget(ClientID, "This minigame is disabled");
-		return false;
+		return;
 	}
 
 	// check if we are already in a minigame
@@ -4956,7 +4956,7 @@ bool CGameContext::SetMinigame(int ClientID, int Minigame)
 			str_format(aMsg, sizeof(aMsg), "You are already in minigame '%s'", GetMinigameName(Minigame));
 			SendChatTarget(ClientID, aMsg);
 		}
-		return false;
+		return;
 	}
 
 	// leave minigame
@@ -4993,7 +4993,7 @@ bool CGameContext::SetMinigame(int ClientID, int Minigame)
 	{
 		// you can't join minigames if you are already in another mingame
 		SendChatTarget(ClientID, "You have to leave first in order to join another minigame");
-		return false;
+		return;
 	}
 
 	pPlayer->KillCharacter(WEAPON_GAME);
@@ -5003,9 +5003,6 @@ bool CGameContext::SetMinigame(int ClientID, int Minigame)
 
 	// Update the gameinfo, add or remove GAMEFLAG_RACE as wanted (in minigames we disable it to properly show the scores)
 	m_pController->UpdateGameInfo(ClientID);
-
-	// successfully joined
-	return true;
 }
 
 void CGameContext::SurvivalTick()
