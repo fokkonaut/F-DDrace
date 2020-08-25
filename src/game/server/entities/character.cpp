@@ -477,8 +477,11 @@ void CCharacter::FireWeapon()
 				{
 					CDoor* pDoor = apDoors[i];
 
-					if ((pDoor->m_PlotID == -1 && !m_DoorHammer) // normal door with doorhammer
-						|| (pDoor->m_PlotID > 0 && pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID()) && !m_DoorHammer)) // plot door with doorhammer or own
+					// number 0 can't be opened and also functions as plot walls that can't be opened
+					// plotid -1: map objects
+					// plotid > 0: plot doors
+					if (pDoor->m_Number == 0 ||
+						(!m_DoorHammer && (pDoor->m_PlotID == -1 || (pDoor->m_PlotID > 0 && pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID())))))
 						continue;
 
 					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
