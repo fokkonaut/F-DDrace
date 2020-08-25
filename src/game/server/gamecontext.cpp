@@ -1023,7 +1023,7 @@ void CGameContext::OnTick()
 		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
 			InstagibTick(i);
 
-	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 30) == 0)
+	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == 0)
 		ExpirePlots();
 
 #ifdef CONF_DEBUG
@@ -3922,6 +3922,10 @@ void CGameContext::ExpirePlots()
 	{
 		if (IsExpired(m_aPlots[i].m_ExpireDate))
 		{
+			int AccID = GetAccIDByUsername(m_aPlots[i].m_aOwner);
+			if (AccID >= ACC_START)
+				SendChatTarget(m_Accounts[AccID].m_ClientID, "Your plot expired");
+
 			m_aPlots[i].m_aOwner[0] = 0;
 			m_aPlots[i].m_aDisplayName[0] = 0;
 			m_aPlots[i].m_ExpireDate = 0;
@@ -3937,6 +3941,9 @@ void CGameContext::SetExpireDate(time_t *pDate, int Days)
 	time(&Now);
 	ExpireDate = *localtime(&Now);
 
+	// we set minutes to 0 always :)
+	ExpireDate.tm_min = 0;
+
 	// add another x days if we have the item already
 	if (*pDate != 0)
 	{
@@ -3946,6 +3953,7 @@ void CGameContext::SetExpireDate(time_t *pDate, int Days)
 		ExpireDate.tm_year = AccDate.tm_year;
 		ExpireDate.tm_mon = AccDate.tm_mon;
 		ExpireDate.tm_mday = AccDate.tm_mday;
+		ExpireDate.tm_hour = AccDate.tm_hour;
 	}
 
 	const time_t ONE_DAY = 24 * 60 * 60;
@@ -3957,6 +3965,9 @@ void CGameContext::SetExpireDate(time_t *pDate, int Days)
 
 bool CGameContext::IsExpired(time_t Date)
 {
+	if (!Date)
+		return false;
+
 	struct tm AccDate;
 	AccDate = *localtime(&Date);
 
@@ -3968,12 +3979,14 @@ bool CGameContext::IsExpired(time_t Date)
 	ExpireDate.tm_year = AccDate.tm_year;
 	ExpireDate.tm_mon = AccDate.tm_mon;
 	ExpireDate.tm_mday = AccDate.tm_mday;
+	ExpireDate.tm_hour = AccDate.tm_hour;
+	ExpireDate.tm_min = AccDate.tm_min;
 
 	double Seconds = difftime(Now, mktime(&ExpireDate));
-	const time_t ONE_DAY = 24 * 60 * 60;
-	int Days = Seconds / ONE_DAY;
+	const time_t ONE_HOUR = 60 * 60;
+	int Hours = Seconds / ONE_HOUR;
 
-	return Days >= 0;
+	return Hours >= 0;
 }
 
 void CGameContext::UpdateTopAccounts(int Type)
@@ -4231,6 +4244,14 @@ int CGameContext::GetNeededXP(int Level)
 	if (Level < DIFFERENCE_XP_END)
 		return m_aNeededXP[Level];
 	return m_aNeededXP[DIFFERENCE_XP_END-1] + (OVER_LVL_100_XP * (Level+1 - DIFFERENCE_XP_END));
+}
+
+int CGameContext::GetAccIDByUsername(const char *pUsername)
+{
+	for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
+		if (!str_comp(pUsername, m_Accounts[i].m_Username))
+			return i;
+	return 0;
 }
 
 int CGameContext::GetAccount(const char* pUsername)

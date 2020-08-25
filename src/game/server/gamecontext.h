@@ -384,6 +384,7 @@ public:
 	void ExpirePlots();
 
 	//account
+	int GetAccIDByUsername(const char *pUsername);
 	int GetAccount(const char* pUsername);
 	void FreeAccount(int ID);
 
