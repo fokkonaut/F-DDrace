@@ -130,6 +130,7 @@ void CPortal::PlayerEnter()
 			{
 				pFlag = (CFlag *)apEnts[i];
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
+				pFlag->SetPrevPos(m_pLinkedPortal->m_Pos);
 				if (pFlag->GetCarrier())
 					pAffectedChr = pFlag->GetCarrier();
 				else if (pFlag->GetLastCarrier())
@@ -140,6 +141,7 @@ void CPortal::PlayerEnter()
 			{
 				pPickup = (CPickupDrop *)apEnts[i];
 				pPickup->SetPos(m_pLinkedPortal->m_Pos);
+				pPickup->SetPrevPos(m_pLinkedPortal->m_Pos);
 				if (pPickup->GetOwner())
 					pAffectedChr = pPickup->GetOwner();
 				break;

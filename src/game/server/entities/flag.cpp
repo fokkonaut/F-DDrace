@@ -105,6 +105,17 @@ void CFlag::Tick()
 		return;
 	}
 
+	// plots
+	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
+	if (PlotID > 0)
+	{
+		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
+		if (m_pCarrier)
+			Drop();
+		m_Vel = vec2(0, 0);
+		m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+	}
+
 	if (m_pCarrier && m_pCarrier->IsAlive())
 	{
 		if (m_pCarrier->m_IsFrozen && m_pCarrier->m_FirstFreezeTick != 0)

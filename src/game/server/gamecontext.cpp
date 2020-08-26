@@ -3903,6 +3903,11 @@ int CGameContext::GetPlotID(int AccID)
 	return 0;
 }
 
+int CGameContext::GetTilePlotID(vec2 Pos)
+{
+	return Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
+}
+
 void CGameContext::SetPlotInfo(int PlotID, int AccID)
 {
 	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || AccID < ACC_START)

@@ -2231,12 +2231,6 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
-	//flags not allowed on plots, resetting them
-	if (HasFlag() != -1 && GetCurrentTilePlotID() > 0)
-	{
-		Controller->ForceFlagOwner(-1, HasFlag());
-	}
-
 	// helper only
 	if ((m_TileIndex == TILE_HELPERS_ONLY) || (m_TileFIndex == TILE_HELPERS_ONLY))
 	{
@@ -3303,7 +3297,7 @@ void CCharacter::HandleLastIndexTiles()
 
 int CCharacter::GetCurrentTilePlotID()
 {
-	return GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
+	return GameServer()->GetTilePlotID(m_Pos);
 }
 
 void CCharacter::TeleOutOfPlot(int PlotID)

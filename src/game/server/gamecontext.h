@@ -383,6 +383,7 @@ public:
 	void ClearPlot(int PlotID);
 	int GetPlotID(int AccID);
 	void ExpirePlots();
+	int GetTilePlotID(vec2 Pos);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);
