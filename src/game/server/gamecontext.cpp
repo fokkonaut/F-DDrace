@@ -4316,7 +4316,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_CLIENT_ID:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_ClientID); break;
 	case ACC_LEVEL:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Level); break;
 	case ACC_XP:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_XP); break;
-	case ACC_MONEY:						str_format(aBuf, sizeof(aBuf), "%llu", m_Accounts[ID].m_Money); break;
+	case ACC_MONEY:						str_format(aBuf, sizeof(aBuf), "%lld", m_Accounts[ID].m_Money); break;
 	case ACC_KILLS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Kills); break;
 	case ACC_DEATHS:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Deaths); break;
 	case ACC_POLICE_LEVEL:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PoliceLevel); break;

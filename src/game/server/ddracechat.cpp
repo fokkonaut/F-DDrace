@@ -1308,7 +1308,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->GetNeededXP((*Account).m_Level));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Money [%llu]", (*Account).m_Money);
+			str_format(aBuf, sizeof(aBuf), "Money [%lld]", (*Account).m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", (*Account).m_PoliceLevel, (*Account).m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1765,16 +1765,16 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "paid %llu money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "paid %lld money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
 	pPlayer->MoneyTransaction(-Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "got %llu money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "got %lld money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pTo->MoneyTransaction(Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You paid %llu money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "You paid %lld money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You got %llu money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "You got %lld money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
@@ -1799,7 +1799,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
-	str_format(aBuf, sizeof(aBuf), "Money: %llu", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
+	str_format(aBuf, sizeof(aBuf), "Money: %lld", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -2380,7 +2380,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 		CGameContext::TopAccounts* r = &pSelf->m_TopAccounts[i + Debut - 1];
 
 		if (Type == TOP_MONEY)
-			str_format(aBuf, sizeof(aBuf), "%d. %s Money: %llu", i + Debut, r->m_aUsername, r->m_Money);
+			str_format(aBuf, sizeof(aBuf), "%d. %s Money: %lld", i + Debut, r->m_aUsername, r->m_Money);
 		else
 			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i + Debut, r->m_aUsername, aType, Type == TOP_LEVEL ? r->m_Level : Type == TOP_POINTS ? r->m_Points : r->m_KillStreak);
 

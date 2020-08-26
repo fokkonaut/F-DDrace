@@ -2326,7 +2326,7 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
 				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
-						"Money [%llu] +1%s%s\n"
+						"Money [%lld] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
 						(*Account).m_Money, (PoliceTile && (*Account).m_PoliceLevel) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
