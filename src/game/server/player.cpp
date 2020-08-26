@@ -149,6 +149,14 @@ void CPlayer::Reset()
 	m_SetRealName = false;
 	m_SetRealNameTick = Now;
 
+	m_ChatFix.m_Mode = CHAT_ALL;
+	m_ChatFix.m_Target = -1;
+	m_ChatFix.m_Message[0] = '\0';
+	m_KillMsgFix.m_Killer = -1;
+	m_KillMsgFix.m_Victim = -1;
+	m_KillMsgFix.m_Weapon = -1;
+	m_KillMsgFix.m_ModeSpecial = 0;
+
 	m_ResumeMoved = false;
 
 	m_RainbowSpeed = GameServer()->Config()->m_SvRainbowSpeedDefault;
@@ -320,16 +328,17 @@ void CPlayer::Tick()
 		if (m_SetRealNameTick < Server()->Tick())
 		{
 			if (m_FixNameID == FIX_CHAT_MSG)
-			{
-				CNetMsg_Sv_Chat m = m_NoNameFix.m_ChatMsg;
-				GameServer()->SendChat(m.m_ClientID, m.m_Mode, m.m_TargetID, m.m_pMessage, m.m_ClientID);
-			}
+				GameServer()->SendChat(m_ClientID, m_ChatFix.m_Mode, m_ChatFix.m_Target, m_ChatFix.m_Message, m_ClientID);
 			else if (m_FixNameID == FIX_KILL_MSG)
 			{
-				CNetMsg_Sv_Chat m = m_NoNameFix.m_ChatMsg;
+				CNetMsg_Sv_KillMsg Msg;
+				Msg.m_Killer = m_KillMsgFix.m_Killer;
+				Msg.m_Victim = GetCID();
+				Msg.m_Weapon = m_KillMsgFix.m_Weapon;
+				Msg.m_ModeSpecial = m_KillMsgFix.m_ModeSpecial;
 				for (int i = 0; i < MAX_CLIENTS; i++)
 					if (GameServer()->m_apPlayers[i] && (!GameServer()->Config()->m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
-						Server()->SendPackMsg(&m, MSGFLAG_VITAL, i);
+						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 
 			m_SetRealName = false;

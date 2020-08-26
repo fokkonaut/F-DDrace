@@ -269,11 +269,20 @@ public:
 	bool m_SetRealName;
 	int64 m_SetRealNameTick;
 
-	struct
+	struct ChatFix
 	{
-		CNetMsg_Sv_Chat m_ChatMsg;
-		CNetMsg_Sv_KillMsg m_KillMsg;
-	} m_NoNameFix;
+		int m_Mode;
+		int m_Target;
+		char m_Message[256];
+	} m_ChatFix;
+
+	struct KillMsgFix
+	{
+		int m_Killer;
+		int m_Victim;
+		int m_Weapon;
+		int m_ModeSpecial;
+	} m_KillMsgFix;
 
 	//extras
 	int m_RainbowSpeed;
