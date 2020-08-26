@@ -384,16 +384,16 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-
-		Msg.m_pMessage += sizeof("@everyone ")-1; // cut the @everyone in the beginning
+		Msg.m_pMessage += sizeof("@everyone")-1; // cut the @everyone in the beginning
+		if (Msg.m_pMessage[0] == ' ')
+			Msg.m_pMessage++;
 
 		char aBuf[128];
 		char aMessage[128];
 		str_copy(aMessage, Msg.m_pMessage, sizeof(aMessage));
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (m_apPlayers[i] && i != ChatterClientID)
+			if (m_apPlayers[i])
 			{
 				str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(i), aMessage);
 				Msg.m_pMessage = aBuf;
@@ -1682,7 +1682,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			// @everyone mode
-			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_startswith_nocase(pMsg->m_pMessage, "@everyone ") && Mode != CHAT_WHISPER)
+			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_startswith_nocase(pMsg->m_pMessage, "@everyone") && Mode != CHAT_WHISPER)
 				Mode = CHAT_ATEVERYONE;
 
 			if (pMsg->m_pMessage[0] == '/')
