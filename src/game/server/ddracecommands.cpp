@@ -1447,20 +1447,25 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		}
 	}
 
-	if (VariableID == -1 || VariableID == ACC_USERNAME)
+	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
 		return;
 	}
 
-	if (pResult->NumArguments() <= 2)
+	char aBuf[128];
+	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
 	{
-		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	else
-		pSelf->SetAccVar(ID, VariableID, pResult->GetString(2));
+	{
+		const char *pValue = pResult->GetString(2);
+		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, pSelf->GetAccVarValue(ID, VariableID), pValue);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->SetAccVar(ID, VariableID, pValue);
+	}
 
 	if (pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->WriteAccountStats(ID);
