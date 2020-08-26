@@ -380,6 +380,27 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		if (ChatterClientID >= 0)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 	}
+	else if (Mode == CHAT_ATEVERYONE)
+	{
+		// send to the clients
+		Msg.m_Mode = CHAT_ALL;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+
+		Msg.m_pMessage += sizeof("@everyone ")-1; // cut the @everyone in the beginning
+
+		char aBuf[128];
+		char aMessage[128];
+		str_copy(aMessage, Msg.m_pMessage, sizeof(aMessage));
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (m_apPlayers[i] && i != ChatterClientID)
+			{
+				str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(i), aMessage);
+				Msg.m_pMessage = aBuf;
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+			}
+		}
+	}
 	else // Mode == CHAT_WHISPER
 	{
 		if (!Server()->IsSevendown(ChatterClientID))
@@ -1660,6 +1681,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Mode = CHAT_NONE;
 			}
 
+			// @everyone mode
+			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_startswith_nocase(pMsg->m_pMessage, "@everyone ") && Mode != CHAT_WHISPER)
+				Mode = CHAT_ATEVERYONE;
+
 			if (pMsg->m_pMessage[0] == '/')
 			{
 				int WhisperOffset = -1;
@@ -1719,9 +1744,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (!pPlayer->m_ShowName)
 			{
-				pPlayer->m_ChatFix.m_Mode = Mode;
-				pPlayer->m_ChatFix.m_Target = pMsg->m_Target;
-				str_copy(pPlayer->m_ChatFix.m_Message, pMsg->m_pMessage, sizeof(pPlayer->m_ChatFix.m_Message));
+				CNetMsg_Sv_Chat m;
+				m.m_ClientID = ClientID;
+				m.m_Mode = Mode;
+				m.m_TargetID = pMsg->m_Target;
+				m.m_pMessage = pMsg->m_pMessage;
+				pPlayer->m_NoNameFix.m_ChatMsg = m;
 				pPlayer->FixForNoName(FIX_CHAT_MSG);
 			}
 			else if(Mode != CHAT_NONE)

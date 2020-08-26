@@ -1447,24 +1447,24 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+	// construct kill message
+	CNetMsg_Sv_KillMsg Msg;
+	Msg.m_Killer = Killer;
+	Msg.m_Victim = m_pPlayer->GetCID();
+	Msg.m_Weapon = GameServer()->GetWeaponType(Weapon);
+	Msg.m_ModeSpecial = ModeSpecial;
+
 	// send the kill message
 	if (!m_pPlayer->m_ShowName || (pKiller && !pKiller->m_ShowName))
 	{
 		if (pKiller && !pKiller->m_ShowName)
 			pKiller->FixForNoName(FIX_SET_NAME_ONLY);
 
-		m_pPlayer->m_KillMsgFix.m_Killer = Killer;
-		m_pPlayer->m_KillMsgFix.m_Weapon = GameServer()->GetWeaponType(Weapon);
-		m_pPlayer->m_KillMsgFix.m_ModeSpecial = ModeSpecial;
+		m_pPlayer->m_NoNameFix.m_KillMsg = Msg;
 		m_pPlayer->FixForNoName(FIX_KILL_MSG);
 	}
 	else
 	{
-		CNetMsg_Sv_KillMsg Msg;
-		Msg.m_Killer = Killer;
-		Msg.m_Victim = m_pPlayer->GetCID();
-		Msg.m_Weapon = GameServer()->GetWeaponType(Weapon);
-		Msg.m_ModeSpecial = ModeSpecial;
 		// only send kill message to players in the same minigame
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (GameServer()->m_apPlayers[i] && (!Config()->m_SvHideMinigamePlayers || (m_pPlayer->m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
