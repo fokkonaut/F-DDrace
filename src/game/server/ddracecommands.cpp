@@ -1379,87 +1379,15 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[ID];
-
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "==== [ACCOUNT INFO] '%s' ====", pResult->GetString(0));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Port: %d", (*Account).m_Port);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Logged in: %d", (int)(*Account).m_LoggedIn);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Disabled: %d", (int)(*Account).m_Disabled);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Password: %s", (*Account).m_Password);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Username: %s", (*Account).m_Username);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "ClientID: %d", (*Account).m_ClientID);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Level: %d", (*Account).m_Level);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "XP: %d", (*Account).m_XP);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Money: %llu", (*Account).m_Money);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Police Level: %d", (*Account).m_PoliceLevel);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Survival Kills: %d", (*Account).m_SurvivalKills);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Survival Wins: %d", (*Account).m_SurvivalWins);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Spooky Ghost: %d", (int)(*Account).m_SpookyGhost);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 0: %s", (*Account).m_aLastMoneyTransaction[0]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 1: %s", (*Account).m_aLastMoneyTransaction[1]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 2: %s", (*Account).m_aLastMoneyTransaction[2]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 3: %s", (*Account).m_aLastMoneyTransaction[3]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Money Transaction 4: %s", (*Account).m_aLastMoneyTransaction[4]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "VIP: %d", (int)(*Account).m_VIP);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Block Points: %d", (*Account).m_BlockPoints);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Instagib Kills: %d", (*Account).m_InstagibKills);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Instagib Wins: %d", (*Account).m_InstagibWins);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Spawn Shotgun: %d", (*Account).m_SpawnWeapon[0]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Spawn Grenade: %d", (*Account).m_SpawnWeapon[1]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Spawn Rifle: %d", (*Account).m_SpawnWeapon[2]);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Ninjajetpack: %d", (*Account).m_Ninjajetpack);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Last Player Name: %s", (*Account).m_aLastPlayerName);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Survival Deaths: %d", (*Account).m_SurvivalDeaths);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Instagib Deaths: %d", (*Account).m_InstagibDeaths);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Taser Level: %d", (*Account).m_TaserLevel);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Killing Spree Record: %d", (*Account).m_KillingSpreeRecord);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire Date VIP: %d", (int)(*Account).m_ExpireDateVIP);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Portal Rifle: %d", (*Account).m_PortalRifle);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire Date Portal Rifle: %d", (int)(*Account).m_ExpireDatePortalRifle);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Version: %d", (*Account).m_Version);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
+	{
+		str_format(aBuf, sizeof(aBuf), "%s: %s", pSelf->GetAccVarName(i), pSelf->GetAccVarValue(ID, i));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
 
 	if (!pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->FreeAccount(ID);
@@ -1490,6 +1418,49 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
 	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID, "");
+
+	if (pSelf->m_Accounts[ID].m_LoggedIn)
+		pSelf->WriteAccountStats(ID);
+	else
+		pSelf->Logout(ID);
+}
+
+void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	
+	int ID = pSelf->GetAccount(pResult->GetString(0));
+	if (ID < ACC_START)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		return;
+	}
+
+	const char *pVariable = pResult->GetString(1);
+	int VariableID = -1;
+	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
+	{
+		if (!str_comp_nocase(pVariable, pSelf->GetAccVarName(i)))
+		{
+			VariableID = i;
+			break;
+		}
+	}
+
+	if (VariableID == -1 || VariableID == ACC_USERNAME)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
+		return;
+	}
+
+	if (pResult->NumArguments() <= 2)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+	else
+		pSelf->SetAccVar(ID, VariableID, pResult->GetString(2));
 
 	if (pSelf->m_Accounts[ID].m_LoggedIn)
 		pSelf->WriteAccountStats(ID);

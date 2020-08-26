@@ -390,6 +390,10 @@ public:
 	int GetAccount(const char* pUsername);
 	void FreeAccount(int ID);
 
+	const char *GetAccVarName(int VariableID);
+	const char *GetAccVarValue(int ID, int VariableID);
+	void SetAccVar(int ID, int VariableID, const char *pData);
+
 	struct TopAccounts
 	{
 		int m_Level;
@@ -798,6 +802,7 @@ private:
 	static void ConAccDisable(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccAddEuros(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccEdit(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
