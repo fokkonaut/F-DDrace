@@ -2039,11 +2039,13 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (pSeller->m_PlotAuctionPrice != Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "The price you entered does not match the offer");
+			return;
 		}
 
 		if (pSelf->m_Accounts[OwnAccID].m_Money < Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
+			return;
 		}
 
 		// success
