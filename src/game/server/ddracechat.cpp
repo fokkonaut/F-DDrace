@@ -2036,35 +2036,40 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pSeller->m_PlotAuctionPrice == Price)
-		{
-			int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
-
-			str_format(aBuf, sizeof(aBuf), "Plot %d has been bought by '%s'", PlotID, pSelf->Server()->ClientName(pResult->m_ClientID));
-			pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
-
-			// a message to you
-			str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", PlotID, pName);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-
-			// and one to the seller
-			str_format(aBuf, sizeof(aBuf), "%s bought your plot", pSelf->Server()->ClientName(pResult->m_ClientID));
-			pSelf->SendChatTarget(ID, aBuf);
-
-			// get money from buyer
-			str_format(aBuf, sizeof(aBuf), "bought plot %d", PlotID);
-			pPlayer->MoneyTransaction(-Price, aBuf);
-
-			// give money to seller
-			pSeller->MoneyTransaction(Price, "sold plot");
-			pSeller->m_PlotAuctionPrice = 0;
-
-			pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
-		}
-		else
+		if (pSeller->m_PlotAuctionPrice != Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "The price you entered does not match the offer");
 		}
+
+		if (pSelf->m_Accounts[OwnAccID].m_Money < Price)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
+		}
+
+		// success
+		int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
+
+		str_format(aBuf, sizeof(aBuf), "Plot %d has been bought by '%s'", PlotID, pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChat(-1, CHAT_ALL, -1, aBuf);
+
+		// a message to you
+		str_format(aBuf, sizeof(aBuf), "You bought plot %d from %s", PlotID, pName);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+		// and one to the seller
+		str_format(aBuf, sizeof(aBuf), "%s bought your plot", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTarget(ID, aBuf);
+
+		// get money from buyer
+		str_format(aBuf, sizeof(aBuf), "-%d (bought plot %d)", Price, PlotID);
+		pPlayer->MoneyTransaction(-Price, aBuf);
+
+		// give money to seller
+		str_format(aBuf, sizeof(aBuf), "+%d (sold plot)", Price);
+		pSeller->MoneyTransaction(Price, aBuf);
+		pSeller->m_PlotAuctionPrice = 0;
+
+		pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
 	}
 	else if (OwnPlotID == 0)
 	{
