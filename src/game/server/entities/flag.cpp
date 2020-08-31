@@ -106,7 +106,7 @@ void CFlag::Tick()
 	}
 
 	// plots
-	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
+	int PlotID = GameServer()->GetTilePlotID(m_Pos);
 	if (PlotID > 0)
 	{
 		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
