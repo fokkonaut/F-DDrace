@@ -29,10 +29,9 @@ bool CDrawEditor::Active()
 
 bool CDrawEditor::CanPlace()
 {
-	CCollision *pCol = GameServer()->Collision();
-	int TilePlotID = pCol->GetPlotID(pCol->GetMapIndex(m_Pos));
+	int TilePlotID = GameServer()->GetTilePlotID(m_Pos);
 	// check for TilePlotID > 0 here, because plots start at id 1
-	return (!pCol->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
+	return (!GameServer()->Collision()->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
@@ -64,7 +63,7 @@ void CDrawEditor::Tick()
 	if (Server()->Tick() % Server()->TickSpeed() == 0)
 	{
 		int PlotID = m_pCharacter->GetCurrentTilePlotID();
-		if (PlotID == GetPlotID())
+		if (PlotID == GetPlotID() || PlotID == 0)
 		{
 			char aBuf[32];
 			str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
@@ -102,15 +101,14 @@ void CDrawEditor::OnPlayerFire()
 	if (!CanPlace())
 		return;
 
-	int PlotID = GameServer()->Collision()->GetPlotID(GameServer()->Collision()->GetMapIndex(m_Pos));
-	if (PlotID >= PLOT_START && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+	int PlotID = GameServer()->GetTilePlotID(m_Pos);
+	if (GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
 		return;
 
 	CEntity *pEntity = CreateEntity();
 	pEntity->m_PlotID = PlotID;
 
-	if (PlotID >= PLOT_START)
-		GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+	GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
@@ -141,7 +139,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 
 		if (CanRemove(pEntity))
 		{
-			if (pEntity->m_PlotID > 0)
+			if (pEntity->m_PlotID >= 0)
 				for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
 					if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
 						GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);

@@ -3929,16 +3929,19 @@ void CGameContext::SetPlotExpire(int PlotID)
 
 unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
 {
-	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+	if (PlotID < 0 || PlotID > Collision()->m_NumPlots)
 		return 0;
 
-	switch (m_aPlots[PlotID].m_Size)
+	if (PlotID >= PLOT_START)
 	{
-	case 0: return Config()->m_SvMaxObjectsPlotSmall;
-	case 1: return Config()->m_SvMaxObjectsPlotBig;
+		switch (m_aPlots[PlotID].m_Size)
+		{
+		case 0: return Config()->m_SvMaxObjectsPlotSmall;
+		case 1: return Config()->m_SvMaxObjectsPlotBig;
+		}
 	}
 
-	return 0;
+	return Config()->m_SvMaxObjectsFreeDraw;
 }
 
 const char *CGameContext::GetPlotSizeString(int PlotID)
@@ -4471,7 +4474,7 @@ void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
 
 void CGameContext::ClearPlot(int PlotID)
 {
-	if (PlotID > 0 && PlotID <= Collision()->m_NumPlots)
+	if (PlotID >= 0 && PlotID <= Collision()->m_NumPlots)
 	{
 		for (unsigned i = 0; i < m_aPlots[PlotID].m_vObjects.size(); i++)
 			m_World.DestroyEntity(m_aPlots[PlotID].m_vObjects[i]);

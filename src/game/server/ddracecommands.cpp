@@ -1594,7 +1594,7 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int PlotID = pResult->GetInteger(0);
-	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
+	if (PlotID < 0 || PlotID > pSelf->Collision()->m_NumPlots)
 		return;
 
 	char aBuf[32];
