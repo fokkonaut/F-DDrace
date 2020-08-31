@@ -523,8 +523,16 @@ void IGameController::Snap(int SnappingClient)
 
 	if (Server()->IsSevendown(SnappingClient))
 	{
+		int TranslatedGameStateFlags = 0;
+		if (GameStateFlags&GAMESTATEFLAG_GAMEOVER)
+			TranslatedGameStateFlags |= 1;
+		if (GameStateFlags&GAMESTATEFLAG_SUDDENDEATH)
+			TranslatedGameStateFlags |= 2;
+		if (GameStateFlags&GAMESTATEFLAG_PAUSED)
+			TranslatedGameStateFlags |= 4;
+
 		((int*)pGameData)[0] = m_GameFlags;
-		((int*)pGameData)[1] = GameStateFlags;
+		((int*)pGameData)[1] = TranslatedGameStateFlags;
 		((int*)pGameData)[2] = GameStartTick;
 		((int*)pGameData)[3] = 0;
 		((int*)pGameData)[4] = m_GameInfo.m_ScoreLimit;
