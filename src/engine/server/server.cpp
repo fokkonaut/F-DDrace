@@ -1604,6 +1604,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	int Sent = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		// DDNet clients can show x/128 as playercount, but the client info is still limited to 64
 		if (Sent >= VANILLA_MAX_CLIENTS)
 			break;
 
