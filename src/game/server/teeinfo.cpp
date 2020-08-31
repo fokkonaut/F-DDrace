@@ -173,31 +173,6 @@ void CTeeInfo::ToSevendown()
 	m_Sevendown.m_ColorBody = 0;
 	m_Sevendown.m_ColorFeet = 0;
 
-	// check for std skin
-	for(int s = 0; s < NUM_SKINS; s++)
-	{
-		// skip spooky ghost skin for comparison if its manually set by player and not forced
-		if (s == SKIN_SPOOKY_GHOST && m_SkinID != SKIN_SPOOKY_GHOST)
-			continue;
-
-		bool match = true;
-		for(int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			if(str_comp(GetSkinPartName(p), s_Skins[s].m_apSkinPartNames[p])
-					|| m_aUseCustomColors[p] != s_Skins[s].m_aUseCustomColors[p]
-					|| (m_aUseCustomColors[p] && m_aSkinPartColors[p] != s_Skins[s].m_aSkinPartColors[p]))
-			{
-				match = false;
-				break;
-			}
-		}
-		if(match)
-		{
-			str_copy(m_Sevendown.m_SkinName, s_Skins[s].SkinNameSevendown(), sizeof(m_Sevendown.m_SkinName));
-			return;
-		}
-	}
-
 	// find closest match
 	int best_skin = 0;
 	int best_matches = -1;
