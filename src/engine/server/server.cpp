@@ -1526,7 +1526,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	char aBuf[128];
 
 	// count the players
-	int PlayerCount = 0, ClientCount = 0, DummyCount = 0;
+	int PlayerCount = 0, ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
