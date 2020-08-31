@@ -7,7 +7,7 @@ enum Skins
 {
 	SKIN_NONE = -1,
 
-	// 0.6 + 0.7 skins
+	// standard 0.6 + 0.7
 	SKIN_BLUEKITTY,
 	SKIN_BLUESTRIPE,
 	SKIN_BROWNBEAR,
@@ -25,14 +25,8 @@ enum Skins
 	SKIN_TWINTRI,
 	SKIN_WARPAINT,
 
-	SKIN_GREENSWARD,
-	SKIN_GREYFOX2,
-	SKIN_SPOOKY_GHOST,
-
-	NUM_SEVENDOWN_SKINS,
-
-	// 0.7 skins
-	SKIN_BEAVER = NUM_SEVENDOWN_SKINS,
+	// standard 0.7
+	SKIN_BEAVER,
 	SKIN_BUMBLER,
 	SKIN_CAVEBAT,
 	SKIN_FORCE,
@@ -56,9 +50,12 @@ enum Skins
 	SKIN_TOOXY,
 	SKIN_WARMOUSE,
 
-	// other skins
-	SKIN_DUMMY,
+	// custom
+	SKIN_GREENSWARD,
+	SKIN_GREYFOX2,
 	SKIN_PENGUIN,
+	SKIN_SPOOKY_GHOST,
+	SKIN_DUMMY,
 
 	NUM_SKINS
 };
@@ -94,5 +91,17 @@ public:
 	void Translate(bool Sevendown);
 	void FromSevendown();
 	void ToSevendown();
+
+	const char *GetSkinPartName(int Part)
+	{
+		// filter out F-Client strings from client recognition
+		if (str_startswith(m_aaSkinPartNames[Part], "fclient!"))
+		{
+			if (Part == SKINPART_MARKING || Part == SKINPART_DECORATION)
+				return "";
+			return "standard";
+		}
+		return m_aaSkinPartNames[Part];
+	}
 };
 #endif //GAME_SERVER_TEEINFO_H
