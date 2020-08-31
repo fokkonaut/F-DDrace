@@ -1545,26 +1545,28 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			bool UpdateInfo = false;
 
 			// set infos
-			char aOldName[MAX_NAME_LENGTH];
-			str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
-			Server()->SetClientName(ClientID, pName);
-			if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0
-				&& str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, aOldName) == 0) // check that we dont have a name on right now set by an admin
+			if (str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID)) == 0) // check that we dont have a name on right now set by an admin
 			{
-				char aChatText[256];
-				str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
-				SendChat(-1, CHAT_ALL, -1, aChatText);
-				pPlayer->SetName(Server()->ClientName(ClientID));
-
-				// reload scores
+				char aOldName[MAX_NAME_LENGTH];
+				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
+				Server()->SetClientName(ClientID, pName);
+				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
 				{
-					Score()->PlayerData(ClientID)->Reset();
-					Score()->LoadScore(ClientID);
-					Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
-					m_apPlayers[ClientID]->m_Score = !Score()->PlayerData(ClientID)->m_BestTime ? -1 : Score()->PlayerData(ClientID)->m_BestTime;
-				}
+					char aChatText[256];
+					str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
+					SendChat(-1, CHAT_ALL, -1, aChatText);
+					pPlayer->SetName(Server()->ClientName(ClientID));
 
-				UpdateInfo = true;
+					// reload scores
+					{
+						Score()->PlayerData(ClientID)->Reset();
+						Score()->LoadScore(ClientID);
+						Score()->PlayerData(ClientID)->m_CurrentTime = Score()->PlayerData(ClientID)->m_BestTime;
+						m_apPlayers[ClientID]->m_Score = !Score()->PlayerData(ClientID)->m_BestTime ? -1 : Score()->PlayerData(ClientID)->m_BestTime;
+					}
+
+					UpdateInfo = true;
+				}
 			}
 
 			if(str_comp(Server()->ClientClan(ClientID), pClan)
