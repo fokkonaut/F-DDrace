@@ -1529,9 +1529,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	int PlayerCount = 0, ClientCount = 0, DummyCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State == CClient::STATE_DUMMY)
-			DummyCount++;
-		else if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -1548,17 +1546,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	ADD_INT(p, Token);
  
 	p.AddString(GameServer()->VersionSevendown(), 32);
-	
-	if(Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
-	{
-		p.AddString(Config()->m_SvName, 64);
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount+DummyCount, Config()->m_SvMaxClients);
-		p.AddString(aBuf, 64);
-	}
-
+	p.AddString(Config()->m_SvName, 64);
 	p.AddString(GetMapName(), 32);
  
 	ADD_INT(p, m_CurrentMapCrc);
@@ -1567,26 +1555,12 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
 
-	int MaxClients = Config()->m_SvMaxClients-DummyCount;
-	int PlayerSlots = Config()->m_SvPlayerSlots-DummyCount;
-	if(ClientCount >= VANILLA_MAX_CLIENTS)
-	{
-		if(ClientCount < MaxClients)
-			ClientCount = VANILLA_MAX_CLIENTS - 1;
-		else
-			ClientCount = VANILLA_MAX_CLIENTS;
-	}
-	if(MaxClients > VANILLA_MAX_CLIENTS)
-		MaxClients = VANILLA_MAX_CLIENTS;
 	if(PlayerCount > ClientCount)
 		PlayerCount = ClientCount;
-	if (PlayerSlots > VANILLA_MAX_CLIENTS)
-		PlayerSlots = VANILLA_MAX_CLIENTS;
-
 	ADD_INT(p, PlayerCount);
-	ADD_INT(p, max(PlayerSlots, PlayerCount));
+	ADD_INT(p, max(Config()->m_SvPlayerSlots, PlayerCount));
 	ADD_INT(p, ClientCount);
-	ADD_INT(p, max(ClientCount, MaxClients));
+	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients));
 
 	p.AddString("", 0);
 
@@ -1633,7 +1607,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 		if (Sent >= VANILLA_MAX_CLIENTS)
 			break;
 
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			int PreviousSize = pp.Size();
 
