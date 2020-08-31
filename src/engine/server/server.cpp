@@ -1526,10 +1526,12 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	char aBuf[128];
 
 	// count the players
-	int PlayerCount = 0, ClientCount = 0;
+	int PlayerCount = 0, ClientCount = 0, DummyCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State == CClient::STATE_DUMMY)
+			DummyCount++;
+		else if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -1558,9 +1560,9 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	if(PlayerCount > ClientCount)
 		PlayerCount = ClientCount;
 	ADD_INT(p, PlayerCount);
-	ADD_INT(p, max(Config()->m_SvPlayerSlots, PlayerCount));
+	ADD_INT(p, max(Config()->m_SvPlayerSlots-DummyCount, PlayerCount));
 	ADD_INT(p, ClientCount);
-	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients));
+	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients-DummyCount));
 
 	p.AddString("", 0);
 
@@ -1608,7 +1610,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 		if (Sent >= VANILLA_MAX_CLIENTS)
 			break;
 
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			int PreviousSize = pp.Size();
 
