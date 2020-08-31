@@ -133,7 +133,7 @@ void CTeeInfo::Translate(bool Sevendown)
 void CTeeInfo::FromSevendown()
 {
 	// reset to default skin
-	int Match = 0;
+	int Match = SKIN_DEFAULT;
 	for(int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		str_copy(m_aaSkinPartNames[p], s_SkinsSevendown[SKIN_DEFAULT].m_apSkinPartNames[p], 24);
@@ -172,11 +172,11 @@ void CTeeInfo::FromSevendown()
 	}
 	else
 	{
-		for (int p = 0; p < NUM_SKINPARTS-1; p++)
+		for (int p = 0; p < NUM_SKINPARTS; p++)
 			m_aSkinPartColors[p] = s_SkinsSevendown[Match].m_aSkinPartColors[p];
 	}
 
-	for (int p = 0; p < NUM_SKINPARTS-1; p++)
+	for (int p = 0; p < NUM_SKINPARTS; p++)
 		m_aUseCustomColors[p] = s_SkinsSevendown[Match].m_aUseCustomColors[p];
 }
 
