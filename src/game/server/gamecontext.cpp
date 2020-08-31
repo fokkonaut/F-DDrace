@@ -384,9 +384,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
-		Msg.m_pMessage += sizeof("@everyone")-1; // cut the @everyone in the beginning
-		if (Msg.m_pMessage[0] == ' ')
-			Msg.m_pMessage++;
 
 		char aBuf[128];
 		char aMessage[128];
@@ -1682,7 +1679,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 
 			// @everyone mode
-			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_startswith_nocase(pMsg->m_pMessage, "@everyone") && Mode != CHAT_WHISPER)
+			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone") && Mode != CHAT_WHISPER)
 				Mode = CHAT_ATEVERYONE;
 
 			if (pMsg->m_pMessage[0] == '/')
