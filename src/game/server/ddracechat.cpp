@@ -1449,7 +1449,7 @@ bool CGameContext::TryRegisterBan(const NETADDR *pAddr, int Secs)
 	// find a matching register ban for this ip, update expiration time if found
 	for(int i = 0; i < m_NumRegisterBans; i++)
 	{
-		if(net_addr_comp_noport(&m_aRegisterBans[i].m_Addr, pAddr) == 0)
+		if(net_addr_comp(&m_aRegisterBans[i].m_Addr, pAddr, false) == 0)
 		{
 			m_aRegisterBans[i].m_LastAttempt = Server()->Tick();
 			m_aRegisterBans[i].m_NumRegistrations++;
@@ -1489,7 +1489,7 @@ int CGameContext::ProcessRegisterBan(int ClientID)
 
 	for(int i = 0; i < m_NumRegisterBans; i++)
 	{
-		if(net_addr_comp_noport(&Addr, &m_aRegisterBans[i].m_Addr) == 0)
+		if(net_addr_comp(&Addr, &m_aRegisterBans[i].m_Addr, false) == 0)
 		{
 			RegisterBanned = (m_aRegisterBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 			break;

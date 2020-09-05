@@ -1020,7 +1020,7 @@ inline void SortClients(CServerInfo *pInfo)
 void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 {
 	// version server
-	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr) == 0)
+	if(m_VersionInfo.m_State == CVersionInfo::STATE_READY && net_addr_comp(&pPacket->m_Address, &m_VersionInfo.m_VersionServeraddr.m_Addr, true) == 0)
 	{
 		// version info
 		if(pPacket->m_DataSize == (int)(sizeof(VERSIONSRV_VERSION) + sizeof(GAME_RELEASE_VERSION)) &&
@@ -1077,7 +1077,7 @@ void CClient::ProcessConnlessPacket(CNetChunk *pPacket)
 			if(m_pMasterServer->IsValid(i))
 			{
 				NETADDR Addr = m_pMasterServer->GetAddr(i);
-				if(net_addr_comp(&pPacket->m_Address, &Addr) == 0)
+				if(net_addr_comp(&pPacket->m_Address, &Addr, true) == 0)
 				{
 					Valid = true;
 					break;
@@ -2609,11 +2609,7 @@ int main(int argc, const char **argv) // ignore_convention
 		}
 	}
 
-	if(secure_random_init() != 0)
-	{
-		dbg_msg("secure", "could not initialize secure RNG");
-		return -1;
-	}
+	bool RandInitFailed = secure_random_init() != 0;
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
@@ -2631,6 +2627,12 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineTextRender *pEngineTextRender = CreateEngineTextRender();
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+
+	if(RandInitFailed)
+	{
+		dbg_msg("secure", "could not initialize secure RNG");
+		return -1;
+	}
 
 	{
 		bool RegisterFail = false;

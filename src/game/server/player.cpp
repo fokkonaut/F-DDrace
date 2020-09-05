@@ -651,7 +651,7 @@ void CPlayer::SetFakeID()
 				continue;
 
 			Server()->GetClientAddr(i, &Addr2);
-			if (net_addr_comp_noport(&Addr, &Addr2) == 0)
+			if (net_addr_comp(&Addr, &Addr2, false) == 0)
 			{
 				if (GameServer()->m_apPlayers[i]->m_FakeID == FakeID)
 				{

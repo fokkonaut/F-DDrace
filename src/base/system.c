@@ -776,19 +776,11 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 	}
 }
 
-int net_addr_comp(const NETADDR *a, const NETADDR *b)
+int net_addr_comp(const NETADDR *a, const NETADDR *b, int check_port)
 {
-	if(mem_comp(a->ip, b->ip, sizeof(a->ip)) == 0 && a->port == b->port && a->type == b->type)
+	if(a->type == b->type && mem_comp(a->ip, b->ip, a->type == NETTYPE_IPV4 ? NETADDR_SIZE_IPV4 : NETADDR_SIZE_IPV6) == 0 && (!check_port || a->port == b->port))
 		return 0;
 	return -1;
-}
-
-int net_addr_comp_noport(const NETADDR* a, const NETADDR* b)
-{
-	NETADDR ta = *a, tb = *b;
-	ta.port = tb.port = 0;
-
-	return net_addr_comp(&ta, &tb);
 }
 
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
@@ -1891,6 +1883,36 @@ int time_houroftheday()
 	time(&time_data);
 	time_info = localtime(&time_data);
 	return time_info->tm_hour;
+}
+
+int time_season()
+{
+	time_t time_data;
+	struct tm *time_info;
+
+	time(&time_data);
+	time_info = localtime(&time_data);
+
+	switch(time_info->tm_mon)
+	{
+		case 11:
+		case 0:
+		case 1:
+			return SEASON_WINTER;
+		case 2:
+		case 3:
+		case 4:
+			return SEASON_SPRING;
+		case 5:
+		case 6:
+		case 7:
+			return SEASON_SUMMER;
+		case 8:
+		case 9:
+		case 10:
+			return SEASON_AUTUMN;
+	}
+	return SEASON_SPRING; // should never happen
 }
 
 int time_isxmasday()

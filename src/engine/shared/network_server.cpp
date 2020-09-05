@@ -117,7 +117,7 @@ bool CNetServer::GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 			continue;
 
-		if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), pAddr) == 0)
+		if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), pAddr, true) == 0)
 			return m_aSlots[i].m_Connection.m_Sevendown;
 	}
 	
@@ -176,7 +176,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 				if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 					continue;
 
-				if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr) == 0)
+				if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr, true) == 0)
 				{
 					if(m_aSlots[i].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown))
 					{
@@ -276,19 +276,15 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 					}
 
 					// only allow a specific number of players with the same ip
-					NETADDR ThisAddr = Addr, OtherAddr;
 					int FoundAddr = 1;
-					ThisAddr.port = 0;
-
+					
 					bool Continue = false;
 					for(int i = 0; i < NET_MAX_CLIENTS; i++)
 					{
 						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 							continue;
 
-						OtherAddr = *m_aSlots[i].m_Connection.PeerAddress();
-						OtherAddr.port = 0;
-						if(!net_addr_comp(&ThisAddr, &OtherAddr))
+						if(!net_addr_comp(&Addr, m_aSlots[i].m_Connection.PeerAddress(), false))
 						{
 							if(FoundAddr++ >= m_MaxClientsPerIP)
 							{
@@ -359,7 +355,7 @@ int CNetServer::Send(CNetChunk *pChunk, TOKEN Token, bool Sevendown)
 				if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 					continue;
 
-				if(net_addr_comp(&pChunk->m_Address, m_aSlots[i].m_Connection.PeerAddress()) == 0)
+				if(net_addr_comp(&pChunk->m_Address, m_aSlots[i].m_Connection.PeerAddress(), true) == 0)
 				{
 					// upgrade the packet, now that we know its recipent
 					pChunk->m_ClientID = i;
@@ -450,7 +446,7 @@ bool CNetServer::Connlimit(NETADDR Addr)
 
 	for(int i = 0; i < NET_CONNLIMIT_IPS; ++i)
 	{
-		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
+		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr, true))
 		{
 			if(m_aSpamConns[i].m_Time > Now - time_freq() * CNetBase::Config()->m_SvConnlimitTime)
 			{

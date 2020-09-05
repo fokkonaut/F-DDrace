@@ -27,11 +27,12 @@ CProjectile::CProjectile
 	int Number,
 	bool Spooky
 )
-	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, Pos)
+	: CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE, vec2(round_to_int(Pos.x), round_to_int(Pos.y)))
 {
 	m_Type = Type;
 	m_Pos = Pos;
-	m_Direction = Dir;
+	m_Direction.x = round_to_int(Dir.x*100.0f) / 100.0f;
+	m_Direction.y = round_to_int(Dir.y*100.0f) / 100.0f;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
@@ -272,10 +273,10 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 	// F-DDrace
 	if (m_DefaultTuning)
 	{
-		pProj->m_X = (int)m_Pos.x;
-		pProj->m_Y = (int)m_Pos.y;
-		pProj->m_VelX = (int)(m_Direction.x * 100.0f);
-		pProj->m_VelY = (int)(m_Direction.y * 100.0f);
+		pProj->m_X = round_to_int(m_Pos.x);
+		pProj->m_Y = round_to_int(m_Pos.y);
+		pProj->m_VelX = round_to_int(m_Direction.x*100.0f);
+		pProj->m_VelY = round_to_int(m_Direction.y*100.0f);
 		pProj->m_StartTick = m_StartTick;
 	}
 	else
@@ -283,10 +284,10 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 		if (!m_CalculatedVel)
 			CalculateVel();
 
-		pProj->m_X = (int)m_LastResetPos.x;
-		pProj->m_Y = (int)m_LastResetPos.y;
-		pProj->m_VelX = m_Vel.x;
-		pProj->m_VelY = m_Vel.y;
+		pProj->m_X = round_to_int(m_LastResetPos.x);
+		pProj->m_Y = round_to_int(m_LastResetPos.y);
+		pProj->m_VelX = round_to_int(m_Vel.x);
+		pProj->m_VelY = round_to_int(m_Vel.y);
 		pProj->m_StartTick = m_LastResetTick;
 	}
 }

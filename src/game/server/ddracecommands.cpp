@@ -372,7 +372,7 @@ bool CGameContext::TryVoteMute(const NETADDR* pAddr, int Secs)
 	// find a matching vote mute for this ip, update expiration time if found
 	for (int i = 0; i < m_NumVoteMutes; i++)
 	{
-		if (net_addr_comp_noport(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
+		if (net_addr_comp(&m_aVoteMutes[i].m_Addr, pAddr, false) == 0)
 		{
 			m_aVoteMutes[i].m_Expire = Server()->Tick()
 				+ Secs * Server()->TickSpeed();
@@ -413,7 +413,7 @@ bool CGameContext::VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, in
 {
 	for (int i = 0; i < m_NumVoteMutes; i++)
 	{
-		if (net_addr_comp_noport(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
+		if (net_addr_comp(&m_aVoteMutes[i].m_Addr, pAddr, false) == 0)
 		{
 			m_NumVoteMutes--;
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
@@ -435,7 +435,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason)
 	// find a matching mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumMutes; i++)
 	{
-		if(net_addr_comp_noport(&m_aMutes[i].m_Addr, pAddr) == 0)
+		if(net_addr_comp(&m_aMutes[i].m_Addr, pAddr, false) == 0)
 		{
 			m_aMutes[i].m_Expire = Server()->Tick()
 							+ Secs * Server()->TickSpeed();

@@ -117,8 +117,43 @@ public:
 	vec2 m_LocalCharacterPos;
 
 	// predicted players
-	CCharacterCore m_PredictedPrevChar;
-	CCharacterCore m_PredictedChar;
+
+	CCharacterCore m_aPredictedPrevChars[MAX_CLIENTS];
+	CCharacterCore m_aPredictedChars[MAX_CLIENTS];
+
+	bool ShouldUsePredicted();
+		// Whether we should use/render predicted entities. Depends on client
+		// and game state.
+private:
+	bool ShouldUsePredictedLocalChar();
+		// Whether we should use/render the predicted local character. Depends
+		// on config and snap state. Should check `ShouldUsePredicted` before
+		// checking this.
+	bool ShouldUsePredictedNonLocalChars();
+		// Whether we should use/render predicted entities for non-local
+		// characters. Depends on config. Should check `ShouldUsePredicted`
+		// before checking this.
+public:
+	bool ShouldUsePredictedChar(int ClientID);
+		// Whether we should use/render predictions for a specific `ClientID`.
+		// Should check `ShouldUsePredicted` before checking this.
+
+	void UsePredictedChar(
+		CNetObj_Character *pPrevChar,
+		CNetObj_Character *pPlayerChar,
+		float *IntraTick,
+		int ClientID
+	);
+		// Replaces `pPrevChar`, `pPlayerChar`, and `IntraTick` with their predicted
+		// counterparts for `ClientID`. Should check `ShouldUsePredictedChar`
+		// before using this.
+
+	vec2 PredictedCharPos(int ClientID);
+		// Return the interpolated, predicted position for `ClientID`
+	vec2 UnpredictedCharPos(int ClientID);
+		// Return the interpolated, unpredicted position for `ClientID`
+
+	// ---
 
 	struct CPlayerInfoItem
 	{
@@ -194,6 +229,8 @@ public:
 		CTeeRenderInfo m_SkinInfo; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 
+		CNetObj_Character m_Evolved;
+
 		float m_Angle;
 		bool m_Active;
 		bool m_ChatIgnore;
@@ -267,11 +304,12 @@ public:
 	virtual const char *NetVersion() const;
 	virtual int ClientVersion() const;
 	void GetPlayerLabel(char* aBuf, int BufferSize, int ClientID, const char* ClientName);
-	bool IsXmas() const;
-	bool IsEaster() const;
 	void StartRendering();
 
+	bool IsXmas() const;
+	bool IsEaster() const;
 	int RacePrecision() const { return m_Snap.m_pGameDataRace ? m_Snap.m_pGameDataRace->m_Precision : 3; }
+	bool IsWorldPaused() const { return m_Snap.m_pGameData && (m_Snap.m_pGameData->m_GameStateFlags&(GAMESTATEFLAG_PAUSED|GAMESTATEFLAG_ROUNDOVER|GAMESTATEFLAG_GAMEOVER)); }
 
 	//
 	void DoEnterMessage(const char *pName, int ClientID, int Team);

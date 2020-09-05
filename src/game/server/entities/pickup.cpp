@@ -291,8 +291,8 @@ void CPickup::Snap(int SnappingClient)
 		m_SnapPos.y = m_Pos.y + sinf(s_Time * 2.0f + Offset) * 2.5f;
 		s_LastLocalTime = Server()->Tick();
 
-		pProj->m_X = m_SnapPos.x;
-		pProj->m_Y = m_SnapPos.y;
+		pProj->m_X = round_to_int(m_SnapPos.x);
+		pProj->m_Y = round_to_int(m_SnapPos.y);
 
 		pProj->m_VelX = 0;
 		pProj->m_VelY = 0;
@@ -306,8 +306,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pP)
 			return;
 
-		pP->m_X = (int)m_Pos.x;
-		pP->m_Y = (int)m_Pos.y;
+		pP->m_X = round_to_int(m_Pos.x);
+		pP->m_Y = round_to_int(m_Pos.y);
 		if (Server()->IsSevendown(SnappingClient))
 		{
 			pP->m_Type = m_Type;
@@ -328,8 +328,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pShotgunBullet)
 			return;
 
-		pShotgunBullet->m_X = (int)m_Pos.x;
-		pShotgunBullet->m_Y = (int)m_Pos.y - 30;
+		pShotgunBullet->m_X = round_to_int(m_Pos.x);
+		pShotgunBullet->m_Y = round_to_int(m_Pos.y - 30);
 		pShotgunBullet->m_Type = WEAPON_SHOTGUN;
 		pShotgunBullet->m_StartTick = Server()->Tick();
 	}
@@ -339,10 +339,10 @@ void CPickup::Snap(int SnappingClient)
 		if (!pLaser)
 			return;
 
-		pLaser->m_X = (int)m_Pos.x;
-		pLaser->m_Y = (int)m_Pos.y - 30;
-		pLaser->m_FromX = (int)m_Pos.x;
-		pLaser->m_FromY = (int)m_Pos.y - 30;
+		pLaser->m_X = round_to_int(m_Pos.x);
+		pLaser->m_Y = round_to_int(m_Pos.y - 30);
+		pLaser->m_FromX = round_to_int(m_Pos.x);
+		pLaser->m_FromY = round_to_int(m_Pos.y - 30);
 		pLaser->m_StartTick = Server()->Tick();
 	}
 	else if (Heart)
@@ -352,8 +352,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pPickup)
 			return;
 
-		pPickup->m_X = (int)m_Pos.x;
-		pPickup->m_Y = (int)m_Pos.y - 30;
+		pPickup->m_X = round_to_int(m_Pos.x);
+		pPickup->m_Y = round_to_int(m_Pos.y - 30);
 		pPickup->m_Type = POWERUP_HEALTH;
 	}
 	else if (Grenade)
@@ -362,8 +362,8 @@ void CPickup::Snap(int SnappingClient)
 		if (!pProj)
 			return;
 
-		pProj->m_X = (int)m_Pos.x;
-		pProj->m_Y = (int)m_Pos.y - 30;
+		pProj->m_X = round_to_int(m_Pos.x);
+		pProj->m_Y = round_to_int(m_Pos.y - 30);
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_GRENADE;
 	}

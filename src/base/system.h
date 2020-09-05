@@ -553,12 +553,30 @@ int time_timestamp();
 
 /*
 	Function: time_houroftheday
-		Retrives the hours since midnight (0..23)
+		Retrieves the hours since midnight (0..23)
 
 	Returns:
 		The current hour of the day
 */
 int time_houroftheday();
+
+
+enum
+{
+	SEASON_SPRING = 0,
+	SEASON_SUMMER,
+	SEASON_AUTUMN,
+	SEASON_WINTER
+};
+
+/*
+	Function: time_season
+		Retrieves the current season of the year.
+
+	Returns:
+		one of the SEASON_* enum literals
+*/
+int time_season();
 
 /*
 	Function: time_isxmasday
@@ -592,6 +610,9 @@ enum
 {
 	NETADDR_MAXSTRSIZE = 1+(8*4+7)+1+1+5+1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
 
+	NETADDR_SIZE_IPV4 = 4,
+	NETADDR_SIZE_IPV6 = 16,
+
 	NETTYPE_INVALID = 0,
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
@@ -602,8 +623,9 @@ enum
 typedef struct
 {
 	unsigned int type;
-	unsigned char ip[16];
+	unsigned char ip[NETADDR_SIZE_IPV6];
 	unsigned short port;
+	unsigned short reserved;
 } NETADDR;
 
 /*
@@ -640,32 +662,16 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 /*
 	Function: net_addr_comp
 		Compares two network addresses.
-
 	Parameters:
 		a - Address to compare
 		b - Address to compare to.
-
+		check_port - compares port or not
 	Returns:
 		<0 - Address a is lesser then address b
 		0 - Address a is equal to address b
 		>0 - Address a is greater then address b
 */
-int net_addr_comp(const NETADDR *a, const NETADDR *b);
-
-/*
-	Function: net_addr_comp_noport
-		Compares two network addresses ignoring port.
-
-	Parameters:
-		a - Address to compare
-		b - Address to compare to.
-
-	Returns:
-		<0 - Address a is less than address b
-		0 - Address a is equal to address b
-		>0 - Address a is greater than address b
-*/
-int net_addr_comp_noport(const NETADDR* a, const NETADDR* b);
+int net_addr_comp(const NETADDR *a, const NETADDR *b, int check_port);
 
 /*
 	Function: net_addr_str
