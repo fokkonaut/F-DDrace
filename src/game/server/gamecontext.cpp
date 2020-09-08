@@ -3276,6 +3276,8 @@ void CGameContext::OnInit()
 	// F-DDrace
 
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_aMinigameDisabled[i] = false;
 	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
