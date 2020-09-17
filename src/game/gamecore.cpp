@@ -473,27 +473,18 @@ void CCharacterCore::Tick(bool UseInput)
 				{
 					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
 
+					// add force to the hooked player
+					pCharCore->m_HookDragVel += Dir*Accel*1.5f;
+
+					// add a little bit force to the guy who has the grip
+					m_HookDragVel -= Dir*Accel*0.25f;
+
 					if (m_pCollision->m_pConfig->m_SvWeakHook)
 					{
-						float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
-						vec2 Temp;
-						// add force to the hooked player
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel*Dir.x*1.5f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel*Dir.y*1.5f);
-						pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
-
-						// add a little bit force to the guy who has the grip
-						Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel*Dir.x*0.25f);
-						Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel*Dir.y*0.25f);
-						m_Vel = ClampVel(m_MoveRestrictions, Temp);
-					}
-					else
-					{
-						// add force to the hooked player
-						pCharCore->m_HookDragVel += Dir*Accel*1.5f;
-
-						// add a little bit force to the guy who has the grip
-						m_HookDragVel -= Dir*Accel*0.25f;
+						pCharCore->AddDragVelocity();
+						pCharCore->ResetDragVelocity();
+						AddDragVelocity();
+						ResetDragVelocity();
 					}
 				}
 			}
