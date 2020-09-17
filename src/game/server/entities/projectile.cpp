@@ -31,8 +31,13 @@ CProjectile::CProjectile
 {
 	m_Type = Type;
 	m_Pos = Pos;
+
+	/* vanilla 0.7 has this instead of `m_Direction = Dir` to sync grenade curvature with client, but this made flappy stop working
+	and I think that this issue needs a clientside fix, not a server side one
 	m_Direction.x = round_to_int(Dir.x*100.0f) / 100.0f;
-	m_Direction.y = round_to_int(Dir.y*100.0f) / 100.0f;
+	m_Direction.y = round_to_int(Dir.y*100.0f) / 100.0f;*/
+	m_Direction = Dir;
+
 	m_LifeSpan = Span;
 	m_Owner = Owner;
 	m_Force = Force;
