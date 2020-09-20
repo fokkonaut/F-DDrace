@@ -37,7 +37,7 @@ bool CDrawEditor::CanPlace()
 bool CDrawEditor::CanRemove(CEntity *pEnt)
 {
 	// check whether pEnt->m_PlotID >= 0 because -1 would mean its a map object, so we dont wanna be able to remove it
-	return CanPlace() && pEnt && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || m_pCharacter->IsFreeDraw());
+	return CanPlace() && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || m_pCharacter->IsFreeDraw());
 }
 
 int CDrawEditor::GetPlotID()
@@ -139,10 +139,9 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 
 		if (CanRemove(pEntity))
 		{
-			if (pEntity->m_PlotID >= 0)
-				for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
-					if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
-						GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+			for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
+				if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
+					GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
 
 			GameServer()->m_World.DestroyEntity(pEntity);
 			m_pCharacter->SetAttackTick(Server()->Tick());

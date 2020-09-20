@@ -98,3 +98,8 @@ bool CEntity::GetNearestAirPosPlayer(vec2 PlayerPos, vec2* OutPos)
 	}
 	return false;
 }
+
+bool CEntity::IsPlotDoor()
+{
+	return m_ObjType == CGameWorld::ENTTYPE_DOOR && m_Number > GameServer()->Collision()->m_NumSwitchers;
+}

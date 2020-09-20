@@ -107,7 +107,7 @@ void CFlag::Tick()
 
 	// plots
 	int PlotID = GameServer()->GetTilePlotID(m_Pos);
-	if (PlotID > 0)
+	if (PlotID >= PLOT_START)
 	{
 		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
 		if (m_pCarrier)

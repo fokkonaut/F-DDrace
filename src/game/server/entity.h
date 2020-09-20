@@ -155,6 +155,8 @@ public:
 	// used for entities inside of plots, created by the draw editor. if not on a plot but still from the editor, its 0, if not an object from editor its -1
 	int m_PlotID;
 
+	bool IsPlotDoor();
+
 	// character drawing right now, only he can see the preview
 	int m_BrushCID;
 };

@@ -94,7 +94,7 @@ CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says
 CONSOLE_COMMAND("teecontrol", "?v[id] ?i[forcedid]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 
 //plots
-CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
+CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("plot_owner", "s[username] i[plotid]", CFGFLAG_SERVER, ConPlotOwner, this, "Sets owner of plot i to account with username s", AUTHED_ADMIN)
 
