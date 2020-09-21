@@ -821,7 +821,7 @@ void CCharacter::FireWeapon()
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
-					|| (distance(PortalPos, m_Pos) > 2000.f)
+					|| (distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance)
 					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));

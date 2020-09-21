@@ -206,6 +206,7 @@ MACRO_CONFIG_INT(SvPortalRifleDelay, sv_portal_rifle_delay, 10, 0, 60, CFGFLAG_S
 MACRO_CONFIG_INT(SvPortalRadius, sv_portal_radius, 46, 0, 1024, CFGFLAG_SERVER, "The radius of a portal for portal rifles", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalDetonationLinked, sv_portal_detonation_linked, 5, 0, 60, CFGFLAG_SERVER, "Time in seconds linked portals detonate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalDetonation, sv_portal_detonation, 10, 0, 60, CFGFLAG_SERVER, "Time in seconds unlinked portals detonate", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortalMaxDistance, sv_portal_max_distance, 1000, 50, 2000, CFGFLAG_SERVER, "Maximum distance to place a portal", AUTHED_ADMIN)
 
 // draw editor
 MACRO_CONFIG_INT(SvFreeDrawLevel, sv_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER|CFGFLAG_GAME, "Required auth level to use draw editor everywhere", AUTHED_ADMIN)
