@@ -129,11 +129,12 @@ void CPortal::PlayerEnter()
 		case CGameWorld::ENTTYPE_FLAG:
 			{
 				pFlag = (CFlag *)apEnts[i];
+				if (pFlag->GetCarrier())
+					continue; // owner is getting teleported with the flag
+
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
 				pFlag->SetPrevPos(m_pLinkedPortal->m_Pos);
-				if (pFlag->GetCarrier())
-					pAffectedChr = pFlag->GetCarrier();
-				else if (pFlag->GetLastCarrier())
+				if (pFlag->GetLastCarrier())
 					pAffectedChr = pFlag->GetLastCarrier();
 				break;
 			}
