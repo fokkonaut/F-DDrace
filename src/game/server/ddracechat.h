@@ -72,13 +72,14 @@ CHAT_COMMAND("room", "s[invite/kick] r[name]", CFGFLAG_CHAT, ConRoom, this, "Inv
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)
 
 //plots
-CHAT_COMMAND("plot", "?s[command] ?s[price/helpcmd/swapname] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)
+CHAT_COMMAND("plot", "?s[command] ?s[price|helpcmd|swapname] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)
 
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar", AUTHED_NO)
 
 //other
 CHAT_COMMAND("resumemoved", "?i['0'|'1']", CFGFLAG_CHAT, ConResumeMoved, this, "Whether to resume from pause when someone moved your tee (off by default), optional i = 0 for off else for on", AUTHED_NO)
+CHAT_COMMAND("weapon", "i[weapon]", CFGFLAG_CHAT, ConWeapon, this, "Sets active weapon", AUTHED_NO)
 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)
@@ -95,7 +96,7 @@ CHAT_COMMAND("top5money", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Money, 
 CHAT_COMMAND("top5spree", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Spree, this, "Shows top5 accounts sorted by killing spree", AUTHED_NO)
 
 //police
-CHAT_COMMAND("policehelper", "s[add/remove] r[name]", CFGFLAG_CHAT, ConPoliceHelper, this, "Adds/removes player r to/from policehelpers", AUTHED_NO)
+CHAT_COMMAND("policehelper", "s[add|remove] r[name]", CFGFLAG_CHAT, ConPoliceHelper, this, "Adds/removes player r to/from policehelpers", AUTHED_NO)
 
 //vip
 CHAT_COMMAND("rainbow", "", CFGFLAG_CHAT, ConRainbowVIP, this, "Toggles rainbow for yourself", AUTHED_NO)

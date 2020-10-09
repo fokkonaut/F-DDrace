@@ -691,6 +691,7 @@ private:
 	static void ConJoinFNG(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
+	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

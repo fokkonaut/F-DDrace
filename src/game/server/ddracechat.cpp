@@ -2282,6 +2282,13 @@ void CGameContext::ConResumeMoved(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer resume from pause if your tee gets moved");
 }
 
+void CGameContext::ConWeapon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (pChr) pChr->SetQueuedWeapon(pResult->GetInteger(0));
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
