@@ -386,7 +386,7 @@ public:
 	int GetTilePlotID(vec2 Pos);
 
 	int m_FullHourOffsetTicks;
-	bool IsFullHour() { return ((Server()->Tick()) % (Server()->TickSpeed() * 60 * 60)) == m_FullHourOffsetTicks; }
+	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);
