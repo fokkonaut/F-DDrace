@@ -1041,7 +1041,7 @@ void CGameContext::OnTick()
 		if (!m_aMinigameDisabled[i == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG])
 			InstagibTick(i);
 
-	if (Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == 0)
+	if (IsFullHour())
 		ExpirePlots();
 
 #ifdef CONF_DEBUG
@@ -3313,6 +3313,18 @@ void CGameContext::OnInit()
 
 	m_LastAccSaveTick = Server()->Tick();
 
+	{
+		time_t rawtime;
+		struct tm* timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+
+		int Seconds = 60 - timeinfo->tm_sec;
+		int Minutes = (60 - timeinfo->tm_min) - 1;
+
+		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
+	}
+
 	for (int i = 0; i < NUM_SHOP_TYPES; i++)
 	{
 		if (m_pShop[i])
@@ -3850,7 +3862,7 @@ void CGameContext::InitPlots()
 		m_aPlots[i].m_ToTele = vec2(-1, -1);
 		m_aPlots[i].m_vObjects.clear();
 
-		if (i > 0 && i < Collision()->m_NumPlots + 1)
+		if (i >= PLOT_START && i < Collision()->m_NumPlots + 1)
 			ReadPlotStats(i);
 	}
 	ExpirePlots();
