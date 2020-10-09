@@ -1361,24 +1361,24 @@ void CPlayer::MoneyTransaction(int64 Amount, const char *pDescription, bool IsEu
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 
 	if (IsEuro)
 	{
-		(*Account).m_Euros += Amount;
+		pAccount->m_Euros += Amount;
 		GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID(), pDescription);
 	}
 	else
-		(*Account).m_Money += Amount;
+		pAccount->m_Money += Amount;
 
 	if (!pDescription[0])
 		return;
 
-	str_copy((*Account).m_aLastMoneyTransaction[4], (*Account).m_aLastMoneyTransaction[3], sizeof((*Account).m_aLastMoneyTransaction[4]));
-	str_copy((*Account).m_aLastMoneyTransaction[3], (*Account).m_aLastMoneyTransaction[2], sizeof((*Account).m_aLastMoneyTransaction[3]));
-	str_copy((*Account).m_aLastMoneyTransaction[2], (*Account).m_aLastMoneyTransaction[1], sizeof((*Account).m_aLastMoneyTransaction[2]));
-	str_copy((*Account).m_aLastMoneyTransaction[1], (*Account).m_aLastMoneyTransaction[0], sizeof((*Account).m_aLastMoneyTransaction[1]));
-	str_copy((*Account).m_aLastMoneyTransaction[0], pDescription, sizeof((*Account).m_aLastMoneyTransaction[0]));
+	str_copy(pAccount->m_aLastMoneyTransaction[4], pAccount->m_aLastMoneyTransaction[3], sizeof(pAccount->m_aLastMoneyTransaction[4]));
+	str_copy(pAccount->m_aLastMoneyTransaction[3], pAccount->m_aLastMoneyTransaction[2], sizeof(pAccount->m_aLastMoneyTransaction[3]));
+	str_copy(pAccount->m_aLastMoneyTransaction[2], pAccount->m_aLastMoneyTransaction[1], sizeof(pAccount->m_aLastMoneyTransaction[2]));
+	str_copy(pAccount->m_aLastMoneyTransaction[1], pAccount->m_aLastMoneyTransaction[0], sizeof(pAccount->m_aLastMoneyTransaction[1]));
+	str_copy(pAccount->m_aLastMoneyTransaction[0], pDescription, sizeof(pAccount->m_aLastMoneyTransaction[0]));
 }
 
 void CPlayer::GiveXP(int Amount, const char *pMessage)
@@ -1386,8 +1386,8 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
-	(*Account).m_XP += Amount;
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	pAccount->m_XP += Amount;
 
 	char aBuf[256];
 
@@ -1397,34 +1397,34 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 
-	if ((*Account).m_XP >= GameServer()->GetNeededXP((*Account).m_Level))
+	if (pAccount->m_XP >= GameServer()->GetNeededXP(pAccount->m_Level))
 	{
-		(*Account).m_Level++;
+		pAccount->m_Level++;
 
-		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", (*Account).m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", pAccount->m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 }
 
 void CPlayer::GiveBlockPoints(int Amount)
 {
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 
 	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
 		Amount += 1;
 
-	(*Account).m_BlockPoints += Amount;
+	pAccount->m_BlockPoints += Amount;
 }
 
 void CPlayer::OnLogin()
 {
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	if (m_pCharacter)
 	{
-		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && (*Account).m_TaserLevel >= 1)
+		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
 			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
 
-		if ((*Account).m_PortalRifle)
+		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
 	}
 
@@ -1481,15 +1481,15 @@ void CPlayer::SetExpireDate(int Item)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 
 	switch (Item)
 	{
 	case ITEM_VIP:
-			GameServer()->SetExpireDate(&(*Account).m_ExpireDateVIP, ITEM_EXPIRE_VIP);
+			GameServer()->SetExpireDate(&pAccount->m_ExpireDateVIP, ITEM_EXPIRE_VIP);
 			break;
 	case ITEM_PORTAL_RIFLE:
-			GameServer()->SetExpireDate(&(*Account).m_ExpireDatePortalRifle, ITEM_EXPIRE_PORTAL_RIFLE);
+			GameServer()->SetExpireDate(&pAccount->m_ExpireDatePortalRifle, ITEM_EXPIRE_PORTAL_RIFLE);
 			break;
 	}
 }
@@ -1499,25 +1499,25 @@ bool CPlayer::IsExpiredItem(int Item)
 	if (GetAccID() < ACC_START)
 		return false;
 
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	time_t tmp;
 
 	switch (Item)
 	{
 	case ITEM_VIP:
 		{
-			if (!(*Account).m_VIP)
+			if (!pAccount->m_VIP)
 				return false;
 
-			tmp = (*Account).m_ExpireDateVIP;
+			tmp = pAccount->m_ExpireDateVIP;
 			break;
 		}
 	case ITEM_PORTAL_RIFLE:
 		{
-			if (!(*Account).m_PortalRifle)
+			if (!pAccount->m_PortalRifle)
 				return false;
 
-			tmp = (*Account).m_ExpireDatePortalRifle;
+			tmp = pAccount->m_ExpireDatePortalRifle;
 			break;
 		}
 	default:
@@ -1530,14 +1530,14 @@ bool CPlayer::IsExpiredItem(int Item)
 		{
 		case ITEM_VIP:
 			{
-				(*Account).m_VIP = false;
-				(*Account).m_ExpireDateVIP = 0;
+				pAccount->m_VIP = false;
+				pAccount->m_ExpireDateVIP = 0;
 				break;
 			}
 		case ITEM_PORTAL_RIFLE:
 			{
-				(*Account).m_PortalRifle = false;
-				(*Account).m_ExpireDatePortalRifle = 0;
+				pAccount->m_PortalRifle = false;
+				pAccount->m_ExpireDatePortalRifle = 0;
 				break;
 			}
 		}

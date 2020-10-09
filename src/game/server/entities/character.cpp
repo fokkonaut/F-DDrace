@@ -1399,23 +1399,23 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
 		{
-			CGameContext::AccountInfo *KillerAcc = &GameServer()->m_Accounts[pKiller->GetAccID()];
+			CGameContext::AccountInfo *pKillerAccount = &GameServer()->m_Accounts[pKiller->GetAccID()];
 
 			// kill streak;
-			if (pKillerChar && pKillerChar->m_KillStreak > (*KillerAcc).m_KillingSpreeRecord)
-				(*KillerAcc).m_KillingSpreeRecord = pKillerChar->m_KillStreak;
+			if (pKillerChar && pKillerChar->m_KillStreak > pKillerAccount->m_KillingSpreeRecord)
+				pKillerAccount->m_KillingSpreeRecord = pKillerChar->m_KillStreak;
 
 			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
 			{
-				(*KillerAcc).m_SurvivalKills++;
+				pKillerAccount->m_SurvivalKills++;
 			}
 			else if (pKiller->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pKiller->m_Minigame == MINIGAME_INSTAGIB_FNG)
 			{
-				(*KillerAcc).m_InstagibKills++;
+				pKillerAccount->m_InstagibKills++;
 			}
 			else
 			{
-				(*KillerAcc).m_Kills++;
+				pKillerAccount->m_Kills++;
 
 				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * Config()->m_SvBlockPointsDelay)
 					if (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking)
@@ -1425,19 +1425,19 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 		if (m_pPlayer->GetAccID() >= ACC_START)
 		{
-			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
 			{
-				(*Account).m_SurvivalDeaths++;
+				pAccount->m_SurvivalDeaths++;
 			}
 			else if (m_pPlayer->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || m_pPlayer->m_Minigame == MINIGAME_INSTAGIB_FNG)
 			{
-				(*Account).m_InstagibDeaths++;
+				pAccount->m_InstagibDeaths++;
 			}
 			else
 			{
-				(*Account).m_Deaths++;
+				pAccount->m_Deaths++;
 			}
 		}
 	}
@@ -2282,7 +2282,7 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			}
 
-			CGameContext::AccountInfo *Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 			int XP = 0;
 			int Money = 0;
@@ -2292,7 +2292,7 @@ void CCharacter::HandleTiles(int Index)
 			XP += GetAliveState() + 1;
 
 			// vip bonus
-			if ((*Account).m_VIP)
+			if (pAccount->m_VIP)
 			{
 				XP += 2;
 				Money += 2;
@@ -2306,7 +2306,7 @@ void CCharacter::HandleTiles(int Index)
 			if (PoliceTile)
 			{
 				XP += 1;
-				Money += (*Account).m_PoliceLevel;
+				Money += pAccount->m_PoliceLevel;
 			}
 
 			//flag bonus
@@ -2329,15 +2329,15 @@ void CCharacter::HandleTiles(int Index)
 				char aPlusXP[128];
 
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
-				str_format(aPolice, sizeof(aPolice), " +%d police", (*Account).m_PoliceLevel);
-				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+				str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
+				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
 						"Money [%lld] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
-						(*Account).m_Money, (PoliceTile && (*Account).m_PoliceLevel) ? aPolice : "", (*Account).m_VIP ? " +2 vip" : "",
-						(*Account).m_XP, GameServer()->GetNeededXP((*Account).m_Level), aPlusXP,
-						(*Account).m_Level
+						pAccount->m_Money, (PoliceTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
+						pAccount->m_Level
 					);
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
@@ -3125,17 +3125,17 @@ void CCharacter::FDDraceInit()
 	for (int i = 0; i < 3; i++)
 		m_aSpawnWeaponActive[i] = false;
 
-	CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 	if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 	{
 		for (int i = 0; i < 3; i++)
-			if ((*Account).m_SpawnWeapon[i])
+			if (pAccount->m_SpawnWeapon[i])
 			{
-				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, (*Account).m_SpawnWeapon[i]);
+				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, pAccount->m_SpawnWeapon[i]);
 				m_aSpawnWeaponActive[i] = true;
 			}
 
-		if ((*Account).m_PortalRifle)
+		if (pAccount->m_PortalRifle)
 			GiveWeapon(WEAPON_PORTAL_RIFLE, false);
 	}
 
@@ -3216,7 +3216,7 @@ void CCharacter::FDDraceTick()
 	// flag bonus
 	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
 	{
-		CGameContext::AccountInfo* Account = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+		CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 		if (m_pPlayer->GetAccID() >= ACC_START)
 		{
@@ -3225,7 +3225,7 @@ void CCharacter::FDDraceTick()
 				int XP = 0;
 				XP += GetAliveState() + 1;
 
-				if ((*Account).m_VIP)
+				if (pAccount->m_VIP)
 					XP += 2;
 
 				m_pPlayer->GiveXP(XP);
@@ -3234,7 +3234,7 @@ void CCharacter::FDDraceTick()
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
 				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
-					(*Account).m_XP, GameServer()->GetNeededXP((*Account).m_Level), (*Account).m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+					pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}

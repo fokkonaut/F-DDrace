@@ -295,13 +295,13 @@ void CShop::ShopWindow(int ClientID, int Dir)
 	{
 		if (m_WindowPage[ClientID] == ITEM_POLICE)
 		{
-			CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-			m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + (*Account).m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
+			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
+			m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + pAccount->m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
 		}
 		else if (m_WindowPage[ClientID] == ITEM_TASER)
 		{
-			CGameContext::AccountInfo* Account = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-			m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + (*Account).m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
+			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
+			m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
 		}
 	}
 
@@ -404,7 +404,7 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
 	CPlayer *pPlayer = m_pGameServer->m_apPlayers[ClientID];
-	CGameContext::AccountInfo *Account = &m_pGameServer->m_Accounts[pPlayer->GetAccID()];
+	CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[pPlayer->GetAccID()];
 
 	char aMsg[128];
 	int ItemID = Item;
@@ -417,16 +417,16 @@ void CShop::BuyItem(int ClientID, int Item)
 		// Check whether we have the item already
 		if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
 			|| (Item == ITEM_BLOODY				&& (pChr->m_Bloody || pChr->m_StrongBloody))
-			|| (Item == ITEM_POLICE				&& (*Account).m_PoliceLevel == NUM_POLICE_LEVELS)
-			|| (Item == ITEM_SPOOKY_GHOST		&& (*Account).m_SpookyGhost)
+			|| (Item == ITEM_POLICE				&& pAccount->m_PoliceLevel == NUM_POLICE_LEVELS)
+			|| (Item == ITEM_SPOOKY_GHOST		&& pAccount->m_SpookyGhost)
 			|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
-			//|| (Item == ITEM_VIP				&& (*Account).m_VIP) // vip can be bought unlimited times
-			|| (Item == ITEM_SPAWN_SHOTGUN		&& (*Account).m_SpawnWeapon[0] == 5)
-			|| (Item == ITEM_SPAWN_GRENADE		&& (*Account).m_SpawnWeapon[1] == 5)
-			|| (Item == ITEM_SPAWN_RIFLE		&& (*Account).m_SpawnWeapon[2] == 5)
-			|| (Item == ITEM_NINJAJETPACK		&& (*Account).m_Ninjajetpack)
-			|| (Item == ITEM_TASER				&& (*Account).m_TaserLevel == NUM_TASER_LEVELS)
-			//|| (Item == ITEM_PORTAL_RIFLE		&& (*Account).m_PortalRifle) // portal rifle can be bought unlimited times
+			//|| (Item == ITEM_VIP				&& pAccount->m_VIP) // vip can be bought unlimited times
+			|| (Item == ITEM_SPAWN_SHOTGUN		&& pAccount->m_SpawnWeapon[0] == 5)
+			|| (Item == ITEM_SPAWN_GRENADE		&& pAccount->m_SpawnWeapon[1] == 5)
+			|| (Item == ITEM_SPAWN_RIFLE		&& pAccount->m_SpawnWeapon[2] == 5)
+			|| (Item == ITEM_NINJAJETPACK		&& pAccount->m_Ninjajetpack)
+			|| (Item == ITEM_TASER				&& pAccount->m_TaserLevel == NUM_TASER_LEVELS)
+			//|| (Item == ITEM_PORTAL_RIFLE		&& pAccount->m_PortalRifle) // portal rifle can be bought unlimited times
 			)
 		{
 			bool UseThe = false;
@@ -446,7 +446,7 @@ void CShop::BuyItem(int ClientID, int Item)
 		}
 
 		// check police lvl 3 for taser
-		if (Item == ITEM_TASER && (*Account).m_PoliceLevel < 3)
+		if (Item == ITEM_TASER && pAccount->m_PoliceLevel < 3)
 		{
 			m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
 			return;
@@ -473,15 +473,15 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 
 	// check for the correct price
-	if ((m_aItems[ItemID].m_IsEuro && (*Account).m_Euros < m_aItems[ItemID].m_Price)
-		|| (!m_aItems[ItemID].m_IsEuro && (*Account).m_Money < m_aItems[ItemID].m_Price))
+	if ((m_aItems[ItemID].m_IsEuro && pAccount->m_Euros < m_aItems[ItemID].m_Price)
+		|| (!m_aItems[ItemID].m_IsEuro && pAccount->m_Money < m_aItems[ItemID].m_Price))
 	{
 		m_pGameServer->SendChatTarget(ClientID, "You don't have enough money");
 		return;
 	}
 
 	// check for the correct level
-	if ((*Account).m_Level < m_aItems[ItemID].m_Level)
+	if (pAccount->m_Level < m_aItems[ItemID].m_Level)
 	{
 		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[ItemID].m_Level, m_aItems[ItemID].m_pName);
 		m_pGameServer->SendChatTarget(ClientID, aMsg);
@@ -506,19 +506,19 @@ void CShop::BuyItem(int ClientID, int Item)
 		{
 		case ITEM_RAINBOW:			pChr->Rainbow(true, -1, true); break;
 		case ITEM_BLOODY:			pChr->Bloody(true, -1, true); break;
-		case ITEM_POLICE:			(*Account).m_PoliceLevel++; break;
-		case ITEM_SPOOKY_GHOST:		(*Account).m_SpookyGhost = true; break;
+		case ITEM_POLICE:			pAccount->m_PoliceLevel++; break;
+		case ITEM_SPOOKY_GHOST:		pAccount->m_SpookyGhost = true; break;
 		case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
-		case ITEM_VIP:				(*Account).m_VIP = true; pPlayer->SetExpireDate(Item); break;
+		case ITEM_VIP:				pAccount->m_VIP = true; pPlayer->SetExpireDate(Item); break;
 		case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
 			// fallthrough
 		case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;
 			// fallthrough
 		case ITEM_SPAWN_RIFLE:		if (Weapon == -1) Weapon = 2;
-									(*Account).m_SpawnWeapon[Weapon]++; break;
-		case ITEM_NINJAJETPACK:		(*Account).m_Ninjajetpack = true; break;
-		case ITEM_TASER:			(*Account).m_TaserLevel++; break;
-		case ITEM_PORTAL_RIFLE:		(*Account).m_PortalRifle = true; pPlayer->SetExpireDate(Item);
+									pAccount->m_SpawnWeapon[Weapon]++; break;
+		case ITEM_NINJAJETPACK:		pAccount->m_Ninjajetpack = true; break;
+		case ITEM_TASER:			pAccount->m_TaserLevel++; break;
+		case ITEM_PORTAL_RIFLE:		pAccount->m_PortalRifle = true; pPlayer->SetExpireDate(Item);
 									if (pPlayer->GetCharacter())
 										pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);
 									break;

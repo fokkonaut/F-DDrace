@@ -1256,26 +1256,26 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[128];
 	time_t tmp;
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "--- Account Info ---");
-	str_format(aBuf, sizeof(aBuf), "Account Name: %s", (*Account).m_Username);
+	str_format(aBuf, sizeof(aBuf), "Account Name: %s", pAccount->m_Username);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Euros: %d", (*Account).m_Euros);
+	str_format(aBuf, sizeof(aBuf), "Euros: %d", pAccount->m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	if ((*Account).m_VIP)
+	if (pAccount->m_VIP)
 	{
-		tmp = (*Account).m_ExpireDateVIP;
+		tmp = pAccount->m_ExpireDateVIP;
 		str_format(aBuf, sizeof(aBuf), "VIP: until %s", pSelf->GetDate(tmp));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "VIP: not bought");
 
-	if ((*Account).m_PortalRifle)
+	if (pAccount->m_PortalRifle)
 	{
-		tmp = (*Account).m_ExpireDatePortalRifle;
+		tmp = pAccount->m_ExpireDatePortalRifle;
 		str_format(aBuf, sizeof(aBuf), "Portal Rifle: until %s", pSelf->GetDate(tmp));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
@@ -1296,7 +1296,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[128];
 	int Minigame = pSelf->m_apPlayers[pResult->m_ClientID]->m_Minigame;
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pPlayer->GetAccID()];
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
 	switch (Minigame)
 	{
@@ -1304,19 +1304,19 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Level [%d]%s", (*Account).m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : "");
+			str_format(aBuf, sizeof(aBuf), "Level [%d]%s", pAccount->m_Level, pPlayer->GetAccID() < ACC_START ? " (not logged in)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", (*Account).m_XP, pSelf->GetNeededXP((*Account).m_Level));
+			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", pAccount->m_XP, pSelf->GetNeededXP(pAccount->m_Level));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Money [%lld]", (*Account).m_Money);
+			str_format(aBuf, sizeof(aBuf), "Money [%lld]", pAccount->m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", (*Account).m_PoliceLevel, (*Account).m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
+			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 			// dont expose euros to other players than you
 			if (ID == pResult->m_ClientID)
 			{
-				str_format(aBuf, sizeof(aBuf), "Euros [%d]", (*Account).m_Euros);
+				str_format(aBuf, sizeof(aBuf), "Euros [%d]", pAccount->m_Euros);
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			}
 		} //fallthrough
@@ -1332,11 +1332,11 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 				str_format(aBuf, sizeof(aBuf), "--- %s's Block Stats ---", pSelf->Server()->ClientName(ID));
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			}
-			str_format(aBuf, sizeof(aBuf), "Points: %d", (*Account).m_BlockPoints);
+			str_format(aBuf, sizeof(aBuf), "Points: %d", pAccount->m_BlockPoints);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_Kills);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", pAccount->m_Kills);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_Deaths);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", pAccount->m_Deaths);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} break;
 
@@ -1344,11 +1344,11 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "--- %s's Survival Stats ---", pSelf->Server()->ClientName(ID));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Wins: %d", (*Account).m_SurvivalWins);
+			str_format(aBuf, sizeof(aBuf), "Wins: %d", pAccount->m_SurvivalWins);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_SurvivalKills);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", pAccount->m_SurvivalKills);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_SurvivalDeaths);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", pAccount->m_SurvivalDeaths);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} break;
 
@@ -1357,11 +1357,11 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "--- %s's Instagib Stats ---", pSelf->Server()->ClientName(ID));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Wins: %d", (*Account).m_InstagibWins);
+			str_format(aBuf, sizeof(aBuf), "Wins: %d", pAccount->m_InstagibWins);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Kills: %d", (*Account).m_InstagibKills);
+			str_format(aBuf, sizeof(aBuf), "Kills: %d", pAccount->m_InstagibKills);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Deaths: %d", (*Account).m_InstagibDeaths);
+			str_format(aBuf, sizeof(aBuf), "Deaths: %d", pAccount->m_InstagibDeaths);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} break;
 	}
@@ -2493,21 +2493,21 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	char aBuf[128];
-	CGameContext::AccountInfo* Account = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Taser ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Police officers with level 3 or higher get a taser license.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser is a rifle that freezes players for a short time.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser relies on the normal rifle, if you loose it, you loose the taser.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your taser stats ~~~");
-	str_format(aBuf, sizeof(aBuf), "Taser level: %d/%d", (*Account).m_TaserLevel, NUM_TASER_LEVELS);
+	str_format(aBuf, sizeof(aBuf), "Taser level: %d/%d", pAccount->m_TaserLevel, NUM_TASER_LEVELS);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	if ((*Account).m_TaserLevel < NUM_TASER_LEVELS)
+	if (pAccount->m_TaserLevel < NUM_TASER_LEVELS)
 	{
-		str_format(aBuf, sizeof(aBuf), "Price for the next level: %d", pSelf->m_aTaserPrice[(*Account).m_TaserLevel]);
+		str_format(aBuf, sizeof(aBuf), "Price for the next level: %d", pSelf->m_aTaserPrice[pAccount->m_TaserLevel]);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
-	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", (*Account).m_TaserLevel * 10);
+	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", pAccount->m_TaserLevel * 10);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
