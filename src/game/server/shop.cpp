@@ -491,6 +491,8 @@ void CShop::BuyItem(int ClientID, int Item)
 	// send a message that we bought the item
 	str_format(aMsg, sizeof(aMsg), "You bought %s %s", m_aItems[ItemID].m_pName, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
+	if (Item == ITEM_VIP || Item == ITEM_PORTAL_RIFLE)
+		m_pGameServer->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
 	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", m_aItems[ItemID].m_pName);
