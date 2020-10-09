@@ -2286,10 +2286,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastKill = Server()->Tick();
 
 			CPlayer *pControlledTee = pPlayer->m_pControlledTee;
-			if (pControlledTee && pControlledTee->m_IsDummy)
+			if (pControlledTee)
 			{
-				pControlledTee->KillCharacter(WEAPON_SELF, false);
-				pControlledTee->Respawn();
+				if (pControlledTee->m_IsDummy)
+				{
+					pControlledTee->KillCharacter(WEAPON_SELF, false);
+					pControlledTee->Respawn();
+				}
 			}
 			else
 			{
