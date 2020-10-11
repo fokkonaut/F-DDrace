@@ -41,6 +41,7 @@ vec3 TextHighlightColor = vec3(0.4f, 0.4f, 1.0f);
 
 // filters
 CMenus::CBrowserFilter::CBrowserFilter(int Custom, const char* pName, IServerBrowser *pServerBrowser)
+	: m_DeleteButtonContainer(true), m_UpButtonContainer(true), m_DownButtonContainer(true)
 {
 	m_Extended = false;
 	m_Custom = Custom;
@@ -57,9 +58,6 @@ CMenus::CBrowserFilter::CBrowserFilter(int Custom, const char* pName, IServerBro
 	default:
 		m_Filter = m_pServerBrowser->AddFilter(&ms_FilterAll);
 	}
-
-	// init buttons
-	m_SwitchButton = 0;
 }
 
 void CMenus::CBrowserFilter::Reset()
@@ -427,17 +425,19 @@ void CMenus::SetOverlay(int Type, float x, float y, const void *pData)
 }
 
 // 1 = browser entry click, 2 = server info click
-int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEntry, const CBrowserFilter *pFilter, bool Selected, bool ShowServerInfo)
+int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEntry, const CBrowserFilter *pFilter, bool Selected, bool ShowServerInfo, CScrollRegion *pScroll)
 {
 	// logic
 	int ReturnValue = 0;
-	bool Inside = UI()->MouseInside(&View) && UI()->MouseInsideClip();
+
+	const bool Hovered = UI()->MouseHovered(&View);
+	bool Highlighted = Hovered && (!pScroll || !pScroll->IsAnimating());
 
 	if(UI()->CheckActiveItem(pID))
 	{
 		if(!UI()->MouseButton(0))
 		{
-			if(Inside)
+			if(Hovered)
 				ReturnValue = 1;
 			UI()->SetActiveItem(0);
 		}
@@ -448,7 +448,7 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 			UI()->SetActiveItem(pID);
 	}
 
-	if(Inside)
+	if(Highlighted)
 	{
 		UI()->SetHotItem(pID);
 		RenderTools()->DrawRoundRect(&View, vec4(1.0f, 1.0f, 1.0f, 0.5f), 5.0f);
@@ -464,7 +464,7 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 	vec4 TextBaseOutlineColor = vec4(0.0, 0.0, 0.0, 0.3f);
 	vec4 ServerInfoTextBaseColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	vec4 HighlightColor = vec4(TextHighlightColor.r, TextHighlightColor.g, TextHighlightColor.b, TextAlpha);
-	if(Selected || Inside)
+	if(Selected || Highlighted)
 	{
 		TextBaseColor = vec4(0.0f, 0.0f, 0.0f, TextAlpha);
 		ServerInfoTextBaseColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -501,7 +501,8 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 
 			Rect.VSplitLeft(Rect.h, &Icon, &Rect);
 			Icon.Margin(2.0f, &Icon);
-			if(DoButton_SpriteClean(IMAGE_BROWSEICONS, pEntry->m_Favorite ? SPRITE_BROWSE_STAR_A : SPRITE_BROWSE_STAR_B, &Icon))
+			DoIcon(IMAGE_BROWSEICONS, pEntry->m_Favorite ? SPRITE_BROWSE_STAR_A : SPRITE_BROWSE_STAR_B, &Icon);
+			if(UI()->DoButtonLogic(&pEntry->m_Favorite, &Icon))
 			{
 				if(!pEntry->m_Favorite)
 					ServerBrowser()->AddFavorite(pEntry);
@@ -585,7 +586,7 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 			int Ping = pEntry->m_Latency;
 
 			vec4 Color;
-			if(Selected || Inside)
+			if(Selected || Highlighted)
 			{
 				Color = TextBaseColor;
 			}
@@ -639,7 +640,7 @@ int CMenus::DoBrowserEntry(const void *pID, CUIRect View, const CServerInfo *pEn
 	{
 		View.HSplitTop(ms_aBrowserCols[0].m_Rect.h, 0, &View);
 
-		if(ReturnValue && UI()->MouseInside(&View))
+		if(ReturnValue && UI()->MouseHovered(&View))
 			ReturnValue++;
 
 		CUIRect Info, Scoreboard;
@@ -669,10 +670,10 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	{
 		Switch = true; // switch later, to make sure we haven't clicked one of the filter buttons (edit...)
 	}
-	vec4 Color = UI()->MouseInside(&View) ? vec4(1.0f, 1.0f, 1.0f, 1.0f) : vec4(0.6f, 0.6f, 0.6f, 1.0f);
+	vec4 Color = UI()->MouseHovered(&View) ? vec4(1.0f, 1.0f, 1.0f, 1.0f) : vec4(0.6f, 0.6f, 0.6f, 1.0f);
 	View.VSplitLeft(20.0f, &Button, &View);
 	Button.Margin(2.0f, &Button);
-	DoIconColor(IMAGE_MENUICONS, pFilter->Extended() ? SPRITE_MENU_EXPANDED : SPRITE_MENU_COLLAPSED, &Button, Color);
+	DoIcon(IMAGE_MENUICONS, pFilter->Extended() ? SPRITE_MENU_EXPANDED : SPRITE_MENU_COLLAPSED, &Button, &Color);
 
 	// split buttons from label
 	View.VSplitLeft(Spacing, 0, &View);
@@ -691,7 +692,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	Button.Margin(2.0f, &Button);
 	if(pFilter->Custom() == CBrowserFilter::FILTER_CUSTOM)
 	{
-		if(DoButton_SpriteClean(IMAGE_TOOLICONS, SPRITE_TOOL_X_A, &Button))
+		if(DoButton_SpriteID(&pFilter->m_DeleteButtonContainer, IMAGE_TOOLICONS, SPRITE_TOOL_X_A, false, &Button))
 		{
 			m_RemoveFilterIndex = FilterIndex;
 			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to remove the filter '%s' from the server browser?"), pFilter->Name());
@@ -706,8 +707,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	Button.Margin(2.0f, &Button);
 	if(FilterIndex > 0 && (pFilter->Custom() > CBrowserFilter::FILTER_ALL || m_lFilters[FilterIndex-1].Custom() != CBrowserFilter::FILTER_STANDARD))
 	{
-		DoIcon(IMAGE_TOOLICONS, SPRITE_TOOL_UP_A, &Button);
-		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[0], &Button))
+		if(DoButton_SpriteID(&pFilter->m_UpButtonContainer, IMAGE_TOOLICONS, SPRITE_TOOL_UP_A, false, &Button))
 		{
 			Move(true, FilterIndex);
 			Switch = false;
@@ -721,8 +721,7 @@ void CMenus::RenderFilterHeader(CUIRect View, int FilterIndex)
 	Button.Margin(2.0f, &Button);
 	if(FilterIndex >= 0 && FilterIndex < m_lFilters.size()-1 && (pFilter->Custom() != CBrowserFilter::FILTER_STANDARD || m_lFilters[FilterIndex+1].Custom() > CBrowserFilter::FILTER_ALL))
 	{
-		DoIcon(IMAGE_TOOLICONS, SPRITE_TOOL_DOWN_A, &Button);
-		if(UI()->DoButtonLogic(&pFilter->m_aButtonID[1], &Button))
+		if(DoButton_SpriteID(&pFilter->m_DownButtonContainer, IMAGE_TOOLICONS, SPRITE_TOOL_DOWN_A, false, &Button))
 		{
 			Move(false, FilterIndex);
 			Switch = false;
@@ -753,6 +752,18 @@ void CMenus::PopupConfirmRemoveFilter()
 	{
 		RemoveFilter(m_RemoveFilterIndex);
 	}
+}
+
+void CMenus::PopupConfirmCountryFilter()
+{
+	CBrowserFilter *pFilter = GetSelectedBrowserFilter();
+	CServerFilterInfo FilterInfo;
+	pFilter->GetFilter(&FilterInfo);
+
+	if(m_PopupSelection != -2)
+		FilterInfo.m_Country = m_PopupSelection;
+
+	pFilter->SetFilter(&FilterInfo);
 }
 
 static void FormatScore(char *pBuf, int BufSize, bool TimeScore, const CServerInfo::CClient *pClient)
@@ -922,7 +933,7 @@ void CMenus::RenderServerbrowserOverlay()
 	vec2 OverlayCenter = vec2(View.x+View.w/2.0f, View.y+View.h/2.0f);
 	float MouseDistance = distance(m_MousePos, OverlayCenter);
 	float PrefMouseDistance = distance(m_PrevMousePos, OverlayCenter);
-	if(PrefMouseDistance > MouseDistance && !UI()->MouseInside(&View))
+	if(PrefMouseDistance > MouseDistance && !UI()->MouseHovered(&View))
 	{
 		m_InfoOverlayActive = false;
 		m_InfoOverlay.m_Reset = true;
@@ -1151,7 +1162,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	ScrollParams.m_ClipBgColor = vec4(0,0,0,0);
 	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
 	ScrollParams.m_SliderMinHeight = 5;
-	ScrollParams.m_ScrollSpeed = 5;
+	ScrollParams.m_ScrollUnit = 60.0f; // 3 rows per scroll
 	View.w += ScrollParams.m_ScrollbarWidth;
 	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
 	View.y += ScrollOffset.y;
@@ -1216,7 +1227,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 				// Prevent flickering entry background and text by drawing it as selected for one more frame after the selection has changed
 				const bool WasSelected = LastSelectedFilter >= 0 && LastSelectedServer >= 0 && FilterIndex == LastSelectedFilter && ServerIndex == LastSelectedServer;
-				if(int ReturnValue = DoBrowserEntry(pFilter->ID(ServerIndex), Row, pItem, pFilter, IsSelected || WasSelected, ShowServerInfo))
+				if(int ReturnValue = DoBrowserEntry(pFilter->ID(ServerIndex), Row, pItem, pFilter, IsSelected || WasSelected, ShowServerInfo, &s_ScrollRegion))
 				{
 					m_ShowServerDetails = !m_ShowServerDetails || ReturnValue == 2 || m_aSelectedServers[BrowserType] != ServerIndex; // click twice on line => fold server details
 					m_aSelectedFilters[BrowserType] = FilterIndex;
@@ -1260,7 +1271,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		s_ScrollRegion.AddRect(MsgBox);
 		if(!s_ScrollRegion.IsRectClipped(MsgBox))
 		{
-			const char *pImportantMessage;
+			char aBuf[128];
+			const char *pImportantMessage = 0;
 			if(m_ActivePage == PAGE_INTERNET && ServerBrowser()->IsRefreshingMasters())
 				pImportantMessage = Localize("Refreshing master servers");
 			else if(SelectedFilter == -1)
@@ -1268,12 +1280,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			else if(ServerBrowser()->IsRefreshing())
 				pImportantMessage = Localize("Fetching server info");
 			else if(!ServerBrowser()->NumServers())
-				pImportantMessage = Localize("No servers found");
+			{
+				if(BrowserType == IServerBrowser::TYPE_INTERNET)
+					pImportantMessage = Localize("No servers found");
+				else if(BrowserType == IServerBrowser::TYPE_LAN)
+				{
+					str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d–%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
+					pImportantMessage = aBuf;
+				}
+			}
 			else
 				pImportantMessage = Localize("No servers match your filter criteria");
 
-			MsgBox.y += MsgBox.h/3.0f;
-			UI()->DoLabel(&MsgBox, pImportantMessage, 16.0f, CUI::ALIGN_CENTER);
+			if(pImportantMessage)
+			{
+				MsgBox.y += MsgBox.h/3.0f;
+				UI()->DoLabel(&MsgBox, pImportantMessage, 16.0f, CUI::ALIGN_CENTER);
+			}
 		}
 	}
 
@@ -1511,7 +1534,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	ScrollParams.m_ScrollbarBgColor = vec4(0,0,0,0);
 	ScrollParams.m_ScrollbarWidth = 14;
 	ScrollParams.m_ScrollbarMargin = 5;
-	ScrollParams.m_ScrollSpeed = 15;
+	ScrollParams.m_ScrollUnit = 40.0f; // various sized content, 40 units per scroll
 	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
 	View.y += ScrollOffset.y;
 
@@ -1541,7 +1564,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 				if(s_ScrollRegion.IsRectClipped(Rect))
 					continue;
 
-				const bool Inside = UI()->MouseInside(&Rect);
+				const bool Inside = UI()->MouseHovered(&Rect);
 				bool ButtonResult = UI()->DoButtonLogic(&(s_FriendButtons[ButtonId%20]), &Rect);
 				RenderTools()->DrawUIRect(&Rect, vec4(s_ListColor[i].r, s_ListColor[i].g, s_ListColor[i].b, Inside ? 0.5f : 0.3f), CUI::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
@@ -1572,7 +1595,8 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 				Icon.HSplitTop(14.0f, &Rect, 0);
 				Rect.VSplitRight(12.0f, 0, &Icon);
 				Icon.HMargin((Icon.h - Icon.w) / 2, &Icon);
-				if(DoButton_SpriteClean(IMAGE_TOOLICONS, SPRITE_TOOL_X_B, &Icon))
+				DoIcon(IMAGE_TOOLICONS, UI()->MouseHovered(&Icon) ? SPRITE_TOOL_X_A : SPRITE_TOOL_X_B, &Icon);
+				if(UI()->DoButtonLogic(&m_lFriendList[i][f], &Icon))
 				{
 					m_pDeleteFriend = &m_lFriendList[i][f];
 					ButtonResult = false;
@@ -1599,8 +1623,8 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 		// header
 		RenderTools()->DrawUIRect(&Header, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
 		Header.VSplitLeft(Header.h, &Icon, &Label);
-		vec4 Color = UI()->MouseInside(&Header) ? vec4(1.0f, 1.0f, 1.0f, 1.0f) : vec4(0.6f, 0.6f, 0.6f, 1.0f);
-		DoIconColor(IMAGE_MENUICONS, s_ListExtended[i] ? SPRITE_MENU_EXPANDED : SPRITE_MENU_COLLAPSED, &Icon, Color);
+		vec4 Color = UI()->MouseHovered(&Header) ? vec4(1.0f, 1.0f, 1.0f, 1.0f) : vec4(0.6f, 0.6f, 0.6f, 1.0f);
+		DoIcon(IMAGE_MENUICONS, s_ListExtended[i] ? SPRITE_MENU_EXPANDED : SPRITE_MENU_COLLAPSED, &Icon, &Color);
 		int ListSize = m_lFriendList[i].size();
 		switch(i)
 		{
@@ -1623,7 +1647,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	BottomArea.HSplitTop(SpacingH, 0, &BottomArea);
 	Button.VSplitLeft(50.0f, &Label, &Button);
 	UI()->DoLabel(&Label, Localize("Name"), FontSize, CUI::ALIGN_LEFT);
-	static char s_aName[MAX_NAME_LENGTH] = { 0 };
+	static char s_aName[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH] = { 0 };
 	static float s_OffsetName = 0.0f;
 	DoEditBox(&s_aName, &Button, s_aName, sizeof(s_aName), Button.h*ms_FontmodHeight*0.8f, &s_OffsetName);
 
@@ -1631,7 +1655,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	BottomArea.HSplitTop(SpacingH, 0, &BottomArea);
 	Button.VSplitLeft(50.0f, &Label, &Button);
 	UI()->DoLabel(&Label, Localize("Clan"), FontSize, CUI::ALIGN_LEFT);
-	static char s_aClan[MAX_CLAN_LENGTH] = { 0 };
+	static char s_aClan[MAX_CLAN_LENGTH*UTF8_BYTE_LENGTH] = { 0 };
 	static float s_OffsetClan = 0.0f;
 	DoEditBox(&s_aClan, &Button, s_aClan, sizeof(s_aClan), Button.h*ms_FontmodHeight*0.8f, &s_OffsetClan);
 
@@ -1645,7 +1669,7 @@ void CMenus::RenderServerbrowserFriendTab(CUIRect View)
 	const char *pButtonText = (!s_aName[0] && !s_aClan[0]) ? Localize("Add friend/clan") : s_aName[0] ? Localize("Add friend") : Localize("Add clan");
 	UI()->DoLabel(&Label, pButtonText, FontSize, CUI::ALIGN_CENTER);
 	if(s_aName[0] || s_aClan[0])
-		DoIcon(IMAGE_FRIENDICONS, UI()->MouseInside(&Button)?SPRITE_FRIEND_PLUS_A:SPRITE_FRIEND_PLUS_B, &Icon);
+		DoIcon(IMAGE_FRIENDICONS, UI()->MouseHovered(&Button) ? SPRITE_FRIEND_PLUS_A : SPRITE_FRIEND_PLUS_B, &Icon);
 	static CButtonContainer s_AddFriend;
 	if((s_aName[0] || s_aClan[0]) && UI()->DoButtonLogic(&s_AddFriend, &Button))
 	{
@@ -1694,7 +1718,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 	UI()->DoLabel(&Label, Localize("New filter"), FontSize, CUI::ALIGN_LEFT);
 	if(s_aFilterName[0])
 	{
-		DoIcon(IMAGE_FRIENDICONS, UI()->MouseInside(&Button) ? SPRITE_FRIEND_PLUS_A : SPRITE_FRIEND_PLUS_B, &Icon);
+		DoIcon(IMAGE_FRIENDICONS, UI()->MouseHovered(&Button) ? SPRITE_FRIEND_PLUS_A : SPRITE_FRIEND_PLUS_B, &Icon);
 		static CButtonContainer s_AddFilter;
 		if(UI()->DoButtonLogic(&s_AddFilter, &Button))
 		{
@@ -1808,7 +1832,8 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 			FilterItem.VSplitLeft(Spacing, 0, &FilterItem);
 			UI()->DoLabel(&FilterItem, FilterInfo.m_aGametype[i], FontSize, CUI::ALIGN_LEFT);
 			FilterItem.VSplitRight(IconWidth, 0, &FilterItem);
-			if(DoButton_SpriteClean(IMAGE_TOOLICONS, SPRITE_TOOL_X_B, &FilterItem))
+			DoIcon(IMAGE_TOOLICONS, UI()->MouseHovered(&FilterItem) ? SPRITE_TOOL_X_A : SPRITE_TOOL_X_B, &FilterItem);
+			if(UI()->DoButtonLogic(&FilterInfo.m_aGametype[i], &FilterItem))
 			{
 				// remove gametype entry
 				if((i == CServerFilterInfo::MAX_GAMETYPES - 1) || !FilterInfo.m_aGametype[i + 1][0])
@@ -1951,7 +1976,7 @@ void CMenus::RenderServerbrowserFilterTab(CUIRect View)
 
 		static int s_BrFilterCountryIndex = 0;
 		if((FilterInfo.m_SortHash&IServerBrowser::FILTER_COUNTRY) && UI()->DoButtonLogic(&s_BrFilterCountryIndex, &Rect))
-			m_Popup = POPUP_COUNTRY;
+			PopupCountry(FilterInfo.m_Country, &CMenus::PopupConfirmCountryFilter);
 	}
 
 	// level
@@ -2113,7 +2138,7 @@ void CMenus::RenderDetailScoreboard(CUIRect View, const CServerInfo *pInfo, int 
 	ScrollParams.m_ScrollbarBgColor = vec4(0,0,0,0);
 	ScrollParams.m_ScrollbarWidth = 5;
 	ScrollParams.m_ScrollbarMargin = 1;
-	ScrollParams.m_ScrollSpeed = 15;
+	ScrollParams.m_ScrollUnit = 60.0f; // 3 players per scroll
 	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
 	View.y += ScrollOffset.y;
 	if(RowCount > 0)
@@ -2241,7 +2266,7 @@ void CMenus::RenderServerbrowserBottomBox(CUIRect MainView)
 	MainView.HSplitTop(25.0f, &MainView, 0);
 	MainView.VSplitLeft(ButtonWidth, &Button, &MainView);
 	static CButtonContainer s_RefreshButton;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Button) || (Input()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
+	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &Button) || (UI()->KeyPress(KEY_R) && (Input()->KeyIsPressed(KEY_LCTRL) || Input()->KeyIsPressed(KEY_RCTRL))))
 	{
 		if(m_MenuPage == PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::REFRESHFLAG_INTERNET);

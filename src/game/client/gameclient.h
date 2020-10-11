@@ -116,42 +116,25 @@ public:
 
 	vec2 m_LocalCharacterPos;
 
-	// predicted players
+	// Whether we should use/render predicted entities. Depends on client
+	// and game state.
+	bool ShouldUsePredicted() const;
 
-	CCharacterCore m_aPredictedPrevChars[MAX_CLIENTS];
-	CCharacterCore m_aPredictedChars[MAX_CLIENTS];
+	// Whether we should use/render predictions for a specific `ClientID`.
+	// Should check `ShouldUsePredicted` before checking this.
+	bool ShouldUsePredictedChar(int ClientID) const;
 
-	bool ShouldUsePredicted();
-		// Whether we should use/render predicted entities. Depends on client
-		// and game state.
-private:
-	bool ShouldUsePredictedLocalChar();
-		// Whether we should use/render the predicted local character. Depends
-		// on config and snap state. Should check `ShouldUsePredicted` before
-		// checking this.
-	bool ShouldUsePredictedNonLocalChars();
-		// Whether we should use/render predicted entities for non-local
-		// characters. Depends on config. Should check `ShouldUsePredicted`
-		// before checking this.
-public:
-	bool ShouldUsePredictedChar(int ClientID);
-		// Whether we should use/render predictions for a specific `ClientID`.
-		// Should check `ShouldUsePredicted` before checking this.
-
+	// Replaces `pPrevChar`, `pPlayerChar`, and `IntraTick` with their predicted
+	// counterparts for `ClientID`. Should check `ShouldUsePredictedChar`
+	// before using this.
 	void UsePredictedChar(
 		CNetObj_Character *pPrevChar,
 		CNetObj_Character *pPlayerChar,
 		float *IntraTick,
 		int ClientID
-	);
-		// Replaces `pPrevChar`, `pPlayerChar`, and `IntraTick` with their predicted
-		// counterparts for `ClientID`. Should check `ShouldUsePredictedChar`
-		// before using this.
+	) const;
 
-	vec2 PredictedCharPos(int ClientID);
-		// Return the interpolated, predicted position for `ClientID`
-	vec2 UnpredictedCharPos(int ClientID);
-		// Return the interpolated, unpredicted position for `ClientID`
+	vec2 GetCharPos(int ClientID, bool Predicted = false) const;
 
 	// ---
 
@@ -214,10 +197,10 @@ public:
 	// client data
 	struct CClientData
 	{
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
+		char m_aName[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH*UTF8_BYTE_LENGTH];
 		int m_Country;
-		char m_aaSkinPartNames[NUM_SKINPARTS][24];
+		char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_LENGTH];
 		int m_aUseCustomColors[NUM_SKINPARTS];
 		int m_aSkinPartColors[NUM_SKINPARTS];
 		int m_SkinPartIDs[NUM_SKINPARTS];
@@ -225,6 +208,7 @@ public:
 		int m_Emoticon;
 		int m_EmoticonStart;
 		CCharacterCore m_Predicted;
+		CCharacterCore m_PrevPredicted;
 
 		CTeeRenderInfo m_SkinInfo; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
@@ -248,6 +232,7 @@ public:
 	float m_TeamChangeTime;
 	bool m_IsXmasDay;
 	float m_LastSkinChangeTime;
+	int m_IdentityState;
 	bool m_IsEasterDay;
 	bool m_InitComplete;
 
@@ -310,6 +295,8 @@ public:
 	bool IsEaster() const;
 	int RacePrecision() const { return m_Snap.m_pGameDataRace ? m_Snap.m_pGameDataRace->m_Precision : 3; }
 	bool IsWorldPaused() const { return m_Snap.m_pGameData && (m_Snap.m_pGameData->m_GameStateFlags&(GAMESTATEFLAG_PAUSED|GAMESTATEFLAG_ROUNDOVER|GAMESTATEFLAG_GAMEOVER)); }
+	bool IsDemoPlaybackPaused() const;
+	float GetAnimationPlaybackSpeed() const;
 
 	//
 	void DoEnterMessage(const char *pName, int ClientID, int Team);

@@ -6,8 +6,9 @@
 
 
 // client
-MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict client movements", AUTHED_NO)
+MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use prediction for objects in the game world", AUTHED_NO)
 MACRO_CONFIG_INT(ClPredictPlayers, cl_predict_players, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict movements of other players", AUTHED_NO)
+MACRO_CONFIG_INT(ClPredictProjectiles, cl_predict_projectiles, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict position of projectiles", AUTHED_NO)
 MACRO_CONFIG_INT(ClNameplates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Show name plates", AUTHED_NO)
 MACRO_CONFIG_INT(ClNameplatesAlways, cl_nameplates_always, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Always show name plates disregarding of distance", AUTHED_NO)
 MACRO_CONFIG_INT(ClNameplatesTeamcolors, cl_nameplates_teamcolors, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use team colors for name plates", AUTHED_NO)
@@ -72,13 +73,13 @@ MACRO_CONFIG_INT(PlayerUseCustomColorDecoration, player_use_custom_color_decorat
 MACRO_CONFIG_INT(PlayerUseCustomColorHands, player_use_custom_color_hands, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors for hands", AUTHED_NO)
 MACRO_CONFIG_INT(PlayerUseCustomColorFeet, player_use_custom_color_feet, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors for feet", AUTHED_NO)
 MACRO_CONFIG_INT(PlayerUseCustomColorEyes, player_use_custom_color_eyes, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Toggles usage of custom colors for eyes", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkin, player_skin, 24, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinBody, player_skin_body, 24, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin body", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinMarking, player_skin_marking, 24, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin marking", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinDecoration, player_skin_decoration, 24, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin decoration", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinHands, player_skin_hands, 24, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin hands", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinFeet, player_skin_feet, 24, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin feet", AUTHED_NO)
-MACRO_CONFIG_STR(PlayerSkinEyes, player_skin_eyes, 24, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin eyes", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkin, player_skin, MAX_SKIN_LENGTH, "default", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinBody, player_skin_body, MAX_SKIN_LENGTH, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin body", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinMarking, player_skin_marking, MAX_SKIN_LENGTH, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin marking", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinDecoration, player_skin_decoration, MAX_SKIN_LENGTH, "", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin decoration", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinHands, player_skin_hands, MAX_SKIN_LENGTH, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin hands", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinFeet, player_skin_feet, MAX_SKIN_LENGTH, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin feet", AUTHED_NO)
+MACRO_CONFIG_STR(PlayerSkinEyes, player_skin_eyes, MAX_SKIN_LENGTH, "standard", CFGFLAG_CLIENT|CFGFLAG_SAVE, "Player skin eyes", AUTHED_NO)
 
 MACRO_CONFIG_INT(UiBrowserPage, ui_browser_page, 5, 5, 8, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface serverbrowser page", AUTHED_NO)
 MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 5, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Interface settings page", AUTHED_NO)

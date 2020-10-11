@@ -5,6 +5,7 @@
 
 #include <engine/config.h>
 #include <game/version.h>
+#include "protocol.h"
 
 class CConfig
 {

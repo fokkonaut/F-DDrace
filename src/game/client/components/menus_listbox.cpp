@@ -40,6 +40,13 @@ void CMenus::CListBox::DoHeader(const CUIRect *pRect, const char *pTitle,
 	m_ListBoxView = View;
 }
 
+void CMenus::CListBox::DoSubHeader(float HeaderHeight, float Spacing)
+{
+	CUIRect View = m_ListBoxView;
+	View.HSplitTop(HeaderHeight+Spacing, 0, &View);
+	m_ListBoxView = View;
+}
+
 bool CMenus::CListBox::DoFilter(float FilterHeight, float Spacing)
 {
 	CUIRect Filter;
@@ -74,8 +81,8 @@ void CMenus::CListBox::DoFooter(const char *pBottomText, float FooterHeight)
 	m_FooterHeight = FooterHeight;
 }
 
-void CMenus::CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int SelectedIndex,
-							  const CUIRect *pRect, bool Background, bool *pActive)
+void CMenus::CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, 
+							int SelectedIndex, const CUIRect *pRect, bool Background, bool *pActive)
 {
 	CUIRect View;
 	if(pRect)
@@ -120,7 +127,9 @@ void CMenus::CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, i
 
 	// setup the scrollbar
 	m_ScrollOffset = vec2(0, 0);
-	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = m_ListBoxRowHeight * RowsPerScroll;
+	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset, &ScrollParams);
 	m_ListBoxView.y += m_ScrollOffset.y;
 }
 
@@ -189,12 +198,20 @@ CMenus::CListboxItem CMenus::CListBox::DoNextItem(const void *pId, bool Selected
 		CUIRect r = Item.m_Rect;
 		m_pRenderTools->DrawUIRect(&r, vec4(1, 1, 1, ProcessInput ? 0.5f : 0.33f), CUI::CORNER_ALL, 5.0f);
 	}
-	/*else*/ if(m_pUI->HotItem() == pId)
+	/*else*/ if(m_pUI->HotItem() == pId && !m_ScrollRegion.IsAnimating())
 	{
 		CUIRect r = Item.m_Rect;
 		m_pRenderTools->DrawUIRect(&r, vec4(1, 1, 1, 0.33f), CUI::CORNER_ALL, 5.0f);
 	}
 
+	return Item;
+}
+
+CMenus::CListboxItem CMenus::CListBox::DoSubheader()
+{
+	CListboxItem Item = DoNextRow();
+	CUIRect r = Item.m_Rect;
+	m_pRenderTools->DrawUIRect(&r, vec4(1, 1, 1, 0.2f), 0, 0.0f);
 	return Item;
 }
 

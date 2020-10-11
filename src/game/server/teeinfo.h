@@ -1,6 +1,7 @@
 #ifndef GAME_SERVER_TEEINFO_H
 #define GAME_SERVER_TEEINFO_H
 
+#include <engine/shared/protocol.h>
 #include <generated/protocol.h>
 
 enum Skins
@@ -63,14 +64,14 @@ enum Skins
 class CTeeInfo
 {
 public:
-	char m_aaSkinPartNames[NUM_SKINPARTS][24] = {"", "", "", "", "", ""};
+	char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_LENGTH] = {"", "", "", "", "", ""};
 	int m_aUseCustomColors[NUM_SKINPARTS] = {false, false, false, false, false, false};
 	int m_aSkinPartColors[NUM_SKINPARTS] = {0, 0, 0, 0, 0, 0};
 
 	// 0.6 info
 	struct Sevendown
 	{
-		char m_SkinName[24] = { '\0' };
+		char m_SkinName[MAX_SKIN_LENGTH] = { '\0' };
 		int m_UseCustomColor = 0;
 		int m_ColorBody = 0;
 		int m_ColorFeet = 0;

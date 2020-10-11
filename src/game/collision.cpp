@@ -339,14 +339,13 @@ int CCollision::GetTile(int x, int y)
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
-	float Distance = distance(Pos0, Pos1);
-	int End(Distance + 1);
+	const int End = distance(Pos0, Pos1)+1;
+	const float InverseEnd = 1.0f/End;
 	vec2 Last = Pos0;
 	int ix = 0, iy = 0; // Temporary position for checking collision
 	for (int i = 0; i <= End; i++)
 	{
-		float a = i / (float)End;
-		vec2 Pos = mix(Pos0, Pos1, a);
+		vec2 Pos = mix(Pos0, Pos1, i*InverseEnd);
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
@@ -529,12 +528,12 @@ void CCollision::MoveBox(vec2* pInoutPos, vec2* pInoutVel, vec2 Size, float Elas
 	vec2 Pos = *pInoutPos;
 	vec2 Vel = *pInoutVel;
 
-	float Distance = length(Vel);
-	int Max = (int)Distance;
+	const float Distance = length(Vel);
+	const int Max = (int)Distance;
 
 	if (Distance > 0.00001f)
 	{
-		float Fraction = 1.0f / (float)(Max + 1);
+		const float Fraction = 1.0f/(Max+1);
 		for (int i = 0; i <= Max; i++)
 		{
 			// Early break as optimization to stop checking for collisions for
