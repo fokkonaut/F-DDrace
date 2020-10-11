@@ -387,6 +387,7 @@ public:
 
 	int m_FullHourOffsetTicks;
 	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
+	bool HasPlotByIP(int ClientID);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);
@@ -461,6 +462,8 @@ public:
 		bool m_PortalRifle;
 		time_t m_ExpireDatePortalRifle;
 		int m_Version;
+		NETADDR m_Addr;
+		NETADDR m_LastAddr;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -506,6 +509,8 @@ public:
 		ACC_PORTAL_RIFLE,
 		ACC_EXPIRE_DATE_PORTAL_RIFLE,
 		ACC_VERSION,
+		ACC_ADDR,
+		ACC_LAST_ADDR,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -545,6 +550,9 @@ public:
 	void CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID);
 
 	void UnsetTelekinesis(CEntity *pEntity);
+
+	bool SameIP(int ClientID1, int ClientID2);
+	bool SameIP(int AccID, const NETADDR *pAddr);
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;

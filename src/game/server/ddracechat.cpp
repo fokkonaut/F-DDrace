@@ -1649,11 +1649,29 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	pSelf->m_Accounts[ID].m_Port = pSelf->Config()->m_SvPort;
-	pSelf->m_Accounts[ID].m_LoggedIn = true;
-	pSelf->m_Accounts[ID].m_ClientID = pResult->m_ClientID;
-	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
-	pSelf->WriteAccountStats(ID);
+	// set some variables and save the account with some new values
+	{
+		pSelf->m_Accounts[ID].m_Port = pSelf->Config()->m_SvPort;
+		pSelf->m_Accounts[ID].m_LoggedIn = true;
+		pSelf->m_Accounts[ID].m_ClientID = pResult->m_ClientID;
+		str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
+
+		NETADDR Addr;
+		pSelf->Server()->GetClientAddr(pResult->m_ClientID, &Addr);
+		if (net_addr_comp(&Addr, &pSelf->m_Accounts[ID].m_Addr, false) != 0)
+		{
+			// addresses are not equal, update last address and set new current address
+			pSelf->m_Accounts[ID].m_LastAddr = pSelf->m_Accounts[ID].m_Addr;
+			pSelf->Server()->GetClientAddr(pResult->m_ClientID, &pSelf->m_Accounts[ID].m_Addr);
+		}
+		else
+		{
+			// addresses are equal, just update the current address to get the possible changed port
+			pSelf->Server()->GetClientAddr(pResult->m_ClientID, &pSelf->m_Accounts[ID].m_Addr);
+		}
+
+		pSelf->WriteAccountStats(ID);
+	}
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully logged in");
 	pSelf->m_apPlayers[pResult->m_ClientID]->OnLogin();
@@ -2045,6 +2063,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (pSelf->m_Accounts[OwnAccID].m_Money < Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
+			return;
+		}
+
+		if (pSelf->HasPlotByIP(pResult->m_ClientID))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Your IP address already owns one plot");
 			return;
 		}
 

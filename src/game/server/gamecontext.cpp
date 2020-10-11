@@ -3943,6 +3943,31 @@ void CGameContext::SetPlotExpire(int PlotID)
 	SetExpireDate(&m_aPlots[PlotID].m_ExpireDate, Days);
 }
 
+bool CGameContext::HasPlotByIP(int ClientID)
+{
+	bool HasPlot = false;
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+
+	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+	{
+		int ID = GetAccount(m_aPlots[i].m_aOwner);
+		if (ID < ACC_START)
+			continue;
+
+		if (SameIP(ID, &Addr))
+			HasPlot = true;
+
+		if (!m_Accounts[ID].m_LoggedIn)
+			FreeAccount(ID);
+
+		if (HasPlot)
+			break;
+	}
+
+	return HasPlot;
+}
+
 unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
 {
 	if (PlotID < 0 || PlotID > Collision()->m_NumPlots)
@@ -3989,6 +4014,26 @@ void CGameContext::ExpirePlots()
 			m_aPlots[i].m_ExpireDate = 0;
 			ClearPlot(i);
 		}
+	}
+}
+
+void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || !Collision()->m_pSwitchers)
+		return;
+
+	int Switch = Collision()->GetSwitchByPlot(PlotID);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
+}
+
+void CGameContext::ClearPlot(int PlotID)
+{
+	if (PlotID >= 0 && PlotID <= Collision()->m_NumPlots)
+	{
+		for (unsigned i = 0; i < m_aPlots[PlotID].m_vObjects.size(); i++)
+			m_World.DestroyEntity(m_aPlots[PlotID].m_vObjects[i]);
+		m_aPlots[PlotID].m_vObjects.clear();
 	}
 }
 
@@ -4158,6 +4203,8 @@ int CGameContext::AddAccount()
 	Account.m_PortalRifle = false;
 	Account.m_ExpireDatePortalRifle = 0;
 	Account.m_Version = ACC_CURRENT_VERSION;
+	Account.m_Addr.type = -1;
+	Account.m_LastAddr.type = -1;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4226,6 +4273,12 @@ void CGameContext::WriteAccountStats(int ID)
 		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
 		AccFile << ACC_CURRENT_VERSION << "\n";
 
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&m_Accounts[ID].m_Addr, aAddrStr, sizeof(aAddrStr), true);
+		AccFile << aAddrStr << "\n";
+		net_addr_str(&m_Accounts[ID].m_LastAddr, aAddrStr, sizeof(aAddrStr), true);
+		AccFile << aAddrStr << "\n";
+
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
 	AccFile.close();
@@ -4273,6 +4326,8 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
 	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
 	case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
+	case ACC_ADDR:						net_addr_from_str(&m_Accounts[ID].m_Addr, pData); break;
+	case ACC_LAST_ADDR:					net_addr_from_str(&m_Accounts[ID].m_LastAddr, pData); break;
 	}
 }
 
@@ -4318,6 +4373,8 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_PORTAL_RIFLE:				return "portal_rifle";
 	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	return "expire_date_portal_rifle";
 	case ACC_VERSION:					return "version";
+	case ACC_ADDR:						return "addr";
+	case ACC_LAST_ADDR:					return "last_addr";
 	}
 	return "Unknown";
 }
@@ -4367,6 +4424,8 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_PORTAL_RIFLE:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalRifle); break;
 	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_ExpireDatePortalRifle); break;
 	case ACC_VERSION:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Version); break;
+	case ACC_ADDR:						net_addr_str(&m_Accounts[ID].m_Addr, aBuf, sizeof(aBuf), true); break;
+	case ACC_LAST_ADDR:					net_addr_str(&m_Accounts[ID].m_LastAddr, aBuf, sizeof(aBuf), true); break;
 	}
 	return aBuf;
 }
@@ -4480,24 +4539,35 @@ void CGameContext::WriteDonationFile(int Type, int Amount, int ID, const char *p
 	DonationsFile << aBuf << "\n";
 }
 
-void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
+bool CGameContext::SameIP(int ClientID1, int ClientID2)
 {
-	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || !Collision()->m_pSwitchers)
-		return;
+	if (ClientID1 < 0 || ClientID1 >= MAX_CLIENTS || ClientID2 < 0 || ClientID2 >= MAX_CLIENTS || !m_apPlayers[ClientID1] || !m_apPlayers[ClientID2])
+		return false;
 
-	int Switch = Collision()->GetSwitchByPlot(PlotID);
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
+	NETADDR Addr1, Addr2;
+	Server()->GetClientAddr(ClientID1, &Addr1);
+	Server()->GetClientAddr(ClientID2, &Addr2);
+
+	bool Same = (net_addr_comp(&Addr1, &Addr2, false) == 0);
+
+	int AccID1 = m_apPlayers[ClientID1]->GetAccID();
+	if (AccID1 >= ACC_START)
+		Same = Same || (net_addr_comp(&Addr2, &m_Accounts[AccID1].m_LastAddr, false) == 0);
+
+	int AccID2 = m_apPlayers[ClientID2]->GetAccID();
+	if (AccID2 >= ACC_START)
+		Same = Same || (net_addr_comp(&Addr1, &m_Accounts[AccID2].m_LastAddr, false) == 0);
+
+	return Same;
 }
 
-void CGameContext::ClearPlot(int PlotID)
+bool CGameContext::SameIP(int AccID, const NETADDR *pAddr)
 {
-	if (PlotID >= 0 && PlotID <= Collision()->m_NumPlots)
-	{
-		for (unsigned i = 0; i < m_aPlots[PlotID].m_vObjects.size(); i++)
-			m_World.DestroyEntity(m_aPlots[PlotID].m_vObjects[i]);
-		m_aPlots[PlotID].m_vObjects.clear();
-	}
+	if (AccID < ACC_START)
+		return false;
+
+	return (net_addr_comp(pAddr, &m_Accounts[AccID].m_Addr, false) == 0
+		|| net_addr_comp(pAddr, &m_Accounts[AccID].m_LastAddr, false) == 0);
 }
 
 int CGameContext::GetNextClientID(bool Inverted)

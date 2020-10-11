@@ -470,6 +470,11 @@ void CShop::BuyItem(int ClientID, int Item)
 			m_pGameServer->SendChatTarget(ClientID, "You already own another plot");
 			return;
 		}
+		else if (m_pGameServer->HasPlotByIP(ClientID))
+		{
+			m_pGameServer->SendChatTarget(ClientID, "Your IP address already owns one plot");
+			return;
+		}
 	}
 
 	// check for the correct price

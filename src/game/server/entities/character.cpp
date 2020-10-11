@@ -1350,6 +1350,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	}
 	if (m_LastTouchedPortalBy == m_Core.m_Killer.m_ClientID)
 		CountKill = false;
+	if (GameServer()->SameIP(m_pPlayer->GetCID(), m_Core.m_Killer.m_ClientID))
+		CountKill = false;
 
 	// if no killer exists its a selfkill
 	if (m_Core.m_Killer.m_ClientID == -1)
