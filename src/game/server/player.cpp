@@ -1450,11 +1450,8 @@ void CPlayer::OnLogout()
 	{
 		m_pCharacter->UnsetSpookyGhost();
 
-		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
-			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
-
-		if (m_pCharacter->GetWeaponGot(WEAPON_PORTAL_RIFLE))
-			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
+		m_pCharacter->GiveWeapon(WEAPON_TASER, true);
+		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
 
 		if (m_pCharacter->m_DrawEditor.Active())
 			m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
