@@ -64,7 +64,7 @@ enum Skins
 class CTeeInfo
 {
 public:
-	char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_LENGTH] = {"", "", "", "", "", ""};
+	char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_LENGTH*UTF8_BYTE_LENGTH] = {"", "", "", "", "", ""};
 	int m_aUseCustomColors[NUM_SKINPARTS] = {false, false, false, false, false, false};
 	int m_aSkinPartColors[NUM_SKINPARTS] = {0, 0, 0, 0, 0, 0};
 
