@@ -1385,7 +1385,13 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
-		str_format(aBuf, sizeof(aBuf), "%s: %s", pSelf->GetAccVarName(i), pSelf->GetAccVarValue(ID, i));
+		if (i == ACC_EXPIRE_DATE_VIP || i == ACC_EXPIRE_DATE_PORTAL_RIFLE)
+		{
+			const char *pValue = pSelf->GetAccVarValue(ID, i);
+			str_format(aBuf, sizeof(aBuf), "%s: %s (%s)", pSelf->GetAccVarName(i), pValue, pSelf->GetDate(str_toint(pValue)));
+		}
+		else
+			str_format(aBuf, sizeof(aBuf), "%s: %s", pSelf->GetAccVarName(i), pSelf->GetAccVarValue(ID, i));
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 
@@ -1462,6 +1468,17 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	else
 	{
 		const char *pValue = pResult->GetString(2);
+
+		time_t ExpireDate = 0;
+		if (VariableID == ACC_EXPIRE_DATE_VIP || VariableID == ACC_EXPIRE_DATE_PORTAL_RIFLE)
+		{
+			pSelf->SetExpireDate(&ExpireDate, pResult->GetInteger(2));
+
+			char aTime[64];
+			str_format(aTime, sizeof(aTime), "%d", (int)ExpireDate);
+			pValue = aTime;
+		}
+
 		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, pSelf->GetAccVarValue(ID, VariableID), pValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		pSelf->SetAccVar(ID, VariableID, pValue);
