@@ -2095,6 +2095,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pSeller->MoneyTransaction(Price, aBuf);
 		pSeller->m_PlotAuctionPrice = 0;
 
+		pSeller->StopPlotEditing();
+
 		pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
 	}
 	else if (OwnPlotID == 0)
@@ -2192,6 +2194,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SetPlotInfo(SwapPlotID, OwnAccID);
 			pPlayer->m_aPlotSwapUsername[0] = 0;
 			pSwap->m_aPlotSwapUsername[0] = 0;
+			pPlayer->StopPlotEditing();
+			pSwap->StopPlotEditing();
 
 			str_format(aBuf, sizeof(aBuf), "You swapped plots with '%s'", pSwapName);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);

@@ -319,6 +319,7 @@ public:
 	// plot
 	void CancelPlotAuction();
 	void CancelPlotSwap();
+	void StopPlotEditing();
 	int m_PlotAuctionPrice;
 	char m_aPlotSwapUsername[32];
 	bool m_PlotSpawn;

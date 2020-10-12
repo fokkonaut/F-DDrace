@@ -1449,16 +1449,19 @@ void CPlayer::OnLogout()
 	if (m_pCharacter)
 	{
 		m_pCharacter->UnsetSpookyGhost();
-
 		m_pCharacter->GiveWeapon(WEAPON_TASER, true);
 		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
 
-		if (m_pCharacter->m_DrawEditor.Active())
-			m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
-
+		StopPlotEditing();
 		CancelPlotAuction();
 		CancelPlotSwap();
 	}
+}
+
+void CPlayer::StopPlotEditing()
+{
+	if (m_pCharacter && m_pCharacter->m_DrawEditor.Active())
+		m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
 }
 
 void CPlayer::CancelPlotAuction()
