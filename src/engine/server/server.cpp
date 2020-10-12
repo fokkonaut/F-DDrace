@@ -2039,8 +2039,6 @@ int CServer::Run()
 	m_NetServer.Close();
 	m_Econ.Shutdown();
 
-	m_Econ.Shutdown();
-
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
 #endif
