@@ -2035,9 +2035,10 @@ int CServer::Run()
 			m_NetServer.Wait(clamp(int((TickStartTime(m_CurrentGameTick+1)-time_get())*1000/time_freq()), 1, 1000/SERVER_TICK_SPEED/2));
 		}
 	}
+
 	// disconnect all clients on shutdown
-	m_NetServer.Close();
 	m_Econ.Shutdown();
+	m_NetServer.Close();
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
