@@ -352,7 +352,7 @@ int CServer::TrySetClientName(int ClientID, const char* pName)
 	pName = aTrimmedName;
 
 	// set the client name
-	str_copy(m_aClients[ClientID].m_aName, pName, MAX_NAME_LENGTH);
+	str_utf8_copy_num(m_aClients[ClientID].m_aName, pName, sizeof(m_aClients[ClientID].m_aName), MAX_NAME_LENGTH);
 	return 0;
 }
 
@@ -361,8 +361,8 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pName)
 		return;
 
-	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, sizeof(aNameTry));
+	char aNameTry[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
+	str_utf8_copy_num(aNameTry, pName, sizeof(aNameTry), MAX_NAME_LENGTH);
 	if (TrySetClientName(ClientID, aNameTry))
 	{
 		// auto rename
@@ -2931,8 +2931,8 @@ void CServer::DummyJoin(int DummyID)
 	m_aClients[DummyID].m_Authed = AUTHED_NO;
 	m_aClients[DummyID].m_Sevendown = false;
 
-	str_copy(m_aClients[DummyID].m_aName, pNames[DummyID], MAX_NAME_LENGTH);
-	str_copy(m_aClients[DummyID].m_aClan, pClans[DummyID], MAX_CLAN_LENGTH);
+	str_utf8_copy_num(m_aClients[DummyID].m_aName, pNames[DummyID], sizeof(m_aClients[DummyID].m_aName), MAX_NAME_LENGTH);
+	str_utf8_copy_num(m_aClients[DummyID].m_aClan, pClans[DummyID], sizeof(m_aClients[DummyID].m_aClan), MAX_CLAN_LENGTH);
 }
 
 void CServer::DummyLeave(int DummyID)
