@@ -1448,6 +1448,8 @@ void CPlayer::OnLogout()
 {
 	if (m_pCharacter)
 	{
+		m_pCharacter->UnsetSpookyGhost();
+
 		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
 			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
 
@@ -1456,8 +1458,6 @@ void CPlayer::OnLogout()
 
 		if (m_pCharacter->m_DrawEditor.Active())
 			m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
-
-		m_pCharacter->UnsetSpookyGhost();
 
 		CancelPlotAuction();
 		CancelPlotSwap();
