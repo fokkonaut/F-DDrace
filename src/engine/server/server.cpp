@@ -2037,8 +2037,8 @@ int CServer::Run()
 	}
 
 	// disconnect all clients on shutdown
-	m_Econ.Shutdown();
 	m_NetServer.Close();
+	m_Econ.Shutdown();
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
