@@ -94,7 +94,7 @@ enum
 	NUM_POLICE_LEVELS = 5,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 1,
+	ACC_CURRENT_VERSION = 2,
 };
 
 enum
