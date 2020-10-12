@@ -1454,6 +1454,9 @@ void CPlayer::OnLogout()
 		if (m_pCharacter->GetWeaponGot(WEAPON_PORTAL_RIFLE))
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
 
+		if (m_pCharacter->m_DrawEditor.Active())
+			m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
+
 		m_pCharacter->UnsetSpookyGhost();
 
 		CancelPlotAuction();

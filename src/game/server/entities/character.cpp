@@ -3409,7 +3409,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 	int Count = 0;
 	for (int i = 0; i < NUM_WEAPONS; i++)
-		if (i != WEAPON_NINJA && i != WEAPON_TASER && i != WEAPON_PORTAL_RIFLE && m_aWeapons[i].m_Got)
+		if (i != WEAPON_NINJA && i != WEAPON_TASER && i != WEAPON_PORTAL_RIFLE && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
 			Count++;
 	if (Count < 2)
 		return;
