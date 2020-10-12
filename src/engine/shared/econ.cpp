@@ -14,7 +14,7 @@ int CEcon::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "client accepted. cid=%d addr=%s'", ClientID, aAddrStr);
+	str_format(aBuf, sizeof(aBuf), "client accepted. cid=%d addr=<{%s}>'", ClientID, aAddrStr);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "econ", aBuf);
 
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTED;
@@ -32,7 +32,7 @@ int CEcon::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
+	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=<{%s}> reason='%s'", ClientID, aAddrStr, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "econ", aBuf);
 
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_EMPTY;
@@ -128,7 +128,7 @@ void CEcon::Update()
 
 				char aAddrStr[NETADDR_MAXSTRSIZE];
 				net_addr_str(m_NetConsole.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
-				str_format(aBuf, sizeof(aBuf), "cid=%d addr=%s  authed", ClientID, aAddrStr);
+				str_format(aBuf, sizeof(aBuf), "cid=%d addr=<{%s}> authed", ClientID, aAddrStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", aBuf);
 			}
 			else

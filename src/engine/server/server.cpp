@@ -1356,19 +1356,19 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 							case AUTHED_ADMIN:
 							{
 								SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
-								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=%s authed with key=%s (admin)", ClientID, aAddrStr, pIdent);
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (admin)", ClientID, aAddrStr, pIdent);
 								break;
 							}
 							case AUTHED_MOD:
 							{
 								SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
-								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=%s authed with key=%s (moderator)", ClientID, aAddrStr, pIdent);
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (moderator)", ClientID, aAddrStr, pIdent);
 								break;
 							}
 							case AUTHED_HELPER:
 							{
 								SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
-								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=%s authed with key=%s (helper)", ClientID, aAddrStr, pIdent);
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (helper)", ClientID, aAddrStr, pIdent);
 								break;
 							}
 						}
