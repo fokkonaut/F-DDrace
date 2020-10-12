@@ -16,7 +16,7 @@ static LOCK gs_ScoreLock = 0;
 CFileScore::CPlayerScore::CPlayerScore(const char *pName, float Score,
 		float aCpTime[NUM_CHECKPOINTS])
 {
-	str_copy(m_aName, pName, sizeof(m_aName));
+	str_utf8_copy_num(m_aName, pName, sizeof(m_aName), MAX_NAME_LENGTH);
 	m_Score = Score;
 	for (int i = 0; i < NUM_CHECKPOINTS; i++)
 		m_aCpTime[i] = aCpTime[i];
@@ -195,7 +195,7 @@ void CFileScore::UpdatePlayer(int ID, float Score,
 			pPlayer->m_aCpTime[c] = aCpTime[c];
 
 		pPlayer->m_Score = Score;
-		str_copy(pPlayer->m_aName, pName, sizeof(pPlayer->m_aName));
+		str_utf8_copy_num(pPlayer->m_aName, pName, sizeof(pPlayer->m_aName), MAX_NAME_LENGTH);
 
 		sort(m_Top.all());
 	}
