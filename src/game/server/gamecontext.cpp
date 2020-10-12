@@ -4131,6 +4131,9 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		if (ID < ACC_START)
 			return 0;
 
+		if (pSelf->m_Accounts[ID].m_KillingSpreeRecord >= 92)
+			pSelf->m_Accounts[ID].m_KillingSpreeRecord = 0;
+
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
 
