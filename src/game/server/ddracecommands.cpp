@@ -1385,13 +1385,16 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
+		const char *pValue = pSelf->GetAccVarValue(ID, i);
+		char aDate[64] = "";
+
 		if (i == ACC_EXPIRE_DATE_VIP || i == ACC_EXPIRE_DATE_PORTAL_RIFLE)
 		{
-			const char *pValue = pSelf->GetAccVarValue(ID, i);
-			str_format(aBuf, sizeof(aBuf), "%s: %s (%s)", pSelf->GetAccVarName(i), pValue, pSelf->GetDate(str_toint(pValue)));
+			if (str_comp_nocase(pValue, "0") != 0)
+				str_format(aDate, sizeof(aDate), " (%s)", pSelf->GetDate(str_toint(pValue)));
 		}
-		else
-			str_format(aBuf, sizeof(aBuf), "%s: %s", pSelf->GetAccVarName(i), pSelf->GetAccVarValue(ID, i));
+
+		str_format(aBuf, sizeof(aBuf), "%s: %s%s", pSelf->GetAccVarName(i), pValue, aDate);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 
