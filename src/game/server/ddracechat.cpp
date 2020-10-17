@@ -2010,6 +2010,11 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot swap <playername>");
 			pSelf->SendChatTarget(pResult->m_ClientID, "Swaps plot with given player");
 		}
+		else if (!str_comp_nocase(pCommand, "list"))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Usage: /plot list");
+			pSelf->SendChatTarget(pResult->m_ClientID, "Shows a list with all currently open plot auctions and swap offers");
+		}
 		return;
 	}
 
@@ -2098,6 +2103,37 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pSeller->StopPlotEditing();
 
 		pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
+	}
+	else if (!str_comp_nocase(pCommand, "list"))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Plot list ~~~");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Buy from auction: '/plot buy <price> <playername>'");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Swap with offer: '/plot swap <playername>'");
+		pSelf->SendChatTarget(pResult->m_ClientID, "List of all plot auctions and swap offers:");
+
+		char aBuf[128];
+		bool Anything = false;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (!pSelf->m_apPlayers[i])
+				continue;
+
+			if (pSelf->m_apPlayers[i]->m_PlotAuctionPrice != 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "Type: auction, name: '%s', price: %d", pSelf->Server()->ClientName(i), pSelf->m_apPlayers[i]->m_PlotAuctionPrice);
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				Anything = true;
+			}
+			if (pSelf->m_apPlayers[i]->m_aPlotSwapUsername[0] != 0)
+			{
+				str_format(aBuf, sizeof(aBuf), "Type: swap, name: '%s'", pSelf->Server()->ClientName(i));
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				Anything = true;
+			}
+		}
+
+		if (!Anything)
+			pSelf->SendChatTarget(pResult->m_ClientID, "There are currently no auctions or swap offers");
 	}
 	else if (OwnPlotID == 0)
 	{
@@ -2211,16 +2247,19 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(ID, aBuf);
 		}
 	}
-	else if (!pChr)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be alive to edit your plot");
-	}
-	else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
-	}
 	else if (!str_comp_nocase(pCommand, "edit"))
 	{
+		if (!pChr)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You have to be alive to edit your plot");
+			return;
+		}
+		else if (pChr->GetCurrentTilePlotID() != OwnPlotID)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside your plot to edit your plot");
+			return;
+		}
+
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
 		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
 		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
