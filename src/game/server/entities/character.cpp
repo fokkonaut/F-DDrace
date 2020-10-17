@@ -2272,11 +2272,18 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
-	if (m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY || m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
+	bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
+	bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
+	bool PlotMoneyTile = m_TileIndex == TILE_MONEY_PLOT || m_TileFIndex == TILE_MONEY_PLOT;
+	if (MoneyTile || PoliceMoneyTile || PlotMoneyTile)
 	{
 		m_MoneyTile = true;
 
-		if (Server()->Tick() % 50 == 0)
+		int Seconds = Server()->TickSpeed();
+		if (PlotMoneyTile) // every 2 seconds only on plot money tile
+			Seconds *= 2;
+
+		if (Server()->Tick() % Seconds == 0)
 		{
 			if (m_pPlayer->GetAccID() < ACC_START)
 			{
@@ -2289,9 +2296,13 @@ void CCharacter::HandleTiles(int Index)
 			int XP = 0;
 			int Money = 0;
 
+			int AliveState = GetAliveState();
+			if (PlotMoneyTile) // disallow survival bonus on plot money tile
+				AliveState = 0;
+
 			// default
 			Money += 1;
-			XP += GetAliveState() + 1;
+			XP += AliveState + 1;
 
 			// vip bonus
 			if (pAccount->m_VIP)
@@ -2301,11 +2312,7 @@ void CCharacter::HandleTiles(int Index)
 			}
 
 			// police bonus
-			bool PoliceTile = false;
-			if (m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE)
-				PoliceTile = true;
-
-			if (PoliceTile)
+			if (PoliceMoneyTile)
 			{
 				XP += 1;
 				Money += pAccount->m_PoliceLevel;
@@ -2313,7 +2320,7 @@ void CCharacter::HandleTiles(int Index)
 
 			//flag bonus
 			bool FlagBonus = false;
-			if (!PoliceTile && HasFlag() != -1)
+			if (!PoliceMoneyTile && HasFlag() != -1)
 			{
 				XP += 1;
 				FlagBonus = true;
@@ -2330,14 +2337,14 @@ void CCharacter::HandleTiles(int Index)
 				char aPolice[32];
 				char aPlusXP[128];
 
-				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
+				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
 				str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
-				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
 						"Money [%lld] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
-						pAccount->m_Money, (PoliceTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+						pAccount->m_Money, (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
 						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
 						pAccount->m_Level
 					);
@@ -3224,8 +3231,9 @@ void CCharacter::FDDraceTick()
 		{
 			if (!m_MoneyTile)
 			{
+				int AliveState = GetAliveState();
 				int XP = 0;
-				XP += GetAliveState() + 1;
+				XP += AliveState + 1;
 
 				if (pAccount->m_VIP)
 					XP += 2;
@@ -3234,9 +3242,9 @@ void CCharacter::FDDraceTick()
 
 				char aSurvival[32];
 				char aMsg[128];
-				str_format(aSurvival, sizeof(aSurvival), " +%d survival", GetAliveState());
+				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
 				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
-					pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", GetAliveState() ? aSurvival : "");
+					pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
