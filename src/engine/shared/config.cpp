@@ -101,7 +101,6 @@ void CConfigManager::Save(const char *pFilename)
 	#define MACRO_CONFIG_STR(Name,ScriptName,len,def,flags,desc,accesslevel) if(((flags)&(CFGFLAG_SAVE))&&((flags)&(m_FlagMask)&&(str_comp(m_Values.m_##Name,def)))){ EscapeParam(aEscapeBuf, m_Values.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
 	#define MACRO_CONFIG_UTF8STR(Name,ScriptName,size,len,def,flags,desc,accesslevel) if(((flags)&(CFGFLAG_SAVE))&&((flags)&(m_FlagMask)&&(str_comp(m_Values.m_##Name,def)))){ EscapeParam(aEscapeBuf, m_Values.m_##Name, sizeof(aEscapeBuf)); str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); WriteLine(aLineBuf); }
 
-
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT

@@ -1351,10 +1351,29 @@ void CConsole::ResetServerGameSettings()
 		} \
 	}
 
+	#define MACRO_CONFIG_UTF8STR(Name,ScriptName,Size,Len,Def,Flags,Desc,AccessLevel) \
+	{ \
+		if(((Flags) & (CFGFLAG_SERVER|CFGFLAG_GAME)) == (CFGFLAG_SERVER|CFGFLAG_GAME)) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			while(pfnCallback == Con_Chain) \
+			{ \
+				CChain *pChainInfo = (CChain *)pUserData; \
+				pUserData = pChainInfo->m_pCallbackUserData; \
+				pfnCallback = pChainInfo->m_pfnCallback; \
+			} \
+			CStrVariableData *pData = (CStrVariableData *)pUserData; \
+			str_utf8_copy_num(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize, pData->m_Length); \
+		} \
+	}
+
 	#include "config_variables.h"
 
 	#undef MACRO_CONFIG_INT
 	#undef MACRO_CONFIG_STR
+	#undef MACRO_CONFIG_UTF8STR
 }
 
 int CConsole::CResult::GetVictim()
