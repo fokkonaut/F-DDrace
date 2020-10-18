@@ -2274,13 +2274,13 @@ void CCharacter::HandleTiles(int Index)
 
 	bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
 	bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
-	bool PlotMoneyTile = m_TileIndex == TILE_MONEY_PLOT || m_TileFIndex == TILE_MONEY_PLOT;
-	if (MoneyTile || PoliceMoneyTile || PlotMoneyTile)
+	if (MoneyTile || PoliceMoneyTile)
 	{
 		m_MoneyTile = true;
 
+		bool Plot = GetCurrentTilePlotID() >= PLOT_START;
 		int Seconds = Server()->TickSpeed();
-		if (PlotMoneyTile) // every 2 seconds only on plot money tile
+		if (Plot) // every 2 seconds only on plot money tile
 			Seconds *= 2;
 
 		if (Server()->Tick() % Seconds == 0)
@@ -2295,10 +2295,7 @@ void CCharacter::HandleTiles(int Index)
 
 			int XP = 0;
 			int Money = 0;
-
-			int AliveState = GetAliveState();
-			if (PlotMoneyTile) // disallow survival bonus on plot money tile
-				AliveState = 0;
+			int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
 
 			// default
 			Money += 1;
@@ -2320,7 +2317,7 @@ void CCharacter::HandleTiles(int Index)
 
 			//flag bonus
 			bool FlagBonus = false;
-			if (!PoliceMoneyTile && HasFlag() != -1)
+			if (!PoliceMoneyTile && !Plot && HasFlag() != -1)
 			{
 				XP += 1;
 				FlagBonus = true;
