@@ -293,7 +293,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	}
 	else if(Index == ENTITY_WEAPON_GRENADE)
 	{
-		Type = POWERUP_BATTERY;
+		Type = POWERUP_WEAPON;
 		SubType = WEAPON_GRENADE;
 	}
 	else if(Index == ENTITY_WEAPON_LASER)

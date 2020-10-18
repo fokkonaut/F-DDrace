@@ -186,12 +186,12 @@ void CPickup::Tick()
 						if (pChr->GetPlayer()->m_SpookyGhost)
 							break;
 
-						Picked = true;
-
 						// activate ninja on target player
 						pChr->GiveNinja();
 						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 						{
+							Picked = true;
+
 							// loop through all players, setting their emotes
 							CCharacter* pC = static_cast<CCharacter*>(GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 							for (; pC; pC = (CCharacter*)pC->TypeNext())
