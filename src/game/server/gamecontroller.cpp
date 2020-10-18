@@ -293,7 +293,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	}
 	else if(Index == ENTITY_WEAPON_GRENADE)
 	{
-		Type = POWERUP_WEAPON;
+		Type = POWERUP_BATTERY;
 		SubType = WEAPON_GRENADE;
 	}
 	else if(Index == ENTITY_WEAPON_LASER)
@@ -356,9 +356,9 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_BALL_GRENADE;
 	}
-	else if (Index == ENTITY_PICKUP_AMMO)
+	else if (Index == ENTITY_PICKUP_BATTERY)
 	{
-		Type = POWERUP_AMMO;
+		Type = POWERUP_BATTERY;
 	}
 	else if (Index == ENTITY_CLOCK)
 	{

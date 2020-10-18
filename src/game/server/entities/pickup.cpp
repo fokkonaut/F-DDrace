@@ -88,7 +88,7 @@ void CPickup::Tick()
 				if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
 				bool Sound = false;
 				// player picked us up, is someone was hooking us, let them go
-				int RespawnTime = -1;
+				bool Picked = false;
 				switch (m_Type)
 				{
 					case POWERUP_HEALTH:
@@ -97,7 +97,7 @@ void CPickup::Tick()
 							if (pChr->IncreaseHealth(1))
 							{
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
-								RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+								Picked = true;
 							}
 						}
 						else if (pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
@@ -109,7 +109,7 @@ void CPickup::Tick()
 							if (pChr->IncreaseArmor(1))
 							{
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
-								RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+								Picked = true;
 							}
 						}
 						else if (pChr->Team() == TEAM_SUPER) continue;
@@ -163,7 +163,7 @@ void CPickup::Tick()
 								pChr->GiveWeapon(m_Subtype);
 							else break;
 
-							RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+							Picked = true;
 
 							if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
 								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
@@ -186,12 +186,12 @@ void CPickup::Tick()
 						if (pChr->GetPlayer()->m_SpookyGhost)
 							break;
 
+						Picked = true;
+
 						// activate ninja on target player
 						pChr->GiveNinja();
 						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 						{
-							RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
-
 							// loop through all players, setting their emotes
 							CCharacter* pC = static_cast<CCharacter*>(GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 							for (; pC; pC = (CCharacter*)pC->TypeNext())
@@ -203,16 +203,12 @@ void CPickup::Tick()
 						break;
 					}
 
-					case POWERUP_AMMO:
-
-						if (true)
+					case POWERUP_BATTERY:
+						if (pChr->GetWeaponGot(WEAPON_TASER) && pChr->GetWeaponAmmo(WEAPON_TASER) < 10)
 						{
-							//nothing here yet
-
-							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
-								RespawnTime = g_pData->m_aPickups[POWERUP_WEAPON].m_Respawntime;
-
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+							pChr->SetWeaponAmmo(WEAPON_TASER, 10);
+							Picked = true;
+							GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));
 						}
 						break;
 
@@ -222,13 +218,16 @@ void CPickup::Tick()
 
 				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 				{
-					if (RespawnTime >= 0)
+					if (Picked)
 					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
 							pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
 						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-						m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+
+						int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+						if (RespawnTime >= 0)
+							m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 					}
 				}
 			}
@@ -275,7 +274,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO || m_Subtype == WEAPON_LIGHTSABER)
+	if (m_Type == POWERUP_BATTERY || m_Subtype == WEAPON_LIGHTSABER)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)

@@ -96,8 +96,7 @@ void CPickupDrop::Tick()
 		m_PickupDelay--;
 
 	Pickup();
-	if (m_Type == POWERUP_WEAPON)
-		IsShieldNear();
+	IsShieldNear();
 	HandleDropped();
 
 	m_PrevPos = m_Pos;
@@ -118,7 +117,7 @@ void CPickupDrop::Pickup()
 				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && m_Bullets == -1
 					&& m_Weapon != WEAPON_HAMMER && m_Weapon != WEAPON_TELEKINESIS && m_Weapon != WEAPON_LIGHTSABER)
 					m_Bullets = 10;
-			
+
 				pChr->GiveWeapon(m_Weapon, false, m_Bullets);
 			}
 
@@ -145,6 +144,11 @@ void CPickupDrop::Pickup()
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
 			else if (m_Weapon == WEAPON_LIGHTSABER)
 				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
+		}
+		else if (m_Type == POWERUP_BATTERY)
+		{
+			pChr->SetWeaponAmmo(m_Weapon, m_Bullets);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
 		}
 		else if (m_Type == POWERUP_HEALTH)
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
@@ -188,6 +192,13 @@ int CPickupDrop::IsCharacterNear()
 				)
 				continue;
 		}
+		else if (m_Type == POWERUP_BATTERY)
+		{
+			if (!pChr->GetWeaponGot(WEAPON_TASER) ||
+				(pChr->GetWeaponGot(m_Weapon) && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
+				)
+				continue;
+		}
 		else if (m_Type == POWERUP_HEALTH && !pChr->IncreaseHealth(1))
 			continue;
 		else if (m_Type == POWERUP_ARMOR && !pChr->IncreaseArmor(1))
@@ -201,7 +212,7 @@ int CPickupDrop::IsCharacterNear()
 
 void CPickupDrop::IsShieldNear()
 {
-	if (!m_DDraceMode)
+	if (!m_DDraceMode || (m_Type != POWERUP_WEAPON && m_Type != POWERUP_BATTERY))
 		return;
 
 	CPickup *apEnts[9];
@@ -417,7 +428,7 @@ void CPickupDrop::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Type == POWERUP_AMMO || m_Weapon == WEAPON_LIGHTSABER)
+	if (m_Type == POWERUP_BATTERY || m_Weapon == WEAPON_LIGHTSABER)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)

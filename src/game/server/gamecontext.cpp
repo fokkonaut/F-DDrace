@@ -4965,6 +4965,8 @@ int CGameContext::GetProjectileType(int Weapon)
 
 int CGameContext::GetPickupType(int Type, int Subtype)
 {
+	if (Type == POWERUP_BATTERY)
+		return PICKUP_LASER;
 	if (Type == POWERUP_NINJA)
 		return PICKUP_NINJA;
 	if (Type != POWERUP_WEAPON)

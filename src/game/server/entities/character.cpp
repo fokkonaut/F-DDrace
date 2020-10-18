@@ -914,16 +914,9 @@ void CCharacter::FireWeapon()
 	{
 		m_aWeapons[GetActiveWeapon()].m_Ammo--;
 
-		// keeping laser and taser ammo equal
-		if (GetActiveWeapon() == WEAPON_LASER)
-			m_aWeapons[WEAPON_TASER].m_Ammo--;
-		else if (GetActiveWeapon() == WEAPON_TASER)
-			m_aWeapons[WEAPON_LASER].m_Ammo--;
-
-		int Weapon = GetActiveWeapon() == WEAPON_TASER ? WEAPON_LASER : GetActiveWeapon();
-		int W = GetSpawnWeaponIndex(Weapon);
-		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[Weapon].m_Ammo == 0)
-			GiveWeapon(Weapon, true);
+		int W = GetSpawnWeaponIndex(GetActiveWeapon());
+		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
+			GiveWeapon(GetActiveWeapon(), true);
 	}
 
 	//spooky ghost
@@ -1006,7 +999,7 @@ void CCharacter::HandleWeapons()
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
 	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1 && m_pPlayer->m_Minigame == MINIGAME_NONE)
-		GiveWeapon(WEAPON_TASER, Remove, Ammo);
+		GiveWeapon(WEAPON_TASER, Remove, 0);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
@@ -3409,7 +3402,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		return;
 
 	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || WeaponID == WEAPON_TASER || WeaponID == WEAPON_PORTAL_RIFLE || WeaponID == WEAPON_DRAW_EDITOR)
+		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || WeaponID == WEAPON_PORTAL_RIFLE || WeaponID == WEAPON_DRAW_EDITOR)
 		return;
 
 	int Count = 0;
@@ -3423,15 +3416,23 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
 
 	int Special = GetWeaponSpecial(WeaponID);
+	int Type = WeaponID == WEAPON_TASER ? POWERUP_BATTERY : POWERUP_WEAPON;
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), Special);
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
 	if (Special == 0)
 	{
-		GiveWeapon(WeaponID, true);
-		SetWeapon(WEAPON_GUN);
+		if (Type == POWERUP_BATTERY)
+		{
+			SetWeaponAmmo(WEAPON_TASER, 0);
+		}
+		else
+		{
+			GiveWeapon(WeaponID, true);
+			SetWeapon(WEAPON_GUN);
+		}
 	}
 	if (Special&SPECIAL_SPREADWEAPON)
 		SpreadWeapon(WeaponID, false, -1, OnDeath);
