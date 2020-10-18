@@ -197,6 +197,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 
 	#undef MACRO_CONFIG_INT
 	#undef MACRO_CONFIG_STR
+	#undef MACRO_CONFIG_UTF8STR
 
 	str_format(aJson, sizeof(aJson), "},\"tuning\":{");
 	Write(aJson, str_length(aJson));
