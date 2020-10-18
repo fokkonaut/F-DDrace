@@ -271,7 +271,7 @@ void CMenus::RenderHSLPicker(CUIRect MainView)
 
 			// bar marker
 			Graphics()->SetColor(0.0f, 0.0f, 0.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(Bar.x + min(127.0f, *apVars[i]/2.0f), Bar.y, UI()->PixelSize(), Bar.h);
+			IGraphics::CQuadItem QuadItem(Bar.x + min(Bar.w, *apVars[i]/255.0f*Bar.w), Bar.y, UI()->PixelSize(), Bar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 
@@ -397,7 +397,7 @@ void CMenus::RenderSkinSelection(CUIRect MainView)
 		mem_copy(Config()->m_PlayerSkin, m_pSelectedSkin->m_aName, sizeof(Config()->m_PlayerSkin));
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			mem_copy(CSkins::ms_apSkinVariables[p], m_pSelectedSkin->m_apParts[p]->m_aName, MAX_SKIN_LENGTH);
+			mem_copy(CSkins::ms_apSkinVariables[p], m_pSelectedSkin->m_apParts[p]->m_aName, MAX_SKIN_ARRAY_SIZE);
 			*CSkins::ms_apUCCVariables[p] = m_pSelectedSkin->m_aUseCustomColors[p];
 			*CSkins::ms_apColorVariables[p] = m_pSelectedSkin->m_aPartColors[p];
 		}
@@ -430,9 +430,9 @@ void CMenus::RenderSkinPartSelection(CUIRect MainView)
 	}
 
 	static int OldSelected = -1;
-	s_ListBox.DoHeader(&MainView, Localize(CSkins::ms_apSkinPartNames[m_TeePartSelected]), GetListHeaderHeight());
+	s_ListBox.DoBegin(&MainView);
 	s_InitSkinPartList = s_ListBox.DoFilter();
-	s_ListBox.DoStart(50.0f, s_paList[m_TeePartSelected].size(), 5, 1, OldSelected);
+	s_ListBox.DoStart(60.0f, s_paList[m_TeePartSelected].size(), 5, 1, OldSelected);
 
 	for(int i = 0; i < s_paList[m_TeePartSelected].size(); ++i)
 	{
@@ -475,7 +475,29 @@ void CMenus::RenderSkinPartSelection(CUIRect MainView)
 			{
 				RenderTools()->RenderTeeHand(&Info, TeePos, vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
 			}
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, 0, vec2(1.0f, 0.0f), TeePos);
+			int TeePartEmote = EMOTE_NORMAL;
+			if(m_TeePartSelected == SKINPART_EYES)
+			{
+				float LocalTime = Client()->LocalTime();
+				TeePartEmote = (int)(LocalTime * 0.5f) % NUM_EMOTES;
+			}
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeePartEmote, vec2(1.0f, 0.0f), TeePos);
+
+			CUIRect Label;
+			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
+			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
+
+			if(Item.m_Selected)
+			{
+				TextRender()->TextColor(CUI::ms_HighlightTextColor);
+				TextRender()->TextOutlineColor(CUI::ms_HighlightTextOutlineColor);
+			}
+			UI()->DoLabel(&Label, s->m_aName, 10.0f, CUI::ALIGN_CENTER);
+			if(Item.m_Selected)
+			{
+				TextRender()->TextColor(CUI::ms_DefaultTextColor);
+				TextRender()->TextOutlineColor(CUI::ms_DefaultTextOutlineColor);
+			}
 		}
 	}
 
@@ -483,7 +505,7 @@ void CMenus::RenderSkinPartSelection(CUIRect MainView)
 	if(NewSelected != -1 && NewSelected != OldSelected)
 	{
 		const CSkins::CSkinPart *s = s_paList[m_TeePartSelected][NewSelected];
-		mem_copy(CSkins::ms_apSkinVariables[m_TeePartSelected], s->m_aName, MAX_SKIN_LENGTH);
+		mem_copy(CSkins::ms_apSkinVariables[m_TeePartSelected], s->m_aName, MAX_SKIN_ARRAY_SIZE);
 		Config()->m_PlayerSkin[0] = 0;
 		m_SkinModified = true;
 	}
@@ -1104,7 +1126,7 @@ void CMenus::RenderSettingsTeeCustom(CUIRect MainView)
 	for(int i = 0; i < NUM_SKINPARTS; i++)
 	{
 		Patterns.VSplitLeft(ButtonWidth, &Button, &Patterns);
-		if(DoButton_MenuTabTop(&s_aPatternButtons[i], Localize(CSkins::ms_apSkinPartNames[i]), m_TeePartSelected==i, &Button))
+		if(DoButton_MenuTabTop(&s_aPatternButtons[i], Localize(CSkins::ms_apSkinPartNames[i], "skins"), m_TeePartSelected==i, &Button))
 		{
 			m_TeePartSelected = i;
 		}
@@ -1141,8 +1163,8 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
 	static bool s_CustomSkinMenu = false;
 	static int s_PlayerCountry = 0;
-	static char s_aPlayerName[256] = {0};
-	static char s_aPlayerClan[256] = {0};
+	static char s_aPlayerName[MAX_NAME_ARRAY_SIZE] = {0};
+	static char s_aPlayerClan[MAX_CLAN_ARRAY_SIZE] = {0};
 
 	if(m_pClient->m_IdentityState < 0)
 	{
@@ -1196,13 +1218,13 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		CTeeRenderInfo OwnSkinInfo;
 		OwnSkinInfo.m_Size = 50.0f;
 
-		char aSkinParts[NUM_SKINPARTS][MAX_SKIN_LENGTH];
+		char aSkinParts[NUM_SKINPARTS][MAX_SKIN_ARRAY_SIZE];
 		char* apSkinPartsPtr[NUM_SKINPARTS];
 		int aUCCVars[NUM_SKINPARTS];
 		int aColorVars[NUM_SKINPARTS];
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			str_copy(aSkinParts[p], CSkins::ms_apSkinVariables[p], MAX_SKIN_LENGTH);
+			str_copy(aSkinParts[p], CSkins::ms_apSkinVariables[p], MAX_SKIN_ARRAY_SIZE);
 			apSkinPartsPtr[p] = aSkinParts[p];
 			aUCCVars[p] = *CSkins::ms_apUCCVariables[p];
 			aColorVars[p] = *CSkins::ms_apColorVariables[p];
@@ -1254,7 +1276,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 		{
-			str_copy(aSkinParts[p], CSkins::ms_apSkinVariables[p], MAX_SKIN_LENGTH);
+			str_copy(aSkinParts[p], CSkins::ms_apSkinVariables[p], MAX_SKIN_ARRAY_SIZE);
 			apSkinPartsPtr[p] = aSkinParts[p];
 			aUCCVars[p] = *CSkins::ms_apUCCVariables[p];
 			aColorVars[p] = *CSkins::ms_apColorVariables[p];
@@ -1320,12 +1342,12 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		// player name
 		Name.HSplitTop(ButtonHeight, &Button, &Name);
 		static float s_OffsetName = 0.0f;
-		DoEditBoxOption(Config()->m_PlayerName, Config()->m_PlayerName, sizeof(Config()->m_PlayerName), &Button, Localize("Name"),  100.0f, &s_OffsetName);
+		DoEditBoxOptionUTF8(Config()->m_PlayerName, Config()->m_PlayerName, sizeof(Config()->m_PlayerName), MAX_NAME_LENGTH, &Button, Localize("Name"),  100.0f, &s_OffsetName);
 
 		// player clan
 		Clan.HSplitTop(ButtonHeight, &Button, &Clan);
 		static float s_OffsetClan = 0.0f;
-		DoEditBoxOption(Config()->m_PlayerClan, Config()->m_PlayerClan, sizeof(Config()->m_PlayerClan), &Button, Localize("Clan"),  100.0f, &s_OffsetClan);
+		DoEditBoxOptionUTF8(Config()->m_PlayerClan, Config()->m_PlayerClan, sizeof(Config()->m_PlayerClan), MAX_CLAN_LENGTH, &Button, Localize("Clan"),  100.0f, &s_OffsetClan);
 
 		// country selector
 		RenderTools()->DrawUIRect(&Bottom, vec4(0.0f, 0.0f, 0.0f, 0.25f), CUI::CORNER_ALL, 5.0f);
@@ -1356,7 +1378,12 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	// bottom button
 	float ButtonWidth = (BottomView.w/6.0f)-(SpacingW*5.0)/6.0f;
-	float BackgroundWidth = s_CustomSkinMenu||(m_pSelectedSkin && (m_pSelectedSkin->m_Flags&CSkins::SKINFLAG_STANDARD) == 0) ? ButtonWidth*2.0f+SpacingW : ButtonWidth;
+	int NumButtons = 1;
+	if(s_CustomSkinMenu)
+		NumButtons = 3;
+	else if(m_pSelectedSkin && (m_pSelectedSkin->m_Flags&CSkins::SKINFLAG_STANDARD) == 0)
+		NumButtons = 2;
+	float BackgroundWidth = ButtonWidth*NumButtons+SpacingW*(NumButtons-1);
 
 	BottomView.VSplitRight(BackgroundWidth, 0, &BottomView);
 	RenderBackgroundShadow(&BottomView, true);
@@ -1368,6 +1395,16 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		static CButtonContainer s_CustomSkinSaveButton;
 		if(DoButton_Menu(&s_CustomSkinSaveButton, Localize("Save"), 0, &Button))
 			m_Popup = POPUP_SAVE_SKIN;
+		BottomView.VSplitLeft(SpacingW, 0, &BottomView);
+
+		BottomView.VSplitLeft(ButtonWidth, &Button, &BottomView);
+		static CButtonContainer s_RandomizeSkinButton;
+		if(DoButton_Menu(&s_RandomizeSkinButton, Localize("Randomize"), 0, &Button))
+		{
+			m_pClient->m_pSkins->RandomizeSkin();
+			Config()->m_PlayerSkin[0] = 0;
+			m_SkinModified = true;
+		}
 		BottomView.VSplitLeft(SpacingW, 0, &BottomView);
 	}
 	else if(m_pSelectedSkin && (m_pSelectedSkin->m_Flags&CSkins::SKINFLAG_STANDARD) == 0)
@@ -1388,6 +1425,13 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(DoButton_Menu(&s_CustomSwitchButton, s_CustomSkinMenu ? Localize("Basic") : Localize("Custom"), 0, &Button))
 	{
 		s_CustomSkinMenu = !s_CustomSkinMenu;
+		if(s_CustomSkinMenu && m_pSelectedSkin)
+		{
+			if(m_pSelectedSkin->m_Flags&CSkins::SKINFLAG_STANDARD)
+				str_format(m_aSaveSkinName, sizeof(m_aSaveSkinName), "copy_%s", m_pSelectedSkin->m_aName);
+			else
+				str_copy(m_aSaveSkinName, m_pSelectedSkin->m_aName, sizeof(m_aSaveSkinName));
+		}
 	}
 
 	// check if the new settings require a server reload

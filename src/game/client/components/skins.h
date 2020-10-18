@@ -26,7 +26,7 @@ public:
 	struct CSkinPart
 	{
 		int m_Flags;
-		char m_aName[MAX_SKIN_LENGTH*UTF8_BYTE_LENGTH];
+		char m_aName[MAX_SKIN_ARRAY_SIZE];
 		IGraphics::CTextureHandle m_OrgTexture;
 		IGraphics::CTextureHandle m_ColorTexture;
 		vec3 m_BloodColor;
@@ -37,7 +37,7 @@ public:
 	struct CSkin
 	{
 		int m_Flags;
-		char m_aName[MAX_SKIN_LENGTH*UTF8_BYTE_LENGTH];
+		char m_aName[MAX_SKIN_ARRAY_SIZE];
 		const CSkinPart *m_apParts[NUM_SKINPARTS];
 		int m_aPartColors[NUM_SKINPARTS];
 		int m_aUseCustomColors[NUM_SKINPARTS];
@@ -67,6 +67,7 @@ public:
 	int Find(const char *pName, bool AllowSpecialSkin);
 	const CSkinPart *GetSkinPart(int Part, int Index);
 	int FindSkinPart(int Part, const char *pName, bool AllowSpecialPart);
+	void RandomizeSkin();
 
 	vec3 GetColorV3(int v) const;
 	vec4 GetColorV4(int v, bool UseAlpha) const;

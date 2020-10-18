@@ -361,7 +361,7 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pName)
 		return;
 
-	char aNameTry[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
+	char aNameTry[MAX_NAME_ARRAY_SIZE];
 	str_utf8_copy_num(aNameTry, pName, sizeof(aNameTry), MAX_NAME_LENGTH);
 	if (TrySetClientName(ClientID, aNameTry))
 	{

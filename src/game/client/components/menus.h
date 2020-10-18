@@ -102,7 +102,7 @@ public:
 		bool m_CleanBackground;
 		float m_FadeStartTime;
 	public:
-		CButtonContainer(bool CleanBackground = false) { m_CleanBackground = CleanBackground; }
+		CButtonContainer(bool CleanBackground = false) : m_FadeStartTime(0.0f) { m_CleanBackground = CleanBackground; }
 		const void *GetID() const { return &m_FadeStartTime; }
 		float GetFade(bool Checked = false, float Seconds = 0.6f);
 		bool IsCleanBackground() const { return m_CleanBackground; }
@@ -122,7 +122,9 @@ private:
 	bool DoButton_GridHeader(const void *pID, const char *pText, bool Checked, CUI::EAlignment Align, const CUIRect *pRect, int Corners = CUI::CORNER_ALL);
 
 	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
-	void DoEditBoxOption(void *pID, char *pOption, int OptionLength, const CUIRect *pRect, const char *pStr, float VSplitVal, float *pOffset, bool Hidden = false);
+	bool DoEditBoxUTF8(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, unsigned MaxLength, float FontSize, float *pOffset, bool Hidden = false, int Corners = CUI::CORNER_ALL);
+	void DoEditBoxOption(void *pID, char *pOption, unsigned OptionSize, const CUIRect *pRect, const char *pStr, float VSplitVal, float *pOffset, bool Hidden = false);
+	void DoEditBoxOptionUTF8(void *pID, char *pOption, unsigned OptionSize, unsigned OptionMaxLength, const CUIRect *pRect, const char *pStr, float VSplitVal, float *pOffset, bool Hidden = false);
 	void DoScrollbarOption(void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, IScrollbarScale *pScale = &LinearScrollbarScale, bool Infinite = false);
 	void DoScrollbarOptionLabeled(void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char *apLabels[], int Num, IScrollbarScale *pScale = &LinearScrollbarScale);
 	float DoIndependentDropdownMenu(void *pID, const CUIRect *pRect, const char *pStr, float HeaderHeight, FDropdownCallback pfnCallback, bool *pActive);
@@ -267,8 +269,9 @@ private:
 	public:
 		CListBox();
 
+		void DoBegin(const CUIRect *pRect);
 		void DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight = 20.0f, float Spacing = 2.0f);
-		void DoSubHeader(float HeaderHeight = 20.0f, float Spacing = 2.0f);
+		void DoSpacing(float Spacing = 20.0f);
 		bool DoFilter(float FilterHeight = 20.0f, float Spacing = 2.0f);
 		void DoFooter(const char *pBottomText, float FooterHeight = 20.0f); // call before DoStart to create a footer
 		void DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex,
@@ -429,7 +432,7 @@ private:
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
 	int m_TeePartSelected;
-	char m_aSaveSkinName[MAX_SKIN_LENGTH];
+	char m_aSaveSkinName[MAX_SKIN_ARRAY_SIZE];
 
 	bool m_RefreshSkinSelector;
 	const CSkins::CSkin *m_pSelectedSkin;
@@ -555,8 +558,8 @@ private:
 	{
 	public:
 		const CServerInfo *m_pServerInfo;
-		char m_aName[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH*UTF8_BYTE_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
+		char m_aClan[MAX_CLAN_ARRAY_SIZE];
 		int m_FriendState;
 		bool m_IsPlayer;
 

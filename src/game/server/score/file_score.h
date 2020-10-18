@@ -16,7 +16,7 @@ class CFileScore: public IScore
 	class CPlayerScore
 	{
 	public:
-		char m_aName[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
 		float m_Score;
 		float m_aCpTime[NUM_CHECKPOINTS];
 

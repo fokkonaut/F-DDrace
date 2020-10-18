@@ -1547,7 +1547,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// set infos
 			if (str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID)) == 0) // check that we dont have a name on right now set by an admin
 			{
-				char aOldName[MAX_NAME_LENGTH*UTF8_BYTE_LENGTH];
+				char aOldName[MAX_NAME_ARRAY_SIZE];
 				str_utf8_copy_num(aOldName, Server()->ClientName(ClientID), sizeof(aOldName), MAX_NAME_LENGTH);
 				Server()->SetClientName(ClientID, pName);
 				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)

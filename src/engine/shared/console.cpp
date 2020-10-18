@@ -742,6 +742,7 @@ struct CStrVariableData
 	IConsole *m_pConsole;
 	char *m_pStr;
 	int m_MaxSize;
+	int m_Length;
 	char* m_pOldValue;
 };
 
@@ -800,7 +801,7 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 			pData->m_pStr[Length] = 0;
 		}
 		else
-			str_copy(pData->m_pStr, pString, pData->m_MaxSize);
+			str_utf8_copy_num(pData->m_pStr, pString, pData->m_MaxSize, pData->m_Length);
 
 		if (pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
 			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize);
@@ -1000,7 +1001,14 @@ void CConsole::Init()
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,Accesslevel) \
 	{ \
 		static char OldValue[Len] = Def; \
-		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len, OldValue }; \
+		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len, Len, OldValue }; \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
+	}
+
+	#define MACRO_CONFIG_UTF8STR(Name,ScriptName,Size,Len,Def,Flags,Desc,Accesslevel) \
+	{ \
+		static char OldValue[Len] = Def; \
+		static CStrVariableData Data = { this, m_pConfig->m_##Name, Size, Len, OldValue }; \
 		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
 	}
 
@@ -1008,6 +1016,7 @@ void CConsole::Init()
 
 	#undef MACRO_CONFIG_INT
 	#undef MACRO_CONFIG_STR
+	#undef MACRO_CONFIG_UTF8STR
 }
 
 void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
