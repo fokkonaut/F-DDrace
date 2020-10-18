@@ -182,6 +182,17 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		First = false; \
 	}
 
+	#define MACRO_CONFIG_UTF8STR(Name,ScriptName,Size,Len,Def,Flags,Desc,Accesslevel) \
+	if((Flags)&CFGFLAG_SERVER && !((Flags)&CFGFLAG_NONTEEHISTORIC) && str_comp(pGameInfo->m_pConfig->m_##Name, (Def)) != 0) \
+	{ \
+		str_format(aJson, sizeof(aJson), "%s\"%s\":\"%s\"", \
+			First ? "" : ",", \
+			E(aBuffer1, #ScriptName), \
+			E(aBuffer2, pGameInfo->m_pConfig->m_##Name)); \
+		Write(aJson, str_length(aJson)); \
+		First = false; \
+	}
+
 	#include <engine/shared/config_variables.h>
 
 	#undef MACRO_CONFIG_INT
