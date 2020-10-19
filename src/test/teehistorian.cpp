@@ -34,9 +34,12 @@ protected:
 			m_Config.m_##Name = (Def);
 		#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Save,Desc,Accesslevel) \
 			str_copy(m_Config.m_##Name, (Def), sizeof(m_Config.m_##Name));
+		#define MACRO_CONFIG_UTF8STR(Name,ScriptName,Size,Len,Def,Save,Desc,Accesslevel) \
+			str_utf8_copy_num(m_Config.m_##Name, (Def), (Size), (Len));
 		#include <engine/shared/config_variables.h>
 		#undef MACRO_CONFIG_STR
 		#undef MACRO_CONFIG_INT
+		#undef MACRO_CONFIG_UTF8STR
 
 		RegisterUuids(&m_UuidManager);
 		RegisterTeehistorianUuids(&m_UuidManager);
