@@ -279,7 +279,8 @@ void CDrawEditor::OnPlayerKill()
 	{
 		if (m_DrawMode == DRAW_WALL)
 		{
-			if (round_to_int(m_Data.m_Laser.m_Angle * 180 / pi) % 45 != 0)
+			int Angle = round_to_int(m_Data.m_Laser.m_Angle * 180 / pi);
+			if (Angle % 45 != 0 || Angle > 360) // its not precise enough when we rotate some rounds and get a higher value
 				SetAngle(s_DefaultAngle);
 			else
 				AddAngle(45);
