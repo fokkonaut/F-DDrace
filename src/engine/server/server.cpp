@@ -1130,7 +1130,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				for(int i = 0; i < m_MapChunksPerRequest && m_aClients[ClientID].m_MapChunk >= 0; ++i)
 				{
 					int Chunk = m_aClients[ClientID].m_Sevendown ? Unpacker.GetInt() : m_aClients[ClientID].m_MapChunk;
-					int Offset = Chunk * ChunkSize;
+					unsigned int Offset = Chunk * ChunkSize;
 					int Last = 0;
 
 					if (m_aClients[ClientID].m_Sevendown)
