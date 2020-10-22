@@ -4766,7 +4766,12 @@ void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUs
 void CGameContext::ConnectDefaultDummies()
 {
 	if (GetShopDummy(TYPE_SHOP_NORMAL) == -1 && Collision()->TileUsed(TILE_SHOP))
-		ConnectDummy(DUMMYMODE_SHOP_DUMMY);
+	{
+		vec2 Pos = vec2(-1, -1);
+		if (Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
+			Pos = Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN);
+		ConnectDummy(DUMMYMODE_SHOP_DUMMY, Pos);
+	}
 
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
 	{
@@ -4787,7 +4792,7 @@ void CGameContext::ConnectDefaultDummies()
 	if (Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 
-	if (Collision()->TileUsed(TILE_PLOT_SHOP))
+	if (GetShopDummy(TYPE_SHOP_PLOT) == -1 && Collision()->TileUsed(TILE_PLOT_SHOP))
 		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY);
 }
 
