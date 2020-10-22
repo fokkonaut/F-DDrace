@@ -1427,7 +1427,7 @@ void CPlayer::OnLogin()
 	if (m_pCharacter)
 	{
 		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
-			m_pCharacter->GiveWeapon(WEAPON_TASER, false, m_pCharacter->GetWeaponAmmo(WEAPON_LASER));
+			m_pCharacter->GiveWeapon(WEAPON_TASER, false, 0);
 
 		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
