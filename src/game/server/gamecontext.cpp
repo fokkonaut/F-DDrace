@@ -1830,6 +1830,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_copy(aReason, pMsg->m_Reason, sizeof(aReason));
 			}
 
+			if (pMsg->m_Force && !Server()->GetAuthedState(ClientID))
+				return;
+
 			if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 			{
 				int Authed = Server()->GetAuthedState(ClientID);
