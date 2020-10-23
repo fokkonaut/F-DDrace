@@ -2124,7 +2124,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 				Anything = true;
 			}
-			if (pSelf->m_apPlayers[i]->m_aPlotSwapUsername[0] != 0)
+			if (!str_comp_nocase(pSelf->m_apPlayers[i]->m_aPlotSwapUsername, pSelf->Server()->ClientName(pResult->m_ClientID)))
 			{
 				str_format(aBuf, sizeof(aBuf), "Type: swap, name: '%s'", pSelf->Server()->ClientName(i));
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
