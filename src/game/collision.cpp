@@ -1381,15 +1381,16 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP;
-		if (GameLayerBlocked || GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
+		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetIndex(Nx, Ny) == TILE_DFREEZE;
+		bool FrontLayerBlocked = GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetFIndex(Nx, Ny) == TILE_DFREEZE;
+		if (GameLayerBlocked || FrontLayerBlocked)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			if (GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP)
-				return TILE_PORTAL_RIFLE_STOP;
+			if (FrontLayerBlocked)
+				return GetFIndex(Nx, Ny);
 			if (GameLayerBlocked)
 				return GetIndex(Nx, Ny);
 			return 0;
