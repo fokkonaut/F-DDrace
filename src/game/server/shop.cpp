@@ -4,7 +4,7 @@
 #include "gamecontext.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 8, 3, 14, 17 };
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 7, 3, 14, 17 };
 
 CShop::CShop(CGameContext *pGameServer, int Type)
 {
@@ -35,7 +35,7 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-		AddItem("Taser battery", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo. Plase visit '/taserinfo'");
+		AddItem("Taser battery x 10", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taserinfo'");
 		AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
