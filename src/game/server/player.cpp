@@ -1426,7 +1426,7 @@ void CPlayer::GiveBlockPoints(int Amount)
 
 bool CPlayer::GiveTaserBattery(int Amount)
 {
-	if (GetAccID() < ACC_START)
+	if (GetAccID() < ACC_START || Amount == 0)
 		return false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];

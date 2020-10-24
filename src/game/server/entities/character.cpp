@@ -3412,7 +3412,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((m_FreezeTime && !OnDeath) || !Config()->m_SvDropWeapons || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
+	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
 		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || WeaponID == WEAPON_PORTAL_RIFLE || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
 		return;
 
@@ -3437,7 +3437,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (WeaponID == WEAPON_TASER)
 	{
 		Type = POWERUP_BATTERY;
-		Ammo = min(GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery, 10);
+		Ammo = OnDeath ? GetAliveState() : min(GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery, 10);
 
 		if (!m_pPlayer->GiveTaserBattery(-Ammo))
 			return;
@@ -3505,6 +3505,10 @@ void CCharacter::DropLoot(int Weapon)
 	}
 	else if (m_pPlayer->m_Minigame == MINIGAME_NONE)
 	{
+		// we dont want to spam spawn with hundreds of weapons
+		if (!GetAliveState())
+			return;
+
 		// up two normal weapons
 		for (int i = 0; i < 2; i++)
 		{
