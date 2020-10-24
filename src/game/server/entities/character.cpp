@@ -3449,6 +3449,8 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 		if (!m_pPlayer->GiveTaserBattery(-Ammo))
 			return;
+
+		UpdateWeaponIndicator();
 	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
