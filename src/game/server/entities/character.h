@@ -405,6 +405,8 @@ public:
 	int m_HookPower;
 	bool m_IsRainbowHooked;
 
+	int m_SavedGamemode;
+
 	// editor
 	CDrawEditor m_DrawEditor;
 	bool IsFreeDraw();
