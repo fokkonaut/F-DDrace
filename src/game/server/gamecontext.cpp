@@ -4217,6 +4217,7 @@ int CGameContext::AddAccount()
 	Account.m_Version = ACC_CURRENT_VERSION;
 	Account.m_Addr.type = -1;
 	Account.m_LastAddr.type = -1;
+	Account.m_TaserBattery = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4291,6 +4292,8 @@ void CGameContext::WriteAccountStats(int ID)
 		net_addr_str(&m_Accounts[ID].m_LastAddr, aAddrStr, sizeof(aAddrStr), true);
 		AccFile << aAddrStr << "\n";
 
+		AccFile << m_Accounts[ID].m_TaserBattery << "\n";
+
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
 	AccFile.close();
@@ -4340,6 +4343,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
 	case ACC_ADDR:						net_addr_from_str(&m_Accounts[ID].m_Addr, pData); break;
 	case ACC_LAST_ADDR:					net_addr_from_str(&m_Accounts[ID].m_LastAddr, pData); break;
+	case TASER_BATTERY:					m_Accounts[ID].m_TaserBattery = atoi(pData); break;
 	}
 }
 
@@ -4387,6 +4391,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_VERSION:					return "version";
 	case ACC_ADDR:						return "addr";
 	case ACC_LAST_ADDR:					return "last_addr";
+	case TASER_BATTERY:					return "taser_battery";
 	}
 	return "Unknown";
 }
@@ -4438,6 +4443,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_VERSION:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Version); break;
 	case ACC_ADDR:						net_addr_str(&m_Accounts[ID].m_Addr, aBuf, sizeof(aBuf), true); break;
 	case ACC_LAST_ADDR:					net_addr_str(&m_Accounts[ID].m_LastAddr, aBuf, sizeof(aBuf), true); break;
+	case TASER_BATTERY:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserBattery); break;
 	}
 	return aBuf;
 }

@@ -914,6 +914,12 @@ void CCharacter::FireWeapon()
 	{
 		m_aWeapons[GetActiveWeapon()].m_Ammo--;
 
+		if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
+		{
+			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery--;
+			UpdateWeaponIndicator();
+		}
+
 		int W = GetSpawnWeaponIndex(GetActiveWeapon());
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
 			GiveWeapon(GetActiveWeapon(), true);
@@ -999,7 +1005,7 @@ void CCharacter::HandleWeapons()
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
 	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1 && m_pPlayer->m_Minigame == MINIGAME_NONE)
-		GiveWeapon(WEAPON_TASER, Remove, 0);
+		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
@@ -1755,7 +1761,12 @@ void CCharacter::Snap(int SnappingClient)
 		else if(GetActiveWeapon() == WEAPON_NINJA)
 			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		else if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
-			pCharacter->m_AmmoCount = m_aWeapons[GetActiveWeapon()].m_Ammo;
+		{
+			int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
+			if (GetActiveWeapon() == WEAPON_TASER)
+				Ammo = clamp((Ammo / 10) + 1, 0, 10);
+			pCharacter->m_AmmoCount = Ammo;
+		}
 	}
 
 	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused())
@@ -3413,22 +3424,32 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
+	{
+		if (WeaponID == WEAPON_TASER)
+			return; // make sure we dont destroy valuable taser battery drops
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
+	}
 
 	int Special = GetWeaponSpecial(WeaponID);
-	int Type = WeaponID == WEAPON_TASER ? POWERUP_BATTERY : POWERUP_WEAPON;
+	int Type = POWERUP_WEAPON;
+	int Ammo = GetWeaponAmmo(WeaponID);
+
+	if (WeaponID == WEAPON_TASER)
+	{
+		Type = POWERUP_BATTERY;
+		Ammo = min(GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery, 10);
+
+		if (!m_pPlayer->GiveTaserBattery(-Ammo))
+			return;
+	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, GetWeaponAmmo(WeaponID), Special);
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, Ammo, Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
 	if (Special == 0)
 	{
-		if (Type == POWERUP_BATTERY)
-		{
-			SetWeaponAmmo(WEAPON_TASER, 0);
-		}
-		else
+		if (WeaponID != WEAPON_TASER)
 		{
 			GiveWeapon(WeaponID, true);
 			SetWeapon(WEAPON_GUN);
@@ -3590,16 +3611,20 @@ void CCharacter::UpdateWeaponIndicator()
 		if (GameServer()->m_pShop[i]->IsInShop(m_pPlayer->GetCID()))
 			return;
 
+	char aTaserBattery[16] = "";
+	if (GetActiveWeapon() == WEAPON_TASER)
+		str_format(aTaserBattery, sizeof(aTaserBattery), " [%d]", GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
+
 	char aBuf[256];
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		char aSpaces[128];
 		str_format(aSpaces, sizeof(aSpaces), "                                                                                                                               ");
-		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aSpaces);
+		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery, aSpaces);
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), " \n \n> %s <", GameServer()->GetWeaponName(GetActiveWeapon()));
+		str_format(aBuf, sizeof(aBuf), " \n \n> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
 	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 }

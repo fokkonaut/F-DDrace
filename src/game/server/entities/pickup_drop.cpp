@@ -42,7 +42,7 @@ CPickupDrop::~CPickupDrop()
 
 void CPickupDrop::Reset(bool Picked)
 {
-	if (m_Type == POWERUP_WEAPON)
+	if (m_Type == POWERUP_WEAPON || m_Type == POWERUP_BATTERY)
 	{
 		CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
 		if (pOwner)
@@ -146,10 +146,7 @@ void CPickupDrop::Pickup()
 				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
 		}
 		else if (m_Type == POWERUP_BATTERY)
-		{
-			pChr->SetWeaponAmmo(m_Weapon, m_Bullets);
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
-		}
 		else if (m_Type == POWERUP_HEALTH)
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team(), -1, ID));
 		else if (m_Type == POWERUP_ARMOR)
@@ -192,13 +189,8 @@ int CPickupDrop::IsCharacterNear()
 				)
 				continue;
 		}
-		else if (m_Type == POWERUP_BATTERY)
-		{
-			if (!pChr->GetWeaponGot(WEAPON_TASER) ||
-				(pChr->GetWeaponGot(m_Weapon) && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
-				)
-				continue;
-		}
+		else if (m_Type == POWERUP_BATTERY && !pChr->GetPlayer()->GiveTaserBattery(m_Bullets))
+			continue;
 		else if (m_Type == POWERUP_HEALTH && !pChr->IncreaseHealth(1))
 			continue;
 		else if (m_Type == POWERUP_ARMOR && !pChr->IncreaseArmor(1))

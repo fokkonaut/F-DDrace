@@ -4,7 +4,7 @@
 #include "gamecontext.h"
 
 // manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 3, 14, 17 };
+int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 8, 3, 14, 17 };
 
 CShop::CShop(CGameContext *pGameServer, int Type)
 {
@@ -35,6 +35,7 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
+		AddItem("Taser battery", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo. Plase visit '/taserinfo'");
 		AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
@@ -426,6 +427,7 @@ void CShop::BuyItem(int ClientID, int Item)
 			|| (Item == ITEM_SPAWN_RIFLE		&& pAccount->m_SpawnWeapon[2] == 5)
 			|| (Item == ITEM_NINJAJETPACK		&& pAccount->m_Ninjajetpack)
 			|| (Item == ITEM_TASER				&& pAccount->m_TaserLevel == NUM_TASER_LEVELS)
+			|| (Item == ITEM_TASER_BATTERY && pAccount->m_TaserBattery >= MAX_TASER_BATTERY)
 			//|| (Item == ITEM_PORTAL_RIFLE		&& pAccount->m_PortalRifle) // portal rifle can be bought unlimited times
 			)
 		{
@@ -436,19 +438,13 @@ void CShop::BuyItem(int ClientID, int Item)
 			case ITEM_POLICE:															m_pGameServer->SendChatTarget(ClientID, "You already have the highest police rank"); break;
 			case ITEM_SPAWN_SHOTGUN: case ITEM_SPAWN_GRENADE: case ITEM_SPAWN_RIFLE:	m_pGameServer->SendChatTarget(ClientID, "You already have the maximum amount of bullets"); break;
 			case ITEM_TASER:															m_pGameServer->SendChatTarget(ClientID, "You already have the maximum taser level"); break;
+			case ITEM_TASER_BATTERY:													m_pGameServer->SendChatTarget(ClientID, "You already have a fully filled taser battery"); break;
 			case ITEM_SPOOKY_GHOST: case ITEM_ROOM_KEY:									UseThe = true;
 				// fallthrough
 			default:
 				str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[ItemID].m_pName);
 				m_pGameServer->SendChatTarget(ClientID, aMsg);
 			}
-			return;
-		}
-
-		// check police lvl 3 for taser
-		if (Item == ITEM_TASER && pAccount->m_PoliceLevel < 3)
-		{
-			m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
 			return;
 		}
 	}
@@ -477,9 +473,31 @@ void CShop::BuyItem(int ClientID, int Item)
 		}
 	}
 
+	// check police lvl 3 for taser
+	if ((Item == ITEM_TASER || Item == ITEM_TASER_BATTERY) && pAccount->m_PoliceLevel < 3)
+	{
+		m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
+		return;
+	}
+
+	int Amount = 1;
+	char aDescription[64];
+	str_copy(aDescription, m_aItems[ItemID].m_pName, sizeof(aDescription));
+
+	if (Item == ITEM_TASER_BATTERY)
+	{
+		Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
+		str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
+	}
+
+	if (Amount <= 0)
+		return;
+
+	int Price = Amount * m_aItems[ItemID].m_Price;
+
 	// check for the correct price
-	if ((m_aItems[ItemID].m_IsEuro && pAccount->m_Euros < m_aItems[ItemID].m_Price)
-		|| (!m_aItems[ItemID].m_IsEuro && pAccount->m_Money < m_aItems[ItemID].m_Price))
+	if ((m_aItems[ItemID].m_IsEuro && pAccount->m_Euros < Price)
+		|| (!m_aItems[ItemID].m_IsEuro && pAccount->m_Money < Price))
 	{
 		m_pGameServer->SendChatTarget(ClientID, "You don't have enough money");
 		return;
@@ -494,14 +512,14 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 
 	// send a message that we bought the item
-	str_format(aMsg, sizeof(aMsg), "You bought %s %s", m_aItems[ItemID].m_pName, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
+	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aDescription, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
 	if (Item == ITEM_VIP || Item == ITEM_PORTAL_RIFLE)
 		m_pGameServer->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
-	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", m_aItems[ItemID].m_Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", m_aItems[ItemID].m_pName);
-	pPlayer->MoneyTransaction(-m_aItems[ItemID].m_Price, aMsg, m_aItems[ItemID].m_IsEuro);
+	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", aDescription);
+	pPlayer->MoneyTransaction(-Price, aMsg, m_aItems[ItemID].m_IsEuro);
 
 
 	if (IsType(TYPE_SHOP_NORMAL))
@@ -525,6 +543,7 @@ void CShop::BuyItem(int ClientID, int Item)
 									pAccount->m_SpawnWeapon[Weapon]++; break;
 		case ITEM_NINJAJETPACK:		pAccount->m_Ninjajetpack = true; break;
 		case ITEM_TASER:			pAccount->m_TaserLevel++; break;
+		case ITEM_TASER_BATTERY:	pPlayer->GiveTaserBattery(Amount); break;
 		case ITEM_PORTAL_RIFLE:		pAccount->m_PortalRifle = true; pPlayer->SetExpireDate(Item);
 									if (pPlayer->GetCharacter())
 										pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);

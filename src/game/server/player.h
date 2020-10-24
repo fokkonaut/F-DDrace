@@ -311,6 +311,7 @@ public:
 	void MoneyTransaction(int64 Amount, const char* pDescription = "", bool IsEuro = false);
 	void GiveXP(int Amount, const char* pMessage = "");
 	void GiveBlockPoints(int Amount);
+	bool GiveTaserBattery(int Amount);
 	void OnLogin();
 	void OnLogout();
 	void SetExpireDate(int Item);

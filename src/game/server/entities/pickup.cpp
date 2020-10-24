@@ -204,9 +204,8 @@ void CPickup::Tick()
 					}
 
 					case POWERUP_BATTERY:
-						if (pChr->GetWeaponGot(WEAPON_TASER) && pChr->GetWeaponAmmo(WEAPON_TASER) < 10)
+						if (pChr->GetPlayer()->GiveTaserBattery(10))
 						{
-							pChr->SetWeaponAmmo(WEAPON_TASER, 10);
 							Picked = true;
 							GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));
 						}
@@ -216,7 +215,7 @@ void CPickup::Tick()
 						break;
 				};
 
-				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || m_Type == POWERUP_BATTERY)
 				{
 					if (Picked)
 					{
@@ -226,6 +225,10 @@ void CPickup::Tick()
 						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 						int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+
+						if (m_Type == POWERUP_BATTERY)
+							RespawnTime = 10 * 60; // 10 min
+
 						if (RespawnTime >= 0)
 							m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 					}

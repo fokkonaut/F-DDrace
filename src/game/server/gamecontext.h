@@ -92,6 +92,7 @@ enum
 	OVER_LVL_100_XP = 2000000,
 	NUM_TASER_LEVELS = 7,
 	NUM_POLICE_LEVELS = 5,
+	MAX_TASER_BATTERY = 100,
 
 	// update this one with every acc change you do
 	ACC_CURRENT_VERSION = 2,
@@ -464,6 +465,7 @@ public:
 		int m_Version;
 		NETADDR m_Addr;
 		NETADDR m_LastAddr;
+		int m_TaserBattery;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -511,6 +513,7 @@ public:
 		ACC_VERSION,
 		ACC_ADDR,
 		ACC_LAST_ADDR,
+		TASER_BATTERY,
 		NUM_ACCOUNT_VARIABLES
 	};
 

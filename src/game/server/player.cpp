@@ -1413,6 +1413,9 @@ void CPlayer::GiveXP(int Amount, const char *pMessage)
 
 void CPlayer::GiveBlockPoints(int Amount)
 {
+	if (GetAccID() < ACC_START)
+		return;
+
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 
 	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
@@ -1421,13 +1424,58 @@ void CPlayer::GiveBlockPoints(int Amount)
 	pAccount->m_BlockPoints += Amount;
 }
 
+bool CPlayer::GiveTaserBattery(int Amount)
+{
+	if (GetAccID() < ACC_START)
+		return false;
+
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	if (pAccount->m_TaserLevel <= 0)
+		return false;
+
+	char Symbol;
+	if (Amount > 0)
+	{
+		if (pAccount->m_TaserBattery >= MAX_TASER_BATTERY)
+			return false;
+
+		Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, Amount);
+		Symbol = '+';
+	}
+	else
+	{
+		if (pAccount->m_TaserBattery <= 0)
+			return false;
+
+		if (pAccount->m_TaserBattery+Amount < 0)
+			Amount -= abs(Amount)-pAccount->m_TaserBattery;
+		Symbol = '-';
+	}
+
+	if (m_pCharacter)
+	{
+		if (!m_pCharacter->GetWeaponGot(WEAPON_TASER))
+			return false;
+
+		int Ammo = m_pCharacter->GetWeaponAmmo(WEAPON_TASER) + Amount;
+		m_pCharacter->SetWeaponAmmo(WEAPON_TASER, Ammo);
+
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, Amount < 0 ? Amount*-1 : Amount);
+		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+	}
+
+	pAccount->m_TaserBattery += Amount;
+	return true;
+}
+
 void CPlayer::OnLogin()
 {
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	if (m_pCharacter)
 	{
 		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
-			m_pCharacter->GiveWeapon(WEAPON_TASER, false, 0);
+			m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
 		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
