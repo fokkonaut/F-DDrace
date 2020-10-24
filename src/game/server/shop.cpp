@@ -511,6 +511,12 @@ void CShop::BuyItem(int ClientID, int Item)
 		return;
 	}
 
+	if (Item == ITEM_TASER_BATTERY && !pPlayer->GiveTaserBattery(Amount))
+	{
+		m_pGameServer->SendChatTarget(ClientID, "Taser battery purchase failed, check that you have a taser");
+		return;
+	}
+
 	// send a message that we bought the item
 	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aDescription, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	m_pGameServer->SendChatTarget(ClientID, aMsg);
@@ -543,7 +549,7 @@ void CShop::BuyItem(int ClientID, int Item)
 									pAccount->m_SpawnWeapon[Weapon]++; break;
 		case ITEM_NINJAJETPACK:		pAccount->m_Ninjajetpack = true; break;
 		case ITEM_TASER:			pAccount->m_TaserLevel++; break;
-		case ITEM_TASER_BATTERY:	pPlayer->GiveTaserBattery(Amount); break;
+		case ITEM_TASER_BATTERY:	break; // done above
 		case ITEM_PORTAL_RIFLE:		pAccount->m_PortalRifle = true; pPlayer->SetExpireDate(Item);
 									if (pPlayer->GetCharacter())
 										pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);
