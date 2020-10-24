@@ -1454,11 +1454,11 @@ bool CPlayer::GiveTaserBattery(int Amount)
 
 	if (m_pCharacter)
 	{
-		if (!m_pCharacter->GetWeaponGot(WEAPON_TASER))
-			return false;
-
-		int Ammo = m_pCharacter->GetWeaponAmmo(WEAPON_TASER) + Amount;
-		m_pCharacter->SetWeaponAmmo(WEAPON_TASER, Ammo);
+		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
+		{
+			int Ammo = m_pCharacter->GetWeaponAmmo(WEAPON_TASER) + Amount;
+			m_pCharacter->SetWeaponAmmo(WEAPON_TASER, Ammo);
+		}
 
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, Amount < 0 ? Amount*-1 : Amount);
