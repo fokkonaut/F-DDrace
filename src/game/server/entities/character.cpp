@@ -1004,6 +1004,16 @@ void CCharacter::HandleWeapons()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
+	if (m_InitializedSpawnWeapons)
+	{
+		int W = GetSpawnWeaponIndex(Weapon);
+		if (W != -1)
+			m_aSpawnWeaponActive[W] = false;
+	}
+
+	if (Weapon == WEAPON_TASER && m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)])
+		return;
+
 	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1 && m_pPlayer->m_Minigame == MINIGAME_NONE)
 		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
@@ -1012,10 +1022,6 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
-
-	int W = GetSpawnWeaponIndex(Weapon);
-	if (W != -1)
-		m_aSpawnWeaponActive[W] = false;
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
@@ -3132,6 +3138,7 @@ void CCharacter::FDDraceInit()
 		m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true;
 	m_RoomAntiSpamTick = Now;
 
+	m_InitializedSpawnWeapons = false;
 	for (int i = 0; i < 3; i++)
 		m_aSpawnWeaponActive[i] = false;
 
@@ -3141,9 +3148,10 @@ void CCharacter::FDDraceInit()
 		for (int i = 0; i < 3; i++)
 			if (pAccount->m_SpawnWeapon[i])
 			{
-				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, pAccount->m_SpawnWeapon[i]);
 				m_aSpawnWeaponActive[i] = true;
+				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, pAccount->m_SpawnWeapon[i]);
 			}
+		m_InitializedSpawnWeapons = true;
 
 		if (pAccount->m_PortalRifle)
 			GiveWeapon(WEAPON_PORTAL_RIFLE, false);

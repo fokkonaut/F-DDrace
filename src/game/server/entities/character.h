@@ -435,6 +435,7 @@ public:
 	void ResetNumInputs() { m_NumInputs = 0; };
 
 	// spawnweapons
+	bool m_InitializedSpawnWeapons;
 	bool m_aSpawnWeaponActive[3];
 	int GetSpawnWeaponIndex(int Weapon);
 
