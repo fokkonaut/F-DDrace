@@ -1764,7 +1764,7 @@ void CCharacter::Snap(int SnappingClient)
 		{
 			int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
 			if (GetActiveWeapon() == WEAPON_TASER)
-				Ammo = clamp((Ammo / 10) + 1, 0, 10);
+				Ammo /= 10;
 			pCharacter->m_AmmoCount = Ammo;
 		}
 	}

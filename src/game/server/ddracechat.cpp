@@ -2583,7 +2583,7 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	}
 	str_format(aBuf, sizeof(aBuf), "FreezeTime: 0.%d seconds", pAccount->m_TaserLevel * 10);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Taser battery: %d/%d taserammo: %d", pAccount->m_TaserBattery, MAX_TASER_BATTERY, pPlayer->GetCharacter()->GetWeaponAmmo(WEAPON_TASER));
+	str_format(aBuf, sizeof(aBuf), "Taser battery: %d/%d", pAccount->m_TaserBattery, MAX_TASER_BATTERY);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
