@@ -2241,6 +2241,14 @@ void CCharacter::HandleTiles(int Index)
 		Bloody(!(m_Bloody || m_StrongBloody));
 	}
 
+	//add jump
+	if ((m_TileIndex == TILE_JUMP_ADD) || (m_TileFIndex == TILE_JUMP_ADD))
+	{
+		if ((m_LastIndexTile == TILE_JUMP_ADD) || (m_LastIndexFrontTile == TILE_JUMP_ADD))
+			return;
+		m_Core.m_Jumps++;
+	}
+
 	//shop
 	for (int i = 0; i < NUM_SHOP_TYPES; i++)
 	{
