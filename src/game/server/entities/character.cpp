@@ -3331,7 +3331,7 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 	if (TilePlotID > 0 && PlotID > 0 && TilePlotID == PlotID)
 	{
 		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
-		m_pPlayer->StopPlotEditing();
+		GiveWeapon(WEAPON_DRAW_EDITOR, true);
 	}
 }
 
