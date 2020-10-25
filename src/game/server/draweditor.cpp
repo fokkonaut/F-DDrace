@@ -30,8 +30,9 @@ bool CDrawEditor::Active()
 bool CDrawEditor::CanPlace()
 {
 	int TilePlotID = GameServer()->GetTilePlotID(m_Pos);
-	// check for TilePlotID > 0 here, because plots start at id 1
-	return (!GameServer()->Collision()->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == GetPlotID()) || m_pCharacter->IsFreeDraw()));
+	int OwnPlotID = GetPlotID();
+	bool FreeDraw = m_pCharacter->IsFreeDraw() && (OwnPlotID < PLOT_START || m_pCharacter->GetCurrentTilePlotID() != OwnPlotID);
+	return (!GameServer()->Collision()->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)

@@ -3022,6 +3022,7 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
+	m_pConfig->m_SvTestingCommands = 1;
 
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
@@ -4016,9 +4017,11 @@ void CGameContext::ExpirePlots()
 			int AccID = GetAccIDByUsername(m_aPlots[i].m_aOwner);
 			if (AccID >= ACC_START)
 			{
-				SendChatTarget(m_Accounts[AccID].m_ClientID, "Your plot expired");
-				m_apPlayers[m_Accounts[AccID].m_ClientID]->CancelPlotAuction();
-				m_apPlayers[m_Accounts[AccID].m_ClientID]->CancelPlotSwap();
+				int ClientID = m_Accounts[AccID].m_ClientID;
+				SendChatTarget(ClientID, "Your plot expired");
+				m_apPlayers[ClientID]->CancelPlotAuction();
+				m_apPlayers[ClientID]->CancelPlotSwap();
+				m_apPlayers[ClientID]->StopPlotEditing();
 			}
 
 			m_aPlots[i].m_aOwner[0] = 0;
