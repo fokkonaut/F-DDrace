@@ -749,7 +749,7 @@ void CCharacter::FireWeapon()
 				if (!m_pTelekinesisEntity)
 				{
 					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
-					CEntity *pEntity = GameWorld()->ClosestEntityTypes(m_CursorPos, 20.f, Types, this, m_pPlayer->GetCID(), false);
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(m_CursorPos, 20.f, Types, this, m_pPlayer->GetCID(), !m_Passive);
 
 					CCharacter *pChr = 0;
 					CFlag *pFlag = 0;
