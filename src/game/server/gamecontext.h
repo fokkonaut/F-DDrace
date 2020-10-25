@@ -95,7 +95,7 @@ enum
 	MAX_TASER_BATTERY = 100,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 2,
+	ACC_CURRENT_VERSION = 3,
 };
 
 enum
