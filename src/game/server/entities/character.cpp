@@ -2156,97 +2156,85 @@ void CCharacter::HandleTiles(int Index)
 	//jetpack toggle
 	if ((m_TileIndex == TILE_JETPACK) || (m_TileFIndex == TILE_JETPACK))
 	{
-		if ((m_LastIndexTile == TILE_JETPACK) || (m_LastIndexFrontTile == TILE_JETPACK))
-			return;
-		Jetpack(!m_Jetpack);
+		if ((m_LastIndexTile != TILE_JETPACK) && (m_LastIndexFrontTile != TILE_JETPACK))
+			Jetpack(!m_Jetpack);
 	}
 
 	//rainbow toggle
 	if ((m_TileIndex == TILE_RAINBOW) || (m_TileFIndex == TILE_RAINBOW))
 	{
-		if ((m_LastIndexTile == TILE_RAINBOW) || (m_LastIndexFrontTile == TILE_RAINBOW))
-			return;
-		Rainbow(!(m_Rainbow || m_pPlayer->m_InfRainbow));
+		if ((m_LastIndexTile != TILE_RAINBOW) && (m_LastIndexFrontTile != TILE_RAINBOW))
+			Rainbow(!(m_Rainbow || m_pPlayer->m_InfRainbow));
 	}
 
 	//atom toggle
 	if ((m_TileIndex == TILE_ATOM) || (m_TileFIndex == TILE_ATOM))
 	{
-		if ((m_LastIndexTile == TILE_ATOM) || (m_LastIndexFrontTile == TILE_ATOM))
-			return;
-		Atom(!m_Atom);
+		if ((m_LastIndexTile != TILE_ATOM) && (m_LastIndexFrontTile != TILE_ATOM))
+			Atom(!m_Atom);
 	}
 
 	//trail toggle
 	if ((m_TileIndex == TILE_TRAIL) || (m_TileFIndex == TILE_TRAIL))
 	{
-		if ((m_LastIndexTile == TILE_TRAIL) || (m_LastIndexFrontTile == TILE_TRAIL))
-			return;
-		Trail(!m_Trail);
+		if ((m_LastIndexTile != TILE_TRAIL) && (m_LastIndexFrontTile != TILE_TRAIL))
+			Trail(!m_Trail);
 	}
 
 	//spooky ghost toggle
 	if ((m_TileIndex == TILE_SPOOKY_GHOST) || (m_TileFIndex == TILE_SPOOKY_GHOST))
 	{
-		if ((m_LastIndexTile == TILE_SPOOKY_GHOST) || (m_LastIndexFrontTile == TILE_SPOOKY_GHOST))
-			return;
-		SpookyGhost(!m_pPlayer->m_SpookyGhost);
+		if ((m_LastIndexTile != TILE_SPOOKY_GHOST) && (m_LastIndexFrontTile != TILE_SPOOKY_GHOST))
+			SpookyGhost(!m_pPlayer->m_SpookyGhost);
 	}
 
 	//add meteor
 	if ((m_TileIndex == TILE_ADD_METEOR) || (m_TileFIndex == TILE_ADD_METEOR))
 	{
-		if ((m_LastIndexTile == TILE_ADD_METEOR) || (m_LastIndexFrontTile == TILE_ADD_METEOR))
-			return;
-		Meteor();
+		if ((m_LastIndexTile != TILE_ADD_METEOR) && (m_LastIndexFrontTile != TILE_ADD_METEOR))
+			Meteor();
 	}
 
 	//remove meteors
 	if ((m_TileIndex == TILE_REMOVE_METEORS) || (m_TileFIndex == TILE_REMOVE_METEORS))
 	{
-		if ((m_LastIndexTile == TILE_REMOVE_METEORS) || (m_LastIndexFrontTile == TILE_REMOVE_METEORS))
-			return;
-		Meteor(false);
+		if ((m_LastIndexTile != TILE_REMOVE_METEORS) && (m_LastIndexFrontTile != TILE_REMOVE_METEORS))
+			Meteor(false);
 	}
 
 	//passive toggle
 	if ((m_TileIndex == TILE_PASSIVE) || (m_TileFIndex == TILE_PASSIVE))
 	{
-		if ((m_LastIndexTile == TILE_PASSIVE) || (m_LastIndexFrontTile == TILE_PASSIVE))
-			return;
-		Passive(!m_Passive);
+		if ((m_LastIndexTile != TILE_PASSIVE) && (m_LastIndexFrontTile != TILE_PASSIVE))
+			Passive(!m_Passive);
 	}
 
 	//vanilla mode
 	if ((m_TileIndex == TILE_VANILLA_MODE) || (m_TileFIndex == TILE_VANILLA_MODE))
 	{
-		if ((m_LastIndexTile == TILE_VANILLA_MODE) || (m_LastIndexFrontTile == TILE_VANILLA_MODE))
-			return;
-		VanillaMode();
+		if ((m_LastIndexTile != TILE_VANILLA_MODE) && (m_LastIndexFrontTile != TILE_VANILLA_MODE))
+			VanillaMode();
 	}
 
 	//ddrace mode
 	if ((m_TileIndex == TILE_DDRACE_MODE) || (m_TileFIndex == TILE_DDRACE_MODE))
 	{
-		if ((m_LastIndexTile == TILE_DDRACE_MODE) || (m_LastIndexFrontTile == TILE_DDRACE_MODE))
-			return;
-		DDraceMode();
+		if ((m_LastIndexTile != TILE_DDRACE_MODE) && (m_LastIndexFrontTile != TILE_DDRACE_MODE))
+			DDraceMode();
 	}
 
 	//bloody toggle
 	if ((m_TileIndex == TILE_BLOODY) || (m_TileFIndex == TILE_BLOODY))
 	{
-		if ((m_LastIndexTile == TILE_BLOODY) || (m_LastIndexFrontTile == TILE_BLOODY))
-			return;
-		Bloody(!(m_Bloody || m_StrongBloody));
+		if ((m_LastIndexTile != TILE_BLOODY) && (m_LastIndexFrontTile != TILE_BLOODY))
+			Bloody(!(m_Bloody || m_StrongBloody));
 	}
 
 	//add jump
 	if ((m_TileIndex == TILE_JUMP_ADD) || (m_TileFIndex == TILE_JUMP_ADD))
 	{
-		if ((m_LastIndexTile == TILE_JUMP_ADD) || (m_LastIndexFrontTile == TILE_JUMP_ADD))
-			return;
-		m_Core.m_Jumps++;
+		if ((m_LastIndexTile != TILE_JUMP_ADD) && (m_LastIndexFrontTile != TILE_JUMP_ADD))
+			m_Core.m_Jumps++;
 	}
 
 	//shop
