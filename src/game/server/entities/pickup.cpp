@@ -227,7 +227,7 @@ void CPickup::Tick()
 						int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
 
 						if (m_Type == POWERUP_BATTERY)
-							RespawnTime = 10 * 60; // 10 min
+							RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
 
 						if (RespawnTime >= 0)
 							m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
