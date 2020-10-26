@@ -1673,7 +1673,6 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 		pSelf->WriteAccountStats(ID);
 	}
 
-	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully logged in");
 	pSelf->m_apPlayers[pResult->m_ClientID]->OnLogin();
 }
 

@@ -1471,14 +1471,24 @@ bool CPlayer::GiveTaserBattery(int Amount)
 
 void CPlayer::OnLogin()
 {
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	if (m_pCharacter)
+	if (GameServer()->Config()->m_SvAccChangeKill)
 	{
-		if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
-			m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
+		GameServer()->SendChatTarget(m_ClientID, "Successfully logged in, you got automatically killed");
+		KillCharacter();
+	}
+	else
+	{
+		GameServer()->SendChatTarget(m_ClientID, "Successfully logged in");
 
-		if (pAccount->m_PortalRifle)
-			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
+		CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+		if (m_pCharacter)
+		{
+			if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
+				m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
+
+			if (pAccount->m_PortalRifle)
+				m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
+		}
 	}
 
 	for (int i = 0; i < NUM_ITEMS; i++)
@@ -1494,16 +1504,26 @@ void CPlayer::OnLogin()
 
 void CPlayer::OnLogout()
 {
-	if (m_pCharacter)
+	if (GameServer()->Config()->m_SvAccChangeKill)
 	{
-		m_pCharacter->UnsetSpookyGhost();
-		m_pCharacter->GiveWeapon(WEAPON_TASER, true);
-		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
-
-		StopPlotEditing();
-		CancelPlotAuction();
-		CancelPlotSwap();
+		GameServer()->SendChatTarget(m_ClientID, "Successfully logged out, you got automatically killed");
+		KillCharacter();
 	}
+	else
+	{
+		GameServer()->SendChatTarget(m_ClientID, "Successfully logged out");
+
+		if (m_pCharacter)
+		{
+			m_pCharacter->UnsetSpookyGhost();
+			m_pCharacter->GiveWeapon(WEAPON_TASER, true);
+			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
+		}
+	}
+
+	StopPlotEditing();
+	CancelPlotAuction();
+	CancelPlotSwap();
 }
 
 void CPlayer::StopPlotEditing()
