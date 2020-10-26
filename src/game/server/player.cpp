@@ -822,7 +822,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		m_Spawning = true;
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && (NewInput->m_Fire&1)
-		// to prevent clicking after you got killed and immediately unspectate your killer on accident 
+		// to prevent clicking after you got killed and immediately unspectate your killer on accident
 		&& (m_SurvivalState == SURVIVAL_OFFLINE || m_SurvivalDieTick < Server()->Tick() - Server()->TickSpeed() * 2))
 	{
 		if(!m_ActiveSpecSwitch)
