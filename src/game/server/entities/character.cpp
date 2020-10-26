@@ -1011,10 +1011,15 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 			m_aSpawnWeaponActive[W] = false;
 	}
 
-	if (Weapon == WEAPON_TASER && m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)])
-		return;
+	if (Weapon == WEAPON_TASER)
+	{
+		if (m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
+			|| GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1
+			|| m_pPlayer->m_Minigame != MINIGAME_NONE)
+			return;
+	}
 
-	if (Weapon == WEAPON_LASER && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel >= 1 && m_pPlayer->m_Minigame == MINIGAME_NONE)
+	if (Weapon == WEAPON_LASER)
 		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)

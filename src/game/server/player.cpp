@@ -1483,8 +1483,7 @@ void CPlayer::OnLogin()
 		CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 		if (m_pCharacter)
 		{
-			if (m_pCharacter->GetWeaponGot(WEAPON_LASER) && pAccount->m_TaserLevel >= 1)
-				m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
+			m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
 			if (pAccount->m_PortalRifle)
 				m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
