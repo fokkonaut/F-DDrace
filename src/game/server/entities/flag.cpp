@@ -54,7 +54,19 @@ void CFlag::PlaySound(int Sound)
 	if (m_SoundTick < 10 && m_CanPlaySound)
 	{
 		m_SoundTick++;
-		GameServer()->CreateSoundGlobal(Sound);
+
+		if (Config()->m_SvFlagSounds == 1)
+		{
+			GameServer()->CreateSoundGlobal(Sound);
+		}
+		else if (Config()->m_SvFlagSounds == 2)
+		{
+			Mask128 TeamMask = Mask128();
+			CCharacter *pChr = m_pCarrier ? m_pCarrier : m_pLastCarrier ? m_pLastCarrier : 0;
+			if (pChr)
+				TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pChr->GetPlayer()->GetCID());
+			GameServer()->CreateSound(m_Pos, Sound, TeamMask);
+		}
 	}
 	else
 		m_CanPlaySound = false;
