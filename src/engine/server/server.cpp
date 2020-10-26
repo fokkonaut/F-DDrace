@@ -1136,12 +1136,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if (m_aClients[ClientID].m_Sevendown)
 					{
 						// drop faulty map data requests
-						if(Chunk < 0 || Offset > m_CurrentMapSize)
+						if(Chunk < 0 || (int)Offset > m_CurrentMapSize)
 							return;
 					}
 
 					// check for last part
-					if(Offset+ChunkSize >= m_CurrentMapSize)
+					if((int)Offset+ChunkSize >= m_CurrentMapSize)
 					{
 						ChunkSize = m_CurrentMapSize-Offset;
 						Last = 1;
