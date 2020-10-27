@@ -2239,7 +2239,12 @@ void CCharacter::HandleTiles(int Index)
 	if ((m_TileIndex == TILE_JUMP_ADD) || (m_TileFIndex == TILE_JUMP_ADD))
 	{
 		if ((m_LastIndexTile != TILE_JUMP_ADD) && (m_LastIndexFrontTile != TILE_JUMP_ADD))
+		{
 			m_Core.m_Jumps++;
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "You got +1 jump and can jump %d times now", m_Core.m_Jumps);
+			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
+		}
 	}
 
 	//shop
