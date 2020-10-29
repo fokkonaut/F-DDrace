@@ -190,6 +190,7 @@ void CGameWorld::UpdatePlayerMaps()
 			if (pMap[j] != -1)
 				rMap[pMap[j]] = j;
 
+		bool UpdateTeamsStates = false;
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
 			if (i == j)
@@ -233,7 +234,7 @@ void CGameWorld::UpdatePlayerMaps()
 						rMap[pMap[Free]] = -1;
 
 						if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
-							((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
+							UpdateTeamsStates = true;
 					}
 					pMap[Free] = j;
 					rMap[j] = Free;
@@ -251,13 +252,16 @@ void CGameWorld::UpdatePlayerMaps()
 							pPlayer->SendConnect(j, rMap[j]);
 
 							if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
-								((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
+								UpdateTeamsStates = true;
 							break;
 						}
 					}
 				}
 			}
 		}
+
+		if (UpdateTeamsStates)
+			((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
 	}
 }
 
