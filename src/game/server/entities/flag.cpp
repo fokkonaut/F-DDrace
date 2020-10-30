@@ -72,6 +72,16 @@ void CFlag::PlaySound(int Sound)
 		m_CanPlaySound = false;
 }
 
+void CFlag::UpdateSpectators(int SpectatorID)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+		if (pPlayer && ((m_Team == TEAM_RED && pPlayer->GetSpecMode() == SPEC_FLAGRED) || (m_Team == TEAM_BLUE && pPlayer->GetSpecMode() == SPEC_FLAGBLUE)))
+			pPlayer->ForceSetSpectatorID(SpectatorID);
+	}
+}
+
 void CFlag::TickPaused()
 {
 	if(m_DropTick)
@@ -95,6 +105,7 @@ void CFlag::Drop(int Dir)
 	m_pLastCarrier = m_pCarrier;
 	m_pCarrier = NULL;
 	m_Vel = vec2(5 * Dir, Dir == 0 ? 0 : -5);
+	UpdateSpectators(-1);
 }
 
 void CFlag::Grab(CCharacter *pChr)
@@ -106,6 +117,7 @@ void CFlag::Grab(CCharacter *pChr)
 	m_pCarrier = pChr;
 	m_pCarrier->m_FirstFreezeTick = 0;
 	GameServer()->UnsetTelekinesis(this);
+	UpdateSpectators(m_pCarrier->GetPlayer()->GetCID());
 }
 
 void CFlag::Tick()

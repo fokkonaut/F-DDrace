@@ -36,6 +36,8 @@ private:
 	int m_SoundTick;
 	bool m_CanPlaySound;
 
+	void UpdateSpectators(int SpectatorID);
+
 public:
 
 	CCharacter *GetCarrier() const { return m_pCarrier; }
