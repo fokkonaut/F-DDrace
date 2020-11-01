@@ -1695,7 +1695,15 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	pSelf->Logout(pPlayer->GetAccID());
+	if (pSelf->Config()->m_SvKillLogout && pPlayer->GetCharacter())
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Kill logout is activated, kill within %d seconds to logout", pSelf->Config()->m_SvKillLogout);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		pPlayer->GetCharacter()->m_LastWantedLogout = pSelf->Server()->Tick();
+	}
+	else
+		pSelf->Logout(pPlayer->GetAccID());
 }
 
 void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData)

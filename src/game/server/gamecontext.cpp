@@ -2305,6 +2305,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				if (pChr->m_LastWantedLogout && pChr->m_LastWantedLogout + Server()->TickSpeed() * Config()->m_SvKillLogout > Server()->Tick())
+					Logout(pPlayer->GetAccID());
+
 				pPlayer->KillCharacter(WEAPON_SELF);
 				pPlayer->Respawn();
 			}
@@ -4452,6 +4455,9 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 
 void CGameContext::Logout(int ID, bool Silent)
 {
+	if (ID < ACC_START)
+		return;
+
 	if (m_Accounts[ID].m_ClientID >= 0)
 	{
 		if (m_apPlayers[m_Accounts[ID].m_ClientID])
