@@ -3184,7 +3184,7 @@ void CCharacter::FDDraceInit()
 	m_LastLinkedPortals = Now;
 	m_LastWantedWeapon = 0;
 
-	m_LastWantedLogout = Now;
+	m_LastWantedLogout = 0;
 }
 
 void CCharacter::FDDraceTick()
