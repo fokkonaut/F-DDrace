@@ -5255,6 +5255,8 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
 		{
 			pPlayer->m_Gamemode = Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+			if (pPlayer->GetCharacter())
+				pPlayer->GetCharacter()->m_SavedGamemode = pPlayer->m_Gamemode;
 			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
 			pPlayer->m_ShowName = true;
 		}
@@ -5272,6 +5274,8 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 		if (Minigame == MINIGAME_SURVIVAL)
 		{
 			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
+			if (pPlayer->GetCharacter())
+				pPlayer->GetCharacter()->m_SavedGamemode = pPlayer->m_Gamemode;
 			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
 		}
 	}
