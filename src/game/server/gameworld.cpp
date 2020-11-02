@@ -629,9 +629,9 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int Col
 			if (p->m_FreezeTime == 0)
 				continue;
 		}
-		if (Mode == 9) //for shopbot and bank bot
+		if (Mode == 9) //for shopbot
 		{
-			if (GameServer()->IsShopDummy(p->GetPlayer()->GetCID()) || GameServer()->m_apPlayers[p->GetPlayer()->GetCID()]->m_Dummymode == DUMMYMODE_BANK_DUMMY)
+			if (GameServer()->IsShopDummy(p->GetPlayer()->GetCID()))
 				continue;
 		}
 

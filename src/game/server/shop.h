@@ -135,11 +135,11 @@ public:
 	void OnKeyPress(int ClientID, int Dir);
 	bool CanChangePage(int ClientID);
 
-	void OnPageChange(int ClientID, int Dir) { ShopWindow(ClientID, Dir); }
-	bool IsInShop(int ClientID) { return m_InShop[ClientID]; }
-	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; }
+	void OnPageChange(int ClientID, int Dir) { ShopWindow(ClientID, Dir); };
+	bool IsInShop(int ClientID) { return m_InShop[ClientID]; };
+	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; };
 
-	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; }
+	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; };
 
 	int GetType() { return m_Type; }
 	bool IsType(int Type) { return m_Type == Type; }
