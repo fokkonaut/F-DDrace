@@ -1326,14 +1326,13 @@ void CPlayer::RainbowTick()
 
 	m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
 
-	CTeeInfo Info;
+	CTeeInfo Info = m_CurrentInfo.m_TeeInfos;
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
 		int BaseColor = m_RainbowColor * 0x010000;
 		int Color = 0xff32;
 		if (p == SKINPART_MARKING)
 			Color *= -256;
-		str_copy(Info.m_aaSkinPartNames[p], m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p], 24);
 		Info.m_aUseCustomColors[p] = 1;
 		Info.m_aSkinPartColors[p] = BaseColor + Color;
 	}
