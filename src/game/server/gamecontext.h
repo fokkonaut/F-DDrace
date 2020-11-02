@@ -13,6 +13,7 @@
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
 #include "shop.h"
+#include "bank.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -547,6 +548,7 @@ public:
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
 
 	class CShop *m_pShop[NUM_SHOP_TYPES];
+	class CBank *m_pBank;
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);
