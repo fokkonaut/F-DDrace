@@ -1177,15 +1177,15 @@ void CCharacter::Tick()
 	m_Core.Tick(true);
 
 	// F-DDrace
-	if (m_Core.m_UpdateFlagVel == FLAG_RED || m_Core.m_UpdateFlagVel == FLAG_BLUE)
+	if (m_Core.m_UpdateFlagVel == HOOK_FLAG_RED || m_Core.m_UpdateFlagVel == HOOK_FLAG_BLUE)
 	{
-		int Flag = m_Core.m_UpdateFlagVel == FLAG_RED ? TEAM_RED : TEAM_BLUE;
+		int Flag = m_Core.m_UpdateFlagVel == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetVel(m_Core.m_UFlagVel);
 	}
 
-	if (m_Core.m_UpdateFlagAtStand == FLAG_RED || m_Core.m_UpdateFlagAtStand == FLAG_BLUE)
+	if (m_Core.m_UpdateFlagAtStand == HOOK_FLAG_RED || m_Core.m_UpdateFlagAtStand == HOOK_FLAG_BLUE)
 	{
-		int Flag = m_Core.m_UpdateFlagAtStand == FLAG_RED ? TEAM_RED : TEAM_BLUE;
+		int Flag = m_Core.m_UpdateFlagAtStand == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
 	}

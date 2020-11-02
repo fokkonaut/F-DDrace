@@ -643,6 +643,30 @@ void CPlayer::FakeSnap()
 		StrToInts(&pClientInfo[0], 4, " ");
 		StrToInts(&pClientInfo[4], 3, "");
 		StrToInts(&pClientInfo[8], 6, "default");
+
+		for (int i = 0; i < 2; i++)
+		{
+			FakeID--;
+			pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETMSGTYPES, FakeID, 17*4); // NETOBJTYPE_CLIENTINFO
+			if(!pClientInfo)
+				return;
+
+			StrToInts(&pClientInfo[0], 4, i == TEAM_RED ? "Red Flag" : "Blue Flag");
+			StrToInts(&pClientInfo[4], 3, "");
+			StrToInts(&pClientInfo[8], 6, "default");
+			pClientInfo[14] = 1;
+			pClientInfo[15] = pClientInfo[16] = i == TEAM_RED ? 65387 : 10223467;
+
+			CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, 5*4));
+			if (!pPlayerInfo)
+				return;
+
+			((int*)pPlayerInfo)[0] = 0;
+			((int*)pPlayerInfo)[1] = FakeID;
+			((int*)pPlayerInfo)[2] = TEAM_BLUE;
+			((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : 0;
+			((int*)pPlayerInfo)[4] = 0;
+		}
 	}
 }
 

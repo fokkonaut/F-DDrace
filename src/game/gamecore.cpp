@@ -313,9 +313,9 @@ void CCharacterCore::Tick(bool UseInput)
 						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
 						m_HookState = HOOK_GRABBED;
 						if (i == TEAM_RED)
-							m_HookedPlayer = FLAG_RED;
+							m_HookedPlayer = HOOK_FLAG_RED;
 						if (i == TEAM_BLUE)
-							m_HookedPlayer = FLAG_BLUE;
+							m_HookedPlayer = HOOK_FLAG_BLUE;
 						Distance = distance(m_HookPos, m_FlagPos[i]);
 
 						if (m_AtStand[i])
@@ -360,11 +360,11 @@ void CCharacterCore::Tick(bool UseInput)
 	if(m_HookState == HOOK_GRABBED)
 	{
 		// F-DDrace
-		if (m_HookedPlayer == FLAG_RED || m_HookedPlayer == FLAG_BLUE)
+		if (m_HookedPlayer == HOOK_FLAG_RED || m_HookedPlayer == HOOK_FLAG_BLUE)
 		{
 			for (int i = 0; i < 2; i++)
 			{
-				if ((i == TEAM_RED && m_HookedPlayer == FLAG_RED) || (i == TEAM_BLUE && m_HookedPlayer == FLAG_BLUE))
+				if ((i == TEAM_RED && m_HookedPlayer == HOOK_FLAG_RED) || (i == TEAM_BLUE && m_HookedPlayer == HOOK_FLAG_BLUE))
 				{
 					if (!m_Carried[i])
 						m_HookPos = m_FlagPos[i];
@@ -490,10 +490,10 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 		}
 
-		if (m_HookedPlayer == FLAG_RED || m_HookedPlayer == FLAG_BLUE)
+		if (m_HookedPlayer == HOOK_FLAG_RED || m_HookedPlayer == HOOK_FLAG_BLUE)
 		{
 			m_UpdateFlagVel = m_HookedPlayer;
-			int Team = m_HookedPlayer == FLAG_RED ? TEAM_RED : TEAM_BLUE;
+			int Team = m_HookedPlayer == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
 			vec2 Temp = m_FlagVel[Team];
 			float Distance = distance(m_Pos, m_FlagPos[Team]);
 			vec2 Dir = normalize(m_Pos - m_FlagPos[Team]);
@@ -612,7 +612,7 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore) const
 	pObjCore->m_HookY = round_to_int(m_HookPos.y);
 	pObjCore->m_HookDx = round_to_int(m_HookDir.x*256.0f);
 	pObjCore->m_HookDy = round_to_int(m_HookDir.y*256.0f);
-	if (m_HookedPlayer == FLAG_RED || m_HookedPlayer == FLAG_BLUE)
+	if (m_HookedPlayer == HOOK_FLAG_RED || m_HookedPlayer == HOOK_FLAG_BLUE)
 		pObjCore->m_HookedPlayer = -1;
 	else
 		pObjCore->m_HookedPlayer = m_HookedPlayer;
@@ -633,7 +633,7 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_HookPos.y = pObjCore->m_HookY;
 	m_HookDir.x = pObjCore->m_HookDx/256.0f;
 	m_HookDir.y = pObjCore->m_HookDy/256.0f;
-	if (m_HookedPlayer != FLAG_RED && m_HookedPlayer != FLAG_BLUE)
+	if (m_HookedPlayer != HOOK_FLAG_RED && m_HookedPlayer != HOOK_FLAG_BLUE)
 		m_HookedPlayer = pObjCore->m_HookedPlayer;
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;

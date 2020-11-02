@@ -50,6 +50,12 @@ enum Portals
 	NUM_PORTALS
 };
 
+enum SpectatorFlagSelection
+{
+	SPEC_SELECT_FLAG_RED = VANILLA_MAX_CLIENTS - SPEC_FLAGRED,
+	SPEC_SELECT_FLAG_BLUE = VANILLA_MAX_CLIENTS - SPEC_FLAGBLUE,
+};
+
 enum
 {
 	WEAPON_PLAYER = -4, // killed by a player

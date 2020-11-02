@@ -1514,6 +1514,12 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
 			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
+
+			if (pMsg->m_SpectatorID == SPEC_SELECT_FLAG_RED || pMsg->m_SpectatorID == SPEC_SELECT_FLAG_BLUE)
+			{
+				pMsg->m_SpecMode = VANILLA_MAX_CLIENTS - pMsg->m_SpectatorID;
+				pMsg->m_SpectatorID = -1;
+			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SKINCHANGE)
 		{
