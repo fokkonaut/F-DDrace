@@ -557,7 +557,6 @@ void IGameController::Snap(int SnappingClient)
 			| GAMEINFOFLAG_ALLOW_EYE_WHEEL
 			| GAMEINFOFLAG_ALLOW_HOOK_COLL
 			| GAMEINFOFLAG_BUG_DDRACE_GHOST
-			| GAMEINFOFLAG_BUG_DDRACE_INPUT // by removing this it would allow ddnet clients to use "click to spectate" feature too, but not sure about other influences...
 			| GAMEINFOFLAG_PREDICT_DDRACE
 			| GAMEINFOFLAG_PREDICT_DDRACE_TILES
 			| GAMEINFOFLAG_ENTITIES_DDNET
