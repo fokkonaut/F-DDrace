@@ -439,16 +439,24 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
-		if (i == SPEC_SELECT_FLAG_RED)
-			Msg.AddInt(1);
-		else if (i == SPEC_SELECT_FLAG_BLUE)
-			Msg.AddInt(36);
-		else
+		if (Server()->IsSevendown(ClientID))
 		{
-			int id = i;
-			Server()->ReverseTranslate(id, ClientID);
-			Msg.AddInt(m_Core.Team(id));
+			int Team = -1;
+			if (i == SPEC_SELECT_FLAG_RED)
+				Team = 1;
+			else if (i == SPEC_SELECT_FLAG_BLUE)
+				Team = 36;
+
+			if (Team != -1)
+			{
+				Msg.AddInt(Team);
+				continue;
+			}
 		}
+
+		int id = i;
+		Server()->ReverseTranslate(id, ClientID);
+		Msg.AddInt(m_Core.Team(id));
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
