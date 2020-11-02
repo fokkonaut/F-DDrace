@@ -4742,7 +4742,8 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 
 	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		pDummy->m_Minigame = MINIGAME_BLOCK;
-	else if (pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
+	else if ((pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
+		|| (pDummy->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY && Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN)))
 		pDummy->m_Minigame = -1;
 
 	pDummy->m_TeeInfos = CTeeInfo(SKIN_DUMMY);
@@ -4807,7 +4808,12 @@ void CGameContext::ConnectDefaultDummies()
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 
 	if (GetShopDummy(TYPE_SHOP_PLOT) == -1 && Collision()->TileUsed(TILE_PLOT_SHOP))
-		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY);
+	{
+		vec2 Pos = vec2(-1, -1);
+		if (Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN))
+			Pos = Collision()->GetRandomTile(ENTITY_PLOT_SHOP_DUMMY_SPAWN);
+		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY, Pos);
+	}
 }
 
 void CGameContext::SetV3Offset(int X, int Y)

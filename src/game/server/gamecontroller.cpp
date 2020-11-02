@@ -368,6 +368,10 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		GameServer()->ConnectDummy(DUMMYMODE_SHOP_DUMMY, Pos);
 	}
+	else if (Index == ENTITY_PLOT_SHOP_DUMMY_SPAWN)
+	{
+		GameServer()->ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY, Pos);
+	}
 	else if(Index >= ENTITY_LASER_FAST_CCW && Index <= ENTITY_LASER_FAST_CW)
 	{
 		int sides2[8];
