@@ -22,6 +22,9 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Owner = Owner;
 	m_SnapPos = m_Pos;
 
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_LastBatteryMsg[i] = 0;
+
 	Reset();
 
 	m_ID2 = Server()->SnapNewID();
@@ -75,7 +78,7 @@ void CPickup::Tick()
 				if(m_Type == POWERUP_WEAPON)
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
 			}
-			else
+			else if (m_Type != POWERUP_BATTERY)
 				return;
 		}
 		// Check if a player intersected us
@@ -204,7 +207,21 @@ void CPickup::Tick()
 					}
 
 					case POWERUP_BATTERY:
-						if (pChr->GetPlayer()->GiveTaserBattery(10))
+						if (m_SpawnTick > 0)
+						{
+							int ClientID = pChr->GetPlayer()->GetCID();
+							if (m_LastBatteryMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
+								return;
+
+							m_LastBatteryMsg[ClientID] = Server()->Tick();
+
+							char aBuf[64];
+							int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
+							str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d seconds", Seconds);
+							GameServer()->SendChatTarget(ClientID, aBuf);
+							return;
+						}
+						else if (pChr->GetPlayer()->GiveTaserBattery(10))
 						{
 							Picked = true;
 							GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));

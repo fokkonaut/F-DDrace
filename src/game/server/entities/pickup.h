@@ -36,6 +36,8 @@ private:
 	vec2 m_Core;
 
 	int m_ID2;
+
+	int64 m_LastBatteryMsg[MAX_CLIENTS];
 };
 
 #endif
