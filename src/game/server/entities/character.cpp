@@ -1013,7 +1013,8 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 
 	if (Weapon == WEAPON_TASER)
 	{
-		if (m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
+		if (!m_aWeapons[WEAPON_LASER].m_Got
+			|| m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
 			|| GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1
 			|| m_pPlayer->m_Minigame != MINIGAME_NONE)
 			return;
