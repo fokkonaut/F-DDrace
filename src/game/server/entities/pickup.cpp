@@ -23,7 +23,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_SnapPos = m_Pos;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_LastBatteryMsg[i] = 0;
+		m_aLastBatteryMsg[i] = 0;
 
 	Reset();
 
@@ -210,10 +210,10 @@ void CPickup::Tick()
 						if (m_SpawnTick > 0)
 						{
 							int ClientID = pChr->GetPlayer()->GetCID();
-							if (m_LastBatteryMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
+							if (m_aLastBatteryMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
 								return;
 
-							m_LastBatteryMsg[ClientID] = Server()->Tick();
+							m_aLastBatteryMsg[ClientID] = Server()->Tick();
 
 							char aBuf[64];
 							int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();

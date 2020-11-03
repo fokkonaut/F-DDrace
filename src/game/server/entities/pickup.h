@@ -37,7 +37,7 @@ private:
 
 	int m_ID2;
 
-	int64 m_LastBatteryMsg[MAX_CLIENTS];
+	int64 m_aLastBatteryMsg[MAX_CLIENTS];
 };
 
 #endif
