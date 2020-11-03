@@ -69,7 +69,7 @@ bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, 
 	if (Team == -1 || m_apFlags[Team])
 		return false;
 
-	m_GameFlags = GAMEFLAG_FLAGS;
+	m_GameFlags |= GAMEFLAG_FLAGS;
 
 	CFlag *F = new CFlag(&GameServer()->m_World, Team, Pos);
 	m_apFlags[Team] = F;

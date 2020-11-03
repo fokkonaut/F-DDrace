@@ -439,7 +439,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
-		if (Server()->IsSevendown(ClientID))
+		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
 			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)

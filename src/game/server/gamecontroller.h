@@ -145,6 +145,8 @@ public:
 	// F-DDrace
 
 	float m_CurrentRecord;
+
+	int GetGameFlags() { return m_GameFlags; }
 };
 
 #endif

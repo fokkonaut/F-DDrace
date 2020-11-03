@@ -1515,7 +1515,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
 			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
 
-			if (pMsg->m_SpectatorID == SPEC_SELECT_FLAG_RED || pMsg->m_SpectatorID == SPEC_SELECT_FLAG_BLUE)
+			if (FlagsUsed() && (pMsg->m_SpectatorID == SPEC_SELECT_FLAG_RED || pMsg->m_SpectatorID == SPEC_SELECT_FLAG_BLUE))
 			{
 				pMsg->m_SpecMode = VANILLA_MAX_CLIENTS - pMsg->m_SpectatorID;
 				pMsg->m_SpectatorID = -1;
@@ -4889,6 +4889,11 @@ void CGameContext::UnsetTelekinesis(CEntity *pEntity)
 			break; // can break here, every entity can only be picked by one player using telekinesis at the time
 		}
 	}
+}
+
+bool CGameContext::FlagsUsed()
+{
+	return (m_pController->GetGameFlags()&GAMEFLAG_FLAGS);
 }
 
 void CGameContext::SendMotd(const char *pMsg, int ClientID)

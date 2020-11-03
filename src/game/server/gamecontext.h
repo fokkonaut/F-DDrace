@@ -557,6 +557,8 @@ public:
 	bool SameIP(int ClientID1, int ClientID2);
 	bool SameIP(int AccID, const NETADDR *pAddr);
 
+	bool FlagsUsed();
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 

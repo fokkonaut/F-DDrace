@@ -182,14 +182,14 @@ void CGameWorld::UpdatePlayerMaps()
 
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-		int Minus = 1;
+		int Reserved = 1;
 
-		if (Server()->IsSevendown(i))
+		if (Server()->IsSevendown(i) && GameServer()->FlagsUsed())
 		{
 			// reserved for flag selecting
 			pMap[SPEC_SELECT_FLAG_RED] = -1;
 			pMap[SPEC_SELECT_FLAG_BLUE] = -1;
-			Minus = VANILLA_MAX_CLIENTS - SPEC_SELECT_FLAG_BLUE;
+			Reserved = VANILLA_MAX_CLIENTS - SPEC_SELECT_FLAG_BLUE;
 		}
 
 		int rMap[MAX_CLIENTS];
@@ -208,7 +208,7 @@ void CGameWorld::UpdatePlayerMaps()
 			CPlayer *pChecked = GameServer()->m_apPlayers[j];
 
 			int Free = -1;
-			for (int k = 0; k < VANILLA_MAX_CLIENTS-Minus; k++)
+			for (int k = 0; k < VANILLA_MAX_CLIENTS-Reserved; k++)
 			{
 				if (pMap[k] == -1 || (pPlayer->m_aSameIP[j] && k == GameServer()->m_apPlayers[j]->m_FakeID))
 				{
