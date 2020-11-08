@@ -443,9 +443,9 @@ void CGameTeams::SendTeamsState(int ClientID)
 		{
 			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)
-				Team = 1;
+				Team = 1; // red colored team
 			else if (i == SPEC_SELECT_FLAG_BLUE)
-				Team = 36;
+				Team = 36; // blue colored team
 
 			if (Team != -1)
 			{
@@ -456,7 +456,14 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 		int id = i;
 		Server()->ReverseTranslate(id, ClientID);
-		Msg.AddInt(m_Core.Team(id));
+
+		int Team = m_Core.Team(id);
+		if (Team == TEAM_SUPER)
+			Team = VANILLA_MAX_CLIENTS;
+		else if (Team > VANILLA_MAX_CLIENTS)
+			Team = 0;
+
+		Msg.AddInt(Team);
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
