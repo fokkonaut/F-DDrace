@@ -51,6 +51,8 @@ public:
 	virtual void DummyLeave(int DummyID) = 0;
 
 	virtual bool IsSevendown(int ClientID) = 0;
+	virtual bool UseLocalIDMap(int ClientID) = 0;
+	virtual void SetIDMapUsage(int ClientID, bool UseLocalIDMap) = 0;
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 

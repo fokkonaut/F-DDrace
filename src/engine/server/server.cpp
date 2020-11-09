@@ -452,6 +452,7 @@ int CServer::Init()
 		m_aClients[i].m_Traffic = 0;
 		m_aClients[i].m_TrafficSince = 0;
 		m_aClients[i].m_Sevendown = false;
+		m_aClients[i].m_UseLocalIDMap = false;
 	}
 
 	m_AnnouncementLastLine = 0;
@@ -827,6 +828,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
+	pThis->m_aClients[ClientID].m_UseLocalIDMap = false;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 
@@ -865,6 +867,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sevendown = false;
+	pThis->m_aClients[ClientID].m_UseLocalIDMap = false;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 
 	return 0;
@@ -2954,6 +2957,7 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
 	m_aClients[DummyID].m_Sevendown = false;
+	m_aClients[DummyID].m_UseLocalIDMap = false;
 
 	m_NetServer.DummyDelete(DummyID);
 }

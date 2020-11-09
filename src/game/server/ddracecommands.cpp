@@ -5,6 +5,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 #include <game/server/entities/character.h>
+#include <engine/server/server.h>
 
 bool CheckClientID(int ClientID);
 
@@ -669,6 +670,19 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 }
 
 // F-DDrace
+
+void CGameContext::ConToggleIDMapUsage(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int ClientID = pResult->m_ClientID;
+	if (!pSelf->m_apPlayers[ClientID])
+		return;
+
+	pSelf->Server()->SetIDMapUsage(ClientID, !pSelf->Server()->UseLocalIDMap(ClientID));
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' is now using %s id map mode for input", pSelf->Server()->ClientName(ClientID), pSelf->Server()->UseLocalIDMap(ClientID) ? "local" : "normal");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
 
 void CGameContext::ConAllWeapons(IConsole::IResult* pResult, void* pUserData)
 {

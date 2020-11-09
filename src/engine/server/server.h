@@ -160,6 +160,7 @@ public:
 		int64 m_TrafficSince;
 
 		bool m_Sevendown;
+		bool m_UseLocalIDMap;
 
 		int m_MapChunk;
 		bool m_NoRconNote;
@@ -278,6 +279,8 @@ public:
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 	bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
+	bool UseLocalIDMap(int ClientID) { return m_aClients[ClientID].m_UseLocalIDMap; }
+	void SetIDMapUsage(int ClientID, bool UseLocalIDMap) { m_aClients[ClientID].m_UseLocalIDMap = UseLocalIDMap; }
 
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);

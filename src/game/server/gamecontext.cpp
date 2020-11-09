@@ -3035,6 +3035,7 @@ void CGameContext::OnInit()
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
+	Console()->SetTranslateVictimCallback(ConsoleTranslateVictimCallback, this);
 
 	DeleteTempfile();
 
@@ -4778,12 +4779,6 @@ int CGameContext::GetShopDummy(int Type)
 	return -1;
 }
 
-void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *IsDummy, void *pUser)
-{
-	CGameContext* pSelf = (CGameContext*)pUser;
-	*IsDummy = pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_IsDummy;
-}
-
 void CGameContext::ConnectDefaultDummies()
 {
 	if (GetShopDummy(TYPE_SHOP_NORMAL) == -1 && Collision()->TileUsed(TILE_SHOP))
@@ -4820,6 +4815,20 @@ void CGameContext::ConnectDefaultDummies()
 			Pos = Collision()->GetRandomTile(ENTITY_PLOT_SHOP_DUMMY_SPAWN);
 		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY, Pos);
 	}
+}
+
+void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pUser)
+{
+	CGameContext* pSelf = (CGameContext*)pUser;
+	*pIsDummy = pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_IsDummy;
+}
+
+bool CGameContext::ConsoleTranslateVictimCallback(int ClientID, int *pVictim, void *pUser)
+{
+	CGameContext* pSelf = (CGameContext*)pUser;
+	if (*pVictim < 0 || *pVictim >= MAX_CLIENTS)
+		return true;
+	return !pSelf->Server()->UseLocalIDMap(ClientID) || pSelf->Server()->ReverseTranslate(*pVictim, ClientID);
 }
 
 void CGameContext::SetV3Offset(int X, int Y)

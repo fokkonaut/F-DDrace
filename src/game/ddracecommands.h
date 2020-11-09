@@ -48,6 +48,8 @@ CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER, ConUnmute, this, "", AUTHED_M
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", AUTHED_HELPER)
 
 // F-DDrace
+CONSOLE_COMMAND("toggle_id_map_usage", "", CFGFLAG_SERVER, ConToggleIDMapUsage, this, "Toggles local and normal id map for rcon commands", AUTHED_HELPER)
+
 //weapons
 CONSOLE_COMMAND("allweapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConAllWeapons, this, "Gives all weapons and extra weapons to player v, or spread weapons", AUTHED_ADMIN)
 CONSOLE_COMMAND("unallweapons", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnAllWeapons, this, "Takes all weapons and extra weapons from player v", AUTHED_ADMIN)
@@ -108,7 +110,7 @@ CONSOLE_COMMAND("player_clan", "v[id] ?r[clan]", CFGFLAG_SERVER, ConPlayerClan, 
 CONSOLE_COMMAND("player_skin", "v[id] ?r[skin]", CFGFLAG_SERVER, ConPlayerSkin, this, "Sets skin of player v", AUTHED_ADMIN)
 
 //info
-CONSOLE_COMMAND("playerinfo", "i[id]", CFGFLAG_SERVER, ConPlayerInfo, this, "Shows information about the player with client id i", AUTHED_ADMIN)
+CONSOLE_COMMAND("playerinfo", "v[id]", CFGFLAG_SERVER, ConPlayerInfo, this, "Shows information about the player with client id v", AUTHED_ADMIN)
 CONSOLE_COMMAND("list", "?s[filter]", CFGFLAG_SERVER, ConListRcon, this, "List connected players with optional case-insensitive substring matching filter", AUTHED_HELPER)
 
 //extras
