@@ -1371,9 +1371,10 @@ void CPlayer::RainbowTick()
 			Color *= -256;
 		Info.m_aUseCustomColors[p] = 1;
 		Info.m_aSkinPartColors[p] = BaseColor + Color;
-	}
 
-	Info.ToSevendown();
+		Info.m_Sevendown.m_UseCustomColor = 1;
+		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = BaseColor + Color;
+	}
 
 	// only send rainbow updates to people close to you, to reduce network traffic
 	for (int i = 0; i < MAX_CLIENTS; i++)
