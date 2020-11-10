@@ -1020,9 +1020,6 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 			return;
 	}
 
-	if (Weapon == WEAPON_LASER)
-		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
-
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
@@ -1052,6 +1049,9 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 	{
 		m_aWeapons[Weapon].m_Ammo = Ammo;
 	}
+
+	if (Weapon == WEAPON_LASER)
+		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 }
 
 void CCharacter::GiveAllWeapons()
