@@ -3,17 +3,13 @@
 #ifndef GAME_SHOP_H
 #define GAME_SHOP_H
 
+#include "house.h"
 #include <engine/shared/protocol.h>
 #include <game/mapitems.h>
 
-class CGameContext;
-
 enum Items
 {
-	PAGE_NONE = -1,
-	PAGE_MAIN,
-
-	ITEM_RAINBOW,
+	ITEM_RAINBOW = 1,
 	ITEM_BLOODY,
 	ITEM_POLICE,
 	ITEM_SPOOKY_GHOST,
@@ -55,13 +51,6 @@ enum Time
 	TIME_5_DAYS,
 };
 
-enum States
-{
-	STATE_NONE = 0,
-	STATE_OPENED_WINDOW,
-	STATE_CONFIRM
-};
-
 enum Expire
 {
 	// days until item expired
@@ -71,20 +60,9 @@ enum Expire
 	ITEM_EXPIRE_PLOT_BIG = 5,
 };
 
-enum Types
-{
-	TYPE_SHOP_NORMAL,
-	TYPE_SHOP_PLOT,
-	NUM_SHOP_TYPES
-};
-
-
-class CShop
+class CShop : public CHouse
 {
 private:
-	class CGameContext *m_pGameServer;
-	class IServer *m_pServer;
-
 	struct ItemInfo
 	{
 		bool m_Used;
@@ -97,52 +75,33 @@ private:
 	} m_aItems[MAX_PLOTS];
 
 	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false);
-	void ShopWindow(int ClientID, int Dir);
-
-	const char *GetHeadline(int Item);
-	const char *GetTimeMessage(int Time);
-	const char *FormatMotd(const char *pMsg, int Item);
-
-	void SendWindow(int ClientID, int Item);
 
 	void BuyItem(int ClientID, int Item);
 	void ConfirmPurchase(int ClientID);
 	void EndPurchase(int ClientID, bool Cancelled);
 
-	int m_WindowPage[MAX_CLIENTS];
-	int m_PurchaseState[MAX_CLIENTS];
+	const char *GetHeadline(int Item);
+	const char *GetTimeMessage(int Time);
 
-	bool m_InShop[MAX_CLIENTS];
-	int m_AntiSpamTick[MAX_CLIENTS];
-	int m_MotdTick[MAX_CLIENTS];
+	void SetPage(int ClientID, int Page);
+	void SendPage(int ClientID, int Page);
 
+	virtual int NumPages() { return NUM_ITEMS_LIST; }
+	int GetPage(int ClientID);
 	int m_BackgroundItem[MAX_CLIENTS];
 
+	// Because it differs for shop/plot shop
 	int m_NumItems;
 	int m_NumItemsList;
-	int m_Type;
 
 public:
-
 	CShop(CGameContext *pGameServer, int Type);
-	void Tick(int ClientID);
 
-	void Reset(int ClientID);
+	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; }
 
-	void OnShopEnter(int ClientID);
-	void OnShopLeave(int ClientID);
-
-	void OnKeyPress(int ClientID, int Dir);
-	bool CanChangePage(int ClientID);
-
-	void OnPageChange(int ClientID, int Dir) { ShopWindow(ClientID, Dir); };
-	bool IsInShop(int ClientID) { return m_InShop[ClientID]; };
-	void ResetMotdTick(int ClientID) { m_MotdTick[ClientID] = 0; };
-
-	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; };
-
-	int GetType() { return m_Type; }
-	bool IsType(int Type) { return m_Type == Type; }
+	virtual void OnPageChange(int ClientID);
+	virtual void OnKeyPress(int ClientID, int Dir);
+	virtual const char *GetWelcomeMessage(int ClientID);
 };
 
 #endif

@@ -171,8 +171,8 @@ void CCharacter::HandleJetpack()
 	if (FullAuto && (m_LatestInput.m_Fire & 1) && m_aWeapons[GetActiveWeapon()].m_Ammo)
 		WillFire = true;
 
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
-		if (GameServer()->m_pShop[i]->CanChangePage(m_pPlayer->GetCID()))
+	for (int i = 0; i < NUM_HOUSES; i++)
+		if (GameServer()->m_pHouses[i]->CanChangePage(m_pPlayer->GetCID()))
 			return;
 
 	if (!WillFire)
@@ -398,12 +398,12 @@ void CCharacter::FireWeapon()
 	}
 
 	// shop window
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		if (GameServer()->m_pShop[i]->CanChangePage(m_pPlayer->GetCID()))
+		if (GameServer()->m_pHouses[i]->CanChangePage(m_pPlayer->GetCID()))
 		{
 			if (ClickedFire)
-				GameServer()->m_pShop[i]->OnPageChange(m_pPlayer->GetCID(), GetAimDir());
+				GameServer()->m_pHouses[i]->DoPageChange(m_pPlayer->GetCID(), GetAimDir());
 			return;
 		}
 	}
@@ -2249,13 +2249,20 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	//shop
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		int Index = i == TYPE_SHOP_NORMAL ? TILE_SHOP : i == TYPE_SHOP_PLOT ? TILE_PLOT_SHOP : -1;
+		int Index = -1;
+		switch (i)
+		{
+		case HOUSE_SHOP: Index = TILE_SHOP; break;
+		case HOUSE_PLOT_SHOP: Index = TILE_PLOT_SHOP; break;
+		case HOUSE_BANK: Index = TILE_BANK; break;
+		}
+
 		if (m_TileIndex == Index || m_TileFIndex == Index)
 		{
 			if (m_LastIndexTile != Index && m_LastIndexFrontTile != Index)
-				GameServer()->m_pShop[i]->OnShopEnter(m_pPlayer->GetCID());
+				GameServer()->m_pHouses[i]->OnEnter(m_pPlayer->GetCID());
 		}
 	}
 
@@ -3176,8 +3183,8 @@ void CCharacter::FDDraceInit()
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
 
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
-		GameServer()->m_pShop[i]->Reset(m_pPlayer->GetCID());
+	for (int i = 0; i < NUM_HOUSES; i++)
+		GameServer()->m_pHouses[i]->Reset(m_pPlayer->GetCID());
 
 	m_LastTouchedSwitcher = -1;
 	m_LastTouchedPortalBy = -1;
@@ -3316,11 +3323,18 @@ void CCharacter::FDDraceTick()
 
 void CCharacter::HandleLastIndexTiles()
 {
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		int Index = i == TYPE_SHOP_NORMAL ? TILE_SHOP : i == TYPE_SHOP_PLOT ? TILE_PLOT_SHOP : -1;
+		int Index = -1;
+		switch (i)
+		{
+		case HOUSE_SHOP: Index = TILE_SHOP; break;
+		case HOUSE_PLOT_SHOP: Index = TILE_PLOT_SHOP; break;
+		case HOUSE_BANK: Index = TILE_BANK; break;
+		}
+
 		if (m_TileIndex != Index && m_TileFIndex != Index)
-			GameServer()->m_pShop[i]->OnShopLeave(m_pPlayer->GetCID());
+			GameServer()->m_pHouses[i]->OnLeave(m_pPlayer->GetCID());
 	}
 
 	if (m_MoneyTile)
@@ -3634,8 +3648,8 @@ void CCharacter::UpdateWeaponIndicator()
 	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
 		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
-		if (GameServer()->m_pShop[i]->IsInShop(m_pPlayer->GetCID()))
+	for (int i = 0; i < NUM_HOUSES; i++)
+		if (GameServer()->m_pHouses[i]->IsInside(m_pPlayer->GetCID()))
 			return;
 
 	char aTaserBattery[16] = "";

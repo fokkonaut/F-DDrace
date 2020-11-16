@@ -207,7 +207,7 @@ public:
 	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis = 0, int CollideWith = -1);
 
 	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
-	int GetClosestShopDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith = -1);
+	int GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith = -1);
 
 	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
 	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true);

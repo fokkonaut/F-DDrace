@@ -19,6 +19,7 @@
 #include "teeinfo.h"
 #include "gamecontext.h"
 #include "player.h"
+#include "shop.h"
 
 #include <game/server/entities/flag.h>
 #include <game/server/entities/lasertext.h>
@@ -67,8 +68,8 @@ void CGameContext::Construct(int Resetting)
 		m_pScore = 0;
 		m_NumMutes = 0;
 		m_NumVoteMutes = 0;
-		for (int i = 0; i < NUM_SHOP_TYPES; i++)
-			m_pShop[i] = 0;
+		for (int i = 0; i < NUM_HOUSES; i++)
+			m_pHouses[i] = 0;
 		m_NumRegisterBans = 0;
 	}
 
@@ -99,10 +100,10 @@ CGameContext::~CGameContext()
 
 	if (m_pScore)
 		delete m_pScore;
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		if (m_pShop[i])
-			delete m_pShop[i];
+		if (m_pHouses[i])
+			delete m_pHouses[i];
 	}
 }
 
@@ -857,8 +858,8 @@ void CGameContext::OnTick()
 			m_apPlayers[i]->PostTick();
 
 			// F-DDrace
-			for (int j = 0; j < NUM_SHOP_TYPES; j++)
-				m_pShop[j]->Tick(i);
+			for (int j = 0; j < NUM_HOUSES; j++)
+				m_pHouses[j]->Tick(i);
 		}
 	}
 
@@ -2047,17 +2048,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					bool InShop = false;
-					for (int i = 0; i < NUM_SHOP_TYPES; i++)
+					bool InHouse = false;
+					for (int i = 0; i < NUM_HOUSES; i++)
 					{
-						if (m_pShop[i]->IsInShop(ClientID))
+						if (m_pHouses[i]->IsInside(ClientID))
 						{
-							m_pShop[i]->OnKeyPress(ClientID, pMsg->m_Vote);
-							InShop = true;
+							m_pHouses[i]->OnKeyPress(ClientID, pMsg->m_Vote);
+							InHouse = true;
 						}
 					}
 					
-					if (!InShop)
+					if (!InHouse)
 						pChr->DropFlag();
 				}
 			}
@@ -2070,17 +2071,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if (pChr)
 				{
-					bool InShop = false;
-					for (int i = 0; i < NUM_SHOP_TYPES; i++)
+					bool InHouse = false;
+					for (int i = 0; i < NUM_HOUSES; i++)
 					{
-						if (m_pShop[i]->IsInShop(ClientID))
+						if (m_pHouses[i]->IsInside(ClientID))
 						{
-							m_pShop[i]->OnKeyPress(ClientID, pMsg->m_Vote);
-							InShop = true;
+							m_pHouses[i]->OnKeyPress(ClientID, pMsg->m_Vote);
+							InHouse = true;
 						}
 					}
 
-					if (!InShop)
+					if (!InHouse)
 						pChr->DropWeapon(pChr->GetActiveWeapon(), false);
 				}
 			}
@@ -3346,12 +3347,15 @@ void CGameContext::OnInit()
 		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
 	}
 
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		if (m_pShop[i])
-			delete m_pShop[i];
-		m_pShop[i] = new CShop(this, i);
+		if (m_pHouses[i])
+			delete m_pHouses[i];
 	}
+	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
+	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
+	//m_pHouses[HOUSE_BANK] = new CBank(this);
+	m_pHouses[HOUSE_BANK] = new CShop(this, HOUSE_PLOT_SHOP);
 
 
 #ifdef CONF_DEBUG
@@ -3521,10 +3525,10 @@ void CGameContext::OnShutdown(bool FullShutdown)
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;
-	for (int i = 0; i < NUM_SHOP_TYPES; i++)
+	for (int i = 0; i < NUM_HOUSES; i++)
 	{
-		delete m_pShop[i];
-		m_pShop[i] = 0;
+		delete m_pHouses[i];
+		m_pHouses[i] = 0;
 	}
 	Clear();
 }
@@ -4653,12 +4657,14 @@ const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter
 
 	int FooterLines = 0;
 	int MaxLinesWithoutFooter = MOTD_MAX_LINES;
-	for (int i = 0; i < str_length(pFooter) + 1; i++)
+	for (int i = 0, s = 0; i < str_length(pFooter) + 1; i++)
 	{
-		if ((pFooter[i] == '\\' && pFooter[i+1] == 'n') || pFooter[i] == '\n')
+		s++;
+		if ((pFooter[i] == '\\' && pFooter[i+1] == 'n') || pFooter[i] == '\n' || s >= 35)
 		{
 			FooterLines++;
 			MaxLinesWithoutFooter--;
+			s = 0;
 		}
 	}
 
@@ -4672,12 +4678,7 @@ const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter
 	for (int i = 0, s = 0; i < MotdLen; i++)
 	{
 		s++;
-		if ((aMotd[i] == '\\' && aMotd[i+1] == 'n') || aMotd[i] == '\n')
-		{
-			Lines++;
-			s = 0;
-		}
-		if (s == 35)
+		if ((aMotd[i] == '\\' && aMotd[i+1] == 'n') || aMotd[i] == '\n' || s >= 35)
 		{
 			Lines++;
 			s = 0;
@@ -4778,29 +4779,37 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);
 }
 
-bool CGameContext::IsShopDummy(int ClientID, int Type)
+bool CGameContext::IsHouseDummy(int ClientID, int Type)
 {
 	if (Type == -1)
 	{
-		for (int i = 0; i < NUM_SHOP_TYPES; i++)
-			if (IsShopDummy(ClientID, i))
+		for (int i = 0; i < NUM_HOUSES; i++)
+			if (IsHouseDummy(ClientID, i))
 				return true;
 		return false;
 	}
-	return m_apPlayers[ClientID] && ((Type == TYPE_SHOP_NORMAL && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_SHOP_DUMMY) || (Type == TYPE_SHOP_PLOT && m_apPlayers[ClientID]->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY));
+
+	int Mode = 0;
+	switch (Type)
+	{
+	case HOUSE_SHOP: Mode = DUMMYMODE_SHOP_DUMMY; break;
+	case HOUSE_PLOT_SHOP: Mode = DUMMYMODE_PLOT_SHOP_DUMMY; break;
+	case HOUSE_BANK: Mode = DUMMYMODE_BANK_DUMMY; break;
+	}
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Dummymode == Mode;
 }
 
-int CGameContext::GetShopDummy(int Type)
+int CGameContext::GetHouseDummy(int Type)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (IsShopDummy(i, Type))
+		if (IsHouseDummy(i, Type))
 			return i;
 	return -1;
 }
 
 void CGameContext::ConnectDefaultDummies()
 {
-	if (GetShopDummy(TYPE_SHOP_NORMAL) == -1 && Collision()->TileUsed(TILE_SHOP))
+	if (GetHouseDummy(HOUSE_SHOP) == -1 && Collision()->TileUsed(TILE_SHOP))
 	{
 		vec2 Pos = vec2(-1, -1);
 		if (Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
@@ -4827,7 +4836,7 @@ void CGameContext::ConnectDefaultDummies()
 	if (Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 
-	if (GetShopDummy(TYPE_SHOP_PLOT) == -1 && Collision()->TileUsed(TILE_PLOT_SHOP))
+	if (GetHouseDummy(HOUSE_PLOT_SHOP) == -1 && Collision()->TileUsed(TILE_PLOT_SHOP))
 	{
 		vec2 Pos = vec2(-1, -1);
 		if (Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN))

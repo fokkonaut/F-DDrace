@@ -3,23 +3,17 @@
 #include "shop.h"
 #include "gamecontext.h"
 
-// manually checked amount of newlines between the end of the description of the current page and the footer
-int pNumNewLines[NUM_ITEMS_LIST+2] = { 13, 10, 10, 8, 7, 8, 5, 9, 9, 9, 10, 9, 7, 3, 14, 17 };
-
-CShop::CShop(CGameContext *pGameServer, int Type)
+CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 {
-	m_pGameServer = pGameServer;
-	m_pServer = m_pGameServer->Server();
-	m_Type = Type;
+	// shop types only
+	if (Type != HOUSE_SHOP && Type != HOUSE_PLOT_SHOP)
+		return;
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		Reset(i);
-
-	m_aItems[0].m_Used = true; // item 0 is technically PAGE_MAIN, so we dont want to get conflicts there
-	for (int i = 1; i < MAX_PLOTS; i++)
+	m_aItems[PAGE_MAIN].m_Used = true;
+	for (int i = PAGE_MAIN+1; i < MAX_PLOTS; i++)
 		m_aItems[i].m_Used = false;
 
-	if (IsType(TYPE_SHOP_NORMAL))
+	if (IsType(HOUSE_SHOP))
 	{
 		m_NumItems = NUM_ITEMS;
 		m_NumItemsList = NUM_ITEMS_LIST;
@@ -33,9 +27,9 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 		AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
-		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja.Toggle it using '/ninjajetpack'.");
+		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-		AddItem("Taser battery x 10", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taserinfo'");
+		AddItem("Taser battery x 10", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taserinfo'.");
 		AddItem("Portal Rifle", 1, 10, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", true);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
@@ -52,7 +46,7 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, m_pGameServer->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
 		}
 	}
-	else if (IsType(TYPE_SHOP_PLOT))
+	else if (IsType(HOUSE_PLOT_SHOP))
 	{
 		m_NumItems = m_NumItemsList = m_pGameServer->Collision()->m_NumPlots + 1;
 		int Size;
@@ -70,16 +64,6 @@ CShop::CShop(CGameContext *pGameServer, int Type)
 			AddItem(aaName[i], Level, Price, Time, "");
 		}
 	}
-}
-
-void CShop::Reset(int ClientID)
-{
-	m_WindowPage[ClientID] = PAGE_NONE;
-	m_PurchaseState[ClientID] = STATE_NONE;
-	m_InShop[ClientID] = false;
-	m_AntiSpamTick[ClientID] = m_pServer->Tick();
-	m_MotdTick[ClientID] = m_pServer->Tick();
-	m_BackgroundItem[ClientID] = 0;
 }
 
 void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro)
@@ -100,82 +84,16 @@ void CShop::AddItem(const char *pName, int Level, int Price, int Time, const cha
 	}
 }
 
-void CShop::OnShopEnter(int ClientID)
+const char *CShop::GetWelcomeMessage(int ClientID)
 {
-	if (m_InShop[ClientID])
-		return;
-
-	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID, m_Type))
-	{
-		CCharacter* pChr = m_pGameServer->GetPlayerChar(ClientID);
-
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", m_pServer->ClientName(ClientID));
-		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, m_Type, ClientID), CHAT_SINGLE, ClientID, aBuf);
-	}
-
-	m_InShop[ClientID] = true;
-}
-
-void CShop::OnShopLeave(int ClientID)
-{
-	if (!m_InShop[ClientID])
-		return;
-
-	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
-
-	if (m_AntiSpamTick[ClientID] < m_pServer->Tick() && !m_pGameServer->IsShopDummy(ClientID, m_Type))
-	{
-		m_pGameServer->SendChat(m_pGameServer->m_World.GetClosestShopDummy(pChr->GetPos(), pChr, m_Type, ClientID), CHAT_SINGLE, ClientID, "Bye! Come back if you need something.");
-		m_AntiSpamTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 5;
-	}
-
-	if (m_WindowPage[ClientID] != PAGE_NONE)
-		m_pGameServer->SendMotd("", ClientID);
-	m_pGameServer->SendBroadcast("", ClientID, false);
-
-	m_PurchaseState[ClientID] = STATE_NONE;
-	m_WindowPage[ClientID] = PAGE_NONE;
-
-	m_InShop[ClientID] = false;
-}
-
-void CShop::OnKeyPress(int ClientID, int Dir)
-{
-	if (Dir == 1)
-	{
-		if (m_PurchaseState[ClientID] == STATE_CONFIRM)
-		{
-			EndPurchase(ClientID, false);
-		}
-		else if (m_PurchaseState[ClientID] == STATE_OPENED_WINDOW)
-		{
-			if (m_WindowPage[ClientID] != PAGE_NONE && m_WindowPage[ClientID] != PAGE_MAIN)
-				ConfirmPurchase(ClientID);
-		}
-	}
-	else if (Dir == -1)
-	{
-		if (m_PurchaseState[ClientID] == STATE_CONFIRM)
-		{
-			EndPurchase(ClientID, true);
-		}
-		else if (m_WindowPage[ClientID] == PAGE_NONE)
-		{
-			ShopWindow(ClientID, PAGE_MAIN);
-			m_PurchaseState[ClientID] = STATE_OPENED_WINDOW;
-		}
-	}
-}
-
-bool CShop::CanChangePage(int ClientID)
-{
-	return m_WindowPage[ClientID] != PAGE_NONE && m_PurchaseState[ClientID] == STATE_OPENED_WINDOW;
+	static char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", Server()->ClientName(ClientID));
+	return aBuf;
 }
 
 const char *CShop::GetHeadline(int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= m_NumItems)
+	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS)
 		return "Unknown";
 
 	static char aRet[64];
@@ -196,44 +114,6 @@ const char *CShop::GetHeadline(int Item)
 	return aRet;
 }
 
-const char *CShop::FormatMotd(const char *pMsg, int Item)
-{
-	char aTemp[64];
-	char aTemp2[64];
-	char aPage[64];
-	static char aRet[900];
-
-	int Page = Item;
-	if (Item == -1) Page = NUM_ITEMS_LIST;
-	else if (Item == -2) Page = NUM_ITEMS_LIST+1;
-	else if (IsType(TYPE_SHOP_NORMAL))
-	{
-		if (Item >= POLICE_RANK_1 && Item <= POLICE_RANK_5) Page = ITEM_POLICE;
-		else if (Item >= TASER_LEVEL_1 && Item <= TASER_LEVEL_7) Page = ITEM_TASER;
-	}
-
-	str_format(aPage, sizeof(aPage), "~ %d ~", Page);
-
-	int NumNewLines = (IsType(TYPE_SHOP_NORMAL) || Page <= 0) ? pNumNewLines[Page] : IsType(TYPE_SHOP_PLOT) ? 8 : 0;
-	aTemp[0] = 0;
-	for (int i = 0; i < NumNewLines; i++)
-	{
-		str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
-		str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
-	}
-
-	str_format(aRet, sizeof(aRet),
-		"**************************************\n"
-		"                  ~  S H O P  ~\n"
-		"**************************************\n\n"
-		"%s"
-		"%s"
-		"**************************************\n"
-		"%s\n"
-		"%s", pMsg, aTemp, Item >= PAGE_MAIN ? "If you want to buy an item, press F3" : "", Item > PAGE_MAIN ? aPage : "");
-	return aRet;
-}
-
 const char *CShop::GetTimeMessage(int Time)
 {
 	switch (Time)
@@ -249,75 +129,109 @@ const char *CShop::GetTimeMessage(int Time)
 	return "Unknown";
 }
 
-void CShop::Tick(int ClientID)
+int CShop::GetPage(int ClientID)
 {
-	if (m_MotdTick[ClientID] < m_pServer->Tick())
+	if (IsType(HOUSE_SHOP))
 	{
-		m_WindowPage[ClientID] = PAGE_NONE;
-		m_PurchaseState[ClientID] = STATE_NONE;
+		if (m_aClients[ClientID].m_Page >= POLICE_RANK_1 && m_aClients[ClientID].m_Page <= POLICE_RANK_5)
+			return ITEM_POLICE;
+		else if (m_aClients[ClientID].m_Page >= TASER_LEVEL_1 && m_aClients[ClientID].m_Page <= TASER_LEVEL_7)
+			return ITEM_TASER;
 	}
+	return m_aClients[ClientID].m_Page;
+}
 
-	if (m_InShop[ClientID])
+void CShop::OnKeyPress(int ClientID, int Dir)
+{
+	if (Dir == 1)
 	{
-		if (m_pServer->Tick() % 50 == 0)
+		if (m_aClients[ClientID].m_State == STATE_CONFIRM)
 		{
-			if (IsType(TYPE_SHOP_NORMAL))
-				m_pGameServer->SendBroadcast("~ S H O P ~", ClientID, false);
-			else if (IsType(TYPE_SHOP_PLOT))
-				m_pGameServer->SendBroadcast("~ P L O T - S H O P ~", ClientID, false);
+			EndPurchase(ClientID, false);
+		}
+		else if (m_aClients[ClientID].m_State == STATE_OPENED_WINDOW)
+		{
+			if (m_aClients[ClientID].m_Page != PAGE_NONE && m_aClients[ClientID].m_Page != PAGE_MAIN)
+				ConfirmPurchase(ClientID);
+		}
+	}
+	else if (Dir == -1)
+	{
+		if (m_aClients[ClientID].m_State == STATE_CONFIRM)
+		{
+			EndPurchase(ClientID, true);
+		}
+		else if (m_aClients[ClientID].m_Page == PAGE_NONE)
+		{
+			SetPage(ClientID, PAGE_MAIN);
+			m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
 		}
 	}
 }
 
-void CShop::ShopWindow(int ClientID, int Dir)
+void CShop::ConfirmPurchase(int ClientID)
 {
-	m_MotdTick[ClientID] = 0;
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf),
+		"Are you sure you want to buy this item?\n\n"
+		"F3 - yes\n"
+		"F4 - no");
 
-	if (Dir == PAGE_MAIN)
+	SendWindow(ClientID, aBuf);
+	m_aClients[ClientID].m_State = STATE_CONFIRM;
+}
+
+void CShop::EndPurchase(int ClientID, bool Cancelled)
+{
+	if (Cancelled)
 	{
-		m_WindowPage[ClientID] = PAGE_MAIN;
+		SendWindow(ClientID, "You canceled the purchase.");
 	}
-	else if (Dir == 1)
+	else
 	{
-		m_WindowPage[ClientID]++;
-		if (m_WindowPage[ClientID] >= m_NumItemsList)
-			m_WindowPage[ClientID] = PAGE_MAIN;
-	}
-	else if (Dir == -1)
-	{
-		m_WindowPage[ClientID]--;
-		if (m_WindowPage[ClientID] < PAGE_MAIN)
-			m_WindowPage[ClientID] = m_NumItemsList-1;
+		BuyItem(ClientID, m_aClients[ClientID].m_Page);
+		SetPage(ClientID, PAGE_MAIN);
 	}
 
-	m_BackgroundItem[ClientID] = m_WindowPage[ClientID];
+	m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
+}
 
-	if (IsType(TYPE_SHOP_NORMAL))
+void CShop::SetPage(int ClientID, int Page)
+{
+	m_aClients[ClientID].m_Page = Page;
+	OnPageChange(ClientID);
+}
+
+void CShop::OnPageChange(int ClientID)
+{
+	m_BackgroundItem[ClientID] = m_aClients[ClientID].m_Page;
+
+	if (IsType(HOUSE_SHOP))
 	{
-		if (m_WindowPage[ClientID] == ITEM_POLICE)
+		if (m_aClients[ClientID].m_Page == ITEM_POLICE)
 		{
 			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
 			m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + pAccount->m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
 		}
-		else if (m_WindowPage[ClientID] == ITEM_TASER)
+		else if (m_aClients[ClientID].m_Page == ITEM_TASER)
 		{
 			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
 			m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
 		}
 	}
 
-	SendWindow(ClientID, m_BackgroundItem[ClientID]);
+	SendPage(ClientID, m_BackgroundItem[ClientID]);
 }
 
-void CShop::SendWindow(int ClientID, int Item)
+void CShop::SendPage(int ClientID, int Item)
 {
 	char aMsg[512];
-	if (m_WindowPage[ClientID] > PAGE_MAIN)
+	if (m_aClients[ClientID].m_Page > PAGE_MAIN)
 	{
 		char aDescription[256];
-		if (IsType(TYPE_SHOP_NORMAL))
+		if (IsType(HOUSE_SHOP))
 			str_copy(aDescription, m_aItems[Item].m_pDescription, sizeof(aDescription));
-		else if (IsType(TYPE_SHOP_PLOT))
+		else if (IsType(HOUSE_PLOT_SHOP))
 		{
 			char aOwner[32];
 			char aRented[64];
@@ -364,35 +278,8 @@ void CShop::SendWindow(int ClientID, int Item)
 		str_format(aMsg, sizeof(aMsg), "Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.");
 	}
 
-	m_pGameServer->SendMotd(FormatMotd(aMsg, Item), ClientID);
-	m_MotdTick[ClientID] = m_pServer->Tick() + m_pServer->TickSpeed() * 10; // motd is there for 10 sec
-}
-
-void CShop::ConfirmPurchase(int ClientID)
-{
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf),
-		"Are you sure you want to buy this item?\n\n"
-		"F3 - yes\n"
-		"F4 - no");
-
-	m_pGameServer->SendMotd(FormatMotd(aBuf, -1), ClientID);
-	m_PurchaseState[ClientID] = STATE_CONFIRM;
-}
-
-void CShop::EndPurchase(int ClientID, bool Cancelled)
-{
-	if (Cancelled)
-	{
-		m_pGameServer->SendMotd(FormatMotd("You canceled the purchase.", -2), ClientID);
-	}
-	else
-	{
-		BuyItem(ClientID, m_WindowPage[ClientID]);
-		ShopWindow(ClientID, PAGE_MAIN);
-	}
-
-	m_PurchaseState[ClientID] = STATE_OPENED_WINDOW;
+	SendWindow(ClientID, aMsg, "If you want to buy an item, press F3");
+	m_aClients[ClientID].m_LastMotd = Server()->Tick();
 }
 
 void CShop::BuyItem(int ClientID, int Item)
@@ -410,7 +297,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	char aMsg[128];
 	int ItemID = Item;
 
-	if (IsType(TYPE_SHOP_NORMAL))
+	if (IsType(HOUSE_SHOP))
 	{
 		if (Item == ITEM_POLICE || Item == ITEM_TASER)
 			ItemID = m_BackgroundItem[ClientID];
@@ -448,7 +335,7 @@ void CShop::BuyItem(int ClientID, int Item)
 			return;
 		}
 	}
-	else if (IsType(TYPE_SHOP_PLOT))
+	else if (IsType(HOUSE_PLOT_SHOP))
 	{
 		int OwnPlotID = m_pGameServer->GetPlotID(pPlayer->GetAccID());
 		if (m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0)
@@ -528,7 +415,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	pPlayer->MoneyTransaction(-Price, aMsg, m_aItems[ItemID].m_IsEuro);
 
 
-	if (IsType(TYPE_SHOP_NORMAL))
+	if (IsType(HOUSE_SHOP))
 	{
 		// give us the bought item
 		int Weapon = -1;
@@ -556,7 +443,7 @@ void CShop::BuyItem(int ClientID, int Item)
 									break;
 		}
 	}
-	else if (IsType(TYPE_SHOP_PLOT))
+	else if (IsType(HOUSE_PLOT_SHOP))
 	{
 		m_pGameServer->SetPlotExpire(Item);
 		char aBuf[64];

@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <game/server/entities/pickup_drop.h>
-#include "shop.h"
+#include "house.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -99,6 +99,7 @@ enum
 
 	// motd
 	MOTD_MAX_LINES = 22,
+	MOTD_MAX_CHARS_PER_LINE = 64,
 };
 
 enum
@@ -344,8 +345,8 @@ public:
 	void ConnectDefaultDummies();
 	void SetV3Offset(int X = -1, int Y = -1);
 
-	bool IsShopDummy(int ClientID, int Type = -1);
-	int GetShopDummy(int Type = -1);
+	bool IsHouseDummy(int ClientID, int Type = -1);
+	int GetHouseDummy(int Type = -1);
 
 	int GetNextClientID(bool Inverted = false);
 
@@ -550,7 +551,7 @@ public:
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
 
-	class CShop *m_pShop[NUM_SHOP_TYPES];
+	class CHouse *m_pHouses[NUM_HOUSES];
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);

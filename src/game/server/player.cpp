@@ -9,6 +9,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <engine/shared/config.h>
 #include "score.h"
+#include "shop.h"
 
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
@@ -295,8 +296,8 @@ void CPlayer::Tick()
 	{
 		if (m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 		{
-			for (int i = 0; i < NUM_SHOP_TYPES; i++)
-				GameServer()->m_pShop[i]->ResetMotdTick(m_ClientID);
+			for (int i = 0; i < NUM_HOUSES; i++)
+				GameServer()->m_pHouses[i]->ResetLastMotd(m_ClientID);
 		}
 		else
 			m_pCharacter->m_NumGhostShots = 0;
@@ -1523,7 +1524,7 @@ void CPlayer::OnLogin()
 		if (IsExpiredItem(i))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", GameServer()->m_pShop[TYPE_SHOP_NORMAL]->GetItemName(i));
+			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", ((CShop *)GameServer()->m_pHouses[HOUSE_SHOP])->GetItemName(i));
 			GameServer()->SendChatTarget(m_ClientID, aBuf);
 		}
 	}
