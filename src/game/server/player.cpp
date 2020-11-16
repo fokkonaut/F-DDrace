@@ -1497,7 +1497,7 @@ bool CPlayer::GiveTaserBattery(int Amount)
 		}
 
 		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, Amount < 0 ? Amount*-1 : Amount);
+		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
 	}
 
