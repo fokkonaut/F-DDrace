@@ -96,6 +96,9 @@ enum
 
 	// update this one with every acc change you do
 	ACC_CURRENT_VERSION = 3,
+
+	// motd
+	MOTD_MAX_LINES = 22,
 };
 
 enum
@@ -518,7 +521,8 @@ public:
 	};
 
 	//motd
-	const char* FormatMotd(const char* pMsg);
+	const char *FormatMotd(const char *pMsg);
+	const char *AppendMotdFooter(const char *pMsg, const char *pFooter);
 
 	//acc broadcast
 	const char* FormatExperienceBroadcast(const char* pMsg, int ClientID);

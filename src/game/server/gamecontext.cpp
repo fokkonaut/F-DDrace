@@ -4642,56 +4642,75 @@ void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 	CreateSound(Pos, Sound, CmaskOne(ClientID));
 }
 
+const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
+{
+	static char aRet[900] = "";
+	if (!pFooter[0])
+	{
+		str_copy(aRet, pMsg, sizeof(aRet));
+		return aRet;
+	}
+
+	int FooterLines = 0;
+	int MaxLinesWithoutFooter = MOTD_MAX_LINES;
+	for (int i = 0; i < str_length(pFooter) + 1; i++)
+	{
+		if ((pFooter[i] == '\\' && pFooter[i+1] == 'n') || pFooter[i] == '\n')
+		{
+			FooterLines++;
+			MaxLinesWithoutFooter--;
+		}
+	}
+
+	char aMotd[900];
+	str_copy(aMotd, pMsg, sizeof(aMotd));
+	if (!aMotd[0])
+		return "";
+
+	int Lines = 0;
+	int MotdLen = str_length(aMotd) + 1;
+	for (int i = 0, s = 0; i < MotdLen; i++)
+	{
+		s++;
+		if ((aMotd[i] == '\\' && aMotd[i+1] == 'n') || aMotd[i] == '\n')
+		{
+			Lines++;
+			s = 0;
+		}
+		if (s == 35)
+		{
+			Lines++;
+			s = 0;
+		}
+	}
+
+	for (int i = MotdLen; i > 0; i--)
+	{
+		if ((aMotd[i-1] == '\\' && aMotd[i] == 'n') || aMotd[i] == '\n' || Lines > MaxLinesWithoutFooter)
+		{
+			aMotd[i] = '\0';
+			aMotd[i - 1] = '\0';
+			Lines--;
+		}
+		else
+			break;
+	}
+
+	Lines = clamp(Lines, 0, MaxLinesWithoutFooter);
+
+	char aNewLines[64] = "";
+	for (int i = 0; i < MOTD_MAX_LINES-Lines; i++)
+		str_append(aNewLines, "\n", sizeof(aNewLines));
+
+	str_format(aRet, sizeof(aRet), "%s%s%s", aMotd, aNewLines, pFooter);
+	return aRet;
+}
+
 const char *CGameContext::FormatMotd(const char *pMsg)
 {
-	char aTemp[64];
-	char aTemp2[64];
-	char aMotd[900];
-	static char aRet[900];
-	str_copy(aMotd, pMsg, sizeof(aMotd));
-	str_copy(aRet, pMsg, sizeof(aRet));
-	if (aMotd[0])
-	{
-		int count = 0;
-		int MotdLen = str_length(aMotd) + 1;
-		for (int i = 0, s = 0; i < MotdLen; i++)
-		{
-			s++;
-			if ((aMotd[i] == '\\' && aMotd[i + 1] == 'n') || aMotd[i] == '\n')
-			{
-				count++;
-				s = 0;
-			}
-			if (s == 35)
-			{
-				count++;
-				s = 0;
-			}
-		}
-
-		for (int i = MotdLen; i > 0; i--)
-		{
-			if ((aMotd[i - 1] == '\\' && aMotd[i] == 'n') || aMotd[i] == '\n' || count > 20)
-			{
-				aMotd[i] = '\0';
-				aMotd[i - 1] = '\0';
-			}
-			else
-				break;
-		}
-
-		if (count > 20)
-			count = 20;
-
-		aTemp[0] = 0;
-		for (int i = 0; i < 22 - count; i++)
-		{
-			str_format(aTemp2, sizeof(aTemp2), "%s", aTemp);
-			str_format(aTemp, sizeof(aTemp), "%s%s", aTemp2, "\n");
-		}
-		str_format(aRet, sizeof(aRet), "%s%sF-DDrace is a mod by fokkonaut\nF-DDrace Mod. Ver.: %s", aMotd, aTemp, GAME_VERSION);
-	}
-	return aRet;
+	char aFooter[128];
+	str_format(aFooter, sizeof(aFooter), "F-DDrace is a mod by fokkonaut\nF-DDrace Mod. Ver.: %s", GAME_VERSION);
+	return AppendMotdFooter(pMsg, aFooter);
 }
 
 const char *CGameContext::FormatExperienceBroadcast(const char *pMsg, int ClientID)
