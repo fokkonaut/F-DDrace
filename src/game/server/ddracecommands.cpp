@@ -1606,6 +1606,31 @@ void CGameContext::ConTeeControl(IConsole::IResult* pResult, void* pUserData)
 		pChr->TeeControl(!pChr->GetPlayer()->m_HasTeeControl, ForcedID, pResult->m_ClientID);
 }
 
+void CGameContext::ConSetMinigame(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	const char *pMinigame = pResult->GetString(1);
+	if (!pSelf->m_apPlayers[Victim])
+		return;
+
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+	{
+		if (str_comp_nocase(pMinigame, pSelf->GetMinigameCommand(i)) == 0)
+		{
+			if (i == pSelf->m_apPlayers[Victim]->m_Minigame)
+				break;
+
+			// dont set minigame to none before setting the other one if we want to set it to none anyways
+			if (i != MINIGAME_NONE && pSelf->m_apPlayers[Victim]->m_Minigame != MINIGAME_NONE)
+				pSelf->SetMinigame(Victim, MINIGAME_NONE);
+
+			pSelf->SetMinigame(Victim, i);
+			break;
+		}
+	}
+}
+
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
