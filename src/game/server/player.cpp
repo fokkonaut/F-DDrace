@@ -1700,7 +1700,7 @@ void CPlayer::SetSkin(int Skin, bool Force)
 	if (Force)
 		m_ForcedSkin = Skin;
 
-	if (m_SpookyGhost)
+	if (m_SpookyGhost && Skin != SKIN_SPOOKY_GHOST)
 		return;
 
 	GameServer()->SendSkinChange(CTeeInfo(Skin), m_ClientID, -1);
