@@ -347,6 +347,7 @@ public:
 
 	bool IsHouseDummy(int ClientID, int Type = -1);
 	int GetHouseDummy(int Type = -1);
+	void ConnectHouseDummy(int Type);
 
 	int GetNextClientID(bool Inverted = false);
 

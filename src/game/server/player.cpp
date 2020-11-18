@@ -1064,14 +1064,15 @@ void CPlayer::TryRespawn()
 	}
 	else if (m_Dummymode == DUMMYMODE_SHOP_DUMMY)
 	{
-		if (GameServer()->Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
-			Index = ENTITY_SHOP_DUMMY_SPAWN;
-		else
-			Index = TILE_SHOP;
+		Index = TILE_SHOP;
 	}
 	else if (m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY)
 	{
 		Index = TILE_PLOT_SHOP;
+	}
+	else if (m_Dummymode == DUMMYMODE_BANK_DUMMY)
+	{
+		Index = TILE_BANK;
 	}
 	else if (m_Minigame == MINIGAME_BLOCK || m_Dummymode == DUMMYMODE_V3_BLOCKER)
 	{

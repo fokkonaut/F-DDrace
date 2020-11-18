@@ -4834,16 +4834,28 @@ int CGameContext::GetHouseDummy(int Type)
 	return -1;
 }
 
-void CGameContext::ConnectDefaultDummies()
+void CGameContext::ConnectHouseDummy(int Type)
 {
-	if (GetHouseDummy(HOUSE_SHOP) == -1 && Collision()->TileUsed(TILE_SHOP))
+	int Index, SpawnTile, Dummymode;
+	switch (Type)
 	{
-		vec2 Pos = vec2(-1, -1);
-		if (Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
-			Pos = Collision()->GetRandomTile(ENTITY_SHOP_DUMMY_SPAWN);
-		ConnectDummy(DUMMYMODE_SHOP_DUMMY, Pos);
+	case HOUSE_SHOP: Index = TILE_SHOP; SpawnTile = ENTITY_SHOP_DUMMY_SPAWN; Dummymode = DUMMYMODE_SHOP_DUMMY; break;
+	case HOUSE_PLOT_SHOP: Index = TILE_PLOT_SHOP; SpawnTile = ENTITY_PLOT_SHOP_DUMMY_SPAWN; Dummymode = DUMMYMODE_PLOT_SHOP_DUMMY; break;
+	case HOUSE_BANK: Index = TILE_BANK; SpawnTile = ENTITY_BANK_DUMMY_SPAWN; Dummymode = DUMMYMODE_BANK_DUMMY; break;
+	default: return;
 	}
 
+	if (GetHouseDummy(Type) == -1 && Collision()->TileUsed(Index))
+	{
+		vec2 Pos = vec2(-1, -1);
+		if (Collision()->TileUsed(SpawnTile))
+			Pos = Collision()->GetRandomTile(SpawnTile);
+		ConnectDummy(Dummymode, Pos);
+	}
+}
+
+void CGameContext::ConnectDefaultDummies()
+{
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
 	{
 		ConnectDummy(DUMMYMODE_CHILLBOCK5_POLICE);
@@ -4863,13 +4875,8 @@ void CGameContext::ConnectDefaultDummies()
 	if (Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 
-	if (GetHouseDummy(HOUSE_PLOT_SHOP) == -1 && Collision()->TileUsed(TILE_PLOT_SHOP))
-	{
-		vec2 Pos = vec2(-1, -1);
-		if (Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN))
-			Pos = Collision()->GetRandomTile(ENTITY_PLOT_SHOP_DUMMY_SPAWN);
-		ConnectDummy(DUMMYMODE_PLOT_SHOP_DUMMY, Pos);
-	}
+	for (int i = 0; i < NUM_HOUSES; i++)
+		ConnectHouseDummy(i);
 }
 
 void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pUser)
