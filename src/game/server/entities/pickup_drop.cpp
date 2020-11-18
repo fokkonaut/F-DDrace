@@ -212,9 +212,7 @@ void CPickupDrop::IsShieldNear()
 
 	for (int i = 0; i < Num; i++)
 	{
-		CPickup *pShield = apEnts[i];
-
-		if (pShield->GetType() == POWERUP_ARMOR)
+		if (apEnts[i]->GetType() == POWERUP_ARMOR)
 		{
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 			Reset();
