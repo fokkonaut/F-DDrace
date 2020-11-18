@@ -1218,10 +1218,13 @@ void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSendMotd(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	if (!pSelf->m_apPlayers[Victim])
+		return;
 	const char *pText = pResult->GetString(2);
 	if (pResult->GetInteger(1) == 1)
 		pText = pSelf->FormatMotd(pText);
-	pSelf->SendMotd(pText, pResult->GetVictim());
+	pSelf->SendMotd(pText, Victim);
 }
 
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
