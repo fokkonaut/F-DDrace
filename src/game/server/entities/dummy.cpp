@@ -4016,23 +4016,18 @@ void CCharacter::DummyTick()
 		}
 
 		CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
-		if (GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
+		if (pChr && GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
 		{
-			if (pChr)
-			{
-				m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-				m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
-				m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-				m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
-			}
+			m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+			m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+			m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
 		}
-		else
+
+		if (!GameServer()->m_pHouses[Type]->IsInside(m_pPlayer->GetCID()) && m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0)
 		{
-			if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0)
-			{
-				Die();
-				return;
-			}
+			Die();
+			return;
 		}
 	}
 	else if (m_pPlayer->m_Dummymode != DUMMYMODE_IDLE)
