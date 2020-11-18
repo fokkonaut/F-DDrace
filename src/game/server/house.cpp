@@ -81,9 +81,6 @@ void CHouse::OnEnter(int ClientID)
 	if (m_aClients[ClientID].m_NextMsg < Server()->Tick())
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
-
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", Server()->ClientName(ClientID));
 		int From = GameServer()->m_World.GetClosestHouseDummy(pChr->GetPos(), pChr, m_Type, ClientID);
 		GameServer()->SendChat(From, CHAT_SINGLE, ClientID, GetWelcomeMessage(ClientID));
 	}
