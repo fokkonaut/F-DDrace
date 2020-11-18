@@ -54,6 +54,8 @@ protected:
 public:
 
 	CHouse(CGameContext *pGameServer, int Type);
+	virtual ~CHouse() {};
+
 	void Tick(int ClientID);
 	void Reset(int ClientID);
 

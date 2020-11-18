@@ -96,6 +96,7 @@ private:
 
 public:
 	CShop(CGameContext *pGameServer, int Type);
+	virtual ~CShop() {};
 
 	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; }
 
