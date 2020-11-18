@@ -86,7 +86,7 @@ private:
 	void SetPage(int ClientID, int Page);
 	void SendPage(int ClientID, int Page);
 
-	virtual int NumPages() { return NUM_ITEMS_LIST; }
+	virtual int NumPages() { return m_NumItemsList; }
 	int GetPage(int ClientID);
 	int m_BackgroundItem[MAX_CLIENTS];
 

@@ -267,7 +267,7 @@ void CShop::SendPage(int ClientID, int Item)
 			GetHeadline(Item),
 			m_aItems[Item].m_Level,
 			m_aItems[Item].m_Price,
-			m_aItems[Item].m_IsEuro ? " Euros" : Item == ITEM_TASER_BATTERY ? "x10" : "",
+			m_aItems[Item].m_IsEuro ? " Euros" : (IsType(HOUSE_SHOP) && Item == ITEM_TASER_BATTERY) ? "x10" : "",
 			GetTimeMessage(m_aItems[Item].m_Time),
 			aDescription,
 			m_aItems[Item].m_IsEuro ? "\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.\n\nCheck '/account' for your details." : ""
