@@ -20,6 +20,7 @@
 #include "gamecontext.h"
 #include "player.h"
 #include "shop.h"
+#include "bank.h"
 
 #include <game/server/entities/flag.h>
 #include <game/server/entities/lasertext.h>
@@ -1692,6 +1693,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// @everyone mode
 			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone") && Mode != CHAT_WHISPER)
 				Mode = CHAT_ATEVERYONE;
+
 			// disallow pings
 			if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
 			{
@@ -3374,8 +3376,7 @@ void CGameContext::OnInit()
 	}
 	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
 	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
-	//m_pHouses[HOUSE_BANK] = new CBank(this);
-	m_pHouses[HOUSE_BANK] = new CShop(this, HOUSE_PLOT_SHOP);
+	m_pHouses[HOUSE_BANK] = new CBank(this);
 
 
 #ifdef CONF_DEBUG

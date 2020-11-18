@@ -7,7 +7,7 @@
 #include <engine/shared/protocol.h>
 #include <game/mapitems.h>
 
-enum Items
+enum ShopItems
 {
 	ITEM_RAINBOW = 1,
 	ITEM_BLOODY,
@@ -22,9 +22,9 @@ enum Items
 	ITEM_TASER,
 	ITEM_TASER_BATTERY,
 	ITEM_PORTAL_RIFLE,
-	NUM_ITEMS_LIST,
+	NUM_ITEMS_SHOP_LIST,
 
-	POLICE_RANK_1 = NUM_ITEMS_LIST,
+	POLICE_RANK_1 = NUM_ITEMS_SHOP_LIST,
 	POLICE_RANK_2,
 	POLICE_RANK_3,
 	POLICE_RANK_4,
@@ -37,10 +37,10 @@ enum Items
 	TASER_LEVEL_5,
 	TASER_LEVEL_6,
 	TASER_LEVEL_7,
-	NUM_ITEMS
+	NUM_ITEMS_SHOP
 };
 
-enum Time
+enum ShopTime
 {
 	TIME_DEATH,
 	TIME_DISCONNECT,
@@ -51,7 +51,7 @@ enum Time
 	TIME_5_DAYS,
 };
 
-enum Expire
+enum ShopExpire
 {
 	// days until item expired
 	ITEM_EXPIRE_VIP = 30,

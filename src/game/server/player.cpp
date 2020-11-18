@@ -1519,7 +1519,7 @@ void CPlayer::OnLogin()
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
 	}
 
-	for (int i = 0; i < NUM_ITEMS; i++)
+	for (int i = 0; i < NUM_ITEMS_SHOP; i++)
 	{
 		if (IsExpiredItem(i))
 		{

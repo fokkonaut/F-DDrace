@@ -15,8 +15,8 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 
 	if (IsType(HOUSE_SHOP))
 	{
-		m_NumItems = NUM_ITEMS;
-		m_NumItemsList = NUM_ITEMS_LIST;
+		m_NumItems = NUM_ITEMS_SHOP;
+		m_NumItemsList = NUM_ITEMS_SHOP_LIST;
 
 		AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
 		AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
@@ -93,7 +93,7 @@ const char *CShop::GetWelcomeMessage(int ClientID)
 
 const char *CShop::GetHeadline(int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS)
+	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS_SHOP)
 		return "Unknown";
 
 	static char aRet[64];

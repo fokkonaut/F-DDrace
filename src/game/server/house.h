@@ -13,14 +13,14 @@ enum HouseTypes
 	NUM_HOUSES
 };
 
-enum States
+enum HouseStates
 {
 	STATE_NONE = 0,
 	STATE_OPENED_WINDOW,
 	STATE_CONFIRM,
 };
 
-enum Pages
+enum HousePages
 {
 	PAGE_NONE = -1,
 	PAGE_MAIN,
