@@ -4004,29 +4004,35 @@ void CCharacter::DummyTick()
 			}
 		}
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY) // shop dummy
+	else if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_BANK_DUMMY) // house dummy
 	{
 		int Type;
-		if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY)
-			Type = HOUSE_SHOP;
-		else if (m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY)
-			Type = HOUSE_PLOT_SHOP;
-		else
-			return;
-
-		CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
-		if (pChr && GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
+		switch (m_pPlayer->m_Dummymode)
 		{
-			m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-			m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
-			m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+		case DUMMYMODE_SHOP_DUMMY: Type = HOUSE_SHOP; break;
+		case DUMMYMODE_PLOT_SHOP_DUMMY: Type = HOUSE_PLOT_SHOP; break;
+		case DUMMYMODE_BANK_DUMMY: Type = HOUSE_BANK; break;
+		default: return;
 		}
 
-		if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0 && !GameServer()->m_pHouses[Type]->IsInside(m_pPlayer->GetCID()))
+		CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
+		if (GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
 		{
-			Die();
-			return;
+			if (pChr)
+			{
+				m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+				m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+				m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
+				m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
+			}
+		}
+		else
+		{
+			if (m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0)
+			{
+				Die();
+				return;
+			}
 		}
 	}
 	else if (m_pPlayer->m_Dummymode != DUMMYMODE_IDLE)
