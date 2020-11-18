@@ -104,6 +104,7 @@ CONSOLE_COMMAND("plot_owner", "s[username] i[plotid]", CFGFLAG_SERVER, ConPlotOw
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
+CONSOLE_COMMAND("sendmotd", "v[id] i[footer] r[text]", CFGFLAG_SERVER, ConSendMotd, this, "Sends a motd containing text r to player v (i=1 with footer)", AUTHED_ADMIN)
 
 //client information
 CONSOLE_COMMAND("player_name", "v[id] ?r[name]", CFGFLAG_SERVER, ConPlayerName, this, "Sets name of player v", AUTHED_ADMIN)

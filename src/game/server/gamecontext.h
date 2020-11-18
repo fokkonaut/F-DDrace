@@ -775,6 +775,7 @@ private:
 
 	static void ConSound(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
+	static void ConSendMotd(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);

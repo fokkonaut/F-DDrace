@@ -1215,6 +1215,15 @@ void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pSelf->CreateLaserText(pChr->GetPos(), Victim, pResult->GetString(1));
 }
 
+void CGameContext::ConSendMotd(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	const char *pText = pResult->GetString(2);
+	if (pResult->GetInteger(1) == 1)
+		pText = pSelf->FormatMotd(pText);
+	pSelf->SendMotd(pText, pResult->GetVictim());
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
