@@ -1692,6 +1692,26 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// @everyone mode
 			if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone") && Mode != CHAT_WHISPER)
 				Mode = CHAT_ATEVERYONE;
+			// disallow pings
+			if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
+			{
+				for (int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if (!m_apPlayers[i] || !Server()->GetAuthedState(i))
+						continue;
+
+					const char *pName = Server()->ClientName(i);
+					const char *pHaystack = str_find(pMsg->m_pMessage, pName);
+					if (pHaystack)
+					{
+						for (int j = 0; j < str_length(pName); j++)
+						{
+							*(const_cast<char *>(pHaystack)) = '*';
+							pHaystack++;
+						}
+					}
+				}
+			}
 
 			if (pMsg->m_pMessage[0] == '/')
 			{

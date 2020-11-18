@@ -219,6 +219,10 @@ MACRO_CONFIG_INT(SvMaxObjectsFreeDraw, sv_max_objects_free_draw, 500, 0, 1000, C
 // taser battery
 MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFLAG_SERVER, "Time in minutes a taser battery respawns after pickup", AUTHED_ADMIN)
 
+// chat
+MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use @everyone in chat", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvChatAdminPingLevel, sv_chat_admin_ping_level, AUTHED_NO, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to ping authed players in chat", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
@@ -232,6 +236,5 @@ MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SE
 MACRO_CONFIG_INT(SvAllowSevendown, sv_allow_sevendown, 0, 0, 1, CFGFLAG_SERVER, "Allows sevendown connections", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 50, 1, 100, CFGFLAG_SERVER, "64 player id <-> vanilla id players map update rate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use @everyone in chat", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 0, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength or weak hook is also there", AUTHED_ADMIN)
 #endif
