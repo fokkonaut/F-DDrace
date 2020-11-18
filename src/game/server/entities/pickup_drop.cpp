@@ -10,8 +10,7 @@
 #include "character.h"
 #include <game/server/player.h>
 
-CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Weapon,
-	int Lifetime, int Bullets, int Special)
+CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Lifetime, int Weapon, int Bullets, int Special)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize)
 {
 	m_Type = Type;
@@ -327,7 +326,7 @@ void CPickupDrop::HandleDropped()
 
 bool CPickupDrop::IsSwitchActiveCb(int Number, void* pUser)
 {
-	CPickupDrop* pThis = (CPickupDrop*)pUser;
+	CPickupDrop *pThis = (CPickupDrop *)pUser;
 	CCollision* pCollision = pThis->GameServer()->Collision();
 	int Team = 0;
 	if (pThis->m_pOwner)

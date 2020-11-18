@@ -3481,7 +3481,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, WeaponID, 300, Ammo, Special);
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, Ammo, Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
 	if (Special == 0)
