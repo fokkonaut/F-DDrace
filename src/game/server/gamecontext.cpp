@@ -4649,6 +4649,11 @@ void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
 {
 	static char aRet[900] = "";
+	if (pMsg[0])
+		str_format(aRet, sizeof(aRet), "%s\n\n%s", pMsg, pFooter);
+	return aRet;
+
+	/*static char aRet[900] = "";
 	if (!pFooter[0])
 	{
 		str_copy(aRet, pMsg, sizeof(aRet));
@@ -4704,7 +4709,7 @@ const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter
 		str_append(aNewLines, "\n", sizeof(aNewLines));
 
 	str_format(aRet, sizeof(aRet), "%s%s%s", aMotd, aNewLines, pFooter);
-	return aRet;
+	return aRet;*/
 }
 
 const char *CGameContext::FormatMotd(const char *pMsg)
