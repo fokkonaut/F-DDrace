@@ -522,6 +522,10 @@ public:
 		NUM_ACCOUNT_VARIABLES
 	};
 
+	// money drops
+	void WriteMoneyListFile();
+	void ReadMoneyListFile();
+
 	//motd
 	const char *FormatMotd(const char *pMsg);
 	const char *AppendMotdFooter(const char *pMsg, const char *pFooter);

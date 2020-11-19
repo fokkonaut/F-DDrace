@@ -15,6 +15,7 @@
 #include <game/version.h>
 
 #include "entities/character.h"
+#include "entities/money.h"
 #include "gamemodes/DDRace.h"
 #include "teeinfo.h"
 #include "gamecontext.h"
@@ -1032,6 +1033,7 @@ void CGameContext::OnTick()
 			WriteAccountStats(i);
 		for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 			WritePlotStats(i);
+		WriteMoneyListFile();
 		m_LastAccSaveTick = Server()->Tick();
 	}
 
@@ -3378,6 +3380,8 @@ void CGameContext::OnInit()
 	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
 	m_pHouses[HOUSE_BANK] = new CBank(this);
 
+	ReadMoneyListFile();
+
 
 #ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MAX_CLIENTS-1
@@ -3531,6 +3535,8 @@ void CGameContext::OnShutdown(bool FullShutdown)
 
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
+
+	WriteMoneyListFile();
 
 	if (FullShutdown)
 		Score()->OnShutdown();
@@ -4592,6 +4598,50 @@ void CGameContext::WriteDonationFile(int Type, int Amount, int ID, const char *p
 	str_format(aFile, sizeof(aFile), "%s/donations.txt", Config()->m_SvDonationFilePath);
 	std::ofstream DonationsFile(aFile, std::ios_base::app | std::ios_base::out);
 	DonationsFile << aBuf << "\n";
+}
+
+void CGameContext::ReadMoneyListFile()
+{
+	std::string data;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath);
+	std::fstream MoneyDropsFile(aBuf);
+	getline(MoneyDropsFile, data);
+	const char *pStr = data.c_str();
+
+	while (1)
+	{
+		if (!pStr)
+			break;
+
+		vec2 Pos = vec2(-1, -1);
+		int Amount = 0;
+
+		sscanf(pStr, "%f/%f:%d", &Pos.x, &Pos.y, &Amount);
+		pStr += 8; // skip the newly read data
+
+		// insert money into world
+		if (Amount > 0)
+			new CMoney(&m_World, Pos, Amount);
+
+		if (pStr = str_find(pStr, ","))
+			pStr++;
+	}
+}
+
+void CGameContext::WriteMoneyListFile()
+{
+	char aFile[256];
+	str_format(aFile, sizeof(aFile), "%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath);
+	std::ofstream MoneyDropsFile(aFile);
+
+	CMoney *pMoney = (CMoney *)m_World.FindFirst(CGameWorld::ENTTYPE_MONEY);
+	for (; pMoney; pMoney = (CMoney *)pMoney->TypeNext())
+	{
+		char aEntry[64];
+		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d%c", pMoney->GetPos().x, pMoney->GetPos().y, pMoney->GetAmount(), pMoney->TypeNext() ? ',' : '\0');
+		MoneyDropsFile << aEntry;
+	}
 }
 
 bool CGameContext::SameIP(int ClientID1, int ClientID2)

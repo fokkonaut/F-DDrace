@@ -4,10 +4,12 @@
 #include <game/server/gamecontext.h>
 #include "money.h"
 
-CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos)
+CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int Amount)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos)
 {
 	m_Pos = Pos;
+	m_Amount = Amount;
+
 	GameWorld()->InsertEntity(this);
 }
 

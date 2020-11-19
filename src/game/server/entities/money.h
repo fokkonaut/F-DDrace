@@ -7,10 +7,14 @@
 
 class CMoney : public CEntity
 {
+private:
+	int m_Amount;
+
 public:
-	CMoney(CGameWorld *pGameWorld, vec2 Pos);
+	CMoney(CGameWorld *pGameWorld, vec2 Pos, int Amount);
 	virtual ~CMoney();
 
+	int GetAmount() { return m_Amount; }
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 };
