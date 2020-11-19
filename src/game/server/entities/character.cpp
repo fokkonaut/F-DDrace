@@ -1011,7 +1011,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 			m_aSpawnWeaponActive[W] = false;
 	}
 
-	if (Weapon == WEAPON_TASER)
+	if (Weapon == WEAPON_TASER && !Remove)
 	{
 		if (!m_aWeapons[WEAPON_LASER].m_Got
 			|| m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
