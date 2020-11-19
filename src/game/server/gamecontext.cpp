@@ -4624,6 +4624,7 @@ void CGameContext::ReadMoneyListFile()
 		if (Amount > 0)
 			new CMoney(&m_World, Pos, Amount);
 
+		// jump to next comma, if it exists skip it so we can start the next loop run with the next money data
 		if (pStr = str_find(pStr, ","))
 			pStr++;
 	}
