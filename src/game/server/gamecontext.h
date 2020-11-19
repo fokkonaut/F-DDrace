@@ -349,7 +349,7 @@ public:
 	int GetHouseDummy(int Type = -1);
 	void ConnectHouseDummy(int Type);
 
-	int GetNextClientID(bool Inverted = false);
+	int GetNextClientID();
 
 	void UpdateHidePlayers(int UpdateID = -1);
 

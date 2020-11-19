@@ -4676,20 +4676,11 @@ bool CGameContext::SameIP(int AccID, const NETADDR *pAddr)
 		|| net_addr_comp(pAddr, &m_Accounts[AccID].m_LastAddr, false) == 0);
 }
 
-int CGameContext::GetNextClientID(bool Inverted)
+int CGameContext::GetNextClientID()
 {
-	if (!Inverted)
-	{
-		for (int i = 0; i < Config()->m_SvMaxClients; i++)
-			if (((CServer*)Server())->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-				return i;
-	}
-	else
-	{
-		for (int i = MAX_CLIENTS-1; i > -1; i--)
-			if (((CServer*)Server())->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
-				return i;
-	}
+	for (int i = 0; i < Config()->m_SvMaxClients; i++)
+		if (((CServer *)Server())->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+			return i;
 	return -1;
 }
 
