@@ -296,6 +296,10 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	char aMsg[128];
 	int ItemID = Item;
+	int Amount = 1;
+
+	char aDescription[64];
+	str_copy(aDescription, m_aItems[ItemID].m_pName, sizeof(aDescription));
 
 	if (IsType(HOUSE_SHOP))
 	{
@@ -334,6 +338,25 @@ void CShop::BuyItem(int ClientID, int Item)
 			}
 			return;
 		}
+
+		// check police lvl 3 for taser
+		if ((Item == ITEM_TASER || Item == ITEM_TASER_BATTERY) && pAccount->m_PoliceLevel < 3)
+		{
+			m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
+			return;
+		}
+
+		if (Item == ITEM_TASER_BATTERY)
+		{
+			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
+			str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
+
+			if (!pPlayer->GiveTaserBattery(Amount))
+			{
+				m_pGameServer->SendChatTarget(ClientID, "Taser battery purchase failed");
+				return;
+			}
+		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
@@ -360,23 +383,6 @@ void CShop::BuyItem(int ClientID, int Item)
 		}
 	}
 
-	// check police lvl 3 for taser
-	if ((Item == ITEM_TASER || Item == ITEM_TASER_BATTERY) && pAccount->m_PoliceLevel < 3)
-	{
-		m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
-		return;
-	}
-
-	int Amount = 1;
-	char aDescription[64];
-	str_copy(aDescription, m_aItems[ItemID].m_pName, sizeof(aDescription));
-
-	if (Item == ITEM_TASER_BATTERY)
-	{
-		Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
-		str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
-	}
-
 	if (Amount <= 0)
 		return;
 
@@ -395,12 +401,6 @@ void CShop::BuyItem(int ClientID, int Item)
 	{
 		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[ItemID].m_Level, m_aItems[ItemID].m_pName);
 		m_pGameServer->SendChatTarget(ClientID, aMsg);
-		return;
-	}
-
-	if (Item == ITEM_TASER_BATTERY && !pPlayer->GiveTaserBattery(Amount))
-	{
-		m_pGameServer->SendChatTarget(ClientID, "Taser battery purchase failed, check that you have a taser");
 		return;
 	}
 
