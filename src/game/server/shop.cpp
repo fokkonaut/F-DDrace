@@ -129,18 +129,6 @@ const char *CShop::GetTimeMessage(int Time)
 	return "Unknown";
 }
 
-int CShop::GetPage(int ClientID)
-{
-	if (IsType(HOUSE_SHOP))
-	{
-		if (m_aClients[ClientID].m_Page >= POLICE_RANK_1 && m_aClients[ClientID].m_Page <= POLICE_RANK_5)
-			return ITEM_POLICE;
-		else if (m_aClients[ClientID].m_Page >= TASER_LEVEL_1 && m_aClients[ClientID].m_Page <= TASER_LEVEL_7)
-			return ITEM_TASER;
-	}
-	return m_aClients[ClientID].m_Page;
-}
-
 void CShop::OnKeyPress(int ClientID, int Dir)
 {
 	if (Dir == 1)
