@@ -272,7 +272,7 @@ void CShop::SendPage(int ClientID, int Item)
 
 void CShop::BuyItem(int ClientID, int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= m_NumItemsList)
+	if (Item <= PAGE_MAIN || Item >= m_NumItemsList)
 	{
 		m_pGameServer->SendChatTarget(ClientID, "Invalid item");
 		return;
