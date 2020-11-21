@@ -788,7 +788,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_AirControlSpeed = 0.f;
 			Tuning.m_AirJumpImpulse = 0.f;
 			Tuning.m_AirControlAccel = 0.f;
-			Tuning.m_HookFireSpeed = 0.f;
 		}
 
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR)
