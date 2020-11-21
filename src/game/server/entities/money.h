@@ -5,10 +5,20 @@
 
 #include <game/server/entity.h>
 
+enum
+{
+	NUM_DOTS = 12,
+	MONEY_DROP_RADIUS = 10,
+};
+
 class CMoney : public CEntity
 {
 private:
+	vec2 m_Vel;
+	int m_TuneZone;
+
 	int m_Amount;
+	int m_aID[NUM_DOTS];
 
 public:
 	CMoney(CGameWorld *pGameWorld, vec2 Pos, int Amount);

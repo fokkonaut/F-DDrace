@@ -4622,7 +4622,7 @@ void CGameContext::ReadMoneyListFile()
 
 		// insert money into world
 		if (Amount > 0)
-			new CMoney(&m_World, Pos, Amount);
+			new CMoney(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Amount);
 
 		// jump to next comma, if it exists skip it so we can start the next loop run with the next money data
 		if ((pStr = str_find(pStr, ",")))
@@ -4640,7 +4640,7 @@ void CGameContext::WriteMoneyListFile()
 	for (; pMoney; pMoney = (CMoney *)pMoney->TypeNext())
 	{
 		char aEntry[64];
-		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d%c", pMoney->GetPos().x, pMoney->GetPos().y, pMoney->GetAmount(), pMoney->TypeNext() ? ',' : '\0');
+		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d%c", pMoney->GetPos().x/32.f, pMoney->GetPos().y/32.f, pMoney->GetAmount(), pMoney->TypeNext() ? ',' : '\0');
 		MoneyDropsFile << aEntry;
 	}
 }
