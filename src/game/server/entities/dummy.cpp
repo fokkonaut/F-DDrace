@@ -314,7 +314,7 @@ void CCharacter::DummyTick()
 	{
 		if (m_Core.m_Pos.x > 241 * 32 && m_Core.m_Pos.x < 418 * 32 && m_Core.m_Pos.y > 121 * 32 && m_Core.m_Pos.y < 192 * 32) //new spawn ChillBlock5 (tourna edition (the on with the gores stuff))
 		{
-			//dieser code wird also nur ausgeführt wenn der bot gerade im neuen bereich ist
+			//dieser code wird also nur ausgefÃ¼hrt wenn der bot gerade im neuen bereich ist
 			if (m_Core.m_Pos.x > 319 * 32 && m_Core.m_Pos.y < 161 * 32) //top right spawn
 			{
 				//look up left
@@ -595,21 +595,21 @@ void CCharacter::DummyTick()
 					}
 				}
 
-				//externe if abfrage weil laufen während sprinegn xD
+				//externe if abfrage weil laufen wÃ¤hrend sprinegn xD
 				if (m_Core.m_Pos.x > 413 * 32 && m_Core.m_Pos.x < 415 * 32) // in den tunnel springen
 					m_Input.m_Jump = 1;
 				else if (m_Core.m_Pos.x > 428 * 32 - 20 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen
 					m_Input.m_Jump = 1;
 
-				// externen springen aufhören für dj
+				// externen springen aufhÃ¶ren fÃ¼r dj
 				if (m_Core.m_Pos.x > 428 * 32 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen nicht mehr springen
 					m_Input.m_Jump = 0;
 
-				//nochmal extern weil springen während springen
+				//nochmal extern weil springen wÃ¤hrend springen
 				if (m_Core.m_Pos.x > 430 * 32 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen springen
 					m_Input.m_Jump = 1;
 
-				if (m_Core.m_Pos.x > 431 * 32 && m_Core.m_Pos.y > 213 * 32) //jump refillen für wayblock spot
+				if (m_Core.m_Pos.x > 431 * 32 && m_Core.m_Pos.y > 213 * 32) //jump refillen fÃ¼r wayblock spot
 					m_Input.m_Jump = 0;
 			}
 			else if (m_DummyMovementMode == 1) //enter ruler area with a left jump 
@@ -630,7 +630,7 @@ void CCharacter::DummyTick()
 				if (m_Core.m_Pos.x > 429 * 32 - 18)
 					m_Input.m_Direction = -1;
 
-				//nochmal extern weil springen während springen
+				//nochmal extern weil springen wÃ¤hrend springen
 				if (m_Core.m_Pos.y < 217 * 32 && m_Core.m_Pos.x > 420 * 32 && m_Core.m_Pos.y > 213 * 32 + 20)
 				{
 					//m_Input.m_Direction = -1;
@@ -645,7 +645,7 @@ void CCharacter::DummyTick()
 			if (m_Core.m_Pos.x > 417 * 32 && m_Core.m_Pos.y < 213 * 32 && m_Core.m_Pos.x < 450 * 32) //vom ruler nach rechts nachm unfreeze werden
 				m_Input.m_Direction = 1;
 
-			if (m_Core.m_Pos.x > 439 * 32 && m_Core.m_Pos.y < 213 * 32 && m_Core.m_Pos.x < 441 * 32) //über das freeze zum hf start springen
+			if (m_Core.m_Pos.x > 439 * 32 && m_Core.m_Pos.y < 213 * 32 && m_Core.m_Pos.x < 441 * 32) //Ã¼ber das freeze zum hf start springen
 				m_Input.m_Jump = 1;
 
 			if (m_Core.m_Pos.y > 200 * 32 && m_Core.m_Pos.x > 457 * 32)
@@ -657,9 +657,9 @@ void CCharacter::DummyTick()
 					SetWeapon(3);
 
 				//prepare for rocktjump
-				if (m_Core.m_Pos.x < 451 * 32 + 1 && m_Core.m_Pos.y > 209 * 32) //wenn zu weit links für rj
+				if (m_Core.m_Pos.x < 451 * 32 + 1 && m_Core.m_Pos.y > 209 * 32) //wenn zu weit links fÃ¼r rj
 					m_Input.m_Direction = 1;
-				else if (m_Core.m_Pos.x > 451 * 32 + 3 && m_Core.m_Pos.y > 209 * 32) //wenn zu weit links für rj
+				else if (m_Core.m_Pos.x > 451 * 32 + 3 && m_Core.m_Pos.y > 209 * 32) //wenn zu weit links fÃ¼r rj
 					m_Input.m_Direction = -1;
 				else
 				{
@@ -1100,7 +1100,7 @@ void CCharacter::DummyTick()
 								{
 									//nicht zu schnell laufen
 									if (Server()->Tick() % 5 == 0)
-										m_Input.m_Direction = -1; //geh links bisse füllst
+										m_Input.m_Direction = -1; //geh links bisse fÃ¼llst
 								}
 								else
 									m_Input.m_Direction = -1;
@@ -1741,7 +1741,7 @@ void CCharacter::DummyTick()
 
 				if (pChr->m_FreezeTime == 0)
 				{
-					//wenn der gegner doch irgendwie unfreeze wird übergib an den main mode und lass den notstand das regeln
+					//wenn der gegner doch irgendwie unfreeze wird Ã¼bergib an den main mode und lass den notstand das regeln
 					m_DummySpecialDefend = false;
 					m_DummySpecialDefendAttack = false;
 				}
@@ -1762,13 +1762,13 @@ void CCharacter::DummyTick()
 
 					if (pChr->m_Pos.x < m_Core.m_Pos.x)
 						m_Input.m_Hook = 1;
-					else //wenn der gegner weiter rechts als der bot is lass los und übergib an main deine arbeit ist hier getahen
+					else //wenn der gegner weiter rechts als der bot is lass los und Ã¼bergib an main deine arbeit ist hier getahen
 					{    //main mode wird evenetuell noch korrigieren mit schieben
 						m_DummySpecialDefend = false;
 						m_DummySpecialDefendAttack = false;
 					}
 
-					//Der bot sollte möglichst weit nach rechts gehen aber natürlich nicht ins freeze
+					//Der bot sollte mÃ¶glichst weit nach rechts gehen aber natÃ¼rlich nicht ins freeze
 					if (m_Core.m_Pos.x < 427 * 32 + 15)
 						m_Input.m_Direction = 1;
 					else
@@ -1805,7 +1805,7 @@ void CCharacter::DummyTick()
 			CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 4);
 			if (pChr && pChr->IsAlive())
 			{
-				//Check ob an notstand mode18 = 0 übergeben
+				//Check ob an notstand mode18 = 0 Ã¼bergeben
 				if (pChr->m_FreezeTime == 0)
 				{
 					m_DummyBored = false;
@@ -1820,7 +1820,7 @@ void CCharacter::DummyTick()
 
 				m_Input.m_Jump = 1;
 
-				if (pChr->m_Pos.y > m_Core.m_Pos.y && pChr->m_Pos.x > m_Core.m_Pos.x + 20) //solange der bot über dem gegner ist (damit er wenn er ihn weg hammert nicht weiter hookt)
+				if (pChr->m_Pos.y > m_Core.m_Pos.y && pChr->m_Pos.x > m_Core.m_Pos.x + 20) //solange der bot Ã¼ber dem gegner ist (damit er wenn er ihn weg hammert nicht weiter hookt)
 					m_Input.m_Hook = 1;
 
 				if (m_Core.m_Pos.x > 420 * 32)
@@ -1865,14 +1865,14 @@ void CCharacter::DummyTick()
 				CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 3);
 				if (pChr && pChr->IsAlive())
 				{
-					if (pChr->m_Pos.x < 436 * 32) //wenn er ganz weit über dem freeze auf der kante ist (hooke direkt)
+					if (pChr->m_Pos.x < 436 * 32) //wenn er ganz weit Ã¼ber dem freeze auf der kante ist (hooke direkt)
 					{
 						m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
 						m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
 						m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
 						m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
 					}
-					else //wenn der Gegner weiter hinter dem unhook ist (hook über den Gegner um ihn trozdem zu treffen und das unhook zu umgehen)
+					else //wenn der Gegner weiter hinter dem unhook ist (hook Ã¼ber den Gegner um ihn trozdem zu treffen und das unhook zu umgehen)
 					{
 						m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x - 50;
 						m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
@@ -1884,7 +1884,7 @@ void CCharacter::DummyTick()
 					if (pChr && pChr->IsAlive())
 					{
 						//wenn jemand im tunnel is check ob du nicht ausversehen den hookst anstatt des ziels in der WB area
-						if (pChr->m_Pos.x < m_Core.m_Pos.x) //hooke nur wenn kein Gegner rechts von dem bot im tunnel is (da er sonst ziemlich wahrscheinlich den hooken würde)
+						if (pChr->m_Pos.x < m_Core.m_Pos.x) //hooke nur wenn kein Gegner rechts von dem bot im tunnel is (da er sonst ziemlich wahrscheinlich den hooken wÃ¼rde)
 							m_Input.m_Hook = 1;
 					}
 					else
@@ -1916,12 +1916,12 @@ void CCharacter::DummyTick()
 			CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 6);
 			if (pChr && pChr->IsAlive()) // wenn ein spieler rechts im freeze lebt //----> versuche im notstand nicht den gegner auch da rein zu hauen da ist ja jetzt voll
 				m_DummyLeftFreezeFull = true;
-			else // wenn da keiner is fülle diesen spot (linke freeze wand im ruler spot)
+			else // wenn da keiner is fÃ¼lle diesen spot (linke freeze wand im ruler spot)
 				m_DummyLeftFreezeFull = false;
 
 			if (m_Core.m_Pos.x > 241 * 32 && m_Core.m_Pos.x < 418 * 32 && m_Core.m_Pos.y > 121 * 32 && m_Core.m_Pos.y < 192 * 32) //new spawn ChillBlock5 (tourna edition (the on with the gores stuff))
 			{
-				//dieser code wird also nur ausgeführt wenn der bot gerade im neuen bereich ist
+				//dieser code wird also nur ausgefÃ¼hrt wenn der bot gerade im neuen bereich ist
 				if (m_Core.m_Pos.x > 319 * 32 && m_Core.m_Pos.y < 161 * 32) //top right spawn
 				{
 					//look up left
@@ -2245,7 +2245,7 @@ void CCharacter::DummyTick()
 						CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 5);
 						if (pChr && pChr->IsAlive())
 						{
-							if (pChr->m_Core.m_Vel.x < 7.8f) //wenn der nächste spieler im tunnel ein slowdude is 
+							if (pChr->m_Core.m_Vel.x < 7.8f) //wenn der nÃ¤chste spieler im tunnel ein slowdude is 
 							{
 								//HauDenBau
 								SetWeapon(0); //hol den hammer raus!
@@ -2272,7 +2272,7 @@ void CCharacter::DummyTick()
 					{
 						if (m_Core.m_Pos.x > 422 * 32) //zu weit rechts
 						{
-							//---> hol schwung für den jump
+							//---> hol schwung fÃ¼r den jump
 							m_Input.m_Direction = -1;
 
 							//new hammer agressive in the walkdirection to free the way
@@ -2296,7 +2296,7 @@ void CCharacter::DummyTick()
 						else if (m_Core.m_Pos.x < 440 * 32 && m_Core.m_Pos.y > 213 * 32) //im tunnel laufen
 							m_Input.m_Direction = 1;
 
-						//externe if abfrage weil laufen während sprinegn xD
+						//externe if abfrage weil laufen wÃ¤hrend sprinegn xD
 						if (m_Core.m_Pos.x > 413 * 32 && m_Core.m_Pos.x < 415 * 32) // in den tunnel springen
 							m_Input.m_Jump = 1;
 						else if (m_Core.m_Pos.x > 428 * 32 - 20 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen
@@ -2305,11 +2305,11 @@ void CCharacter::DummyTick()
 						if (m_Core.m_Pos.x > 428 * 32 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen nicht mehr springen
 							m_Input.m_Jump = 0;
 
-						//nochmal extern weil springen während springen
+						//nochmal extern weil springen wÃ¤hrend springen
 						if (m_Core.m_Pos.x > 430 * 32 && m_Core.m_Pos.y > 213 * 32) // im tunnel springen springen
 							m_Input.m_Jump = 1;
 
-						if (m_Core.m_Pos.x > 431 * 32 && m_Core.m_Pos.y > 213 * 32) //jump refillen für wayblock spot
+						if (m_Core.m_Pos.x > 431 * 32 && m_Core.m_Pos.y > 213 * 32) //jump refillen fÃ¼r wayblock spot
 							m_Input.m_Jump = 0;
 					}
 				}
@@ -2403,7 +2403,7 @@ void CCharacter::DummyTick()
 								}
 							}
 
-							//Blocke gefreezte gegner für immer 
+							//Blocke gefreezte gegner fÃ¼r immer 
 							if (pChr->m_FreezeTime > 0 && pChr->m_Pos.y > 204 * 32 && pChr->m_Pos.x > 422 * 32) //wenn ein gegner weit genung rechts freeze am boden liegt
 							{
 								if (m_Core.m_Pos.x + (5 * 32 + 40) < pChr->m_Pos.x) // er versucht 5 tiles links des gefreezten gegner zu kommen
@@ -2466,10 +2466,10 @@ void CCharacter::DummyTick()
 
 							if (m_Core.m_Vel.y < 20.0f && m_Core.m_Pos.y < 207 * 32)  // wenn der tee nach oben gehammert wird
 							{
-								if (m_Core.m_Pos.y > 206 * 32) //ab 206 würd er so oder so ins freeze springen
+								if (m_Core.m_Pos.y > 206 * 32) //ab 206 wÃ¼rd er so oder so ins freeze springen
 									m_Input.m_Jump = 1;
 
-								if (m_Core.m_Pos.y < pChr->m_Pos.y) //wenn der bot über dem spieler is soll er hooken
+								if (m_Core.m_Pos.y < pChr->m_Pos.y) //wenn der bot Ã¼ber dem spieler is soll er hooken
 									m_Input.m_Hook = 1;
 								else
 									m_Input.m_Hook = 0;
@@ -2496,7 +2496,7 @@ void CCharacter::DummyTick()
 							//Hau den weg (wie dummymode 21)
 							if (pChr->m_Pos.x > 418 * 32 && pChr->m_Pos.y > 209 * 32)  //das ganze findet nur im bereich statt wo sonst eh nichts passiert
 							{
-								//wenn der bot den gegner nicht boosten würde hammer den auch nich weg
+								//wenn der bot den gegner nicht boosten wÃ¼rde hammer den auch nich weg
 								Fire(false);
 
 								if (pChr->m_Core.m_Vel.y < -0.5f && m_Core.m_Pos.y + 15 > pChr->m_Pos.y) //wenn der dude speed nach oben hat
@@ -2553,7 +2553,7 @@ void CCharacter::DummyTick()
 								m_Input.m_Hook = 1;
 							}
 
-							//GameServer()->SendChat(m_pPlayer->GetCID(), CGameContext::CHAT_ALL, "Prüfe ob zu weit rechts");
+							//GameServer()->SendChat(m_pPlayer->GetCID(), CGameContext::CHAT_ALL, "PrÃ¼fe ob zu weit rechts");
 							if (m_Core.m_Pos.x < (418 * 32) - 10) // zu weit links -> geh rechts
 								m_Input.m_Direction = 1;
 							else if (m_Core.m_Pos.x >(428 * 32) + 10) // zu weit rechts -> geh links
@@ -2573,7 +2573,7 @@ void CCharacter::DummyTick()
 
 									if (pChr->m_Pos.y < 213 * 32 + 10 && pChr->m_Pos.x < 430 * 32 && pChr->m_Pos.y > 210 * 32 && pChr->m_Pos.x > 417 * 32) // wenn ein spieler auf der linken seite in der ruler area is 
 									{
-										//wenn ein gegner rechts des bots is prepare für trick[1]
+										//wenn ein gegner rechts des bots is prepare fÃ¼r trick[1]
 										if (m_Core.m_Pos.x < pChr->m_Pos.x && pChr->m_Pos.x < 429 * 32 + 6)
 										{
 											m_Input.m_Direction = -1;
@@ -2585,7 +2585,7 @@ void CCharacter::DummyTick()
 												m_DummyFreezeBlockTrick = 1;
 											}
 										}
-										//wenn ein gegner links des bots is prepare für tick[3]
+										//wenn ein gegner links des bots is prepare fÃ¼r tick[3]
 										if (m_Core.m_Pos.x > pChr->m_Pos.x && pChr->m_Pos.x < 429 * 32)
 										{
 											m_Input.m_Direction = 1;
@@ -2617,10 +2617,10 @@ void CCharacter::DummyTick()
 							m_Input.m_Direction = -1;
 					}
 
-					// über das freeze springen wenn rechts der bevorzugenten camp stelle
+					// Ã¼ber das freeze springen wenn rechts der bevorzugenten camp stelle
 					if (m_Core.m_Pos.x > 434 * 32)
 						m_Input.m_Jump = 1;
-					else if (m_Core.m_Pos.x > (434 * 32) - 20 && m_Core.m_Pos.x < (434 * 32) + 20) // bei flug über freeze jump wd holen
+					else if (m_Core.m_Pos.x > (434 * 32) - 20 && m_Core.m_Pos.x < (434 * 32) + 20) // bei flug Ã¼ber freeze jump wd holen
 						m_Input.m_Jump = 0;
 
 					//new testy moved tricks into Wayblocker area (y < 213 && x > 215) (was external)
@@ -3399,20 +3399,28 @@ void CCharacter::DummyTick()
 				if (m_Core.m_Pos.x > 33 * 32 && m_Core.m_Pos.x < 42 * 32 && m_Core.m_Pos.y > 20 * 32 && m_Core.m_Pos.y < 25 * 32)
 				{
 					GameServer()->SendEmoticon(m_pPlayer->GetCID(), 14); //happy emote when successfully did the grenaede jump
-					if (Server()->Tick() % 1 == 0) //change to gun
-						SetWeapon(1);
 				}
-				if (m_Core.m_Pos.x > 47 * 32 && m_Core.m_Pos.x < 48 * 32) // jumping up on the plateu
+				if (m_Core.m_Pos.x < 50 * 32)
 				{
-					m_Input.m_Direction = 0;
 					m_Input.m_Jump = 1;
+					if (Server()->Tick() % 20 == 0)
+						m_Input.m_Jump = 0;
+					if (m_Core.m_Pos.y < 19 * 32 && m_FreezeTime == 0)
+						Fire();
+					m_Input.m_TargetX = -200;
+					m_Input.m_TargetY = 200;
+				}
+				// don't walk into freeze
+				if (m_Core.m_Pos.x > 47 * 32 && m_Core.m_Pos.x < 50 * 32 && m_Core.m_Pos.y > 17 * 32)
+				{
+					m_Input.m_Direction = -1;
 				}
 			}
 			else if (m_Core.m_Pos.y < 16 * 32 && m_Core.m_Pos.x < 75 * 32 && m_Core.m_Pos.x > 40 * 32) // walking right on it
 			{
 				m_Input.m_Direction = 1;
 				m_Input.m_Jump = 0;
-				if (m_Core.m_Pos.x > 55 * 32 && m_Core.m_Pos.x < 56 * 32) //jumping over gap
+				if (m_Core.m_Pos.y > 10 * 32 && m_Core.m_Pos.x > 55 * 32 && m_Core.m_Pos.x < 56 * 32) //jumping over gap
 					m_Input.m_Jump = 1;
 			}
 			if (m_Core.m_Pos.y > 15 * 32 && m_Core.m_Pos.x > 55 * 32 && m_Core.m_Pos.x < 65 * 32)
@@ -3441,19 +3449,73 @@ void CCharacter::DummyTick()
 			else if (m_Core.m_Pos.x > 135 * 32)
 			{
 				m_Input.m_Direction = 1;
-				if (m_Core.m_Pos.y > 12 * 32) // gores (the long way to 5 jumps)
+				// gores (the long way to 5 jumps)
+				if (m_Core.m_Pos.x < 220 * 32)
 				{
-					m_Input.m_TargetX = 100;
-					m_Input.m_TargetY = -200;
-					m_Input.m_Hook = 1;
-					if (m_Core.m_Pos.y < 12 * 32)
-						m_Input.m_Hook = 0;
-					if (m_Core.m_Pos.x > 212 * 32)
+					if ((m_Core.m_Pos.y > 12 * 32 + 10 && m_Core.m_Vel.y > 4.1f) ||
+						(m_Core.m_Pos.y > 12 * 32 + 30 && m_Core.m_Vel.y > -1.1f))
 					{
+						if (m_Core.m_HookState == HOOK_FLYING || m_Core.m_HookState == HOOK_GRABBED)
+						{
+							m_Input.m_TargetX = -100;
+							m_Input.m_TargetY = 100;
+							Fire();
+						}
+						else
+						{
+							m_Input.m_TargetX = 100;
+							m_Input.m_TargetY = -200;
+						}
 						m_Input.m_Hook = 1;
-						m_Input.m_TargetX = 100;
-						m_Input.m_TargetY = -75;
-						m_Input.m_Jump = 1;
+						if (m_Core.m_Pos.y < 12 * 32)
+						{
+							m_Input.m_Hook = 0;
+						}
+						if (m_Core.m_Pos.x > 212 * 32)
+						{
+							m_Input.m_Hook = 1;
+							m_Input.m_TargetX = 100;
+							m_Input.m_TargetY = -75;
+							m_Input.m_Jump = 1;
+						}
+					}
+				}
+				// 5 jumps area
+				if (m_Core.m_Pos.x > 222 * 32)
+				{
+					m_Input.m_Jump = 0;
+					if (m_Core.m_Jumps < 5)
+					{
+						if (m_Core.m_Pos.x > 227 * 32)
+							m_Input.m_Direction = -1;
+						else
+							m_Input.m_Direction = 1;
+					}
+					else // got 5 jumps go into tele
+					{
+						m_Input.m_TargetX = -200;
+						m_Input.m_TargetY = 150;
+						if (m_Core.m_Pos.x < 229 * 32)
+						{
+							if (m_FreezeTime == 0)
+								Fire();
+						}
+						else // on right side of platform (do rj here)
+						{
+							if (IsGrounded() && !m_ReloadTimer)
+							{
+								if (m_Core.m_Pos.x > 231 * 32)
+								{
+									m_DummyDidRocketjump = true;
+									Fire();
+								}
+							}
+							else
+							{
+								if (m_Core.m_Pos.x > 229 * 32 + 10 && !m_DummyDidRocketjump)
+									m_Input.m_Direction = -1;
+							}
+						}
 					}
 				}
 			}
@@ -3478,6 +3540,8 @@ void CCharacter::DummyTick()
 		}
 		if (m_Core.m_Pos.x > 368 * 32 && m_Core.m_Pos.y < 340 * 32) //new spawn going left and hopping over the gap under the CFRM.  (the jump over the freeze gap before falling down is not here, its in line 13647)
 		{
+			if (Server()->Tick() % 1 == 0) //change to gun
+				SetWeapon(1);
 			m_Input.m_Direction = -1;
 			if (m_Core.m_Pos.x > 509 * 32 && m_Core.m_Pos.y > 62 * 32) // if bot gets under the table he will go right and jump out of the gap under the table
 			{

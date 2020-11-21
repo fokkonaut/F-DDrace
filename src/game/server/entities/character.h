@@ -479,6 +479,7 @@ public:
 	int m_DummyHelpMode;
 	bool m_DummyHelpHook;
 	bool m_DummyClosestPolice;
+	bool m_DummyDidRocketjump;
 
 	int m_DummyGrenadeJump;
 	bool m_DummyTouchedGround;
