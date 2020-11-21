@@ -67,6 +67,11 @@ public:
 	struct MoveRestrictionExtra
 	{
 		bool m_CanEnterRoom;
+
+		MoveRestrictionExtra()
+		{
+			m_CanEnterRoom = false;
+		}
 	};
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, MoveRestrictionExtra Extra = MoveRestrictionExtra());
