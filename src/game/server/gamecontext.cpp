@@ -4058,10 +4058,13 @@ void CGameContext::ExpirePlots()
 			if (AccID >= ACC_START)
 			{
 				int ClientID = m_Accounts[AccID].m_ClientID;
-				SendChatTarget(ClientID, "Your plot expired");
-				m_apPlayers[ClientID]->CancelPlotAuction();
-				m_apPlayers[ClientID]->CancelPlotSwap();
-				m_apPlayers[ClientID]->StopPlotEditing();
+				if (ClientID >= 0 && m_apPlayers[ClientID])
+				{
+					SendChatTarget(ClientID, "Your plot expired");
+					m_apPlayers[ClientID]->CancelPlotAuction();
+					m_apPlayers[ClientID]->CancelPlotSwap();
+					m_apPlayers[ClientID]->StopPlotEditing();
+				}
 			}
 
 			m_aPlots[i].m_aOwner[0] = 0;
