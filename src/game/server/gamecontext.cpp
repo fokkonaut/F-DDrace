@@ -2087,9 +2087,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if (pMsg->m_Vote == -1) //vote no (f4)
 			{
-				m_pConfig->m_SvTestingCommands = 1;
-				new CMoney(&m_World, pChr->GetPos(), 10, pChr->GetAimDir());
-
 				if (pPlayer->m_TeeControlMode)
 				{
 					if (pControlledTee)
