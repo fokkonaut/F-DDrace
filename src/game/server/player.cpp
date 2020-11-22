@@ -200,6 +200,7 @@ void CPlayer::Reset()
 	m_PlotAuctionPrice = 0;
 	m_aPlotSwapUsername[0] = 0;
 	m_PlotSpawn = false;
+	m_WalletMoney = 0;
 }
 
 void CPlayer::Tick()
@@ -1399,7 +1400,7 @@ int CPlayer::GetAccID()
 	return 0;
 }
 
-void CPlayer::MoneyTransaction(int64 Amount, const char *pDescription, bool IsEuro)
+void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEuro)
 {
 	if (GetAccID() < ACC_START)
 		return;
@@ -1414,14 +1415,30 @@ void CPlayer::MoneyTransaction(int64 Amount, const char *pDescription, bool IsEu
 	else
 		pAccount->m_Money += Amount;
 
-	if (!pDescription[0])
+	ApplyMoneyHistoryMsg(TRANSACTION_BANK, pDescription);
+}
+
+void CPlayer::WalletTransaction(int64 Amount, const char *pDescription)
+{
+	m_WalletMoney += Amount;
+	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, pDescription);
+}
+
+void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
+{
+	if (!pDescription[0] || GetAccID() < ACC_START)
 		return;
 
+	const char *pType = Type == TRANSACTION_BANK ? "BANK" : Type == TRANSACTION_WALLET ? "WALLET" : "UNKNOWN";
+	char aDescription[256];
+	str_format(aDescription, sizeof(aDescription), "[%s] %s", pType, pDescription);
+
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	str_copy(pAccount->m_aLastMoneyTransaction[4], pAccount->m_aLastMoneyTransaction[3], sizeof(pAccount->m_aLastMoneyTransaction[4]));
 	str_copy(pAccount->m_aLastMoneyTransaction[3], pAccount->m_aLastMoneyTransaction[2], sizeof(pAccount->m_aLastMoneyTransaction[3]));
 	str_copy(pAccount->m_aLastMoneyTransaction[2], pAccount->m_aLastMoneyTransaction[1], sizeof(pAccount->m_aLastMoneyTransaction[2]));
 	str_copy(pAccount->m_aLastMoneyTransaction[1], pAccount->m_aLastMoneyTransaction[0], sizeof(pAccount->m_aLastMoneyTransaction[1]));
-	str_copy(pAccount->m_aLastMoneyTransaction[0], pDescription, sizeof(pAccount->m_aLastMoneyTransaction[0]));
+	str_copy(pAccount->m_aLastMoneyTransaction[0], aDescription, sizeof(pAccount->m_aLastMoneyTransaction[0]));
 }
 
 void CPlayer::GiveXP(int Amount, const char *pMessage)

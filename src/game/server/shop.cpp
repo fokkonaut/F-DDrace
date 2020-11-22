@@ -36,19 +36,19 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		{
 			str_format(aaBuf[i], sizeof(aaBuf[i]), "Police Rank %d", i+1);
-			AddItem(aaBuf[i], m_pGameServer->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
+			AddItem(aaBuf[i], GameServer()->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
 		}
 
 		static char aaBuf2[NUM_TASER_LEVELS][32];
 		for (int i = 0; i < NUM_TASER_LEVELS; i++)
 		{
 			str_format(aaBuf2[i], sizeof(aaBuf2[i]), "Taser Level %d", i+1);
-			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, m_pGameServer->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
+			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, GameServer()->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
 		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
-		m_NumItems = m_NumItemsList = m_pGameServer->Collision()->m_NumPlots + 1;
+		m_NumItems = m_NumItemsList = GameServer()->Collision()->m_NumPlots + 1;
 		int Size;
 		static char aaName[MAX_PLOTS][32];
 		int Level;
@@ -56,7 +56,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		int Time;
 		for (int i = PLOT_START; i < m_NumItems; i++)
 		{
-			Size = m_pGameServer->m_aPlots[i].m_Size;
+			Size = GameServer()->m_aPlots[i].m_Size;
 			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i);
 			Level = (Size + 1) * 20;
 			Price = (Size + 1) * 50000;
@@ -89,6 +89,16 @@ const char *CShop::GetWelcomeMessage(int ClientID)
 	static char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Welcome to the shop, %s! Press F4 to start shopping.", Server()->ClientName(ClientID));
 	return aBuf;
+}
+
+const char *CShop::GetConfirmMessage(int ClientID)
+{
+	return "Are you sure you want to buy this item?";
+}
+
+const char *CShop::GetEndMessage(int ClientID)
+{
+	return "You canceled the purchase.";
 }
 
 const char *CShop::GetHeadline(int Item)
@@ -129,92 +139,37 @@ const char *CShop::GetTimeMessage(int Time)
 	return "Unknown";
 }
 
-void CShop::OnKeyPress(int ClientID, int Dir)
+void CShop::OnSuccess(int ClientID)
 {
-	if (Dir == 1)
-	{
-		if (m_aClients[ClientID].m_State == STATE_CONFIRM)
-		{
-			EndPurchase(ClientID, false);
-		}
-		else if (m_aClients[ClientID].m_State == STATE_OPENED_WINDOW)
-		{
-			if (m_aClients[ClientID].m_Page != PAGE_NONE && m_aClients[ClientID].m_Page != PAGE_MAIN)
-				ConfirmPurchase(ClientID);
-		}
-	}
-	else if (Dir == -1)
-	{
-		if (m_aClients[ClientID].m_State == STATE_CONFIRM)
-		{
-			EndPurchase(ClientID, true);
-		}
-		else if (m_aClients[ClientID].m_Page == PAGE_NONE)
-		{
-			SetPage(ClientID, PAGE_MAIN);
-			m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
-		}
-	}
-}
-
-void CShop::ConfirmPurchase(int ClientID)
-{
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf),
-		"Are you sure you want to buy this item?\n\n"
-		"F3 - yes\n"
-		"F4 - no");
-
-	SendWindow(ClientID, aBuf);
-	m_aClients[ClientID].m_State = STATE_CONFIRM;
-}
-
-void CShop::EndPurchase(int ClientID, bool Cancelled)
-{
-	if (Cancelled)
-	{
-		SendWindow(ClientID, "You canceled the purchase.");
-	}
-	else
-	{
-		BuyItem(ClientID, m_aClients[ClientID].m_Page);
-		SetPage(ClientID, PAGE_MAIN);
-	}
-
-	m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
-}
-
-void CShop::SetPage(int ClientID, int Page)
-{
-	m_aClients[ClientID].m_Page = Page;
-	OnPageChange(ClientID);
+	BuyItem(ClientID, m_aClients[ClientID].m_Page);
 }
 
 void CShop::OnPageChange(int ClientID)
 {
-	m_BackgroundItem[ClientID] = m_aClients[ClientID].m_Page;
+	m_aBackgroundItem[ClientID] = m_aClients[ClientID].m_Page;
 
 	if (IsType(HOUSE_SHOP))
 	{
 		if (m_aClients[ClientID].m_Page == ITEM_POLICE)
 		{
-			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-			m_BackgroundItem[ClientID] = clamp(POLICE_RANK_1 + pAccount->m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
+			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()];
+			m_aBackgroundItem[ClientID] = clamp(POLICE_RANK_1 + pAccount->m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
 		}
 		else if (m_aClients[ClientID].m_Page == ITEM_TASER)
 		{
-			CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[m_pGameServer->m_apPlayers[ClientID]->GetAccID()];
-			m_BackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
+			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()];
+			m_aBackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
 		}
 	}
 
-	SendPage(ClientID, m_BackgroundItem[ClientID]);
-}
-
-void CShop::SendPage(int ClientID, int Item)
-{
+	// send page
+	int Item = m_aBackgroundItem[ClientID];
 	char aMsg[512];
-	if (m_aClients[ClientID].m_Page > PAGE_MAIN)
+	if (m_aClients[ClientID].m_Page <= PAGE_MAIN)
+	{
+		str_format(aMsg, sizeof(aMsg), "Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.");
+	}
+	else
 	{
 		char aDescription[256];
 		if (IsType(HOUSE_SHOP))
@@ -223,12 +178,12 @@ void CShop::SendPage(int ClientID, int Item)
 		{
 			char aOwner[32];
 			char aRented[64];
-			bool Owned = m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0;
+			bool Owned = GameServer()->m_aPlots[Item].m_aOwner[0] != 0;
 
 			if (Owned)
 			{
-				str_format(aOwner, sizeof(aOwner), "'%s'", m_pGameServer->m_aPlots[Item].m_aDisplayName);
-				str_format(aRented, sizeof(aRented), "Rented until: %s", m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate));
+				str_format(aOwner, sizeof(aOwner), "'%s'", GameServer()->m_aPlots[Item].m_aDisplayName);
+				str_format(aRented, sizeof(aRented), "Rented until: %s", GameServer()->GetDate(GameServer()->m_aPlots[Item].m_ExpireDate));
 			}
 			else
 			{
@@ -241,8 +196,8 @@ void CShop::SendPage(int ClientID, int Item)
 				"Max. objects: %d\n"
 				"Owner: %s\n"
 				"%s",
-				m_pGameServer->GetPlotSizeString(Item),
-				m_pGameServer->GetMaxPlotObjects(Item),
+				GameServer()->GetPlotSizeString(Item),
+				GameServer()->GetMaxPlotObjects(Item),
 				aOwner, aRented);
 		}
 
@@ -261,10 +216,6 @@ void CShop::SendPage(int ClientID, int Item)
 			m_aItems[Item].m_IsEuro ? "\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.\n\nCheck '/account' for your details." : ""
 		);
 	}
-	else
-	{
-		str_format(aMsg, sizeof(aMsg), "Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.");
-	}
 
 	SendWindow(ClientID, aMsg, "If you want to buy an item, press F3");
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
@@ -274,13 +225,13 @@ void CShop::BuyItem(int ClientID, int Item)
 {
 	if (Item <= PAGE_MAIN || Item >= m_NumItemsList)
 	{
-		m_pGameServer->SendChatTarget(ClientID, "Invalid item");
+		GameServer()->SendChatTarget(ClientID, "Invalid item");
 		return;
 	}
 
-	CCharacter *pChr = m_pGameServer->GetPlayerChar(ClientID);
-	CPlayer *pPlayer = m_pGameServer->m_apPlayers[ClientID];
-	CGameContext::AccountInfo *pAccount = &m_pGameServer->m_Accounts[pPlayer->GetAccID()];
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pPlayer->GetAccID()];
 
 	char aMsg[128];
 	int ItemID = Item;
@@ -292,7 +243,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	if (IsType(HOUSE_SHOP))
 	{
 		if (Item == ITEM_POLICE || Item == ITEM_TASER)
-			ItemID = m_BackgroundItem[ClientID];
+			ItemID = m_aBackgroundItem[ClientID];
 
 		// Check whether we have the item already
 		if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
@@ -314,15 +265,15 @@ void CShop::BuyItem(int ClientID, int Item)
 
 			switch (Item)
 			{
-			case ITEM_POLICE:															m_pGameServer->SendChatTarget(ClientID, "You already have the highest police rank"); break;
-			case ITEM_SPAWN_SHOTGUN: case ITEM_SPAWN_GRENADE: case ITEM_SPAWN_RIFLE:	m_pGameServer->SendChatTarget(ClientID, "You already have the maximum amount of bullets"); break;
-			case ITEM_TASER:															m_pGameServer->SendChatTarget(ClientID, "You already have the maximum taser level"); break;
-			case ITEM_TASER_BATTERY:													m_pGameServer->SendChatTarget(ClientID, "You already have a fully filled taser battery"); break;
+			case ITEM_POLICE:															GameServer()->SendChatTarget(ClientID, "You already have the highest police rank"); break;
+			case ITEM_SPAWN_SHOTGUN: case ITEM_SPAWN_GRENADE: case ITEM_SPAWN_RIFLE:	GameServer()->SendChatTarget(ClientID, "You already have the maximum amount of bullets"); break;
+			case ITEM_TASER:															GameServer()->SendChatTarget(ClientID, "You already have the maximum taser level"); break;
+			case ITEM_TASER_BATTERY:													GameServer()->SendChatTarget(ClientID, "You already have a fully filled taser battery"); break;
 			case ITEM_SPOOKY_GHOST: case ITEM_ROOM_KEY:									UseThe = true;
 				// fallthrough
 			default:
 				str_format(aMsg, sizeof(aMsg), "You already have %s%s", UseThe ? "the " : "", m_aItems[ItemID].m_pName);
-				m_pGameServer->SendChatTarget(ClientID, aMsg);
+				GameServer()->SendChatTarget(ClientID, aMsg);
 			}
 			return;
 		}
@@ -330,7 +281,7 @@ void CShop::BuyItem(int ClientID, int Item)
 		// check police lvl 3 for taser
 		if ((Item == ITEM_TASER || Item == ITEM_TASER_BATTERY) && pAccount->m_PoliceLevel < 3)
 		{
-			m_pGameServer->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
+			GameServer()->SendChatTarget(ClientID, "You need to be police level 3 or higher to get a taser license");
 			return;
 		}
 
@@ -341,32 +292,32 @@ void CShop::BuyItem(int ClientID, int Item)
 
 			if (!pPlayer->GiveTaserBattery(Amount))
 			{
-				m_pGameServer->SendChatTarget(ClientID, "Taser battery purchase failed");
+				GameServer()->SendChatTarget(ClientID, "Taser battery purchase failed");
 				return;
 			}
 		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
-		int OwnPlotID = m_pGameServer->GetPlotID(pPlayer->GetAccID());
-		if (m_pGameServer->m_aPlots[Item].m_aOwner[0] != 0)
+		int OwnPlotID = GameServer()->GetPlotID(pPlayer->GetAccID());
+		if (GameServer()->m_aPlots[Item].m_aOwner[0] != 0)
 		{
-			m_pGameServer->SendChatTarget(ClientID, "This plot is already sold to someone else");
+			GameServer()->SendChatTarget(ClientID, "This plot is already sold to someone else");
 			return;
 		}
 		else if (OwnPlotID == Item)
 		{
-			m_pGameServer->SendChatTarget(ClientID, "You already own that plot");
+			GameServer()->SendChatTarget(ClientID, "You already own that plot");
 			return;
 		}
 		else if (OwnPlotID != 0)
 		{
-			m_pGameServer->SendChatTarget(ClientID, "You already own another plot");
+			GameServer()->SendChatTarget(ClientID, "You already own another plot");
 			return;
 		}
-		else if (m_pGameServer->HasPlotByIP(ClientID))
+		else if (GameServer()->HasPlotByIP(ClientID))
 		{
-			m_pGameServer->SendChatTarget(ClientID, "Your IP address already owns one plot");
+			GameServer()->SendChatTarget(ClientID, "Your IP address already owns one plot");
 			return;
 		}
 	}
@@ -378,9 +329,9 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	// check for the correct price
 	if ((m_aItems[ItemID].m_IsEuro && pAccount->m_Euros < Price)
-		|| (!m_aItems[ItemID].m_IsEuro && pAccount->m_Money < Price))
+		|| (!m_aItems[ItemID].m_IsEuro && pPlayer->m_WalletMoney < Price))
 	{
-		m_pGameServer->SendChatTarget(ClientID, "You don't have enough money");
+		GameServer()->SendChatTarget(ClientID, "You don't have enough money");
 		return;
 	}
 
@@ -388,19 +339,22 @@ void CShop::BuyItem(int ClientID, int Item)
 	if (pAccount->m_Level < m_aItems[ItemID].m_Level)
 	{
 		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[ItemID].m_Level, m_aItems[ItemID].m_pName);
-		m_pGameServer->SendChatTarget(ClientID, aMsg);
+		GameServer()->SendChatTarget(ClientID, aMsg);
 		return;
 	}
 
 	// send a message that we bought the item
 	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aDescription, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
-	m_pGameServer->SendChatTarget(ClientID, aMsg);
+	GameServer()->SendChatTarget(ClientID, aMsg);
 	if (Item == ITEM_VIP || Item == ITEM_PORTAL_RIFLE)
-		m_pGameServer->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
+		GameServer()->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
 	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", aDescription);
-	pPlayer->MoneyTransaction(-Price, aMsg, m_aItems[ItemID].m_IsEuro);
+	if (m_aItems[ItemID].m_IsEuro)
+		pPlayer->BankTransaction(-Price, aMsg, true);
+	else
+		pPlayer->WalletTransaction(-Price, aMsg);
 
 
 	if (IsType(HOUSE_SHOP))
@@ -433,10 +387,10 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
-		m_pGameServer->SetPlotExpire(Item);
+		GameServer()->SetPlotExpire(Item);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "The plot will expire on %s", m_pGameServer->GetDate(m_pGameServer->m_aPlots[Item].m_ExpireDate));
-		m_pGameServer->SendChatTarget(ClientID, aBuf);
-		m_pGameServer->SetPlotInfo(Item, pPlayer->GetAccID());
+		str_format(aBuf, sizeof(aBuf), "The plot will expire on %s", GameServer()->GetDate(GameServer()->m_aPlots[Item].m_ExpireDate));
+		GameServer()->SendChatTarget(ClientID, aBuf);
+		GameServer()->SetPlotInfo(Item, pPlayer->GetAccID());
 	}
 }

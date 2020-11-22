@@ -1308,7 +1308,9 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", pAccount->m_XP, pSelf->GetNeededXP(pAccount->m_Level));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Money [%lld]", pAccount->m_Money);
+			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->m_WalletMoney);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Bank [%lld]", pAccount->m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1759,6 +1761,11 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
 		return;
 	}
+	if (!pSelf->m_pHouses[HOUSE_BANK]->IsInside(pResult->m_ClientID))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to be inside of a bank to pay money from your bank account to others.");
+		return;
+	}
 
 	int64 Money = atoll(pResult->GetString(0));
 	int ID = pSelf->GetCIDByName(pResult->GetString(1));
@@ -1790,16 +1797,16 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "paid %lld money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
-	pPlayer->MoneyTransaction(-Money, aBuf);
+	str_format(aBuf, sizeof(aBuf), "paid %lld money from bank account to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	pPlayer->BankTransaction(-Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "got %lld money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
-	pTo->MoneyTransaction(Money, aBuf);
+	str_format(aBuf, sizeof(aBuf), "got %lld money to bank account from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	pTo->BankTransaction(Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You paid %lld money to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "You paid %lld money from your bank account to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "You got %lld money from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "You got %lld money to your bank account from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
@@ -1824,7 +1831,9 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
-	str_format(aBuf, sizeof(aBuf), "Money: %lld", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
+	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->m_WalletMoney);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Bank: %lld", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1944,7 +1953,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 
 	if (pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_Money < 2000000)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 2.000.000 money to use this command");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 2.000.000 money on your bank account to use this command");
 		return;
 	}
 
@@ -1953,7 +1962,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "You lost 50.000 money for teleporting to spawn");
-	pPlayer->MoneyTransaction(-50000, "-50000 (teleported to spawn)");
+	pPlayer->WalletTransaction(-50000, "-50000 (teleported to spawn)");
 	pChr->Core()->m_Pos = Pos;
 	pChr->ReleaseHook();
 
@@ -2072,7 +2081,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pSelf->m_Accounts[OwnAccID].m_Money < Price)
+		if (pPlayer->m_WalletMoney < Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
 			return;
@@ -2095,16 +2104,16 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 		// and one to the seller
-		str_format(aBuf, sizeof(aBuf), "%s bought your plot", pSelf->Server()->ClientName(pResult->m_ClientID));
+		str_format(aBuf, sizeof(aBuf), "%s bought your plot, the money is moved to your bank account", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTarget(ID, aBuf);
 
 		// get money from buyer
 		str_format(aBuf, sizeof(aBuf), "-%d (bought plot %d)", Price, PlotID);
-		pPlayer->MoneyTransaction(-Price, aBuf);
+		pPlayer->WalletTransaction(-Price, aBuf);
 
 		// give money to seller
 		str_format(aBuf, sizeof(aBuf), "+%d (sold plot)", Price);
-		pSeller->MoneyTransaction(Price, aBuf);
+		pSeller->BankTransaction(Price, aBuf);
 		pSeller->m_PlotAuctionPrice = 0;
 
 		pSeller->StopPlotEditing();

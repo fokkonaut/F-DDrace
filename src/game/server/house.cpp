@@ -38,7 +38,7 @@ void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg)
 	const char *pCut = "**************************************\n";
 
 	char aPage[8] = "";
-	if (m_aClients[ClientID].m_Page > PAGE_MAIN)
+	if (m_aClients[ClientID].m_Page > PAGE_MAIN && m_Type != HOUSE_BANK)
 		str_format(aPage, sizeof(aPage), "~ %d ~", m_aClients[ClientID].m_Page);
 
 	char aFooter[128];
@@ -112,30 +112,98 @@ void CHouse::OnLeave(int ClientID)
 	m_aClients[ClientID].m_Page = PAGE_NONE;
 }
 
+void CHouse::OnKeyPress(int ClientID, int Dir)
+{
+	if (m_Type == HOUSE_BANK && m_aClients[ClientID].m_State == STATE_OPENED_WINDOW)
+	{
+		m_aClients[ClientID].m_State = STATE_CHOSE_ASSIGNMENT;
+		SetAssignment(ClientID, Dir);
+		return;
+	}
+
+	if (Dir == 1)
+	{
+		int NeedConfirmState = m_Type == HOUSE_BANK ? STATE_CHOSE_ASSIGNMENT : STATE_OPENED_WINDOW;
+		if (m_aClients[ClientID].m_State == NeedConfirmState)
+		{
+			if (m_aClients[ClientID].m_Page > PAGE_MAIN)
+				ConfirmAssignment(ClientID);
+		}
+		else if (m_aClients[ClientID].m_State == STATE_CONFIRM)
+		{
+			EndSession(ClientID, false);
+		}
+	}
+	else if (Dir == -1)
+	{
+		if (m_aClients[ClientID].m_Page == PAGE_NONE)
+		{
+			SetPage(ClientID, PAGE_MAIN);
+			m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
+		}
+		else if (m_aClients[ClientID].m_State == STATE_CONFIRM)
+		{
+			EndSession(ClientID, true);
+		}
+	}
+}
+
+void CHouse::ConfirmAssignment(int ClientID)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s\n\nF3: yes\nF4: no", GetConfirmMessage(ClientID));
+	SendWindow(ClientID, aBuf);
+	m_aClients[ClientID].m_State = STATE_CONFIRM;
+}
+
+void CHouse::EndSession(int ClientID, bool Cancelled)
+{
+	if (Cancelled)
+	{
+		SendWindow(ClientID, GetEndMessage(ClientID));
+	}
+	else
+	{
+		OnSuccess(ClientID);
+		SetPage(ClientID, PAGE_MAIN);
+	}
+
+	m_aClients[ClientID].m_State = STATE_OPENED_WINDOW;
+}
+
 bool CHouse::CanChangePage(int ClientID)
 {
-	return m_aClients[ClientID].m_Page != PAGE_NONE && m_aClients[ClientID].m_State == STATE_OPENED_WINDOW;
+	return m_aClients[ClientID].m_Page != PAGE_NONE && m_aClients[ClientID].m_State >= STATE_OPENED_WINDOW && m_aClients[ClientID].m_State != STATE_CONFIRM;
+}
+
+void CHouse::SetPage(int ClientID, int Page)
+{
+	m_aClients[ClientID].m_Page = Page;
+	OnPageChange(ClientID);
 }
 
 void CHouse::DoPageChange(int ClientID, int Dir)
 {
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
 
-	if (Dir == PAGE_MAIN)
+	if (m_Type != HOUSE_BANK || m_aClients[ClientID].m_Page > PAGE_MAIN)
 	{
-		m_aClients[ClientID].m_Page = PAGE_MAIN;
-	}
-	else if (Dir == 1)
-	{
-		m_aClients[ClientID].m_Page++;
-		if (m_aClients[ClientID].m_Page >= NumPages())
+		if (Dir == PAGE_MAIN)
+		{
 			m_aClients[ClientID].m_Page = PAGE_MAIN;
-	}
-	else if (Dir == -1)
-	{
-		m_aClients[ClientID].m_Page--;
-		if (m_aClients[ClientID].m_Page < PAGE_MAIN)
-			m_aClients[ClientID].m_Page = NumPages()-1;
+		}
+		else if (Dir == 1)
+		{
+			m_aClients[ClientID].m_Page++;
+			if (m_aClients[ClientID].m_Page >= NumPages())
+				m_aClients[ClientID].m_Page = FirstPage();
+		}
+		else if (Dir == -1)
+		{
+			m_aClients[ClientID].m_Page--;
+			if (m_aClients[ClientID].m_Page < FirstPage())
+				m_aClients[ClientID].m_Page = NumPages() - 1;
+		}
 	}
 
 	OnPageChange(ClientID);

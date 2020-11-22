@@ -466,8 +466,6 @@ public:
 
 	vec2 m_CursorPos;
 
-	int64 m_WalletMoney;
-
 
 	/////////dummymode variables
 

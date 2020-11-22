@@ -9,7 +9,7 @@
 
 enum ShopItems
 {
-	ITEM_RAINBOW = 1,
+	ITEM_RAINBOW = PAGE_MAIN+1,
 	ITEM_BLOODY,
 	ITEM_POLICE,
 	ITEM_SPOOKY_GHOST,
@@ -75,19 +75,13 @@ private:
 	} m_aItems[MAX_PLOTS];
 
 	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false);
-
 	void BuyItem(int ClientID, int Item);
-	void ConfirmPurchase(int ClientID);
-	void EndPurchase(int ClientID, bool Cancelled);
 
 	const char *GetHeadline(int Item);
 	const char *GetTimeMessage(int Time);
 
-	void SetPage(int ClientID, int Page);
-	void SendPage(int ClientID, int Page);
-
 	virtual int NumPages() { return m_NumItemsList; }
-	int m_BackgroundItem[MAX_CLIENTS];
+	int m_aBackgroundItem[MAX_CLIENTS];
 
 	// Because it differs for shop/plot shop
 	int m_NumItems;
@@ -100,8 +94,10 @@ public:
 	const char *GetItemName(int Item) { return m_aItems[Item].m_pName; }
 
 	virtual void OnPageChange(int ClientID);
-	virtual void OnKeyPress(int ClientID, int Dir);
+	virtual void OnSuccess(int ClientID);
 	virtual const char *GetWelcomeMessage(int ClientID);
+	virtual const char *GetConfirmMessage(int ClientID);
+	virtual const char *GetEndMessage(int ClientID);
 };
 
 #endif

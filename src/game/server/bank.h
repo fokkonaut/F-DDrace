@@ -8,13 +8,36 @@
 
 enum BankPages
 {
+	AMOUNT_100 = PAGE_MAIN+1,
+	AMOUNT_1K,
+	AMOUNT_5K,
+	AMOUNT_10K,
+	AMOUNT_50K,
+	AMOUNT_100K,
+	AMOUNT_500K,
+	AMOUNT_1MIL,
+	AMOUNT_5MIL,
+	AMOUNT_10MIL,
+	AMOUNT_50MIL,
+	AMOUNT_100MIL,
 	NUM_PAGES_BANK
+};
+
+enum BankAssignment
+{
+	ASSIGNMENT_NONE,
+	ASSIGNMENT_DEPOSIT,
+	ASSIGNMENT_WITHDRAW,
 };
 
 class CBank : public CHouse
 {
 private:
+	int GetAmount(int Type);
+	int m_aAssignmentMode[MAX_CLIENTS];
+	bool NotLoggedIn(int ClientID);
 
+	virtual int FirstPage() { return AMOUNT_100; }
 	virtual int NumPages() { return NUM_PAGES_BANK; }
 
 public:
@@ -22,8 +45,11 @@ public:
 	virtual ~CBank() {};
 
 	virtual void OnPageChange(int ClientID);
-	virtual void OnKeyPress(int ClientID, int Dir);
+	virtual void OnSuccess(int ClientID);
 	virtual const char *GetWelcomeMessage(int ClientID);
+	virtual const char *GetConfirmMessage(int ClientID);
+	virtual const char *GetEndMessage(int ClientID);
+	virtual void SetAssignment(int ClientID, int Dir);
 };
 
 #endif

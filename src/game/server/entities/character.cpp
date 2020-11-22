@@ -2352,7 +2352,7 @@ void CCharacter::HandleTiles(int Index)
 			}
 
 			// give money and xp
-			m_pPlayer->MoneyTransaction(Money);
+			m_pPlayer->WalletTransaction(Money);
 			m_pPlayer->GiveXP(XP);
 
 			// broadcast
@@ -2369,7 +2369,7 @@ void CCharacter::HandleTiles(int Index)
 						"Money [%lld] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
-						pAccount->m_Money, (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+						m_pPlayer->m_WalletMoney, (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
 						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
 						pAccount->m_Level
 					);
@@ -2389,7 +2389,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		else
 		{
-			m_pPlayer->MoneyTransaction(500);
+			m_pPlayer->WalletTransaction(500);
 			m_pPlayer->GiveXP(2500);
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money xp bomb)");
 
@@ -3193,7 +3193,6 @@ void CCharacter::FDDraceInit()
 	m_LastLinkedPortals = Now;
 	m_LastWantedWeapon = 0;
 	m_LastWantedLogout = 0;
-	m_WalletMoney = 0;
 }
 
 void CCharacter::FDDraceTick()
@@ -3563,11 +3562,11 @@ void CCharacter::DropLoot(int Weapon)
 		DropWeapon((rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS, true, Dir);
 	}
 
-	if (m_WalletMoney > 0)
+	if (m_pPlayer->m_WalletMoney > 0)
 	{
 		float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-		new CMoney(GameWorld(), m_Pos, m_WalletMoney, Dir);
-		m_WalletMoney = 0; // DropLoot() is called on death anyways, so no need to reset it in theory
+		new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, Dir);
+		m_pPlayer->m_WalletMoney = 0;
 	}
 }
 

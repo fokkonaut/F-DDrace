@@ -57,6 +57,12 @@ enum SpectatorFlagSelection
 	SPEC_SELECT_FLAG_BLUE = VANILLA_MAX_CLIENTS - SPEC_FLAGBLUE,
 };
 
+enum Transaction
+{
+	TRANSACTION_BANK,
+	TRANSACTION_WALLET,
+};
+
 enum
 {
 	WEAPON_PLAYER = -4, // killed by a player
@@ -318,7 +324,6 @@ public:
 
 	//account
 	int GetAccID();
-	void MoneyTransaction(int64 Amount, const char* pDescription = "", bool IsEuro = false);
 	void GiveXP(int Amount, const char* pMessage = "");
 	void GiveBlockPoints(int Amount);
 	bool GiveTaserBattery(int Amount);
@@ -326,6 +331,11 @@ public:
 	void OnLogout();
 	void SetExpireDate(int Item);
 	bool IsExpiredItem(int Item);
+
+	void BankTransaction(int64 Amount, const char *pDescription = "", bool IsEuro = false);
+	void WalletTransaction(int64 Amount, const char *pDescription = "");
+	void ApplyMoneyHistoryMsg(int Type, const char *pDescription);
+	int64 m_WalletMoney;
 
 	// plot
 	void CancelPlotAuction();
