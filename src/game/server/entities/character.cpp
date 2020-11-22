@@ -3447,7 +3447,7 @@ void CCharacter::DropMoney(int64 Amount)
 	m_pPlayer->WalletTransaction(-Amount);
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "-%d", Amount);
+	str_format(aBuf, sizeof(aBuf), "-%lld", Amount);
 	GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf);
 }
 
