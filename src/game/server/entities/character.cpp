@@ -2599,7 +2599,7 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 			int XpBonus = newJumps > 2 ? (newJumps * 100) : 0;
-			if (XpBonus && newJumps > m_MaxJumps)
+			if (XpBonus && newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT)
 				m_pPlayer->GiveXP(XpBonus, "upgrading jumps");
 
 			m_Core.m_Jumps = newJumps;
