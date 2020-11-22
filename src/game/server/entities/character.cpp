@@ -19,6 +19,7 @@
 #include "atom.h"
 #include "trail.h"
 #include "portal.h"
+#include "money.h"
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
 
@@ -3191,8 +3192,8 @@ void CCharacter::FDDraceInit()
 
 	m_LastLinkedPortals = Now;
 	m_LastWantedWeapon = 0;
-
 	m_LastWantedLogout = 0;
+	m_WalletMoney = 0;
 }
 
 void CCharacter::FDDraceTick()
@@ -3560,6 +3561,13 @@ void CCharacter::DropLoot(int Weapon)
 		// up to one extra weapon
 		float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
 		DropWeapon((rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS, true, Dir);
+	}
+
+	if (m_WalletMoney > 0)
+	{
+		float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
+		new CMoney(GameWorld(), m_Pos, m_WalletMoney, Dir);
+		m_WalletMoney = 0; // DropLoot() is called on death anyways, so no need to reset it in theory
 	}
 }
 

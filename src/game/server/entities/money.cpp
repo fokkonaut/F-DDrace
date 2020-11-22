@@ -4,11 +4,12 @@
 #include <game/server/gamecontext.h>
 #include "money.h"
 
-CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int Amount)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, MONEY_DROP_RADIUS*2)
+CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, float Direction)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, MONEY_DROP_RADIUS*2)
 {
 	m_Pos = Pos;
 	m_Amount = Amount;
+	m_Vel = vec2(5*Direction, Direction == 0 ? 0 : -5);
 
 	GameWorld()->InsertEntity(this);
 
@@ -24,28 +25,23 @@ CMoney::~CMoney()
 
 void CMoney::Tick()
 {
-	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
+	CAdvancedEntity::Tick();
+	HandleDropped();
 
-	if (!m_TuneZone)
-		m_Vel.y += GameServer()->Tuning()->m_Gravity;
-	else
-		m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
-
-	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
+	/*CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
 	if (pClosest)
 	{
 		//pClosest->GiveMoneyToPocket(m_Amount);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Collected %d money", m_Amount);
+		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
 		GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
-		str_format(aBuf, sizeof(aBuf), "+%d", m_Amount);
+		str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
 		GameServer()->CreateLaserText(pClosest->GetPos(), pClosest->GetPlayer()->GetCID(), aBuf);
 		GameWorld()->DestroyEntity(this);
 		return;
-	}
+	}*/
 
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.5f);
+	m_PrevPos = m_Pos;
 }
 
 void CMoney::Snap(int SnappingClient)

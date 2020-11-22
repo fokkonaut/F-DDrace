@@ -10,9 +10,10 @@ class CAdvancedEntity : public CEntity
 public:
 	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProimityRadius, int Owner = -1);
 	virtual ~CAdvancedEntity() {}
-	virtual void Reset() {}
-	virtual void Snap(int SnappingClient) {}
+
+	virtual void Reset();
 	virtual void Tick();
+	virtual void Snap(int SnappingClient) {}
 
 protected:
 	bool IsGrounded(bool SetVel = false);

@@ -3,7 +3,7 @@
 #ifndef GAME_SERVER_ENTITIES_MONEY_H
 #define GAME_SERVER_ENTITIES_MONEY_H
 
-#include <game/server/entity.h>
+#include "advanced_entity.h"
 
 enum
 {
@@ -11,17 +11,14 @@ enum
 	MONEY_DROP_RADIUS = 10,
 };
 
-class CMoney : public CEntity
+class CMoney : public CAdvancedEntity
 {
 private:
-	vec2 m_Vel;
-	int m_TuneZone;
-
-	int m_Amount;
+	int64 m_Amount;
 	int m_aID[NUM_DOTS];
 
 public:
-	CMoney(CGameWorld *pGameWorld, vec2 Pos, int Amount);
+	CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, float Direction = 0);
 	virtual ~CMoney();
 
 	int GetAmount() { return m_Amount; }

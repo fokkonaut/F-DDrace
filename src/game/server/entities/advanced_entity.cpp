@@ -16,6 +16,11 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 }
 
+void CAdvancedEntity::Reset()
+{
+	GameWorld()->DestroyEntity(this);
+}
+
 void CAdvancedEntity::Tick()
 {
 	// weapon hits death-tile or left the game layer, reset it
