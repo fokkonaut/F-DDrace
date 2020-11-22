@@ -18,7 +18,7 @@ const char *CBank::GetWelcomeMessage(int ClientID)
 
 const char *CBank::GetConfirmMessage(int ClientID)
 {
-	int Amount = GetAmount(m_aClients[ClientID].m_Page);
+	int Amount = GetAmount(m_aClients[ClientID].m_Page, ClientID);
 	static char aBuf[128];
 	if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 	{
@@ -153,10 +153,8 @@ int CBank::GetAmount(int Type, int ClientID)
 				return pPlayer->m_WalletMoney;
 			else if (ASSIGNMENT_WITHDRAW)
 				return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money;
-			else return 0;
 		}
-		else
-			return 0;
+		return 0;
 	}
 
 	switch (Type)
