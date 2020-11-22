@@ -119,9 +119,9 @@ void CFlag::Grab(CCharacter *pChr)
 
 void CFlag::Tick()
 {
-	CAdvancedEntity::Tick();
 	// for the CAdvancedEntity part
-	m_pOwner = m_pLastCarrier;
+	m_Owner = m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1;
+	CAdvancedEntity::Tick();
 
 	// plots
 	int PlotID = GameServer()->GetTilePlotID(m_Pos);

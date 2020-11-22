@@ -23,6 +23,15 @@ void CAdvancedEntity::Reset()
 
 void CAdvancedEntity::Tick()
 {
+	m_pOwner = 0;
+	if (m_Owner >= 0)
+	{
+		if (!GameServer()->m_apPlayers[m_Owner])
+			m_Owner = -1;
+		else if (GameServer()->GetPlayerChar(m_Owner))
+			m_pOwner = GameServer()->GetPlayerChar(m_Owner);
+	}
+
 	// weapon hits death-tile or left the game layer, reset it
 	if (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameLayerClipped(m_Pos))
 	{

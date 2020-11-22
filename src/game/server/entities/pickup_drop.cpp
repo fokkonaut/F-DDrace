@@ -39,7 +39,7 @@ void CPickupDrop::Reset(bool Picked)
 	if (m_Type == POWERUP_WEAPON || m_Type == POWERUP_BATTERY)
 	{
 		CPlayer *pOwner = GameServer()->m_apPlayers[m_Owner];
-		if (pOwner)
+		if (m_Owner >= 0 && pOwner)
 			for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
 				if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
 					pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
@@ -60,17 +60,14 @@ void CPickupDrop::Reset(bool Picked)
 
 void CPickupDrop::Tick()
 {
-	CAdvancedEntity::Tick();
-
-	m_pOwner = 0;
-	if (m_Owner != -1 && GameServer()->GetPlayerChar(m_Owner))
-		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
-
+	// check this before the CAdvancedEntity tick to not lose our m_Owner for this check
 	if (m_Owner >= 0 && !GameServer()->m_apPlayers[m_Owner] && Config()->m_SvDestroyDropsOnLeave)
 	{
 		Reset();
 		return;
 	}
+
+	CAdvancedEntity::Tick();
 
 	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : Mask128();
 
@@ -154,7 +151,7 @@ int CPickupDrop::IsCharacterNear()
 	{
 		CCharacter* pChr = apEnts[i];
 
-		if ((m_PickupDelay > 0 && pChr == GameServer()->GetPlayerChar(m_Owner)) || !pChr->CanCollide(m_Owner, false))
+		if ((m_PickupDelay > 0 && pChr == m_pOwner) || (m_Owner >= 0 && !pChr->CanCollide(m_Owner, false)))
 			continue;
 
 		if (m_Type == POWERUP_WEAPON)

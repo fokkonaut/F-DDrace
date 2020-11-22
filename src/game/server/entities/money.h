@@ -24,7 +24,7 @@ private:
 	vec2 m_MergePos;
 
 public:
-	CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, float Direction = 0);
+	CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner = -1, float Direction = 0);
 	virtual ~CMoney();
 
 	int GetAmount() { return m_Amount; }

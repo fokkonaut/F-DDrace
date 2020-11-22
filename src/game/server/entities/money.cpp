@@ -4,8 +4,8 @@
 #include <game/server/gamecontext.h>
 #include "money.h"
 
-CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, float Direction)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, MONEY_DROP_RADIUS*2)
+CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, MONEY_DROP_RADIUS*2, Owner)
 {
 	m_Pos = Pos;
 	m_Amount = Amount;
