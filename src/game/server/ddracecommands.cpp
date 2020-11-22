@@ -1716,3 +1716,19 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Changed owner of plot %d from '%s' to '%s'", PlotID, pSelf->m_Accounts[OldID].m_Username, pSelf->m_Accounts[NewID].m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
+
+void CGameContext::ConPlotInfo(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int PlotID = pResult->GetInteger(0);
+	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
+		return;
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "Owner account: %s", pSelf->m_aPlots[PlotID].m_aOwner);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Size: %s", pSelf->GetPlotSizeString(PlotID));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Expire date: %s", pSelf->m_aPlots[PlotID].m_ExpireDate == 0 ? "" : pSelf->GetDate(pSelf->m_aPlots[PlotID].m_ExpireDate));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+}

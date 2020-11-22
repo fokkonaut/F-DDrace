@@ -844,6 +844,7 @@ private:
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlotOwner(IConsole::IResult* pResult, void* pUserData);
+	static void ConPlotInfo(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

@@ -100,6 +100,7 @@ CONSOLE_COMMAND("set_minigame", "v[id] s[minigame]", CFGFLAG_SERVER, ConSetMinig
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("plot_owner", "s[username] i[plotid]", CFGFLAG_SERVER, ConPlotOwner, this, "Sets owner of plot i to account with username s", AUTHED_ADMIN)
+CONSOLE_COMMAND("plot_info", "i[plotid]", CFGFLAG_SERVER, ConPlotInfo, this, "Shows information about plot i", AUTHED_ADMIN)
 
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
