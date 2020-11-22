@@ -10,7 +10,7 @@ enum
 	NUM_DOTS = 12,
 	NUM_MONEY_IDS = NUM_DOTS + 1, // one extra for the merge laser
 
-	MONEY_DROP_RADIUS = 10,
+	MONEY_DROP_RADIUS = 14,
 	MERGE_RADIUS = 32*24,
 };
 
