@@ -8,7 +8,8 @@
 
 enum BankPages
 {
-	AMOUNT_100 = PAGE_MAIN+1,
+	AMOUNT_EVERYTHING = PAGE_MAIN+1,
+	AMOUNT_100,
 	AMOUNT_1K,
 	AMOUNT_5K,
 	AMOUNT_10K,
@@ -33,11 +34,11 @@ enum BankAssignment
 class CBank : public CHouse
 {
 private:
-	int GetAmount(int Type);
+	int GetAmount(int Type, int ClientID = -1);
 	int m_aAssignmentMode[MAX_CLIENTS];
 	bool NotLoggedIn(int ClientID);
 
-	virtual int FirstPage() { return AMOUNT_100; }
+	virtual int FirstPage() { return AMOUNT_EVERYTHING; }
 	virtual int NumPages() { return NUM_PAGES_BANK; }
 
 public:

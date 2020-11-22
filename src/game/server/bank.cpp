@@ -56,7 +56,7 @@ void CBank::OnSuccess(int ClientID)
 
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pPlayer->GetAccID()];
-	int Amount = GetAmount(m_aClients[ClientID].m_Page);
+	int Amount = GetAmount(m_aClients[ClientID].m_Page, ClientID);
 	char aMsg[128];
 
 	if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
@@ -67,8 +67,8 @@ void CBank::OnSuccess(int ClientID)
 			return;
 		}
 
-		pAccount->m_Money += Amount;
-		pPlayer->m_WalletMoney -= Amount;
+		pPlayer->BankTransaction(Amount);
+		pPlayer->WalletTransaction(-Amount);
 
 		str_format(aMsg, sizeof(aMsg), "You deposited %d money from your wallet to your bank account.", Amount);
 		GameServer()->SendChatTarget(ClientID, aMsg);
@@ -82,8 +82,8 @@ void CBank::OnSuccess(int ClientID)
 			return;
 		}
 
-		pAccount->m_Money -= Amount;
-		pPlayer += Amount;
+		pPlayer->BankTransaction(-Amount);
+		pPlayer->WalletTransaction(Amount);
 
 		str_format(aMsg, sizeof(aMsg), "You withdrew %d money from your wallet to your bank account.", Amount);
 		GameServer()->SendChatTarget(ClientID, aMsg);
@@ -101,7 +101,7 @@ void CBank::SetAssignment(int ClientID, int Dir)
 	case 1: m_aAssignmentMode[ClientID] = ASSIGNMENT_DEPOSIT; break;
 	}
 
-	SetPage(ClientID, AMOUNT_100);
+	SetPage(ClientID, AMOUNT_EVERYTHING);
 }
 
 void CBank::OnPageChange(int ClientID)
@@ -114,13 +114,23 @@ void CBank::OnPageChange(int ClientID)
 	}
 	else
 	{
-		const char *pAssignment = m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT ? "D E P O S I T" : m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW ? "W I T H D R A W" : "U N K N O W N";
-		str_format(aMsg, sizeof(aMsg), "Current balance: %lld\n\n%s\n\n", GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()].m_Money, pAssignment);
+		const char *pAssignment = "";
+		if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
+			pAssignment = "D E P O S I T";
+		else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
+			pAssignment = "W I T H D R A W";
 
-		for (int i = AMOUNT_100; i < NUM_PAGES_BANK; i++)
+		str_format(aMsg, sizeof(aMsg), "Bank: %lld\nWallet: %lld\n\n%s\n\n", GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()].m_Money, GameServer()->m_apPlayers[ClientID]->m_WalletMoney, pAssignment);
+		for (int i = AMOUNT_EVERYTHING; i < NUM_PAGES_BANK; i++)
 		{
+			char aAmount[64];
+			if (i == AMOUNT_EVERYTHING)
+				str_format(aAmount, sizeof(aAmount), "Everything (%d)", GetAmount(i, ClientID));
+			else
+				str_format(aAmount, sizeof(aAmount), "%d", GetAmount(i));
+
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s%d%s\n", i == m_aClients[ClientID].m_Page ? ">  " : "", GetAmount(i), i == m_aClients[ClientID].m_Page ? "  <" : "");
+			str_format(aBuf, sizeof(aBuf), "%s%s%s\n", i == m_aClients[ClientID].m_Page ? ">  " : "", aAmount, i == m_aClients[ClientID].m_Page ? "  <" : "");
 			str_append(aMsg, aBuf, sizeof(aMsg));
 		}
 	}
@@ -129,8 +139,26 @@ void CBank::OnPageChange(int ClientID)
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
 }
 
-int CBank::GetAmount(int Type)
+int CBank::GetAmount(int Type, int ClientID)
 {
+	if (Type == AMOUNT_EVERYTHING)
+	{
+		if (ClientID >= 0)
+		{
+			CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+			if (!pPlayer)
+				return 0;
+
+			if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
+				return pPlayer->m_WalletMoney;
+			else if (ASSIGNMENT_WITHDRAW)
+				return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money;
+			else return 0;
+		}
+		else
+			return 0;
+	}
+
 	switch (Type)
 	{
 	case AMOUNT_100: return 100;

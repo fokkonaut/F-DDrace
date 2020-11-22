@@ -1308,9 +1308,9 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "XP [%d/%d]", pAccount->m_XP, pSelf->GetNeededXP(pAccount->m_Level));
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->m_WalletMoney);
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Bank [%lld]", pAccount->m_Money);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->m_WalletMoney);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1831,9 +1831,9 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
-	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->m_WalletMoney);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Bank: %lld", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->m_WalletMoney);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);

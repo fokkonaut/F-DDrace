@@ -28,18 +28,16 @@ void CMoney::Tick()
 	CAdvancedEntity::Tick();
 	HandleDropped();
 
-	/*CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
+	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
 	if (pClosest)
 	{
-		//pClosest->GiveMoneyToPocket(m_Amount);
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
 		GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
-		str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
-		GameServer()->CreateLaserText(pClosest->GetPos(), pClosest->GetPlayer()->GetCID(), aBuf);
-		GameWorld()->DestroyEntity(this);
+		pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
+		Reset();
 		return;
-	}*/
+	}
 
 	m_PrevPos = m_Pos;
 }
