@@ -3546,7 +3546,7 @@ void CCharacter::DropLoot(int Weapon)
 		// we dont want to spam spawn with hundreds of weapons
 		if (GetAliveState())
 		{
-			// up two normal weapons
+			// up to two normal weapons
 			for (int i = 0; i < 2; i++)
 			{
 				int Weapon = rand() % NUM_VANILLA_WEAPONS;
