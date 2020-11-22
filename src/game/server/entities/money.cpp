@@ -91,10 +91,10 @@ void CMoney::Snap(int SnappingClient)
 	pBullet->m_StartTick = 0;
 	pBullet->m_Type = WEAPON_SHOTGUN;
 
-	float AngleStep = 2.0f * pi / NUM_DOTS;
-	for(int i = 0; i < NUM_DOTS; i++)
+	float AngleStep = 2.0f * pi / GetNumDots();
+	for(int i = 0; i < GetNumDots(); i++)
 	{
-		vec2 Pos = m_Pos + vec2(GetRadius(m_Amount) * cos(AngleStep*i), GetRadius(m_Amount) * sin(AngleStep*i));
+		vec2 Pos = m_Pos + vec2(GetRadius() * cos(AngleStep*i), GetRadius() * sin(AngleStep*i));
 		
 		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
 		if(!pObj)
@@ -110,7 +110,7 @@ void CMoney::Snap(int SnappingClient)
 
 	if (m_MergeTick > Server()->Tick() - 5)
 	{
-		CNetObj_Laser* pObj = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[NUM_DOTS], sizeof(CNetObj_Laser)));
+		CNetObj_Laser* pObj = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[NUM_DOTS_BIG], sizeof(CNetObj_Laser)));
 		if (!pObj)
 			return;
 
