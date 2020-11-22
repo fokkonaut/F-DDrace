@@ -2598,11 +2598,13 @@ void CCharacter::HandleTiles(int Index)
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
-			if (newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT)
-				m_pPlayer->GiveXP(newJumps * 100, "upgrading jumps");
 
+			if (newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT)
+			{
+				m_pPlayer->GiveXP(newJumps * 100, "upgrading jumps");
+				m_MaxJumps = newJumps;
+			}
 			m_Core.m_Jumps = newJumps;
-			m_MaxJumps = max(m_MaxJumps, m_Core.m_Jumps);
 		}
 	}
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
