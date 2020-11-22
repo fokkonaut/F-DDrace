@@ -151,7 +151,7 @@ int CBank::GetAmount(int Type, int ClientID)
 
 			if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 				return pPlayer->m_WalletMoney;
-			else if (ASSIGNMENT_WITHDRAW)
+			else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
 				return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money;
 		}
 		return 0;
