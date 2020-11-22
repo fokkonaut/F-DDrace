@@ -29,7 +29,7 @@ void CMoney::Tick()
 	HandleDropped();
 
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
-	/*if (pClosest)
+	if (pClosest)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
@@ -37,7 +37,7 @@ void CMoney::Tick()
 		pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
 		Reset();
 		return;
-	}*/
+	}
 
 	m_PrevPos = m_Pos;
 }
