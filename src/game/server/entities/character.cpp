@@ -2598,9 +2598,8 @@ void CCharacter::HandleTiles(int Index)
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
-			int XpBonus = newJumps > 2 ? (newJumps * 100) : 0;
-			if (XpBonus && newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT)
-				m_pPlayer->GiveXP(XpBonus, "upgrading jumps");
+			if (newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT)
+				m_pPlayer->GiveXP(newJumps * 100, "upgrading jumps");
 
 			m_Core.m_Jumps = newJumps;
 			m_MaxJumps = max(m_MaxJumps, m_Core.m_Jumps);
@@ -3198,7 +3197,7 @@ void CCharacter::FDDraceInit()
 	m_LastLinkedPortals = Now;
 	m_LastWantedWeapon = 0;
 	m_LastWantedLogout = 0;
-	m_MaxJumps = 0;
+	m_MaxJumps = m_Core.m_Jumps;
 }
 
 void CCharacter::FDDraceTick()
