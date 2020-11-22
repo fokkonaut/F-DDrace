@@ -14,10 +14,10 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, float Direction)
 	m_MergePos = vec2(-1, -1);
 	m_MergeTick = 0;
 
-	GameWorld()->InsertEntity(this);
-
 	for (int i = 0; i < NUM_MONEY_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
+
+	GameWorld()->InsertEntity(this);
 }
 
 CMoney::~CMoney()
@@ -47,7 +47,7 @@ void CMoney::Tick()
 
 	CMoney *apEnts[16];
 	int Num = GameWorld()->FindEntities(m_Pos, MERGE_RADIUS, (CEntity**)apEnts, 16, CGameWorld::ENTTYPE_MONEY);
-	for (int i = Num-1; i >= 0; i--)
+	for (int i = 0; i < Num; i++)
 	{
 		if (apEnts[i] == this || apEnts[i]->IsMarkedForDestroy() || GameServer()->Collision()->IntersectLine(m_Pos, apEnts[i]->GetPos(), 0, 0))
 			continue;
