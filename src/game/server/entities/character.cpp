@@ -2598,8 +2598,12 @@ void CCharacter::HandleTiles(int Index)
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
+			int XpBonus = newJumps > 2 ? (newJumps * 100) : 0;
+			if (XpBonus && newJumps > m_MaxJumps)
+				m_pPlayer->GiveXP(XpBonus, "upgrading jumps");
 
 			m_Core.m_Jumps = newJumps;
+			m_MaxJumps = max(m_MaxJumps, m_Core.m_Jumps);
 		}
 	}
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
@@ -3194,6 +3198,7 @@ void CCharacter::FDDraceInit()
 	m_LastLinkedPortals = Now;
 	m_LastWantedWeapon = 0;
 	m_LastWantedLogout = 0;
+	m_MaxJumps = 0;
 }
 
 void CCharacter::FDDraceTick()
