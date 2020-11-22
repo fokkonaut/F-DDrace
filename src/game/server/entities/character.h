@@ -407,6 +407,7 @@ public:
 	bool m_IsRainbowHooked;
 
 	int m_SavedGamemode;
+	int m_MaxJumps;
 
 	// editor
 	CDrawEditor m_DrawEditor;
