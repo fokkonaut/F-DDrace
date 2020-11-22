@@ -3437,6 +3437,20 @@ bool CCharacter::IsFreeDraw()
 	return Server()->GetAuthedState(m_pPlayer->GetCID()) >= Config()->m_SvFreeDrawLevel;
 }
 
+void CCharacter::DropMoney(int64 Amount)
+{
+	if (Amount <= 0 || Amount < m_pPlayer->m_WalletMoney)
+		return;
+
+	float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
+	new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, Dir);
+	m_pPlayer->WalletTransaction(-Amount);
+
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "-%d", Amount);
+	GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf);
+}
+
 void CCharacter::DropFlag()
 {
 	for (int i = 0; i < 2; i++)
@@ -3569,12 +3583,7 @@ void CCharacter::DropLoot(int Weapon)
 		}
 	}
 
-	if (m_pPlayer->m_WalletMoney > 0)
-	{
-		float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-		new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, Dir);
-		m_pPlayer->m_WalletMoney = 0;
-	}
+	DropMoney(m_pPlayer->m_WalletMoney);
 }
 
 int CCharacter::GetWeaponSpecial(int Type)

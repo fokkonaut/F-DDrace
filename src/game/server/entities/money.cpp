@@ -5,7 +5,7 @@
 #include "money.h"
 
 CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, MONEY_DROP_RADIUS*2, Owner)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, GetRadius(Amount)*2, Owner)
 {
 	m_Pos = Pos;
 	m_Amount = Amount;
@@ -13,6 +13,8 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 
 	m_MergePos = vec2(-1, -1);
 	m_MergeTick = 0;
+
+	m_PickupDelay = Server()->TickSpeed() * 2;
 
 	for (int i = 0; i < NUM_MONEY_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -34,13 +36,20 @@ void CMoney::Tick()
 	CAdvancedEntity::Tick();
 	HandleDropped();
 
+	if (m_PickupDelay > 0)
+		m_PickupDelay--;
+
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
-	if (pClosest)
+	if (pClosest && (pClosest != m_pOwner || m_PickupDelay <= 0))
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
 		GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
 		pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "+%d", m_Amount);
+		GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf);
+
 		Reset();
 		return;
 	}
@@ -80,7 +89,7 @@ void CMoney::Snap(int SnappingClient)
 	float AngleStep = 2.0f * pi / NUM_DOTS;
 	for(int i = 0; i < NUM_DOTS; i++)
 	{
-		vec2 Pos = m_Pos + vec2(MONEY_DROP_RADIUS * cos(AngleStep*i), MONEY_DROP_RADIUS * sin(AngleStep*i));
+		vec2 Pos = m_Pos + vec2(GetRadius(m_Amount) * cos(AngleStep*i), GetRadius(m_Amount) * sin(AngleStep*i));
 		
 		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
 		if(!pObj)

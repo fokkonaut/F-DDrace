@@ -10,16 +10,21 @@ enum
 	NUM_DOTS = 12,
 	NUM_MONEY_IDS = NUM_DOTS + 1, // one extra for the merge laser
 
-	MONEY_DROP_RADIUS = 14,
+	SMALL_MONEY_AMOUNT = 100,
+	MONEY_RADIUS_BIG = 14,
+	MONEY_RADIUS_SMALL = 10,
+
 	MERGE_RADIUS = 32*24,
 };
 
 class CMoney : public CAdvancedEntity
 {
 private:
+	int GetRadius(int64 Amount) { return (Amount <= SMALL_MONEY_AMOUNT) ? MONEY_RADIUS_SMALL : MONEY_RADIUS_BIG; }
 	int64 m_Amount;
 	int m_aID[NUM_MONEY_IDS];
 
+	int m_PickupDelay;
 	int64 m_MergeTick;
 	vec2 m_MergePos;
 
