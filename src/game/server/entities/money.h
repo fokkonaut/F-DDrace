@@ -24,7 +24,7 @@ private:
 	int64 m_Amount;
 	int m_aID[NUM_MONEY_IDS];
 
-	int m_PickupDelay;
+	int64 m_StartTick;
 	int64 m_MergeTick;
 	vec2 m_MergePos;
 

@@ -14,7 +14,7 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 	m_MergePos = vec2(-1, -1);
 	m_MergeTick = 0;
 
-	m_PickupDelay = Server()->TickSpeed() * 2;
+	m_StartTick = Server()->Tick();
 
 	for (int i = 0; i < NUM_MONEY_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -33,14 +33,19 @@ void CMoney::Tick()
 	if (IsMarkedForDestroy())
 		return;
 
+	// Remove small money drops after 10 minutes
+	if (m_Amount <= SMALL_MONEY_AMOUNT && m_StartTick < Server()->Tick() - Server()->TickSpeed() * 60 * 10)
+	{
+		Reset();
+		return;
+	}
+
 	CAdvancedEntity::Tick();
 	HandleDropped();
 
-	if (m_PickupDelay > 0)
-		m_PickupDelay--;
-
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
-	if (pClosest && (pClosest != m_pOwner || m_PickupDelay <= 0))
+	// Owner can pick up the money after 2 seconds, everyone else immediately
+	if (pClosest && (pClosest != m_pOwner || m_StartTick < Server()->Tick() - Server()->TickSpeed() * 2))
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
