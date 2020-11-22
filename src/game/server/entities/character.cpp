@@ -3690,6 +3690,14 @@ void CCharacter::CheckMoved()
 	m_pPlayer->Pause(CPlayer::PAUSE_NONE, false);
 }
 
+void CCharacter::ForceSetPos(vec2 Pos)
+{
+	int CurrentPlotID = GetCurrentTilePlotID();
+	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(Pos))
+		m_pPlayer->StopPlotEditing();
+	m_Core.m_Pos = m_Pos = m_PrevPos = Pos;
+}
+
 int CCharacter::GetAliveState()
 {
 	for (int i = 4; i > 0; i--)

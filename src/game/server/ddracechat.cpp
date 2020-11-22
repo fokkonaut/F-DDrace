@@ -1963,8 +1963,9 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "You lost 50.000 money for teleporting to spawn");
 	pPlayer->WalletTransaction(-50000, "-50000 (teleported to spawn)");
-	pChr->Core()->m_Pos = Pos;
+
 	pChr->ReleaseHook();
+	pChr->ForceSetPos(Pos);
 
 	// create death effect and do a nice sound when teleporting to spawn
 	Mask128 TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pResult->m_ClientID);

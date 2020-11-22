@@ -117,12 +117,8 @@ void CPortal::PlayerEnter()
 				if (!pAffectedChr->CanCollide(m_Owner, false))
 					continue;
 
-				int CurrentPlotID = pChr->GetCurrentTilePlotID();
-				if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(m_pLinkedPortal->m_Pos))
-					pChr->GetPlayer()->StopPlotEditing();
-
 				pChr->ReleaseHook();
-				pChr->Core()->m_Pos = pChr->m_PrevPos = m_pLinkedPortal->m_Pos;
+				pChr->ForceSetPos(m_pLinkedPortal->m_Pos);
 				pChr->m_DDRaceState = DDRACE_CHEAT;
 
 				pChr->Core()->m_Killer.m_ClientID = m_Owner;

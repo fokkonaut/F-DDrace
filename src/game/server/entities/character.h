@@ -343,6 +343,7 @@ public:
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
 	void SetPrevPos(vec2 PrevPos) { m_PrevPos = PrevPos; };
+	void ForceSetPos(vec2 Pos);
 
 	void SetCoreHook(int Hook) { m_Core.m_Hook = Hook; }
 	void SetCoreCollision(int Collision) { m_Core.m_Collision = Collision; }
