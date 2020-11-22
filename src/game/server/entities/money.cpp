@@ -33,15 +33,15 @@ void CMoney::Tick()
 	if (IsMarkedForDestroy())
 		return;
 
+	CAdvancedEntity::Tick();
+	HandleDropped();
+
 	// Remove small money drops after 10 minutes
 	if (m_Amount <= SMALL_MONEY_AMOUNT && m_StartTick < Server()->Tick() - Server()->TickSpeed() * 60 * 10)
 	{
 		Reset();
 		return;
 	}
-
-	CAdvancedEntity::Tick();
-	HandleDropped();
 
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
 	// Owner can pick up the money after 2 seconds, everyone else immediately
