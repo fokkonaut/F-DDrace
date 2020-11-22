@@ -1650,6 +1650,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracecommands.cpp
   draweditor.cpp
   draweditor.h
+  entities/advanced_entity.cpp
+  entities/advanced_entity.h
   entities/atom.cpp
   entities/atom.h
   entities/character.cpp

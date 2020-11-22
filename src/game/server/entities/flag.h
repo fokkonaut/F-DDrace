@@ -4,33 +4,21 @@
 #ifndef GAME_SERVER_ENTITIES_FLAG_H
 #define GAME_SERVER_ENTITIES_FLAG_H
 
-#include <game/server/entity.h>
+#include "advanced_entity.h"
 
-class CFlag : public CEntity
+class CFlag : public CAdvancedEntity
 {
 private:
 	static const int ms_PhysSize = 14;
 
 	int m_Team;
 	bool m_AtStand;
+	vec2 m_StandPos;
 	int m_DropTick;
 	int m_GrabTick;
 
 	CCharacter *m_pCarrier;
 	CCharacter *m_pLastCarrier;
-
-	vec2 m_Vel;
-	vec2 m_StandPos;
-	vec2 m_PrevPos;
-
-	int m_TeleCheckpoint;
-	int m_TuneZone;
-
-	static bool IsSwitchActiveCb(int Number, void* pUser);
-	void HandleTiles(int Index);
-	int m_TileIndex;
-	int m_TileFIndex;
-	int m_MoveRestrictions;
 
 	void PlaySound(int Sound);
 	int m_SoundTick;
@@ -56,8 +44,6 @@ public:
 
 	void Grab(class CCharacter *pChr);
 	void Drop(int Dir = 0);
-	void HandleDropped();
-	bool IsGrounded(bool SetVel = false);
 
 	CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos);
 

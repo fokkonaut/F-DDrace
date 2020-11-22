@@ -11,20 +11,15 @@
 #include <game/server/player.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Lifetime, int Weapon, int Bullets, int Special)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize, Owner)
 {
 	m_Type = Type;
 	m_Weapon = Weapon;
 	m_Lifetime = Server()->TickSpeed() * Lifetime;
-	m_Pos = GameServer()->GetPlayerChar(Owner)->GetPos();
 	m_Special = Special;
 	m_Bullets = Bullets;
-	m_Owner = Owner;
 	m_Vel = vec2(5*Direction, -5);
 	m_PickupDelay = Server()->TickSpeed() * 2;
-	m_TeleCheckpoint = GameServer()->GetPlayerChar(Owner)->m_TeleCheckpoint;
-	m_PrevPos = m_Pos;
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	m_SnapPos = m_Pos;
 	m_DDraceMode = GameServer()->m_apPlayers[Owner]->m_Gamemode == GAMEMODE_DDRACE;
 
@@ -43,7 +38,7 @@ void CPickupDrop::Reset(bool Picked)
 {
 	if (m_Type == POWERUP_WEAPON || m_Type == POWERUP_BATTERY)
 	{
-		CPlayer* pOwner = GameServer()->m_apPlayers[m_Owner];
+		CPlayer *pOwner = GameServer()->m_apPlayers[m_Owner];
 		if (pOwner)
 			for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
 				if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
@@ -65,6 +60,8 @@ void CPickupDrop::Reset(bool Picked)
 
 void CPickupDrop::Tick()
 {
+	CAdvancedEntity::Tick();
+
 	m_pOwner = 0;
 	if (m_Owner != -1 && GameServer()->GetPlayerChar(m_Owner))
 		m_pOwner = GameServer()->GetPlayerChar(m_Owner);
@@ -76,13 +73,6 @@ void CPickupDrop::Tick()
 	}
 
 	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : Mask128();
-
-	// weapon hits death-tile or left the game layer, reset it
-	if (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameLayerClipped(m_Pos))
-	{
-		Reset();
-		return;
-	}
 
 	m_Lifetime--;
 	if (m_Lifetime <= 0)
@@ -216,193 +206,6 @@ void CPickupDrop::IsShieldNear()
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 			Reset();
 		}
-	}
-}
-
-bool CPickupDrop::IsGrounded(bool SetVel)
-{
-	if ((GameServer()->Collision()->CheckPoint(m_Pos.x + GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5))
-		|| (GameServer()->Collision()->CheckPoint(m_Pos.x - GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5)))
-	{
-		if (SetVel)
-			m_Vel.x *= 0.75f;
-		return true;
-	}
-
-	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
-	if ((MoveRestrictionsBelow&CANTMOVE_DOWN) || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y + GetProximityRadius() + 4))) == TILE_STOPA)
-	{
-		if (SetVel)
-			m_Vel.x *= 0.925f;
-		return true;
-	}
-
-	if (SetVel)
-		m_Vel.x *= 0.98f;
-	return false;
-}
-
-void CPickupDrop::HandleDropped()
-{
-	//Gravity
-	if (!m_TuneZone)
-		m_Vel.y += GameServer()->Tuning()->m_Gravity;
-	else
-		m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
-
-	//Speedups
-	if (GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos)))
-	{
-		vec2 Direction, MaxVel, TempVel = m_Vel;
-		int Force, MaxSpeed = 0;
-		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos), &Direction, &Force, &MaxSpeed);
-		if (Force == 255 && MaxSpeed)
-		{
-			m_Vel = Direction * (MaxSpeed / 5);
-		}
-		else
-		{
-			if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-			if (MaxSpeed > 0)
-			{
-				if (Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
-				else if (Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
-				else if (Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
-				else
-					SpeederAngle = asin(-1.0f);
-
-				if (SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
-
-				if (TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
-				else if (TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
-				else if (TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
-				else
-					TeeAngle = asin(-1.0f);
-
-				if (TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
-
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
-
-				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-					TempVel += Direction * Force;
-				else if (abs((int)SpeedLeft) > Force)
-					TempVel += Direction * -Force;
-				else
-					TempVel += Direction * SpeedLeft;
-			}
-			else
-				TempVel += Direction * Force;
-
-			m_Vel = TempVel;
-		}
-	}
-
-	// tiles
-	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
-
-	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if (!Indices.empty())
-		for (std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
-			HandleTiles(*i);
-	else
-	{
-		HandleTiles(CurrentIndex);
-	}
-	IsGrounded(true);
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.5f);
-}
-
-bool CPickupDrop::IsSwitchActiveCb(int Number, void* pUser)
-{
-	CPickupDrop *pThis = (CPickupDrop *)pUser;
-	CCollision* pCollision = pThis->GameServer()->Collision();
-	int Team = 0;
-	if (pThis->m_pOwner)
-		Team = pThis->m_pOwner->Team();
-	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[Team] && Team != TEAM_SUPER;
-}
-
-void CPickupDrop::HandleTiles(int Index)
-{
-	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
-	int MapIndex = Index;
-	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
-
-	// stopper
-	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
-
-	// teleporters
-	int z = GameServer()->Collision()->IsTeleport(MapIndex);
-	if (z && Controller->m_TeleOuts[z - 1].size())
-	{
-		int Num = Controller->m_TeleOuts[z - 1].size();
-		m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
-		return;
-	}
-	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
-	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
-	{
-		int Num = Controller->m_TeleOuts[evilz - 1].size();
-		m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
-		m_Vel.x = 0;
-		m_Vel.y = 0;
-		return;
-	}
-	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
-	{
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if (Controller->m_TeleCheckOuts[k].size())
-			{
-				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
-				m_Vel.x = 0;
-				m_Vel.y = 0;
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		vec2 SpawnPos;
-		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
-		{
-			m_Pos = SpawnPos;
-			m_Vel.x = 0;
-			m_Vel.y = 0;
-		}
-		return;
-	}
-	if (GameServer()->Collision()->IsCheckTeleport(MapIndex))
-	{
-		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-		for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
-		{
-			if (Controller->m_TeleCheckOuts[k].size())
-			{
-				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
-				return;
-			}
-		}
-		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-		vec2 SpawnPos;
-		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
-			m_Pos = SpawnPos;
-		return;
 	}
 }
 
