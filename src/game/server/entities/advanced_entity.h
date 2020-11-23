@@ -8,7 +8,7 @@
 class CAdvancedEntity : public CEntity
 {
 public:
-	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProimityRadius, int Owner = -1);
+	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProimityRadius, int Owner = -1, bool CheckDeath = true);
 	virtual ~CAdvancedEntity() {}
 
 	virtual void Reset();
@@ -28,6 +28,8 @@ protected:
 	int m_Owner;
 	int m_TeleCheckpoint;
 	int m_TuneZone;
+
+	bool m_CheckDeath;
 
 	static bool IsSwitchActiveCb(int Number, void* pUser);
 	void HandleTiles(int Index);

@@ -6,7 +6,7 @@
 #include "money.h"
 
 CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, GetRadius(Amount)*2, Owner)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, GetRadius(Amount)*2, Owner, false)
 {
 	m_Pos = Pos;
 	m_Amount = Amount;

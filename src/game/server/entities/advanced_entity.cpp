@@ -5,12 +5,13 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
-CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProximityRadius, int Owner)
+CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProximityRadius, int Owner, bool CheckDeath)
 : CEntity(pGameWorld, Objtype, Pos, ProximityRadius)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
 	m_pOwner = Owner >= 0 ? GameServer()->GetPlayerChar(Owner) : 0;
+	m_CheckDeath = CheckDeath;
 	m_TeleCheckpoint = m_pOwner ? m_pOwner->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
@@ -33,7 +34,7 @@ void CAdvancedEntity::Tick()
 	}
 
 	// weapon hits death-tile or left the game layer, reset it
-	if (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameLayerClipped(m_Pos))
+	if (GameLayerClipped(m_Pos) || (m_CheckDeath && (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH)))
 	{
 		Reset();
 		return;
