@@ -1817,15 +1817,16 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 		return;
 
-	if (!pSelf->Config()->m_SvAccounts)
+	if (pResult->NumArguments() > 0)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
-		return;
-	}
+		if (str_comp_nocase(pResult->GetString(0), "drop") != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Invalid argument");
+			return;
+		}
 
-	if (pPlayer->GetAccID() < ACC_START)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		if (pPlayer->GetCharacter())
+			pPlayer->GetCharacter()->DropMoney(pResult->GetInteger(1));
 		return;
 	}
 

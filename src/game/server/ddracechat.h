@@ -66,7 +66,7 @@ CHAT_COMMAND("logout", "", CFGFLAG_CHAT, ConLogout, this, "Log out of an account
 CHAT_COMMAND("changepassword", "s[old-pw] s[new-pw] s[new-pw]", CFGFLAG_CHAT, ConChangePassword, this, "Changes account password", AUTHED_NO)
 
 CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays i money to player r", AUTHED_NO)
-CHAT_COMMAND("money", "", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions", AUTHED_NO)
+CHAT_COMMAND("money", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions, or drops i amount", AUTHED_NO)
 
 CHAT_COMMAND("room", "s[invite/kick] r[name]", CFGFLAG_CHAT, ConRoom, this, "Invite or kick player r from the room", AUTHED_NO)
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)

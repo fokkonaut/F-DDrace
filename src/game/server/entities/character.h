@@ -125,7 +125,7 @@ public:
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 
 	//drops
-	void DropMoney(int64 Amount);
+	void DropMoney(int64 Amount, int Dir = -3);
 	void DropFlag();
 	void DropWeapon(int WeaponID, bool OnDeath, float Dir = -3);
 	void DropPickup(int Type, int Amount = 1);

@@ -3437,13 +3437,14 @@ bool CCharacter::IsFreeDraw()
 	return Server()->GetAuthedState(m_pPlayer->GetCID()) >= Config()->m_SvFreeDrawLevel;
 }
 
-void CCharacter::DropMoney(int64 Amount)
+void CCharacter::DropMoney(int64 Amount, int Dir)
 {
-	if (Amount <= 0 || Amount < m_pPlayer->m_WalletMoney)
+	if (Amount <= 0 || Amount > m_pPlayer->m_WalletMoney)
 		return;
 
-	float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-	new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, m_pPlayer->GetCID(), Dir);
+	if (Dir != -3)
+		Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
+	new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir);
 	m_pPlayer->WalletTransaction(-Amount);
 
 	char aBuf[64];
