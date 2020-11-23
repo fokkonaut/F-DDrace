@@ -48,7 +48,7 @@ void CMoney::Tick()
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, TimePassed(2) ? 0 : m_pOwner, m_Owner, true, true);
 	if (pClosest)
 	{
-		if (distance(m_Pos, pClosest->GetPos()) < GetProximityRadius() + pClosest->GetProximityRadius())
+		if (distance(m_Pos, pClosest->GetPos()) < GetProximityRadius())
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
@@ -68,7 +68,7 @@ void CMoney::Tick()
 	CMoney *pMoney = (CMoney *)GameWorld()->ClosestEntity(m_Pos, RADIUS_FIND_MONEY, CGameWorld::ENTTYPE_MONEY, this, true);
 	if (pMoney)
 	{
-		if (distance(m_Pos, pMoney->GetPos()) < GetProximityRadius()*2)
+		if (distance(m_Pos, pMoney->GetPos()) < GetProximityRadius())
 		{
 			m_Amount += pMoney->m_Amount;
 			pMoney->Reset();
