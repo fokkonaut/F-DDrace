@@ -25,7 +25,7 @@ class CMoney : public CAdvancedEntity
 private:
 	int64 m_Amount;
 	int64 m_StartTick;
-	bool TimePassed(float Seconds);
+	bool SecondsPassed(float Seconds);
 	int m_aID[NUM_DOTS_BIG];
 
 	void MoveTo(vec2 Pos, int Radius);

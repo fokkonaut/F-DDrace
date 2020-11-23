@@ -25,7 +25,7 @@ CMoney::~CMoney()
 		Server()->SnapFreeID(m_aID[i]);
 }
 
-bool CMoney::TimePassed(float Seconds)
+bool CMoney::SecondsPassed(float Seconds)
 {
 	return m_StartTick < (Server()->Tick() - Server()->TickSpeed() * Seconds);
 }
@@ -39,13 +39,13 @@ void CMoney::Tick()
 	HandleDropped();
 
 	// Remove small money drops after 10 minutes
-	if (m_Amount < SMALL_MONEY_AMOUNT && TimePassed(60 * 10))
+	if (m_Amount < SMALL_MONEY_AMOUNT && SecondsPassed(60 * 10))
 	{
 		Reset();
 		return;
 	}
 
-	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, TimePassed(2) ? 0 : m_pOwner, m_Owner, true, true);
+	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, SecondsPassed(2) ? 0 : m_pOwner, m_Owner, true, true);
 	if (pClosest)
 	{
 		if (distance(m_Pos, pClosest->GetPos()) < GetRadius() + pClosest->GetProximityRadius())

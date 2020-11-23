@@ -12,6 +12,7 @@ public:
 	virtual ~CAdvancedEntity() {}
 
 	virtual void Reset();
+	// CAdvancedEntity::Tick() has to be called within the tick function of the child entity
 	virtual void Tick();
 	virtual void Snap(int SnappingClient) {}
 
