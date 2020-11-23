@@ -12,7 +12,7 @@
 
 #include <vector>
 #include "entities/pickup_drop.h"
-#include "houses/house.h""
+#include "houses/house.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
