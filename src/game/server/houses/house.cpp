@@ -1,7 +1,7 @@
 // made by fokkonaut
 
 #include "house.h"
-#include "gamecontext.h"
+#include <game/server/gamecontext.h>
 #include <engine/shared/config.h>
 
 IServer *CHouse::Server() { return GameServer()->Server(); }

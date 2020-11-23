@@ -20,11 +20,11 @@
 #include "teeinfo.h"
 #include "gamecontext.h"
 #include "player.h"
-#include "shop.h"
-#include "bank.h"
+#include "houses/shop.h"
+#include "houses/bank.h"
 
-#include <game/server/entities/flag.h>
-#include <game/server/entities/lasertext.h>
+#include "entities/flag.h"
+#include "entities/lasertext.h"
 #include <fstream>
 #include <limits>
 #include <string>

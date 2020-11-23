@@ -1643,8 +1643,6 @@ set_src(ENGINE_SERVER GLOB src/engine/server
 )
 set_src(GAME_SERVER GLOB_RECURSE src/game/server
   alloc.h
-  bank.cpp
-  bank.h
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
@@ -1708,8 +1706,12 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   gamemodes/gamemode.h
   gameworld.cpp
   gameworld.h
-  house.cpp
-  house.h
+  houses/bank.cpp
+  houses/bank.h
+  houses/house.cpp
+  houses/house.h
+  houses/shop.cpp
+  houses/shop.h
   mask128.h
   player.cpp
   player.h
@@ -1720,8 +1722,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   score/file_score.h
   score/sql_score.cpp
   score/sql_score.h
-  shop.cpp
-  shop.h
   teams.cpp
   teams.h
   teehistorian.cpp

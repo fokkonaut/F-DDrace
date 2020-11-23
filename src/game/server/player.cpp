@@ -9,7 +9,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <engine/shared/config.h>
 #include "score.h"
-#include "shop.h"
+#include "houses/shop.h"
 
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)

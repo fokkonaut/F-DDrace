@@ -1,7 +1,7 @@
 // made by fokkonaut
 
 #include "shop.h"
-#include "gamecontext.h"
+#include <game/server/gamecontext.h>
 
 CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 {

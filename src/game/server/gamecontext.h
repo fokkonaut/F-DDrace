@@ -11,8 +11,8 @@
 #include <game/voting.h>
 
 #include <vector>
-#include <game/server/entities/pickup_drop.h>
-#include "house.h"
+#include "entities/pickup_drop.h"
+#include "houses/house.h""
 
 #include "eventhandler.h"
 #include "gameworld.h"

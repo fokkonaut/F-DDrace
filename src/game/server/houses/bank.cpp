@@ -1,7 +1,7 @@
 // made by fokkonaut
 
 #include "bank.h"
-#include "gamecontext.h"
+#include <game/server/gamecontext.h>
 
 CBank::CBank(CGameContext *pGameServer) : CHouse(pGameServer, HOUSE_BANK)
 {
