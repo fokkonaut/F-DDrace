@@ -487,7 +487,7 @@ CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 }
 
 
-CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis)
+CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, bool CheckWall)
 {
 	// Find other players
 	float ClosestRange = Radius*2;
@@ -497,6 +497,9 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	for(; p; p = p->TypeNext())
  	{
 		if(p == pNotThis)
+			continue;
+
+		if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
@@ -513,7 +516,7 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
@@ -526,6 +529,9 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 			continue;
 
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
+			continue;
+
+		if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);

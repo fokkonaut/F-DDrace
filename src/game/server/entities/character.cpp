@@ -3443,7 +3443,7 @@ void CCharacter::DropMoney(int64 Amount)
 		return;
 
 	float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-	new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, Dir);
+	new CMoney(GameWorld(), m_Pos, m_pPlayer->m_WalletMoney, m_pPlayer->GetCID(), Dir);
 	m_pPlayer->WalletTransaction(-Amount);
 
 	char aBuf[64];

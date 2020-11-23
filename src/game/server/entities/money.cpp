@@ -11,10 +11,6 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 	m_Pos = Pos;
 	m_Amount = Amount;
 	m_Vel = vec2(5*Direction, Direction == 0 ? 0 : -5);
-
-	m_MergePos = vec2(-1, -1);
-	m_MergeTick = 0;
-
 	m_StartTick = Server()->Tick();
 
 	for (int i = 0; i < NUM_MONEY_IDS; i++)
@@ -29,6 +25,11 @@ CMoney::~CMoney()
 		Server()->SnapFreeID(m_aID[i]);
 }
 
+bool CMoney::TimePassed(float Seconds)
+{
+	return m_StartTick < (Server()->Tick() - Server()->TickSpeed() * Seconds);
+}
+
 void CMoney::Tick()
 {
 	if (IsMarkedForDestroy())
@@ -38,46 +39,60 @@ void CMoney::Tick()
 	HandleDropped();
 
 	// Remove small money drops after 10 minutes
-	if (m_Amount <= SMALL_MONEY_AMOUNT && m_StartTick < Server()->Tick() - Server()->TickSpeed() * 60 * 10)
+	if (m_Amount < SMALL_MONEY_AMOUNT && TimePassed(60 * 10))
 	{
 		Reset();
 		return;
 	}
 
-	CCharacter *pNotThis = 0;
-	if (m_StartTick < Server()->Tick() - Server()->TickSpeed() * 2)
-		pNotThis = m_pOwner;
-
-	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetRadius(), pNotThis);
-	// Owner can pick up the money after 2 seconds, everyone else immediately
+	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, TimePassed(2) ? 0 : m_pOwner, m_Owner, true, true);
 	if (pClosest)
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
-		GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
-		pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
+		if (distance(m_Pos, pClosest->GetPos()) < GetProximityRadius() + pClosest->GetProximityRadius())
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
+			GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
+			pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
-		GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf);
+			str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
+			GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf);
 
-		Reset();
-		return;
+			Reset();
+			return;
+		}
+		else
+			MoveTo(pClosest->GetPos(), RADIUS_FIND_PLAYERS);
 	}
 
-	CMoney *apEnts[16];
-	int Num = GameWorld()->FindEntities(m_Pos, MERGE_RADIUS, (CEntity**)apEnts, 16, CGameWorld::ENTTYPE_MONEY);
-	for (int i = 0; i < Num; i++)
+	CMoney *pMoney = (CMoney *)GameWorld()->ClosestEntity(m_Pos, RADIUS_FIND_MONEY, CGameWorld::ENTTYPE_MONEY, this, true);
+	if (pMoney)
 	{
-		if (apEnts[i] == this || apEnts[i]->IsMarkedForDestroy() || GameServer()->Collision()->IntersectLine(m_Pos, apEnts[i]->GetPos(), 0, 0))
-			continue;
+		if (distance(m_Pos, pMoney->GetPos()) < GetProximityRadius()*2)
+		{
+			m_Amount += pMoney->m_Amount;
+			pMoney->Reset();
 
-		m_Amount += apEnts[i]->m_Amount;
-		m_MergePos = apEnts[i]->GetPos();
-		m_MergeTick = Server()->Tick();
-		apEnts[i]->Reset();
+			Mask128 TeamMask = Mask128();
+			if (m_pOwner)
+				TeamMask = m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_pOwner->GetPlayer()->GetCID());
+			GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
+		}
+		else if (!pClosest)
+			MoveTo(pMoney->GetPos(), RADIUS_FIND_MONEY);
 	}
 
 	m_PrevPos = m_Pos;
+}
+
+void CMoney::MoveTo(vec2 Pos, int Radius)
+{
+	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
+	m_Vel.x = clamp(m_Vel.x+(Diff.x/Radius*5), (float)-MAX_SPEED, (float)MAX_SPEED);
+
+	float Gravity = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_Gravity : GameServer()->Tuning()->m_Gravity;
+	m_Vel.y -= Gravity;
+	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), (float)-MAX_SPEED, (float)MAX_SPEED);
 }
 
 void CMoney::Snap(int SnappingClient)
@@ -120,18 +135,5 @@ void CMoney::Snap(int SnappingClient)
 		pObj->m_VelY = 0;
 		pObj->m_StartTick = 0;
 		pObj->m_Type = WEAPON_HAMMER;
-	}
-
-	if (m_MergeTick > Server()->Tick() - 5)
-	{
-		CNetObj_Laser* pObj = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[NUM_DOTS_BIG], sizeof(CNetObj_Laser)));
-		if (!pObj)
-			return;
-
-		pObj->m_X = round_to_int(m_MergePos.x);
-		pObj->m_Y = round_to_int(m_MergePos.y);
-		pObj->m_FromX = round_to_int(m_Pos.x);
-		pObj->m_FromY = round_to_int(m_Pos.y);
-		pObj->m_StartTick = m_MergeTick;
 	}
 }
