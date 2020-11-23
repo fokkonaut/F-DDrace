@@ -57,8 +57,13 @@ void CBank::OnSuccess(int ClientID)
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pPlayer->GetAccID()];
 	int Amount = GetAmount(m_aClients[ClientID].m_Page, ClientID);
-	char aMsg[128];
+	if (Amount <= 0)
+	{
+		GameServer()->SendChatTarget(ClientID, "You need to select an amount to deposit or withdraw.");
+		return;
+	}
 
+	char aMsg[128];
 	if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 	{
 		if (pPlayer->m_WalletMoney < Amount)
@@ -107,6 +112,7 @@ void CBank::SetAssignment(int ClientID, int Dir)
 void CBank::OnPageChange(int ClientID)
 {
 	char aMsg[512];
+	const char *pFooter = "";
 	if (m_aClients[ClientID].m_Page <= PAGE_MAIN)
 	{
 		m_aAssignmentMode[ClientID] = ASSIGNMENT_NONE;
@@ -114,28 +120,23 @@ void CBank::OnPageChange(int ClientID)
 	}
 	else
 	{
-		const char *pAssignment = "";
-		if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
-			pAssignment = "D E P O S I T";
-		else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
-			pAssignment = "W I T H D R A W";
-
+		pFooter = "Press F3 to confirm your assignment.";
+		const char *pAssignment = m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT ? "D E P O S I T" : m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW ? "W I T H D R A W" : "";
 		str_format(aMsg, sizeof(aMsg), "Bank: %lld\nWallet: %lld\n\n%s\n\n", GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()].m_Money, GameServer()->m_apPlayers[ClientID]->m_WalletMoney, pAssignment);
-		for (int i = AMOUNT_EVERYTHING; i < NUM_PAGES_BANK; i++)
-		{
-			char aAmount[64];
-			if (i == AMOUNT_EVERYTHING)
-				str_format(aAmount, sizeof(aAmount), "Everything (%d)", GetAmount(i, ClientID));
-			else
-				str_format(aAmount, sizeof(aAmount), "%d", GetAmount(i));
 
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s%s%s\n", i == m_aClients[ClientID].m_Page ? ">  " : "", aAmount, i == m_aClients[ClientID].m_Page ? "  <" : "");
-			str_append(aMsg, aBuf, sizeof(aMsg));
-		}
+		char aAmount[64];
+		int Type = m_aClients[ClientID].m_Page;
+		if (Type == AMOUNT_EVERYTHING)
+			str_format(aAmount, sizeof(aAmount), "Everything (%d)", GetAmount(Type, ClientID));
+		else
+			str_format(aAmount, sizeof(aAmount), "%d", GetAmount(Type));
+
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "- > %s < +", aAmount);
+		str_append(aMsg, aBuf, sizeof(aMsg));
 	}
 
-	SendWindow(ClientID, aMsg);
+	SendWindow(ClientID, aMsg, pFooter);
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
 }
 
