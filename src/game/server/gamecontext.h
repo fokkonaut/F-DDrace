@@ -86,10 +86,15 @@ enum Top5
 
 enum
 {
+	// start for account ids and plot ids
 	ACC_START = 1, // account ids start with 1, 0 means not logged in
 	PLOT_START = 1,
+
+	// needed xp after the hardcoded requirements
 	DIFFERENCE_XP_END = 100,
 	OVER_LVL_100_XP = 2000000,
+
+	// item maximums
 	NUM_TASER_LEVELS = 7,
 	NUM_POLICE_LEVELS = 5,
 	MAX_TASER_BATTERY = 100,
@@ -98,8 +103,7 @@ enum
 	ACC_CURRENT_VERSION = 3,
 
 	// motd
-	MOTD_MAX_LINES = 22,
-	MOTD_MAX_CHARS_PER_LINE = 64,
+	MOTD_MAX_LINES = 24,
 };
 
 enum

@@ -4718,7 +4718,7 @@ const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter
 		str_format(aRet, sizeof(aRet), "%s\n\n%s", pMsg, pFooter);
 	return aRet;
 
-	/*MOTD_MAX_LINES ist eigentloch 24, nicht 22. Weiß nicht wieso das dann überhaupt alles funktioniert... Needs a Rewrite :D
+	/*MOTD_MAX_LINES ist jetzt 24, war vorher aber 22. Weiß nicht wieso das dann überhaupt alles funktioniert... Muss auf jedenfall angepasst werden. Needs a Rewrite :D
 	static char aRet[900] = "";
 	if (!pFooter[0])
 	{
