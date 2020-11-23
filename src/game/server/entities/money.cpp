@@ -2,6 +2,7 @@
 
 #include <engine/server.h>
 #include <game/server/gamecontext.h>
+#include <game/server/teams.h>
 #include "money.h"
 
 CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction)
@@ -43,9 +44,13 @@ void CMoney::Tick()
 		return;
 	}
 
-	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius(), 0);
+	CCharacter *pNotThis = 0;
+	if (m_StartTick < Server()->Tick() - Server()->TickSpeed() * 2)
+		pNotThis = m_pOwner;
+
+	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, GetRadius(), pNotThis);
 	// Owner can pick up the money after 2 seconds, everyone else immediately
-	if (pClosest && (pClosest != m_pOwner || m_StartTick < Server()->Tick() - Server()->TickSpeed() * 2))
+	if (pClosest)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
@@ -79,6 +84,15 @@ void CMoney::Snap(int SnappingClient)
 {
 	if (NetworkClipped(SnappingClient))
 		return;
+
+	if (GameServer()->GetPlayerChar(SnappingClient) && m_pOwner)
+	{
+		if (m_pOwner->IsPaused())
+			return;
+
+		if (!CmaskIsSet(m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_pOwner->GetPlayer()->GetCID()), SnappingClient))
+			return;
+	}
 
 	CNetObj_Projectile *pBullet = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(!pBullet)
