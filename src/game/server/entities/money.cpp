@@ -13,7 +13,7 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 	m_Vel = vec2(5*Direction, Direction == 0 ? 0 : -5);
 	m_StartTick = Server()->Tick();
 
-	for (int i = 0; i < NUM_MONEY_IDS; i++)
+	for (int i = 0; i < NUM_DOTS_BIG; i++)
 		m_aID[i] = Server()->SnapNewID();
 
 	GameWorld()->InsertEntity(this);
@@ -21,7 +21,7 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 
 CMoney::~CMoney()
 {
-	for (int i = 0; i < NUM_MONEY_IDS; i++)
+	for (int i = 0; i < NUM_DOTS_BIG; i++)
 		Server()->SnapFreeID(m_aID[i]);
 }
 
@@ -88,11 +88,11 @@ void CMoney::Tick()
 void CMoney::MoveTo(vec2 Pos, int Radius)
 {
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
-	m_Vel.x = clamp(m_Vel.x+(Diff.x/Radius*5), (float)-MONEY_MAX_FLY_SPEED, (float)MONEY_MAX_FLY_SPEED);
+	m_Vel.x = clamp(m_Vel.x+(Diff.x/Radius*5), -MONEY_MAX_FLY_SPEED, MONEY_MAX_FLY_SPEED);
 
 	float Gravity = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_Gravity : GameServer()->Tuning()->m_Gravity;
 	m_Vel.y -= Gravity;
-	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), (float)-MONEY_MAX_FLY_SPEED, (float)MONEY_MAX_FLY_SPEED);
+	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), -MONEY_MAX_FLY_SPEED, MONEY_MAX_FLY_SPEED);
 }
 
 void CMoney::Snap(int SnappingClient)

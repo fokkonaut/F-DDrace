@@ -5,13 +5,12 @@
 
 #include "advanced_entity.h"
 
-#define MONEY_MAX_FLY_SPEED 1.25
+#define MONEY_MAX_FLY_SPEED 1.5f
 
 enum
 {
 	NUM_DOTS_SMALL = 6,
 	NUM_DOTS_BIG = 12,
-	NUM_MONEY_IDS = NUM_DOTS_BIG + 1, // one extra for the merge laser
 
 	SMALL_MONEY_AMOUNT = 1000,
 	MONEY_RADIUS_BIG = 14,
@@ -27,7 +26,7 @@ private:
 	int64 m_Amount;
 	int64 m_StartTick;
 	bool TimePassed(float Seconds);
-	int m_aID[NUM_MONEY_IDS];
+	int m_aID[NUM_DOTS_BIG];
 
 	void MoveTo(vec2 Pos, int Radius);
 	int GetRadius() { return GetRadius(m_Amount); }
