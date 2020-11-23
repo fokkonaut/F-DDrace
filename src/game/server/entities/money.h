@@ -5,6 +5,8 @@
 
 #include "advanced_entity.h"
 
+#define MONEY_MAX_FLY_SPEED 1.25
+
 enum
 {
 	NUM_DOTS_SMALL = 6,
@@ -17,7 +19,6 @@ enum
 
 	RADIUS_FIND_MONEY = 32*24,
 	RADIUS_FIND_PLAYERS = 32*12,
-	MAX_SPEED = 2,
 };
 
 class CMoney : public CAdvancedEntity
