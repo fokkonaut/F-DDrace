@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include "money.h"
+#include <engine/shared/config.h>
 
 CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction)
 : CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, GetRadius(Amount)*2, Owner, false)
@@ -87,13 +88,17 @@ void CMoney::Tick()
 
 void CMoney::MoveTo(vec2 Pos, int Radius)
 {
+	float MaxFlySpeed = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_MoneyMaxFlySpeed : GameServer()->Tuning()->m_MoneyMaxFlySpeed;
+	if (MaxFlySpeed <= 0)
+		return;
+
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
-	m_Vel.x = clamp(m_Vel.x+(Diff.x/Radius*5), -MONEY_MAX_FLY_SPEED, MONEY_MAX_FLY_SPEED);
+	m_Vel.x = clamp(m_Vel.x+(Diff.x/Radius*5), -MaxFlySpeed, MaxFlySpeed);
 
 	// Calculate out the gravity while we move to a position, we cant just not call HandleDropped() because we still want teleporter, stopper, etc...
 	float Gravity = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_Gravity : GameServer()->Tuning()->m_Gravity;
 	m_Vel.y -= Gravity;
-	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), -MONEY_MAX_FLY_SPEED, MONEY_MAX_FLY_SPEED);
+	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), -MaxFlySpeed, MaxFlySpeed);
 }
 
 void CMoney::Snap(int SnappingClient)

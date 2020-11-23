@@ -5,8 +5,6 @@
 
 #include "advanced_entity.h"
 
-#define MONEY_MAX_FLY_SPEED 1.5f
-
 enum
 {
 	NUM_DOTS_SMALL = 6,
