@@ -1826,7 +1826,15 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 		}
 
 		if (pPlayer->GetCharacter())
-			pPlayer->GetCharacter()->DropMoney(pResult->GetInteger(1));
+		{
+			int Amount = pResult->GetInteger(1);
+			if (Amount > 100000)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop money bags over 100.000");
+				return;
+			}
+			pPlayer->GetCharacter()->DropMoney(Amount);
+		}
 		return;
 	}
 
