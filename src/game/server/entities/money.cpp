@@ -100,7 +100,6 @@ void CMoney::MoveTo(vec2 Pos, int Radius)
 	m_Vel.y -= Gravity;
 	float AddVelY = (Diff.y/Radius*5);
 	m_Vel.y = clamp(m_Vel.y+AddVelY, -MaxFlySpeed, max(MaxFlySpeed, m_Vel.y-AddVelY));
-
 }
 
 void CMoney::Snap(int SnappingClient)
