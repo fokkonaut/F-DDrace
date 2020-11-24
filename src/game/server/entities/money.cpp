@@ -89,7 +89,7 @@ void CMoney::Tick()
 void CMoney::MoveTo(vec2 Pos, int Radius)
 {
 	float MaxFlySpeed = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_MoneyMaxFlySpeed : GameServer()->Tuning()->m_MoneyMaxFlySpeed;
-	if (MaxFlySpeed <= 0)
+	if (MaxFlySpeed <= 0.f)
 		return;
 
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
