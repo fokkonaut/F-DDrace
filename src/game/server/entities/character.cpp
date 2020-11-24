@@ -3450,6 +3450,7 @@ void CCharacter::DropMoney(int64 Amount, int Dir)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "-%lld", Amount);
 	GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf);
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 }
 
 void CCharacter::DropFlag()

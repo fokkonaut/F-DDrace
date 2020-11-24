@@ -57,6 +57,7 @@ void CMoney::Tick()
 
 			str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
 			GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pClosest->Teams()->TeamMask(pClosest->Team(), -1, pClosest->GetPlayer()->GetCID()));
 
 			Reset();
 			return;
@@ -97,7 +98,9 @@ void CMoney::MoveTo(vec2 Pos, int Radius)
 	// Calculate out the gravity while we move to a position, we cant just not call HandleDropped() because we still want teleporter, stopper, etc...
 	float Gravity = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_Gravity : GameServer()->Tuning()->m_Gravity;
 	m_Vel.y -= Gravity;
-	m_Vel.y = clamp(m_Vel.y+(Diff.y/Radius*5), -MaxFlySpeed, MaxFlySpeed);
+	float AddVelY = (Diff.y/Radius*5);
+	m_Vel.y = clamp(m_Vel.y+AddVelY, -MaxFlySpeed, max(MaxFlySpeed, m_Vel.y-AddVelY));
+
 }
 
 void CMoney::Snap(int SnappingClient)
