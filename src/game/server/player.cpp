@@ -8,6 +8,7 @@
 #include "player.h"
 #include <game/server/gamemodes/DDRace.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 #include "score.h"
 #include "houses/shop.h"
 
@@ -1439,6 +1440,25 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
 	str_copy(pAccount->m_aLastMoneyTransaction[2], pAccount->m_aLastMoneyTransaction[1], sizeof(pAccount->m_aLastMoneyTransaction[2]));
 	str_copy(pAccount->m_aLastMoneyTransaction[1], pAccount->m_aLastMoneyTransaction[0], sizeof(pAccount->m_aLastMoneyTransaction[1]));
 	str_copy(pAccount->m_aLastMoneyTransaction[0], aDescription, sizeof(pAccount->m_aLastMoneyTransaction[0]));
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	char aBuf[1024];
+	char aTimestamp[256];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_DATE);
+	str_format(aFilename, sizeof(aFilename), "dumps/money_%s.txt", aTimestamp);
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+	str_format(aBuf, sizeof(aBuf), "[%s][%s] account='%s' msg='%s' name='%s'", aTimestamp, pType, GameServer()->m_Accounts[GetAccID()].m_Username, pDescription, Server()->ClientName(m_ClientID));
+	IOHANDLE File = GameServer()->Storage()->OpenFile(aFilename, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+	if(File)
+	{
+		io_write(File, aBuf, str_length(aBuf));
+		io_write_newline(File);
+		io_close(File);
+	}
+	else
+	{
+		dbg_msg("money", "error: failed to open '%s' for writing", aFilename);
+	}
 }
 
 void CPlayer::GiveXP(int Amount, const char *pMessage)
