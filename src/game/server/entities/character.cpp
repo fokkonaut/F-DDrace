@@ -2390,7 +2390,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 		else
 		{
-			m_pPlayer->WalletTransaction(500);
+			m_pPlayer->WalletTransaction(500, "won bomb");
 			m_pPlayer->GiveXP(2500);
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money xp bomb)");
 

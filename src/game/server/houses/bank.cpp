@@ -72,8 +72,8 @@ void CBank::OnSuccess(int ClientID)
 			return;
 		}
 
-		pPlayer->BankTransaction(Amount);
-		pPlayer->WalletTransaction(-Amount);
+		pPlayer->BankTransaction(Amount, "deposit");
+		pPlayer->WalletTransaction(-Amount, "deposit");
 
 		str_format(aMsg, sizeof(aMsg), "You deposited %d money from your wallet to your bank account.", Amount);
 		GameServer()->SendChatTarget(ClientID, aMsg);
@@ -87,8 +87,8 @@ void CBank::OnSuccess(int ClientID)
 			return;
 		}
 
-		pPlayer->BankTransaction(-Amount);
-		pPlayer->WalletTransaction(Amount);
+		pPlayer->BankTransaction(-Amount, "withdraw");
+		pPlayer->WalletTransaction(Amount, "withdraw");
 
 		str_format(aMsg, sizeof(aMsg), "You withdrew %d money from your wallet to your bank account.", Amount);
 		GameServer()->SendChatTarget(ClientID, aMsg);

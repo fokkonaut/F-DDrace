@@ -1416,23 +1416,23 @@ void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEur
 	else
 		pAccount->m_Money += Amount;
 
-	ApplyMoneyHistoryMsg(TRANSACTION_BANK, pDescription);
+	ApplyMoneyHistoryMsg(TRANSACTION_BANK, Amount, pDescription);
 }
 
 void CPlayer::WalletTransaction(int64 Amount, const char *pDescription)
 {
 	m_WalletMoney += Amount;
-	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, pDescription);
+	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, Amount, pDescription);
 }
 
-void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
+void CPlayer::ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescription)
 {
 	if (!pDescription[0] || GetAccID() < ACC_START)
 		return;
 
 	const char *pType = Type == TRANSACTION_BANK ? "BANK" : Type == TRANSACTION_WALLET ? "WALLET" : "UNKNOWN";
 	char aDescription[256];
-	str_format(aDescription, sizeof(aDescription), "[%s] %s", pType, pDescription);
+	str_format(aDescription, sizeof(aDescription), "[%s] %s%d %s", pType, Amount > 0 ? "+" : "", Amount, pDescription);
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	str_copy(pAccount->m_aLastMoneyTransaction[4], pAccount->m_aLastMoneyTransaction[3], sizeof(pAccount->m_aLastMoneyTransaction[4]));
@@ -1447,7 +1447,13 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_DATE);
 	str_format(aFilename, sizeof(aFilename), "dumps/money_%s.txt", aTimestamp);
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
-	str_format(aBuf, sizeof(aBuf), "[%s][%s] account='%s' msg='%s' name='%s'", aTimestamp, pType, GameServer()->m_Accounts[GetAccID()].m_Username, pDescription, Server()->ClientName(m_ClientID));
+	str_format(aBuf, sizeof(aBuf),
+		"[%s][%s] account='%s' msg='%s%d %s' name='%s'",
+		aTimestamp, pType,
+		GameServer()->m_Accounts[GetAccID()].m_Username,
+		Amount > 0 ? "+" : "", Amount, pDescription,
+		Server()->ClientName(m_ClientID)
+	);
 	IOHANDLE File = GameServer()->Storage()->OpenFile(aFilename, IOFLAG_APPEND, IStorage::TYPE_SAVE);
 	if(File)
 	{
