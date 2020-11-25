@@ -8,6 +8,7 @@
 #include "player.h"
 #include <game/server/gamemodes/DDRace.h>
 #include <engine/shared/config.h>
+#include <engine/storage.h>
 #include "score.h"
 #include "houses/shop.h"
 
@@ -1415,23 +1416,23 @@ void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEur
 	else
 		pAccount->m_Money += Amount;
 
-	ApplyMoneyHistoryMsg(TRANSACTION_BANK, pDescription);
+	ApplyMoneyHistoryMsg(TRANSACTION_BANK, Amount, pDescription);
 }
 
 void CPlayer::WalletTransaction(int64 Amount, const char *pDescription)
 {
 	m_WalletMoney += Amount;
-	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, pDescription);
+	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, Amount, pDescription);
 }
 
-void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
+void CPlayer::ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescription)
 {
 	if (!pDescription[0] || GetAccID() < ACC_START)
 		return;
 
 	const char *pType = Type == TRANSACTION_BANK ? "BANK" : Type == TRANSACTION_WALLET ? "WALLET" : "UNKNOWN";
 	char aDescription[256];
-	str_format(aDescription, sizeof(aDescription), "[%s] %s", pType, pDescription);
+	str_format(aDescription, sizeof(aDescription), "[%s] %s%d %s", pType, Amount > 0 ? "+" : "", Amount, pDescription);
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	str_copy(pAccount->m_aLastMoneyTransaction[4], pAccount->m_aLastMoneyTransaction[3], sizeof(pAccount->m_aLastMoneyTransaction[4]));
@@ -1439,6 +1440,31 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, const char *pDescription)
 	str_copy(pAccount->m_aLastMoneyTransaction[2], pAccount->m_aLastMoneyTransaction[1], sizeof(pAccount->m_aLastMoneyTransaction[2]));
 	str_copy(pAccount->m_aLastMoneyTransaction[1], pAccount->m_aLastMoneyTransaction[0], sizeof(pAccount->m_aLastMoneyTransaction[1]));
 	str_copy(pAccount->m_aLastMoneyTransaction[0], aDescription, sizeof(pAccount->m_aLastMoneyTransaction[0]));
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	char aBuf[1024];
+	char aTimestamp[256];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_DATE);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/money_%s.txt", GameServer()->Config()->m_SvMoneyhistoryFilePath, aTimestamp);
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+	str_format(aBuf, sizeof(aBuf),
+		"[%s][%s] account='%s' msg='%s%d %s' name='%s'",
+		aTimestamp, pType,
+		GameServer()->m_Accounts[GetAccID()].m_Username,
+		Amount > 0 ? "+" : "", Amount, pDescription,
+		Server()->ClientName(m_ClientID)
+	);
+	IOHANDLE File = GameServer()->Storage()->OpenFile(aFilename, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+	if(File)
+	{
+		io_write(File, aBuf, str_length(aBuf));
+		io_write_newline(File);
+		io_close(File);
+	}
+	else
+	{
+		dbg_msg("money", "error: failed to open '%s' for writing", aFilename);
+	}
 }
 
 void CPlayer::GiveXP(int Amount, const char *pMessage)

@@ -350,7 +350,7 @@ void CShop::BuyItem(int ClientID, int Item)
 		GameServer()->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
-	str_format(aMsg, sizeof(aMsg), "-%d %s, bought '%s'", Price, m_aItems[ItemID].m_IsEuro ? "euros" : "money", aDescription);
+	str_format(aMsg, sizeof(aMsg), "%s, bought '%s'", m_aItems[ItemID].m_IsEuro ? "euros" : "money", aDescription);
 	if (m_aItems[ItemID].m_IsEuro)
 		pPlayer->BankTransaction(-Price, aMsg, true);
 	else

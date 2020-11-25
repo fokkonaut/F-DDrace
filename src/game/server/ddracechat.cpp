@@ -1797,10 +1797,10 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "paid %lld money from bank account to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "paid to '%s'", pSelf->Server()->ClientName(pTo->GetCID()));
 	pPlayer->BankTransaction(-Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "got %lld money to bank account from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "received from '%s'", pSelf->Server()->ClientName(pResult->m_ClientID));
 	pTo->BankTransaction(Money, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "You paid %lld money from your bank account to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
@@ -1971,7 +1971,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "You lost 50.000 money for teleporting to spawn");
-	pPlayer->WalletTransaction(-50000, "-50000 (teleported to spawn)");
+	pPlayer->WalletTransaction(-50000, "teleported to spawn");
 
 	pChr->ReleaseHook();
 	pChr->ForceSetPos(Pos);
@@ -2118,12 +2118,11 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(ID, aBuf);
 
 		// get money from buyer
-		str_format(aBuf, sizeof(aBuf), "-%d (bought plot %d)", Price, PlotID);
+		str_format(aBuf, sizeof(aBuf), "bought plot %d", PlotID);
 		pPlayer->WalletTransaction(-Price, aBuf);
 
 		// give money to seller
-		str_format(aBuf, sizeof(aBuf), "+%d (sold plot)", Price);
-		pSeller->BankTransaction(Price, aBuf);
+		pSeller->BankTransaction(Price, "sold plot");
 		pSeller->m_PlotAuctionPrice = 0;
 
 		pSeller->StopPlotEditing();

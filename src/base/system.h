@@ -1376,6 +1376,7 @@ GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 int str_span(const char *str, const char *set);
 
 #define FORMAT_TIME "%H:%M:%S"
+#define FORMAT_DATE "%Y-%m-%d"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
 

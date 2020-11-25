@@ -53,7 +53,7 @@ void CMoney::Tick()
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
 			GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
-			pClosest->GetPlayer()->WalletTransaction(m_Amount, aBuf);
+			pClosest->GetPlayer()->WalletTransaction(m_Amount, "collected");
 
 			str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
 			GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf);
