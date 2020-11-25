@@ -340,8 +340,7 @@ void CCharacter::HandleWeaponSwitch()
 	// back to the wanted weapon after you entered the editor, so we only allow setting the directly wanted weapon when its not the same as the last request
 	if (m_LatestInput.m_WantedWeapon)
 	{
-		// always pretend there is no direct selection after setting the weapon, fixes /weapon but behaviour is still not perfect...
-		if (/*m_DrawEditor.Active() && */m_Input.m_WantedWeapon == m_LastWantedWeapon)
+		if (m_DrawEditor.Active() && m_Input.m_WantedWeapon == m_LastWantedWeapon)
 			m_LatestInput.m_WantedWeapon = 0; // pretend we dont have a direct weapon selection
 		m_LastWantedWeapon = m_Input.m_WantedWeapon;
 	}
