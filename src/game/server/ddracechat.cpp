@@ -1838,7 +1838,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop money bags over 100.000");
 				return;
 			}
-			if (Amount < pPlayer->m_WalletMoney)
+			if (Amount > pPlayer->m_WalletMoney)
 			{
 				pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money in your wallet");
 				return;
