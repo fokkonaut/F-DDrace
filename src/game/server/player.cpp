@@ -1445,7 +1445,7 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescriptio
 	char aBuf[1024];
 	char aTimestamp[256];
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_DATE);
-	str_format(aFilename, sizeof(aFilename), "dumps/money_%s.txt", aTimestamp);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/money_%s.txt", GameServer()->Config()->m_SvMoneyhistoryFilePath, aTimestamp);
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 	str_format(aBuf, sizeof(aBuf),
 		"[%s][%s] account='%s' msg='%s%d %s' name='%s'",
