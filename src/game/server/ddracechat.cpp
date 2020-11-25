@@ -1797,10 +1797,10 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "paid to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
+	str_format(aBuf, sizeof(aBuf), "paid to '%s'", pSelf->Server()->ClientName(pTo->GetCID()));
 	pPlayer->BankTransaction(-Money, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "received from '%s'", Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), "received from '%s'", pSelf->Server()->ClientName(pResult->m_ClientID));
 	pTo->BankTransaction(Money, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "You paid %lld money from your bank account to '%s'", Money, pSelf->Server()->ClientName(pTo->GetCID()));
