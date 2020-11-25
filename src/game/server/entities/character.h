@@ -457,6 +457,8 @@ public:
 	// money xp bomb
 	bool m_GotMoneyXPBomb;
 
+	int64 m_LastMoneyDrop;
+
 	// true if the character is constantly getting freezed by Freeze() function, e.g. on a freeze tile or while deepfrozen
 	bool m_IsFrozen;
 

@@ -3200,6 +3200,8 @@ void CCharacter::FDDraceInit()
 	m_LastWantedWeapon = 0;
 	m_LastWantedLogout = 0;
 	m_MaxJumps = m_Core.m_Jumps;
+
+	m_LastMoneyDrop = 0;
 }
 
 void CCharacter::FDDraceTick()
