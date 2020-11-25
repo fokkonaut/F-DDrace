@@ -2352,7 +2352,7 @@ void CCharacter::HandleTiles(int Index)
 			}
 
 			// give money and xp
-			m_pPlayer->WalletTransaction(Money, "");
+			m_pPlayer->WalletTransaction(Money);
 			m_pPlayer->GiveXP(XP);
 
 			// broadcast
