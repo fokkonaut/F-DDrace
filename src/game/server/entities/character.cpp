@@ -3548,7 +3548,13 @@ void CCharacter::DropPickup(int Type, int Amount)
 
 void CCharacter::DropLoot(int Weapon)
 {
-	if (!Config()->m_SvDropsOnDeath || Weapon == WEAPON_GAME)
+	if (!Config()->m_SvDropsOnDeath)
+		return;
+
+	// Drop money even if killed by the game, e.g. team change or minigame change
+	DropMoney(m_pPlayer->m_WalletMoney);
+
+	if (Weapon == WEAPON_GAME)
 		return;
 
 	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
@@ -3586,8 +3592,6 @@ void CCharacter::DropLoot(int Weapon)
 			DropWeapon((rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS, true, Dir);
 		}
 	}
-
-	DropMoney(m_pPlayer->m_WalletMoney);
 }
 
 int CCharacter::GetWeaponSpecial(int Type)

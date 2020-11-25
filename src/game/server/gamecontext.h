@@ -303,6 +303,7 @@ public:
 	virtual void OnConsoleInit();
 	virtual void OnMapChange(char* pNewMapName, int MapNameSize);
 	virtual void OnShutdown(bool FullShutdown = false);
+	virtual void OnPreShutdown();
 
 	virtual void OnTick();
 	virtual void OnPreSnap();
@@ -529,6 +530,7 @@ public:
 	// money drops
 	void WriteMoneyListFile();
 	void ReadMoneyListFile();
+	void SaveOrDropWallet();
 
 	//motd
 	const char *FormatMotd(const char *pMsg);

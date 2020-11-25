@@ -14,7 +14,6 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_CheckDeath = CheckDeath;
 	m_TeleCheckpoint = m_pOwner ? m_pOwner->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
-	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 }
 
 void CAdvancedEntity::Reset()

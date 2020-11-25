@@ -2039,6 +2039,9 @@ int CServer::Run()
 		}
 	}
 
+	// F-DDrace // to handle everything while the players are still available
+	GameServer()->OnPreShutdown();
+
 	// disconnect all clients on shutdown
 	m_NetServer.Close();
 	m_Econ.Shutdown();
