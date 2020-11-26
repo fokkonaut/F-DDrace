@@ -749,7 +749,7 @@ void CCharacter::FireWeapon()
 
 				if (!m_pTelekinesisEntity)
 				{
-					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
+					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 					CEntity *pEntity = GameWorld()->ClosestEntityTypes(m_CursorPos, 20.f, Types, this, m_pPlayer->GetCID(), !m_Passive);
 
 					CCharacter *pChr = 0;
@@ -3247,6 +3247,13 @@ void CCharacter::FDDraceTick()
 					CPickupDrop *pPickup = (CPickupDrop *)m_pTelekinesisEntity;
 					pPickup->SetPos(m_CursorPos);
 					pPickup->SetVel(Vel);
+					break;
+				}
+				case (CGameWorld::ENTTYPE_MONEY):
+				{
+					CMoney *pMoney = (CMoney *)m_pTelekinesisEntity;
+					pMoney->SetPos(m_CursorPos);
+					pMoney->SetVel(Vel);
 					break;
 				}
 			}

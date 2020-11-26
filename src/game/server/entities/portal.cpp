@@ -5,6 +5,7 @@
 #include <game/server/teams.h>
 #include "portal.h"
 #include "flag.h"
+#include "money.h"
 #include <engine/shared/config.h>
 #include <algorithm>
 
@@ -88,7 +89,7 @@ void CPortal::PlayerEnter()
 			m_vTeleported.erase(m_vTeleported.begin() + i);
 	}
 
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP);
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 	CEntity *apEnts[128];
 	int Num = GameWorld()->FindEntitiesTypes(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, 128, Types);
 
@@ -106,6 +107,7 @@ void CPortal::PlayerEnter()
 		CCharacter *pChr = 0;
 		CFlag *pFlag = 0;
 		CPickupDrop *pPickup = 0;
+		CMoney *pMoney = 0;
 
 		switch (apEnts[i]->GetObjType())
 		{
@@ -145,6 +147,15 @@ void CPortal::PlayerEnter()
 				pPickup->SetPrevPos(m_pLinkedPortal->m_Pos);
 				if (pPickup->GetOwner())
 					pAffectedChr = pPickup->GetOwner();
+				break;
+			}
+		case CGameWorld::ENTTYPE_MONEY:
+			{
+				pMoney = (CMoney *)apEnts[i];
+				pMoney->SetPos(m_pLinkedPortal->m_Pos);
+				pMoney->SetPrevPos(m_pLinkedPortal->m_Pos);
+				if (pMoney->GetOwner())
+					pAffectedChr = pMoney->GetOwner();
 				break;
 			}
 		}

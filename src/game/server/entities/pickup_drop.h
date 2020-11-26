@@ -17,11 +17,6 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
-	void SetVel(vec2 Vel) { m_Vel = Vel; }
-	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
-
-	CCharacter *GetOwner() { return m_pOwner; };
-
 private:
 	static int const ms_PhysSize = 14;
 

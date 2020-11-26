@@ -16,6 +16,10 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient) {}
 
+	CCharacter *GetOwner() { return m_pOwner; };
+	void SetVel(vec2 Vel) { m_Vel = Vel; }
+	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
+
 protected:
 	bool IsGrounded(bool SetVel = false);
 	// HandleDropped() has to be called within the tick function of the child entity whenever the entity is dropped and not being carried
