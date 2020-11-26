@@ -569,12 +569,14 @@ void IGameController::Snap(int SnappingClient)
 			| GAMEINFOFLAG_RACE
 			| GAMEINFOFLAG_DONT_MASK_ENTITIES;
 
-		if (pSnap->m_Minigame == MINIGAME_NONE)
+		if (pSnap->m_Minigame == MINIGAME_NONE || pSnap->m_Minigame == MINIGAME_BLOCK)
 		{
 			pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
+		}
 
-			if (pSnap->m_ScoreMode == SCORE_TIME)
-				pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
+		if (pSnap->m_Minigame == MINIGAME_NONE && pSnap->m_ScoreMode == SCORE_TIME)
+		{
+			pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
 		}
 
 		if (!pSnappingChar)
