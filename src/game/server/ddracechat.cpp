@@ -1975,12 +1975,6 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_Money < 2000000)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You need at least 2.000.000 money on your bank account to use this command");
-		return;
-	}
-
 	vec2 Pos = pSelf->Collision()->GetRandomTile(ENTITY_SPAWN);
 	if (Pos == vec2(-1, -1))
 		return;
