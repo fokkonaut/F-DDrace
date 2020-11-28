@@ -4037,3 +4037,11 @@ void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)
 		m_pPlayer->ResumeFromTeeControl();
 	GameServer()->SendExtraMessage(TEE_CONTROL, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
+
+void CCharacter::WeaponMoneyReward(int Weapon)
+{
+	if (m_HadWeapon[Weapon])
+		return;
+	m_HadWeapon[Weapon] = true;
+	m_pPlayer->WalletTransaction(1);
+}
