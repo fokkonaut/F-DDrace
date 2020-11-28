@@ -359,6 +359,7 @@ public:
 	bool IsHooked(int Power = -1);
 	void SetPlaying();
 	bool m_ResumeMoved;
+	int64 m_LastWalletMessage;
 
 	// automatic actions when player enters afk mode
 	void OnSetAfk();

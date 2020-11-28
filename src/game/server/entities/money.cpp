@@ -51,8 +51,12 @@ void CMoney::Tick()
 		if (distance(m_Pos, pClosest->GetPos()) < GetRadius() + pClosest->GetProximityRadius())
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "Collected %lld money", m_Amount);
-			GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
+			if (m_Amount > 499 || pClosest->GetPlayer()->m_LastWalletMessage < time_get() - time_freq() * 60)
+			{
+				pClosest->GetPlayer()->m_LastWalletMessage = time_get();
+				str_format(aBuf, sizeof(aBuf), "+%lld money (see /money)", m_Amount);
+				GameServer()->SendChatTarget(pClosest->GetPlayer()->GetCID(), aBuf);
+			}
 			pClosest->GetPlayer()->WalletTransaction(m_Amount, "collected");
 
 			str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
