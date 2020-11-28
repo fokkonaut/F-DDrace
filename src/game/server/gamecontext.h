@@ -562,7 +562,7 @@ public:
 	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
 
 	void CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3);
-	int MoneyLaserTextTime(int64 Amount) { return Amount < SMALL_MONEY_AMOUNT ? 3 : 1; }
+	int MoneyLaserTextTime(int64 Amount) { return Amount < SMALL_MONEY_AMOUNT ? 1 : 3; }
 
 	class CHouse *m_pHouses[NUM_HOUSES];
 
