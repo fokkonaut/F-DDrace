@@ -3558,7 +3558,8 @@ void CCharacter::DropLoot(int Weapon)
 		return;
 
 	// Drop money even if killed by the game, e.g. team change or minigame change
-	DropMoney(m_pPlayer->m_WalletMoney);
+	if (m_FreezeTime)
+		DropMoney(m_pPlayer->m_WalletMoney);
 
 	if (Weapon == WEAPON_GAME)
 		return;
