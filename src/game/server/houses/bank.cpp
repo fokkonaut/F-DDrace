@@ -22,11 +22,11 @@ const char *CBank::GetConfirmMessage(int ClientID)
 	static char aBuf[128];
 	if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 	{
-		str_format(aBuf, sizeof(aBuf), "Are you sure that you want to deposit %d money from your wallet to your account?", Amount);
+		str_format(aBuf, sizeof(aBuf), "Are you sure that you want to deposit %d money from your wallet to your bank account?", Amount);
 	}
 	else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
 	{
-		str_format(aBuf, sizeof(aBuf), "Are you sure that you want to withdraw %d money from your account to your wallet?", Amount);
+		str_format(aBuf, sizeof(aBuf), "Are you sure that you want to withdraw %d money from your bank account to your wallet?", Amount);
 	}
 	return aBuf;
 }
@@ -90,7 +90,7 @@ void CBank::OnSuccess(int ClientID)
 		pPlayer->BankTransaction(-Amount, "withdraw");
 		pPlayer->WalletTransaction(Amount, "withdraw");
 
-		str_format(aMsg, sizeof(aMsg), "You withdrew %d money from your wallet to your bank account.", Amount);
+		str_format(aMsg, sizeof(aMsg), "You withdrew %d money from your bank account to your wallet.", Amount);
 		GameServer()->SendChatTarget(ClientID, aMsg);
 	}
 }
