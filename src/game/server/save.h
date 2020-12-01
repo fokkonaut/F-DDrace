@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
-// Moved to save.cpp so we can include this file in player.
+// Moved to save.cpp so we can include this file in player.h
 //#include "./entities/character.h"
 #include <engine/shared/protocol.h>
 class CCharacter;
@@ -13,7 +13,7 @@ class CSaveTee
 public:
 	CSaveTee();
 	~CSaveTee();
-	void Save(CCharacter* pchr); // F-DDrace TODO: extra weapons and mod specific stuff is not saved or loaded with the string
+	void Save(CCharacter* pchr); // F-DDrace TODO: extra weapons and mod specific stuff is not saved or loaded with the string, just in cache
 	void Load(CCharacter* pchr, int Team);
 	char* GetString();
 	int LoadString(char* String);
