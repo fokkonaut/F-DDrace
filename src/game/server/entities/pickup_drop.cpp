@@ -105,6 +105,7 @@ void CPickupDrop::Pickup()
 					m_Bullets = 10;
 
 				pChr->GiveWeapon(m_Weapon, false, m_Bullets);
+				pChr->WeaponMoneyReward(m_Weapon);
 			}
 
 			if (m_Special&SPECIAL_JETPACK)

@@ -160,6 +160,7 @@ void CPickup::Tick()
 							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
 								break;
 
+							pChr->WeaponMoneyReward(m_Subtype);
 							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
 								pChr->GiveWeapon(m_Subtype, false, 10);
 							else if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
