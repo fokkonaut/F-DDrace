@@ -324,6 +324,8 @@ public:
 	void SetLastAction(int LastAction) { m_LastAction = LastAction; };
 	int GetArmor() { return m_Armor; };
 	void SetArmor(int Armor) { m_Armor = Armor; };
+	int GetHealth() { return m_Health; }
+	void SetHealth(int Health) { m_Health = Health; }
 	CCharacterCore GetCore() { return m_Core; };
 	void SetCore(CCharacterCore Core) { m_Core = Core; };
 	CCharacterCore* Core() { return &m_Core; };
@@ -435,7 +437,7 @@ public:
 
 	CNetObj_PlayerInput GetInput() { return m_Input; };
 
-	int m_SpawnTick;
+	int64 m_SpawnTick;
 	bool m_GotLasered;
 
 	int m_KillStreak;
@@ -460,6 +462,12 @@ public:
 
 	// money xp bomb
 	bool m_GotMoneyXPBomb;
+
+	// minigame join/leave request
+	bool MinigameRequestTick();
+	bool RequestMinigameChange(int RequestedMinigame);
+	int m_RequestedMinigame;
+	int64 m_LastMinigameRequest;
 
 	int64 m_LastMoneyDrop;
 

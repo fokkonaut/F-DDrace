@@ -94,12 +94,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	FDDraceInit();
-
 	GameServer()->m_pController->OnCharacterSpawn(this);
-
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
-
 	DDraceInit();
+	m_pPlayer->LoadMinigameTee();
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
@@ -1162,6 +1160,9 @@ void CCharacter::Tick()
 		return;
 
 	// F-DDrace
+	if (MinigameRequestTick())
+		return; // We need to return here because in SetMinigame() the player is killed already
+
 	FDDraceTick();
 	HandleLastIndexTiles();
 	DummyTick();
@@ -3204,6 +3205,10 @@ void CCharacter::FDDraceInit()
 
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aHadWeapon[i] = false;
+
+	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
+	m_RequestedMinigame = MINIGAME_NONE;
+	m_LastMinigameRequest = 0;
 }
 
 void CCharacter::FDDraceTick()
@@ -3363,6 +3368,46 @@ void CCharacter::HandleLastIndexTiles()
 			m_MoneyTile = false;
 		}
 	}
+}
+
+bool CCharacter::RequestMinigameChange(int RequestedMinigame)
+{
+	if (RequestedMinigame == m_RequestedMinigame)
+		return false;
+
+	m_RequestedMinigame = RequestedMinigame;
+	m_LastMinigameRequest = Server()->Tick();
+	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Minigame request sent, please don't move for 5 seconds");
+	return true;
+}
+
+bool CCharacter::MinigameRequestTick()
+{
+	if (!m_LastMinigameRequest || m_RequestedMinigame == m_pPlayer->m_Minigame)
+		return false;
+
+	if (m_LastMinigameRequest < Server()->Tick() - Server()->TickSpeed() * 5)
+	{
+		GameServer()->SetMinigame(m_pPlayer->GetCID(), m_RequestedMinigame);
+		m_RequestedMinigame = MINIGAME_NONE;
+		m_LastMinigameRequest = 0;
+		return true;
+	}
+	else if (m_Pos != m_PrevPos)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your minigame request was cancelled because you moved");
+		m_RequestedMinigame = MINIGAME_NONE;
+		m_LastMinigameRequest = 0;
+	}
+	else if ((Server()->Tick() - m_LastMinigameRequest - 1) % Server()->TickSpeed() == 0)
+	{
+		int Remaining = ((m_LastMinigameRequest + Server()->TickSpeed() * 5) - Server()->Tick()) / Server()->TickSpeed();
+		char aBuf[4];
+		str_format(aBuf, sizeof(aBuf), "%d", Remaining+1);
+		GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf, 1);
+	}
+
+	return false;
 }
 
 int CCharacter::GetCurrentTilePlotID()

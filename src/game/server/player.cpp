@@ -171,6 +171,7 @@ void CPlayer::Reset()
 	m_ForceSpawnPos = vec2(-1, -1);
 	m_WeaponIndicator = GameServer()->Config()->m_SvWeaponIndicatorDefault;
 
+	m_SavedMinigameTee = false;
 	m_Minigame = MINIGAME_NONE;
 	m_SurvivalState = SURVIVAL_OFFLINE;
 
@@ -1106,6 +1107,10 @@ void CPlayer::TryRespawn()
 			SpawnPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 	}
 
+	// its gonna be loaded in CCharacter::Spawn()
+	if (CanLoadMinigameTee())
+		SpawnPos = m_MinigameTee.GetPos();
+
 	if (SpawnPos == vec2(-1, -1))
 	{
 		if (!GameServer()->Collision()->TileUsed(Index))
@@ -1557,7 +1562,7 @@ void CPlayer::OnLogin()
 	GameServer()->SendChatTarget(m_ClientID, "Successfully logged in");
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	if (m_pCharacter)
+	if (m_Minigame == MINIGAME_NONE && m_pCharacter)
 	{
 		m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
@@ -1865,4 +1870,28 @@ void CPlayer::OnSetAfk()
 		m_pCharacter->SetAvailableWeapon();
 		GameServer()->SendChatTarget(m_ClientID, "You automatically exited the plot editor because you were afk for too long");
 	}
+}
+
+void CPlayer::SaveMinigameTee()
+{
+	if (m_SavedMinigameTee || !m_pCharacter)
+		return;
+
+	m_MinigameTee.Save(m_pCharacter);
+	m_SavedMinigameTee = true;
+}
+
+bool CPlayer::LoadMinigameTee()
+{
+	if (!CanLoadMinigameTee() || !m_pCharacter)
+		return false;
+
+	m_MinigameTee.Load(m_pCharacter, 0);
+	m_SavedMinigameTee = false;
+	return true;
+}
+
+bool CPlayer::CanLoadMinigameTee()
+{
+	return m_SavedMinigameTee && m_Minigame == m_MinigameTee.GetMinigame();
 }

@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "teeinfo.h"
+#include "save.h"
 
 enum NoNameFix
 {
@@ -385,6 +386,12 @@ public:
 	int m_ForcedSkin;
 
 	//minigames
+	CSaveTee m_MinigameTee;
+	bool m_SavedMinigameTee;
+	void SaveMinigameTee();
+	bool LoadMinigameTee();
+	bool CanLoadMinigameTee();
+
 	int m_Minigame;
 	int m_SurvivalState;
 	int m_SurvivalDieTick;

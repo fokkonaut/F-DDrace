@@ -5400,6 +5400,10 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 		return;
 	}
 
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	if (!pChr || pChr->RequestMinigameChange(Minigame))
+		return;
+
 	// leave minigame
 	if (Minigame == MINIGAME_NONE)
 	{
@@ -5409,9 +5413,6 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 		//reset everything
 		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
 		{
-			pPlayer->m_Gamemode = Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
-			if (pPlayer->GetCharacter())
-				pPlayer->GetCharacter()->m_SavedGamemode = pPlayer->m_Gamemode;
 			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
 			pPlayer->m_ShowName = true;
 		}
@@ -5422,6 +5423,9 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 		str_format(aMsg, sizeof(aMsg), "'%s' joined the minigame '%s', use '/%s' to join aswell", Server()->ClientName(ClientID), GetMinigameName(Minigame), GetMinigameCommand(Minigame));
 		SendChat(-1, CHAT_ALL, -1, aMsg);
 		SendChatTarget(ClientID, "Say '/leave' to join the normal area again");
+
+		// Save character stats to reload them after leaving
+		pPlayer->SaveMinigameTee();
 
 		//set minigame required stuff
 		((CGameControllerDDRace*)m_pController)->m_Teams.SetCharacterTeam(pPlayer->GetCID(), 0);

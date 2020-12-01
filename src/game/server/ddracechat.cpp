@@ -1697,6 +1697,12 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
+	if (pPlayer->m_Minigame != MINIGAME_NONE)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't logout in a minigame");
+		return;
+	}
+
 	if (pSelf->Config()->m_SvKillLogout && pPlayer->GetCharacter())
 	{
 		char aBuf[128];

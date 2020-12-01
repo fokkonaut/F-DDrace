@@ -2,6 +2,7 @@
 #include <cstdio>
 
 #include "save.h"
+#include "./entities/character.h"
 #include "teams.h"
 #include "./gamemodes/DDRace.h"
 #include <engine/shared/config.h>
@@ -14,9 +15,9 @@ CSaveTee::~CSaveTee()
 {
 }
 
-void CSaveTee::save(CCharacter *pChr)
+void CSaveTee::Save(CCharacter *pChr)
 {
-	str_copy(m_name, pChr->Server()->ClientName(pChr->GetPlayer()->GetCID()), sizeof(m_name));
+	str_copy(m_aName, pChr->Server()->ClientName(pChr->GetPlayer()->GetCID()), sizeof(m_aName));
 
 	m_Alive = pChr->IsAlive();
 	m_Paused = abs(pChr->GetPlayer()->IsPaused());
@@ -49,7 +50,9 @@ void CSaveTee::save(CCharacter *pChr)
 	m_TuneZoneOld = pChr->m_TuneZoneOld;
 
 	if(pChr->m_StartTime)
-		m_Time = pChr->Server()->Tick() - pChr->m_StartTime + 60 * pChr->Server()->TickSpeed();
+		m_Time = pChr->Server()->Tick() - pChr->m_StartTime;
+	else
+		m_Time = 0;
 
 	m_Pos = pChr->GetPos();
 	m_PrevPos = pChr->m_PrevPos;
@@ -86,9 +89,46 @@ void CSaveTee::save(CCharacter *pChr)
 	m_HookState = pChr->GetCore().m_HookState;
 
 	FormatUuid(pChr->GameServer()->GameUuid(), aGameUuid, sizeof(aGameUuid));
+
+	// F-DDrace
+	m_Health = pChr->GetHealth();
+	m_Armor = pChr->GetArmor();
+	m_Invisible = pChr->m_Invisible;
+	m_Rainbow = pChr->m_Rainbow;
+	m_Atom = pChr->m_Atom;
+	m_Trail = pChr->m_Trail;
+	m_Meteors = pChr->m_Meteors;
+	m_Bloody = pChr->m_Bloody;
+	m_StrongBloody = pChr->m_StrongBloody;
+	m_ScrollNinja = pChr->m_ScrollNinja;
+	m_HookPower = pChr->m_HookPower;
+	for (int i = 0; i < NUM_WEAPONS; i++)
+	{
+		m_aSpreadWeapon[i] = pChr->m_aSpreadWeapon[i];
+		m_aHadWeapon[i] = pChr->m_aHadWeapon[i];
+	}
+	m_FakeTuneCollision = pChr->m_FakeTuneCollision;
+	m_OldFakeTuneCollision = pChr->m_OldFakeTuneCollision;
+	m_Passive = pChr->m_Passive;
+	m_PoliceHelper = pChr->m_PoliceHelper;
+	m_Item = pChr->m_Item;
+	m_DoorHammer = pChr->m_DoorHammer;
+	m_AlwaysTeleWeapon = pChr->m_AlwaysTeleWeapon;
+	m_FreezeHammer = pChr->m_FreezeHammer;
+	m_SavedGamemode = pChr->m_SavedGamemode;
+	for (int i = 0; i < 3; i++)
+		m_aSpawnWeaponActive[i] = pChr->m_aSpawnWeaponActive[i];
+	m_HasFinishedSpecialRace = pChr->m_HasFinishedSpecialRace;
+	m_GotMoneyXPBomb = pChr->m_GotMoneyXPBomb;
+	m_SpawnTick = pChr->m_SpawnTick;
+	m_KillStreak = pChr->m_KillStreak;
+	m_MaxJumps = pChr->m_MaxJumps;
+
+	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
+	m_Minigame = pChr->GetPlayer()->m_Minigame;
 }
 
-void CSaveTee::load(CCharacter *pChr, int Team)
+void CSaveTee::Load(CCharacter *pChr, int Team)
 {
 	pChr->GetPlayer()->Pause(m_Paused, true);
 
@@ -167,11 +207,52 @@ void CSaveTee::load(CCharacter *pChr, int Team)
 	}
 
 	pChr->SetSolo(m_IsSolo);
+
+	// F-DDrace
+	pChr->SetHealth(m_Health);
+	pChr->SetArmor(m_Armor);
+	pChr->m_Invisible = m_Invisible;
+	pChr->m_Rainbow = m_Rainbow;
+	pChr->Atom(m_Atom, -1, true);
+	pChr->Trail(m_Trail, -1, true);
+	pChr->Meteor(m_Meteors, -1, false, true);
+	pChr->m_Bloody = m_Bloody;
+	pChr->m_StrongBloody = m_StrongBloody;
+	pChr->ScrollNinja(m_ScrollNinja, -1, true);
+	pChr->m_HookPower = m_HookPower;
+	for (int i = 0; i < NUM_WEAPONS; i++)
+	{
+		pChr->m_aSpreadWeapon[i] = m_aSpreadWeapon[i];
+		pChr->m_aHadWeapon[i] = m_aHadWeapon[i];
+	}
+	pChr->m_FakeTuneCollision = m_FakeTuneCollision;
+	pChr->m_OldFakeTuneCollision = m_OldFakeTuneCollision;
+	pChr->Passive(m_Passive, -1, true);
+	pChr->m_PoliceHelper = m_PoliceHelper;
+	pChr->Item(m_Item, -1, true);
+	pChr->m_DoorHammer = m_DoorHammer;
+	pChr->m_AlwaysTeleWeapon = m_AlwaysTeleWeapon;
+	pChr->m_FreezeHammer = m_FreezeHammer;
+	pChr->m_SavedGamemode = m_SavedGamemode;
+	for (int i = 0; i < 3; i++)
+		pChr->m_aSpawnWeaponActive[i] = m_aSpawnWeaponActive[i];
+	pChr->m_HasFinishedSpecialRace = m_HasFinishedSpecialRace;
+	pChr->m_GotMoneyXPBomb = m_GotMoneyXPBomb;
+	pChr->m_SpawnTick = m_SpawnTick;
+	pChr->m_KillStreak = m_KillStreak;
+	pChr->m_MaxJumps = m_MaxJumps;
+
+	pChr->Core()->m_SpinBot = m_SpinBot;
+	pChr->Core()->m_SpinBotSpeed = m_SpinBotSpeed;
+	pChr->Core()->m_AimClosest = m_AimClosest;
+
+	pChr->GetPlayer()->m_Gamemode = m_Gamemode;
+	pChr->GetPlayer()->m_Minigame = m_Minigame;
 }
 
 char* CSaveTee::GetString()
 {
-	str_format(m_String, sizeof(m_String),
+	str_format(m_aString, sizeof(m_aString),
 		"%s\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
@@ -193,7 +274,7 @@ char* CSaveTee::GetString()
 		%f\t%f\t%f\t%f\t%f\t\
 		%f\t%f\t%f\t%f\t%f\t\
 		%d\t%s",
-		m_name, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
+		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
 		m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Got,
 		m_aWeapons[2].m_AmmoRegenStart, m_aWeapons[2].m_Ammo, m_aWeapons[2].m_Got,
@@ -215,7 +296,7 @@ char* CSaveTee::GetString()
 		m_CpCurrent[20], m_CpCurrent[21], m_CpCurrent[22], m_CpCurrent[23], m_CpCurrent[24],
 		m_NotEligibleForFinish, aGameUuid
 	);
-	return m_String;
+	return m_aString;
 }
 
 int CSaveTee::LoadString(char* String)
@@ -243,7 +324,7 @@ int CSaveTee::LoadString(char* String)
 		%f\t%f\t%f\t%f\t%f\t\
 		%f\t%f\t%f\t%f\t%f\t\
 		%d\t%*s",
-		m_name, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
+		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
 		&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Got,
 		&m_aWeapons[2].m_AmmoRegenStart, &m_aWeapons[2].m_Ammo, &m_aWeapons[2].m_Got,
@@ -280,15 +361,15 @@ CSaveTeam::CSaveTeam(IGameController* Controller)
 {
 	m_pController = Controller;
 	m_Switchers = 0;
-	SavedTees = 0;
+	m_apSavedTees = 0;
 }
 
 CSaveTeam::~CSaveTeam()
 {
 	if(m_Switchers)
 		delete[] m_Switchers;
-	if(SavedTees)
-		delete[] SavedTees;
+	if(m_apSavedTees)
+		delete[] m_apSavedTees;
 }
 
 int CSaveTeam::save(int Team)
@@ -314,14 +395,14 @@ int CSaveTeam::save(int Team)
 		m_TeamLocked = Teams->TeamLocked(Team);
 		m_Practice = Teams->IsPractice(Team);
 
-		SavedTees = new CSaveTee[m_MembersCount];
+		m_apSavedTees = new CSaveTee[m_MembersCount];
 		int j = 0;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(Teams->m_Core.Team(i) == Team)
 			{
 				if(m_pController->GameServer()->m_apPlayers[i] && m_pController->GameServer()->m_apPlayers[i]->GetCharacter())
-					SavedTees[j].save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
+					m_apSavedTees[j].Save(m_pController->GameServer()->m_apPlayers[i]->GetCharacter());
 				else
 					return 3;
 				j++;
@@ -362,7 +443,7 @@ int CSaveTeam::load(int Team)
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
-		int ID = MatchPlayer(SavedTees[i].GetName());
+		int ID = MatchPlayer(m_apSavedTees[i].GetName());
 		if(ID == -1) // first check if team can be loaded / do not load half teams
 		{
 			return i+10; // +10 to leave space for other return-values
@@ -384,10 +465,10 @@ int CSaveTeam::load(int Team)
 
 	for (int i = 0; i < m_MembersCount; i++)
 	{
-		pChr = MatchCharacter(SavedTees[i].GetName(), i);
+		pChr = MatchCharacter(m_apSavedTees[i].GetName(), i);
 		if(pChr)
 		{
-			SavedTees[i].load(pChr, Team);
+			m_apSavedTees[i].Load(pChr, Team);
 		}
 	}
 
@@ -422,7 +503,7 @@ CCharacter* CSaveTeam::MatchCharacter(char name[16], int SaveID)
 		if(m_pController->GameServer()->m_apPlayers[ID]->GetCharacter())
 			return m_pController->GameServer()->m_apPlayers[ID]->GetCharacter();
 		else
-			return m_pController->GameServer()->m_apPlayers[ID]->ForceSpawn(SavedTees[SaveID].GetPos());
+			return m_pController->GameServer()->m_apPlayers[ID]->ForceSpawn(m_apSavedTees[SaveID].GetPos());
 	}
 	return 0;
 }
@@ -434,7 +515,7 @@ char* CSaveTeam::GetString()
 	for(int i = 0; i < m_MembersCount; i++)
 	{
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "\n%s", SavedTees[i].GetString());
+		str_format(aBuf, sizeof(aBuf), "\n%s", m_apSavedTees[i].GetString());
 		str_append(m_String, aBuf, sizeof(m_String));
 	}
 
@@ -504,14 +585,14 @@ int CSaveTeam::LoadString(const char* String)
 		return 1;
 	}
 
-	if(SavedTees)
+	if(m_apSavedTees)
 	{
-		delete [] SavedTees;
-		SavedTees = 0;
+		delete [] m_apSavedTees;
+		m_apSavedTees = 0;
 	}
 
 	if(m_MembersCount)
-		SavedTees = new CSaveTee[m_MembersCount];
+		m_apSavedTees = new CSaveTee[m_MembersCount];
 
 	for (int n = 0; n < m_MembersCount; n++)
 	{
@@ -535,7 +616,7 @@ int CSaveTeam::LoadString(const char* String)
 		if(StrSize < sizeof(SaveTee))
 		{
 			str_copy(SaveTee, CopyPos, StrSize);
-			int Num = SavedTees[n].LoadString(SaveTee);
+			int Num = m_apSavedTees[n].LoadString(SaveTee);
 			if(Num)
 			{
 				dbg_msg("load", "failed to load tee");
