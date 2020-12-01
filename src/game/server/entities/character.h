@@ -409,8 +409,9 @@ public:
 
 	int m_SavedGamemode;
 	int m_MaxJumps;
-	bool m_HadWeapon[NUM_WEAPONS];
 
+	// weapon money reward
+	bool m_aHadWeapon[NUM_WEAPONS];
 	void WeaponMoneyReward(int Weapon);
 
 	// editor

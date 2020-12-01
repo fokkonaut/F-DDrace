@@ -3201,6 +3201,9 @@ void CCharacter::FDDraceInit()
 	m_MaxJumps = m_Core.m_Jumps;
 
 	m_LastMoneyDrop = 0;
+
+	for (int i = 0; i < NUM_WEAPONS; i++)
+		m_aHadWeapon[i] = false;
 }
 
 void CCharacter::FDDraceTick()
@@ -3782,6 +3785,14 @@ void CCharacter::ReleaseHook(bool Other)
 		GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 }
 
+void CCharacter::WeaponMoneyReward(int Weapon)
+{
+	if (m_aHadWeapon[Weapon])
+		return;
+	m_aHadWeapon[Weapon] = true;
+	m_pPlayer->WalletTransaction(1);
+}
+
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)
 {
 	m_Jetpack = Set;
@@ -4036,12 +4047,4 @@ void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)
 	if (!Set)
 		m_pPlayer->ResumeFromTeeControl();
 	GameServer()->SendExtraMessage(TEE_CONTROL, m_pPlayer->GetCID(), Set, FromID, Silent);
-}
-
-void CCharacter::WeaponMoneyReward(int Weapon)
-{
-	if (m_HadWeapon[Weapon])
-		return;
-	m_HadWeapon[Weapon] = true;
-	m_pPlayer->WalletTransaction(1);
 }
