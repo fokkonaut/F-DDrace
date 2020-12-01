@@ -1865,6 +1865,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	for (int i = 0; i < 5; i++)
 		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Drop money: '/money drop <amount>'");
 }
 
 void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
