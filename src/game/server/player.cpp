@@ -727,11 +727,10 @@ void CPlayer::OnDisconnect()
 		m_pCharacter->DropMoney(m_WalletMoney);
 	KillCharacter();
 
+	GameServer()->Logout(GetAccID());
+
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
-
-	if (GetAccID() >= ACC_START)
-		GameServer()->Logout(GetAccID());
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
