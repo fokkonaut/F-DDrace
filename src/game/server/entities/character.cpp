@@ -3372,6 +3372,9 @@ void CCharacter::HandleLastIndexTiles()
 
 bool CCharacter::RequestMinigameChange(int RequestedMinigame)
 {
+	if (m_LastMinigameRequest && m_LastMinigameRequest > Server()->Tick() - Server()->TickSpeed() * 5)
+		return true;
+
 	if (RequestedMinigame == m_RequestedMinigame)
 		return false;
 
