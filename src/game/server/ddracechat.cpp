@@ -1953,7 +1953,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	CCharacter *pChr = pPlayer->GetCharacter();
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pPlayer || !pChr)
 		return;
 
@@ -1972,6 +1972,12 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 	if (pChr->m_FreezeTime)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while frozen");
+		return;
+	}
+
+	if (pPlayer->m_WalletMoney < 50000)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
 		return;
 	}
 
