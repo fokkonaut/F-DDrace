@@ -4669,7 +4669,7 @@ void CGameContext::SaveOrDropWallet()
 		if (pPlayer->GetAccID() >= ACC_START)
 		{
 			pPlayer->BankTransaction(pPlayer->m_WalletMoney, "automatic wallet to bank due to shutdown");
-			pPlayer->WalletTransaction(-pPlayer->m_WalletMoney, "");
+			pPlayer->WalletTransaction(-pPlayer->m_WalletMoney);
 		}
 		else if (pPlayer->GetCharacter())
 			pPlayer->GetCharacter()->DropMoney(pPlayer->m_WalletMoney);
