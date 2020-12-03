@@ -169,7 +169,6 @@ MACRO_CONFIG_INT(SvTestingCommands, sv_test_cmds, 0, 0, 1, CFGFLAG_SERVER, "Turn
 MACRO_CONFIG_INT(SvFreezeDelay, sv_freeze_delay, 3, 1, 30, CFGFLAG_SERVER|CFGFLAG_GAME, "How many seconds the players will remain frozen (applies to all except delayed freeze in switch layer & deepfreeze)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvInviteFrequency, sv_invite_frequency, 1, 0, 9999, CFGFLAG_SERVER, "The minimum allowed delay between invites", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvKillProtection, sv_kill_protection, 0, 0, 9999, CFGFLAG_SERVER, "0 - Disable, 1-9999 minutes", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 0, 0, 99999, CFGFLAG_SERVER, "0 - Disable, 1-99999 money amount", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvChatDelay, sv_chat_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between chat messages", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvCheckpointSave, sv_checkpoint_save, 1, 0, 1, CFGFLAG_SERVER, "Whether to save checkpoint times to the score file", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvScoreFolder, sv_score_folder, 32, "records", CFGFLAG_SERVER, "Folder to save score files to", AUTHED_ADMIN)

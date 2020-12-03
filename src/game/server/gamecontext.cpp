@@ -2169,10 +2169,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, "Kill Protection enabled. If you really want to join the spectators, first type /kill");
 					return;
 				}
-				if (Config()->m_SvWalletKillProtection != 0 && pPlayer->m_WalletMoney >= Config()->m_SvWalletKillProtection && pChr->m_FreezeTime)
+				if (Config()->m_SvWalletKillProtection != 0 && pPlayer->GetWalletMoney() >= Config()->m_SvWalletKillProtection && pChr->m_FreezeTime)
 				{
 					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), "Warning you have %lld money in your wallet! (see /money)", pPlayer->m_WalletMoney);
+					str_format(aBuf, sizeof(aBuf), "Warning you have %lld money in your wallet! (see /money)", pPlayer->GetWalletMoney());
 					SendChatTarget(ClientID, aBuf);
 					SendChatTarget(ClientID, "Wallet kill Protection enabled. If you really want to join the spectators, first type /kill");
 					return;
@@ -2332,10 +2332,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, type /kill");
 				return;
 			}
-			if (Config()->m_SvWalletKillProtection != 0 && pPlayer->m_WalletMoney >= Config()->m_SvWalletKillProtection && pChr->m_FreezeTime)
+			if (Config()->m_SvWalletKillProtection != 0 && pPlayer->GetWalletMoney() >= Config()->m_SvWalletKillProtection && pChr->m_FreezeTime)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Warning you have %lld money in your wallet! (see /money)", pPlayer->m_WalletMoney);
+				str_format(aBuf, sizeof(aBuf), "Warning you have %lld money in your wallet! (see /money)", pPlayer->GetWalletMoney());
 				SendChatTarget(ClientID, aBuf);
 				SendChatTarget(ClientID, "Wallet kill Protection enabled. If you really want to kill, type /kill");
 				return;

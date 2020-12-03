@@ -1193,7 +1193,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
 	if((pSelf->Config()->m_SvKillProtection != 0 && CurrTime >= (60 * pSelf->Config()->m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED) ||
-		(pSelf->Config()->m_SvWalletKillProtection != 0 && pPlayer->m_WalletMoney >= pSelf->Config()->m_SvWalletKillProtection && pChr->m_FreezeTime))
+		(pSelf->Config()->m_SvWalletKillProtection != 0 && pPlayer->GetWalletMoney() >= pSelf->Config()->m_SvWalletKillProtection && pChr->m_FreezeTime))
 	{
 			pPlayer->KillCharacter(WEAPON_SELF);
 
