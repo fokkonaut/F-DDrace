@@ -66,7 +66,7 @@ void CBank::OnSuccess(int ClientID)
 	char aMsg[128];
 	if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 	{
-		if (pPlayer->m_WalletMoney < Amount)
+		if (pPlayer->GetWalletMoney() < Amount)
 		{
 			GameServer()->SendChatTarget(ClientID, "You don't have enough money in your wallet to deposit this amount.");
 			return;
@@ -122,7 +122,7 @@ void CBank::OnPageChange(int ClientID)
 	{
 		pFooter = "Press F3 to confirm your assignment.";
 		const char *pAssignment = m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT ? "D E P O S I T" : m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW ? "W I T H D R A W" : "";
-		str_format(aMsg, sizeof(aMsg), "Bank: %lld\nWallet: %lld\n\n%s\n\n", GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()].m_Money, GameServer()->m_apPlayers[ClientID]->m_WalletMoney, pAssignment);
+		str_format(aMsg, sizeof(aMsg), "Bank: %lld\nWallet: %lld\n\n%s\n\n", GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()].m_Money, GameServer()->m_apPlayers[ClientID]->GetWalletMoney(), pAssignment);
 
 		char aAmount[64];
 		int Type = m_aClients[ClientID].m_Page;
@@ -151,7 +151,7 @@ int CBank::GetAmount(int Type, int ClientID)
 				return 0;
 
 			if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
-				return pPlayer->m_WalletMoney;
+				return pPlayer->GetWalletMoney();
 			else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
 				return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money;
 		}

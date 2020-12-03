@@ -4668,11 +4668,11 @@ void CGameContext::SaveOrDropWallet()
 		// If player is not logged we just drop it so it will get reloaded after reload or on next server start
 		if (pPlayer->GetAccID() >= ACC_START)
 		{
-			pPlayer->BankTransaction(pPlayer->m_WalletMoney, "automatic wallet to bank due to shutdown");
-			pPlayer->WalletTransaction(-pPlayer->m_WalletMoney);
+			pPlayer->BankTransaction(pPlayer->GetWalletMoney(), "automatic wallet to bank due to shutdown");
+			pPlayer->WalletTransaction(-pPlayer->GetWalletMoney());
 		}
 		else if (pPlayer->GetCharacter())
-			pPlayer->GetCharacter()->DropMoney(pPlayer->m_WalletMoney);
+			pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
 	}
 }
 

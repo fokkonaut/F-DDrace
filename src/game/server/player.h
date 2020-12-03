@@ -336,7 +336,7 @@ public:
 	void BankTransaction(int64 Amount, const char *pDescription = "", bool IsEuro = false);
 	void WalletTransaction(int64 Amount, const char *pDescription = "");
 	void ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescription);
-	int64 m_WalletMoney;
+	int64 GetWalletMoney() { return m_WalletMoney; }
 
 	// plot
 	void CancelPlotAuction();
@@ -402,6 +402,9 @@ public:
 	void SetFakeID();
 	int m_FakeID;
 	bool m_aSameIP[MAX_CLIENTS];
+
+private:
+	int64 m_WalletMoney;
 };
 
 #endif
