@@ -97,8 +97,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	DDraceInit();
-	if (m_pPlayer->LoadMinigameTee())
-		m_Core.m_Vel.y = -2.f;
+	m_pPlayer->LoadMinigameTee();
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn

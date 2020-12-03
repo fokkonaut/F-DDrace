@@ -1890,6 +1890,8 @@ bool CPlayer::LoadMinigameTee()
 		return false;
 
 	m_MinigameTee.Load(m_pCharacter, 0);
+	m_pCharacter->Core()->m_Vel.y = -2.f; // avoid stacking in each other
+
 	m_SavedMinigameTee = false;
 	return true;
 }
