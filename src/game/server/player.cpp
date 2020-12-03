@@ -1420,7 +1420,7 @@ void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEur
 		pAccount->m_Euros += Amount;
 
 		char aDescription[256];
-		str_format(aDescription, sizeof(aDescription), "%d %s", Amount, pDescription);
+		str_format(aDescription, sizeof(aDescription), "%lld %s", Amount, pDescription);
 		GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID(), aDescription);
 	}
 	else
