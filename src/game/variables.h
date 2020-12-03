@@ -4,6 +4,7 @@
 #define GAME_VARIABLES_H
 #undef GAME_VARIABLES_H // this file will be included several times
 
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Use prediction for objects in the game world", AUTHED_NO)
 MACRO_CONFIG_INT(ClPredictPlayers, cl_predict_players, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SAVE, "Predict movements of other players", AUTHED_NO)
