@@ -18,6 +18,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 
 void CAdvancedEntity::Reset()
 {
+	GameServer()->UnsetTelekinesis(this);
 	GameWorld()->DestroyEntity(this);
 }
 
