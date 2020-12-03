@@ -2370,7 +2370,7 @@ void CCharacter::HandleTiles(int Index)
 						"Money [%lld] +1%s%s\n"
 						"XP [%d/%d]%s\n"
 						"Level [%d]",
-						m_pPlayer->m_WalletMoney, (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+						m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
 						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
 						pAccount->m_Level
 					);
@@ -3498,7 +3498,7 @@ bool CCharacter::IsFreeDraw()
 
 void CCharacter::DropMoney(int64 Amount, int Dir)
 {
-	if (Amount <= 0 || Amount > m_pPlayer->m_WalletMoney)
+	if (Amount <= 0 || Amount > m_pPlayer->GetWalletMoney())
 		return;
 
 	if (Dir == -3)
@@ -3612,7 +3612,7 @@ void CCharacter::DropLoot(int Weapon)
 
 	// Drop money even if killed by the game, e.g. team change or minigame change
 	if (m_FreezeTime)
-		DropMoney(m_pPlayer->m_WalletMoney);
+		DropMoney(m_pPlayer->GetWalletMoney());
 
 	if (Weapon == WEAPON_GAME)
 		return;

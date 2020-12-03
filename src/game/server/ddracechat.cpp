@@ -1310,7 +1310,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Bank [%lld]", pAccount->m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->m_WalletMoney);
+			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->GetWalletMoney());
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1844,7 +1844,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop money bags over 100.000");
 				return;
 			}
-			if (Amount > pPlayer->m_WalletMoney)
+			if (Amount > pPlayer->GetWalletMoney())
 			{
 				pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money in your wallet");
 				return;
@@ -1863,7 +1863,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	str_format(aBuf, sizeof(aBuf), "Bank: %lld", pSelf->m_Accounts[pPlayer->GetAccID()].m_Money);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->m_WalletMoney);
+	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->GetWalletMoney());
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
@@ -1982,7 +1982,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pPlayer->m_WalletMoney < 50000)
+	if (pPlayer->GetWalletMoney() < 50000)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
 		return;
@@ -2113,7 +2113,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pPlayer->m_WalletMoney < Price)
+		if (pPlayer->GetWalletMoney() < Price)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough money");
 			return;
