@@ -15,6 +15,12 @@ CSaveTee::~CSaveTee()
 {
 }
 
+void CSaveTee::TeleOutOfPlot(vec2 ToTele)
+{
+	m_Pos = m_PrevPos = m_CorePos = ToTele;
+	m_aWeapons[WEAPON_DRAW_EDITOR].m_Got = false;
+}
+
 void CSaveTee::Save(CCharacter *pChr)
 {
 	str_copy(m_aName, pChr->Server()->ClientName(pChr->GetPlayer()->GetCID()), sizeof(m_aName));

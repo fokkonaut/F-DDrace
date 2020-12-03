@@ -1880,6 +1880,7 @@ void CPlayer::SaveMinigameTee()
 	if (m_SavedMinigameTee || !m_pCharacter)
 		return;
 
+	m_pCharacter->UnsetSpookyGhost(); // unset spookyghost to avoid conflicts after loading again
 	m_MinigameTee.Save(m_pCharacter);
 	m_SavedMinigameTee = true;
 }

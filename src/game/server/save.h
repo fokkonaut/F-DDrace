@@ -20,7 +20,9 @@ public:
 	vec2 GetPos() { return m_Pos; }
 	char* GetName() { return m_aName; }
 
+	// F-DDrace
 	int GetMinigame() { return m_Minigame; }
+	void TeleOutOfPlot(vec2 ToTele);
 
 private:
 

@@ -3420,6 +3420,13 @@ int CCharacter::GetCurrentTilePlotID()
 
 void CCharacter::TeleOutOfPlot(int PlotID)
 {
+	if (m_pPlayer->m_Minigame != MINIGAME_NONE && m_pPlayer->m_SavedMinigameTee)
+	{
+		int SavedTilePlotID = GameServer()->GetTilePlotID(m_pPlayer->m_MinigameTee.GetPos());
+		if (SavedTilePlotID > 0 && PlotID > 0 && SavedTilePlotID == PlotID)
+			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_aPlots[PlotID].m_ToTele);
+	}
+
 	int TilePlotID = GetCurrentTilePlotID();
 	if (TilePlotID > 0 && PlotID > 0 && TilePlotID == PlotID)
 	{
