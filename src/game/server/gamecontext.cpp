@@ -5514,7 +5514,8 @@ void CGameContext::SurvivalTick()
 			SendChatTarget(m_SurvivalWinner, "You are the winner");
 
 			// add a win to the winners' accounts
-			m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
+			if (m_apPlayers[m_SurvivalWinner]->GetAccID() >= ACC_START)
+				m_Accounts[m_apPlayers[m_SurvivalWinner]->GetAccID()].m_SurvivalWins++;
 			m_apPlayers[m_SurvivalWinner]->GiveXP(250, "win a survival round");
 		}
 
