@@ -17,8 +17,8 @@ private:
 	int m_DropTick;
 	int m_GrabTick;
 
-	CCharacter *m_pCarrier;
-	CCharacter *m_pLastCarrier;
+	int m_Carrier;
+	int m_LastCarrier;
 
 	void PlaySound(int Sound);
 	int m_SoundTick;
@@ -28,10 +28,10 @@ private:
 
 public:
 
-	CCharacter *GetCarrier() const { return m_pCarrier; }
-	CCharacter *GetLastCarrier() const { return m_pLastCarrier; }
-	void SetCarrier(class CCharacter *pNewCarrier) { m_pCarrier = pNewCarrier; }
-	void SetLastCarrier(class CCharacter *pLastCarrier) { m_pLastCarrier = pLastCarrier; }
+	CCharacter *GetCarrier();
+	CCharacter *GetLastCarrier();
+	void SetCarrier(int NewCarrier) { m_Carrier = NewCarrier; }
+	void SetLastCarrier(int LastCarrier) { m_LastCarrier = LastCarrier; }
 	bool IsAtStand() const { return m_AtStand; }
 	void SetAtStand(bool AtStand) { m_AtStand = AtStand; }
 	vec2 GetVel() { return m_Vel; }
@@ -42,7 +42,7 @@ public:
 	int GetDropTick() { return m_DropTick; };
 	int GetTeam() { return m_Team; };
 
-	void Grab(class CCharacter *pChr);
+	void Grab(int NewCarrier);
 	void Drop(int Dir = 0);
 
 	CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos);
