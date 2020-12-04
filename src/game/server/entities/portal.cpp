@@ -66,10 +66,10 @@ void CPortal::Tick()
 		return;
 	}
 
-	PlayerEnter();
+	EntitiesEnter();
 }
 
-void CPortal::PlayerEnter()
+void CPortal::EntitiesEnter()
 {
 	if (!m_pLinkedPortal)
 		return;

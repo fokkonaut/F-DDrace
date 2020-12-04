@@ -23,7 +23,7 @@ class CPortal : public CEntity
 	int m_aID[NUM_IDS];
 
 	std::vector<CEntity*> m_vTeleported;
-	void PlayerEnter();
+	void EntitiesEnter();
 
 public:
 	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner);
