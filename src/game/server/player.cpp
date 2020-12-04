@@ -1477,7 +1477,7 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescriptio
 	}
 }
 
-void CPlayer::GiveXP(int Amount, const char *pMessage)
+void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 {
 	if (GetAccID() < ACC_START)
 		return;

@@ -3353,7 +3353,7 @@ void CGameContext::OnInit()
 		ConnectDefaultDummies();
 	SetV3Offset(Config()->m_V3OffsetX, Config()->m_V3OffsetY);
 
-	int NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
+	int64 NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
 	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
 	8000000, 9000000, 10000000, 11000000, 12000000, 13000000, 14000000, 15000000, 16000000, 17000000, 18000000, 19000000, 20000000, 21000000, 22000000, 23000000, 24000000, 25000000,
 	26000000, 27000000, 28000000, 29000000, 30000000, 31000000, 32000000, 33000000, 34000000, 35000000, 36000000, 37000000, 38000000, 39000000, 40000000, 41010000, 42020000, 43030000,
@@ -4380,7 +4380,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_USERNAME:					str_copy(m_Accounts[ID].m_Username, pData, sizeof(m_Accounts[ID].m_Username)); break;
 	case ACC_CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(pData); break;
 	case ACC_LEVEL:						m_Accounts[ID].m_Level = atoi(pData); break;
-	case ACC_XP:						m_Accounts[ID].m_XP = atoi(pData); break;
+	case ACC_XP:						m_Accounts[ID].m_XP = atoll(pData); break;
 	case ACC_MONEY:						m_Accounts[ID].m_Money = atoll(pData); break;
 	case ACC_KILLS:						m_Accounts[ID].m_Kills = atoi(pData); break;
 	case ACC_DEATHS:					m_Accounts[ID].m_Deaths = atoi(pData); break;
@@ -4480,7 +4480,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_USERNAME:					str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_Username); break;
 	case ACC_CLIENT_ID:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_ClientID); break;
 	case ACC_LEVEL:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Level); break;
-	case ACC_XP:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_XP); break;
+	case ACC_XP:						str_format(aBuf, sizeof(aBuf), "%lld", m_Accounts[ID].m_XP); break;
 	case ACC_MONEY:						str_format(aBuf, sizeof(aBuf), "%lld", m_Accounts[ID].m_Money); break;
 	case ACC_KILLS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Kills); break;
 	case ACC_DEATHS:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Deaths); break;
@@ -4545,7 +4545,7 @@ void CGameContext::LogoutAllAccounts()
 	dbg_msg("acc", "logged out all accounts");
 }
 
-int CGameContext::GetNeededXP(int Level)
+int64 CGameContext::GetNeededXP(int Level)
 {
 	if (Level < DIFFERENCE_XP_END)
 		return m_aNeededXP[Level];

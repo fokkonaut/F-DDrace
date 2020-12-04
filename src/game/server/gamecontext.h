@@ -433,8 +433,8 @@ public:
 
 	int m_aTaserPrice[NUM_TASER_LEVELS];
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];
-	int m_aNeededXP[DIFFERENCE_XP_END];
-	int GetNeededXP(int Level);
+	int64 m_aNeededXP[DIFFERENCE_XP_END];
+	int64 GetNeededXP(int Level);
 	int m_LastAccSaveTick;
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
@@ -449,7 +449,7 @@ public:
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
-		int m_XP;
+		int64 m_XP;
 		int64 m_Money;
 		int m_Kills;
 		int m_Deaths;

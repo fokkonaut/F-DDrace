@@ -325,7 +325,7 @@ public:
 
 	//account
 	int GetAccID();
-	void GiveXP(int Amount, const char* pMessage = "");
+	void GiveXP(int64 Amount, const char *pMessage = "");
 	void GiveBlockPoints(int Amount);
 	bool GiveTaserBattery(int Amount);
 	void OnLogin();

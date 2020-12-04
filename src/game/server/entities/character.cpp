@@ -2368,7 +2368,7 @@ void CCharacter::HandleTiles(int Index)
 				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 				str_format(aMsg, sizeof(aMsg),
 						"Money [%lld] +1%s%s\n"
-						"XP [%d/%d]%s\n"
+						"XP [%lld/%lld]%s\n"
 						"Level [%d]",
 						m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
 						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
@@ -3295,7 +3295,7 @@ void CCharacter::FDDraceTick()
 				char aSurvival[32];
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-				str_format(aMsg, sizeof(aMsg), " \n \nXP [%d/%d] +1 flag%s%s",
+				str_format(aMsg, sizeof(aMsg), " \n \nXP [%lld/%lld] +1 flag%s%s",
 					pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
