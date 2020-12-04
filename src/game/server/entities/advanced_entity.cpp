@@ -10,9 +10,8 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
-	m_pOwner = Owner >= 0 ? GameServer()->GetPlayerChar(Owner) : 0;
 	m_CheckDeath = CheckDeath;
-	m_TeleCheckpoint = m_pOwner ? m_pOwner->m_TeleCheckpoint : 0;
+	m_TeleCheckpoint = GetOwner() ? GetOwner()->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
 }
 
@@ -22,16 +21,15 @@ void CAdvancedEntity::Reset()
 	GameWorld()->DestroyEntity(this);
 }
 
+CCharacter *CAdvancedEntity::GetOwner()
+{
+	return GameServer()->GetPlayerChar(m_Owner);
+}
+
 void CAdvancedEntity::Tick()
 {
-	m_pOwner = 0;
-	if (m_Owner >= 0)
-	{
-		if (!GameServer()->m_apPlayers[m_Owner])
-			m_Owner = -1;
-		else if (GameServer()->GetPlayerChar(m_Owner))
-			m_pOwner = GameServer()->GetPlayerChar(m_Owner);
-	}
+	if (m_Owner >= 0 && !GameServer()->m_apPlayers[m_Owner])
+		m_Owner = -1;
 
 	// weapon hits death-tile or left the game layer, reset it
 	if (GameLayerClipped(m_Pos) || (m_CheckDeath && (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH)))
@@ -51,7 +49,7 @@ bool CAdvancedEntity::IsGrounded(bool SetVel)
 		return true;
 	}
 
-	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
+	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f, GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 	if ((MoveRestrictionsBelow&CANTMOVE_DOWN) || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y + GetProximityRadius() + 4))) == TILE_STOPA)
 	{
 		if (SetVel)
@@ -151,8 +149,8 @@ bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
 	CAdvancedEntity *pThis = (CAdvancedEntity *)pUser;
 	CCollision* pCollision = pThis->GameServer()->Collision();
 	int Team = 0;
-	if (pThis->m_pOwner)
-		Team = pThis->m_pOwner->Team();
+	if (pThis->GetOwner())
+		Team = pThis->GetOwner()->Team();
 	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[Team] && Team != TEAM_SUPER;
 }
 
@@ -162,7 +160,7 @@ void CAdvancedEntity::HandleTiles(int Index)
 	int MapIndex = Index;
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, m_pOwner ? m_pOwner->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
+	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 
 	// stopper
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);

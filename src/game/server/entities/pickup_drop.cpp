@@ -52,7 +52,7 @@ void CPickupDrop::Reset(bool Picked)
 	}
 
 	if (!Picked)
-		GameServer()->CreateDeath(m_Pos, m_pOwner ? m_Owner : -1);
+		GameServer()->CreateDeath(m_Pos, m_Owner);
 
 	GameServer()->UnsetTelekinesis(this);
 	GameWorld()->DestroyEntity(this);
@@ -69,7 +69,7 @@ void CPickupDrop::Tick()
 
 	CAdvancedEntity::Tick();
 
-	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : Mask128();
+	m_TeamMask = GetOwner() ? GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, m_Owner) : Mask128();
 
 	m_Lifetime--;
 	if (m_Lifetime <= 0)
@@ -152,7 +152,7 @@ int CPickupDrop::IsCharacterNear()
 	{
 		CCharacter* pChr = apEnts[i];
 
-		if ((m_PickupDelay > 0 && pChr == m_pOwner) || (m_Owner >= 0 && !pChr->CanCollide(m_Owner, false)))
+		if ((m_PickupDelay > 0 && pChr == GetOwner()) || (m_Owner >= 0 && !pChr->CanCollide(m_Owner, false)))
 			continue;
 
 		if (m_Type == POWERUP_WEAPON)

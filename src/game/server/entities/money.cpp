@@ -45,7 +45,7 @@ void CMoney::Tick()
 		return;
 	}
 
-	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, SecondsPassed(2) ? 0 : m_pOwner, m_Owner, true, true);
+	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, SecondsPassed(2) ? 0 : GetOwner(), m_Owner, true, true);
 	if (pClosest)
 	{
 		if (distance(m_Pos, pClosest->GetPos()) < GetRadius() + pClosest->GetProximityRadius())
@@ -75,8 +75,8 @@ void CMoney::Tick()
 			pMoney->Reset();
 
 			Mask128 TeamMask = Mask128();
-			if (m_pOwner)
-				TeamMask = m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_pOwner->GetPlayer()->GetCID());
+			if (GetOwner())
+				TeamMask = GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, GetOwner()->GetPlayer()->GetCID());
 			GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
 		}
 		else if (!pClosest)
@@ -107,12 +107,12 @@ void CMoney::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && m_pOwner)
+	if (GameServer()->GetPlayerChar(SnappingClient) && GetOwner())
 	{
-		if (m_pOwner->IsPaused())
+		if (GetOwner()->IsPaused())
 			return;
 
-		if (!CmaskIsSet(m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_pOwner->GetPlayer()->GetCID()), SnappingClient))
+		if (!CmaskIsSet(GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, GetOwner()->GetPlayer()->GetCID()), SnappingClient))
 			return;
 	}
 
