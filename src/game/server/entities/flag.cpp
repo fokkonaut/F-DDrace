@@ -26,10 +26,10 @@ void CFlag::Reset(bool Init)
 		if (Config()->m_SvFlagSounds)
 			GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
-		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
+		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
 	}
-	m_Carrier = -1;
-	m_LastCarrier = -1;
+	m_pCarrier = NULL;
+	m_pLastCarrier = NULL;
 	m_AtStand = true;
 	m_Pos = m_StandPos;
 	m_Vel = vec2(0,0);
@@ -38,16 +38,6 @@ void CFlag::Reset(bool Init)
 	m_TeleCheckpoint = 0;
 	m_SoundTick = 0;
 	m_CanPlaySound = true;
-}
-
-CCharacter *CFlag::GetCarrier()
-{
-	return GameServer()->GetPlayerChar(m_Carrier);
-}
-
-CCharacter *CFlag::GetLastCarrier()
-{
-	return GameServer()->GetPlayerChar(m_LastCarrier);
 }
 
 void CFlag::PlaySound(int Sound)
@@ -69,7 +59,7 @@ void CFlag::PlaySound(int Sound)
 		else if (Config()->m_SvFlagSounds == 2)
 		{
 			Mask128 TeamMask = Mask128();
-			CCharacter *pChr = GetCarrier() ? GetCarrier() : GetLastCarrier() ? GetLastCarrier() : 0;
+			CCharacter *pChr = m_pCarrier ? m_pCarrier : m_pLastCarrier ? m_pLastCarrier : 0;
 			if (pChr)
 				TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pChr->GetPlayer()->GetCID());
 			GameServer()->CreateSound(m_Pos, Sound, TeamMask);
@@ -99,56 +89,56 @@ void CFlag::TickPaused()
 
 void CFlag::TickDefered()
 {
-	if (GetCarrier())
-		m_Pos = GetCarrier()->GetPos();
+	if (m_pCarrier && m_pCarrier->IsAlive())
+		m_Pos = m_pCarrier->GetPos();
 }
 
 void CFlag::Drop(int Dir)
 {
 	PlaySound(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
-	if (GetCarrier())
-		GameServer()->SendBroadcast("", m_Carrier, false);
-	m_LastCarrier = m_Carrier;
-	m_Carrier = -1;
+	if (m_pCarrier)
+		GameServer()->SendBroadcast("", m_pCarrier->GetPlayer()->GetCID(), false);
+	m_pLastCarrier = m_pCarrier;
+	m_pCarrier = NULL;
 	m_Vel = vec2(5 * Dir, Dir == 0 ? 0 : -5);
 	UpdateSpectators(-1);
 }
 
-void CFlag::Grab(int NewCarrier)
+void CFlag::Grab(CCharacter *pChr)
 {
 	PlaySound(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 	if (m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
-	m_Carrier = NewCarrier;
-	GetCarrier()->m_FirstFreezeTick = 0;
+	m_pCarrier = pChr;
+	m_pCarrier->m_FirstFreezeTick = 0;
 	GameServer()->UnsetTelekinesis(this);
-	UpdateSpectators(m_Carrier);
+	UpdateSpectators(m_pCarrier->GetPlayer()->GetCID());
 }
 
 void CFlag::Tick()
 {
 	// for the CAdvancedEntity part
-	m_Owner = GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1;
+	m_Owner = m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1;
 	CAdvancedEntity::Tick();
 
 	// plots
 	int PlotID = GameServer()->GetTilePlotID(m_Pos);
 	if (PlotID >= PLOT_START)
 	{
-		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
-		if (GetCarrier())
+		GameServer()->CreateDeath(m_Pos, m_pCarrier ? m_pCarrier->GetPlayer()->GetCID() : m_pLastCarrier ? m_pLastCarrier->GetPlayer()->GetCID() : -1);
+		if (m_pCarrier)
 			Drop();
 		m_Vel = vec2(0, 0);
 		m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 	}
 
-	if (GetCarrier())
+	if (m_pCarrier && m_pCarrier->IsAlive())
 	{
-		if (GetCarrier()->m_IsFrozen && GetCarrier()->m_FirstFreezeTick != 0)
-			if (Server()->Tick() > GetCarrier()->m_FirstFreezeTick + Server()->TickSpeed() * 8)
-				Drop(GetCarrier()->GetAimDir());
+		if (m_pCarrier->m_IsFrozen && m_pCarrier->m_FirstFreezeTick != 0)
+			if (Server()->Tick() > m_pCarrier->m_FirstFreezeTick + Server()->TickSpeed() * 8)
+				Drop(m_pCarrier->GetAimDir());
 	}
 	else
 	{
@@ -159,19 +149,19 @@ void CFlag::Tick()
 			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL))
 				continue;
 
-			if (GetCarrier() == apCloseCCharacters[i] || (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
+			if (m_pCarrier == apCloseCCharacters[i] || (m_pLastCarrier == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
 				continue;
 
 			// take the flag
 			if (apCloseCCharacters[i]->HasFlag() == -1)
 			{
-				Grab(apCloseCCharacters[i]->GetPlayer()->GetCID());
+				Grab(apCloseCCharacters[i]);
 				break;
 			}
 		}
 	}
 
-	if (!GetCarrier() && !m_AtStand)
+	if (!m_pCarrier && !m_AtStand)
 	{
 		if (m_DropTick && Server()->Tick() > m_DropTick + Server()->TickSpeed() * 90)
 		{
@@ -193,12 +183,12 @@ void CFlag::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && GetCarrier())
+	if (GameServer()->GetPlayerChar(SnappingClient) && m_pCarrier)
 	{
-		if (GetCarrier()->IsPaused())
+		if (m_pCarrier->IsPaused())
 			return;
 
-		if (!CmaskIsSet(GetCarrier()->Teams()->TeamMask(GetCarrier()->Team(), -1, GetCarrier()->GetPlayer()->GetCID()), SnappingClient))
+		if (!CmaskIsSet(m_pCarrier->Teams()->TeamMask(m_pCarrier->Team(), -1, m_pCarrier->GetPlayer()->GetCID()), SnappingClient))
 			return;
 	}
 

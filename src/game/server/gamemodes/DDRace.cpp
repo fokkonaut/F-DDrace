@@ -97,7 +97,7 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		}
 
 		if (F->GetLastCarrier() == pVictim)
-			F->SetLastCarrier(-1);
+			F->SetLastCarrier(NULL);
 	}
 
 	return HadFlag;
@@ -113,7 +113,7 @@ void CGameControllerDDRace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter 
 			return;
 
 		if (F->GetCarrier() == pOldCarrier && HasFlag(pNewCarrier) == -1)
-			F->Grab(pNewCarrier->GetPlayer()->GetCID());
+			F->Grab(pNewCarrier);
 	}
 }
 
@@ -126,8 +126,8 @@ void CGameControllerDDRace::ForceFlagOwner(int ClientID, int Team)
 	if (ClientID >= 0 && HasFlag(pChr) == -1)
 	{
 		if (F->GetCarrier())
-			F->SetLastCarrier(F->GetCarrier()->GetPlayer()->GetCID());
-		F->Grab(ClientID);
+			F->SetLastCarrier(F->GetCarrier());
+		F->Grab(pChr);
 	}
 	else if (ClientID == -1)
 		F->Reset();
