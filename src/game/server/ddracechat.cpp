@@ -60,7 +60,7 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 	{
 		const char *pArg = pResult->GetString(0);
 		const IConsole::CCommandInfo *pCmdInfo =
-				pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_SERVER, false);
+				pSelf->Console()->GetCommandInfo(pArg, CFGFLAG_CHAT, false);
 		if (pCmdInfo)
 		{
 			if (pCmdInfo->m_pParams)
