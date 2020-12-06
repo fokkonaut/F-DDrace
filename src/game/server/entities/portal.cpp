@@ -104,16 +104,12 @@ void CPortal::EntitiesEnter()
 			continue;
 
 		CCharacter *pAffectedChr = 0;
-		CCharacter *pChr = 0;
-		CFlag *pFlag = 0;
-		CPickupDrop *pPickup = 0;
-		CMoney *pMoney = 0;
 
 		switch (apEnts[i]->GetObjType())
 		{
 		case CGameWorld::ENTTYPE_CHARACTER:
 			{
-				pChr = (CCharacter *)apEnts[i];
+				CCharacter *pChr = (CCharacter *)apEnts[i];
 				pAffectedChr = pChr;
 
 				if (!pAffectedChr->CanCollide(m_Owner, false))
@@ -130,7 +126,7 @@ void CPortal::EntitiesEnter()
 			}
 		case CGameWorld::ENTTYPE_FLAG:
 			{
-				pFlag = (CFlag *)apEnts[i];
+				CFlag *pFlag = (CFlag *)apEnts[i];
 				if (pFlag->GetCarrier())
 					continue; // owner is getting teleported with the flag
 
@@ -142,7 +138,7 @@ void CPortal::EntitiesEnter()
 			}
 		case CGameWorld::ENTTYPE_PICKUP_DROP:
 			{
-				pPickup = (CPickupDrop *)apEnts[i];
+				CPickupDrop *pPickup = (CPickupDrop *)apEnts[i];
 				pPickup->SetPos(m_pLinkedPortal->m_Pos);
 				pPickup->SetPrevPos(m_pLinkedPortal->m_Pos);
 				if (pPickup->GetOwner())
@@ -151,7 +147,7 @@ void CPortal::EntitiesEnter()
 			}
 		case CGameWorld::ENTTYPE_MONEY:
 			{
-				pMoney = (CMoney *)apEnts[i];
+				CMoney *pMoney = (CMoney *)apEnts[i];
 				pMoney->SetPos(m_pLinkedPortal->m_Pos);
 				pMoney->SetPrevPos(m_pLinkedPortal->m_Pos);
 				if (pMoney->GetOwner())
