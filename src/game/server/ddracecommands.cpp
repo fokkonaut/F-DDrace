@@ -1635,9 +1635,9 @@ void CGameContext::ConSetMinigame(IConsole::IResult* pResult, void* pUserData)
 
 			// dont set minigame to none before setting the other one if we want to set it to none anyways
 			if (i != MINIGAME_NONE && pSelf->m_apPlayers[Victim]->m_Minigame != MINIGAME_NONE)
-				pSelf->SetMinigame(Victim, MINIGAME_NONE);
+				pSelf->SetMinigame(Victim, MINIGAME_NONE, true);
 
-			pSelf->SetMinigame(Victim, i);
+			pSelf->SetMinigame(Victim, i, true);
 			break;
 		}
 	}

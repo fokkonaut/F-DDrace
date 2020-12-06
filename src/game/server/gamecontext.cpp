@@ -5387,7 +5387,7 @@ const char* CGameContext::GetMinigameCommand(int Minigame)
 	return "unknown";
 }
 
-void CGameContext::SetMinigame(int ClientID, int Minigame)
+void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer)
@@ -5417,7 +5417,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame)
 	}
 
 	CCharacter *pChr = GetPlayerChar(ClientID);
-	if (!pChr || pChr->RequestMinigameChange(Minigame))
+	if (!Force && (!pChr || pChr->RequestMinigameChange(Minigame)))
 		return;
 
 	// leave minigame
