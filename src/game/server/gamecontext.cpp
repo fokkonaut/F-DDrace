@@ -209,13 +209,33 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	}
 
 	// deal damage
-	CCharacter *apEnts[MAX_CLIENTS];
+	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = g_pData->m_Explosion.m_Radius;
 	float InnerRadius = 48.0f;
-	int Num = m_World.FindEntities(Pos, Radius, (CEntity * *)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
+	int Num = m_World.FindEntitiesTypes(Pos, Radius, (CEntity * *)apEnts, MAX_CLIENTS, Types);
 	Mask128 TeamMask = Mask128();
 	for (int i = 0; i < Num; i++)
 	{
+		CCharacter *pChr = 0;
+		CAdvancedEntity *pEnt = 0;
+		bool IsCharacter = apEnts[i]->GetObjType() == CGameWorld::ENTTYPE_CHARACTER;
+		if (IsCharacter)
+		{
+			pChr = (CCharacter *)apEnts[i];
+		}
+		else
+		{
+			pEnt = (CAdvancedEntity *)apEnts[i];
+			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
+			{
+				if (((CFlag *)pEnt)->GetCarrier())
+					continue;
+			}
+			else
+				pChr = pEnt->GetOwner();
+		}
+
 		vec2 Diff = apEnts[i]->GetPos() - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);
@@ -231,20 +251,36 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		float Dmg = Strength * l;
 		if (!(int)Dmg) continue;
 
-		if ((GetPlayerChar(Owner) ? !(GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit || NoDamage) || Owner == apEnts[i]->GetPlayer()->GetCID())
+		if ((GetPlayerChar(Owner) ? !(GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit || NoDamage) || (IsCharacter && Owner == pChr->GetPlayer()->GetCID()))
 		{
-			if (Owner != -1 && apEnts[i]->IsAlive() && !apEnts[i]->CanCollide(Owner)) continue;
-			if (Owner == -1 && ActivatedTeam != -1 && apEnts[i]->IsAlive() && apEnts[i]->Team() != ActivatedTeam) continue;
+			if (Owner != -1 && pChr && pChr->IsAlive() && !pChr->CanCollide(Owner)) continue;
+			if (Owner == -1 && ActivatedTeam != -1 && pChr && pChr->IsAlive() && pChr->Team() != ActivatedTeam) continue;
 
 			// Explode at most once per team
-			int PlayerTeam = ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(apEnts[i]->GetPlayer()->GetCID());
+			int PlayerTeam = pChr ? ((CGameControllerDDRace*)m_pController)->m_Teams.m_Core.Team(pChr->GetPlayer()->GetCID()) : 0;
 			if (GetPlayerChar(Owner) ? GetPlayerChar(Owner)->m_Hit & CCharacter::DISABLE_HIT_GRENADE : !Config()->m_SvHit || NoDamage)
 			{
 				if (!CmaskIsSet(TeamMask, PlayerTeam)) continue;
 				TeamMask = CmaskUnset(TeamMask, PlayerTeam);
 			}
 
-			apEnts[i]->TakeDamage(ForceDir * Dmg * 2, ForceDir*-1, (int)Dmg, Owner, Weapon);
+			vec2 Force = ForceDir * Dmg * 2;
+			if (IsCharacter)
+			{
+				pChr->TakeDamage(Force, ForceDir*-1, (int)Dmg, Owner, Weapon);
+			}
+			else
+			{
+				if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
+				{
+					CFlag *pFlag = (CFlag *)pEnt;
+					pFlag->SetAtStand(false);
+					pFlag->SetDropTick(Server()->Tick());
+				}
+
+				vec2 Temp = pEnt->GetVel() + Force;
+				pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
+			}
 		}
 	}
 }

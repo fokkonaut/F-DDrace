@@ -34,23 +34,50 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	vec2 At;
 	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CCharacter* pHit;
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	if (pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE) && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : Config()->m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
-	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
+	CCharacter *pChr = 0;
+	CAdvancedEntity *pEnt = 0;
+	CEntity *pIntersected = 0;
 
-	if (!pHit || (pHit == pOwnerChar && Config()->m_SvOldLaser) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !Config()->m_SvHit))
+	if (pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE) && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : Config()->m_SvHit)
+		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types);
+	else
+		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types, pOwnerChar);
+
+	bool IsCharacter = false;
+	if (pIntersected)
+	{
+		IsCharacter = pIntersected->GetObjType() == CGameWorld::ENTTYPE_CHARACTER;
+		if (IsCharacter)
+		{
+			pChr = (CCharacter *)pIntersected;
+		}
+		else
+		{
+			pEnt = (CAdvancedEntity *)pIntersected;
+			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
+			{
+				if (((CFlag *)pEnt)->GetCarrier())
+					return false;
+			}
+			else
+				pChr = pEnt->GetOwner();
+		}
+	}
+
+	if ((!IsCharacter && !pEnt) || ((IsCharacter && !pChr) || (IsCharacter && pChr == pOwnerChar && Config()->m_SvOldLaser) || (pChr != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !Config()->m_SvHit)))
 		return false;
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
 	if (m_Type == WEAPON_SHOTGUN)
 	{
-		vec2 Temp;
+		vec2 Vel = IsCharacter ? pChr->Core()->m_Vel : pEnt->GetVel();
+		vec2 Pos = IsCharacter ? pChr->Core()->m_Pos : pEnt->GetPos();
 
+		vec2 Temp;
 		float Strength;
 		if (!m_TuneZone)
 			Strength = GameServer()->Tuning()->m_ShotgunStrength;
@@ -58,27 +85,43 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
 
 		if (!Config()->m_SvOldLaser)
-			Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - pHit->Core()->m_Pos) * Strength;
+			Temp = Vel + normalize(m_PrevPos - Pos) * Strength;
 		else if (pOwnerChar)
-			Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - pHit->Core()->m_Pos) * Strength;
+			Temp = Vel + normalize(pOwnerChar->Core()->m_Pos - Pos) * Strength;
 		else
-			Temp = pHit->Core()->m_Vel;
-		pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+			Temp = Vel;
+
+		if (IsCharacter)
+		{
+			pChr->Core()->m_Vel = ClampVel(pChr->m_MoveRestrictions, Temp);
+		}
+		else
+		{
+			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
+			{
+				CFlag *pFlag = (CFlag *)pEnt;
+				pFlag->SetAtStand(false);
+				pFlag->SetDropTick(Server()->Tick());
+			}
+
+			pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
+			return true;
+		}
 	}
 	else if (m_Type == WEAPON_LASER)
 	{
-		pHit->m_GotLasered = true;
-		pHit->UnFreeze();
+		pChr->m_GotLasered = true;
+		pChr->UnFreeze();
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
 		if (pOwnerChar)
 		{
-			pHit->Freeze(10.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
-			pHit->m_GotLasered = true;
+			pChr->Freeze(10.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
+			pChr->m_GotLasered = true;
 		}
 	}
-	pHit->TakeDamage(vec2(0.f, 0.f), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetWeaponType(m_Type)].m_Damage, m_Owner, m_Type);
+	pChr->TakeDamage(vec2(0.f, 0.f), vec2(0, 0), g_pData->m_Weapons.m_aId[GameServer()->GetWeaponType(m_Type)].m_Damage, m_Owner, m_Type);
 	return true;
 }
 

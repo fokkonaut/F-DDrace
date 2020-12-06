@@ -738,3 +738,53 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 
 	return Num;
 }
+
+CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int Types, CCharacter *pThisOnly)
+{
+	// Find other players
+	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
+	CEntity *pClosest = 0;
+
+	for (int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if (!(Types&1<<i))
+			continue;
+
+		CEntity *p = FindFirst(i);
+		for(; p; p = p->TypeNext())
+ 		{
+			if(p == pNotThis)
+				continue;
+
+			if (pThisOnly && p != pThisOnly)
+				continue;
+
+			if (CollideWith != -1)
+			{
+				CCharacter *pChr = 0;
+				if (i == ENTTYPE_CHARACTER)
+					pChr = (CCharacter *)p;
+				else if (i == ENTTYPE_FLAG || i == ENTTYPE_PICKUP_DROP || i == ENTTYPE_MONEY)
+					pChr = ((CAdvancedEntity *)p)->GetOwner();
+
+				if (pChr && !pChr->CanCollide(CollideWith))
+					continue;
+			}
+
+			vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
+			float Len = distance(p->m_Pos, IntersectPos);
+			if(Len < p->m_ProximityRadius+Radius)
+			{
+				Len = distance(Pos0, IntersectPos);
+				if(Len < ClosestLen)
+				{
+					NewPos = IntersectPos;
+					ClosestLen = Len;
+					pClosest = p;
+				}
+			}
+		}
+	}
+
+	return pClosest;
+}

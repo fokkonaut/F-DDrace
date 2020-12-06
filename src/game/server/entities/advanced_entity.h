@@ -17,6 +17,8 @@ public:
 	virtual void Snap(int SnappingClient) {}
 
 	CCharacter *GetOwner();
+	int GetMoveRestrictions() { return m_MoveRestrictions; }
+	vec2 GetVel() { return m_Vel; }
 	void SetVel(vec2 Vel) { m_Vel = Vel; }
 	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
 
