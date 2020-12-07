@@ -4747,8 +4747,9 @@ void CGameContext::ShutdownSaveCharacters()
 		if (!pChr)
 			continue;
 
-		// Force leave minigame
-		SetMinigame(i, MINIGAME_NONE, true);
+		// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
+		if (pChr->GetPlayer()->m_Minigame != MINIGAME_NONE)
+			pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
 		// Get address and swap : to ! for filename
 		char aAddrStr[NETADDR_MAXSTRSIZE];
