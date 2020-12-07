@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 file(STRINGS src/game/version.h VERSION_LINE
   LIMIT_COUNT 1
