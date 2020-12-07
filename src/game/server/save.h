@@ -5,6 +5,7 @@
 //#include "./entities/character.h"
 #include <engine/shared/protocol.h>
 class CCharacter;
+class CGameContext;
 
 #include <game/server/gamecontroller.h>
 
@@ -23,6 +24,9 @@ public:
 	// F-DDrace
 	int GetMinigame() { return m_Minigame; }
 	void TeleOutOfPlot(vec2 ToTele);
+
+	bool SaveFile(const char *pFileName, CGameContext *pGameServer);
+	bool LoadFile(const char *pFileName, CCharacter *pChr);
 
 private:
 
@@ -94,41 +98,42 @@ private:
 	int m_Health;
 	int m_Armor;
 
-	bool m_Invisible;
-	bool m_Rainbow;
-	bool m_Atom;
-	bool m_Trail;
+	int m_Invisible;
+	int m_Rainbow;
+	int m_Atom;
+	int m_Trail;
 	int m_Meteors;
-	bool m_Bloody;
-	bool m_StrongBloody;
-	bool m_ScrollNinja;
+	int m_Bloody;
+	int m_StrongBloody;
+	int m_ScrollNinja;
 	int m_HookPower;
-	bool m_aSpreadWeapon[NUM_WEAPONS];
-	bool m_aHadWeapon[NUM_WEAPONS];
-	bool m_FakeTuneCollision;
-	bool m_OldFakeTuneCollision;
-	bool m_Passive;
-	bool m_PoliceHelper;
+	int m_aSpreadWeapon[NUM_WEAPONS];
+	int m_aHadWeapon[NUM_WEAPONS];
+	int m_FakeTuneCollision;
+	int m_OldFakeTuneCollision;
+	int m_Passive;
+	int m_PoliceHelper;
 	int m_Item;
-	bool m_DoorHammer;
-	bool m_AlwaysTeleWeapon;
-	bool m_FreezeHammer;
+	int m_DoorHammer;
+	int m_AlwaysTeleWeapon;
+	int m_FreezeHammer;
 	int m_SavedGamemode;
-	bool m_aSpawnWeaponActive[3];
-	bool m_HasFinishedSpecialRace;
-	bool m_GotMoneyXPBomb;
+	int m_aSpawnWeaponActive[3];
+	int m_HasFinishedSpecialRace;
+	int m_GotMoneyXPBomb;
 	int64 m_SpawnTick;
 	int m_KillStreak;
 	int m_MaxJumps;
 
 	// core
-	bool m_SpinBot;
+	int m_SpinBot;
 	int m_SpinBotSpeed;
-	bool m_AimClosest;
+	int m_AimClosest;
 
 	// player
 	int m_Gamemode;
 	int m_Minigame;
+	int64 m_WalletMoney;
 };
 
 class CSaveTeam

@@ -337,6 +337,7 @@ public:
 	void WalletTransaction(int64 Amount, const char *pDescription = "");
 	void ApplyMoneyHistoryMsg(int Type, int Amount, const char *pDescription);
 	int64 GetWalletMoney() { return m_WalletMoney; }
+	void SetWalletMoney(int64 Amount) { m_WalletMoney = Amount; }
 
 	// plot
 	void CancelPlotAuction();
@@ -402,6 +403,9 @@ public:
 	void SetFakeID();
 	int m_FakeID;
 	bool m_aSameIP[MAX_CLIENTS];
+
+	// shutdown tee
+	bool m_CheckedShutdownSaved;
 
 private:
 	int64 m_WalletMoney;

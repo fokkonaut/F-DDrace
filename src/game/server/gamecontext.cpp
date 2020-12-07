@@ -1082,6 +1082,14 @@ void CGameContext::OnTick()
 	if (IsFullHour())
 		ExpirePlots();
 
+	if (Server()->Tick() == Server()->TickSpeed() * 60 * Config()->m_SvRemoveSavedTees)
+	{
+		dbg_msg("saves", "removed all shutdown save files");
+		char aPath[IO_MAX_PATH_LENGTH];
+		str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
+		Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, RemoveShutdownSaves, this);
+	}
+
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -3435,6 +3443,9 @@ void CGameContext::OnInit()
 
 	ReadMoneyListFile();
 
+	m_ShutdownSave.m_ClientID = -1;
+	m_ShutdownSave.m_Got = false;
+
 
 #ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MAX_CLIENTS-1
@@ -3584,7 +3595,7 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 void CGameContext::OnPreShutdown()
 {
-	SaveOrDropWallet();
+	ShutdownSaveCharacters();
 	LogoutAllAccounts();
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
@@ -4707,24 +4718,109 @@ void CGameContext::WriteMoneyListFile()
 	}
 }
 
-void CGameContext::SaveOrDropWallet()
+void CGameContext::ShutdownSaveCharacters()
 {
+	if (!Config()->m_SvShutdownSaveTees)
+		return;
+
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		CPlayer *pPlayer = m_apPlayers[i];
-		if (!pPlayer)
+		CCharacter *pChr = GetPlayerChar(i);
+		if (!pChr)
 			continue;
 
-		// Move all money from wallet to bank, would be unfair to restart the server otherwise
-		// If player is not logged we just drop it so it will get reloaded after reload or on next server start
-		if (pPlayer->GetAccID() >= ACC_START)
-		{
-			pPlayer->BankTransaction(pPlayer->GetWalletMoney(), "automatic wallet to bank due to shutdown");
-			pPlayer->WalletTransaction(-pPlayer->GetWalletMoney());
-		}
-		else if (pPlayer->GetCharacter())
-			pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
+		// Get address and swap : to ! for filename
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		Server()->GetClientAddr(i, aAddrStr, sizeof(aAddrStr), true);
+		SwapAddrSeperator(aAddrStr);
+
+		// create file and save the character
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
+		CSaveTee SaveTee;
+		SaveTee.Save(pChr);
+		SaveTee.SaveFile(aFilename, this);
 	}
+}
+
+void CGameContext::CheckShutdownSaved(int ClientID)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if (!pPlayer || !pPlayer->GetCharacter() || pPlayer->m_CheckedShutdownSaved || !Config()->m_SvShutdownSaveTees)
+		return;
+
+	// checking right now...
+	pPlayer->m_CheckedShutdownSaved = true;
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
+
+	m_ShutdownSave.m_ClientID = ClientID;
+	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, CheckShutdownSavedCallback, this);
+	m_ShutdownSave.m_ClientID = -1;
+
+	// result of ListDirectory
+	if (!m_ShutdownSave.m_Got)
+		return;
+
+	// make sure to reset this
+	m_ShutdownSave.m_Got = false;
+
+	// Get address and swap : to ! for filenames
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	Server()->GetClientAddr(ClientID, aAddrStr, sizeof(aAddrStr), true);
+	SwapAddrSeperator(aAddrStr);
+
+	// Get path and load
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
+	CSaveTee SaveTee;
+	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
+	{
+		// Remove file, this save has been used now
+		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+	}
+}
+
+int CGameContext::CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+
+	if (!IsDir && str_endswith(pName, ".save"))
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		str_copy(aAddrStr, pName, str_length(pName) - 4); // remove the .save
+		pSelf->SwapAddrSeperator(aAddrStr);
+
+		NETADDR OwnAddr, FileAddr;
+		pSelf->Server()->GetClientAddr(pSelf->m_ShutdownSave.m_ClientID, &OwnAddr);
+		net_addr_from_str(&FileAddr, aAddrStr);
+		if (net_addr_comp(&OwnAddr, &FileAddr, true) == 0)
+			pSelf->m_ShutdownSave.m_Got = true;
+	}
+
+	return 0;
+}
+
+void CGameContext::SwapAddrSeperator(char *pAddrStr)
+{
+	// Replace ':' by '!' as a valid symbol in filenames, or when trying to load such a file revert it back to a ':'
+	const char *pPos;
+	if ((pPos = str_find(pAddrStr, ":")))
+		*(const_cast<char *>(pPos)) = '!';
+	else if ((pPos = str_find(pAddrStr, "!")))
+		*(const_cast<char *>(pPos)) = ':';
+}
+
+int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if (!IsDir && str_endswith(pName, ".save"))
+	{
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pName);
+		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
+	}
+	return 0;
 }
 
 bool CGameContext::SameIP(int ClientID1, int ClientID2)

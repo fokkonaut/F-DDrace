@@ -203,6 +203,8 @@ void CPlayer::Reset()
 	m_aPlotSwapUsername[0] = 0;
 	m_PlotSpawn = false;
 	m_WalletMoney = 0;
+
+	m_CheckedShutdownSaved = false;
 }
 
 void CPlayer::Tick()

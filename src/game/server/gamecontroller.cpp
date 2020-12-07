@@ -590,7 +590,7 @@ void IGameController::Snap(int SnappingClient)
 	}
 	else
 	{
-		pGameData->m_GameStartTick = GameStartTick;
+		pGameData->m_GameStartTick = GameStartTick < 0 ? m_GameStartTick : GameStartTick;
 		pGameData->m_GameStateFlags = GameStateFlags;
 		pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
 

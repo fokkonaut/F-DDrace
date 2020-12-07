@@ -264,7 +264,7 @@ public:
 	bool IsBanned(int ClientID);
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo) const;
-	void GetClientAddr(int ClientID, char *pAddrStr, int Size) const;
+	void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const;
 	int GetClientVersion(int ClientID) const;
 	const char *ClientName(int ClientID) const;
 	const char *ClientClan(int ClientID) const;

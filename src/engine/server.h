@@ -37,7 +37,7 @@ public:
 	virtual int ClientCountry(int ClientID) const = 0;
 	virtual bool ClientIngame(int ClientID) const = 0;
 	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
-	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size) const = 0;
+	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const = 0;
 	virtual int GetClientVersion(int ClientID) const = 0;
 	virtual void RestrictRconOutput(int ClientID) = 0;
 

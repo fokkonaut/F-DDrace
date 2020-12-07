@@ -531,7 +531,6 @@ public:
 	// money drops
 	void WriteMoneyListFile();
 	void ReadMoneyListFile();
-	void SaveOrDropWallet();
 
 	//motd
 	const char *FormatMotd(const char *pMsg);
@@ -604,6 +603,19 @@ public:
 
 	// callback for local id map mode for rcon
 	static bool ConsoleTranslateVictimCallback(int ClientID, int *pVictim, void *pUser);
+
+	// shutdown tee
+	struct
+	{
+		int m_ClientID;
+		bool m_Got;
+	} m_ShutdownSave;
+
+	void ShutdownSaveCharacters();
+	void CheckShutdownSaved(int ClientID);
+	static int CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	void SwapAddrSeperator(char *pAddrStr);
+	static int RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser);
 
 private:
 

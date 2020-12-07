@@ -1671,19 +1671,19 @@ bool CSqlScore::LoadTeamThread(CSqlServer* pSqlServer, const CSqlData *pGameData
 					else if(Num >= 10 && Num < 100)
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.SavedTees[Num-10].GetName());
+						str_format(aBuf, sizeof(aBuf), "Unable to find player: '%s'", SavedTeam.m_apSavedTees[Num-10].GetName());
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 					}
 					else if(Num >= 100 && Num < 200)
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.SavedTees[Num-100].GetName());
+						str_format(aBuf, sizeof(aBuf), "%s is racing right now, Team can't be loaded if a Tee is racing already", SavedTeam.m_apSavedTees[Num-100].GetName());
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 					}
 					else if(Num >= 200)
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Everyone has to be in a team, %s is in team 0 or the wrong team", SavedTeam.SavedTees[Num-200].GetName());
+						str_format(aBuf, sizeof(aBuf), "Everyone has to be in a team, %s is in team 0 or the wrong team", SavedTeam.m_apSavedTees[Num-200].GetName());
 						pData->GameServer()->SendChatTarget(pData->m_ClientID, aBuf);
 					}
 					else

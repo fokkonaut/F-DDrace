@@ -168,7 +168,12 @@ MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG
 MACRO_CONFIG_STR(SvExpMsgColorValue, sv_exp_msg_color_value, 4, "595", CFGFLAG_SERVER|CFGFLAG_GAME, "Value color for the experience broadcast", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvMoneyDropsFilePath, sv_money_drops_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the money drops file", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
+
+// saved tees
+MACRO_CONFIG_INT(SvShutdownSaveTees, sv_shutdown_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before shutdown/reload to load them again", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvSavedTeesFilePath, sv_saved_tees_file_path, 128, "savedtees", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to saved tees files (relative to dumps dir)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvRemoveSavedTees, sv_remove_saved_tees, 15, 1, 60, CFGFLAG_SERVER, "Time in minutes when saved tee files are removed after server restart", AUTHED_ADMIN)
 
 // flags
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 0, 0, 2, CFGFLAG_SERVER, "Flag sounds on drop/pickup/respawn (0=off, 1=public sounds, 2=respawn public rest local)", AUTHED_ADMIN)
