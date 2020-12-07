@@ -4750,6 +4750,8 @@ void CGameContext::ShutdownSaveCharacters()
 		if (pChr->GetPlayer()->m_Minigame != MINIGAME_NONE)
 			pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
+		Logout(pChr->GetPlayer()->GetAccID());
+
 		// Get address and swap : to ! for filename
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(i, aAddrStr, sizeof(aAddrStr), true);
