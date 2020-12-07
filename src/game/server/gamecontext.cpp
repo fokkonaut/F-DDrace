@@ -2583,13 +2583,13 @@ void CGameContext::ConTuneZone(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int List = pResult->GetInteger(0);
 	const char* pParamName = pResult->GetString(1);
-	float NewValue = pResult->GetFloat(2);
+	float NewValue = pResult->NumArguments() == 3 ? pResult->GetFloat(2) : -1;
 	char aBuf[256];
 	float Value;
 
 	if (List >= 0 && List < NUM_TUNEZONES)
 	{
-		if (pSelf->TuningList()[List].Set(pParamName, NewValue))
+		if (NewValue != -1 && pSelf->TuningList()[List].Set(pParamName, NewValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s in zone %d changed to %.2f", pParamName, List, NewValue);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
