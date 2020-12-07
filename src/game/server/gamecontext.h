@@ -614,7 +614,7 @@ public:
 	void ShutdownSaveCharacters();
 	void CheckShutdownSaved(int ClientID);
 	static int CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser);
-	void SwapAddrSeperator(char *pAddrStr);
+	void SwapAddrSeparator(char *pAddrStr);
 	static int RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser);
 
 private:
