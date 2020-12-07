@@ -4795,6 +4795,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
 	{
 		// Remove file, this save has been used now
+		dbg_msg("save", "'%s' used his shutdown save, removing save file", Server()->ClientName(ClientID));
 		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 	}
 }

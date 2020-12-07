@@ -590,7 +590,11 @@ void IGameController::Snap(int SnappingClient)
 	}
 	else
 	{
-		pGameData->m_GameStartTick = GameStartTick < 0 ? m_GameStartTick : GameStartTick;
+		// 0.7 clients cant handle a negative game start tick, thats why we just give them a 0:00 time to "indicate" this is not their real time
+		if (GameStartTick < 0)
+			GameStartTick = Server()->Tick();
+
+		pGameData->m_GameStartTick = GameStartTick;
 		pGameData->m_GameStateFlags = GameStateFlags;
 		pGameData->m_GameStateEndTick = 0; // no timer/infinite = 0, on end = GameEndTick, otherwise = GameStateEndTick
 
