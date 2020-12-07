@@ -759,6 +759,9 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 			if (pThisOnly && p != pThisOnly)
 				continue;
 
+			if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
+				continue;
+
 			if (CollideWith != -1)
 			{
 				CCharacter *pChr = 0;
@@ -766,9 +769,6 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 					pChr = (CCharacter *)p;
 				else if (i == ENTTYPE_FLAG || i == ENTTYPE_PICKUP_DROP || i == ENTTYPE_MONEY)
 					pChr = ((CAdvancedEntity *)p)->GetOwner();
-
-				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
-					continue;
 
 				if (pChr && !pChr->CanCollide(CollideWith))
 					continue;
