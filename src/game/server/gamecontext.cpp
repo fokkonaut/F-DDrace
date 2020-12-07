@@ -4827,11 +4827,11 @@ int CGameContext::CheckShutdownSavedCallback(const char *pName, int IsDir, int S
 
 void CGameContext::SwapAddrSeperator(char *pAddrStr)
 {
-	// Replace ':' by '!' as a valid symbol in filenames, or when trying to load such a file revert it back to a ':'
+	// Replace ':' by '_' as a valid symbol in filenames, or when trying to load such a file revert it back to a ':'
 	const char *pPos;
 	if ((pPos = str_find(pAddrStr, ":")))
-		*(const_cast<char *>(pPos)) = '!';
-	else if ((pPos = str_find(pAddrStr, "!")))
+		*(const_cast<char *>(pPos)) = '_';
+	else if ((pPos = str_find(pAddrStr, "_")))
 		*(const_cast<char *>(pPos)) = ':';
 }
 
