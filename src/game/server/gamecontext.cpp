@@ -4755,7 +4755,7 @@ void CGameContext::ShutdownSaveCharacters()
 		// Get address and swap : to ! for filename
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(i, aAddrStr, sizeof(aAddrStr), true);
-		SwapAddrSeperator(aAddrStr);
+		SwapAddrSeparator(aAddrStr);
 
 		// create file and save the character
 		char aFilename[IO_MAX_PATH_LENGTH];
@@ -4792,7 +4792,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	// Get address and swap : to ! for filenames
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	Server()->GetClientAddr(ClientID, aAddrStr, sizeof(aAddrStr), true);
-	SwapAddrSeperator(aAddrStr);
+	SwapAddrSeparator(aAddrStr);
 
 	// Get path and load
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
@@ -4813,7 +4813,7 @@ int CGameContext::CheckShutdownSavedCallback(const char *pName, int IsDir, int S
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		str_copy(aAddrStr, pName, str_length(pName) - 4); // remove the .save
-		pSelf->SwapAddrSeperator(aAddrStr);
+		pSelf->SwapAddrSeparator(aAddrStr);
 
 		NETADDR OwnAddr, FileAddr;
 		pSelf->Server()->GetClientAddr(pSelf->m_ShutdownSave.m_ClientID, &OwnAddr);
@@ -4825,7 +4825,7 @@ int CGameContext::CheckShutdownSavedCallback(const char *pName, int IsDir, int S
 	return 0;
 }
 
-void CGameContext::SwapAddrSeperator(char *pAddrStr)
+void CGameContext::SwapAddrSeparator(char *pAddrStr)
 {
 	// Replace ':' by '_' as a valid symbol in filenames, or when trying to load such a file revert it back to a ':'
 	const char *pPos;
