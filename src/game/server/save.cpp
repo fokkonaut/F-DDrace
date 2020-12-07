@@ -414,7 +414,7 @@ int CSaveTee::LoadString(char* String)
 		%f\t%f\t%f\t%f\t%f\t\
 		%f\t%f\t%f\t%f\t%f\t\
 		%f\t%f\t%f\t%f\t%f\t\
-		%d\t%*s"
+		%d\t%36s"
 		/* F-DDrace */
 		"\t%d\t%d\t\
 		%d\t%d\t%d\t\
@@ -455,7 +455,7 @@ int CSaveTee::LoadString(char* String)
 		&m_CpCurrent[10], &m_CpCurrent[11], &m_CpCurrent[12], &m_CpCurrent[13], &m_CpCurrent[14],
 		&m_CpCurrent[15], &m_CpCurrent[16], &m_CpCurrent[17], &m_CpCurrent[18], &m_CpCurrent[19],
 		&m_CpCurrent[20], &m_CpCurrent[21], &m_CpCurrent[22], &m_CpCurrent[23], &m_CpCurrent[24],
-		&m_NotEligibleForFinish,
+		&m_NotEligibleForFinish, aGameUuid,
 		/* F-DDrace */
 		&m_Health, &m_Armor,
 		&m_aWeapons[6].m_AmmoRegenStart, &m_aWeapons[6].m_Ammo, &m_aWeapons[6].m_Got,
@@ -482,9 +482,9 @@ int CSaveTee::LoadString(char* String)
 
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
-	case 90:
+	case 91:
 		return 0;
-	case 186: // F-DDrace extra vars
+	case 187: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
