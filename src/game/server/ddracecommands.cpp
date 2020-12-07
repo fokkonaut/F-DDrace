@@ -1077,7 +1077,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int ID = pResult->GetInteger(0);
+	int ID = pResult->GetVictim();
 	CCharacter *pChr = pSelf->GetPlayerChar(ID);
 	CPlayer *pPlayer = pSelf->m_apPlayers[ID];
 

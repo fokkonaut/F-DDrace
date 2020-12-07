@@ -171,6 +171,10 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_KillStreak = pChr->m_KillStreak;
 	m_MaxJumps = pChr->m_MaxJumps;
 
+	m_SpinBot = pChr->Core()->m_SpinBot;
+	m_SpinBotSpeed = pChr->Core()->m_SpinBotSpeed;
+	m_AimClosest = pChr->Core()->m_AimClosest;
+
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
 	m_Minigame = pChr->GetPlayer()->m_Minigame;
 	m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
