@@ -1501,7 +1501,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		if (VariableID == ACC_EXPIRE_DATE_VIP || VariableID == ACC_EXPIRE_DATE_PORTAL_RIFLE)
 		{
 			time_t ExpireDate = 0;
-			pSelf->SetExpireDate(&ExpireDate, pResult->GetInteger(2));
+			pSelf->SetExpireDate(&ExpireDate, pResult->GetFloat(2));
 
 			char aTime[64];
 			str_format(aTime, sizeof(aTime), "%d", (int)ExpireDate);

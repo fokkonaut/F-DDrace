@@ -369,7 +369,7 @@ public:
 	unsigned int GetMaxPlotObjects(int PlotID);
 	const char *GetPlotSizeString(int PlotID);
 
-	void SetExpireDate(time_t *pDate, int Days);
+	void SetExpireDate(time_t *pDate, float Days);
 	bool IsExpired(time_t Date);
 
 	struct SPlot

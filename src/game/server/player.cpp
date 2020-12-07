@@ -357,6 +357,9 @@ void CPlayer::Tick()
 
 	// rainbow
 	RainbowTick();
+
+	if (GameServer()->IsFullHour())
+		ExpireItems();
 }
 
 void CPlayer::PostTick()
@@ -1566,6 +1569,8 @@ void CPlayer::OnLogin()
 {
 	GameServer()->SendChatTarget(m_ClientID, "Successfully logged in");
 
+	ExpireItems();
+
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	if (m_Minigame == MINIGAME_NONE && m_pCharacter)
 	{
@@ -1573,16 +1578,6 @@ void CPlayer::OnLogin()
 
 		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
-	}
-
-	for (int i = 0; i < NUM_ITEMS_SHOP; i++)
-	{
-		if (IsExpiredItem(i))
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", ((CShop *)GameServer()->m_pHouses[HOUSE_SHOP])->GetItemName(i));
-			GameServer()->SendChatTarget(m_ClientID, aBuf);
-		}
 	}
 }
 
@@ -1626,6 +1621,19 @@ void CPlayer::CancelPlotSwap()
 
 	m_aPlotSwapUsername[0] = 0;
 	GameServer()->SendChat(-1, CHAT_ALL, -1, "Your plot swap offer got cancelled");
+}
+
+void CPlayer::ExpireItems()
+{
+	for (int i = 0; i < NUM_ITEMS_SHOP; i++)
+	{
+		if (IsExpiredItem(i))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "[WARNING] Your %s expired", ((CShop *)GameServer()->m_pHouses[HOUSE_SHOP])->GetItemName(i));
+			GameServer()->SendChatTarget(m_ClientID, aBuf);
+		}
+	}
 }
 
 void CPlayer::SetExpireDate(int Item)

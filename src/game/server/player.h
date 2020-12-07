@@ -332,6 +332,7 @@ public:
 	void OnLogout();
 	void SetExpireDate(int Item);
 	bool IsExpiredItem(int Item);
+	void ExpireItems();
 
 	void BankTransaction(int64 Amount, const char *pDescription = "", bool IsEuro = false);
 	void WalletTransaction(int64 Amount, const char *pDescription = "");

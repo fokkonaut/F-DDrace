@@ -4165,7 +4165,7 @@ void CGameContext::ClearPlot(int PlotID)
 	}
 }
 
-void CGameContext::SetExpireDate(time_t *pDate, int Days)
+void CGameContext::SetExpireDate(time_t *pDate, float Days)
 {
 	time_t Now;
 	struct tm ExpireDate;
@@ -4216,10 +4216,8 @@ bool CGameContext::IsExpired(time_t Date)
 	ExpireDate.tm_sec = AccDate.tm_sec;
 
 	double Seconds = difftime(Now, mktime(&ExpireDate));
-	const time_t ONE_HOUR = 60 * 60;
-	int Hours = Seconds / ONE_HOUR;
-
-	return Hours >= 0;
+	int Minutes = Seconds / 60;
+	return Minutes >= 0;
 }
 
 void CGameContext::UpdateTopAccounts(int Type)
