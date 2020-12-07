@@ -167,7 +167,7 @@ void CSaveTee::Save(CCharacter *pChr)
 		m_aSpawnWeaponActive[i] = pChr->m_aSpawnWeaponActive[i];
 	m_HasFinishedSpecialRace = pChr->m_HasFinishedSpecialRace;
 	m_GotMoneyXPBomb = pChr->m_GotMoneyXPBomb;
-	m_SpawnTick = pChr->m_SpawnTick;
+	m_SpawnTick = pChr->Server()->Tick() - pChr->m_SpawnTick;
 	m_KillStreak = pChr->m_KillStreak;
 	m_MaxJumps = pChr->m_MaxJumps;
 
@@ -290,7 +290,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->m_aSpawnWeaponActive[i] = m_aSpawnWeaponActive[i];
 	pChr->m_HasFinishedSpecialRace = m_HasFinishedSpecialRace;
 	pChr->m_GotMoneyXPBomb = m_GotMoneyXPBomb;
-	pChr->m_SpawnTick = m_SpawnTick;
+	pChr->m_SpawnTick = pChr->Server()->Tick() - m_SpawnTick;
 	pChr->m_KillStreak = m_KillStreak;
 	pChr->m_MaxJumps = m_MaxJumps;
 
