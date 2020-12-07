@@ -69,6 +69,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 	if ((!IsCharacter && !pEnt) || ((IsCharacter && !pChr) || (IsCharacter && pChr == pOwnerChar && Config()->m_SvOldLaser) || (pChr != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !Config()->m_SvHit)))
 		return false;
+
 	m_From = From;
 	m_Pos = At;
 	m_Energy = -1;
