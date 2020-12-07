@@ -23,9 +23,9 @@ class CMoney : public CAdvancedEntity
 private:
 	int64 m_Amount;
 	int64 m_StartTick;
-	bool SecondsPassed(float Seconds);
 	int m_aID[NUM_DOTS_BIG];
 
+	bool SecondsPassed(float Seconds);
 	void MoveTo(vec2 Pos, int Radius);
 	int GetRadius() { return GetRadius(m_Amount); }
 	int GetRadius(int64 Amount) { return (Amount < SMALL_MONEY_AMOUNT) ? MONEY_RADIUS_SMALL : MONEY_RADIUS_BIG; } // To be called in the constructor
