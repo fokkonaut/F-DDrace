@@ -40,6 +40,13 @@ void CFlag::Reset(bool Init)
 	m_CanPlaySound = true;
 }
 
+void CFlag::SetAtStand(bool AtStand)
+{
+	if (m_AtStand && !AtStand)
+		m_DropTick = Server()->Tick();
+	m_AtStand = AtStand;
+}
+
 CCharacter *CFlag::GetCarrier()
 {
 	return GameServer()->GetPlayerChar(m_Carrier);

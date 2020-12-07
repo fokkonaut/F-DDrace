@@ -778,11 +778,8 @@ void CCharacter::FireWeapon()
 								m_pTelekinesisEntity = pEntity;
 								TelekinesisSound = true;
 
-								if (pFlag && pFlag->IsAtStand())
-								{
+								if (pFlag)
 									pFlag->SetAtStand(false);
-									pFlag->SetDropTick(Server()->Tick());
-								}
 							}
 
 						}
@@ -1190,7 +1187,6 @@ void CCharacter::Tick()
 	{
 		int Flag = m_Core.m_UpdateFlagAtStand == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetAtStand(false);
-		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetDropTick(Server()->Tick());
 	}
 
 	// handle Weapons

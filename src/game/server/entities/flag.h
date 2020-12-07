@@ -33,14 +33,13 @@ public:
 	void SetCarrier(int NewCarrier) { m_Carrier = NewCarrier; }
 	void SetLastCarrier(int LastCarrier) { m_LastCarrier = LastCarrier; }
 	bool IsAtStand() const { return m_AtStand; }
-	void SetAtStand(bool AtStand) { m_AtStand = AtStand; }
+	void SetAtStand(bool AtStand);
 	vec2 GetVel() { return m_Vel; }
 	void SetVel(vec2 Vel) { m_Vel = Vel; }
 	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
 
-	void SetDropTick(int DropTick) { m_DropTick = DropTick; };
-	int GetDropTick() { return m_DropTick; };
-	int GetTeam() { return m_Team; };
+	int GetDropTick() { return m_DropTick; }
+	int GetTeam() { return m_Team; }
 
 	void Grab(int NewCarrier);
 	void Drop(int Dir = 0);

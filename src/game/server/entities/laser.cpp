@@ -98,11 +98,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		else
 		{
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
-			{
-				CFlag *pFlag = (CFlag *)pEnt;
-				pFlag->SetAtStand(false);
-				pFlag->SetDropTick(Server()->Tick());
-			}
+				((CFlag *)pEnt)->SetAtStand(false);
 
 			pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
 			return true;

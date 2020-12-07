@@ -272,11 +272,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			else
 			{
 				if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
-				{
-					CFlag *pFlag = (CFlag *)pEnt;
-					pFlag->SetAtStand(false);
-					pFlag->SetDropTick(Server()->Tick());
-				}
+					((CFlag *)pEnt)->SetAtStand(false);
 
 				vec2 Temp = pEnt->GetVel() + Force;
 				pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
