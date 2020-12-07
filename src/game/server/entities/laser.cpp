@@ -36,7 +36,9 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	if (Config()->m_SvInteractiveDrops)
+		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 	CCharacter *pChr = 0;
 	CAdvancedEntity *pEnt = 0;
 	CEntity *pIntersected = 0;

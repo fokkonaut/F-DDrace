@@ -212,7 +212,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = g_pData->m_Explosion.m_Radius;
 	float InnerRadius = 48.0f;
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
+
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	if (Config()->m_SvInteractiveDrops)
+		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 	int Num = m_World.FindEntitiesTypes(Pos, Radius, (CEntity * *)apEnts, MAX_CLIENTS, Types);
 	Mask128 TeamMask = Mask128();
 	for (int i = 0; i < Num; i++)

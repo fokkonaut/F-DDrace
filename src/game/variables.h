@@ -193,6 +193,7 @@ MACRO_CONFIG_INT(SvDropsOnDeath, sv_drops_on_death, 0, 0, 1, CFGFLAG_SERVER|CFGF
 MACRO_CONFIG_INT(SvDestroyDropsOnLeave, sv_destroy_drops_on_leave, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Destroy dropped weapons (hearts, shields) when their owner disconnects", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxWeaponDrops, sv_max_weapon_drops, 5, 0, 10, CFGFLAG_SERVER, "Maximum amount of dropped weapons per player", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxPickupDrops, sv_max_pickup_drops, 500, 0, 600, CFGFLAG_SERVER, "Maximum amount of dropped hearts and shields", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvInteractiveDrops, sv_interactive_drops, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether dropped weapons, flags, money interact with shotgun and explosions", AUTHED_ADMIN)
 
 // spread weapons
 MACRO_CONFIG_INT(SvNumSpreadShots, sv_num_spread_shots, 3, 2, 9, CFGFLAG_SERVER, "Number of shots for the spread weapons", AUTHED_ADMIN)
