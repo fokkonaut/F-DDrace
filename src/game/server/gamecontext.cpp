@@ -4747,6 +4747,9 @@ void CGameContext::ShutdownSaveCharacters()
 		if (!pChr)
 			continue;
 
+		// Force leave minigame
+		SetMinigame(i, MINIGAME_NONE, true);
+
 		// Get address and swap : to ! for filename
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(i, aAddrStr, sizeof(aAddrStr), true);
@@ -4795,7 +4798,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
 	{
 		// Remove file, this save has been used now
-		dbg_msg("save", "'%s' used his shutdown save, removing save file", Server()->ClientName(ClientID));
+		dbg_msg("save", "%d:%s used his shutdown save, removing save file", ClientID, Server()->ClientName(ClientID));
 		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 	}
 }
