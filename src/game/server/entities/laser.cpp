@@ -37,7 +37,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
 	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
-	if (Config()->m_SvInteractiveDrops)
+	if (Config()->m_SvInteractiveDrops && m_Type == WEAPON_SHOTGUN)
 		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 	CCharacter *pChr = 0;
 	CAdvancedEntity *pEnt = 0;
