@@ -4748,6 +4748,7 @@ void CGameContext::ShutdownSaveCharacters()
 			continue;
 
 		// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
+		// We cant use SetMinigame(MINIGAME_NONE) here because that would kill the character, ending in a crash
 		if (pChr->GetPlayer()->m_Minigame != MINIGAME_NONE)
 			pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
