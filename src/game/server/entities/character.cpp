@@ -99,8 +99,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	DDraceInit();
 
 	m_pPlayer->LoadMinigameTee();
-	if (!m_pPlayer->m_CheckedShutdownSaved)
-		GameServer()->CheckShutdownSaved(m_pPlayer->GetCID());
+	GameServer()->CheckShutdownSaved(m_pPlayer->GetCID());
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
