@@ -434,7 +434,7 @@ char* CSaveTee::GetString()
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer, m_SavedGamemode,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
-		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_Killer.m_ClientID, m_Killer.m_Weapon, m_MoveRestrictionExtra.m_CanEnterRoom,
+		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_Killer.m_ClientID, m_Killer.m_Weapon, (int)m_MoveRestrictionExtra.m_CanEnterRoom,
 		m_Gamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_aAccUsername
 	);
@@ -528,7 +528,7 @@ int CSaveTee::LoadString(char* String)
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer, &m_SavedGamemode,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
-		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_Killer.m_ClientID, &m_Killer.m_Weapon, &m_MoveRestrictionExtra.m_CanEnterRoom,
+		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_Killer.m_ClientID, &m_Killer.m_Weapon, (int)&m_MoveRestrictionExtra.m_CanEnterRoom,
 		&m_Gamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		m_aAccUsername
 	);
