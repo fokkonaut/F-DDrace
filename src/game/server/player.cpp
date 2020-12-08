@@ -1494,7 +1494,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 
 	if (pMessage[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "+%d XP (%s)", Amount, pMessage);
+		str_format(aBuf, sizeof(aBuf), "+%lld XP (%s)", Amount, pMessage);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 
