@@ -5,7 +5,6 @@
 //#include "./entities/character.h"
 #include <engine/shared/protocol.h>
 #include <game/server/gamecontroller.h>
-#include <game/gamecore.h>
 
 class CCharacter;
 class CGameContext;
@@ -133,8 +132,9 @@ private:
 	int m_SpinBot;
 	int m_SpinBotSpeed;
 	int m_AimClosest;
-	CCharacterCore::KillerInfo m_Killer;
-	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
+	int m_KillerClientID;
+	int m_KillerWeapon;
+	int m_MoveRestrictionExtraCanEnterRoom;
 
 	// player
 	int m_Gamemode;
