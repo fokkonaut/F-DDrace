@@ -22,11 +22,12 @@ void CSaveTee::TeleOutOfPlot(vec2 ToTele)
 	m_aWeapons[WEAPON_DRAW_EDITOR].m_Got = false;
 }
 
-bool CSaveTee::SaveFile(const char *pFileName, CGameContext *pGameServer)
+bool CSaveTee::SaveFile(const char *pFileName, CCharacter *pChr)
 {
-	IOHANDLE File = pGameServer->Storage()->OpenFile(pFileName, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	IOHANDLE File = pChr->GameServer()->Storage()->OpenFile(pFileName, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(File)
 	{
+		Save(pChr);
 		io_write(File, GetString(), str_length(GetString()));
 		io_write_newline(File);
 		io_close(File);
@@ -37,9 +38,6 @@ bool CSaveTee::SaveFile(const char *pFileName, CGameContext *pGameServer)
 
 bool CSaveTee::LoadFile(const char *pFileName, CCharacter *pChr)
 {
-	if (!pChr)
-		return false;
-
 	IOHANDLE File = pChr->GameServer()->Storage()->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if (File)
 	{

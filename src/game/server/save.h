@@ -25,7 +25,7 @@ public:
 	int GetMinigame() { return m_Minigame; }
 	void TeleOutOfPlot(vec2 ToTele);
 
-	bool SaveFile(const char *pFileName, CGameContext *pGameServer);
+	bool SaveFile(const char *pFileName, CCharacter *pChr);
 	bool LoadFile(const char *pFileName, CCharacter *pChr);
 
 private:

@@ -4761,8 +4761,7 @@ void CGameContext::ShutdownSaveCharacters()
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
 		CSaveTee SaveTee;
-		SaveTee.Save(pChr);
-		SaveTee.SaveFile(aFilename, this);
+		SaveTee.SaveFile(aFilename, pChr);
 	}
 }
 
