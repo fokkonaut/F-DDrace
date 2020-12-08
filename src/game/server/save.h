@@ -127,6 +127,7 @@ private:
 	int64 m_SpawnTick;
 	int m_KillStreak;
 	int m_MaxJumps;
+	int m_CarriedFlag;
 
 	// core
 	int m_SpinBot;

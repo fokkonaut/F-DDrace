@@ -170,6 +170,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_SpawnTick = pChr->Server()->Tick() - pChr->m_SpawnTick;
 	m_KillStreak = pChr->m_KillStreak;
 	m_MaxJumps = pChr->m_MaxJumps;
+	m_CarriedFlag = pChr->HasFlag();
 
 	// core
 	m_SpinBot = pChr->Core()->m_SpinBot;
@@ -315,6 +316,13 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_SpawnTick = pChr->Server()->Tick() - m_SpawnTick;
 	pChr->m_KillStreak = m_KillStreak;
 	pChr->m_MaxJumps = m_MaxJumps;
+	if (m_CarriedFlag != -1 && m_ShutdownSave)
+	{
+		CGameControllerDDRace *pController = ((CGameControllerDDRace *)pChr->GameServer()->m_pController);
+		CFlag *pFlag = pController->m_apFlags[m_CarriedFlag];
+		if (pFlag && !pFlag->GetCarrier())
+			pController->ForceFlagOwner(pChr->GetPlayer()->GetCID(), m_CarriedFlag);
+	}
 
 	// core
 	pChr->Core()->m_SpinBot = m_SpinBot;
@@ -381,7 +389,7 @@ char* CSaveTee::GetString()
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
-		%d\t%d\t%lld\t%d\t%d\t\
+		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%s\t",
@@ -425,7 +433,7 @@ char* CSaveTee::GetString()
 		m_aHadWeapon[8], m_aHadWeapon[9], m_aHadWeapon[10], m_aHadWeapon[11], m_aHadWeapon[12], m_aHadWeapon[13], m_aHadWeapon[14], m_aHadWeapon[15],
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer, m_SavedGamemode,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
-		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps,
+		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
 		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_Killer.m_ClientID, m_Killer.m_Weapon, m_MoveRestrictionExtra.m_CanEnterRoom,
 		m_Gamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_aAccUsername
@@ -475,7 +483,7 @@ int CSaveTee::LoadString(char* String)
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
-		%d\t%d\t%lld\t%d\t%d\t\
+		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%s\t",
@@ -519,7 +527,7 @@ int CSaveTee::LoadString(char* String)
 		&m_aHadWeapon[8], &m_aHadWeapon[9], &m_aHadWeapon[10], &m_aHadWeapon[11], &m_aHadWeapon[12], &m_aHadWeapon[13], &m_aHadWeapon[14], &m_aHadWeapon[15],
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer, &m_SavedGamemode,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
-		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps,
+		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
 		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_Killer.m_ClientID, &m_Killer.m_Weapon, &m_MoveRestrictionExtra.m_CanEnterRoom,
 		&m_Gamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		m_aAccUsername
@@ -529,7 +537,7 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 91:
 		return 0;
-	case 198: // F-DDrace extra vars
+	case 199: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
