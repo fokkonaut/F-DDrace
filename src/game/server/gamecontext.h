@@ -532,6 +532,7 @@ public:
 	// money drops
 	void WriteMoneyListFile();
 	void ReadMoneyListFile();
+	void SaveOrDropWallet();
 
 	//motd
 	const char *FormatMotd(const char *pMsg);
