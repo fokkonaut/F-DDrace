@@ -232,8 +232,7 @@ public:
 	{
 		int m_ClientID;
 		int m_Weapon;
-	};
-	KillerInfo m_Killer;
+	} m_Killer;
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 

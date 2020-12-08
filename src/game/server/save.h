@@ -4,10 +4,11 @@
 // Moved to save.cpp so we can include this file in player.h
 //#include "./entities/character.h"
 #include <engine/shared/protocol.h>
+#include <game/server/gamecontroller.h>
+#include <game/gamecore.h>
+
 class CCharacter;
 class CGameContext;
-
-#include <game/server/gamecontroller.h>
 
 class CSaveTee
 {
@@ -129,11 +130,22 @@ private:
 	int m_SpinBot;
 	int m_SpinBotSpeed;
 	int m_AimClosest;
+	CCharacterCore::KillerInfo m_Killer;
+	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
 	// player
 	int m_Gamemode;
 	int m_Minigame;
 	int64 m_WalletMoney;
+	int m_RainbowSpeed;
+	int m_InfRainbow;
+	int m_InfMeteors;
+	int m_HasSpookyGhost;
+	int m_PlotSpawn;
+	int m_HasRoomKey;
+
+	// account
+	char m_aAccUsername[32];
 };
 
 class CSaveTeam

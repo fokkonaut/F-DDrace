@@ -1607,76 +1607,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	char aUsername[32];
-	char aPassword[128];
-	str_copy(aUsername, pResult->GetString(0), sizeof(aUsername));
-	str_copy(aPassword, pResult->GetString(1), sizeof(aPassword));
-
-	if (pPlayer->GetAccID() >= ACC_START)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are already logged in");
-		return;
-	}
-
-	int ID = pSelf->AddAccount();
-	pSelf->ReadAccountStats(ID, aUsername);
-
-	if (pSelf->m_Accounts[ID].m_Username[0] == '\0')
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "That account doesn't exist, please register first");
-		pSelf->FreeAccount(ID);
-		return;
-	}
-
-	if (pSelf->m_Accounts[ID].m_LoggedIn)
-	{
-		if (pSelf->m_Accounts[ID].m_Port == pSelf->Config()->m_SvPort)
-			pSelf->SendChatTarget(pResult->m_ClientID, "This account is already logged in");
-		else
-			pSelf->SendChatTarget(pResult->m_ClientID, "This account is already logged in on another server");
-		pSelf->FreeAccount(ID);
-		return;
-	}
-
-	if (pSelf->m_Accounts[ID].m_Disabled)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "This account is disabled");
-		pSelf->FreeAccount(ID);
-		return;
-	}
-
-	if (str_comp(pSelf->m_Accounts[ID].m_Password, aPassword))
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Wrong password");
-		pSelf->FreeAccount(ID);
-		return;
-	}
-
-	// set some variables and save the account with some new values
-	{
-		pSelf->m_Accounts[ID].m_Port = pSelf->Config()->m_SvPort;
-		pSelf->m_Accounts[ID].m_LoggedIn = true;
-		pSelf->m_Accounts[ID].m_ClientID = pResult->m_ClientID;
-		str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
-
-		NETADDR Addr;
-		pSelf->Server()->GetClientAddr(pResult->m_ClientID, &Addr);
-		if (net_addr_comp(&Addr, &pSelf->m_Accounts[ID].m_Addr, false) != 0)
-		{
-			// addresses are not equal, update last address and set new current address
-			pSelf->m_Accounts[ID].m_LastAddr = pSelf->m_Accounts[ID].m_Addr;
-			pSelf->Server()->GetClientAddr(pResult->m_ClientID, &pSelf->m_Accounts[ID].m_Addr);
-		}
-		else
-		{
-			// addresses are equal, just update the current address to get the possible changed port
-			pSelf->Server()->GetClientAddr(pResult->m_ClientID, &pSelf->m_Accounts[ID].m_Addr);
-		}
-
-		pSelf->WriteAccountStats(ID);
-	}
-
-	pSelf->m_apPlayers[pResult->m_ClientID]->OnLogin();
+	pSelf->Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1));
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
@@ -1710,9 +1641,10 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		str_format(aBuf, sizeof(aBuf), "Kill logout is activated, kill within %d seconds to logout", pSelf->Config()->m_SvKillLogout);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		pPlayer->GetCharacter()->m_LastWantedLogout = pSelf->Server()->Tick();
+		return;
 	}
-	else
-		pSelf->Logout(pPlayer->GetAccID());
+
+	pSelf->Logout(pPlayer->GetAccID());
 }
 
 void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData)

@@ -3445,6 +3445,7 @@ void CGameContext::OnInit()
 
 	m_ShutdownSave.m_ClientID = -1;
 	m_ShutdownSave.m_Got = false;
+	m_ShutdownSave.m_aUsername[0] = '\0';
 
 
 #ifdef CONF_DEBUG
@@ -4589,6 +4590,79 @@ void CGameContext::LogoutAllAccounts()
 	dbg_msg("acc", "logged out all accounts");
 }
 
+void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->GetAccID() >= ACC_START)
+	{
+		SendChatTarget(ClientID, "You are already logged in");
+		return;
+	}
+
+	int ID = AddAccount();
+	ReadAccountStats(ID, pUsername);
+
+	if (m_Accounts[ID].m_Username[0] == '\0')
+	{
+		SendChatTarget(ClientID, "That account doesn't exist, please register first");
+		FreeAccount(ID);
+		return;
+	}
+
+	if (m_Accounts[ID].m_LoggedIn)
+	{
+		if (m_Accounts[ID].m_Port == Config()->m_SvPort)
+			SendChatTarget(ClientID, "This account is already logged in");
+		else
+			SendChatTarget(ClientID, "This account is already logged in on another server");
+		FreeAccount(ID);
+		return;
+	}
+
+	if (m_Accounts[ID].m_Disabled)
+	{
+		SendChatTarget(ClientID, "This account is disabled");
+		FreeAccount(ID);
+		return;
+	}
+
+	if (PasswordRequired && str_comp(m_Accounts[ID].m_Password, pPassword))
+	{
+		SendChatTarget(ClientID, "Wrong password");
+		FreeAccount(ID);
+		return;
+	}
+
+	// set some variables and save the account with some new values
+	{
+		m_Accounts[ID].m_Port = Config()->m_SvPort;
+		m_Accounts[ID].m_LoggedIn = true;
+		m_Accounts[ID].m_ClientID = ClientID;
+		str_copy(m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(ClientID), sizeof(m_Accounts[ID].m_aLastPlayerName));
+
+		NETADDR Addr;
+		Server()->GetClientAddr(ClientID, &Addr);
+		if (net_addr_comp(&Addr, &m_Accounts[ID].m_Addr, false) != 0)
+		{
+			// addresses are not equal, update last address and set new current address
+			m_Accounts[ID].m_LastAddr = m_Accounts[ID].m_Addr;
+			Server()->GetClientAddr(ClientID, &m_Accounts[ID].m_Addr);
+		}
+		else
+		{
+			// addresses are equal, just update the current address to get the possible changed port
+			Server()->GetClientAddr(ClientID, &m_Accounts[ID].m_Addr);
+		}
+
+		WriteAccountStats(ID);
+	}
+
+	pPlayer->OnLogin();
+}
+
 int64 CGameContext::GetNeededXP(int Level)
 {
 	if (Level < DIFFERENCE_XP_END)
@@ -4750,7 +4824,10 @@ void CGameContext::ShutdownSaveCharacters()
 		if (pChr->GetPlayer()->m_Minigame != MINIGAME_NONE)
 			pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
-		Logout(pChr->GetPlayer()->GetAccID());
+		// We save the acc username to save it in the account to automatically relogin after joining again
+		int AccID = pChr->GetPlayer()->GetAccID();
+		str_copy(m_ShutdownSave.m_aUsername, m_Accounts[AccID].m_Username, sizeof(m_ShutdownSave.m_aUsername));
+		Logout(AccID);
 
 		// Get address and swap : to ! for filename
 		char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -4762,6 +4839,9 @@ void CGameContext::ShutdownSaveCharacters()
 		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
 		CSaveTee SaveTee;
 		SaveTee.SaveFile(aFilename, pChr);
+
+		// reset it again
+		m_ShutdownSave.m_aUsername[0] = '\0';
 	}
 }
 

@@ -430,6 +430,7 @@ public:
 	void WriteAccountStats(int ID);
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
+	void Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
 
 	int m_aTaserPrice[NUM_TASER_LEVELS];
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];
@@ -609,6 +610,7 @@ public:
 	{
 		int m_ClientID;
 		bool m_Got;
+		char m_aUsername[32];
 	} m_ShutdownSave;
 
 	void ShutdownSaveCharacters();

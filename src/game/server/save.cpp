@@ -136,6 +136,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	FormatUuid(pChr->GameServer()->GameUuid(), aGameUuid, sizeof(aGameUuid));
 
 	// F-DDrace
+	// character
 	m_Health = pChr->GetHealth();
 	m_Armor = pChr->GetArmor();
 	m_Invisible = pChr->m_Invisible;
@@ -169,13 +170,31 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_KillStreak = pChr->m_KillStreak;
 	m_MaxJumps = pChr->m_MaxJumps;
 
+	// core
 	m_SpinBot = pChr->Core()->m_SpinBot;
 	m_SpinBotSpeed = pChr->Core()->m_SpinBotSpeed;
 	m_AimClosest = pChr->Core()->m_AimClosest;
+	m_Killer = pChr->Core()->m_Killer;
+	m_MoveRestrictionExtra = pChr->Core()->m_MoveRestrictionExtra;
 
+	// player
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
 	m_Minigame = pChr->GetPlayer()->m_Minigame;
 	m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
+	m_RainbowSpeed = pChr->GetPlayer()->m_RainbowSpeed;
+	m_InfRainbow = pChr->GetPlayer()->m_InfRainbow;
+	m_InfMeteors = pChr->GetPlayer()->m_InfMeteors;
+	m_HasSpookyGhost = pChr->GetPlayer()->m_HasSpookyGhost;
+	m_PlotSpawn = pChr->GetPlayer()->m_PlotSpawn;
+	m_HasRoomKey = pChr->GetPlayer()->m_HasRoomKey;
+
+	// account
+	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
+	// we cant just set it to 0 or '\0' because that would fuck up the LoadString() as it is a null terminator
+	if (pChr->GameServer()->m_ShutdownSave.m_aUsername[0] == '\0')
+		m_aAccUsername[0] = '$';
+	else
+		str_copy(m_aAccUsername, pChr->GameServer()->m_ShutdownSave.m_aUsername, sizeof(m_aAccUsername));
 }
 
 void CSaveTee::Load(CCharacter *pChr, int Team)
@@ -259,6 +278,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->SetSolo(m_IsSolo);
 
 	// F-DDrace
+	// character
 	pChr->SetHealth(m_Health);
 	pChr->SetArmor(m_Armor);
 	pChr->m_Invisible = m_Invisible;
@@ -292,13 +312,27 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_KillStreak = m_KillStreak;
 	pChr->m_MaxJumps = m_MaxJumps;
 
+	// core
 	pChr->Core()->m_SpinBot = m_SpinBot;
 	pChr->Core()->m_SpinBotSpeed = m_SpinBotSpeed;
 	pChr->Core()->m_AimClosest = m_AimClosest;
+	pChr->Core()->m_Killer = m_Killer;
+	pChr->Core()->m_MoveRestrictionExtra = m_MoveRestrictionExtra;
 
+	// player
 	pChr->GetPlayer()->m_Gamemode = m_Gamemode;
 	pChr->GetPlayer()->m_Minigame = m_Minigame;
 	pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
+	pChr->GetPlayer()->m_RainbowSpeed = m_RainbowSpeed;
+	pChr->GetPlayer()->m_InfRainbow = m_InfRainbow;
+	pChr->Meteor(m_InfMeteors, -1, true, true);
+	pChr->GetPlayer()->m_HasSpookyGhost = m_HasSpookyGhost;
+	pChr->GetPlayer()->m_PlotSpawn = m_PlotSpawn;
+	pChr->GetPlayer()->m_HasRoomKey = m_HasRoomKey;
+
+	// account
+	if (m_aAccUsername[0] != '$') // explanation: see CSaveTee::Save() @ m_aAccUsername
+		pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_aAccUsername, "", false);
 }
 
 char* CSaveTee::GetString()
@@ -343,8 +377,9 @@ char* CSaveTee::GetString()
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t\
-		%d\t%d\t%d\t\
-		%d\t%d\t%lld\t",
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%s\t",
 		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
 		m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Got,
@@ -386,8 +421,9 @@ char* CSaveTee::GetString()
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer, m_SavedGamemode,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps,
-		m_SpinBot, m_SpinBotSpeed, m_AimClosest,
-		m_Gamemode, m_Minigame, m_WalletMoney
+		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_Killer.m_ClientID, m_Killer.m_Weapon, m_MoveRestrictionExtra.m_CanEnterRoom,
+		m_Gamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
+		m_aAccUsername
 	);
 	return m_aString;
 }
@@ -435,8 +471,9 @@ int CSaveTee::LoadString(char* String)
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t\
-		%d\t%d\t%d\t\
-		%d\t%d\t%lld\t",
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%s\t",
 		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
 		&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Got,
@@ -478,15 +515,16 @@ int CSaveTee::LoadString(char* String)
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer, &m_SavedGamemode,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps,
-		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest,
-		&m_Gamemode, &m_Minigame, &m_WalletMoney
+		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_Killer.m_ClientID, &m_Killer.m_Weapon, &m_MoveRestrictionExtra.m_CanEnterRoom,
+		&m_Gamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
+		m_aAccUsername
 	);
 
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 91:
 		return 0;
-	case 187: // F-DDrace extra vars
+	case 197: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
