@@ -13,7 +13,7 @@ class CGameContext;
 class CSaveTee
 {
 public:
-	CSaveTee();
+	CSaveTee(bool ShutdownSave = false);
 	~CSaveTee();
 	void Save(CCharacter* pchr); // F-DDrace TODO: extra weapons and mod specific stuff is not saved or loaded with the string, just in cache
 	void Load(CCharacter* pchr, int Team);
@@ -95,6 +95,8 @@ private:
 	char aGameUuid[16];
 
 	// F-DDrace
+	int m_ShutdownSave;
+
 	// character
 	int m_Health;
 	int m_Armor;

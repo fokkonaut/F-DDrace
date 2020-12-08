@@ -66,6 +66,7 @@ enum Transaction
 
 enum
 {
+	WEAPON_MINIGAME_CHANGE = -5, // killed due to minigame swap
 	WEAPON_PLAYER = -4, // killed by a player
 	WEAPON_GAME = -3, // team switching etc
 	WEAPON_SELF = -2, // console kill command

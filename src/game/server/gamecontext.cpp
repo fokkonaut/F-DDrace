@@ -4837,7 +4837,7 @@ void CGameContext::ShutdownSaveCharacters()
 		// create file and save the character
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
-		CSaveTee SaveTee;
+		CSaveTee SaveTee(true);
 		SaveTee.SaveFile(aFilename, pChr);
 
 		// reset it again
@@ -4875,7 +4875,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 
 	// Get path and load
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
-	CSaveTee SaveTee;
+	CSaveTee SaveTee(true);
 	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
 	{
 		// Remove file, this save has been used now
@@ -5695,7 +5695,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		return;
 	}
 
-	pPlayer->KillCharacter(WEAPON_GAME);
+	pPlayer->KillCharacter(WEAPON_MINIGAME_CHANGE);
 	pPlayer->m_Minigame = Minigame;
 
 	UpdateHidePlayers();

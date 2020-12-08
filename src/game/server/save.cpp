@@ -8,8 +8,9 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
-CSaveTee::CSaveTee()
+CSaveTee::CSaveTee(bool ShutdownSave)
 {
+	m_ShutdownSave = (int)ShutdownSave;
 }
 
 CSaveTee::~CSaveTee()
@@ -180,7 +181,10 @@ void CSaveTee::Save(CCharacter *pChr)
 	// player
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
 	m_Minigame = pChr->GetPlayer()->m_Minigame;
-	m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
+	if (m_ShutdownSave)
+		m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
+	else
+		m_WalletMoney = 0;
 	m_RainbowSpeed = pChr->GetPlayer()->m_RainbowSpeed;
 	m_InfRainbow = pChr->GetPlayer()->m_InfRainbow;
 	m_InfMeteors = pChr->GetPlayer()->m_InfMeteors;
@@ -322,7 +326,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	// player
 	pChr->GetPlayer()->m_Gamemode = m_Gamemode;
 	pChr->GetPlayer()->m_Minigame = m_Minigame;
-	pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
+	if (m_ShutdownSave)
+		pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
 	pChr->GetPlayer()->m_RainbowSpeed = m_RainbowSpeed;
 	pChr->GetPlayer()->m_InfRainbow = m_InfRainbow;
 	pChr->Meteor(m_InfMeteors, -1, true, true);
@@ -360,7 +365,7 @@ char* CSaveTee::GetString()
 		%f\t%f\t%f\t%f\t%f\t\
 		%d\t%s"
 		/* F-DDrace */
-		"\t%d\t%d\t\
+		"\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
@@ -402,7 +407,7 @@ char* CSaveTee::GetString()
 		m_CpCurrent[20], m_CpCurrent[21], m_CpCurrent[22], m_CpCurrent[23], m_CpCurrent[24],
 		m_NotEligibleForFinish, aGameUuid,
 		/* F-DDrace */
-		m_Health, m_Armor,
+		m_ShutdownSave, m_Health, m_Armor,
 		m_aWeapons[6].m_AmmoRegenStart, m_aWeapons[6].m_Ammo, m_aWeapons[6].m_Got,
 		m_aWeapons[7].m_AmmoRegenStart, m_aWeapons[7].m_Ammo, m_aWeapons[7].m_Got,
 		m_aWeapons[8].m_AmmoRegenStart, m_aWeapons[8].m_Ammo, m_aWeapons[8].m_Got,
@@ -454,7 +459,7 @@ int CSaveTee::LoadString(char* String)
 		%f\t%f\t%f\t%f\t%f\t\
 		%d\t%36s"
 		/* F-DDrace */
-		"\t%d\t%d\t\
+		"\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
@@ -496,7 +501,7 @@ int CSaveTee::LoadString(char* String)
 		&m_CpCurrent[20], &m_CpCurrent[21], &m_CpCurrent[22], &m_CpCurrent[23], &m_CpCurrent[24],
 		&m_NotEligibleForFinish, aGameUuid,
 		/* F-DDrace */
-		&m_Health, &m_Armor,
+		&m_ShutdownSave, &m_Health, &m_Armor,
 		&m_aWeapons[6].m_AmmoRegenStart, &m_aWeapons[6].m_Ammo, &m_aWeapons[6].m_Got,
 		&m_aWeapons[7].m_AmmoRegenStart, &m_aWeapons[7].m_Ammo, &m_aWeapons[7].m_Got,
 		&m_aWeapons[8].m_AmmoRegenStart, &m_aWeapons[8].m_Ammo, &m_aWeapons[8].m_Got,
@@ -524,7 +529,7 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 91:
 		return 0;
-	case 197: // F-DDrace extra vars
+	case 198: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

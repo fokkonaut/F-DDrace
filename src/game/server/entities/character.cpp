@@ -1348,7 +1348,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	DropLoot(Weapon);
 
 	// reset if killed by the game or if not killed by a player or deathtile while unfrozen
-	if (Weapon == WEAPON_GAME || (!m_FreezeTime && Weapon != WEAPON_PLAYER && Weapon != WEAPON_WORLD))
+	if (Weapon == WEAPON_MINIGAME_CHANGE || Weapon == WEAPON_GAME || (!m_FreezeTime && Weapon != WEAPON_PLAYER && Weapon != WEAPON_WORLD))
 	{
 		m_Core.m_Killer.m_ClientID = -1;
 		m_Core.m_Killer.m_Weapon = -1;
@@ -3616,11 +3616,11 @@ void CCharacter::DropLoot(int Weapon)
 	if (!Config()->m_SvDropsOnDeath)
 		return;
 
-	// Drop money even if killed by the game, e.g. team change or minigame change
-	if (m_FreezeTime)
+	// Drop money even if killed by the game, e.g. team change, but never when swapping minigame
+	if (Weapon != WEAPON_MINIGAME_CHANGE && m_FreezeTime)
 		DropMoney(m_pPlayer->GetWalletMoney());
 
-	if (Weapon == WEAPON_GAME)
+	if (Weapon == WEAPON_GAME || Weapon == WEAPON_MINIGAME_CHANGE)
 		return;
 
 	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
