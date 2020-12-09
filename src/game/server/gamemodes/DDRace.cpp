@@ -78,7 +78,6 @@ bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, 
 
 int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
 {
-	Config()->m_SvTestingCommands = 1;
 	int HadFlag = 0;
 
 	// drop flags
