@@ -78,6 +78,7 @@ bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, 
 
 int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
 {
+	Config()->m_SvTestingCommands = 1;
 	int HadFlag = 0;
 
 	// drop flags
@@ -91,13 +92,12 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 			HadFlag |= 2;
 		if (F->GetCarrier() == pVictim)
 		{
-			if (HasFlag(pKiller->GetCharacter()) != -1)
+			if (HasFlag(pKiller->GetCharacter()) == -1)
+				ChangeFlagOwner(pVictim, pKiller->GetCharacter());
+			else
 				F->Drop();
 			HadFlag |= 1;
 		}
-
-		if (F->GetLastCarrier() == pVictim)
-			F->SetLastCarrier(-1);
 	}
 
 	return HadFlag;

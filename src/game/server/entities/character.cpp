@@ -1493,8 +1493,6 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 
-	((CGameControllerDDRace*)GameServer()->m_pController)->ChangeFlagOwner(this, GameServer()->GetPlayerChar(Killer));
-
 	// character doesnt exist, print some messages and set states
 	// if the player is in deathmatch mode, or simply playing
 	if (GameServer()->m_SurvivalGameState > SURVIVAL_LOBBY && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY && Killer != WEAPON_GAME)
