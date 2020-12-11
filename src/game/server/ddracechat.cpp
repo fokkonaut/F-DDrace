@@ -1678,6 +1678,12 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 		return;
 	}
 
+	if (str_length(pResult->GetString(1)) > 20 || str_length(pResult->GetString(1)) < 3 || str_length(pResult->GetString(2)) > 20 || str_length(pResult->GetString(2)) < 3)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "The password is too long or too short");
+		return;
+	}
+
 	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(1), sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password));
 	pSelf->WriteAccountStats(pPlayer->GetAccID());
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
