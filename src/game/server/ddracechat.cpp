@@ -1282,6 +1282,9 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	}
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "Tele Rifle: not bought");
+
+	str_format(aBuf, sizeof(aBuf), "Contact: %s", pAccount->m_aContact);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
 void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
@@ -1687,6 +1690,40 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(1), sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password));
 	pSelf->WriteAccountStats(pPlayer->GetAccID());
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
+}
+
+void CGameContext::ConContact(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!pSelf->Config()->m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
+		return;
+	}
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	const char *pContact = pResult->GetString(0);
+	if (!pContact || !pContact[0])
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You need to enter a way to contact you, for example: Discord, E-Mail, Skype, etc.");
+		return;
+	}
+
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_aContact[0] == '\0')
+		pPlayer->GiveXP(500, "initial contact info set");
+
+	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_aContact, pContact, sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_aContact));
+	pSelf->WriteAccountStats(pPlayer->GetAccID());
+	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully updated contact information, check '/account'");
 }
 
 void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)

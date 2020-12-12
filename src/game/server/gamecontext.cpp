@@ -4333,6 +4333,7 @@ int CGameContext::AddAccount()
 	Account.m_Addr.type = -1;
 	Account.m_LastAddr.type = -1;
 	Account.m_TaserBattery = 0;
+	Account.m_aContact[0] = '\0';
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4362,53 +4363,13 @@ void CGameContext::WriteAccountStats(int ID)
 
 	if (AccFile.is_open())
 	{
-		AccFile << Config()->m_SvPort << "\n";
-		AccFile << m_Accounts[ID].m_LoggedIn << "\n";
-		AccFile << m_Accounts[ID].m_Disabled << "\n";
-		AccFile << m_Accounts[ID].m_Password << "\n";
-		AccFile << m_Accounts[ID].m_Username << "\n";
-		AccFile << m_Accounts[ID].m_ClientID << "\n";
-		AccFile << m_Accounts[ID].m_Level << "\n";
-		AccFile << m_Accounts[ID].m_XP << "\n";
-		AccFile << m_Accounts[ID].m_Money << "\n";
-		AccFile << m_Accounts[ID].m_Kills << "\n";
-		AccFile << m_Accounts[ID].m_Deaths << "\n";
-		AccFile << m_Accounts[ID].m_PoliceLevel << "\n";
-		AccFile << m_Accounts[ID].m_SurvivalKills << "\n";
-		AccFile << m_Accounts[ID].m_SurvivalWins << "\n";
-		AccFile << m_Accounts[ID].m_SpookyGhost << "\n";
-		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[0] << "\n";
-		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[1] << "\n";
-		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[2] << "\n";
-		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[3] << "\n";
-		AccFile << m_Accounts[ID].m_aLastMoneyTransaction[4] << "\n";
-		AccFile << m_Accounts[ID].m_VIP << "\n";
-		AccFile << m_Accounts[ID].m_BlockPoints << "\n";
-		AccFile << m_Accounts[ID].m_InstagibKills << "\n";
-		AccFile << m_Accounts[ID].m_InstagibWins << "\n";
-		AccFile << m_Accounts[ID].m_SpawnWeapon[0] << "\n";
-		AccFile << m_Accounts[ID].m_SpawnWeapon[1] << "\n";
-		AccFile << m_Accounts[ID].m_SpawnWeapon[2] << "\n";
-		AccFile << m_Accounts[ID].m_Ninjajetpack << "\n";
-		AccFile << m_Accounts[ID].m_aLastPlayerName << "\n";
-		AccFile << m_Accounts[ID].m_SurvivalDeaths << "\n";
-		AccFile << m_Accounts[ID].m_InstagibDeaths << "\n";
-		AccFile << m_Accounts[ID].m_TaserLevel << "\n";
-		AccFile << m_Accounts[ID].m_KillingSpreeRecord << "\n";
-		AccFile << m_Accounts[ID].m_Euros << "\n";
-		AccFile << m_Accounts[ID].m_ExpireDateVIP << "\n";
-		AccFile << m_Accounts[ID].m_PortalRifle << "\n";
-		AccFile << m_Accounts[ID].m_ExpireDatePortalRifle << "\n";
-		AccFile << ACC_CURRENT_VERSION << "\n";
-
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&m_Accounts[ID].m_Addr, aAddrStr, sizeof(aAddrStr), true);
-		AccFile << aAddrStr << "\n";
-		net_addr_str(&m_Accounts[ID].m_LastAddr, aAddrStr, sizeof(aAddrStr), true);
-		AccFile << aAddrStr << "\n";
-
-		AccFile << m_Accounts[ID].m_TaserBattery << "\n";
-
+		for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
+		{
+			if (i == ACC_VERSION)
+				AccFile << ACC_CURRENT_VERSION << "\n";
+			else
+				AccFile << GetAccVarValue(ID, i) << "\n";
+		}
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
 	AccFile.close();
@@ -4458,7 +4419,8 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
 	case ACC_ADDR:						net_addr_from_str(&m_Accounts[ID].m_Addr, pData); break;
 	case ACC_LAST_ADDR:					net_addr_from_str(&m_Accounts[ID].m_LastAddr, pData); break;
-	case TASER_BATTERY:					m_Accounts[ID].m_TaserBattery = atoi(pData); break;
+	case ACC_TASER_BATTERY:				m_Accounts[ID].m_TaserBattery = atoi(pData); break;
+	case ACC_CONTACT:					str_copy(m_Accounts[ID].m_aContact, pData, sizeof(m_Accounts[ID].m_aContact)); break;
 	}
 }
 
@@ -4506,14 +4468,15 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_VERSION:					return "version";
 	case ACC_ADDR:						return "addr";
 	case ACC_LAST_ADDR:					return "last_addr";
-	case TASER_BATTERY:					return "taser_battery";
+	case ACC_TASER_BATTERY:				return "taser_battery";
+	case ACC_CONTACT:					return "contact";
 	}
 	return "Unknown";
 }
 
 const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 {
-	static char aBuf[64];
+	static char aBuf[128];
 	str_copy(aBuf, "Unknown", sizeof(aBuf));
 
 	switch (VariableID)
@@ -4521,8 +4484,8 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_PORT:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Port); break;
 	case ACC_LOGGED_IN:					str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_LoggedIn); break;
 	case ACC_DISABLED:					str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_Disabled); break;
-	case ACC_PASSWORD:					str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_Password); break;
-	case ACC_USERNAME:					str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_Username); break;
+	case ACC_PASSWORD:					str_copy(aBuf, m_Accounts[ID].m_Password, sizeof(aBuf)); break;
+	case ACC_USERNAME:					str_copy(aBuf, m_Accounts[ID].m_Username, sizeof(aBuf)); break;
 	case ACC_CLIENT_ID:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_ClientID); break;
 	case ACC_LEVEL:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Level); break;
 	case ACC_XP:						str_format(aBuf, sizeof(aBuf), "%lld", m_Accounts[ID].m_XP); break;
@@ -4533,11 +4496,11 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_SURVIVAL_KILLS:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_SurvivalKills); break;
 	case ACC_SURVIVAL_WINS:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_SurvivalWins); break;
 	case ACC_SPOOKY_GHOST:				str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_SpookyGhost); break;
-	case ACC_LAST_MONEY_TRANSACTION_0:	str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastMoneyTransaction[0]); break;
-	case ACC_LAST_MONEY_TRANSACTION_1:	str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastMoneyTransaction[1]); break;
-	case ACC_LAST_MONEY_TRANSACTION_2:	str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastMoneyTransaction[2]); break;
-	case ACC_LAST_MONEY_TRANSACTION_3:	str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastMoneyTransaction[3]); break;
-	case ACC_LAST_MONEY_TRANSACTION_4:	str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastMoneyTransaction[4]); break;
+	case ACC_LAST_MONEY_TRANSACTION_0:	str_copy(aBuf, m_Accounts[ID].m_aLastMoneyTransaction[0], sizeof(aBuf)); break;
+	case ACC_LAST_MONEY_TRANSACTION_1:	str_copy(aBuf, m_Accounts[ID].m_aLastMoneyTransaction[1], sizeof(aBuf)); break;
+	case ACC_LAST_MONEY_TRANSACTION_2:	str_copy(aBuf, m_Accounts[ID].m_aLastMoneyTransaction[2], sizeof(aBuf)); break;
+	case ACC_LAST_MONEY_TRANSACTION_3:	str_copy(aBuf, m_Accounts[ID].m_aLastMoneyTransaction[3], sizeof(aBuf)); break;
+	case ACC_LAST_MONEY_TRANSACTION_4:	str_copy(aBuf, m_Accounts[ID].m_aLastMoneyTransaction[4], sizeof(aBuf)); break;
 	case ACC_VIP:						str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_VIP); break;
 	case ACC_BLOCK_POINTS:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_BlockPoints); break;
 	case ACC_INSTAGIB_KILLS:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_InstagibKills); break;
@@ -4546,7 +4509,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_SPAWN_WEAPON_1:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_SpawnWeapon[1]); break;
 	case ACC_SPAWN_WEAPON_2:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_SpawnWeapon[2]); break;
 	case ACC_NINJAJETPACK:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Ninjajetpack); break;
-	case ACC_LAST_PLAYER_NAME:			str_format(aBuf, sizeof(aBuf), "%s", m_Accounts[ID].m_aLastPlayerName); break;
+	case ACC_LAST_PLAYER_NAME:			str_copy(aBuf, m_Accounts[ID].m_aLastPlayerName, sizeof(aBuf)); break;
 	case ACC_SURVIVAL_DEATHS:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_SurvivalDeaths); break;
 	case ACC_INSTAGIB_DEATHS:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_InstagibDeaths); break;
 	case ACC_TASER_LEVEL:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserLevel); break;
@@ -4558,7 +4521,8 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_VERSION:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Version); break;
 	case ACC_ADDR:						net_addr_str(&m_Accounts[ID].m_Addr, aBuf, sizeof(aBuf), true); break;
 	case ACC_LAST_ADDR:					net_addr_str(&m_Accounts[ID].m_LastAddr, aBuf, sizeof(aBuf), true); break;
-	case TASER_BATTERY:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserBattery); break;
+	case ACC_TASER_BATTERY:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserBattery); break;
+	case ACC_CONTACT:					str_copy(aBuf, m_Accounts[ID].m_aContact, sizeof(aBuf)); break;
 	}
 	return aBuf;
 }

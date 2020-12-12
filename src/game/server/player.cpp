@@ -1579,6 +1579,12 @@ void CPlayer::OnLogin()
 		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
 	}
+
+	if (pAccount->m_aContact[0] == '\0')
+	{
+		GameServer()->SendChatTarget(m_ClientID, "[WARNING] You did not set a contact, it can be used to recover your password or to get back the account after it got stolen.");
+		GameServer()->SendChatTarget(m_ClientID, "Set a contact with '/contact <option>' to hide this message and for a free XP reward.");
+	}
 }
 
 void CPlayer::OnLogout()

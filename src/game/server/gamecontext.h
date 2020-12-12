@@ -101,7 +101,7 @@ enum
 	MAX_TASER_BATTERY = 100,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 3,
+	ACC_CURRENT_VERSION = 4,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -458,7 +458,7 @@ public:
 		int m_SurvivalKills;
 		int m_SurvivalWins;
 		bool m_SpookyGhost;
-		char m_aLastMoneyTransaction[5][256];
+		char m_aLastMoneyTransaction[5][128];
 		bool m_VIP;
 		int m_BlockPoints;
 		int m_InstagibKills;
@@ -478,6 +478,7 @@ public:
 		NETADDR m_Addr;
 		NETADDR m_LastAddr;
 		int m_TaserBattery;
+		char m_aContact[128];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -525,7 +526,8 @@ public:
 		ACC_VERSION,
 		ACC_ADDR,
 		ACC_LAST_ADDR,
-		TASER_BATTERY,
+		ACC_TASER_BATTERY,
+		ACC_CONTACT,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -724,6 +726,7 @@ private:
 	static void ConLogout(IConsole::IResult* pResult, void* pUserData);
 	static void ConRegister(IConsole::IResult* pResult, void* pUserData);
 	static void ConChangePassword(IConsole::IResult* pResult, void* pUserData);
+	static void ConContact(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPayMoney(IConsole::IResult* pResult, void* pUserData);
 	static void ConMoney(IConsole::IResult* pResult, void* pUserData);
