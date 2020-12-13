@@ -4761,6 +4761,8 @@ void CGameContext::SaveDrop(int ClientID, const char *pReason)
 
 	// Save character
 	SaveCharacter(ClientID);
+	// Remove wallet money so we dont automatically drop it on disconnect because it is saved already
+	m_apPlayers[ClientID]->SetWalletMoney(0);
 
 	// Add address to list of save dropped ips
 	NETADDR Addr;
