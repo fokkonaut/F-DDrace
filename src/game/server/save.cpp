@@ -198,7 +198,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
 	// we cant just set it to 0 or '\0' because that would fuck up the LoadString() as it is a null terminator
 	if (pChr->GameServer()->m_ShutdownSave.m_aUsername[0] == '\0')
-		m_aAccUsername[0] = '$';
+		str_copy(m_aAccUsername, "$", sizeof(m_aAccUsername));
 	else
 		str_copy(m_aAccUsername, pChr->GameServer()->m_ShutdownSave.m_aUsername, sizeof(m_aAccUsername));
 }
