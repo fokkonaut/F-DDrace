@@ -57,7 +57,10 @@ void CPortal::Tick()
 		m_Owner = -1;
 
 	if (m_Owner != -1 && !GameServer()->GetPlayerChar(m_Owner))
+	{
 		Reset();
+		return;
+	}
 	 
 	if ((m_LinkedTick == 0 && m_StartTick < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonation)
 		|| (m_LinkedTick != 0 && m_LinkedTick < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonationLinked))
@@ -164,6 +167,7 @@ void CPortal::EntitiesEnter()
 		GameServer()->CreatePlayerSpawn(m_pLinkedPortal->m_Pos, TeamMask);
 
 		m_pLinkedPortal->m_vTeleported.push_back(apEnts[i]);
+		m_vTeleported.push_back(apEnts[i]);
 	}
 }
 
