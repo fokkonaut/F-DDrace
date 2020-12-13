@@ -622,6 +622,15 @@ public:
 	void SwapAddrSeparator(char *pAddrStr);
 	static int RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser);
 
+	// this function is used for shutdown tee but also for save drop
+	void SaveCharacter(int ClientID);
+
+	// save drop
+	void SaveDrop(int ClientID, const char *pReason);
+	int SaveDropped(int ClientID);
+	int SaveDropped(const NETADDR *pAddr);
+	std::vector<NETADDR *> m_vSaveDropped;
+
 private:
 
 	bool m_VoteWillPass;
@@ -866,6 +875,7 @@ private:
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);
+	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
