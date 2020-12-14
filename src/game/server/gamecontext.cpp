@@ -4756,7 +4756,7 @@ void CGameContext::WriteMoneyListFile()
 
 void CGameContext::SaveDrop(int ClientID, const char *pReason)
 {
-	if (!GetPlayerChar(ClientID))
+	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
 		return;
 
 	// Save character
