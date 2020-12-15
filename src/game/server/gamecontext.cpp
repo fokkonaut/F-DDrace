@@ -359,12 +359,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 
 	const char *pModeStr;
-	if(Mode == CHAT_WHISPER)
+	if(Mode == CHAT_WHISPER || Mode == CHAT_SINGLE)
 		pModeStr = 0;
 	else if(Mode == CHAT_TEAM)
 		pModeStr = "teamchat";
-	else if(Mode == CHAT_SINGLE)
-		pModeStr = "chat-single";
 	else
 		pModeStr = "chat";
 
