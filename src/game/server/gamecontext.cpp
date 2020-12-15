@@ -3594,7 +3594,16 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 void CGameContext::OnPreShutdown()
 {
-	ShutdownSaveCharacters();
+	if (Config()->m_SvShutdownSaveTees)
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			SaveCharacter(i);
+	}
+	else
+	{
+		SaveOrDropWallet();
+	}
+
 	LogoutAllAccounts();
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
@@ -4787,18 +4796,6 @@ int CGameContext::SaveDropped(const NETADDR *pAddr)
 		if (net_addr_comp(m_vSaveDropped[i], pAddr, true))
 			return i;
 	return -1;
-}
-
-void CGameContext::ShutdownSaveCharacters()
-{
-	if (!Config()->m_SvShutdownSaveTees)
-	{
-		SaveOrDropWallet();
-		return;
-	}
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		SaveCharacter(i);
 }
 
 void CGameContext::SaveOrDropWallet()

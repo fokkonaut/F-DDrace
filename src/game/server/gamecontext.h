@@ -616,7 +616,6 @@ public:
 		char m_aUsername[32];
 	} m_ShutdownSave;
 
-	void ShutdownSaveCharacters();
 	void CheckShutdownSaved(int ClientID);
 	static int CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void SwapAddrSeparator(char *pAddrStr);
