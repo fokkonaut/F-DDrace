@@ -512,6 +512,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (i == pResult->m_ClientID) continue;
 		if (!pSelf->m_apPlayers[i]) continue;
 		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
+		if (pSelf->Server()->IsSevendown(i) != pSelf->Server()->IsSevendown(pResult->m_ClientID)) continue;
 
 		// save original id map
 		int aOrigIdMap[VANILLA_MAX_CLIENTS];
