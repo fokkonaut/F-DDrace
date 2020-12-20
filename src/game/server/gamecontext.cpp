@@ -2452,9 +2452,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
 			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
 		}
-		else if (MsgID == NETMSGTYPE_CL_AIM)
+		else if (MsgID == NETMSGTYPE_CL_EXPLAYERFLAGS)
 		{
-			pPlayer->m_Aim = (bool)pUnpacker->GetInt();
+			CNetMsg_Cl_ExPlayerFlags *pMsg = (CNetMsg_Cl_ExPlayerFlags *)pRawMsg;
+			pPlayer->m_Aim = (bool)pMsg->m_Flags&EXPLAYERFLAG_AIM;
 		}
 		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
 		{

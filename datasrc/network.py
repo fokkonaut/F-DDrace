@@ -23,7 +23,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
 
-ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC"])
+ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC", "AIM"])
 
 GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
@@ -562,7 +562,9 @@ Messages = [
 
 	NetMessageEx("Sv_TeamsState", "teamstate@ddnet7.tw", []),
 
-	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet7.tw", []),
+	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@ddnet7.tw", [
+		NetIntAny("m_Flags"),
+	]),
 
-	NetMessageEx("Cl_Aim", "aim@ddnet7.tw", []),
+	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet7.tw", []),
 ]
