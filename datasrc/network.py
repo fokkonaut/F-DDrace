@@ -22,9 +22,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 							"GAME_PAUSED"]) # todo 0.8: sort (1 para)
 
 Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
-
 ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC", "AIM"])
-
 GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
 	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
@@ -34,9 +32,12 @@ GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"BUG_DDRACE_INPUT", "BUG_FNG_LASER_RANGE", "BUG_VANILLA_BOUNCE",
 	"PREDICT_FNG", "PREDICT_DDRACE", "PREDICT_DDRACE_TILES", "PREDICT_VANILLA",
 	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
-	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES",
+	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES", "ENTITIES_BW"
+	# Full, use GameInfoFlags2 for more flags
 ])
-
+GameInfoFlags2 = Flags("GAMEINFOFLAG2", [
+	"ALLOW_X_SKINS", "GAMETYPE_CITY",
+])
 CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
                   "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
@@ -109,6 +110,7 @@ Flags = [
 	RaceFlags,
 	ExPlayerFlags,
 	GameInfoFlags,
+	GameInfoFlags2,
 	CharacterFlags,
 ]
 
@@ -280,6 +282,7 @@ Objects = [
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntAny("m_Version"),
+		NetIntAny("m_Flags2"),
 	], fixup=False),
 
 	## Events
