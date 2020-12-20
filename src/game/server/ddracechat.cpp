@@ -516,7 +516,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 		// save original id map
 		int OrigFakeID = pPlayer->m_FakeID;
-		int TimeoutedFakeID;
+		int TimeoutedFakeID = -1;
 		int aOrigIdMap[VANILLA_MAX_CLIENTS];
 		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
 		{
