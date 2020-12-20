@@ -282,6 +282,7 @@ public:
 	bool UseLocalIDMap(int ClientID) { return m_aClients[ClientID].m_UseLocalIDMap; }
 	void SetIDMapUsage(int ClientID, bool UseLocalIDMap) { m_aClients[ClientID].m_UseLocalIDMap = UseLocalIDMap; }
 
+	void SendCapabilities(int ClientID);
 	void SendMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);

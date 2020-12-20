@@ -572,6 +572,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven
 				MsgId -= 4;
 			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 				MsgId -= 4;
+			else if (MsgId == NETMSG_CAPABILITIES)
+				;
 			else if(MsgId >= NUM_NETMSGTYPES)
 				MsgId -= NUM_NETMSGTYPES;
 			else
@@ -881,6 +883,17 @@ void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_
 	*pMapCrc = m_CurrentMapCrc;
 }
 
+void CServer::SendCapabilities(int ClientID)
+{
+	if (!m_aClients[ClientID].m_Sevendown)
+		return;
+
+	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
+	Msg.AddInt(SERVERCAP_CURVERSION); // version
+	Msg.AddInt(SERVERCAPFLAG_DDNET|SERVERCAPFLAG_CHATTIMEOUTCODE); // flags
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
 void CServer::SendMap(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
@@ -1100,7 +1113,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_AUTH)
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(str_comp(pVersion, GameServer()->NetVersion()) != 0 && str_comp(pVersion, GameServer()->NetVersionSevendown()) != 0)
+				if((!m_aClients[ClientID].m_Sevendown && str_comp(pVersion, GameServer()->NetVersion()) != 0) || (m_aClients[ClientID].m_Sevendown && str_comp(pVersion, GameServer()->NetVersionSevendown()) != 0))
 				{
 					// wrong version
 					char aReason[256];
@@ -1120,6 +1133,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_Version = Unpacker.GetInt();
 
 				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+				SendCapabilities(ClientID);
 				SendMap(ClientID);
 			}
 		}
