@@ -649,6 +649,8 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+	if(m_Aim)
+		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AIM;
 
 	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
 	if(SnappingClient >= 0)
