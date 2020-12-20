@@ -515,11 +515,15 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (pSelf->Server()->IsSevendown(i) != pSelf->Server()->IsSevendown(pResult->m_ClientID)) continue;
 
 		// save original id map
+		int OrigFakeID = pPlayer->m_FakeID;
+		int TimeoutedFakeID;
 		int aOrigIdMap[VANILLA_MAX_CLIENTS];
 		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
+		{
 			aOrigIdMap[j] = pSelf->Server()->GetIdMap(pResult->m_ClientID)[j];
-		int OrigFakeID = pPlayer->m_FakeID;
-		int TimeoutedFakeID = pSelf->m_apPlayers[i]->m_FakeID;
+			if (pSelf->Server()->GetIdMap(pResult->m_ClientID)[j] == i)
+				TimeoutedFakeID = j;
+		}
 
 		if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
 		{
