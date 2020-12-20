@@ -220,8 +220,6 @@ class NetObject:
 		self.struct_name = "CNetObj_%s" % self.name
 		self.enum_name = "NETOBJTYPE_%s" % self.name.upper()
 		self.variables = variables
-		if fixup and ex != None:
-			ex = "object-{}".format(ex)
 		self.ex = ex
 
 	def emit_declaration(self):
@@ -256,8 +254,6 @@ class NetEvent(NetObject):
 
 class NetMessage(NetObject):
 	def __init__(self, name, variables, ex=None, teehistorian=True):
-		if ex != None:
-			ex = "message-{}".format(ex)
 		NetObject.__init__(self, name, variables, ex=ex, fixup=False)
 		self.base_struct_name = "CNetMsg_%s" % self.base
 		self.struct_name = "CNetMsg_%s" % self.name

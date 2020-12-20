@@ -254,8 +254,25 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetObjectEx("ExPlayerInfo", "player@netobj.ddnet.tw", [
+	# 0.7
+
+	NetObjectEx("ExPlayerInfo", "explayerinfo@netobj.ddnet7.tw", [
 		NetIntAny("m_Flags"),
+	]),
+
+	# 0.6
+
+	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetTick("m_FreezeEnd"),
+		NetIntRange("m_Jumps", 0, 255),
+		NetIntAny("m_TeleCheckpoint"),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+	]),
+
+	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
+		NetIntAny("m_Flags"),
+		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
@@ -305,6 +322,13 @@ Objects = [
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
+	]),
+
+	# 0.6
+
+	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
 	]),
 ]
 
@@ -525,16 +549,20 @@ Messages = [
 		NetIntAny("m_Test"),
 	]),
 
+	# 0.6 and 0.7
+	 
 	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
 
-	NetMessageEx("Cl_ExPlayerInfo", "explayerinfo@ddnet.tw", [
+	# 0.7
+
+	NetMessageEx("Cl_ExPlayerInfo", "explayerinfo@ddnet7.tw", [
 		NetIntAny("m_Flags"),
 	]),
 
-	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet.tw", []),
+	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet7.tw", []),
 
-	NetMessageEx("Sv_TeamsState", "teamstate@ddnet.tw", []),
+	NetMessageEx("Sv_TeamsState", "teamstate@ddnet7.tw", []),
 ]

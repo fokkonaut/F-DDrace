@@ -1041,7 +1041,9 @@ static inline int MsgFromSevendown(int Msg, bool System)
 	}
 	else
 	{
-		if(Msg >= 17 && Msg <= 20)
+		if(Msg >= OFFSET_UUID)
+			;
+		else if(Msg >= 17 && Msg <= 20)
 			Msg = NETMSGTYPE_CL_SAY + Msg - 17;
 		else if (Msg == 21)
 			Msg = NETMSGTYPE_CL_SKINCHANGE;

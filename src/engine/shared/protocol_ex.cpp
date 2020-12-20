@@ -8,7 +8,7 @@
 
 void RegisterUuids(CUuidManager *pManager)
 {
-	#define UUID(id, name) pManager->RegisterName(id, "system-message-" name);
+	#define UUID(id, name) pManager->RegisterName(id, name);
 	#include "protocol_ex_msgs.h"
 	#undef UUID
 }
