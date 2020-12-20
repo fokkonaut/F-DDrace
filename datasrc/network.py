@@ -23,7 +23,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
 
-ExPlayerFlags = Flags("EXPLAYERFLAG", ["AIM", "AFK"])
+ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC"])
 
 GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
@@ -36,6 +36,11 @@ GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"ENTITIES_DDNET", "ENTITIES_DDRACE", "ENTITIES_RACE", "ENTITIES_FNG",
 	"ENTITIES_VANILLA", "DONT_MASK_ENTITIES",
 ])
+
+CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
+                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
+                  "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
+                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA"])
 
 
 RawHeader = '''
@@ -104,6 +109,7 @@ Flags = [
 	RaceFlags,
 	ExPlayerFlags,
 	GameInfoFlags,
+	CharacterFlags,
 ]
 
 Objects = [
@@ -254,10 +260,11 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	# 0.7
+	# 0.6 and 0.7
 
-	NetObjectEx("ExPlayerInfo", "explayerinfo@netobj.ddnet7.tw", [
+	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
+		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
 	# 0.6
@@ -268,11 +275,6 @@ Objects = [
 		NetIntRange("m_Jumps", 0, 255),
 		NetIntAny("m_TeleCheckpoint"),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
-	]),
-
-	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
-		NetIntAny("m_Flags"),
-		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
@@ -558,11 +560,9 @@ Messages = [
 
 	# 0.7
 
-	NetMessageEx("Cl_ExPlayerInfo", "explayerinfo@ddnet7.tw", [
-		NetIntAny("m_Flags"),
-	]),
+	NetMessageEx("Sv_TeamsState", "teamstate@ddnet7.tw", []),
 
 	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet7.tw", []),
 
-	NetMessageEx("Sv_TeamsState", "teamstate@ddnet7.tw", []),
+	NetMessageEx("Cl_Aim", "aim@ddnet7.tw", []),
 ]

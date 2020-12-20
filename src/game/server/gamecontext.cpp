@@ -2242,11 +2242,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				SendBroadcast(aBuf, ClientID);
 			}
 		}
-		else if (MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
-		{
-			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
-			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
-		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
 		{
 			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
@@ -2452,10 +2447,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_Command *pMsg = (CNetMsg_Cl_Command*)pRawMsg;
 			CommandManager()->OnCommand(pMsg->m_Name, pMsg->m_Arguments, ClientID);
 		}
-		else if (MsgID == NETMSGTYPE_CL_EXPLAYERINFO)
+		else if (MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
 		{
-			CNetMsg_Cl_ExPlayerInfo *pMsg = (CNetMsg_Cl_ExPlayerInfo *)pRawMsg;
-			pPlayer->m_Aim = (bool)pMsg->m_Flags&EXPLAYERFLAG_AIM;
+			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
+			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+		}
+		else if (MsgID == NETMSGTYPE_CL_AIM)
+		{
+			pPlayer->m_Aim = (bool)pUnpacker->GetInt();
 		}
 		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
 		{

@@ -635,16 +635,33 @@ void CPlayer::Snap(int SnappingClient)
 
 		pPlayerInfo->m_Latency = Latency;
 		pPlayerInfo->m_Score = Score;
+	}
 
-		CNetObj_ExPlayerInfo *pExPlayerInfo = static_cast<CNetObj_ExPlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_EXPLAYERINFO, id, sizeof(CNetObj_ExPlayerInfo)));
-		if(!pExPlayerInfo)
-			return;
+	CNetObj_DDNetPlayer *pDDNetPlayer = static_cast<CNetObj_DDNetPlayer *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPLAYER, id, sizeof(CNetObj_DDNetPlayer)));
+	if(!pDDNetPlayer)
+		return;
 
-		pExPlayerInfo->m_Flags = 0;
-		if (m_Aim)
-			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AIM;
-		if(m_Afk)
-			pExPlayerInfo->m_Flags |= EXPLAYERFLAG_AFK;
+	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(id);
+	pDDNetPlayer->m_Flags = 0;
+	if(m_Afk)
+		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
+	if(m_Paused == PAUSE_SPEC)
+		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
+	if(m_Paused == PAUSE_PAUSED)
+		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+
+	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
+	if(SnappingClient >= 0)
+	{
+		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
+	}
+
+	if(ShowSpec)
+	{
+		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
+		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
 	}
 }
 
