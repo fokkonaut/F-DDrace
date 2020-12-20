@@ -2455,7 +2455,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if (MsgID == NETMSGTYPE_CL_EXPLAYERFLAGS)
 		{
 			CNetMsg_Cl_ExPlayerFlags *pMsg = (CNetMsg_Cl_ExPlayerFlags *)pRawMsg;
-			pPlayer->m_Aim = (bool)(pMsg->m_Flags&EXPLAYERFLAG_AIM);
+			pPlayer->m_Aim = pMsg->m_Flags&EXPLAYERFLAG_AIM;
 		}
 		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
 		{
