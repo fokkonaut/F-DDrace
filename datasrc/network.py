@@ -36,7 +36,7 @@ GameInfoFlags = Flags("GAMEINFOFLAG", [
 	# Full, use GameInfoFlags2 for more flags
 ])
 GameInfoFlags2 = Flags("GAMEINFOFLAG2", [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
 ])
 CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
                   "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
@@ -82,7 +82,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=3,
+	GAMEINFO_CURVERSION=6,
 };
 '''
 

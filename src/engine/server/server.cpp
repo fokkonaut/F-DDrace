@@ -885,9 +885,6 @@ void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_
 
 void CServer::SendCapabilities(int ClientID)
 {
-	if (!m_aClients[ClientID].m_Sevendown)
-		return;
-
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
 	Msg.AddInt(SERVERCAPFLAG_DDNET|SERVERCAPFLAG_CHATTIMEOUTCODE); // flags

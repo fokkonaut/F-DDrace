@@ -547,47 +547,6 @@ void IGameController::Snap(int SnappingClient)
 		((int*)pGameData)[5] = m_GameInfo.m_TimeLimit;
 		((int*)pGameData)[6] = 0;
 		((int*)pGameData)[7] = m_RoundCount+1;
-
-		CNetObj_GameInfoEx *pGameInfoEx = (CNetObj_GameInfoEx *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFOEX, 0, sizeof(CNetObj_GameInfoEx));
-		if (!pGameInfoEx)
-			return;
-
-		pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
-		pGameInfoEx->m_Flags = 0
-			| GAMEINFOFLAG_GAMETYPE_RACE
-			| GAMEINFOFLAG_GAMETYPE_DDRACE
-			| GAMEINFOFLAG_GAMETYPE_DDNET
-			| GAMEINFOFLAG_RACE_RECORD_MESSAGE
-			| GAMEINFOFLAG_ALLOW_EYE_WHEEL
-			| GAMEINFOFLAG_ALLOW_HOOK_COLL
-			| GAMEINFOFLAG_BUG_DDRACE_GHOST
-			| GAMEINFOFLAG_PREDICT_DDRACE
-			| GAMEINFOFLAG_PREDICT_DDRACE_TILES
-			| GAMEINFOFLAG_ENTITIES_DDNET
-			| GAMEINFOFLAG_ENTITIES_DDRACE
-			| GAMEINFOFLAG_ENTITIES_RACE
-			| GAMEINFOFLAG_RACE
-			| GAMEINFOFLAG_DONT_MASK_ENTITIES;
-		pGameInfoEx->m_Flags2 = 0;
-
-		if (pSnap->m_Minigame == MINIGAME_NONE || pSnap->m_Minigame == MINIGAME_BLOCK)
-		{
-			pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
-		}
-
-		if (pSnap->m_Minigame == MINIGAME_NONE && pSnap->m_ScoreMode == SCORE_TIME)
-		{
-			pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
-		}
-
-		if (!pSnappingChar)
-			return;
-
-		if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
-			pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
-
-		if (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active())
-			pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 	}
 	else
 	{
@@ -607,6 +566,49 @@ void IGameController::Snap(int SnappingClient)
 		pGameDataRace->m_Precision = 0;
 		pGameDataRace->m_RaceFlags = 0;
 	}
+
+	CNetObj_GameInfoEx *pGameInfoEx = (CNetObj_GameInfoEx *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFOEX, 0, sizeof(CNetObj_GameInfoEx));
+	if (!pGameInfoEx)
+		return;
+
+	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
+	pGameInfoEx->m_Flags = 0
+		| GAMEINFOFLAG_GAMETYPE_RACE
+		| GAMEINFOFLAG_GAMETYPE_DDRACE
+		| GAMEINFOFLAG_GAMETYPE_DDNET
+		| GAMEINFOFLAG_RACE_RECORD_MESSAGE
+		| GAMEINFOFLAG_ALLOW_EYE_WHEEL
+		| GAMEINFOFLAG_ALLOW_HOOK_COLL
+		| GAMEINFOFLAG_BUG_DDRACE_GHOST
+		| GAMEINFOFLAG_PREDICT_DDRACE
+		| GAMEINFOFLAG_PREDICT_DDRACE_TILES
+		| GAMEINFOFLAG_ENTITIES_DDNET
+		| GAMEINFOFLAG_ENTITIES_DDRACE
+		| GAMEINFOFLAG_ENTITIES_RACE
+		| GAMEINFOFLAG_RACE
+		| GAMEINFOFLAG_DONT_MASK_ENTITIES;
+	pGameInfoEx->m_Flags2 = 0
+		| GAMEINFOFLAG2_GAMETYPE_FDDRACE
+		| GAMEINFOFLAG2_ENTITIES_FDDRACE;
+
+	if (pSnap->m_Minigame == MINIGAME_NONE || pSnap->m_Minigame == MINIGAME_BLOCK)
+	{
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
+	}
+
+	if (pSnap->m_Minigame == MINIGAME_NONE && pSnap->m_ScoreMode == SCORE_TIME)
+	{
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
+	}
+
+	if (!pSnappingChar)
+		return;
+
+	if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
+		pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
+
+	if (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active())
+		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 }
 
 void IGameController::Tick()
