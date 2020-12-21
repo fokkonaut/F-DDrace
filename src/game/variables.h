@@ -231,6 +231,7 @@ MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFL
 // chat
 MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use @everyone in chat", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvChatAdminPingLevel, sv_chat_admin_ping_level, AUTHED_NO, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to ping authed players in chat", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvLolFilter, sv_lol_filter, 0, 0, 1, CFGFLAG_SERVER, "I like turtles.", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)

@@ -1760,6 +1760,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 
+			if (str_comp_nocase(pMsg->m_pMessage, "lol") == 0 && Config()->m_SvLolFilter)
+				pMsg->m_pMessage = "I like turtles.";
+
 			if (pMsg->m_pMessage[0] == '/')
 			{
 				int WhisperOffset = -1;
