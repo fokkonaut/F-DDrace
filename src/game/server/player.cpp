@@ -1530,7 +1530,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 	{
 		pAccount->m_Level++;
 
-		str_format(aBuf, sizeof(aBuf), "You are now Level %d!", pAccount->m_Level);
+		str_format(aBuf, sizeof(aBuf), "You are now level %d!", pAccount->m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 }
