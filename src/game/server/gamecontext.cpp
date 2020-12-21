@@ -4344,6 +4344,7 @@ int CGameContext::AddAccount()
 	Account.m_LastAddr.type = -1;
 	Account.m_TaserBattery = 0;
 	Account.m_aContact[0] = '\0';
+	Account.m_aTimeoutCode[0] = '\0';
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4431,6 +4432,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_LAST_ADDR:					net_addr_from_str(&m_Accounts[ID].m_LastAddr, pData); break;
 	case ACC_TASER_BATTERY:				m_Accounts[ID].m_TaserBattery = atoi(pData); break;
 	case ACC_CONTACT:					str_copy(m_Accounts[ID].m_aContact, pData, sizeof(m_Accounts[ID].m_aContact)); break;
+	case ACC_TIMEOUT_CODE:				str_copy(m_Accounts[ID].m_aTimeoutCode, pData, sizeof(m_Accounts[ID].m_aTimeoutCode)); break;
 	}
 }
 
@@ -4480,6 +4482,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_LAST_ADDR:					return "last_addr";
 	case ACC_TASER_BATTERY:				return "taser_battery";
 	case ACC_CONTACT:					return "contact";
+	case ACC_TIMEOUT_CODE:				return "timeout_code";
 	}
 	return "Unknown";
 }
@@ -4533,6 +4536,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_LAST_ADDR:					net_addr_str(&m_Accounts[ID].m_LastAddr, aBuf, sizeof(aBuf), true); break;
 	case ACC_TASER_BATTERY:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserBattery); break;
 	case ACC_CONTACT:					str_copy(aBuf, m_Accounts[ID].m_aContact, sizeof(aBuf)); break;
+	case ACC_TIMEOUT_CODE:				str_copy(aBuf, m_Accounts[ID].m_aTimeoutCode, sizeof(aBuf)); break;
 	}
 	return aBuf;
 }
@@ -4616,6 +4620,7 @@ void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		m_Accounts[ID].m_LoggedIn = true;
 		m_Accounts[ID].m_ClientID = ClientID;
 		str_copy(m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(ClientID), sizeof(m_Accounts[ID].m_aLastPlayerName));
+		str_copy(m_Accounts[ID].m_aTimeoutCode, pPlayer->m_TimeoutCode, sizeof(m_Accounts[ID].m_aTimeoutCode));
 
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);

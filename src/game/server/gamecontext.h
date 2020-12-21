@@ -479,6 +479,7 @@ public:
 		NETADDR m_LastAddr;
 		int m_TaserBattery;
 		char m_aContact[128];
+		char m_aTimeoutCode[64];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -528,6 +529,7 @@ public:
 		ACC_LAST_ADDR,
 		ACC_TASER_BATTERY,
 		ACC_CONTACT,
+		ACC_TIMEOUT_CODE,
 		NUM_ACCOUNT_VARIABLES
 	};
 

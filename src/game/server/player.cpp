@@ -1629,6 +1629,8 @@ void CPlayer::OnLogout()
 	StopPlotEditing();
 	CancelPlotAuction();
 	CancelPlotSwap();
+
+	str_copy(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode, m_TimeoutCode, sizeof(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode));
 }
 
 void CPlayer::StopPlotEditing()
