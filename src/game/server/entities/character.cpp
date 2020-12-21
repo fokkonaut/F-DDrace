@@ -62,6 +62,14 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_Armor = 0;
 	m_TriggeredEvents = 0;
 	m_StrongWeakID = 0;
+
+	m_pDummyBlmapChillPolice = 0;
+}
+
+CCharacter::~CCharacter()
+{
+	if (m_pDummyBlmapChillPolice)
+		delete m_pDummyBlmapChillPolice;
 }
 
 void CCharacter::Reset()
@@ -94,6 +102,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	FDDraceInit();
+	m_pDummyBlmapChillPolice = new CDummyBlmapChillPolice(this, pPlayer);
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	DDraceInit();

@@ -1658,6 +1658,10 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/dragger.cpp
   entities/dragger.h
   entities/dummy.cpp
+  entities/dummy/blmapchill_police.cpp
+  entities/dummy/blmapchill_police.h
+  entities/dummy/dummybase.cpp
+  entities/dummy/dummybase.h
   entities/flag.cpp
   entities/flag.h
   entities/gun.cpp
