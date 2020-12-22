@@ -5314,6 +5314,55 @@ void CGameContext::UnsetTelekinesis(CEntity *pEntity)
 	}
 }
 
+void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
+{
+	CPlayer *pOrig = m_apPlayers[OrigID];
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	int *pOrigIdMap = Server()->GetIdMap(OrigID);
+	int *pIdMap = Server()->GetIdMap(ClientID);
+
+	// remove timeouted tee
+	int id = ClientID;
+	Server()->Translate(id, OrigID);
+	pOrigIdMap[id] = -1;
+	pPlayer->SendDisconnect(ClientID, id);
+
+	// before we can add ourself we have to remove another tee at this id
+	if (pIdMap[pOrig->m_FakeID] != OrigID)
+	{
+		id = pIdMap[pOrig->m_FakeID];
+		Server()->Translate(id, OrigID);
+		pPlayer->SendDisconnect(pIdMap[pOrig->m_FakeID], id);
+	}
+
+	// add ourself
+	pOrigIdMap[pOrig->m_FakeID] = ClientID;
+
+	// copy id map
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		pIdMap[i] = pOrigIdMap[i];
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		// move same ip list to the new player
+		pPlayer->m_aSameIP[i] = pOrig->m_aSameIP[i];
+		if (!m_apPlayers[i] || !pOrig->m_aSameIP[i] || i == ClientID)
+			continue;
+
+		// remove timeouted tee for others with the same ip (notice that we can use m_FakeID here because among players with the same ips the fake ids are the same)
+		Server()->GetIdMap(i)[pPlayer->m_FakeID] = -1;
+		m_apPlayers[i]->SendDisconnect(ClientID, pPlayer->m_FakeID);
+
+		// and insert the new client with the old fake id
+		Server()->GetIdMap(i)[pOrig->m_FakeID] = ClientID;
+		m_apPlayers[i]->SendDisconnect(OrigID, pOrig->m_FakeID);
+		m_apPlayers[i]->SendConnect(ClientID, pOrig->m_FakeID);
+	}
+
+	// set the old fake id for the new player
+	pPlayer->m_FakeID = pOrig->m_FakeID;
+}
+
 bool CGameContext::FlagsUsed()
 {
 	return (m_pController->GetGameFlags()&GAMEFLAG_FLAGS);

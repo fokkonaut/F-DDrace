@@ -632,6 +632,9 @@ public:
 	int SaveDropped(const NETADDR *pAddr);
 	std::vector<NETADDR *> m_vSaveDropped;
 
+	//
+	virtual void OnSetTimedOut(int ClientID, int OrigID);
+
 private:
 
 	bool m_VoteWillPass;

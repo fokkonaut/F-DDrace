@@ -514,28 +514,8 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		if (str_comp(pSelf->m_apPlayers[i]->m_TimeoutCode, pTimeout)) continue;
 		if (pSelf->Server()->IsSevendown(i) != pSelf->Server()->IsSevendown(pResult->m_ClientID)) continue;
 
-		// save original id map
-		int OrigFakeID = pPlayer->m_FakeID;
-		int TimeoutedFakeID = -1;
-		int aOrigIdMap[VANILLA_MAX_CLIENTS];
-		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-		{
-			aOrigIdMap[j] = pSelf->Server()->GetIdMap(pResult->m_ClientID)[j];
-			if (pSelf->Server()->GetIdMap(pResult->m_ClientID)[j] == i)
-				TimeoutedFakeID = j;
-		}
-
 		if (pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
 		{
-			// restore id map
-			int *pTimeoutedIdMap = pSelf->Server()->GetIdMap(i);
-			for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-				pTimeoutedIdMap[j] = aOrigIdMap[j];
-			pTimeoutedIdMap[OrigFakeID] = i;
-			pTimeoutedIdMap[TimeoutedFakeID] = -1;
-			pSelf->m_apPlayers[i]->SendDisconnect(i, TimeoutedFakeID);
-			pSelf->m_apPlayers[i]->m_FakeID = OrigFakeID;
-
 			if (pSelf->m_apPlayers[i]->GetCharacter())
 				pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
 			return;

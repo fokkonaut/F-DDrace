@@ -223,6 +223,7 @@ public:
 	virtual void OnConsoleInit() = 0;
 	virtual void OnShutdown(bool FullShutdown = false) = 0;
 	virtual void OnPreShutdown() = 0;
+	virtual void OnSetTimedOut(int ClientID, int OrigID) = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;
