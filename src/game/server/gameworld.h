@@ -58,7 +58,7 @@ private:
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
-	void UpdatePlayerMaps();
+	void UpdatePlayerMaps(int ForcedID = -1);
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -73,6 +73,8 @@ public:
 	~CGameWorld();
 
 	void SetGameServer(CGameContext *pGameServer);
+
+	void ForceUpdatePlayerMap(int ClientID) { UpdatePlayerMaps(ClientID); }
 
 	CEntity *FindFirst(int Type);
 

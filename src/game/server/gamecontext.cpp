@@ -1643,6 +1643,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			dbg_msg("ddrace", "%d using custom client. version: %d", ClientID, Version);
 
+			m_World.ForceUpdatePlayerMap(ClientID);
 			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
 
 			//autoban known bot versions
@@ -2475,7 +2476,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			dbg_msg("ddrace", "%d using custom client. version: %x, ddrace: %d", ClientID, Server()->GetClientVersion(ClientID), pPlayer->m_DDraceVersion);
 
 			if (pPlayer->m_DDraceVersion >= VERSION_DDRACE_TEAMS)
-				((CGameControllerDDRace*)m_pController)->m_Teams.SendTeamsState(ClientID);
+			{
+				m_World.ForceUpdatePlayerMap(ClientID);
+				((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+			}
 		}
 	}
 	else

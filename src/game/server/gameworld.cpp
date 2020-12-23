@@ -170,13 +170,14 @@ bool distCompare(std::pair<float,int> a, std::pair<float,int> b)
 	return (a.first < b.first);
 }
 
-void CGameWorld::UpdatePlayerMaps()
+void CGameWorld::UpdatePlayerMaps(int ForcedID)
 {
-	if (Server()->Tick() % Config()->m_SvMapUpdateRate != 0)
+	if (ForcedID == -1 && Server()->Tick() % Config()->m_SvMapUpdateRate != 0)
 		return;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
+		if (ForcedID != -1 && i != ForcedID) continue; // only update specific player
 		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
 		int *pMap = Server()->GetIdMap(i);
 
