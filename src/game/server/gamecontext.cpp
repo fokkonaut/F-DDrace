@@ -5361,6 +5361,8 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 
 	// set the old fake id for the new player
 	pPlayer->m_FakeID = pOrig->m_FakeID;
+
+	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
 }
 
 bool CGameContext::FlagsUsed()
