@@ -262,14 +262,10 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	# 0.6 and 0.7
-
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
-
-	# 0.6
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
@@ -553,21 +549,17 @@ Messages = [
 	NetMessageEx("Sv_MyOwnMessage", "my-own-message@heinrich5991.de", [
 		NetIntAny("m_Test"),
 	]),
-
-	# 0.6 and 0.7
 	 
 	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
 
-	# 0.7
+	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
-	NetMessageEx("Sv_TeamsState", "teamstate@ddnet7.tw", []),
-
-	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@ddnet7.tw", [
+	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@netmsg.7.ddnet.tw", [
 		NetIntAny("m_Flags"),
 	]),
 
-	NetMessageEx("Cl_IsDDrace", "isddrace@ddnet7.tw", []),
+	NetMessageEx("Cl_IsDDrace", "isddrace@netmsg.7.ddnet.tw", []),
 ]
