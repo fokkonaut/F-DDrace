@@ -85,7 +85,7 @@ public:
 	int Entity(int x, int y, int Layer);
 	int GetPureMapIndex(float x, float y);
 	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }
-	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
+	std::list < int > GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0);
 	int GetMapIndex(vec2 Pos);
 	bool TileExists(int Index);
 	bool TileExistsNext(int Index);
