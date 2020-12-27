@@ -581,6 +581,7 @@ public:
 	bool SameIP(int AccID, const NETADDR *pAddr);
 
 	bool FlagsUsed();
+	void CreateFolders();
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;

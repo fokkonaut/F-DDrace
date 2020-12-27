@@ -3419,6 +3419,8 @@ void CGameContext::OnInit()
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		m_aPoliceLevel[i] = PoliceLevel[i];
 
+	CreateFolders();
+
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
@@ -4957,6 +4959,22 @@ int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageT
 		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 	return 0;
+}
+
+void CGameContext::CreateFolders()
+{
+	Storage()->CreateFolder(Config()->m_SvAccFilePath, IStorage::TYPE_SAVE);
+	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
+	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
+	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
+
+	char aPath[256];
+	str_format(aPath, sizeof(aPath), "dumps/money/%s", Config()->m_SvMap);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "dumps/savedtees/%s", Config()->m_SvMap);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
 bool CGameContext::SameIP(int ClientID1, int ClientID2)
