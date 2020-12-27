@@ -5780,6 +5780,12 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 	}
 
 	CCharacter *pChr = GetPlayerChar(ClientID);
+	if (pChr && pChr->m_FreezeTime)
+	{
+		SendChatTarget(ClientID, "You can not join minigames while being frozen");
+		return;
+	}
+
 	if (!Force && (!pChr || pChr->RequestMinigameChange(Minigame)))
 		return;
 
