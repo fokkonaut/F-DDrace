@@ -2438,13 +2438,14 @@ void CCharacter::HandleTiles(int Index)
 			if (Server()->Tick() % 50 == 0)
 				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
 		}
-		else
+		else if (m_pPlayer->m_LastMoneyXPBomb < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonationLinked)
 		{
 			m_pPlayer->WalletTransaction(500, "from money-xp bomb");
 			m_pPlayer->GiveXP(2500);
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money-xp bomb)");
 
 			m_GotMoneyXPBomb = true;
+			m_pPlayer->m_LastMoneyXPBomb = Server()->Tick();
 		}
 	}
 

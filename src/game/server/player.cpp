@@ -206,6 +206,8 @@ void CPlayer::Reset()
 	m_WalletMoney = 0;
 
 	m_CheckedShutdownSaved = false;
+
+	m_LastMoneyXPBomb = 0;
 }
 
 void CPlayer::Tick()

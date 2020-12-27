@@ -342,6 +342,8 @@ public:
 	int64 GetWalletMoney() { return m_WalletMoney; }
 	void SetWalletMoney(int64 Amount) { m_WalletMoney = Amount; }
 
+	int64 m_LastMoneyXPBomb;
+
 	// plot
 	void CancelPlotAuction();
 	void CancelPlotSwap();
