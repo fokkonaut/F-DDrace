@@ -1084,7 +1084,7 @@ void CGameContext::OnTick()
 	{
 		dbg_msg("saves", "removed all shutdown save files");
 		char aPath[IO_MAX_PATH_LENGTH];
-		str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, RemoveShutdownSaves, this);
 	}
 
@@ -4011,7 +4011,7 @@ void CGameContext::ReadPlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%d.plot", Config()->m_SvPlotFilePath, ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Config()->m_SvMap, ID);
 	std::fstream PlotFile(aBuf);
 
 	for (int i = 0; i < NUM_PLOT_VARIABLES; i++)
@@ -4032,7 +4032,7 @@ void CGameContext::WritePlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%d.plot", Config()->m_SvPlotFilePath, ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Config()->m_SvMap, ID);
 	std::ofstream PlotFile(aBuf);
 
 	if (PlotFile.is_open())
@@ -4734,7 +4734,7 @@ void CGameContext::ReadMoneyListFile()
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
 	std::fstream MoneyDropsFile(aBuf);
 	getline(MoneyDropsFile, data);
 	const char *pStr = data.c_str();
@@ -4763,7 +4763,7 @@ void CGameContext::ReadMoneyListFile()
 void CGameContext::WriteMoneyListFile()
 {
 	char aFile[256];
-	str_format(aFile, sizeof(aFile), "%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath);
+	str_format(aFile, sizeof(aFile), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
 	std::ofstream MoneyDropsFile(aFile);
 
 	CMoney *pMoney = (CMoney *)m_World.FindFirst(CGameWorld::ENTTYPE_MONEY);
@@ -4855,7 +4855,7 @@ void CGameContext::SaveCharacter(int ClientID)
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap, aAddrStr);
 	CSaveTee SaveTee(true);
 	SaveTee.SaveFile(aFilename, pChr);
 
@@ -4878,7 +4878,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	pPlayer->m_CheckedShutdownSaved = true;
 
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
 
 	m_ShutdownSave.m_ClientID = ClientID;
 	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, CheckShutdownSavedCallback, this);
@@ -4897,7 +4897,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	SwapAddrSeparator(aAddrStr);
 
 	// Get path and load
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s.save", Config()->m_SvSavedTeesFilePath, aAddrStr);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap, aAddrStr);
 	CSaveTee SaveTee(true);
 	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
 	{
@@ -4955,7 +4955,7 @@ int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageT
 		}
 
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pName);
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pSelf->Config()->m_SvMap, pName);
 		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 	return 0;
@@ -4967,6 +4967,10 @@ void CGameContext::CreateFolders()
 	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
 
 	char aPath[256];
+	// money history
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
 	// plots
 	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Config()->m_SvMap);
@@ -4981,12 +4985,6 @@ void CGameContext::CreateFolders()
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-
-	// money history
-	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvMoneyHistoryFilePath, Config()->m_SvMap);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
