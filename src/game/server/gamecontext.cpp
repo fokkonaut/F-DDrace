@@ -4964,11 +4964,19 @@ int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageT
 void CGameContext::CreateFolders()
 {
 	Storage()->CreateFolder(Config()->m_SvAccFilePath, IStorage::TYPE_SAVE);
-	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
-	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
 	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
 
 	char aPath[256];
+	// plots
+	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Config()->m_SvMap);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
+	// money drops
+	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
 	// saved tee
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
