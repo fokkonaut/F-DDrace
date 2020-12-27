@@ -436,10 +436,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	}
 	else // Mode == CHAT_WHISPER
 	{
-		if (!Server()->IsSevendown(ChatterClientID))
-			if (!Server()->ReverseTranslate(To, ChatterClientID))
-				return;
-
 		if (To < 0 || To >= MAX_CLIENTS || !Server()->ClientIngame(To))
 		{
 			char aBuf[32];
@@ -447,6 +443,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			SendChatTarget(ChatterClientID, aBuf);
 			return;
 		}
+
+		m_apPlayers[ChatterClientID]->m_LastWhisperTo = To;
 
 		// send to the clients
 		Msg.m_TargetID = To;
@@ -1733,7 +1731,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Mode = CHAT_NONE;
 			}
 
-			if (Mode != CHAT_WHISPER)
+			if (Mode == CHAT_WHISPER)
+			{
+				if (!Server()->IsSevendown(ClientID))
+					if (!Server()->ReverseTranslate(pMsg->m_Target, ClientID))
+						return;
+			}
+			else
 			{
 				// @everyone mode
 				if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone"))
@@ -1767,10 +1771,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (pMsg->m_pMessage[0] == '/')
 			{
 				int WhisperOffset = -1;
+				int ConverseOffset = -1;
 				if (Server()->IsSevendown(ClientID))
 				{
 					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "w ", 2) == 0) WhisperOffset = 3;
 					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "whisper ", 8) == 0) WhisperOffset = 9;
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "c ", 2) == 0) ConverseOffset = 3;
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "converse ", 9) == 0) ConverseOffset = 10;
 				}
 
 				if (WhisperOffset != -1)
@@ -1778,9 +1785,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					int Target;
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + WhisperOffset, 256);
-					Mode = CHAT_WHISPER;
 					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &Target);
-					SendChat(ClientID, Mode, Target, pMsg->m_pMessage, ClientID);
+					SendChat(ClientID, CHAT_WHISPER, Target, pMsg->m_pMessage, ClientID);
+				}
+				else if (ConverseOffset != -1)
+				{
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + ConverseOffset, 256);
+					
+					if (pPlayer->m_LastWhisperTo >= 0)
+						SendChat(ClientID, CHAT_WHISPER, pPlayer->m_LastWhisperTo, aWhisperMsg, ClientID);
+					else
+						SendChatTarget(ClientID, "You do not have an ongoing conversation. Whisper to someone to start one");
 				}
 				else
 				{

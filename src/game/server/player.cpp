@@ -67,6 +67,7 @@ void CPlayer::Reset()
 	m_EyeEmote = true;
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = true;
+	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
 	m_TimeoutCode[0] = '\0';
 
@@ -779,6 +780,9 @@ void CPlayer::OnDisconnect()
 				GameServer()->m_apPlayers[i]->m_SpectatorID = -1;
 			}
 		}
+
+		if (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_LastWhisperTo == m_ClientID)
+			GameServer()->m_apPlayers[i]->m_LastWhisperTo = -1;
 
 		CCharacter* pChr = GameServer()->GetPlayerChar(i);
 		if (pChr && pChr->Core()->m_Killer.m_ClientID == m_ClientID)
