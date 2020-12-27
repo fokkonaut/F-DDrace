@@ -4969,11 +4969,16 @@ void CGameContext::CreateFolders()
 	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
 
 	char aPath[256];
-	str_format(aPath, sizeof(aPath), "dumps/money/%s", Config()->m_SvMap);
+	// saved tee
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "dumps/savedtees/%s", Config()->m_SvMap);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
+	// money history
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvMoneyHistoryFilePath, Config()->m_SvMap);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
