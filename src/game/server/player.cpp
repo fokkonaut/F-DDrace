@@ -1605,7 +1605,7 @@ void CPlayer::OnLogin()
 		m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
 		if (pAccount->m_PortalRifle)
-			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE);
+			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 	}
 
 	if (pAccount->m_aContact[0] == '\0')
@@ -1623,7 +1623,7 @@ void CPlayer::OnLogout()
 	{
 		m_pCharacter->UnsetSpookyGhost();
 		m_pCharacter->GiveWeapon(WEAPON_TASER, true);
-		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true);
+		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, true);
 	}
 
 	StopPlotEditing();

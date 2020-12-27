@@ -112,7 +112,7 @@ public:
 	bool IncreaseHealth(int Amount);
 	bool IncreaseArmor(int Amount);
 
-	void GiveWeapon(int Weapon, bool Remove = false, int Ammo = -1);
+	void GiveWeapon(int Weapon, bool Remove = false, int Ammo = -1, bool PortalRifleByAcc = false);
 	void GiveNinja();
 	void RemoveNinja();
 
@@ -404,7 +404,9 @@ public:
 	bool m_PoliceHelper;
 	bool m_MoneyTile;
 	int64 m_RoomAntiSpamTick;
+
 	int64 m_LastLinkedPortals;
+	bool m_CollectedPortalRifle;
 
 	int m_HookPower;
 	bool m_IsRainbowHooked;

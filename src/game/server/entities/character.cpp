@@ -1000,7 +1000,7 @@ void CCharacter::HandleWeapons()
 	return;
 }
 
-void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
+void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleByAcc)
 {
 	if (m_InitializedSpawnWeapons)
 	{
@@ -1026,6 +1026,9 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
+
+	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
+		m_CollectedPortalRifle = !Remove;
 
 	if (Weapon == WEAPON_NINJA)
 	{
@@ -3210,6 +3213,8 @@ void CCharacter::FDDraceInit()
 		m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true;
 	m_RoomAntiSpamTick = Now;
 
+	m_CollectedPortalRifle = false;
+
 	m_InitializedSpawnWeapons = false;
 	for (int i = 0; i < 3; i++)
 		m_aSpawnWeaponActive[i] = false;
@@ -3226,7 +3231,7 @@ void CCharacter::FDDraceInit()
 		m_InitializedSpawnWeapons = true;
 
 		if (pAccount->m_PortalRifle)
-			GiveWeapon(WEAPON_PORTAL_RIFLE, false);
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 	}
 
 	m_HasFinishedSpecialRace = false;
@@ -3586,12 +3591,12 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		return;
 
 	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || WeaponID == WEAPON_PORTAL_RIFLE || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
+		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
 		return;
 
 	int Count = 0;
 	for (int i = 0; i < NUM_WEAPONS; i++)
-		if (i != WEAPON_NINJA && i != WEAPON_TASER && i != WEAPON_PORTAL_RIFLE && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
+		if (i != WEAPON_NINJA && i != WEAPON_TASER && (i != WEAPON_PORTAL_RIFLE || m_CollectedPortalRifle) && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
 			Count++;
 	if (Count < 2)
 		return;
