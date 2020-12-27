@@ -3670,8 +3670,8 @@ void CCharacter::DropLoot(int Weapon)
 	if (!Config()->m_SvDropsOnDeath)
 		return;
 
-	// Drop money even if killed by the game, e.g. team change, but never when swapping minigame
-	if (Weapon != WEAPON_MINIGAME_CHANGE && m_FreezeTime)
+	// Drop money even if killed by the game, e.g. team change, but never when leaving a minigame (joining and being frozen drops too)
+	if ((Weapon != WEAPON_MINIGAME_CHANGE || m_RequestedMinigame != MINIGAME_NONE) && m_FreezeTime)
 		DropMoney(m_pPlayer->GetWalletMoney());
 
 	if (Weapon == WEAPON_GAME || Weapon == WEAPON_MINIGAME_CHANGE)
