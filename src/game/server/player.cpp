@@ -1946,6 +1946,7 @@ bool CPlayer::LoadMinigameTee()
 
 	m_MinigameTee.Load(m_pCharacter, 0);
 	m_pCharacter->Core()->m_Vel.y = -2.f; // avoid stacking in each other
+	m_pCharacter->Freeze(); // avoid too strong meta with backup tees in block areas
 
 	m_SavedMinigameTee = false;
 	return true;
