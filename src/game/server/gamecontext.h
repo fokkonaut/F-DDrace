@@ -170,6 +170,7 @@ class CGameContext : public IGameServer
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
+	static void ConchainUpdateLocalChat(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
 	static void NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
 	static void RemoveCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
@@ -583,6 +584,8 @@ public:
 	bool FlagsUsed();
 	void CreateFolders();
 
+	bool IsLocal(int CientID1, int ClientID2);
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 
@@ -761,6 +764,7 @@ private:
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
+	static void ConLocalChat(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

@@ -439,9 +439,9 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
+		int Team = -1;
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
-			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)
 				Team = 1; // red colored team
 			else if (i == SPEC_SELECT_FLAG_BLUE)
@@ -457,7 +457,16 @@ void CGameTeams::SendTeamsState(int ClientID)
 		int id = i;
 		Server()->ReverseTranslate(id, ClientID);
 
-		int Team = m_Core.Team(id);
+		bool OwnLocalChat = GameServer()->m_apPlayers[ClientID]->m_LocalChat;
+		bool OtherLocalChat = GameServer()->m_apPlayers[id] && GameServer()->m_apPlayers[id]->m_LocalChat;
+		bool Local = GameServer()->IsLocal(ClientID, id);
+		if ((OwnLocalChat && Local) || (!OwnLocalChat && !Local && OtherLocalChat))
+		{
+			Msg.AddInt(63);
+			continue;
+		}
+
+		Team = m_Core.Team(id);
 		if (Team == TEAM_SUPER)
 			Team = VANILLA_MAX_CLIENTS;
 		else if (Team > VANILLA_MAX_CLIENTS)

@@ -2414,6 +2414,40 @@ void CGameContext::ConWeapon(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->SetQueuedWeapon(pResult->GetInteger(0));
 }
 
+void CGameContext::ConLocalChat(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!pSelf->Config()->m_SvLocalChat)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Local chat is disabled");
+		return;
+	}
+	
+	if (pResult->NumArguments())
+	{
+		if (pPlayer->m_LocalChat == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_LocalChat = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_LocalChat = !pPlayer->m_LocalChat;
+	}
+
+	if (pPlayer->m_LocalChat)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Entered local chat");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Entered public chat");
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SendTeamsState(i);
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
