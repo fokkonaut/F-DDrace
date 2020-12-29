@@ -412,8 +412,6 @@ public:
 	int m_FakeID;
 	bool m_aSameIP[MAX_CLIENTS];
 
-	bool m_aLastNetworkClipped[MAX_CLIENTS];
-
 	// shutdown tee
 	bool m_CheckedShutdownSaved;
 
