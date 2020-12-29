@@ -820,6 +820,7 @@ void CCharacter::FireWeapon()
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| (distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance)
+					|| GameServer()->GetTilePlotID(PortalPos) >= PLOT_START
 					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
