@@ -645,7 +645,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pDDNetPlayer)
 		return;
 
-	pDDNetPlayer->m_AuthLevel = GameServer()->Config()->m_SvAuthedHighlighted ? Server()->GetAuthedState(id) : AUTHED_NO;
+	pDDNetPlayer->m_AuthLevel = GameServer()->Config()->m_SvAuthedHighlighted ? Server()->GetAuthedState(m_ClientID) : AUTHED_NO;
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
