@@ -99,6 +99,7 @@ enum
 	NUM_TASER_LEVELS = 7,
 	NUM_POLICE_LEVELS = 5,
 	MAX_TASER_BATTERY = 100,
+	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
 	ACC_CURRENT_VERSION = 4,
@@ -447,7 +448,7 @@ public:
 		int m_Port;
 		bool m_LoggedIn;
 		bool m_Disabled;
-		char m_Password[32];
+		char m_Password[MAX_PASSWORD_LENGTH];
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;

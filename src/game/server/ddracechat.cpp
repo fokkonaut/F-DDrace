@@ -1594,7 +1594,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	if (str_length(aPassword) > 20 || str_length(aPassword) < 3)
+	if (str_length(aPassword) > MAX_PASSWORD_LENGTH || str_length(aPassword) < 3)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "The password is too long or too short");
 		return;
@@ -1716,7 +1716,7 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 		return;
 	}
 
-	if (str_length(pResult->GetString(1)) > 20 || str_length(pResult->GetString(1)) < 3)
+	if (str_length(pResult->GetString(1)) > MAX_PASSWORD_LENGTH || str_length(pResult->GetString(1)) < 3)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "The password is too long or too short");
 		return;
