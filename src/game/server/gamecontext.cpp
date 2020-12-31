@@ -456,7 +456,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (IsLocal(ChatterClientID, i))
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NO_TRANSLATE, i);
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER
 	{
