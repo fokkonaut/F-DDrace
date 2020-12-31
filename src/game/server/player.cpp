@@ -190,6 +190,7 @@ void CPlayer::Reset()
 	{
 		m_HidePlayerTeam[i] = TEAM_RED;
 		m_aSameIP[i] = false;
+		m_aLastNetworkClipped[i] = false;
 	}
 
 	m_pControlledTee = 0;

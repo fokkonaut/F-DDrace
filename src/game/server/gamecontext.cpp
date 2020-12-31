@@ -2992,9 +2992,11 @@ void CGameContext::ConchainUpdateLocalChat(IConsole::IResult* pResult, void* pUs
 				if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_LocalChat)
 				{
 					pSelf->m_apPlayers[i]->m_LocalChat = false;
-					pSelf->SendChatTarget(i, "Local chat mode has been disabled, automatically entered public chat");
+					pSelf->SendChatTarget(pResult->m_ClientID, "Local chat mode has been disabled, automatically entered public chat");
 				}
 			}
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SendTeamsState(i);
 		}
 	}
 }

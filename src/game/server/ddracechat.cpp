@@ -2443,6 +2443,9 @@ void CGameContext::ConLocalChat(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Entered local chat");
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "Entered public chat");
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SendTeamsState(i);
 }
 
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
