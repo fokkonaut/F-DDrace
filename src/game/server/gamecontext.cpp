@@ -348,7 +348,14 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	char aBuf[256], aText[256];
 	str_copy(aText, pText, sizeof(aText));
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
+	{
+		// join local or public chat
+		bool Local = Mode == CHAT_TEAM;
+		if ((Mode == CHAT_ALL || Mode == CHAT_TEAM) && m_apPlayers[ChatterClientID] && m_apPlayers[ChatterClientID]->JoinChat(Local))
+			Mode = Local ? CHAT_LOCAL : CHAT_ALL;
+
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), aText);
+	}
 	else if (ChatterClientID == -2)
 	{
 		str_format(aBuf, sizeof(aBuf), "### %s", aText);
@@ -379,18 +386,26 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (CanReceiveMessage(ChatterClientID, i))
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+	}
 	else if(Mode == CHAT_TEAM)
 	{
-		CTeamsCore* Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
 		// pack one for the recording only
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+
+		CTeamsCore* Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
 
 		// send to the clients
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_apPlayers[i] != 0)
 			{
+				if (!CanReceiveMessage(ChatterClientID, i))
+					continue;
+
 				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS)
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
@@ -433,6 +448,15 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 		}
+	}
+	else if (Mode == CHAT_LOCAL)
+	{
+		// send to the clients
+		Msg.m_Mode = CHAT_TEAM;
+
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (IsLocal(ChatterClientID, i))
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NO_TRANSLATE, i);
 	}
 	else // Mode == CHAT_WHISPER
 	{
@@ -1737,6 +1761,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					if (!Server()->ReverseTranslate(pMsg->m_Target, ClientID))
 						return;
 			}
+			else if (Mode == CHAT_TEAM)
+			{
+				if (pPlayer->m_LocalChat && GetPlayerChar(ClientID))
+					Mode = CHAT_LOCAL;
+			}
 			else
 			{
 				// @everyone mode
@@ -2957,6 +2986,26 @@ void CGameContext::ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* p
 	}
 }
 
+void CGameContext::ConchainUpdateLocalChat(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if (pResult->NumArguments())
+	{
+		CGameContext* pSelf = (CGameContext*)pUserData;
+		if (!pSelf->Config()->m_SvLocalChat)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_LocalChat)
+				{
+					pSelf->m_apPlayers[i]->m_LocalChat = false;
+					pSelf->SendChatTarget(pResult->m_ClientID, "Local chat mode has been disabled, automatically entered public chat");
+				}
+			}
+		}
+	}
+}
+
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3041,6 +3090,7 @@ void CGameContext::OnConsoleInit()
 	// F-DDrace
 	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
+	Console()->Chain("sv_local_chat", ConchainUpdateLocalChat, this);
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include <game/ddracecommands.h>
@@ -5066,6 +5116,34 @@ void CGameContext::CreateSoundPlayer(int Sound, int ClientID)
 void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 {
 	CreateSound(Pos, Sound, CmaskOne(ClientID));
+}
+
+bool CGameContext::IsLocal(int ClientID1, int ClientID2)
+{
+	if (ClientID1 == ClientID2)
+		return true;
+
+	CCharacter *p1 = GetPlayerChar(ClientID1);
+	CCharacter *p2 = GetPlayerChar(ClientID2);
+
+	if (!p1 || !p2)
+		return false;
+
+	float dx = p1->GetPos().x-p2->GetPos().x;
+	float dy = p1->GetPos().y-p2->GetPos().y;
+
+	if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
+		return false;
+
+	if(distance(p1->GetPos(), p2->GetPos()) > 4000.0f)
+		return false;
+
+	return true;
+}
+
+bool CGameContext::CanReceiveMessage(int Sender, int Receiver)
+{
+	return m_apPlayers[Receiver] && (!m_apPlayers[Receiver]->m_LocalChat || IsLocal(Sender, Receiver));
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)

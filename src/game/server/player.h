@@ -368,6 +368,10 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
+	bool JoinChat(bool Local);
+	bool m_LocalChat;
+	int GetAuthedHighlighted();
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 

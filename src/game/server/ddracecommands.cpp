@@ -1070,7 +1070,7 @@ void CGameContext::ConSayBy(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
 	CPlayer* pPlayer = pSelf->m_apPlayers[Victim];
-	if (pPlayer) pSelf->SendChat(Victim, CHAT_ALL, -1, pResult->GetString(1));
+	if (pPlayer) pSelf->SendChat(Victim, pPlayer->m_LocalChat ? CHAT_LOCAL : CHAT_ALL, -1, pResult->GetString(1));
 }
 
 void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)

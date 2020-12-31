@@ -205,10 +205,9 @@ void CPlayer::Reset()
 	m_aPlotSwapUsername[0] = 0;
 	m_PlotSpawn = false;
 	m_WalletMoney = 0;
-
 	m_CheckedShutdownSaved = false;
-
 	m_LastMoneyXPBomb = 0;
+	m_LocalChat = false;
 }
 
 void CPlayer::Tick()
@@ -625,7 +624,7 @@ void CPlayer::Snap(int SnappingClient)
 	else
 	{
 		pPlayerInfo->m_PlayerFlags = m_PlayerFlags&PLAYERFLAG_CHATTING;
-		if(Server()->GetAuthedState(m_ClientID) && GameServer()->Config()->m_SvAuthedHighlighted)
+		if(GetAuthedHighlighted())
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_ADMIN;
 		if(m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_READY;
@@ -644,7 +643,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pDDNetPlayer)
 		return;
 
-	pDDNetPlayer->m_AuthLevel = GameServer()->Config()->m_SvAuthedHighlighted ? Server()->GetAuthedState(m_ClientID) : AUTHED_NO;
+	pDDNetPlayer->m_AuthLevel = GetAuthedHighlighted();
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
@@ -755,6 +754,26 @@ int CPlayer::GetHidePlayerTeam(int Asker)
 		|| (GameServer()->Config()->m_SvHideMinigamePlayers && pAsker->m_Minigame != m_Minigame)))
 		return TEAM_BLUE;
 	return m_Team;
+}
+
+int CPlayer::GetAuthedHighlighted()
+{
+	if (GameServer()->Config()->m_SvLocalChat)
+		return m_LocalChat ? AUTHED_HELPER : AUTHED_NO;
+	return GameServer()->Config()->m_SvAuthedHighlighted ? Server()->GetAuthedState(m_ClientID) : AUTHED_NO;
+}
+
+bool CPlayer::JoinChat(bool Local)
+{
+	if (!GameServer()->Config()->m_SvLocalChat || m_LocalChat == Local)
+		return false;
+
+	m_LocalChat = Local;
+	if (m_LocalChat)
+		GameServer()->SendChatTarget(m_ClientID, "Entered local chat");
+	else
+		GameServer()->SendChatTarget(m_ClientID, "Entered public chat");
+	return true;
 }
 
 void CPlayer::OnDisconnect()

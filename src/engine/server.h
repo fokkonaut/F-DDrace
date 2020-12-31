@@ -99,7 +99,7 @@ public:
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
 		// 128 player translation
-		if (pMsg->m_Mode != CHAT_WHISPER && pMsg->m_ClientID >= 0 && ((pMsg->m_Mode == CHAT_TEAM && pMsg->m_ClientID != ClientID) || !Translate(pMsg->m_ClientID, ClientID)))
+		if (pMsg->m_Mode != CHAT_WHISPER && pMsg->m_ClientID >= 0 && (!Translate(pMsg->m_ClientID, ClientID) || (!(Flags&MSGFLAG_NO_TRANSLATE) && pMsg->m_Mode == CHAT_TEAM && pMsg->m_ClientID != ClientID)))
 		{
 			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
 			pMsg->m_pMessage = msgbuf;
