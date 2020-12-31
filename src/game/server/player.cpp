@@ -184,13 +184,11 @@ void CPlayer::Reset()
 	m_HasRoomKey = false;
 
 	m_ForcedSkin = SKIN_NONE;
-	m_LocalChat = false;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_HidePlayerTeam[i] = TEAM_RED;
 		m_aSameIP[i] = false;
-		m_aLastNetworkClipped[i] = false;
 	}
 
 	m_pControlledTee = 0;

@@ -379,14 +379,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_TargetID = -1;
 
 	if(Mode == CHAT_ALL)
-	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (!m_apPlayers[i] || (m_apPlayers[i]->m_LocalChat && !IsLocal(ChatterClientID, i)))
-				continue;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
-		}
-	}
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 	else if(Mode == CHAT_TEAM)
 	{
 		CTeamsCore* Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
@@ -398,9 +391,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		{
 			if(m_apPlayers[i] != 0)
 			{
-				if (m_apPlayers[i]->m_LocalChat && !IsLocal(ChatterClientID, i))
-					continue;
-
 				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS)
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
@@ -443,15 +433,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 		}
-	}
-	else if (Mode == CHAT_LOCAL)
-	{
-		// send to the clients
-		Msg.m_Mode = CHAT_TEAM;
-
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (IsLocal(ChatterClientID, i))
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER
 	{
@@ -1762,9 +1743,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone"))
 					Mode = CHAT_ATEVERYONE;
 
-				if (pPlayer->m_LocalChat && GetPlayerChar(ClientID))
-					Mode = CHAT_LOCAL;
-
 				// disallow pings
 				if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
 				{
@@ -2979,28 +2957,6 @@ void CGameContext::ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* p
 	}
 }
 
-void CGameContext::ConchainUpdateLocalChat(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if (pResult->NumArguments())
-	{
-		CGameContext* pSelf = (CGameContext*)pUserData;
-		if (!pSelf->Config()->m_SvLocalChat)
-		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_LocalChat)
-				{
-					pSelf->m_apPlayers[i]->m_LocalChat = false;
-					pSelf->SendChatTarget(pResult->m_ClientID, "Local chat mode has been disabled, automatically entered public chat");
-				}
-			}
-			for (int i = 0; i < MAX_CLIENTS; i++)
-				((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SendTeamsState(i);
-		}
-	}
-}
-
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3085,7 +3041,6 @@ void CGameContext::OnConsoleInit()
 	// F-DDrace
 	Console()->Chain("sv_hide_minigame_players", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
-	Console()->Chain("sv_local_chat", ConchainUpdateLocalChat, this);
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include <game/ddracecommands.h>
@@ -5111,22 +5066,6 @@ void CGameContext::CreateSoundPlayer(int Sound, int ClientID)
 void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 {
 	CreateSound(Pos, Sound, CmaskOne(ClientID));
-}
-
-bool CGameContext::IsLocal(int ClientID1, int ClientID2)
-{
-	if (ClientID1 == ClientID2)
-		return true;
-
-	CCharacter *p1 = GetPlayerChar(ClientID1);
-	CCharacter *p2 = GetPlayerChar(ClientID2);
-
-	if (!p1 || !p2)
-		return false;
-
-	if (!((CEntity *)p1)->NetworkClipped(ClientID2) && !((CEntity *)p2)->NetworkClipped(ClientID1))
-		return true;
-	return false;
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)

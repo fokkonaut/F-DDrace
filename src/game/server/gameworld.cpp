@@ -229,11 +229,6 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 				continue;
 			}
 
-			bool Local = GameServer()->IsLocal(i, j);
-			if (Local != m_aaLastLocal[i][j])
-				UpdateTeamsStates = true;
-			m_aaLastLocal[i][j] = Local;
-
 			if (rMap[j] == -1 && (Free != -1 || (pChecked->GetCharacter() && !pChecked->GetCharacter()->NetworkClipped(i, false)) || pPlayer->m_aSameIP[j]))
 			{
 				if (Free != -1)
@@ -249,10 +244,6 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 						rMap[pMap[Free]] = -1;
 
 						if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
-							UpdateTeamsStates = true;
-
-						CPlayer *pFree = GameServer()->m_apPlayers[pMap[Free]];
-						if (pFree && pFree->m_LocalChat != pChecked->m_LocalChat)
 							UpdateTeamsStates = true;
 					}
 					pMap[Free] = j;
@@ -271,10 +262,6 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 							pPlayer->SendConnect(j, rMap[j]);
 
 							if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
-								UpdateTeamsStates = true;
-
-							CPlayer *pFree = GameServer()->m_apPlayers[k];
-							if (pFree && pFree->m_LocalChat != pChecked->m_LocalChat)
 								UpdateTeamsStates = true;
 							break;
 						}

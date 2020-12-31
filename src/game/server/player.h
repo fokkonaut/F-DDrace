@@ -368,8 +368,6 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
-	bool m_LocalChat;
-
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 
@@ -411,8 +409,6 @@ public:
 	void SetFakeID();
 	int m_FakeID;
 	bool m_aSameIP[MAX_CLIENTS];
-
-	bool m_aLastNetworkClipped[MAX_CLIENTS];
 
 	// shutdown tee
 	bool m_CheckedShutdownSaved;

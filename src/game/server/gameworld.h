@@ -59,7 +59,6 @@ private:
 	class IServer *m_pServer;
 
 	void UpdatePlayerMaps(int ForcedID = -1);
-	bool m_aaLastLocal[MAX_CLIENTS][MAX_CLIENTS];
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
