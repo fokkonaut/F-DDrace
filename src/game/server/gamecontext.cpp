@@ -5120,7 +5120,7 @@ void CGameContext::CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID)
 
 bool CGameContext::IsLocal(int ClientID1, int ClientID2)
 {
-	if (ClientID1 == ClientID2)
+	if (ClientID1 == ClientID2 || ClientID1 <= 0 || ClientID2 <= 0)
 		return true;
 
 	CCharacter *p1 = GetPlayerChar(ClientID1);
