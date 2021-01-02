@@ -765,7 +765,7 @@ int CPlayer::GetAuthedHighlighted()
 
 bool CPlayer::JoinChat(bool Local)
 {
-	if (!GameServer()->Config()->m_SvLocalChat || m_LocalChat == Local)
+	if (m_LocalChat == Local || !GameServer()->Config()->m_SvLocalChat)
 		return false;
 
 	m_LocalChat = Local;
