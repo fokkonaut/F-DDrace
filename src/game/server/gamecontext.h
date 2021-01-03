@@ -588,6 +588,9 @@ public:
 	bool IsLocal(int CientID1, int ClientID2);
 	bool CanReceiveMessage(int Sender, int Receiver);
 
+	void SendAllPolice(const char *pMessage);
+	void JailPlayer(int PlayerID, int Seconds);
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 

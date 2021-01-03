@@ -2410,6 +2410,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
+			if (m_apPlayers[ClientID]->m_SpawnBlocks > 3 && Config()->m_SvSpawnBlockProtection == 2)
+			{
+				SendChatTarget(ClientID, "[SPAWNBLOCK] You can't selfkill because you spawnblock too much. Try agian later.");
+				return;
+			}
+
 			//Kill Protection
 			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
 			if (Config()->m_SvKillProtection != 0 && CurrTime >= (60 * Config()->m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
@@ -5146,6 +5152,30 @@ bool CGameContext::CanReceiveMessage(int Sender, int Receiver)
 	return m_apPlayers[Receiver] && (!m_apPlayers[Receiver]->m_LocalChat || IsLocal(Sender, Receiver));
 }
 
+void CGameContext::SendAllPolice(const char * pMessage)
+{
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "[POLICE-CHANNEL] %s", pMessage);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_apPlayers[i] && m_Accounts[m_apPlayers[i]->GetAccID()].m_PoliceLevel)
+		{
+			SendChatTarget(i, aBuf);
+		}
+	}
+}
+
+void CGameContext::JailPlayer(int PlayerID, int Seconds)
+{
+	CPlayer *pPlayer = m_apPlayers[PlayerID];
+	if (!pPlayer)
+		return;
+
+	pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
+	if(pPlayer->GetCharacter())
+		pPlayer->KillCharacter(WEAPON_MINIGAME_CHANGE);
+}
+
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
 {
 	static char aRet[900] = "";
@@ -5835,6 +5865,12 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		return;
 
 	char aMsg[128];
+
+	if (pPlayer->m_JailTime)
+	{
+		SendChatTarget(ClientID, "You can't do that while being jailed.");
+		return;
+	}
 
 	// check whether minigame is disabled
 	if (Minigame != MINIGAME_NONE && m_aMinigameDisabled[Minigame])
