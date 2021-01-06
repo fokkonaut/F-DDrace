@@ -377,7 +377,7 @@ void CPlayer::Tick()
 		ExpireItems();
 
 	// reduce spawnblocks every 30 seconds
-	if (m_SpawnBlocks > 0 && Server()->Tick() % Server()->TickSpeed() * 30 == 0)
+	if (m_SpawnBlocks > 0 && Server()->Tick() % (Server()->TickSpeed() * 30) == 0)
 		m_SpawnBlocks--;
 
 	if (m_JailTime > 1) // 1 is the indicator to respawn at the jail release tile
@@ -827,6 +827,7 @@ void CPlayer::OnDisconnect()
 		m_pCharacter->DropMoney(GetWalletMoney());
 	KillCharacter();
 
+	GameServer()->SaveJailed(m_ClientID);
 	GameServer()->Logout(GetAccID());
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;

@@ -647,6 +647,21 @@ public:
 	void SendChatPolice(const char *pMessage);
 	void JailPlayer(int ClientID, int Seconds);
 
+	void SaveJailed(int ClientID);
+	void CheckSavedJail(int ClientID);
+
+	struct JailedPlayer
+	{
+		char m_aUsername[32];
+		NETADDR m_Addr;
+
+		char m_aName[MAX_NAME_LENGTH];
+		CTeeInfo m_TeeInfo;
+
+		int64 m_JailTime;
+	};
+	std::vector<JailedPlayer> m_vSavedJailedPlayers;
+
 	// gangster
 	void ProcessSpawnBlockProtection(int ClientID);
 	bool IsSpawnArea(vec2 Pos);

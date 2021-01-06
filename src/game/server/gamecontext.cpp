@@ -1311,6 +1311,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
 
 	m_apPlayers[ClientID]->CheckClanProtection();
+	CheckSavedJail(ClientID);
 
 	if (!Server()->IsSevendown(ClientID))
 	{
@@ -3526,6 +3527,8 @@ void CGameContext::OnInit()
 	m_ShutdownSave.m_Got = false;
 	m_ShutdownSave.m_aUsername[0] = '\0';
 
+	m_vSavedJailedPlayers.clear();
+
 
 #ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MAX_CLIENTS-1
@@ -5172,6 +5175,49 @@ void CGameContext::JailPlayer(int ClientID, int Seconds)
 	pPlayer->m_EscapeTime = 0;
 	if(pPlayer->GetCharacter())
 		pPlayer->KillCharacter(WEAPON_GAME);
+}
+
+void CGameContext::SaveJailed(int ClientID)
+{
+	if (!m_apPlayers[ClientID] || !m_apPlayers[ClientID]->m_JailTime)
+		return;
+
+	JailedPlayer Player;
+	Server()->GetClientAddr(ClientID, &Player.m_Addr);
+	str_copy(Player.m_aName, Server()->ClientName(ClientID), sizeof(Player.m_aName));
+	str_copy(Player.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Player.m_aUsername));
+	Player.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
+	Player.m_JailTime = m_apPlayers[ClientID]->m_JailTime;
+	m_vSavedJailedPlayers.push_back(Player);
+}
+
+void CGameContext::CheckSavedJail(int ClientID)
+{
+	if (!m_apPlayers[ClientID])
+		return;
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+
+	for (unsigned int i = 0; i < m_vSavedJailedPlayers.size(); i++)
+	{
+		JailedPlayer Info = m_vSavedJailedPlayers[i];
+		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
+		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
+		bool SameAcc = Info.m_aUsername[0] != '\0' && str_comp(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
+		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
+		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
+		bool SameClientInfo = SameName && SameTeeInfo && SameAddr;
+
+		if (SameAddrAndPort || SameAcc || SameClientInfo)
+		{
+			JailPlayer(ClientID, Info.m_JailTime/Server()->TickSpeed());
+			if (m_apPlayers[ClientID]->GetAccID() < ACC_START)
+				Login(ClientID, Info.m_aUsername, "", false);
+			m_vSavedJailedPlayers.erase(m_vSavedJailedPlayers.begin() + i);
+			break;
+		}
+	}
 }
 
 void CGameContext::ProcessSpawnBlockProtection(int ClientID)

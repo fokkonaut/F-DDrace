@@ -526,40 +526,41 @@ void CCharacter::FireWeapon()
 					else
 						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
-					vec2 Dir;
-					if (length(pTarget->m_Pos - m_Pos) > 0.0f)
-						Dir = normalize(pTarget->m_Pos - m_Pos);
-					else
-						Dir = vec2(0.f, -1.f);
-
-					float Strength;
-					if (!m_TuneZone)
-						Strength = GameServer()->Tuning()->m_HammerStrength;
-					else
-						Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
-
-					vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-					Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
-					Temp -= pTarget->m_Core.m_Vel;
-
-					pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-						m_pPlayer->GetCID(), GetActiveWeapon());
-
 					// police catch gangster
 					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
 						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime)
 					{
+						int TargetCID = pTarget->GetPlayer()->GetCID();
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(pTarget->GetPlayer()->GetCID()));
+						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(TargetCID));
 						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 
 						str_format(aBuf, sizeof(aBuf), "You were arrested for 10 minutes by '%s'", Server()->ClientName(m_pPlayer->GetCID()));
-						GameServer()->SendChatTarget(pTarget->GetPlayer()->GetCID(), aBuf);
+						GameServer()->SendChatTarget(TargetCID, aBuf);
 						pTarget->GetPlayer()->m_EscapeTime = 0;
-						GameServer()->JailPlayer(i, 600); // 10 minutes jail
+						GameServer()->JailPlayer(TargetCID, 600); // 10 minutes jail
 					}
 					else
 					{
+						vec2 Dir;
+						if (length(pTarget->m_Pos - m_Pos) > 0.0f)
+							Dir = normalize(pTarget->m_Pos - m_Pos);
+						else
+							Dir = vec2(0.f, -1.f);
+
+						float Strength;
+						if (!m_TuneZone)
+							Strength = GameServer()->Tuning()->m_HammerStrength;
+						else
+							Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+
+						vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+						Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
+						Temp -= pTarget->m_Core.m_Vel;
+
+						pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+							m_pPlayer->GetCID(), GetActiveWeapon());
+
 						pTarget->UnFreeze();
 
 						if (m_FreezeHammer)
