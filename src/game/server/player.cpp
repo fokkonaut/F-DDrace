@@ -388,7 +388,7 @@ void CPlayer::Tick()
 			GameServer()->SendChatTarget(m_ClientID, "You were released from jail");
 			KillCharacter(WEAPON_GAME);
 		}
-		else if (Server()->Tick() % 50 == 0)
+		else if (Server()->Tick() % 50 == 0 && (!m_pCharacter || !m_pCharacter->m_MoneyTile))
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "Your are arrested for %lld seconds", m_JailTime / Server()->TickSpeed());
