@@ -545,6 +545,27 @@ void CCharacter::FireWeapon()
 					pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 						m_pPlayer->GetCID(), GetActiveWeapon());
 
+					// Police catch gangster
+					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel && pTarget->m_FreezeTime > 1)
+					{
+						if (pTarget->GetPlayer()->m_Minigame == MINIGAME_NONE)
+						{
+							if (pTarget->GetPlayer()->m_EscapeTime) // always prefer normal hammer
+							{
+								char aBuf[256];
+								str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest).", Server()->ClientName(pTarget->GetPlayer()->GetCID()));
+								GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+
+								str_format(aBuf, sizeof(aBuf), "You were arrested for 5 minutes by '%s'.", Server()->ClientName(m_pPlayer->GetCID()));
+								GameServer()->SendChatTarget(pTarget->GetPlayer()->GetCID(), aBuf);
+								pTarget->GetPlayer()->m_EscapeTime = 0;
+								GameServer()->JailPlayer(i, 600); // 10 minutes jail
+								Hits++;
+								continue;
+							}
+						}
+					}
+
 					pTarget->UnFreeze();
 
 					if (m_FreezeHammer)
@@ -1457,6 +1478,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 				pAccount->m_Deaths++;
 			}
 		}
+		BlockSpawnProt(Killer);
 	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
@@ -1554,6 +1576,43 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 	// reset gamemode if it got changed by a tile but the setting says something different
 	m_pPlayer->m_Gamemode = m_SavedGamemode;
+}
+
+bool CCharacter::IsSpawn()
+{
+	return (m_Pos.x > Config()->m_SvSpawnareaLowX * 32
+		&& m_Pos.x < Config()->m_SvSpawnareaHighX * 32
+		&& m_Pos.y > Config()->m_SvSpawnareaLowY * 32
+		&& m_Pos.y < Config()->m_SvSpawnareaHighY * 32);
+}
+
+void CCharacter::BlockSpawnProt(int Killer)
+{
+	char aBuf[128];
+	CPlayer *pKiller = GameServer()->m_apPlayers[Killer];
+	if (!pKiller)
+		return;
+	if (!pKiller->GetCharacter())
+		return;
+	if (m_pPlayer->GetCID() == Killer)
+		return;
+
+	if (pKiller->GetCharacter()->IsSpawn()) // if killer is in spawn area
+	{
+		pKiller->m_SpawnBlocks++;
+		if (Config()->m_SvSpawnBlockProtection)
+		{
+			GameServer()->SendChatTarget(Killer, "[WARNING] spawnblocking is illegal.");
+
+			if (pKiller->m_SpawnBlocks > 2)
+			{
+				str_format(aBuf, sizeof(aBuf), "'%s' is spawnblocking. catch him!", Server()->ClientName(Killer));
+				GameServer()->SendAllPolice(aBuf);
+				GameServer()->SendChatTarget(Killer, "Police is searching you because of spawnblocking.");
+				pKiller->m_EscapeTime += Server()->TickSpeed() * 120; // + 2 minutes escape time
+			}
+		}
+	}
 }
 
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)

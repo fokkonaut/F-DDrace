@@ -208,6 +208,8 @@ void CPlayer::Reset()
 	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
 	m_LocalChat = false;
+	m_SpawnBlocks = 0;
+	m_EscapeTime = 0;
 }
 
 void CPlayer::Tick()
@@ -371,6 +373,42 @@ void CPlayer::Tick()
 
 	if (GameServer()->IsFullHour())
 		ExpireItems();
+
+	// spawnblock reducer
+	if (Server()->Tick() % 1200 == 0 && m_SpawnBlocks > 0)
+		m_SpawnBlocks--;
+
+	if (m_JailTime > 1)
+	{
+		m_EscapeTime = 0;
+		m_JailTime--;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Your are arrested for %lld seconds.", m_JailTime / Server()->TickSpeed());
+		if (Server()->Tick() % 40 == 0)
+		{
+			GameServer()->SendBroadcast(aBuf, GetCID(), 0);
+		}
+		if (m_JailTime == 1)
+		{
+			GameServer()->SendChatTarget(GetCID(), "[JAIL] You were released from jail.");
+			KillCharacter(WEAPON_MINIGAME_CHANGE);
+		}
+	}
+	if (m_EscapeTime > 0)
+	{
+		m_EscapeTime--;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Avoid policehammers for the next %lld seconds.", m_EscapeTime / Server()->TickSpeed());
+
+		if (Server()->Tick() % Server()->TickSpeed() * 60 == 0)
+		{
+			GameServer()->SendBroadcast(aBuf, GetCID(), 0);
+		}
+		if (m_EscapeTime == 1)
+		{
+			GameServer()->SendChatTarget(GetCID(), "Your life as a gangster is over. You are free now.");
+		}
+	}
 }
 
 void CPlayer::PostTick()
@@ -1157,6 +1195,15 @@ void CPlayer::TryRespawn()
 	else if (m_Minigame == MINIGAME_INSTAGIB_FNG)
 	{
 		Index = ENTITY_SPAWN_BLUE;
+	}
+	else if (m_JailTime == 1)
+	{
+		m_JailTime = 0;
+		Index = TILE_JAILRELEASE;
+	}
+	else if (m_JailTime)
+	{
+		Index = TILE_JAIL;
 	}
 	else if (m_PlotSpawn)
 	{
