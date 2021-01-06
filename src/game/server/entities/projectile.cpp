@@ -55,7 +55,8 @@ CProjectile::CProjectile
 	m_Spooky = Spooky;
 
 	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
-	m_DDrace = !GameServer()->m_apPlayers[m_Owner] || GameServer()->m_apPlayers[m_Owner]->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
+	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
+	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
 	m_DefaultTuning = IsDefaultTuning() && m_DDrace;
 
 	m_LastResetPos = Pos;
