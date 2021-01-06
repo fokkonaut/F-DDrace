@@ -5194,7 +5194,7 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 				str_format(aBuf, sizeof(aBuf), "'%s' is spawnblocking. Catch him!", Server()->ClientName(Killer));
 				SendChatPolice(aBuf);
 				SendChatTarget(Killer, "Police is searching you because of spawnblocking");
-				pKiller->m_EscapeTime += Server()->TickSpeed() * 60 * 2; // + 2 minutes escape time
+				pKiller->m_EscapeTime += Server()->TickSpeed() * 120; // + 2 minutes escape time
 			}
 		}
 	}
