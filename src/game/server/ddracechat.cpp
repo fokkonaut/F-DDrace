@@ -1645,7 +1645,8 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	pSelf->Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1));
+	if (pSelf->Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1)))
+		pSelf->CheckSavedJail(pResult->m_ClientID);
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)

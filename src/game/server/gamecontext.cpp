@@ -4649,16 +4649,16 @@ void CGameContext::LogoutAllAccounts()
 	dbg_msg("acc", "logged out all accounts");
 }
 
-void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired)
+bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer)
-		return;
+		return false;
 
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
 		SendChatTarget(ClientID, "You are already logged in");
-		return;
+		return false;
 	}
 
 	int ID = AddAccount();
@@ -4668,7 +4668,7 @@ void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 	{
 		SendChatTarget(ClientID, "That account doesn't exist, please register first");
 		FreeAccount(ID);
-		return;
+		return false;
 	}
 
 	if (m_Accounts[ID].m_LoggedIn)
@@ -4678,21 +4678,21 @@ void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		else
 			SendChatTarget(ClientID, "This account is already logged in on another server");
 		FreeAccount(ID);
-		return;
+		return false;
 	}
 
 	if (m_Accounts[ID].m_Disabled)
 	{
 		SendChatTarget(ClientID, "This account is disabled");
 		FreeAccount(ID);
-		return;
+		return false;
 	}
 
 	if (PasswordRequired && str_comp(m_Accounts[ID].m_Password, pPassword))
 	{
 		SendChatTarget(ClientID, "Wrong password");
 		FreeAccount(ID);
-		return;
+		return false;
 	}
 
 	// set some variables and save the account with some new values
@@ -4722,6 +4722,7 @@ void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 	}
 
 	pPlayer->OnLogin();
+	return true;
 }
 
 int64 CGameContext::GetNeededXP(int Level)

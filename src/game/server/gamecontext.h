@@ -431,7 +431,7 @@ public:
 	void WriteAccountStats(int ID);
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
-	void Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
+	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
 
 	int m_aTaserPrice[NUM_TASER_LEVELS];
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];
