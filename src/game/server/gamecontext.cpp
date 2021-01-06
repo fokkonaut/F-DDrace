@@ -2412,7 +2412,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (m_apPlayers[ClientID]->m_SpawnBlocks > 3 && Config()->m_SvSpawnBlockProtection == 2)
 			{
-				SendChatTarget(ClientID, "[SPAWNBLOCK] You can't selfkill because you spawnblock too much. Try agian later.");
+				SendChatTarget(ClientID, "You can't kill yourself because you spawnblocked too much. Try again later.");
 				return;
 			}
 
@@ -4912,7 +4912,7 @@ void CGameContext::SaveCharacter(int ClientID)
 
 	// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
 	// We cant use SetMinigame(MINIGAME_NONE) here because that would kill the character, ending in a crash
-	if (pChr->GetPlayer()->m_Minigame != MINIGAME_NONE)
+	if (pChr->GetPlayer()->IsMinigame())
 		pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
 	// We save the acc username to save it in the account to automatically relogin after joining again
@@ -5152,28 +5152,60 @@ bool CGameContext::CanReceiveMessage(int Sender, int Receiver)
 	return m_apPlayers[Receiver] && (!m_apPlayers[Receiver]->m_LocalChat || IsLocal(Sender, Receiver));
 }
 
-void CGameContext::SendAllPolice(const char * pMessage)
+void CGameContext::SendChatPolice(const char *pMessage)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "[POLICE-CHANNEL] %s", pMessage);
 	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
 		if (m_apPlayers[i] && m_Accounts[m_apPlayers[i]->GetAccID()].m_PoliceLevel)
-		{
 			SendChatTarget(i, aBuf);
-		}
-	}
 }
 
-void CGameContext::JailPlayer(int PlayerID, int Seconds)
+void CGameContext::JailPlayer(int ClientID, int Seconds)
 {
-	CPlayer *pPlayer = m_apPlayers[PlayerID];
+	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer)
 		return;
 
 	pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
+	pPlayer->m_EscapeTime = 0;
 	if(pPlayer->GetCharacter())
-		pPlayer->KillCharacter(WEAPON_MINIGAME_CHANGE);
+		pPlayer->KillCharacter(WEAPON_GAME);
+}
+
+void CGameContext::ProcessSpawnBlockProtection(int ClientID)
+{
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	int Killer = pChr->Core()->m_Killer.m_ClientID;
+	CPlayer *pKiller = Killer >= 0 ? m_apPlayers[Killer] : 0;
+	if (!pChr || ClientID == Killer)
+		return;
+
+	if (IsSpawnArea(pChr->GetPos())) // if killer is in spawn area
+	{
+		pKiller->m_SpawnBlocks++;
+		if (Config()->m_SvSpawnBlockProtection)
+		{
+			SendChatTarget(Killer, "[WARNING] Spawnblocking is illegal");
+
+			if (pKiller->m_SpawnBlocks > 2)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "'%s' is spawnblocking. Catch him!", Server()->ClientName(Killer));
+				SendChatPolice(aBuf);
+				SendChatTarget(Killer, "Police is searching you because of spawnblocking");
+				pKiller->m_EscapeTime += Server()->TickSpeed() * 120; // + 2 minutes escape time
+			}
+		}
+	}
+}
+
+bool CGameContext::IsSpawnArea(vec2 Pos)
+{
+	return (Pos.x > Config()->m_SvSpawnAreaLowX * 32
+		&& Pos.x < Config()->m_SvSpawnAreaHighX * 32
+		&& Pos.y > Config()->m_SvSpawnAreaLowY * 32
+		&& Pos.y < Config()->m_SvSpawnAreaHighY * 32);
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
@@ -5866,12 +5898,6 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 
 	char aMsg[128];
 
-	if (pPlayer->m_JailTime)
-	{
-		SendChatTarget(ClientID, "You can't do that while being jailed.");
-		return;
-	}
-
 	// check whether minigame is disabled
 	if (Minigame != MINIGAME_NONE && m_aMinigameDisabled[Minigame])
 	{
@@ -5911,7 +5937,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		}
 	}
 	// join minigame
-	else if (pPlayer->m_Minigame == MINIGAME_NONE)
+	else if (!pPlayer->IsMinigame())
 	{
 		str_format(aMsg, sizeof(aMsg), "'%s' joined the minigame '%s', use '/%s' to join aswell", Server()->ClientName(ClientID), GetMinigameName(Minigame), GetMinigameCommand(Minigame));
 		SendChat(-1, CHAT_ALL, -1, aMsg);

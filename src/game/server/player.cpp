@@ -208,8 +208,10 @@ void CPlayer::Reset()
 	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
 	m_LocalChat = false;
+
 	m_SpawnBlocks = 0;
 	m_EscapeTime = 0;
+	m_JailTime = 0;
 }
 
 void CPlayer::Tick()
@@ -374,39 +376,38 @@ void CPlayer::Tick()
 	if (GameServer()->IsFullHour())
 		ExpireItems();
 
-	// spawnblock reducer
-	if (Server()->Tick() % 1200 == 0 && m_SpawnBlocks > 0)
+	// reduce spawnblocks every 30 seconds
+	if (m_SpawnBlocks > 0 && Server()->Tick() % Server()->TickSpeed() * 30 == 0)
 		m_SpawnBlocks--;
 
-	if (m_JailTime > 1)
+	if (m_JailTime > 1) // 1 is the indicator to respawn at the jail release tile
 	{
-		m_EscapeTime = 0;
 		m_JailTime--;
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Your are arrested for %lld seconds.", m_JailTime / Server()->TickSpeed());
-		if (Server()->Tick() % 40 == 0)
-		{
-			GameServer()->SendBroadcast(aBuf, GetCID(), 0);
-		}
 		if (m_JailTime == 1)
 		{
-			GameServer()->SendChatTarget(GetCID(), "[JAIL] You were released from jail.");
-			KillCharacter(WEAPON_MINIGAME_CHANGE);
+			GameServer()->SendChatTarget(m_ClientID, "You were released from jail");
+			KillCharacter(WEAPON_GAME);
+		}
+		else if (Server()->Tick() % 50 == 0)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Your are arrested for %lld seconds", m_JailTime / Server()->TickSpeed());
+			GameServer()->SendBroadcast(aBuf, m_ClientID, false);
 		}
 	}
+
 	if (m_EscapeTime > 0)
 	{
 		m_EscapeTime--;
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "Avoid policehammers for the next %lld seconds.", m_EscapeTime / Server()->TickSpeed());
-
-		if (Server()->Tick() % Server()->TickSpeed() * 60 == 0)
-		{
-			GameServer()->SendBroadcast(aBuf, GetCID(), 0);
-		}
 		if (m_EscapeTime == 1)
 		{
-			GameServer()->SendChatTarget(GetCID(), "Your life as a gangster is over. You are free now.");
+			GameServer()->SendChatTarget(m_ClientID, "Your life as a gangster is over, you are free now");
+		}
+		else if (Server()->Tick() % Server()->TickSpeed() * 60 == 0)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Avoid policehammers for the next %lld seconds", m_EscapeTime / Server()->TickSpeed());
+			GameServer()->SendBroadcast(aBuf, m_ClientID, false);
 		}
 	}
 }
@@ -792,6 +793,11 @@ int CPlayer::GetHidePlayerTeam(int Asker)
 		|| (GameServer()->Config()->m_SvHideMinigamePlayers && pAsker->m_Minigame != m_Minigame)))
 		return TEAM_BLUE;
 	return m_Team;
+}
+
+bool CPlayer::IsMinigame()
+{
+	return m_Minigame != MINIGAME_NONE;
 }
 
 int CPlayer::GetAuthedHighlighted()
@@ -1199,7 +1205,7 @@ void CPlayer::TryRespawn()
 	else if (m_JailTime == 1)
 	{
 		m_JailTime = 0;
-		Index = TILE_JAILRELEASE;
+		Index = TILE_JAIL_RELEASE;
 	}
 	else if (m_JailTime)
 	{
@@ -1672,7 +1678,7 @@ void CPlayer::OnLogin()
 	ExpireItems();
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	if (m_Minigame == MINIGAME_NONE && m_pCharacter)
+	if (!IsMinigame() && m_pCharacter)
 	{
 		m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
@@ -1979,7 +1985,7 @@ bool CPlayer::CheckClanProtection()
 void CPlayer::OnSetAfk()
 {
 	// leave current minigame
-	if (m_Minigame != MINIGAME_NONE)
+	if (IsMinigame())
 	{
 		GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE);
 		GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");

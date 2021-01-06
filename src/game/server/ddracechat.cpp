@@ -1667,7 +1667,7 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	if (pPlayer->m_Minigame != MINIGAME_NONE)
+	if (pPlayer->IsMinigame())
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't logout in a minigame");
 		return;
@@ -1981,7 +1981,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pPlayer->m_Minigame != MINIGAME_NONE)
+	if (pPlayer->IsMinigame())
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command in minigames");
 		return;

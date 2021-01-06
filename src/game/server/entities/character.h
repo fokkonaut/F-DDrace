@@ -249,8 +249,6 @@ private:
 	vec2 m_PrevSavePos;
 	bool m_Solo;
 
-	bool IsSpawn();
-	void BlockSpawnProt(int Killer);
 	void FDDraceTick();
 	void DummyTick();
 	void FDDraceInit();

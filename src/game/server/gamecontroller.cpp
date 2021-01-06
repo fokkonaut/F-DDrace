@@ -591,12 +591,12 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG2_GAMETYPE_FDDRACE
 		| GAMEINFOFLAG2_ENTITIES_FDDRACE;
 
-	if (pSnap->m_Minigame == MINIGAME_NONE || pSnap->m_Minigame == MINIGAME_BLOCK)
+	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK)
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
 	}
 
-	if (pSnap->m_Minigame == MINIGAME_NONE && pSnap->m_ScoreMode == SCORE_TIME)
+	if (!pSnap->IsMinigame() && pSnap->m_ScoreMode == SCORE_TIME)
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
 	}
@@ -686,7 +686,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 				continue;
 
 			// F-DDrace
-			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME && GameServer()->m_apPlayers[i]->m_Minigame == MINIGAME_NONE)
+			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME && !GameServer()->m_apPlayers[i]->IsMinigame())
 				GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
 
 			CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(i) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
@@ -696,7 +696,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 	else
 	{
 		// F-DDrace
-		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME && GameServer()->m_apPlayers[ClientID]->m_Minigame == MINIGAME_NONE)
+		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME && !GameServer()->m_apPlayers[ClientID]->IsMinigame())
 			GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
 
 		CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(ClientID) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;

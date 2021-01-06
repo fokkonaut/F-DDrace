@@ -363,6 +363,11 @@ public:
 	//weapon indicator
 	bool m_WeaponIndicator;
 
+	// police
+	int64 m_EscapeTime;
+	int64 m_JailTime;
+	int m_SpawnBlocks;
+
 	//others
 	bool IsHooked(int Power = -1);
 	void SetPlaying();
@@ -371,9 +376,6 @@ public:
 	bool JoinChat(bool Local);
 	bool m_LocalChat;
 	int GetAuthedHighlighted();
-	int64 m_EscapeTime;
-	int64 m_JailTime;
-	int m_SpawnBlocks;
 
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
@@ -406,6 +408,7 @@ public:
 	bool LoadMinigameTee();
 	bool CanLoadMinigameTee();
 
+	bool IsMinigame();
 	int m_Minigame;
 	int m_SurvivalState;
 	int m_SurvivalDieTick;

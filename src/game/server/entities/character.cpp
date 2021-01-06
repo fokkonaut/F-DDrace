@@ -457,7 +457,7 @@ void CCharacter::FireWeapon()
 			Spread[i] += 0.05f;
 
 	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? Config()->m_SvNumSpreadShots : 1;
-	if (m_pPlayer->m_Minigame != MINIGAME_NONE || (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
+	if (m_pPlayer->IsMinigame() || (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
 		NumShots = 1;
 	bool Sound = true;
 
@@ -545,31 +545,26 @@ void CCharacter::FireWeapon()
 					pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 						m_pPlayer->GetCID(), GetActiveWeapon());
 
-					// Police catch gangster
-					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel && pTarget->m_FreezeTime > 1)
+					// police catch gangster
+					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
+						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime)
 					{
-						if (pTarget->GetPlayer()->m_Minigame == MINIGAME_NONE)
-						{
-							if (pTarget->GetPlayer()->m_EscapeTime) // always prefer normal hammer
-							{
-								char aBuf[256];
-								str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest).", Server()->ClientName(pTarget->GetPlayer()->GetCID()));
-								GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(pTarget->GetPlayer()->GetCID()));
+						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 
-								str_format(aBuf, sizeof(aBuf), "You were arrested for 5 minutes by '%s'.", Server()->ClientName(m_pPlayer->GetCID()));
-								GameServer()->SendChatTarget(pTarget->GetPlayer()->GetCID(), aBuf);
-								pTarget->GetPlayer()->m_EscapeTime = 0;
-								GameServer()->JailPlayer(i, 600); // 10 minutes jail
-								Hits++;
-								continue;
-							}
-						}
+						str_format(aBuf, sizeof(aBuf), "You were arrested for 10 minutes by '%s'", Server()->ClientName(m_pPlayer->GetCID()));
+						GameServer()->SendChatTarget(pTarget->GetPlayer()->GetCID(), aBuf);
+						pTarget->GetPlayer()->m_EscapeTime = 0;
+						GameServer()->JailPlayer(i, 600); // 10 minutes jail
 					}
+					else
+					{
+						pTarget->UnFreeze();
 
-					pTarget->UnFreeze();
-
-					if (m_FreezeHammer)
-						pTarget->Freeze();
+						if (m_FreezeHammer)
+							pTarget->Freeze();
+					}
 
 					Hits++;
 				}
@@ -1036,7 +1031,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 		if (!m_aWeapons[WEAPON_LASER].m_Got
 			|| m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
 			|| GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1
-			|| m_pPlayer->m_Minigame != MINIGAME_NONE)
+			|| m_pPlayer->IsMinigame())
 			return;
 	}
 
@@ -1416,7 +1411,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 	{
 		// killing spree
 		char aBuf[128];
-		bool IsBlock = pKiller->m_Minigame == MINIGAME_NONE || pKiller->m_Minigame == MINIGAME_BLOCK;
+		bool IsBlock = !pKiller->IsMinigame() || pKiller->m_Minigame == MINIGAME_BLOCK;
 		CCharacter* pKillerChar = pKiller->GetCharacter();
 		if (CountKill && pKillerChar && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
 		{
@@ -1478,7 +1473,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 				pAccount->m_Deaths++;
 			}
 		}
-		BlockSpawnProt(Killer);
+
+		GameServer()->ProcessSpawnBlockProtection(m_pPlayer->GetCID());
 	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
@@ -1576,43 +1572,6 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 	// reset gamemode if it got changed by a tile but the setting says something different
 	m_pPlayer->m_Gamemode = m_SavedGamemode;
-}
-
-bool CCharacter::IsSpawn()
-{
-	return (m_Pos.x > Config()->m_SvSpawnareaLowX * 32
-		&& m_Pos.x < Config()->m_SvSpawnareaHighX * 32
-		&& m_Pos.y > Config()->m_SvSpawnareaLowY * 32
-		&& m_Pos.y < Config()->m_SvSpawnareaHighY * 32);
-}
-
-void CCharacter::BlockSpawnProt(int Killer)
-{
-	char aBuf[128];
-	CPlayer *pKiller = GameServer()->m_apPlayers[Killer];
-	if (!pKiller)
-		return;
-	if (!pKiller->GetCharacter())
-		return;
-	if (m_pPlayer->GetCID() == Killer)
-		return;
-
-	if (pKiller->GetCharacter()->IsSpawn()) // if killer is in spawn area
-	{
-		pKiller->m_SpawnBlocks++;
-		if (Config()->m_SvSpawnBlockProtection)
-		{
-			GameServer()->SendChatTarget(Killer, "[WARNING] spawnblocking is illegal.");
-
-			if (pKiller->m_SpawnBlocks > 2)
-			{
-				str_format(aBuf, sizeof(aBuf), "'%s' is spawnblocking. catch him!", Server()->ClientName(Killer));
-				GameServer()->SendAllPolice(aBuf);
-				GameServer()->SendChatTarget(Killer, "Police is searching you because of spawnblocking.");
-				pKiller->m_EscapeTime += Server()->TickSpeed() * 120; // + 2 minutes escape time
-			}
-		}
-	}
 }
 
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)
@@ -3281,7 +3240,7 @@ void CCharacter::FDDraceInit()
 		m_aSpawnWeaponActive[i] = false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-	if (m_pPlayer->m_Minigame == MINIGAME_NONE)
+	if (!m_pPlayer->IsMinigame())
 	{
 		for (int i = 0; i < 3; i++)
 			if (pAccount->m_SpawnWeapon[i])
@@ -3491,6 +3450,12 @@ bool CCharacter::RequestMinigameChange(int RequestedMinigame)
 	if (RequestedMinigame == m_RequestedMinigame)
 		return false;
 
+	if (m_pPlayer->m_JailTime)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't join a minigame while being arrested");
+		return false;
+	}
+
 	m_RequestedMinigame = RequestedMinigame;
 	m_LastMinigameRequest = Server()->Tick();
 	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Minigame request sent, please don't move for 5 seconds");
@@ -3533,7 +3498,7 @@ int CCharacter::GetCurrentTilePlotID()
 
 void CCharacter::TeleOutOfPlot(int PlotID)
 {
-	if (m_pPlayer->m_Minigame != MINIGAME_NONE && m_pPlayer->m_SavedMinigameTee)
+	if (m_pPlayer->IsMinigame() && m_pPlayer->m_SavedMinigameTee)
 	{
 		int SavedTilePlotID = GameServer()->GetTilePlotID(m_pPlayer->m_MinigameTee.GetPos());
 		if (SavedTilePlotID > 0 && PlotID > 0 && SavedTilePlotID == PlotID)
@@ -3751,7 +3716,7 @@ void CCharacter::DropLoot(int Weapon)
 			DropWeapon(i, true, Dir);
 		}
 	}
-	else if (m_pPlayer->m_Minigame == MINIGAME_NONE)
+	else if (!m_pPlayer->IsMinigame())
 	{
 		// we dont want to spam spawn with hundreds of weapons
 		if (GetAliveState())
@@ -3792,7 +3757,7 @@ int CCharacter::GetWeaponSpecial(int Type)
 
 void CCharacter::SetSpookyGhost()
 {
-	if (m_pPlayer->m_SpookyGhost || m_pPlayer->m_Minigame != MINIGAME_NONE)
+	if (m_pPlayer->m_SpookyGhost || m_pPlayer->IsMinigame())
 		return;
 
 	BackupWeapons(BACKUP_SPOOKY_GHOST);

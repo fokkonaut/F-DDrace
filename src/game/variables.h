@@ -237,6 +237,13 @@ MACRO_CONFIG_INT(SvLocalChat, sv_local_chat, 0, 0, 1, CFGFLAG_SERVER, "Whether l
 // admin highlight
 MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SERVER, "Whether authed players are highlighted in the scoreboard (deactivated by sv_local_chat)", AUTHED_ADMIN)
 
+// spawn block
+MACRO_CONFIG_INT(SvSpawnBlockProtection, sv_spawn_block_protection, 0, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "0 = off, 1 = escape time, 2 = esctime time + killban", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaLowX, sv_spawnarea_low_x, 5, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "low x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaLowY, sv_spawnarea_low_y, 4, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "low y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaHighX, sv_spawnarea_high_x, 48, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "high x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaHighY, sv_spawnarea_high_y, 48, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "high y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
@@ -251,9 +258,4 @@ MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 50, 1, 100, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 0, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength or weak hook is also there", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnBlockProtection, sv_spawnblock_prot, 0, 0, 2, CFGFLAG_SERVER | CFGFLAG_GAME, "0=off 1=escape time 2=esctime+killban", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnareaLowX, sv_spawnarea_low_x, 5, 0, 1000, CFGFLAG_SERVER | CFGFLAG_GAME, "low x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnareaLowY, sv_spawnarea_low_y, 4, 0, 1000, CFGFLAG_SERVER | CFGFLAG_GAME, "low y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnareaHighX, sv_spawnarea_high_x, 48, 0, 1000, CFGFLAG_SERVER | CFGFLAG_GAME, "high x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnareaHighY, sv_spawnarea_high_y, 48, 0, 1000, CFGFLAG_SERVER | CFGFLAG_GAME, "high y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
 #endif
