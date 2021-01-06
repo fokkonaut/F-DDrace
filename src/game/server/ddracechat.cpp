@@ -1673,6 +1673,12 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
+	if (pPlayer->m_JailTime)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't logout while being arrested");
+		return;
+	}
+
 	if (pSelf->Config()->m_SvKillLogout && pPlayer->GetCharacter())
 	{
 		char aBuf[128];
