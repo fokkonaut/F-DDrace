@@ -5179,10 +5179,11 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	int Killer = pChr->Core()->m_Killer.m_ClientID;
 	CPlayer *pKiller = Killer >= 0 ? m_apPlayers[Killer] : 0;
-	if (!pChr || ClientID == Killer)
+	if (!pChr || !pKiller || ClientID == Killer)
 		return;
 
-	if (IsSpawnArea(pChr->GetPos())) // if killer is in spawn area
+	bool IsKillerSpawn = pKiller->GetCharacter() && IsSpawnArea(pKiller->GetCharacter()->GetPos());
+	if (IsSpawnArea(pChr->GetPos()) || IsKillerSpawn) // if killer or victim is in spawn area
 	{
 		pKiller->m_SpawnBlocks++;
 		if (Config()->m_SvSpawnBlockProtection)
