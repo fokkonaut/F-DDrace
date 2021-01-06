@@ -4698,7 +4698,8 @@ void CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		m_Accounts[ID].m_LoggedIn = true;
 		m_Accounts[ID].m_ClientID = ClientID;
 		str_copy(m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(ClientID), sizeof(m_Accounts[ID].m_aLastPlayerName));
-		str_copy(m_Accounts[ID].m_aTimeoutCode, pPlayer->m_TimeoutCode, sizeof(m_Accounts[ID].m_aTimeoutCode));
+		if (pPlayer->m_TimeoutCode[0] != '\0')
+			str_copy(m_Accounts[ID].m_aTimeoutCode, pPlayer->m_TimeoutCode, sizeof(m_Accounts[ID].m_aTimeoutCode));
 
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);
