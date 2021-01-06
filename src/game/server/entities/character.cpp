@@ -556,7 +556,7 @@ void CCharacter::FireWeapon()
 						str_format(aBuf, sizeof(aBuf), "You were arrested for 10 minutes by '%s'", Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChatTarget(pTarget->GetPlayer()->GetCID(), aBuf);
 						pTarget->GetPlayer()->m_EscapeTime = 0;
-						GameServer()->JailPlayer(i, 600); // 10 minutes jail
+						GameServer()->JailPlayer(i, 60 * 10); // 10 minutes jail
 					}
 					else
 					{
