@@ -351,7 +351,6 @@ public:
 	//dummy
 	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1));
 	void ConnectDefaultDummies();
-	void SetV3Offset(int X = -1, int Y = -1);
 
 	bool IsHouseDummy(int ClientID, int Type = -1);
 	int GetHouseDummy(int Type = -1);
@@ -640,6 +639,9 @@ public:
 
 	//
 	virtual void OnSetTimedOut(int ClientID, int OrigID);
+
+	// map specific
+	void SetMapSpecificOptions();
 
 	// police
 	void SendChatPolice(const char *pMessage);

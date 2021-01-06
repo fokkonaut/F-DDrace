@@ -183,8 +183,8 @@ MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG
 MACRO_CONFIG_INT(SvHideDummies, sv_hide_dummies, 1, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDefaultDummies, sv_default_dummies, 0, 0, 1, CFGFLAG_SERVER, "Whether to create default dummies for specific maps when the server starts", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFakeDummyPing, sv_fake_dummy_ping, 0, 0, 1, CFGFLAG_SERVER, "Whether ping of server-side dummies are more natural or 0", AUTHED_ADMIN)
-MACRO_CONFIG_INT(V3OffsetX, v3_offset_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy", AUTHED_ADMIN)
-MACRO_CONFIG_INT(V3OffsetY, v3_offset_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset Y for the blmapV3 dummy", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvV3OffsetX, sv_v3_offset_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvV3OffsetY, sv_v3_offset_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset Y for the blmapV3 dummy", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDummyBotSkin, sv_dummy_bot_skin, 1, 0, 1, CFGFLAG_SERVER, "Whether dummies should have the bot skin applied", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDummyBlocking, sv_dummy_blocking, 1, 0, 1, CFGFLAG_SERVER, "Whether blocking dummies increases killstreak and gives block points", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHideBotsStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from status command", AUTHED_ADMIN)
@@ -239,10 +239,10 @@ MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SE
 
 // spawn block
 MACRO_CONFIG_INT(SvSpawnBlockProtection, sv_spawn_block_protection, 0, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "0 = off, 1 = escape time, 2 = esctime time + killban", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnAreaLowX, sv_spawnarea_low_x, 5, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "low x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnAreaLowY, sv_spawnarea_low_y, 4, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "low y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnAreaHighX, sv_spawnarea_high_x, 48, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "high x position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSpawnAreaHighY, sv_spawnarea_high_y, 48, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "high y position (as tile) of spawn area used for spawnblock prot", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaLowX, sv_spawnarea_low_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Low X tile position of area for spawnblock protection", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaLowY, sv_spawnarea_low_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Low Y tile position of area for spawnblock protection", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaHighX, sv_spawnarea_high_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "High X tile position of area for spawnblock protection", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAreaHighY, sv_spawnarea_high_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "High Y tile position of area for spawnblock protection", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)

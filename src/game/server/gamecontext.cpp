@@ -3471,7 +3471,7 @@ void CGameContext::OnInit()
 
 	if (Config()->m_SvDefaultDummies)
 		ConnectDefaultDummies();
-	SetV3Offset(Config()->m_V3OffsetX, Config()->m_V3OffsetY);
+	SetMapSpecificOptions();
 
 	int64 NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
 	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
@@ -5202,10 +5202,10 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 
 bool CGameContext::IsSpawnArea(vec2 Pos)
 {
-	return (Pos.x > Config()->m_SvSpawnAreaLowX * 32
-		&& Pos.x < Config()->m_SvSpawnAreaHighX * 32
-		&& Pos.y > Config()->m_SvSpawnAreaLowY * 32
-		&& Pos.y < Config()->m_SvSpawnAreaHighY * 32);
+	return (Pos.x >= Config()->m_SvSpawnAreaLowX * 32
+		&& Pos.x <= Config()->m_SvSpawnAreaHighX * 32
+		&& Pos.y >= Config()->m_SvSpawnAreaLowY * 32
+		&& Pos.y <= Config()->m_SvSpawnAreaHighY * 32);
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
@@ -5434,25 +5434,28 @@ bool CGameContext::ConsoleTranslateVictimCallback(int ClientID, int *pVictim, vo
 	return !pSelf->Server()->UseLocalIDMap(ClientID) || pSelf->Server()->ReverseTranslate(*pVictim, ClientID);
 }
 
-void CGameContext::SetV3Offset(int X, int Y)
+void CGameContext::SetMapSpecificOptions()
 {
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
 	{
-		X = 374;
-		Y = 59;
+		Config()->m_SvV3OffsetX = 374;
+		Config()->m_SvV3OffsetY = 59;
 	}
 	else if (!str_comp(Config()->m_SvMap, "blmapV3RoyalX"))
 	{
-		X = 97;
-		Y = 19;
+		Config()->m_SvV3OffsetX = 97;
+		Config()->m_SvV3OffsetY = 19;
 	}
 	else if (!str_comp(Config()->m_SvMap, "BlmapChill"))
 	{
-		X = 696;
-		Y = 617;
+		Config()->m_SvV3OffsetX = 696;
+		Config()->m_SvV3OffsetY = 617;
+
+		Config()->m_SvSpawnAreaLowX = 5;
+		Config()->m_SvSpawnAreaLowY = 4;
+		Config()->m_SvSpawnAreaHighX = 48;
+		Config()->m_SvSpawnAreaHighY = 48;
 	}
-	Config()->m_V3OffsetX = X;
-	Config()->m_V3OffsetY = Y;
 }
 
 void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int Seconds)
