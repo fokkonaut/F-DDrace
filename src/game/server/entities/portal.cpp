@@ -107,13 +107,50 @@ void CPortal::EntitiesEnter()
 			continue;
 
 		CCharacter *pAffectedChr = 0;
-
 		switch (apEnts[i]->GetObjType())
 		{
 		case CGameWorld::ENTTYPE_CHARACTER:
 			{
 				CCharacter *pChr = (CCharacter *)apEnts[i];
 				pAffectedChr = pChr;
+				break;
+			}
+		case CGameWorld::ENTTYPE_FLAG:
+			{
+				CFlag *pFlag = (CFlag *)apEnts[i];
+				if (pFlag->GetCarrier())
+					continue; // owner is getting teleported with the flag
+
+				if (pFlag->GetLastCarrier())
+					pAffectedChr = pFlag->GetLastCarrier();
+				break;
+			}
+		case CGameWorld::ENTTYPE_PICKUP_DROP:
+			{
+				CPickupDrop *pPickup = (CPickupDrop *)apEnts[i];
+				if (pPickup->GetOwner())
+					pAffectedChr = pPickup->GetOwner();
+				break;
+			}
+		case CGameWorld::ENTTYPE_MONEY:
+			{
+				CMoney *pMoney = (CMoney *)apEnts[i];
+				if (pMoney->GetOwner())
+					pAffectedChr = pMoney->GetOwner();
+				break;
+			}
+		}
+
+		// disallow using the portal if its placed on the other side of a plot door
+		int Team = pAffectedChr ? pAffectedChr->Team() : 0;
+		if (GameServer()->IntersectedLineDoor(m_Pos, apEnts[i]->GetPos(), Team, true))
+			continue;
+
+		switch (apEnts[i]->GetObjType())
+		{
+		case CGameWorld::ENTTYPE_CHARACTER:
+			{
+				CCharacter *pChr = (CCharacter *)apEnts[i];
 
 				if (!pAffectedChr->CanCollide(m_Owner, false))
 					continue;
@@ -130,13 +167,8 @@ void CPortal::EntitiesEnter()
 		case CGameWorld::ENTTYPE_FLAG:
 			{
 				CFlag *pFlag = (CFlag *)apEnts[i];
-				if (pFlag->GetCarrier())
-					continue; // owner is getting teleported with the flag
-
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
 				pFlag->SetPrevPos(m_pLinkedPortal->m_Pos);
-				if (pFlag->GetLastCarrier())
-					pAffectedChr = pFlag->GetLastCarrier();
 				break;
 			}
 		case CGameWorld::ENTTYPE_PICKUP_DROP:
@@ -144,8 +176,6 @@ void CPortal::EntitiesEnter()
 				CPickupDrop *pPickup = (CPickupDrop *)apEnts[i];
 				pPickup->SetPos(m_pLinkedPortal->m_Pos);
 				pPickup->SetPrevPos(m_pLinkedPortal->m_Pos);
-				if (pPickup->GetOwner())
-					pAffectedChr = pPickup->GetOwner();
 				break;
 			}
 		case CGameWorld::ENTTYPE_MONEY:
@@ -153,8 +183,6 @@ void CPortal::EntitiesEnter()
 				CMoney *pMoney = (CMoney *)apEnts[i];
 				pMoney->SetPos(m_pLinkedPortal->m_Pos);
 				pMoney->SetPrevPos(m_pLinkedPortal->m_Pos);
-				if (pMoney->GetOwner())
-					pAffectedChr = pMoney->GetOwner();
 				break;
 			}
 		}
@@ -205,7 +233,7 @@ void CPortal::Snap(int SnappingClient)
 		pObj->m_FromY = (int)PartPosEnd.y;
 		pObj->m_StartTick = Server()->Tick();
 	}
-	
+
 	if (!m_pLinkedPortal)
 		return;
 

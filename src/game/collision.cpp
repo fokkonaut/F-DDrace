@@ -1404,6 +1404,40 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 	return 0;
 }
 
+int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool PlotDoorOnly)
+{
+	if (!m_pDoor || (PlotDoorOnly && !m_NumPlots))
+		return 0;
+
+	float d = distance(Pos0, Pos1);
+	vec2 Last = Pos0;
+
+	for (float f = 0; f < d; f++)
+	{
+		float a = f / d;
+		vec2 Pos = mix(Pos0, Pos1, a);
+		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+
+		bool IsDoor = (m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA);
+		bool IsPlotDoor = (IsDoor && GetPlotBySwitch(m_pDoor[Ny * m_Width + Nx].m_Number) > 0);
+		if (IsPlotDoor || (!PlotDoorOnly && IsDoor))
+		{
+			if (pOutCollision)
+				*pOutCollision = Pos;
+			if (pOutBeforeCollision)
+				*pOutBeforeCollision = Last;
+			return m_pDoor[Ny * m_Width + Nx].m_Number;
+		}
+		Last = Pos;
+	}
+	if (pOutCollision)
+		* pOutCollision = Pos1;
+	if (pOutBeforeCollision)
+		* pOutBeforeCollision = Pos1;
+	return 0;
+}
+
 bool CCollision::IsPlotTile(int Index)
 {
 	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;

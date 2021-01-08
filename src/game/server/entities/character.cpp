@@ -832,12 +832,13 @@ void CCharacter::FireWeapon()
 				vec2 PortalPos;
 				bool Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
 				if (!Found || !PortalPos
-					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
+					|| GameServer()->GetTilePlotID(PortalPos) >= PLOT_START
+					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
-					|| (distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance)
-					|| GameServer()->GetTilePlotID(PortalPos) >= PLOT_START
+					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
+					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true)
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));

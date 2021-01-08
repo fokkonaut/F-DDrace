@@ -402,6 +402,8 @@ public:
 	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
 	bool HasPlotByIP(int ClientID);
 
+	bool IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly);
+
 	//account
 	int GetAccIDByUsername(const char *pUsername);
 	int GetAccount(const char* pUsername);

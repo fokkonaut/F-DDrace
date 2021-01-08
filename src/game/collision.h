@@ -134,6 +134,7 @@ public:
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
 	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+	int IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool PlotDoorOnly);
 	void UnsetDCollisionAt(float x, float y);
 
 	// plots

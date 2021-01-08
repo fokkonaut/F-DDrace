@@ -4257,6 +4257,14 @@ void CGameContext::ClearPlot(int PlotID)
 	}
 }
 
+bool CGameContext::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly)
+{
+	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, PlotDoorOnly);
+	if (Number <= 0)
+		return false;
+	return Collision()->m_pSwitchers[Number].m_Status[Team];
+}
+
 void CGameContext::SetExpireDate(time_t *pDate, float Days)
 {
 	time_t Now;
