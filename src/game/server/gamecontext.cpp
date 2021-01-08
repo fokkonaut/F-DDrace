@@ -4860,43 +4860,6 @@ void CGameContext::WriteMoneyListFile()
 	}
 }
 
-void CGameContext::SaveDrop(int ClientID, const char *pReason)
-{
-	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
-		return;
-
-	// Save character
-	SaveCharacter(ClientID);
-	// Remove wallet money so we dont automatically drop it on disconnect because it is saved already
-	m_apPlayers[ClientID]->SetWalletMoney(0);
-
-	// Add address to list of save dropped ips
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientID, &Addr);
-	m_vSaveDropped.push_back(&Addr);
-
-	// Drop the client
-	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
-}
-
-int CGameContext::SaveDropped(int ClientID)
-{
-	if (!m_vSaveDropped.size())
-		return -1;
-
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientID, &Addr);
-	return SaveDropped(&Addr);
-}
-
-int CGameContext::SaveDropped(const NETADDR *pAddr)
-{
-	for (unsigned int i = 0; i < m_vSaveDropped.size(); i++)
-		if (net_addr_comp(m_vSaveDropped[i], pAddr, true))
-			return i;
-	return -1;
-}
-
 void CGameContext::SaveOrDropWallet()
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -4951,13 +4914,8 @@ void CGameContext::SaveCharacter(int ClientID)
 void CGameContext::CheckShutdownSaved(int ClientID)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
-	int SaveDroppedIndex = SaveDropped(ClientID);
-	if (!pPlayer || !pPlayer->GetCharacter() || pPlayer->m_CheckedShutdownSaved || (!Config()->m_SvShutdownSaveTees && SaveDroppedIndex == -1))
+	if (!pPlayer || !pPlayer->GetCharacter() || pPlayer->m_CheckedShutdownSaved || !Config()->m_SvShutdownSaveTees)
 		return;
-
-	// Save dropped by rcon cmd, remove from list because we loaded it right now
-	if (SaveDroppedIndex != -1)
-		m_vSaveDropped.erase(m_vSaveDropped.begin() + SaveDroppedIndex);
 
 	// checking right now...
 	pPlayer->m_CheckedShutdownSaved = true;
@@ -5027,18 +4985,6 @@ int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageT
 	CGameContext *pSelf = (CGameContext *)pUser;
 	if (!IsDir && str_endswith(pName, ".save"))
 	{
-		// Check whether this file is a save drop, then dont delete it
-		{
-			char aAddrStr[NETADDR_MAXSTRSIZE];
-			str_copy(aAddrStr, pName, str_length(pName) - 4); // remove the .save
-			pSelf->SwapAddrSeparator(aAddrStr);
-
-			NETADDR Addr;
-			net_addr_from_str(&Addr, aAddrStr);
-			if (pSelf->SaveDropped(&Addr) != -1)
-				return 0;
-		}
-
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pSelf->Config()->m_SvMap, pName);
 		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
