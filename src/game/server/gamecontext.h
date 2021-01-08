@@ -656,6 +656,7 @@ public:
 	{
 		char m_aUsername[32];
 		NETADDR m_Addr;
+		char m_aTimeoutCode[64];
 
 		char m_aName[MAX_NAME_LENGTH];
 		CTeeInfo m_TeeInfo;

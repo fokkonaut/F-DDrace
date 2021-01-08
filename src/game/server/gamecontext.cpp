@@ -5197,6 +5197,7 @@ void CGameContext::SaveJailed(int ClientID)
 	str_copy(Player.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Player.m_aUsername));
 	Player.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
 	Player.m_JailTime = m_apPlayers[ClientID]->m_JailTime;
+	str_copy(Player.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Player.m_aTimeoutCode));
 	m_vSavedJailedPlayers.push_back(Player);
 }
 
@@ -5213,11 +5214,12 @@ void CGameContext::CheckSavedJail(int ClientID)
 		JailedPlayer Info = m_vSavedJailedPlayers[i];
 		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
 		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
+		bool SameTimeoutCode = m_apPlayers[ClientID]->m_TimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
 		bool SameAcc = Info.m_aUsername[0] != '\0' && str_comp(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
 		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
 		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
-		bool SameClientInfo = SameName && SameTeeInfo && SameAddr;
 
+		bool SameClientInfo = (SameAddr || SameTimeoutCode) && SameName && SameTeeInfo;
 		if (SameAddrAndPort || SameAcc || SameClientInfo)
 		{
 			JailPlayer(ClientID, Info.m_JailTime/Server()->TickSpeed());
