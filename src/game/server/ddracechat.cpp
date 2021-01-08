@@ -1994,6 +1994,12 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	if (pPlayer->m_JailTime)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while being arrested");
+		return;
+	}
+
 	if (pChr->m_FreezeTime)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You can't use this command while frozen");

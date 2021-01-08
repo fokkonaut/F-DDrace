@@ -527,10 +527,18 @@ void CCharacter::FireWeapon()
 						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 					// police catch gangster
-					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
-						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime)
+					bool JailHammer = (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
+						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime);
+
+					int TargetCID = pTarget->GetPlayer()->GetCID();
+					if (JailHammer && GameServer()->SameIP(m_pPlayer->GetCID(), TargetCID))
 					{
-						int TargetCID = pTarget->GetPlayer()->GetCID();
+						GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't arrest your dummy");
+						JailHammer = false;
+					}
+
+					if (JailHammer)
+					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(TargetCID));
 						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
@@ -3242,7 +3250,7 @@ void CCharacter::FDDraceInit()
 		m_aSpawnWeaponActive[i] = false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-	if (!m_pPlayer->IsMinigame())
+	if (!m_pPlayer->IsMinigame() && !m_pPlayer->m_JailTime)
 	{
 		for (int i = 0; i < 3; i++)
 			if (pAccount->m_SpawnWeapon[i])

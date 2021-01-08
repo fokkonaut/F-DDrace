@@ -391,7 +391,7 @@ void CPlayer::Tick()
 		else if (Server()->Tick() % 50 == 0 && (!m_pCharacter || !m_pCharacter->m_MoneyTile))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Your are arrested for %lld seconds", m_JailTime / Server()->TickSpeed());
+			str_format(aBuf, sizeof(aBuf), "You are arrested for %lld seconds", m_JailTime / Server()->TickSpeed());
 			GameServer()->SendBroadcast(aBuf, m_ClientID, false);
 		}
 	}
@@ -1165,6 +1165,7 @@ void CPlayer::TryRespawn()
 
 	vec2 SpawnPos = vec2(-1, -1);
 	int Index = ENTITY_SPAWN;
+	bool JailRelease = false;
 
 	if (m_ForceSpawnPos != vec2(-1, -1))
 	{
@@ -1206,6 +1207,7 @@ void CPlayer::TryRespawn()
 	else if (m_JailTime == 1)
 	{
 		m_JailTime = 0;
+		JailRelease = true;
 		Index = TILE_JAIL_RELEASE;
 	}
 	else if (m_JailTime)
@@ -1239,6 +1241,10 @@ void CPlayer::TryRespawn()
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+
+	// Freeze character on jail release
+	if (JailRelease)
+		m_pCharacter->Freeze(5);
 
 	if (GameServer()->Config()->m_SvTeam == 3)
 	{
@@ -1679,7 +1685,7 @@ void CPlayer::OnLogin()
 	ExpireItems();
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	if (!IsMinigame() && m_pCharacter)
+	if (!IsMinigame() && !m_JailTime && m_pCharacter)
 	{
 		m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
 
