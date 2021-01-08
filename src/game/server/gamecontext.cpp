@@ -2485,6 +2485,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			// F-DDrace
 			pPlayer->CheckClanProtection();
+			CheckSavedJail(ClientID);
 
 			if (pPlayer->m_SpookyGhost || pPlayer->m_ForcedSkin != SKIN_NONE)
 				return;
