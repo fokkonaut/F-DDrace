@@ -289,12 +289,6 @@ void CShop::BuyItem(int ClientID, int Item)
 		{
 			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
 			str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
-
-			if (!pPlayer->GiveTaserBattery(Amount))
-			{
-				GameServer()->SendChatTarget(ClientID, "Taser battery purchase failed");
-				return;
-			}
 		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
@@ -340,6 +334,12 @@ void CShop::BuyItem(int ClientID, int Item)
 	{
 		str_format(aMsg, sizeof(aMsg), "Your level is too low, you need to be level %d to buy %s", m_aItems[ItemID].m_Level, m_aItems[ItemID].m_pName);
 		GameServer()->SendChatTarget(ClientID, aMsg);
+		return;
+	}
+
+	if (IsType(HOUSE_SHOP) && Item == ITEM_TASER_BATTERY && !pPlayer->GiveTaserBattery(Amount))
+	{
+		GameServer()->SendChatTarget(ClientID, "Taser battery purchase failed");
 		return;
 	}
 
