@@ -589,7 +589,8 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG_DONT_MASK_ENTITIES;
 	pGameInfoEx->m_Flags2 = 0
 		| GAMEINFOFLAG2_GAMETYPE_FDDRACE
-		| GAMEINFOFLAG2_ENTITIES_FDDRACE;
+		| GAMEINFOFLAG2_ENTITIES_FDDRACE
+		| GAMEINFOFLAG2_ALLOW_X_SKINS;
 
 	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK)
 	{

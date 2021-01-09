@@ -62,6 +62,7 @@ static Skin s_Skins[NUM_SKINS] = {
 /* spooky ghost cant be set by a 0.6 client, it will only translate if the player has it forced by the server */
 {"spooky_ghost",{"spiky","tricircular","","standard","standard","colorable"},{1,1,1,1,1,1},{255,-16777016,255,184,9765959,255},"ghost"},
 {"dummy",{"greensward","duodonny","","standard","standard","standard"},{1,1,1,1,1,1},{50,-16777146,50,50,50,50},""},
+{"ninja",{"kitty","uppy","","standard","standard","negative"},{1,1,0,0,0,0},{0,-16777152,65408,0,0,0},"x_ninja"},
 };
 
 CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
