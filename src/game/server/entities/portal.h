@@ -34,6 +34,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	void SetLinkedPortal(CPortal *pPortal);
+	void DestroyLinkedPortal();
 };
 
 #endif // GAME_SERVER_ENTITIES_PORTAL_H

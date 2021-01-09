@@ -323,6 +323,8 @@ void CDrawEditor::OnWeaponSwitch()
 
 			GameServer()->SetPlotDoorStatus(PlotID, true);
 		}
+
+		GameServer()->RemovePortalsFromPlot(PlotID);
 	}
 	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
 	{

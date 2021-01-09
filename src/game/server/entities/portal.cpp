@@ -51,6 +51,12 @@ void CPortal::SetLinkedPortal(CPortal *pPortal)
 	m_LinkedTick = Server()->Tick();
 }
 
+void CPortal::DestroyLinkedPortal()
+{
+	if (m_pLinkedPortal)
+		m_pLinkedPortal->Reset();
+}
+
 void CPortal::Tick()
 {
 	if (m_Owner != -1 && !GameServer()->m_apPlayers[m_Owner])

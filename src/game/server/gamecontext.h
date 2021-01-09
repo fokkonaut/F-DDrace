@@ -403,6 +403,7 @@ public:
 	bool HasPlotByIP(int ClientID);
 
 	bool IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly);
+	void RemovePortalsFromPlot(int PlotID);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);

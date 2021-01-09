@@ -839,13 +839,14 @@ void CCharacter::FireWeapon()
 			{
 				vec2 PortalPos;
 				bool Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
+				bool CheckPlotDoorOnly = GameServer()->GetTilePlotID(m_Pos) < PLOT_START; // disallow portal through all doors in plot, but not in normal gameplay
+
 				if (!Found || !PortalPos
-					|| GameServer()->GetTilePlotID(PortalPos) >= PLOT_START
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true)
+					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), CheckPlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					)
 				{
