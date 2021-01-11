@@ -5191,7 +5191,7 @@ void CGameContext::CheckSavedJail(int ClientID)
 		if (SameAddrAndPort || SameAcc || SameClientInfo)
 		{
 			JailPlayer(ClientID, Info.m_JailTime/Server()->TickSpeed());
-			if (m_apPlayers[ClientID]->GetAccID() < ACC_START)
+			if (m_apPlayers[ClientID]->GetAccID() < ACC_START && Info.m_aUsername[0] != '\0')
 				Login(ClientID, Info.m_aUsername, "", false);
 			m_vSavedJailedPlayers.erase(m_vSavedJailedPlayers.begin() + i);
 			break;
