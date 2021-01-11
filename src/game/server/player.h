@@ -253,7 +253,6 @@ public:
 	int64 m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
 
-	bool m_Aim;
 	bool m_Afk;
 
 	// F-DDrace

@@ -7,7 +7,7 @@ Emoticons = Enum("EMOTICON", ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", 
 Votes = Enum("VOTE", ["UNKNOWN", "START_OP", "START_KICK", "START_SPEC", "END_ABORT", "END_PASS", "END_FAIL"]) # todo 0.8: add RUN_OP, RUN_KICK, RUN_SPEC; rem UNKNOWN
 ChatModes = Enum("CHAT", ["NONE", "ALL", "TEAM", "WHISPER", "SINGLE", "ATEVERYONE", "LOCAL"])
 
-PlayerFlags = Flags("PLAYERFLAG", ["ADMIN", "CHATTING", "SCOREBOARD", "READY", "DEAD", "WATCHING", "BOT"])
+PlayerFlags = Flags("PLAYERFLAG", ["ADMIN", "CHATTING", "SCOREBOARD", "READY", "DEAD", "WATCHING", "BOT", "AIM"])
 GameFlags = Flags("GAMEFLAG", ["TEAMS", "FLAGS", "SURVIVAL", "RACE"])
 GameStateFlags = Flags("GAMESTATEFLAG", ["WARMUP", "SUDDENDEATH", "ROUNDOVER", "GAMEOVER", "PAUSED", "STARTCOUNTDOWN"])
 CoreEventFlags = Flags("COREEVENTFLAG", ["GROUND_JUMP", "AIR_JUMP", "HOOK_ATTACH_PLAYER", "HOOK_ATTACH_GROUND", "HOOK_HIT_NOHOOK", "HOOK_ATTACH_FLAG"])
@@ -22,7 +22,7 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 							"GAME_PAUSED"]) # todo 0.8: sort (1 para)
 
 Authed = Enum("AUTHED", ["NO", "HELPER", "MOD", "ADMIN"])
-ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC", "AIM"])
+ExPlayerFlags = Flags("EXPLAYERFLAG", ["AFK", "PAUSED", "SPEC"])
 GameInfoFlags = Flags("GAMEINFOFLAG", [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
 	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
@@ -556,8 +556,4 @@ Messages = [
 	]),
 
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
-
-	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@netmsg.7.ddnet.tw", [
-		NetIntAny("m_Flags"),
-	]),
 ]

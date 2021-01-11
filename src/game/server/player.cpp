@@ -672,6 +672,8 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 		if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
+		if (GameServer()->GetClientDDNetVersion(m_ClientID) >= VERSION_DDNET && (m_PlayerFlags&PLAYERFLAG_AIM))
+			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_AIM;
 
 		pPlayerInfo->m_Latency = Latency;
 		pPlayerInfo->m_Score = Score;
@@ -689,8 +691,6 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
-	if(m_Aim)
-		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AIM;
 
 	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
 	if(SnappingClient >= 0)
@@ -873,11 +873,10 @@ void CPlayer::TranslatePlayerFlags(CNetObj_PlayerInput *NewInput)
 	if (!Server()->IsSevendown(m_ClientID))
 		return;
 
-	m_Aim = NewInput->m_PlayerFlags&16;
-
 	int PlayerFlags = 0;
 	if (NewInput->m_PlayerFlags&4) PlayerFlags |= PLAYERFLAG_CHATTING;
 	if (NewInput->m_PlayerFlags&8) PlayerFlags |= PLAYERFLAG_SCOREBOARD;
+	if (NewInput->m_PlayerFlags&16) PlayerFlags |= PLAYERFLAG_AIM;
 	NewInput->m_PlayerFlags = PlayerFlags;
 }
 

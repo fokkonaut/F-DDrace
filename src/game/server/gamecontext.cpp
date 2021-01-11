@@ -1544,7 +1544,10 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);
 	int ClientVersion = Info.m_DDNetVersion;
-	dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
+	if (Server()->IsSevendown(ClientID))
+		dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
+	else
+		dbg_msg("ddnet", "cid=%d ddnet_ver=%d version=%x", ClientID, ClientVersion, Server()->GetClientVersion(ClientID));
 
 	// update player map to send teams state
 	m_World.ForceUpdatePlayerMap(ClientID);
@@ -2521,11 +2524,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
 			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
-		}
-		else if (MsgID == NETMSGTYPE_CL_EXPLAYERFLAGS)
-		{
-			CNetMsg_Cl_ExPlayerFlags *pMsg = (CNetMsg_Cl_ExPlayerFlags *)pRawMsg;
-			pPlayer->m_Aim = pMsg->m_Flags&EXPLAYERFLAG_AIM;
 		}
 	}
 	else
