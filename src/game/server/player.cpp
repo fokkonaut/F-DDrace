@@ -672,7 +672,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_WATCHING;
 		if (m_IsDummy && GameServer()->Config()->m_SvDummyBotSkin)
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_BOT;
-		if (GameServer()->GetClientDDNetVersion(m_ClientID) >= VERSION_DDNET && (m_PlayerFlags&PLAYERFLAG_AIM))
+		if (GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET && (m_PlayerFlags&PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= PLAYERFLAG_AIM;
 
 		pPlayerInfo->m_Latency = Latency;
