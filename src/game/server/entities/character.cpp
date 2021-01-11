@@ -2389,7 +2389,9 @@ void CCharacter::HandleTiles(int Index)
 
 		bool Plot = GetCurrentTilePlotID() >= PLOT_START;
 		int Seconds = Server()->TickSpeed();
-		if (Plot) // every 2 seconds only on plot money tile
+		if (m_pPlayer->m_JailTime) // every 3 seconds only while arrested
+			Seconds *= 3;
+		else if (Plot) // every 2 seconds only on plot money tile
 			Seconds *= 2;
 
 		if (Server()->Tick() % Seconds == 0)
