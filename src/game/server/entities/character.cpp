@@ -3459,12 +3459,12 @@ bool CCharacter::RequestMinigameChange(int RequestedMinigame)
 		return true;
 
 	if (RequestedMinigame == m_RequestedMinigame)
-		return false;
+		return false; // only return false here, to actually join the minigame
 
 	if (m_pPlayer->m_JailTime)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't join a minigame while being arrested");
-		return false;
+		return true;
 	}
 
 	m_RequestedMinigame = RequestedMinigame;
