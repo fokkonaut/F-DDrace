@@ -432,7 +432,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (GameServer()->Config()->m_SvTeam == 3)
 		return;
 
-	if (!m_pGameContext->m_apPlayers[ClientID] || (m_pGameContext->m_apPlayers[ClientID]->m_DDraceVersion < VERSION_DDRACE_TEAMS && !Server()->IsSevendown(ClientID)))
+	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->GetClientDDNetVersion(ClientID) < VERSION_DDNET)
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);

@@ -116,8 +116,9 @@ enum
 
 enum
 {
+	VERSION_NONE = -1,
 	VERSION_VANILLA = 0,
-	VERSION_DDRACE_TEAMS = 1,
+	VERSION_DDNET = 1,
 };
 
 #endif

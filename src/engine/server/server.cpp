@@ -274,6 +274,10 @@ void CServer::CClient::Reset()
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = 0;
 	m_MapChunk = 0;
+
+	m_DDNetVersion = VERSION_NONE;
+	m_GotDDNetVersionPacket = false;
+	m_DDNetVersionSettled = false;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_RegisterSevendown(true)
@@ -496,9 +500,32 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
+		pInfo->m_GotDDNetVersion = m_aClients[ClientID].m_DDNetVersionSettled;
+		pInfo->m_DDNetVersion = m_aClients[ClientID].m_DDNetVersion >= 0 ? m_aClients[ClientID].m_DDNetVersion : VERSION_VANILLA;
+		if(m_aClients[ClientID].m_GotDDNetVersionPacket)
+		{
+			pInfo->m_pConnectionID = &m_aClients[ClientID].m_ConnectionID;
+			pInfo->m_pDDNetVersionStr = m_aClients[ClientID].m_aDDNetVersionStr;
+		}
+		else
+		{
+			pInfo->m_pConnectionID = 0;
+			pInfo->m_pDDNetVersionStr = 0;
+		}
 		return 1;
 	}
 	return 0;
+}
+
+void CServer::SetClientDDNetVersion(int ClientID, int DDNetVersion)
+{
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
+
+	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	{
+		m_aClients[ClientID].m_DDNetVersion = DDNetVersion;
+		m_aClients[ClientID].m_DDNetVersionSettled = true;
+	}
 }
 
 void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort) const
@@ -512,6 +539,20 @@ int CServer::GetClientVersion(int ClientID) const
 	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
 		return m_aClients[ClientID].m_Version;
 	return 0;
+}
+
+const char *CServer::GetClientVersionStr(int ClientID) const
+{
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	{
+		static char s_aVersion[64];
+		if (m_aClients[ClientID].m_Sevendown)
+			str_format(s_aVersion, sizeof(s_aVersion), "%d", m_aClients[ClientID].m_DDNetVersion);
+		else
+			str_format(s_aVersion, sizeof(s_aVersion), "%x", m_aClients[ClientID].m_Version);
+		return s_aVersion;
+	}
+	return "";
 }
 
 const char *CServer::ClientName(int ClientID) const
@@ -816,7 +857,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 		pThis->GameServer()->OnClientDrop(ClientID, "removing dummy");
 	}
 
-	pThis->m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+	pThis->m_aClients[ClientID].m_State = CClient::STATE_PREAUTH;
 	pThis->m_aClients[ClientID].m_aName[0] = 0;
 	pThis->m_aClients[ClientID].m_aClan[0] = 0;
 	pThis->m_aClients[ClientID].m_Country = -1;
@@ -1033,14 +1074,12 @@ static inline int MsgFromSevendown(int Msg, bool System)
 			;
 		else if(Msg >= 14 && Msg <= 24)
 			Msg = NETMSG_READY + Msg - 14;
-		else
+		else if(Msg < OFFSET_UUID)
 			return -1;
 	}
 	else
 	{
-		if(Msg >= OFFSET_UUID)
-			;
-		else if(Msg >= 17 && Msg <= 20)
+		if(Msg >= 17 && Msg <= 20)
 			Msg = NETMSGTYPE_CL_SAY + Msg - 17;
 		else if (Msg == 21)
 			Msg = NETMSGTYPE_CL_SKINCHANGE;
@@ -1048,9 +1087,7 @@ static inline int MsgFromSevendown(int Msg, bool System)
 			Msg = NETMSGTYPE_CL_KILL;
 		else if(Msg >= 23 && Msg <= 25)
 			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 23;
-		else if (Msg == 26)
-			Msg = NETMSGTYPE_CL_ISDDRACE;
-		else
+		else if(Msg < OFFSET_UUID)
 			return -1;
 	}
 
@@ -1107,9 +1144,28 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	if(Sys)
 	{
 		// system message
-		if(Msg == NETMSG_INFO)
+		if(Msg == NETMSG_CLIENTVER)
 		{
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_AUTH)
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_PREAUTH)
+			{
+				CUuid *pConnectionID = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionID));
+				int DDNetVersion = Unpacker.GetInt();
+				const char *pDDNetVersionStr = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+				if(Unpacker.Error() || !str_utf8_check(pDDNetVersionStr) || DDNetVersion < 0)
+				{
+					return;
+				}
+				m_aClients[ClientID].m_ConnectionID = *pConnectionID;
+				m_aClients[ClientID].m_DDNetVersion = DDNetVersion;
+				str_copy(m_aClients[ClientID].m_aDDNetVersionStr, pDDNetVersionStr, sizeof(m_aClients[ClientID].m_aDDNetVersionStr));
+				m_aClients[ClientID].m_DDNetVersionSettled = true;
+				m_aClients[ClientID].m_GotDDNetVersionPacket = true;
+				m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+			}
+		}
+		else if(Msg == NETMSG_INFO)
+		{
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_PREAUTH || m_aClients[ClientID].m_State == CClient::STATE_AUTH))
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 				if((!m_aClients[ClientID].m_Sevendown && str_comp(pVersion, GameServer()->NetVersion()) != 0) || (m_aClients[ClientID].m_Sevendown && str_comp(pVersion, GameServer()->NetVersionSevendown()) != 0))
@@ -2185,14 +2241,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 				}
 
-				char aVersion[16];
-				if (pThis->m_aClients[i].m_Sevendown)
-					str_format(aVersion, sizeof(aVersion), "%d", pThis->m_aClients[i].m_Version);
-				else
-					str_format(aVersion, sizeof(aVersion), "%x", pThis->m_aClients[i].m_Version);
-
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d name='%s' score=%d %s", i, aAddrStr,
-						aVersion, (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
+						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);

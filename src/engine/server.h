@@ -27,6 +27,10 @@ public:
 	{
 		const char *m_pName;
 		int m_Latency;
+		bool m_GotDDNetVersion;
+		int m_DDNetVersion;
+		const char *m_pDDNetVersionStr;
+		const CUuid *m_pConnectionID;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
@@ -39,6 +43,7 @@ public:
 	virtual int GetClientInfo(int ClientID, CClientInfo *pInfo) const = 0;
 	virtual void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const = 0;
 	virtual int GetClientVersion(int ClientID) const = 0;
+	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void RestrictRconOutput(int ClientID) = 0;
 
 	// F-DDrace

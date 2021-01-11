@@ -1306,6 +1306,13 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	if(Info.m_GotDDNetVersion)
+	{
+		OnClientDDNetVersionKnown(ClientID);
+	}
+
 	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	if (Config()->m_SvWelcome[0] != 0)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
@@ -1532,6 +1539,24 @@ const char *CGameContext::GetWhisper(char *pStr, int *pTarget)
 	return pStr;
 }
 
+void CGameContext::OnClientDDNetVersionKnown(int ClientID)
+{
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	int ClientVersion = Info.m_DDNetVersion;
+	dbg_msg("ddnet", "cid=%d version=%d", ClientID, ClientVersion);
+
+	// update player map to send teams state
+	m_World.ForceUpdatePlayerMap(ClientID);
+
+	//update his teams state
+	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+
+	//autoban known bot versions
+	if(Config()->m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
+		Server()->Kick(ClientID, "unsupported client");
+}
+
 void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	if (Server()->IsSevendown(ClientID))
@@ -1658,21 +1683,6 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (UpdateInfo)
 				pPlayer->UpdateInformation();
-		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
-		{
-			int Version = pUnpacker->GetInt();
-			((CServer *)Server())->m_aClients[ClientID].m_Version = Version;
-
-			dbg_msg("ddrace", "%d using custom client. version: %d", ClientID, Version);
-
-			m_World.ForceUpdatePlayerMap(ClientID);
-			((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
-
-			//autoban known bot versions
-			if(Config()->m_SvBannedVersions[0] != '\0' && IsVersionBanned(Version))
-				Server()->Kick(ClientID, "unsupported client");
-			return 0;
 		}
 		else
 		{
@@ -2516,26 +2526,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_ExPlayerFlags *pMsg = (CNetMsg_Cl_ExPlayerFlags *)pRawMsg;
 			pPlayer->m_Aim = pMsg->m_Flags&EXPLAYERFLAG_AIM;
-		}
-		else if (MsgID == NETMSGTYPE_CL_ISDDRACE)
-		{
-			int Version = pUnpacker->GetInt();
-
-			if (pUnpacker->Error())
-			{
-				if (pPlayer->m_DDraceVersion < VERSION_DDRACE_TEAMS)
-					pPlayer->m_DDraceVersion = VERSION_DDRACE_TEAMS;
-			}
-			else if(pPlayer->m_DDraceVersion < Version)
-				pPlayer->m_DDraceVersion = Version;
-
-			dbg_msg("ddrace", "%d using custom client. version: %x, ddrace: %d", ClientID, Server()->GetClientVersion(ClientID), pPlayer->m_DDraceVersion);
-
-			if (pPlayer->m_DDraceVersion >= VERSION_DDRACE_TEAMS)
-			{
-				m_World.ForceUpdatePlayerMap(ClientID);
-				((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
-			}
 		}
 	}
 	else
@@ -4008,6 +3998,13 @@ void CGameContext::List(int ClientID, const char* pFilter)
 	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
 	SEND(aBuf);
 	#undef SEND
+}
+
+int CGameContext::GetClientDDNetVersion(int ClientID)
+{
+	IServer::CClientInfo Info = {0};
+	Server()->GetClientInfo(ClientID, &Info);
+	return Info.m_DDNetVersion;
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

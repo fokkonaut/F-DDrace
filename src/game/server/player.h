@@ -255,7 +255,6 @@ public:
 
 	bool m_Aim;
 	bool m_Afk;
-	int m_DDraceVersion;
 
 	// F-DDrace
 

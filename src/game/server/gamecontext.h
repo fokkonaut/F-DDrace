@@ -340,6 +340,8 @@ public:
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionSevendown() const;
 
+	void OnClientDDNetVersionKnown(int ClientID);
+	int GetClientDDNetVersion(int ClientID);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
 	int64 m_NonEmptySince;

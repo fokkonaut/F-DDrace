@@ -110,6 +110,7 @@ public:
 		enum
 		{
 			STATE_EMPTY = 0,
+			STATE_PREAUTH,
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_CONNECTING_AS_SPEC,
@@ -153,6 +154,14 @@ public:
 		int m_AuthKey;
 		int m_AuthTries;
 
+		int m_MapChunk;
+		bool m_NoRconNote;
+		bool m_Quitting;
+		const IConsole::CCommandInfo *m_pRconCmdToSend;
+		const CMapListEntry *m_pMapListEntryToSend;
+
+		void Reset();
+
 		// DDrace
 		bool m_ShowIps;
 
@@ -162,13 +171,11 @@ public:
 		bool m_Sevendown;
 		bool m_UseLocalIDMap;
 
-		int m_MapChunk;
-		bool m_NoRconNote;
-		bool m_Quitting;
-		const IConsole::CCommandInfo *m_pRconCmdToSend;
-		const CMapListEntry *m_pMapListEntryToSend;
-
-		void Reset();
+		bool m_GotDDNetVersionPacket;
+		bool m_DDNetVersionSettled;
+		int m_DDNetVersion;
+		char m_aDDNetVersionStr[64];
+		CUuid m_ConnectionID;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -265,6 +272,7 @@ public:
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
 	int GetClientInfo(int ClientID, CClientInfo *pInfo) const;
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const;
+	void SetClientDDNetVersion(int ClientID, int DDNetVersion);
 	int GetClientVersion(int ClientID) const;
 	const char *ClientName(int ClientID) const;
 	const char *ClientClan(int ClientID) const;
@@ -373,6 +381,8 @@ public:
 
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
+
+	const char *GetClientVersionStr(int ClientID) const;
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters

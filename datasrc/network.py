@@ -560,6 +560,4 @@ Messages = [
 	NetMessageEx("Cl_ExPlayerFlags", "explayerflags@netmsg.7.ddnet.tw", [
 		NetIntAny("m_Flags"),
 	]),
-
-	NetMessageEx("Cl_IsDDrace", "isddrace@netmsg.7.ddnet.tw", []),
 ]
