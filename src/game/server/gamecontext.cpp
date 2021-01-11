@@ -1782,9 +1782,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 							continue;
 
 						const char *pName = Server()->ClientName(i);
-						const char *pHaystack = str_find(pMsg->m_pMessage, pName);
-						if (pHaystack)
+						while(1)
 						{
+							const char *pHaystack = str_find(pMsg->m_pMessage, pName);
+							if (!pHaystack)
+								break;
+
 							for (int j = 0; j < str_length(pName); j++)
 							{
 								*(const_cast<char *>(pHaystack)) = '*';
