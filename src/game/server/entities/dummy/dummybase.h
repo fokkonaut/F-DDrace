@@ -25,6 +25,7 @@ class CDummyBase
 {
 public:
 	CDummyBase(CCharacter *pChr, int Mode);
+	virtual ~CDummyBase() {}
 	void Tick();
 	int Mode() { return m_Mode; }
 
