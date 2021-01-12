@@ -1783,7 +1783,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else
 			{
 				// @everyone mode
-				if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find(pMsg->m_pMessage, "@everyone"))
+				if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find_nocase(pMsg->m_pMessage, "@everyone"))
 					Mode = CHAT_ATEVERYONE;
 
 				// disallow pings
@@ -1797,7 +1797,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						const char *pName = Server()->ClientName(i);
 						while(1)
 						{
-							const char *pHaystack = str_find(pMsg->m_pMessage, pName);
+							const char *pHaystack = str_find_nocase(pMsg->m_pMessage, pName);
 							if (!pHaystack)
 								break;
 
