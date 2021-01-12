@@ -460,10 +460,13 @@ void CCharacterCore::Tick(bool UseInput)
 
 				// F-DDrace // body check
 				// reset last hit weapon if someone new touches us
-				if (m_Killer.m_ClientID != pCharCore->m_Id)
-					m_Killer.m_Weapon = -1;
+				if (m_pCollision->m_pConfig->m_SvTouchedKills)
+				{
+					if (m_Killer.m_ClientID != pCharCore->m_Id)
+						m_Killer.m_Weapon = -1;
 
-				m_Killer.m_ClientID = pCharCore->m_Id;
+					m_Killer.m_ClientID = pCharCore->m_Id;
+				}
 			}
 
 			// handle hook influence
