@@ -1494,14 +1494,14 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
-	/*char aBuf[256];
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d killer_team:%d victim_team:%d",
 		Killer, Server()->ClientName(Killer),
 		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial,
 		GameServer()->m_apPlayers[Killer]->GetTeam(),
 		m_pPlayer->GetTeam()
 	);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);*/
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// construct kill message
 	CNetMsg_Sv_KillMsg Msg;
