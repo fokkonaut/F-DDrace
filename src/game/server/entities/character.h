@@ -12,6 +12,7 @@
 #include "pickup.h"
 #include "lightsaber.h"
 #include "stable_projectile.h"
+#include "dummy/blmapchill_police.h"
 
 #include <game/server/draweditor.h>
 
@@ -74,6 +75,7 @@ public:
 	static const int ms_PhysSize = 28;
 
 	CCharacter(CGameWorld *pWorld);
+	~CCharacter();
 
 	virtual void Reset();
 	virtual void Destroy();
@@ -488,26 +490,13 @@ public:
 
 	/////////dummymode variables
 
+
+	CDummyBlmapChillPolice *m_pDummyBlmapChillPolice;
+
+	CNetObj_PlayerInput *Input() { return &m_Input; };
+	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; };
 	void Fire(bool Fire = true);
-
-	//dummymode 32 vars (BlmapChill police guard)
-	int m_DummyLovedX;
-	int m_DummyLovedY;
-	int m_DummyLowerPanic;
-	int m_DummySpeed;
-	int m_DummyHelpMode;
-	bool m_DummyHelpHook;
-	bool m_DummyClosestPolice;
-	bool m_DummyDidRocketjump;
-
-	int m_DummyGrenadeJump;
-	bool m_DummyTouchedGround;
-	bool m_DummyAlreadyBeenHere;
-	bool m_DummyStartGrenade;
-	bool m_DummyUsedDJ;
-	int m_DummySpawnTeleporter;
-	bool m_DummyReachedCinemaEntrance;
-
+	int GetReloadTimer() { return m_ReloadTimer; }
 
 	//dummymode 29 vars (ChillBlock5 blocker)
 	int m_DummyFreezeBlockTrick;
