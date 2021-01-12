@@ -1441,6 +1441,11 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 	return 0;
 }
 
+int CCollision::GetDoorNumber(vec2 Pos)
+{
+	return GetDTileNumber(GetPureMapIndex(Pos));
+}
+
 bool CCollision::IsPlotTile(int Index)
 {
 	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;

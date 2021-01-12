@@ -3521,15 +3521,22 @@ int CCharacter::GetCurrentTilePlotID()
 
 void CCharacter::TeleOutOfPlot(int PlotID)
 {
+	if (PlotID < PLOT_START)
+		return;
+
 	if (m_pPlayer->IsMinigame() && m_pPlayer->m_SavedMinigameTee)
 	{
-		int SavedTilePlotID = GameServer()->GetTilePlotID(m_pPlayer->m_MinigameTee.GetPos());
-		if (SavedTilePlotID > 0 && PlotID > 0 && SavedTilePlotID == PlotID)
+		vec2 SavedPos = m_pPlayer->m_MinigameTee.GetPos();
+		int SavedTilePlotID = GameServer()->GetTilePlotID(SavedPos);
+		int SavedPlotDoor = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(SavedPos));
+
+		if (SavedTilePlotID == PlotID || SavedPlotDoor == PlotID)
 			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_aPlots[PlotID].m_ToTele);
 	}
 
 	int TilePlotID = GetCurrentTilePlotID();
-	if (TilePlotID > 0 && PlotID > 0 && TilePlotID == PlotID)
+	int PlotDoor = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(m_Pos));
+	if (TilePlotID == PlotID || PlotDoor == PlotID)
 	{
 		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);
