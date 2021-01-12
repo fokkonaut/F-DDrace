@@ -614,7 +614,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 		}
 	}
 
-	bool CallSaveScore = false;
+	bool CallSaveScore = GameServer()->Config()->m_SvSaveWorseScores;
 
 	if (!pData->m_BestTime || Time < pData->m_BestTime)
 	{
