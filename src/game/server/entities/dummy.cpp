@@ -3,9 +3,9 @@
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
-void CCharacter::Fire(bool Fire)
+void CCharacter::Fire(bool Stroke)
 {
-	if (Fire)
+	if (Stroke)
 	{
 		m_LatestInput.m_Fire++;
 		m_Input.m_Fire++;
@@ -19,19 +19,17 @@ void CCharacter::Fire(bool Fire)
 
 void CCharacter::DummyTick()
 {
-	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
-		return;
-	if (!IsAlive())
+	if (!IsAlive() || !m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
 		return;
 
 	ResetInput();
 	m_Input.m_Hook = 0;
 
-	if (m_pPlayer->m_Dummymode == DUMMYMODE_IDLE)
+	if (m_pPlayer->GetDummyMode() == DUMMYMODE_IDLE)
 	{
 		// do nothing
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_V3_BLOCKER)  //ChillBlock5 blmapv3 1o1 mode // made by chillerdragon // improved by fokkonaut
+	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_V3_BLOCKER)  //ChillBlock5 blmapv3 1o1 mode // made by chillerdragon // improved by fokkonaut
 	{
 		int V3_OFFSET_X = Config()->m_SvV3OffsetX * 32;
 		int V3_OFFSET_Y = Config()->m_SvV3OffsetY * 32;
@@ -312,7 +310,7 @@ void CCharacter::DummyTick()
 				m_Input.m_Hook = 0;
 		}
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_CHILLBLOCK5_RACER) //Race mode ChillBlock5 //by chillerdragon cleanup by fokkonaut
+	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_CHILLBLOCK5_RACER) //Race mode ChillBlock5 //by chillerdragon cleanup by fokkonaut
 	{
 		if (m_Core.m_Pos.x > 241 * 32 && m_Core.m_Pos.x < 418 * 32 && m_Core.m_Pos.y > 121 * 32 && m_Core.m_Pos.y < 192 * 32) //new spawn ChillBlock5 (tourna edition (the on with the gores stuff))
 		{
@@ -1686,7 +1684,7 @@ void CCharacter::DummyTick()
 				m_Input.m_Hook = 0;
 		}
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_CHILLBLOCK5_BLOCKER) //chillblock5 blocker //made by chillerdragon, cleaned up as much as possible by fokkonaut
+	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_CHILLBLOCK5_BLOCKER) //chillblock5 blocker //made by chillerdragon, cleaned up as much as possible by fokkonaut
 	{
 		if (m_DummyBoredCounter > 2)
 		{
@@ -3044,7 +3042,7 @@ void CCharacter::DummyTick()
 		else
 			m_DummyBlockMode = 0;
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_CHILLBOCK5_POLICE) //ChillBlock5 Police Guard //made by chillerdragon
+	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_CHILLBOCK5_POLICE) //ChillBlock5 Police Guard //made by chillerdragon
 	{
 		if (m_Core.m_Pos.x < 460 * 32) //spawn
 		{
@@ -3308,14 +3306,10 @@ void CCharacter::DummyTick()
 			}
 		}
 	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_BLMAPCHILL_POLICE)
-	{
-		m_pDummyBlmapChillPolice->OnTick();
-	}
-	else if (m_pPlayer->m_Dummymode == DUMMYMODE_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY || m_pPlayer->m_Dummymode == DUMMYMODE_BANK_DUMMY) // house dummy
+	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_SHOP_DUMMY || m_pPlayer->GetDummyMode() == DUMMYMODE_PLOT_SHOP_DUMMY || m_pPlayer->GetDummyMode() == DUMMYMODE_BANK_DUMMY) // house dummy
 	{
 		int Type;
-		switch (m_pPlayer->m_Dummymode)
+		switch (m_pPlayer->GetDummyMode())
 		{
 		case DUMMYMODE_SHOP_DUMMY: Type = HOUSE_SHOP; break;
 		case DUMMYMODE_PLOT_SHOP_DUMMY: Type = HOUSE_PLOT_SHOP; break;
@@ -3338,6 +3332,4 @@ void CCharacter::DummyTick()
 			return;
 		}
 	}
-	else if (m_pPlayer->m_Dummymode != DUMMYMODE_IDLE)
-		m_pPlayer->m_Dummymode = DUMMYMODE_IDLE;
 }

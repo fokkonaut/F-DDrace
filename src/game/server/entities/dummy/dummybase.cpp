@@ -1,83 +1,51 @@
+// made by fokkonaut and ChillerDragon
 
 #include "dummybase.h"
-
-#include "../character.h"
-#include <game/server/player.h>
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
-CDummyBase::CDummyBase(class CCharacter *pChr, class CPlayer *pPlayer)
+CGameContext *CDummyBase::GameServer() const { return m_pCharacter->GameServer(); }
+CGameWorld *CDummyBase::GameWorld() const { return m_pCharacter->GameWorld(); }
+IServer *CDummyBase::Server() const { return GameServer()->Server(); }
+
+vec2 CDummyBase::GetPos() { return m_pCharacter->Core()->m_Pos; }
+vec2 CDummyBase::GetVel() { return m_pCharacter->Core()->m_Vel; }
+int CDummyBase::HookState() { return m_pCharacter->Core()->m_HookState; }
+int CDummyBase::Jumped() { return m_pCharacter->Core()->m_Jumped; }
+int CDummyBase::Jumps() { return m_pCharacter->Core()->m_Jumps; }
+bool CDummyBase::IsGrounded() { return m_pCharacter->IsGrounded(); }
+void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); }
+void CDummyBase::Die() { m_pCharacter->Die(); }
+CNetObj_PlayerInput *CDummyBase::Input() { return m_pCharacter->Input(); }
+CNetObj_PlayerInput *CDummyBase::LatestInput() { return m_pCharacter->LatestInput(); }
+
+CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 {
-	m_pChr = pChr;
-	m_pPlayer = pPlayer;
+	m_pCharacter = pChr;
+	m_pPlayer = pChr->GetPlayer();
+	m_Mode = Mode;
 }
 
-IServer *CDummyBase::Server()
+void CDummyBase::Fire(bool Stroke)
 {
-	return m_pChr->Server();
+	if (Stroke)
+	{
+		LatestInput()->m_Fire++;
+		Input()->m_Fire++;
+	}
+	else
+	{
+		LatestInput()->m_Fire = 0;
+		Input()->m_Fire = 0;
+	}
 }
 
-CGameContext *CDummyBase::GameServer()
+void CDummyBase::Tick()
 {
-	return m_pChr->GameServer();
-}
+	// Prepare input
+	m_pCharacter->ResetInput();
+	Input()->m_Hook = 0;
 
-CGameWorld *CDummyBase::GameWorld()
-{
-	return m_pChr->GameWorld();
-}
-
-CNetObj_PlayerInput *CDummyBase::Input()
-{
-	return m_pChr->Input();
-}
-
-CNetObj_PlayerInput *CDummyBase::LatestInput()
-{
-	return m_pChr->LatestInput();
-}
-
-vec2 CDummyBase::GetPos()
-{
-	return m_pChr->GetCore().m_Pos;
-}
-
-vec2 CDummyBase::GetVel()
-{
-	return m_pChr->GetCore().m_Vel;
-}
-
-void CDummyBase::Die()
-{
-	m_pChr->Die();
-}
-
-void CDummyBase::SetWeapon(int Weapon)
-{
-	m_pChr->SetWeapon(Weapon);
-}
-
-void CDummyBase::Fire()
-{
-	m_pChr->Fire();
-}
-
-bool CDummyBase::IsGrounded()
-{
-	return m_pChr->IsGrounded();
-}
-
-int CDummyBase::HookState()
-{
-	return m_pChr->GetCore().m_HookState;
-}
-
-int CDummyBase::Jumped()
-{
-	return m_pChr->GetCore().m_Jumped;
-}
-
-int CDummyBase::Jumps()
-{
-	return m_pChr->GetCore().m_Jumps;
+	// Then start controlling
+	OnTick();
 }

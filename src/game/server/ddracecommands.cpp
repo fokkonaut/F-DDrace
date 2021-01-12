@@ -1242,11 +1242,11 @@ void CGameContext::ConDummymode(IConsole::IResult *pResult, void *pUserData)
 			return;
 
 		if (pResult->NumArguments() == 2)
-			pPlayer->m_Dummymode = pResult->GetInteger(1);
+			pPlayer->SetDummyMode(pResult->GetInteger(1));
 		else if (pResult->NumArguments() == 1)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "Dummymode of '%s': [%d]", pSelf->Server()->ClientName(pResult->GetInteger(0)), pPlayer->m_Dummymode);
+			str_format(aBuf, sizeof(aBuf), "Dummymode of '%s': [%d]", pSelf->Server()->ClientName(pResult->GetInteger(0)), pPlayer->GetDummyMode());
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 	}

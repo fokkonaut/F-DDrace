@@ -112,7 +112,7 @@ void CLightsaber::Step()
 	if (!m_pOwner)
 		return;
 
-	vec2 to2 = m_Pos + normalize(vec2(m_pOwner->GetInput().m_TargetX, m_pOwner->GetInput().m_TargetY)) * m_Length;
+	vec2 to2 = m_Pos + normalize(vec2(m_pOwner->Input()->m_TargetX, m_pOwner->Input()->m_TargetY)) * m_Length;
 	GameServer()->Collision()->IntersectLine(m_Pos, to2, &m_To, 0);
 }
 

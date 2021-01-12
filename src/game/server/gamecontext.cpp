@@ -5355,7 +5355,7 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg, int Client
 	return aRet;
 }
 
-void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
+void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)
 {
 	int DummyID = GetNextClientID();
 	if (DummyID < 0 || DummyID >= MAX_CLIENTS || m_apPlayers[DummyID])
@@ -5364,20 +5364,20 @@ void CGameContext::ConnectDummy(int Dummymode, vec2 Pos)
 	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, false);
 	Server()->DummyJoin(DummyID);
 	pDummy->m_IsDummy = true;
-	pDummy->m_Dummymode = Dummymode;
+	pDummy->SetDummyMode(DummyMode);
 	pDummy->m_ForceSpawnPos = Pos;
 	pDummy->m_Afk = false; // players are marked as afk when they first enter. dummies dont send real inputs, thats why we need to make them non-afk again
 
-	if (pDummy->m_Dummymode == DUMMYMODE_V3_BLOCKER && Collision()->TileUsed(TILE_MINIGAME_BLOCK))
+	if (DummyMode == DUMMYMODE_V3_BLOCKER && Collision()->TileUsed(TILE_MINIGAME_BLOCK))
 		pDummy->m_Minigame = MINIGAME_BLOCK;
-	else if ((pDummy->m_Dummymode == DUMMYMODE_SHOP_DUMMY && Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
-		|| (pDummy->m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY && Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN)))
+	else if ((DummyMode == DUMMYMODE_SHOP_DUMMY && Collision()->TileUsed(ENTITY_SHOP_DUMMY_SPAWN))
+		|| (DummyMode == DUMMYMODE_PLOT_SHOP_DUMMY && Collision()->TileUsed(ENTITY_PLOT_SHOP_DUMMY_SPAWN)))
 		pDummy->m_Minigame = -1;
 
 	pDummy->m_TeeInfos = CTeeInfo(SKIN_DUMMY);
 	OnClientEnter(DummyID);
 
-	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, Dummymode);
+	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, DummyMode);
 }
 
 bool CGameContext::IsHouseDummy(int ClientID, int Type)
@@ -5397,7 +5397,7 @@ bool CGameContext::IsHouseDummy(int ClientID, int Type)
 	case HOUSE_PLOT_SHOP: Mode = DUMMYMODE_PLOT_SHOP_DUMMY; break;
 	case HOUSE_BANK: Mode = DUMMYMODE_BANK_DUMMY; break;
 	}
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Dummymode == Mode;
+	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetDummyMode() == Mode;
 }
 
 int CGameContext::GetHouseDummy(int Type)

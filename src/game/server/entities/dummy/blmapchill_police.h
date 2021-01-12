@@ -3,15 +3,15 @@
 #ifndef GAME_SERVER_ENTITIES_DUMMY_BLMAPCHILL_POLICE_H
 #define GAME_SERVER_ENTITIES_DUMMY_BLMAPCHILL_POLICE_H
 
-#include <base/vmath.h>
 #include "dummybase.h"
 
-class CDummyBlmapChillPolice : public CDummyBase {
+class CDummyBlmapChillPolice : public CDummyBase
+{
 public:
-	CDummyBlmapChillPolice(class CCharacter *pChr, class CPlayer *pPlayer);
+	CDummyBlmapChillPolice(CCharacter *pChr);
+	virtual void OnTick();
 
-	void OnTick();
-
+private:
 	int m_LovedX;
 	int m_LovedY;
 	int m_LowerPanic;
@@ -27,7 +27,7 @@ public:
 	bool m_HasAlreadyBeenHere;
 	bool m_HasStartGrenade;
 	bool m_IsDJUsed;
-	bool m_HashReachedCinemaEntrance;
+	bool m_HasReachedCinemaEntrance;
 };
 
 #endif

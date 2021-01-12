@@ -138,7 +138,7 @@ void CPlayer::Reset()
 	// F-DDrace
 
 	m_IsDummy = false;
-	m_Dummymode = DUMMYMODE_IDLE;
+	m_DummyMode = DUMMYMODE_IDLE;
 	m_FakePing = 0;
 
 	m_vWeaponLimit.resize(NUM_WEAPONS);
@@ -1169,19 +1169,19 @@ void CPlayer::TryRespawn()
 	{
 		SpawnPos = m_ForceSpawnPos;
 	}
-	else if (m_Dummymode == DUMMYMODE_SHOP_DUMMY)
+	else if (m_DummyMode == DUMMYMODE_SHOP_DUMMY)
 	{
 		Index = TILE_SHOP;
 	}
-	else if (m_Dummymode == DUMMYMODE_PLOT_SHOP_DUMMY)
+	else if (m_DummyMode == DUMMYMODE_PLOT_SHOP_DUMMY)
 	{
 		Index = TILE_PLOT_SHOP;
 	}
-	else if (m_Dummymode == DUMMYMODE_BANK_DUMMY)
+	else if (m_DummyMode == DUMMYMODE_BANK_DUMMY)
 	{
 		Index = TILE_BANK;
 	}
-	else if (m_Minigame == MINIGAME_BLOCK || m_Dummymode == DUMMYMODE_V3_BLOCKER)
+	else if (m_Minigame == MINIGAME_BLOCK || m_DummyMode == DUMMYMODE_V3_BLOCKER)
 	{
 		Index = TILE_MINIGAME_BLOCK;
 	}
@@ -1838,6 +1838,16 @@ bool CPlayer::IsHooked(int Power)
 			return Power >= 0 ? pChr->m_HookPower == Power : true;
 	}
 	return false;
+}
+
+void CPlayer::SetDummyMode(int Dummymode)
+{
+	if (m_DummyMode != Dummymode)
+	{
+		m_DummyMode = Dummymode;
+		if (m_pCharacter)
+			m_pCharacter->CreateDummyHandle(Dummymode);
+	}
 }
 
 void CPlayer::SetPlaying()

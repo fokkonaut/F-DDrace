@@ -351,7 +351,7 @@ public:
 	// F-DDrace
 
 	//dummy
-	void ConnectDummy(int Dummymode = 0, vec2 Pos = vec2(-1, -1));
+	void ConnectDummy(int DummyMode = 0, vec2 Pos = vec2(-1, -1));
 	void ConnectDefaultDummies();
 
 	bool IsHouseDummy(int ClientID, int Type = -1);

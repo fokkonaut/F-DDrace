@@ -20,9 +20,10 @@
 #include "trail.h"
 #include "portal.h"
 #include "money.h"
+#include "dummy/blmapchill_police.h"
+
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
-
 #include <generated/protocol.h>
 
 //input count
@@ -62,14 +63,12 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 	m_Armor = 0;
 	m_TriggeredEvents = 0;
 	m_StrongWeakID = 0;
-
-	m_pDummyBlmapChillPolice = 0;
 }
 
 CCharacter::~CCharacter()
 {
-	if (m_pDummyBlmapChillPolice)
-		delete m_pDummyBlmapChillPolice;
+	if (m_pDummyHandle)
+		delete m_pDummyHandle;
 }
 
 void CCharacter::Reset()
@@ -102,7 +101,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	FDDraceInit();
-	m_pDummyBlmapChillPolice = new CDummyBlmapChillPolice(this, pPlayer);
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	DDraceInit();
@@ -1195,9 +1193,9 @@ void CCharacter::Tick()
 	if (MinigameRequestTick())
 		return; // We need to return here because in SetMinigame() the player is killed already
 
+	DummyTick();
 	FDDraceTick();
 	HandleLastIndexTiles();
-	DummyTick();
 
 	DDraceTick();
 
@@ -3300,6 +3298,21 @@ void CCharacter::FDDraceInit()
 	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
 	m_RequestedMinigame = MINIGAME_NONE;
 	m_LastMinigameRequest = 0;
+
+	m_pDummyHandle = 0;
+	CreateDummyHandle(m_pPlayer->GetDummyMode());
+}
+
+void CCharacter::CreateDummyHandle(int Dummymode)
+{
+	if (m_pDummyHandle)
+		delete m_pDummyHandle;
+	m_pDummyHandle = 0;
+
+	switch (Dummymode)
+	{
+	case DUMMYMODE_BLMAPCHILL_POLICE: m_pDummyHandle = new CDummyBlmapChillPolice(this); break;
+	}
 }
 
 void CCharacter::FDDraceTick()
@@ -3426,14 +3439,16 @@ void CCharacter::FDDraceTick()
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
 
-	// update the editor
-	m_DrawEditor.Tick();
-
 	if (m_IsRainbowHooked && !m_pPlayer->IsHooked(RAINBOW))
 	{
 		m_IsRainbowHooked = false;
 		m_pPlayer->ResetSkin();
 	}
+
+	// update
+	m_DrawEditor.Tick();
+	if (m_pDummyHandle)
+		m_pDummyHandle->Tick();
 }
 
 void CCharacter::HandleLastIndexTiles()

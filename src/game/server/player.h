@@ -32,19 +32,6 @@ enum Scoreformat
 	SCORE_BLOCK_POINTS
 };
 
-enum Dummymode
-{
-	DUMMYMODE_IDLE = 0,
-	DUMMYMODE_V3_BLOCKER = -6,
-	DUMMYMODE_CHILLBLOCK5_RACER = 23,
-	DUMMYMODE_CHILLBLOCK5_BLOCKER = 29,
-	DUMMYMODE_CHILLBOCK5_POLICE = 31,
-	DUMMYMODE_BLMAPCHILL_POLICE = 32,
-	DUMMYMODE_SHOP_DUMMY = 99,
-	DUMMYMODE_PLOT_SHOP_DUMMY = 98,
-	DUMMYMODE_BANK_DUMMY = 97,
-};
-
 enum Portals
 {
 	PORTAL_FIRST,
@@ -200,6 +187,9 @@ private:
 	int64 m_ForcePauseTime;
 	int64 m_LastPause;
 
+	// F-DDrace
+	int m_DummyMode;
+
 public:
 	enum
 	{
@@ -261,8 +251,9 @@ public:
 	std::vector< std::vector<CPickupDrop*> > m_vWeaponLimit;
 
 	//dummy
+	int GetDummyMode() { return m_DummyMode; }
+	void SetDummyMode(int DummyMode);
 	bool m_IsDummy;
-	int m_Dummymode;
 	int m_FakePing;
 	vec2 m_ForceSpawnPos;
 

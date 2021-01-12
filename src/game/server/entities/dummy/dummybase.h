@@ -1,36 +1,58 @@
+// made by fokkonaut and ChillerDragon
+
 #ifndef GAME_SERVER_ENTITIES_DUMMYBASE_H
 #define GAME_SERVER_ENTITIES_DUMMYBASE_H
 
-#include <base/vmath.h>
+#include <game/server/entity.h>
 
 class CCharacter;
 class CPlayer;
 
-class CDummyBase {
-public:
-	CDummyBase(class CCharacter *pChr, class CPlayer *pPlayer);
+enum Dummymode
+{
+	DUMMYMODE_IDLE = 0,
+	DUMMYMODE_V3_BLOCKER = -6,
+	DUMMYMODE_CHILLBLOCK5_RACER = 23,
+	DUMMYMODE_CHILLBLOCK5_BLOCKER = 29,
+	DUMMYMODE_CHILLBOCK5_POLICE = 31,
+	DUMMYMODE_BLMAPCHILL_POLICE = 32,
+	DUMMYMODE_SHOP_DUMMY = 99,
+	DUMMYMODE_PLOT_SHOP_DUMMY = 98,
+	DUMMYMODE_BANK_DUMMY = 97,
+};
 
-	void OnTick();
+class CDummyBase
+{
+public:
+	CDummyBase(CCharacter *pChr, int Mode);
+	void Tick();
+	int Mode() { return m_Mode; }
+
+private:
+	virtual void OnTick() {}
+	int m_Mode;
+
+protected:
+	CGameContext *GameServer() const;
+	CGameWorld *GameWorld() const;
+	IServer *Server() const;
+
+	CCharacter *m_pCharacter;
+	CPlayer *m_pPlayer;
 
 	vec2 GetPos();
 	vec2 GetVel();
-	void Die();
-	void SetWeapon(int Weapon);
-	void Fire();
-	bool IsGrounded();
 	int HookState();
 	int Jumped();
 	int Jumps();
+	bool IsGrounded();
 
-	class IServer *Server();
-	class CGameContext *GameServer();
-	class CGameWorld *GameWorld();
-	struct CNetObj_PlayerInput *Input();
-	struct CNetObj_PlayerInput *LatestInput();
+	void SetWeapon(int Weapon);
+	void Fire(bool Stroke = true);
+	void Die();
 
-
-	CCharacter *m_pChr;
-	CPlayer *m_pPlayer;
+	CNetObj_PlayerInput *Input();
+	CNetObj_PlayerInput *LatestInput();
 };
 
 #endif

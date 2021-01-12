@@ -7,13 +7,13 @@
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
-CDummyBlmapChillPolice::CDummyBlmapChillPolice(class CCharacter *pChr, class CPlayer *pPlayer)
-: CDummyBase(pChr, pPlayer)
+CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
+: CDummyBase(pChr, DUMMYMODE_BLMAPCHILL_POLICE)
 {
 	m_LovedX = 0;
 	m_LovedY = 0;
 	m_LowerPanic = 0;
-	m_Speed = 0;
+	m_Speed = 70;
 	m_HelpMode = 0;
 	m_GrenadeJump = 0;
 	m_SpawnTeleporter = 0;
@@ -25,15 +25,13 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(class CCharacter *pChr, class CPl
 	m_HasAlreadyBeenHere = false;
 	m_HasStartGrenade = false;
 	m_IsDJUsed = false;
-	m_HashReachedCinemaEntrance = false;
+	m_HasReachedCinemaEntrance = false;
 }
 
 void CDummyBlmapChillPolice::OnTick()
 {
 	if (GetPos().x > 451 * 32 && GetPos().x < 472 * 32 && GetPos().y > 74 * 32 && GetPos().y < 85 * 32) //spawn area, walk into the left SPAWN teleporter
 	{
-		m_Speed = 70; // fix for crashbug (DONT REMOVE)
-
 		Input()->m_Direction = -1;
 		if (GetPos().x > 454 * 32 && GetPos().x < 458 * 32) //left side of spawn area
 		{
@@ -44,7 +42,7 @@ void CDummyBlmapChillPolice::OnTick()
 	}
 	else if (GetPos().x < 240 * 32 && GetPos().y < 36 * 32) // the complete zone in the map intselfs. its for resetting the dummy when he is back in spawn using tp
 	{
-		if (m_pChr->m_IsFrozen && GetPos().x > 32 * 32)
+		if (m_pCharacter->m_IsFrozen && GetPos().x > 32 * 32)
 		{
 			if (Server()->Tick() % 60 == 0)
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing
@@ -127,7 +125,7 @@ void CDummyBlmapChillPolice::OnTick()
 				Input()->m_Jump = 1;
 				if (Server()->Tick() % 20 == 0)
 					Input()->m_Jump = 0;
-				if (GetPos().y < 19 * 32 && m_pChr->m_FreezeTime == 0)
+				if (GetPos().y < 19 * 32 && m_pCharacter->m_FreezeTime == 0)
 					Fire();
 				Input()->m_TargetX = -200;
 				Input()->m_TargetY = 200;
@@ -219,12 +217,12 @@ void CDummyBlmapChillPolice::OnTick()
 					Input()->m_TargetY = 150;
 					if (GetPos().x < 229 * 32)
 					{
-						if (m_pChr->m_FreezeTime == 0)
+						if (m_pCharacter->m_FreezeTime == 0)
 							Fire();
 					}
 					else // on right side of platform (do rj here)
 					{
-						if (IsGrounded() && !m_pChr->GetReloadTimer())
+						if (IsGrounded() && !m_pCharacter->GetReloadTimer())
 						{
 							if (GetPos().x > 231 * 32)
 							{
@@ -242,7 +240,7 @@ void CDummyBlmapChillPolice::OnTick()
 			}
 		}
 	}
-	if (m_pChr->m_IsFrozen && GetPos().y < 410 * 32) // kills when in freeze and not in policebase
+	if (m_pCharacter->m_IsFrozen && GetPos().y < 410 * 32) // kills when in freeze and not in policebase
 	{
 		if (Server()->Tick() % 60 == 0)
 			GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing
@@ -252,7 +250,7 @@ void CDummyBlmapChillPolice::OnTick()
 			return;
 		}
 	}
-	if (m_pChr->m_IsFrozen && GetPos().x < 41 * 32 && GetPos().x > 33 * 32 && GetPos().y < 10 * 32) // kills when on speedup right next to the newtee spawn to prevent infinite flappy blocking
+	if (m_pCharacter->m_IsFrozen && GetPos().x < 41 * 32 && GetPos().x > 33 * 32 && GetPos().y < 10 * 32) // kills when on speedup right next to the newtee spawn to prevent infinite flappy blocking
 	{
 		if (Server()->Tick() % 500 == 0) // kill when freeze
 		{
@@ -304,14 +302,14 @@ void CDummyBlmapChillPolice::OnTick()
 	{
 		if (IsGrounded())
 		{
-			m_HashReachedCinemaEntrance = true;
+			m_HasReachedCinemaEntrance = true;
 			Input()->m_Jump = 1;
 		}
 		else if (GetPos().y < 313 * 32 && GetPos().y > 312 * 32 && GetPos().x < 367 * 32)
 			Input()->m_Direction = 1;
 		else if (GetPos().x > 367 * 32)
 			Input()->m_Direction = -1;
-		if (!m_HashReachedCinemaEntrance && GetPos().x < 370 * 32)
+		if (!m_HasReachedCinemaEntrance && GetPos().x < 370 * 32)
 			Input()->m_Direction = 0;
 		if (GetVel().y > 0.0000001f && GetPos().y < 310 * 32)
 			Input()->m_Jump = 1;
@@ -546,7 +544,7 @@ void CDummyBlmapChillPolice::OnTick()
 							Input()->m_Direction = -1;
 					}
 
-					if ((GetPos().y > 441 * 32 + 10 && (GetPos().x > 402 * 32 || GetPos().x < 399 * 32 + 10)) || m_pChr->m_IsFrozen) //check for fail position
+					if ((GetPos().y > 441 * 32 + 10 && (GetPos().x > 402 * 32 || GetPos().x < 399 * 32 + 10)) || m_pCharacter->m_IsFrozen) //check for fail position
 						m_LowerPanic = 1; //lower panic mode to reposition
 				}
 			}
@@ -554,7 +552,7 @@ void CDummyBlmapChillPolice::OnTick()
 			{
 				m_HelpMode = 0;
 				//check if officer needs help
-				CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pChr, m_pPlayer->GetCID(), 1);
+				CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
 				if (pChr && pChr->IsAlive())
 				{
 					if (GetPos().y > 435 * 32) // setting the destination of dummy to top left police entry bcs otherwise bot fails when trying to help --> walks into jail wall xd
@@ -777,7 +775,7 @@ void CDummyBlmapChillPolice::OnTick()
 		}
 		if (GetPos().x > 290 * 32 && GetPos().x < 450 * 32 && GetPos().y > 415 * 32 && GetPos().y < 450 * 32)
 		{
-			if (m_pChr->m_IsFrozen) // kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
+			if (m_pCharacter->m_IsFrozen) // kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
 			{
 				if (Server()->Tick() % 60 == 0)
 					GameServer()->SendEmoticon(m_pPlayer->GetCID(), 3); // tear emote before killing

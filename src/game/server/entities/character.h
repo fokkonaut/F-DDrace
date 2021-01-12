@@ -8,13 +8,13 @@
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 #include <game/server/player.h>
+#include <game/server/draweditor.h>
 
 #include "pickup.h"
 #include "lightsaber.h"
 #include "stable_projectile.h"
-#include "dummy/blmapchill_police.h"
 
-#include <game/server/draweditor.h>
+#include "dummy/dummybase.h"
 
 enum Extra
 {
@@ -439,8 +439,6 @@ public:
 
 	int GetAliveState();
 
-	CNetObj_PlayerInput GetInput() { return m_Input; };
-
 	int64 m_SpawnTick;
 	bool m_GotLasered;
 
@@ -460,6 +458,8 @@ public:
 	CStableProjectile* m_pTeeControlCursor;
 	void SetTeeControlCursor();
 	void RemoveTeeControlCursor();
+
+	vec2 m_CursorPos;
 
 	// special race
 	bool m_HasFinishedSpecialRace;
@@ -481,22 +481,23 @@ public:
 	void OnPlayerHook();
 	void ReleaseHook(bool Other = true);
 
+	// last
 	void SetLastTouchedSwitcher(int Number);
 	int m_LastTouchedSwitcher;
 	int m_LastTouchedPortalBy;
 
-	vec2 m_CursorPos;
+	CNetObj_PlayerInput *Input() { return &m_Input; };
+	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; };
+	int GetReloadTimer() { return m_ReloadTimer; }
+
+	// Handles dummymode stuff
+	void CreateDummyHandle(int Dummymode);
+	CDummyBase *m_pDummyHandle;
 
 
 	/////////dummymode variables
 
-
-	CDummyBlmapChillPolice *m_pDummyBlmapChillPolice;
-
-	CNetObj_PlayerInput *Input() { return &m_Input; };
-	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; };
-	void Fire(bool Fire = true);
-	int GetReloadTimer() { return m_ReloadTimer; }
+	void Fire(bool Stroke = true);
 
 	//dummymode 29 vars (ChillBlock5 blocker)
 	int m_DummyFreezeBlockTrick;
