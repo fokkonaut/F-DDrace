@@ -826,7 +826,7 @@ void CPlayer::OnDisconnect()
 		m_pCharacter->DropMoney(GetWalletMoney());
 	KillCharacter();
 
-	GameServer()->SaveJailed(m_ClientID);
+	GameServer()->SavePlayer(m_ClientID);
 	GameServer()->Logout(GetAccID());
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;

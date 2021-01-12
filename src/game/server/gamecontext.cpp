@@ -1318,7 +1318,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
 
 	m_apPlayers[ClientID]->CheckClanProtection();
-	CheckSavedJail(ClientID);
+	CheckLoadPlayer(ClientID);
 
 	if (!Server()->IsSevendown(ClientID))
 	{
@@ -2501,7 +2501,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			// F-DDrace
 			pPlayer->CheckClanProtection();
-			CheckSavedJail(ClientID);
+			CheckLoadPlayer(ClientID);
 
 			if (pPlayer->m_SpookyGhost || pPlayer->m_ForcedSkin != SKIN_NONE)
 				return;
@@ -3518,7 +3518,7 @@ void CGameContext::OnInit()
 	m_ShutdownSave.m_Got = false;
 	m_ShutdownSave.m_aUsername[0] = '\0';
 
-	m_vSavedJailedPlayers.clear();
+	m_vSavedPlayers.clear();
 
 
 #ifdef CONF_DEBUG
@@ -5139,7 +5139,7 @@ void CGameContext::SendChatPolice(const char *pMessage)
 void CGameContext::JailPlayer(int ClientID, int Seconds)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
-	if (!pPlayer)
+	if (!pPlayer || Seconds <= 0)
 		return;
 
 	// make sure we are not saved as killer for someone else after we got arrested, so we cant take the flag to the jail
@@ -5151,22 +5151,27 @@ void CGameContext::JailPlayer(int ClientID, int Seconds)
 		pPlayer->KillCharacter(WEAPON_GAME);
 }
 
-void CGameContext::SaveJailed(int ClientID)
+void CGameContext::SavePlayer(int ClientID)
 {
-	if (!m_apPlayers[ClientID] || !m_apPlayers[ClientID]->m_JailTime)
+	if (!m_apPlayers[ClientID])
 		return;
 
-	JailedPlayer Player;
-	Server()->GetClientAddr(ClientID, &Player.m_Addr);
-	str_copy(Player.m_aName, Server()->ClientName(ClientID), sizeof(Player.m_aName));
-	str_copy(Player.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Player.m_aUsername));
-	Player.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
-	Player.m_JailTime = m_apPlayers[ClientID]->m_JailTime;
-	str_copy(Player.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Player.m_aTimeoutCode));
-	m_vSavedJailedPlayers.push_back(Player);
+	// we dont have anything to save
+	if (!m_apPlayers[ClientID]->m_JailTime && !m_apPlayers[ClientID]->m_EscapeTime)
+		return;
+
+	SavedPlayer Info;
+	Server()->GetClientAddr(ClientID, &Info.m_Addr);
+	str_copy(Info.m_aName, Server()->ClientName(ClientID), sizeof(Info.m_aName));
+	str_copy(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Info.m_aUsername));
+	Info.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
+	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
+	Info.m_JailTime = m_apPlayers[ClientID]->m_JailTime;
+	Info.m_EscapeTime = m_apPlayers[ClientID]->m_EscapeTime;
+	m_vSavedPlayers.push_back(Info);
 }
 
-void CGameContext::CheckSavedJail(int ClientID)
+void CGameContext::CheckLoadPlayer(int ClientID)
 {
 	if (!m_apPlayers[ClientID])
 		return;
@@ -5174,9 +5179,9 @@ void CGameContext::CheckSavedJail(int ClientID)
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
 
-	for (unsigned int i = 0; i < m_vSavedJailedPlayers.size(); i++)
+	for (unsigned int i = 0; i < m_vSavedPlayers.size(); i++)
 	{
-		JailedPlayer Info = m_vSavedJailedPlayers[i];
+		SavedPlayer Info = m_vSavedPlayers[i];
 		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
 		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
 		bool SameTimeoutCode = m_apPlayers[ClientID]->m_TimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
@@ -5184,13 +5189,18 @@ void CGameContext::CheckSavedJail(int ClientID)
 		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
 		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
 
-		bool SameClientInfo = (SameAddr || SameTimeoutCode) && SameName && SameTeeInfo;
-		if (SameAddrAndPort || SameAcc || SameClientInfo)
+		bool SameClientInfo = SameAddr && (SameName || SameTeeInfo);
+		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
 		{
+			// restore info
 			JailPlayer(ClientID, Info.m_JailTime/Server()->TickSpeed());
-			if (m_apPlayers[ClientID]->GetAccID() < ACC_START && Info.m_aUsername[0] != '\0')
+			m_apPlayers[ClientID]->m_EscapeTime = Info.m_EscapeTime;
+
+			// login if possible
+			if (Info.m_aUsername[0] != '\0' && m_apPlayers[ClientID]->GetAccID() < ACC_START)
 				Login(ClientID, Info.m_aUsername, "", false);
-			m_vSavedJailedPlayers.erase(m_vSavedJailedPlayers.begin() + i);
+
+			m_vSavedPlayers.erase(m_vSavedPlayers.begin() + i);
 			break;
 		}
 	}

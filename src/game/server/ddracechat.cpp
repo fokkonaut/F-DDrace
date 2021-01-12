@@ -524,6 +524,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);
 	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
+	pSelf->CheckLoadPlayer(pResult->m_ClientID);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
@@ -1646,7 +1647,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	}
 
 	if (pSelf->Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1)))
-		pSelf->CheckSavedJail(pResult->m_ClientID);
+		pSelf->CheckLoadPlayer(pResult->m_ClientID);
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)

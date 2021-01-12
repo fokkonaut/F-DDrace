@@ -644,10 +644,15 @@ public:
 	void SendChatPolice(const char *pMessage);
 	void JailPlayer(int ClientID, int Seconds);
 
-	void SaveJailed(int ClientID);
-	void CheckSavedJail(int ClientID);
+	// gangster
+	void ProcessSpawnBlockProtection(int ClientID);
+	bool IsSpawnArea(vec2 Pos);
 
-	struct JailedPlayer
+	// saved
+	void SavePlayer(int ClientID);
+	void CheckLoadPlayer(int ClientID);
+
+	struct SavedPlayer
 	{
 		char m_aUsername[32];
 		NETADDR m_Addr;
@@ -656,13 +661,11 @@ public:
 		char m_aName[MAX_NAME_LENGTH];
 		CTeeInfo m_TeeInfo;
 
+		// value that can get saved and restored
 		int64 m_JailTime;
+		int64 m_EscapeTime;
 	};
-	std::vector<JailedPlayer> m_vSavedJailedPlayers;
-
-	// gangster
-	void ProcessSpawnBlockProtection(int ClientID);
-	bool IsSpawnArea(vec2 Pos);
+	std::vector<SavedPlayer> m_vSavedPlayers;
 
 private:
 
