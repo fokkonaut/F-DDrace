@@ -527,18 +527,11 @@ void CCharacter::FireWeapon()
 						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 					// police catch gangster
-					bool JailHammer = (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
-						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime);
-
-					int TargetCID = pTarget->GetPlayer()->GetCID();
-					if (JailHammer && GameServer()->SameIP(m_pPlayer->GetCID(), TargetCID))
+					if ((GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
+						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime))
 					{
-						GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't arrest your dummy");
-						JailHammer = false;
-					}
+						int TargetCID = pTarget->GetPlayer()->GetCID();
 
-					if (JailHammer)
-					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(TargetCID));
 						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
