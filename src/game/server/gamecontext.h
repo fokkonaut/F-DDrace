@@ -582,6 +582,7 @@ public:
 	void CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID);
 
 	void UnsetTelekinesis(CEntity *pEntity);
+	void UnsetKiller(int ClientID);
 
 	bool SameIP(int ClientID1, int ClientID2);
 	bool SameIP(int AccID, const NETADDR *pAddr);

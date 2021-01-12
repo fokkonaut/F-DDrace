@@ -5142,6 +5142,9 @@ void CGameContext::JailPlayer(int ClientID, int Seconds)
 	if (!pPlayer)
 		return;
 
+	// make sure we are not saved as killer for someone else after we got arrested, so we cant take the flag to the jail
+	UnsetKiller(ClientID);
+
 	pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
 	pPlayer->m_EscapeTime = 0;
 	if(pPlayer->GetCharacter())
@@ -5514,6 +5517,19 @@ void CGameContext::UnsetTelekinesis(CEntity *pEntity)
 		{
 			pChr->m_pTelekinesisEntity = 0;
 			break; // can break here, every entity can only be picked by one player using telekinesis at the time
+		}
+	}
+}
+
+void CGameContext::UnsetKiller(int ClientID)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CCharacter *pChr = GetPlayerChar(i);
+		if (ClientID != i && pChr && pChr->Core()->m_Killer.m_ClientID == ClientID)
+		{
+			pChr->Core()->m_Killer.m_ClientID = -1;
+			pChr->Core()->m_Killer.m_Weapon = -1;
 		}
 	}
 }

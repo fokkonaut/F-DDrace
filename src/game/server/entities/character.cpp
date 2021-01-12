@@ -1372,6 +1372,10 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 {
+	// make sure we are not saved as killer for someone else after we joined a minigame, so we cant take the flag to a minigame
+	if (Weapon == WEAPON_MINIGAME_CHANGE)
+		GameServer()->UnsetKiller(m_pPlayer->GetCID());
+
 	m_DrawEditor.OnPlayerDeath();
 
 	// drop armor, hearts and weapons
