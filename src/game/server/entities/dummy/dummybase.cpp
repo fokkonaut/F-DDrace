@@ -42,6 +42,9 @@ void CDummyBase::Fire(bool Stroke)
 
 void CDummyBase::Tick()
 {
+	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
+		return;
+
 	// Prepare input
 	m_pCharacter->ResetInput();
 	Input()->m_Hook = 0;
