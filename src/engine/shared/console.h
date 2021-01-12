@@ -81,9 +81,6 @@ class CConsole : public IConsole
 	FIsDummyCallback m_pfnIsDummyCallback;
 	void *m_pIsDummyUserdata;
 
-	FTranslateVictimCallback m_pfnTranslateVictimCallback;
-	void *m_pTranslateVictimUserdata;
-
 	enum
 	{
 		CONSOLE_MAX_STR_LENGTH = 1024,
@@ -234,7 +231,6 @@ public:
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr);
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser);
 	virtual void SetIsDummyCallback(FIsDummyCallback pfnCallback, void *pUser);
-	virtual void SetTranslateVictimCallback(FTranslateVictimCallback pfnCallback, void *pUser);
 
 	void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
 	void ResetServerGameSettings();

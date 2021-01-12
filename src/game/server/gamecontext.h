@@ -617,9 +617,6 @@ public:
 	//isdummy callback for console victim dummy
 	static void ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pUser);
 
-	// callback for local id map mode for rcon
-	static bool ConsoleTranslateVictimCallback(int ClientID, int *pVictim, void *pUser);
-
 	// shutdown tee
 	struct
 	{
@@ -815,8 +812,6 @@ private:
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);
-
-	static void ConToggleIDMapUsage(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAllWeapons(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnAllWeapons(IConsole::IResult* pResult, void* pUserData);

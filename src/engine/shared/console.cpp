@@ -321,12 +321,6 @@ void CConsole::SetIsDummyCallback(FIsDummyCallback pfnCallback, void* pUser)
 	m_pIsDummyUserdata = pUser;
 }
 
-void CConsole::SetTranslateVictimCallback(FTranslateVictimCallback pfnCallback, void* pUser)
-{
-	m_pfnTranslateVictimCallback = pfnCallback;
-	m_pTranslateVictimUserdata = pUser;
-}
-
 bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr)
@@ -489,12 +483,6 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags&CFGFLAG_NONTEEHISTORIC))
 						{
 							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
-						}
-
-						if (m_pfnTranslateVictimCallback)
-						{
-							if (!m_pfnTranslateVictimCallback(ClientID, &Result.m_Victim, m_pTranslateVictimUserdata))
-								return;
 						}
 
 						// always set the victim to yourself when a helper executes, so helpers can only give stuff to theirselves
@@ -959,8 +947,6 @@ CConsole::CConsole(int FlagMask)
 	m_pTeeHistorianCommandUserdata = 0;
 	m_pfnIsDummyCallback = 0;
 	m_pIsDummyUserdata = 0;
-	m_pfnTranslateVictimCallback = 0;
-	m_pTranslateVictimUserdata = 0;
 
 	m_pConfig = 0;
 	m_pStorage = 0;

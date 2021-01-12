@@ -3191,7 +3191,6 @@ void CGameContext::OnInit()
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
-	Console()->SetTranslateVictimCallback(ConsoleTranslateVictimCallback, this);
 
 	DeleteTempfile();
 
@@ -5445,14 +5444,6 @@ void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pU
 {
 	CGameContext* pSelf = (CGameContext*)pUser;
 	*pIsDummy = pSelf->m_apPlayers[ClientID] && pSelf->m_apPlayers[ClientID]->m_IsDummy;
-}
-
-bool CGameContext::ConsoleTranslateVictimCallback(int ClientID, int *pVictim, void *pUser)
-{
-	CGameContext* pSelf = (CGameContext*)pUser;
-	if (*pVictim < 0 || *pVictim >= MAX_CLIENTS)
-		return true;
-	return !pSelf->Server()->UseLocalIDMap(ClientID) || pSelf->Server()->ReverseTranslate(*pVictim, ClientID);
 }
 
 void CGameContext::SetMapSpecificOptions()
