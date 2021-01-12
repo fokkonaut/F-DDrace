@@ -1876,9 +1876,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision)
+	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision || m_Passive)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking)
+	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking || m_Passive)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -3306,6 +3306,7 @@ void CCharacter::FDDraceTick()
 	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 
 	// fake tune collision
+	if (!Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		CCharacter* pChr = GameWorld()->ClosestCharacter(m_Pos, GetProximityRadius()*2 + 10.f, this);
 		m_FakeTuneCollision = (!m_Super && (m_Solo || m_Passive)) || (pChr && !pChr->m_Super && (pChr->m_Solo || pChr->m_Passive || (Team() != pChr->Team() && m_pPlayer->m_ShowOthers)));
