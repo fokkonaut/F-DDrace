@@ -1494,15 +1494,6 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
-	dbg_msg("debug", "%d", Killer);
-	dbg_msg("debug", "%s", Server()->ClientName(Killer));
-	dbg_msg("debug", "%d", m_pPlayer->GetCID());
-	dbg_msg("debug", "%s", Server()->ClientName(m_pPlayer->GetCID()));
-	dbg_msg("debug", "%d", Weapon);
-	dbg_msg("debug", "%d", ModeSpecial);
-	dbg_msg("debug", "%d", GameServer()->m_apPlayers[Killer]->GetTeam());
-	dbg_msg("debug", "%d", m_pPlayer->GetTeam());
-
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d killer_team:%d victim_team:%d",
 		Killer, Server()->ClientName(Killer),
