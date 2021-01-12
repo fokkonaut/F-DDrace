@@ -132,8 +132,6 @@ private:
 	int m_SpinBot;
 	int m_SpinBotSpeed;
 	int m_AimClosest;
-	int m_KillerClientID;
-	int m_KillerWeapon;
 	int m_MoveRestrictionExtraCanEnterRoom;
 
 	// player
