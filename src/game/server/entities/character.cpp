@@ -2461,6 +2461,12 @@ void CCharacter::HandleTiles(int Index)
 						pAccount->m_Level
 					);
 
+				// message gets cut off otherwise
+				if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
+				{
+					for (int i = 0; i < 32; i++)
+						str_append(aMsg, " ", sizeof(aMsg));
+				}
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
 		}
@@ -3883,9 +3889,9 @@ void CCharacter::UpdateWeaponIndicator()
 	char aBuf[256];
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
-		char aSpaces[128];
-		str_format(aSpaces, sizeof(aSpaces), "                                                                                                                               ");
-		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery, aSpaces);
+		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		for (int i = 0; i < 128; i++)
+			str_append(aBuf, " ", sizeof(aBuf));
 	}
 	else
 	{
