@@ -191,6 +191,8 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_HasSpookyGhost = pChr->GetPlayer()->m_HasSpookyGhost;
 	m_PlotSpawn = pChr->GetPlayer()->m_PlotSpawn;
 	m_HasRoomKey = pChr->GetPlayer()->m_HasRoomKey;
+	m_JailTime = pChr->GetPlayer()->m_JailTime;
+	m_EscapeTime = pChr->GetPlayer()->m_EscapeTime;
 
 	// account
 	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
@@ -340,6 +342,9 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->GetPlayer()->m_HasSpookyGhost = m_HasSpookyGhost;
 	pChr->GetPlayer()->m_PlotSpawn = m_PlotSpawn;
 	pChr->GetPlayer()->m_HasRoomKey = m_HasRoomKey;
+	if (m_JailTime)
+		pChr->GameServer()->JailPlayer(pChr->GetPlayer()->GetCID(), m_JailTime/pChr->Server()->TickSpeed());
+	pChr->GetPlayer()->m_EscapeTime = m_EscapeTime;
 
 	// account
 	if (m_aAccUsername[0] != '$') // explanation: see CSaveTee::Save() @ m_aAccUsername
@@ -390,7 +395,7 @@ char* CSaveTee::GetString()
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%s\t",
+		%lld\t%lld\t%s\t",
 		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
 		m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Got,
@@ -434,7 +439,7 @@ char* CSaveTee::GetString()
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
 		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_MoveRestrictionExtraCanEnterRoom,
 		m_Gamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
-		m_aAccUsername
+		m_JailTime, m_EscapeTime, m_aAccUsername
 	);
 	return m_aString;
 }
@@ -484,7 +489,7 @@ int CSaveTee::LoadString(char* String)
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%s\t",
+		%lld\t%lld\t%s\t",
 		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
 		&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Got,
@@ -528,14 +533,14 @@ int CSaveTee::LoadString(char* String)
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
 		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_MoveRestrictionExtraCanEnterRoom,
 		&m_Gamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
-		m_aAccUsername
+		&m_JailTime, &m_EscapeTime, m_aAccUsername
 	);
 
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 91:
 		return 0;
-	case 197: // F-DDrace extra vars
+	case 199: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

@@ -144,6 +144,8 @@ private:
 	int m_HasSpookyGhost;
 	int m_PlotSpawn;
 	int m_HasRoomKey;
+	int64 m_JailTime;
+	int64 m_EscapeTime;
 
 	// account
 	char m_aAccUsername[32];
