@@ -2427,7 +2427,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if (m_apPlayers[ClientID]->m_SpawnBlocks > 3 && Config()->m_SvSpawnBlockProtection == 2)
+			if (m_apPlayers[ClientID]->m_SpawnBlockScore > 3 && Config()->m_SvSpawnBlockProtection == 2)
 			{
 				SendChatTarget(ClientID, "You can't kill yourself because you spawnblocked too much. Try again later.");
 				return;
@@ -5215,14 +5215,14 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 	if (ClientID == Killer || !pChr || !pKiller || !pKiller->GetCharacter() || pKiller->m_IsDummy)
 		return;
 
-	if (IsSpawnArea(pKiller->GetCharacter()->GetPos())) // if killer is in spawn area
+	if (IsSpawnArea(pKiller->GetCharacter()->GetPos()) && pChr->IsGrounded()) // if killer is in spawn area
 	{
-		pKiller->m_SpawnBlocks++;
+		pKiller->m_SpawnBlockScore++;
 		if (Config()->m_SvSpawnBlockProtection)
 		{
 			SendChatTarget(Killer, "[WARNING] Spawnblocking is illegal");
 
-			if (pKiller->m_SpawnBlocks > 2)
+			if (pKiller->m_SpawnBlockScore > 2)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), "'%s' is spawnblocking. Catch him!", Server()->ClientName(Killer));

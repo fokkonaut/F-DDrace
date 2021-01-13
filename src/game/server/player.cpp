@@ -208,7 +208,7 @@ void CPlayer::Reset()
 	m_LastMoneyXPBomb = 0;
 	m_LocalChat = false;
 
-	m_SpawnBlocks = 0;
+	m_SpawnBlockScore = 0;
 	m_EscapeTime = 0;
 	m_JailTime = 0;
 }
@@ -376,8 +376,8 @@ void CPlayer::Tick()
 		ExpireItems();
 
 	// reduce spawnblocks every 30 seconds
-	if (m_SpawnBlocks > 0 && Server()->Tick() % (Server()->TickSpeed() * 30) == 0)
-		m_SpawnBlocks--;
+	if (m_SpawnBlockScore > 0 && Server()->Tick() % (Server()->TickSpeed() * 30) == 0)
+		m_SpawnBlockScore--;
 
 	if (m_JailTime > 1) // 1 is the indicator to respawn at the jail release tile
 	{

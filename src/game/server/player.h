@@ -355,7 +355,7 @@ public:
 	// police
 	int64 m_EscapeTime;
 	int64 m_JailTime;
-	int m_SpawnBlocks;
+	int m_SpawnBlockScore;
 
 	//others
 	bool IsHooked(int Power = -1);
