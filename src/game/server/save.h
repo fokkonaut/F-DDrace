@@ -133,6 +133,7 @@ private:
 	int m_SpinBotSpeed;
 	int m_AimClosest;
 	int m_MoveRestrictionExtraCanEnterRoom;
+	int m_SpiderHook;
 
 	// player
 	int m_Gamemode;

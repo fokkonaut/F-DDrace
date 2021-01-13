@@ -3451,6 +3451,24 @@ void CCharacter::FDDraceTick()
 		m_pPlayer->ResetSkin();
 	}
 
+	if(m_Core.m_SpiderHook && m_Core.m_SpiderWebMode && m_Core.m_HookedPlayer == -1 && m_Core.m_HookState == HOOK_GRABBED && distance(m_Core.m_Pos, m_Core.m_HookPos) > 48.0f)
+	{
+		// Find other players
+		CCharacter *pChr = (CCharacter *)GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+		for (; pChr; pChr = (CCharacter *)pChr->TypeNext())
+		{
+			vec2 IntersectPos = closest_point_on_line(m_Core.m_Pos, m_Core.m_HookPos, pChr->GetPos());
+			float Len = distance(pChr->m_Pos, IntersectPos);
+			if(Len < pChr->GetProximityRadius())
+			{
+				m_Core.m_HookedPlayer = pChr->m_pPlayer->GetCID();
+				m_Core.m_HookTick = 0;
+				m_Core.m_SpiderWebMode = false;
+				break;
+			}
+		}
+	}
+
 	// update
 	m_DrawEditor.Tick();
 	if (m_pDummyHandle)

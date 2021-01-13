@@ -115,6 +115,8 @@ void CCharacterCore::Reset()
 	m_AimClosest = false;
 	m_AimClosestPos = vec2(0, 0);
 	m_UpdateAngle = 0;
+	m_SpiderHook = false;
+	m_SpiderWebMode = false;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -420,9 +422,21 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// release hook (max hook time is 1.25)
+		int HookTime = SERVER_TICK_SPEED+SERVER_TICK_SPEED/5;
+		if (m_SpiderWebMode)
+			HookTime = 2*SERVER_TICK_SPEED;
+
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5 || (m_HookedPlayer < MAX_CLIENTS && !m_pWorld->m_apCharacters[m_HookedPlayer])))
+		if(m_HookedPlayer != -1 && (m_HookTick > HookTime || (m_HookedPlayer < MAX_CLIENTS && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
+			m_HookedPlayer = -1;
+			m_HookState = HOOK_RETRACTED;
+			m_HookPos = m_Pos;
+		}
+
+		if(m_SpiderHook && distance(m_HookPos, m_Pos) > 600.0f)
+		{
+			// release hook
 			m_HookedPlayer = -1;
 			m_HookState = HOOK_RETRACTED;
 			m_HookPos = m_Pos;
