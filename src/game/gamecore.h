@@ -242,8 +242,6 @@ public:
 	bool m_AimClosest;
 	vec2 m_AimClosestPos;
 	int m_UpdateAngle;
-	bool m_SpiderHook;
-	bool m_SpiderWebMode;
 
 	int m_Id;
 	class CCollision* Collision() { return m_pCollision; }
