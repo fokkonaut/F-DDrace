@@ -336,14 +336,6 @@ int CCollision::GetTile(int x, int y)
 	return 0;
 }
 
-int CCollision::GetTileRaw(int x, int y)
-{
-	if(!m_pTiles)
-		return 0;
-
-	return GetTileIndex(GetPureMapIndex(x, y));
-}
-
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
@@ -1378,6 +1370,40 @@ vec2 CCollision::GetRandomTile(int Index)
 	return vec2(-1, -1);
 }
 
+int CCollision::GetDoorNumber(vec2 Pos)
+{
+	return GetDTileNumber(GetPureMapIndex(Pos));
+}
+
+int CCollision::GetTileRaw(int x, int y)
+{
+	if(!m_pTiles)
+		return 0;
+	return GetTileIndex(GetPureMapIndex(x, y));
+}
+
+bool CCollision::IsPlotTile(int Index)
+{
+	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;
+}
+
+int CCollision::GetPlotID(int Index)
+{
+	if (Index >= 0 && m_pSwitch && m_pSwitch[Index].m_Type == TILE_SWITCH_PLOT && m_pSwitch[Index].m_Number > 0)
+		return GetPlotBySwitch(m_pSwitch[Index].m_Number);
+	return 0;
+}
+
+int CCollision::GetSwitchByPlot(int PlotID)
+{
+	return PlotID + m_NumSwitchers;
+}
+
+int CCollision::GetPlotBySwitch(int SwitchID)
+{
+	return SwitchID - m_NumSwitchers;
+}
+
 int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
 	float d = distance(Pos0, Pos1);
@@ -1447,45 +1473,4 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 	if (pOutBeforeCollision)
 		* pOutBeforeCollision = Pos1;
 	return 0;
-}
-
-int CCollision::GetDoorNumber(vec2 Pos)
-{
-	return GetDTileNumber(GetPureMapIndex(Pos));
-}
-
-bool CCollision::IsPlotTile(int Index)
-{
-	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;
-}
-
-int CCollision::GetPlotID(int Index)
-{
-	if (Index >= 0 && m_pSwitch && m_pSwitch[Index].m_Type == TILE_SWITCH_PLOT && m_pSwitch[Index].m_Number > 0)
-		return m_pSwitch[Index].m_Number - m_NumSwitchers;
-	return 0;
-}
-
-int CCollision::GetSwitchByPlot(int PlotID)
-{
-	return PlotID + m_NumSwitchers;
-}
-
-int CCollision::GetPlotBySwitch(int SwitchID)
-{
-	return SwitchID - m_NumSwitchers;
-}
-
-// F-DDrace
-
-int CCollision::IsAir(int x, int y)
-{
-	int index = GetTileRaw(x, y);
-	return index == TILE_AIR;
-}
-
-int CCollision::IsFreeze(int x, int y)
-{
-	int index = GetTileRaw(x, y);
-	return index == TILE_FREEZE;
 }

@@ -81,8 +81,6 @@ public:
 	}
 
 	int GetTile(int x, int y);
-	int GetTileRaw(int x, int y);
-	int GetTileRaw(vec2 Pos) { return GetTileRaw(Pos.x, Pos.y); }
 	int GetFTile(int x, int y);
 	int Entity(int x, int y, int Layer);
 	int GetPureMapIndex(float x, float y);
@@ -132,10 +130,16 @@ public:
 
 	// F-DDrace
 	class CConfig *m_pConfig;
+	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+
+	// tiles
 	bool TileUsed(int Index) { return GetRandomTile(Index) != vec2(-1, -1); }
 	vec2 GetRandomTile(int Index);
 	std::vector< std::vector<vec2> > m_vTiles;
-	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+
+	int GetTileRaw(int x, int y);
+	int GetTileRaw(vec2 Pos) { return GetTileRaw(Pos.x, Pos.y); }
+
 	// IntersectLineDoor: returns -1 when intersected with a plot built laserwall, otherwise returns the number of the intersected laser wall
 	int IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool PlotDoorOnly);
 	int GetDoorNumber(vec2 Pos);
@@ -147,9 +151,6 @@ public:
 	int GetSwitchByPlot(int PlotID);
 	int GetPlotBySwitch(int SwitchID);
 	int m_NumPlots;
-
-	int IsAir(int x, int y);
-	int IsFreeze(int x, int y);
 
 private:
 

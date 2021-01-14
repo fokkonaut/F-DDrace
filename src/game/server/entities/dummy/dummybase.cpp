@@ -7,7 +7,6 @@
 CGameContext *CDummyBase::GameServer() const { return m_pCharacter->GameServer(); }
 CGameWorld *CDummyBase::GameWorld() const { return m_pCharacter->GameWorld(); }
 IServer *CDummyBase::Server() const { return GameServer()->Server(); }
-CCollision *CDummyBase::Collision() const { return GameServer()->Collision(); }
 
 vec2 CDummyBase::GetPos() { return m_pCharacter->Core()->m_Pos; }
 vec2 CDummyBase::GetVel() { return m_pCharacter->Core()->m_Vel; }
@@ -27,6 +26,19 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_Mode = Mode;
 }
 
+void CDummyBase::Tick()
+{
+	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
+		return;
+
+	// Prepare input
+	m_pCharacter->ResetInput();
+	Input()->m_Hook = 0;
+
+	// Then start controlling
+	OnTick();
+}
+
 void CDummyBase::Fire(bool Stroke)
 {
 	if (Stroke)
@@ -41,57 +53,52 @@ void CDummyBase::Fire(bool Stroke)
 	}
 }
 
-void CDummyBase::Tick()
+void CDummyBase::AvoidFreeze()
 {
-	if (!m_pPlayer->m_IsDummy || m_pPlayer->m_TeeControllerID != -1)
-		return;
+	#define FREEZE(x, y) GameServer()->Collision()->GetTileRaw(x, y) == TILE_FREEZE
+	#define AIR(x, y) GameServer()->Collision()->GetTileRaw(x, y) == TILE_AIR
+	#define SOLID(x, y) GameServer()->Collision()->IsSolid(x, y)
 
-	// Prepare input
-	m_pCharacter->ResetInput();
-	Input()->m_Hook = 0;
-
-	// Then start controlling
-	OnTick();
-}
-
-void CDummyBase::AvoidFreezes()
-{
 	int x = GetPos().x;
 	int y = GetPos().y;
-	//int xv = (int)GetVel().x * 32;
-	int yv = (int)GetVel().y * 32;
+	//int xv = GetVel().x * 32;
+	int yv = GetVel().y * 32;
 
 	// sides
-	if(Collision()->IsFreeze(x+32, y))
+	if(FREEZE(x+32, y))
 		Input()->m_Direction = -1;
-	if(Collision()->IsFreeze(x-32, y))
+	if(FREEZE(x-32, y))
 		Input()->m_Direction = 1;
 
 	// corners
-	if(Collision()->IsFreeze(x+32, y-32) && !Collision()->IsFreeze(x-32, y))
+	if(FREEZE(x+32, y-32) && !FREEZE(x-32, y))
 		Input()->m_Direction = -1;
-	if(Collision()->IsFreeze(x-32, y-32) && !Collision()->IsFreeze(x+32, y))
+	if(FREEZE(x-32, y-32) && !FREEZE(x+32, y))
 		Input()->m_Direction = 1;
 
 	// small edges
-	if(Collision()->IsAir(x-32, y) && Collision()->IsFreeze(x-32, y+32))
+	if(FREEZE(x-32, y) && FREEZE(x-32, y+32))
 		Input()->m_Direction = 1;
 
-	if(Collision()->IsAir(x+32, y) && Collision()->IsFreeze(x+32, y+32))
+	if(AIR(x+32, y) && AIR(x+32, y+32))
 		Input()->m_Direction = -1;
 		
 	// big edges
-	if(Collision()->IsAir(x-32, y) && Collision()->IsAir(x-64, y) && Collision()->IsAir(x-64, y+32) && Collision()->IsFreeze(x-64, y+32))
+	if(AIR(x-32, y) && AIR(x-64, y) && AIR(x-64, y+32) && FREEZE(x-64, y+32))
 		Input()->m_Direction = 1;
-	if(Collision()->IsAir(x+32, y) && Collision()->IsAir(x+64, y) && Collision()->IsAir(x+64, y+32) && Collision()->IsFreeze(x+64, y+32))
+	if(AIR(x+32, y) && AIR(x+64, y) && AIR(x+64, y+32) && FREEZE(x+64, y+32))
 		Input()->m_Direction = -1;
 		
 	// while falling
-	if (Collision()->IsFreeze(x, y+yv))
+	if (FREEZE(x, y+yv))
 	{
-		if(Collision()->IsSolid(x-yv, y+yv))
+		if(SOLID(x-yv, y+yv))
 			Input()->m_Direction = 1;
-		if(Collision()->IsSolid(x+yv, y+yv))
+		if(SOLID(x+yv, y+yv))
 			Input()->m_Direction = -1;
 	}
+
+	#undef FREEZE
+	#undef AIR
+	#undef SOLID
 }

@@ -697,19 +697,16 @@ void CDummyBlmapChillPolice::OnTick()
 			// jump through freeze if one is close or go back if no vel
 			for (int i = 10; i < 160; i+=20)
 			{
-				// waiting for
-				// https://github.com/fokkonaut/F-DDrace/pull/76
-				// int tile = GameServer()->Collision()->GetTile(GetPos().x + i, GetPos().y);
-				// if (tile == TILE_FREEZE)
-				// {
-				// 	if (GetVel().y > 1.1f)
-				// 	{
-				// 		Input()->m_Direction = -1;
-				// 	}
-				// 	if (IsGrounded() && GetVel().x > 8.8f)
-				// 		Input()->m_Jump = 1;
-				// 	break;
-				// }
+				if (GameServer()->Collision()->GetTileRaw(GetPos().x + i, GetPos().y) == TILE_FREEZE)
+				{
+					if (GetVel().y > 1.1f)
+					{
+						Input()->m_Direction = -1;
+					}
+					if (IsGrounded() && GetVel().x > 8.8f)
+						Input()->m_Jump = 1;
+					break;
+				}
 			}
 		}
 		/* * * * * * * *

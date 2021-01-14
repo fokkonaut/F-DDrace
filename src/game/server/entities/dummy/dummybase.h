@@ -37,7 +37,6 @@ protected:
 	CGameContext *GameServer() const;
 	CGameWorld *GameWorld() const;
 	IServer *Server() const;
-	CCollision *Collision() const;
 
 	CCharacter *m_pCharacter;
 	CPlayer *m_pPlayer;
@@ -52,7 +51,7 @@ protected:
 	void SetWeapon(int Weapon);
 	void Fire(bool Stroke = true);
 	void Die();
-	void AvoidFreezes();
+	void AvoidFreeze();
 
 	CNetObj_PlayerInput *Input();
 	CNetObj_PlayerInput *LatestInput();
