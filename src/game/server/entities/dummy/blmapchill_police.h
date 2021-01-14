@@ -20,6 +20,7 @@ private:
 	int m_HelpMode;
 	int m_GrenadeJump;
 	int m_SpawnTeleporter;
+	int m_FailedAttempts;
 
 	bool m_IsHelpHook;
 	bool m_IsClosestPolice;
@@ -29,6 +30,7 @@ private:
 	bool m_HasStartGrenade;
 	bool m_IsDJUsed;
 	bool m_HasReachedCinemaEntrance;
+	bool m_GetSpeed;
 };
 
 #endif

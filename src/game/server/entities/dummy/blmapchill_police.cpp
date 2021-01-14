@@ -17,6 +17,7 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_HelpMode = 0;
 	m_GrenadeJump = 0;
 	m_SpawnTeleporter = 0;
+	m_FailedAttempts = 0;
 
 	m_IsHelpHook = false;
 	m_IsClosestPolice = false;
@@ -30,10 +31,11 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 
 void CDummyBlmapChillPolice::OnTick()
 {
-	if (GetPos().x > 451 * 32 && GetPos().x < 472 * 32 && GetPos().y > 74 * 32 && GetPos().y < 85 * 32) //spawn area, walk into the left SPAWN teleporter
+	if (GetPos().x > 451 * 32 && GetPos().x < 472 * 32 && GetPos().y > 74 * 32 && GetPos().y < 85 * 32) // new spawn area, walk into the left SPAWN teleporter
 	{
 		Input()->m_Direction = -1;
-		if (GetPos().x > 454 * 32 && GetPos().x < 458 * 32) //left side of spawn area
+		// jump into tele on spawn or jump onto edge after getting 5 jumps
+		if (GetPos().x > 454 * 32 && GetPos().x < 462 * 32) // left side of new spawn area
 		{
 			Input()->m_Jump = 1;
 			if (Server()->Tick() % 10 == 0)
@@ -58,7 +60,7 @@ void CDummyBlmapChillPolice::OnTick()
 			m_SpawnTeleporter = 2;
 		if (GetPos().x < 26 * 32 && GetPos().y < 14 * 32 && GetPos().x > 25 * 32) // looking for tp and setting different aims for the swing
 			m_SpawnTeleporter = 3;
-		if (GetPos().y > 21 * 32 && GetPos().x > 43 * 32 && GetPos().y < 35 * 32) // kill 
+		if (GetPos().y > 25 * 32 && GetPos().x > 43 * 32 && GetPos().y < 35 * 32) // kill
 		{
 			Die();
 			return;
@@ -73,7 +75,7 @@ void CDummyBlmapChillPolice::OnTick()
 			Die();
 			return;
 		}
-		else if (GetPos().y > 25 * 32) // after unfreeze hold hook to the right and walk right.
+		if (GetPos().y > 25 * 32) // after unfreeze hold hook to the right and walk right.
 		{
 			Input()->m_TargetX = 100;
 			Input()->m_TargetY = 1;
@@ -112,6 +114,9 @@ void CDummyBlmapChillPolice::OnTick()
 					Fire();
 				}
 			}
+			// fix getting stuck in the unfreeze and hooking the wall
+			if (GetPos().x < 33 * 32 && GetPos().x > 31 * 32 && GetPos().y < 29 * 32)
+				Input()->m_Hook = 0;
 		}
 		else if (GetPos().x > 33 * 32 && GetPos().x < 50 * 32 && GetPos().y > 18 * 32)
 		{
@@ -149,12 +154,34 @@ void CDummyBlmapChillPolice::OnTick()
 			if (GetPos().x > 63 * 32)
 				Input()->m_Jump = 1;
 		}
+		// fallen into lower right area of the top block area before gores
+		if (GetPos().y > 20 * 32 && GetPos().y < 25 * 32)
+		{
+			Input()->m_TargetX = GetPos().x > 67 * 32 ? -20 : 20;
+			Input()->m_TargetY = 100;
+			if (GetPos().x > 69 * 32)
+				Input()->m_Direction = -1;
+			if (IsGrounded())
+				Input()->m_Jump = 1;
+			if (GetPos().y < 23 * 32 + 20 && GetVel().y < -1.1f)
+				Fire();
+		}
 		else if (GetPos().x > 75 * 32 && GetPos().x < 135 * 32) //gores stuff (the thign with freeze spikes from top and bottom)
 		{
 			Input()->m_Jump = 0;
 			Input()->m_Direction = 1;
-			if (GetPos().x > 77 * 32) //start jump into gores
+			// start jump into gores
+			if (GetPos().x > 77 * 32 && GetPos().y > 13 * 32 && GetPos().x < 80 * 32)
 				Input()->m_Jump = 1;
+			// nade boost on roof
+			if ((GetPos().x > 80 * 32 && GetPos().x < 90 * 32) ||
+				(GetPos().x > 104 * 32 && GetPos().x < 117 * 32))
+			{
+				if (GetPos().y < 10 * 32)
+					Fire();
+				Input()->m_TargetX = GetVel().x > 12.0f ? -10 : -100;
+				Input()->m_TargetY = -180;
+			}
 			if (GetPos().x > 92 * 32 && GetPos().y > 12.5 * 32) // hooking stuff from now on
 			{
 				Input()->m_TargetX = 100;
@@ -163,6 +190,9 @@ void CDummyBlmapChillPolice::OnTick()
 				if (GetPos().y < 14 * 32 && GetPos().x > 100 * 32 && GetPos().x < 110 * 32)
 					Input()->m_Hook = 0;
 			}
+			// Don't swing into roof when boost worked
+			if (GetPos().x > 127 * 32 && GetPos().x < 138 * 32 && GetVel().x > 12.f && GetVel().y < -1.5)
+				Input()->m_Hook = 0;
 			if (GetPos().x > 120 * 32 && GetPos().y < 13 * 32)
 				Input()->m_Hook = 0;
 		}
@@ -258,9 +288,12 @@ void CDummyBlmapChillPolice::OnTick()
 			return;
 		}
 	}
-	if (GetPos().x > 368 * 32 && GetPos().y < 340 * 32) //new spawn going left and hopping over the gap under the CFRM.  (the jump over the freeze gap before falling down is not here, its in line 13647)
+	// new spawn going left and hopping over the gap under the CFRM.
+	// (the jump over the freeze gap before falling down is not here, its in line 38 (search for comment 'jump onto edge after getting 5 jumps'))
+	if (m_GrenadeJump == 4 || (GetPos().x > 368 * 32 && GetPos().y < 340 * 32))
 	{
-		if (Server()->Tick() % 1 == 0) //change to gun
+		// change to gun
+		if (Server()->Tick() % 3 == 0 && GetPos().x > 497 * 32)
 			SetWeapon(1);
 		Input()->m_Direction = -1;
 		if (GetPos().x > 509 * 32 && GetPos().y > 62 * 32) // if bot gets under the table he will go right and jump out of the gap under the table
@@ -272,25 +305,142 @@ void CDummyBlmapChillPolice::OnTick()
 					Input()->m_Jump = 1;
 			}
 		}
+		// jump over chairs
 		else if (Server()->Tick() % 10 == 0 && GetPos().x > 505 * 32)
 			Input()->m_Jump = 1;
+		// jump out of the chair room
 		if (GetPos().x < 497 * 32 && GetPos().x > 496 * 32)
 			Input()->m_Jump = 1;
-		if (GetPos().x < 480 * 32 && GetPos().x > 479 * 32)
+		// fallen too low backup jump
+		if (GetPos().x > 469 * 32 && GetPos().y > 74 * 32)
+		{
 			Input()->m_Jump = 1;
+			if (Server()->Tick() % 15 == 0)
+				Input()->m_Jump = 0;
+		}
+
+		// above new spawn about to jump through freeze
+		if (GetPos().y < 75 * 32)
+		{
+			// Slow down to hit ground before jumping through freeze
+			if (GetPos().x > 465 * 32 && GetPos().x < 469 * 32)
+			{
+				if (!IsGrounded())
+					Input()->m_Direction = 1;
+			}
+			// Too slow to jump through freeze -> go back get speed
+			if (GetPos().x > 455 * 32)
+			{
+				if (GetPos().x < 461 * 32 && GetVel().x > -9 && !m_GetSpeed)
+				{
+					m_GetSpeed = true;
+					m_FailedAttempts++;
+				}
+				if (GetPos().x > 465 * 32 || GetVel().x < -10)
+					m_GetSpeed = false;
+				if (m_GetSpeed)
+				{
+					Input()->m_Direction = 1;
+					Input()->m_TargetX = 200;
+					Input()->m_TargetY = 100;
+					Input()->m_Hook = 1;
+					if (Server()->Tick() % 15 == 0)
+						Input()->m_Hook = 0;
+				}
+			}
+			// count not succeding for a long time as fail
+			if (Server()->Tick() % 200 == 0)
+				m_FailedAttempts++;
+		}
+		// somebody is blocking flappy intentionally
+		if (m_FailedAttempts > 4 && GetPos().x > 452 * 32)
+		{
+			// don't aim for edge and rather go full speed to bypass the blocker
+			Input()->m_Direction = -1;
+			Input()->m_Hook = 0;
+			Input()->m_TargetX = 100;
+			Input()->m_TargetY = 100;
+			if (Server()->Tick() % 15 == 0)
+				SetWeapon(3);
+			if (GetVel().y < -0.2)
+				Fire();
+			if (IsGrounded())
+				Input()->m_Jump = 1;
+			if (GetPos().x < 456 * 32)
+				Input()->m_Jump = 1;
+			if (Server()->Tick() % 15 == 0)
+				Input()->m_Jump = 0;
+		}
+
+		// rocket jump from new spawn edge to old map entry
+		if (GetPos().x < 453 * 32 && GetPos().y < 80 * 32)
+		{
+			Input()->m_Direction = 0;
+			if (Server()->Tick() % 10 == 0) // change to grenade
+				SetWeapon(3);
+
+			if (!m_pCharacter->m_FreezeTime && IsGrounded() && m_GrenadeJump == 0) // shoot up
+			{
+				Input()->m_Jump = 1;
+				Input()->m_TargetX = 1;
+				Input()->m_TargetY = -100;
+				LatestInput()->m_TargetX = 1;
+				LatestInput()->m_TargetY = -100;
+				Fire();
+				m_GrenadeJump = 1;
+			}
+			else if (GetVel().y > -7.6f && m_GrenadeJump == 1) // jump in air // basically a timer for when the grenade comes down
+			{
+				Input()->m_Jump = 1;
+				m_GrenadeJump = 2;
+			}
+			if (m_GrenadeJump == 2 || m_GrenadeJump == 3) // double grenade
+			{
+				if (IsGrounded())
+					Input()->m_Direction = -1;
+				if (GetVel().y < 0.09f && GetVel().x < -0.1f)
+				{
+					Input()->m_Jump = 1;
+					Input()->m_TargetX = 100;
+					Input()->m_TargetY = 150;
+					LatestInput()->m_TargetX = 100;
+					LatestInput()->m_TargetY = 150;
+					Fire();
+					m_GrenadeJump = 4;
+				}
+			}
+			if (m_GrenadeJump == 4)
+			{
+				Input()->m_Direction = -1;
+				if (GetVel().y > 4.4f)
+					Input()->m_Jump = 1;
+				if (GetPos().y > 85 * 32)
+					m_GrenadeJump = 0; // something went wrong abort and try fallback grenade jump
+			}
+		}
+		else // Reset rj vars for fallback grenade jump and other reuse
+		{
+			m_GrenadeJump = 0;
+		}
 	}
 	if (GetPos().x > 370 * 32 && GetPos().y < 340 * 32 && GetPos().y > 310 * 32) // bottom going left to the grenade jump
 	{
 		Input()->m_Direction = -1;
-		if (GetPos().x < 422 * 32 && GetPos().x > 421 * 32) // bottom jump over the hole to police station
+		// bottom jump over the hole to police station
+		if (GetPos().x < 422 * 32 && GetPos().x > 421 * 32)
 			Input()->m_Jump = 1;
-		if (GetPos().x < 406 * 32 && GetPos().x > 405 * 32) // using 5jump from now on
+		// using 5jump from now on
+		if (GetPos().x < 406 * 32 && GetPos().x > 405 * 32)
 			Input()->m_Jump = 1;
 		if (GetPos().x < 397 * 32 && GetPos().x > 396 * 32)
 			Input()->m_Jump = 1;
 		if (GetPos().x < 387 * 32 && GetPos().x > 386 * 32)
 			Input()->m_Jump = 1;
-		if (GetPos().x < 377 * 32 && GetPos().x > 376 * 32) // last jump from the 5 jump
+		// last jump from the 5 jump
+		if (GetPos().x < 377 * 32 && GetPos().x > 376 * 32)
+			Input()->m_Jump = 1;
+		// recover from uncontrolled long fall
+		if (GetPos().x > 435 * 32 && GetPos().y > 327 * 32 && GetVel().y > 20.0f)
 			Input()->m_Jump = 1;
 		if (GetPos().y > 339 * 32) // if he falls into the hole to police station he will kill
 		{
@@ -445,7 +595,29 @@ void CDummyBlmapChillPolice::OnTick()
 		if (GetPos().x < 328 * 32 && GetPos().y < 60 * 32)
 			Input()->m_Jump = 1;
 	}
-	else if (GetPos().y > 260 * 32 && GetPos().x < 325 * 32 && GetPos().y < 328 * 32 && GetPos().x > 275 * 32) // jumping over the big freeze to get into the tunnel
+	// Stuck on the outside of the clu spike thing
+	else if (GetPos().y > 120 * 32 && GetPos().y < 185 * 32 && GetPos().x > 233 * 32 && GetPos().x < 300 * 32)
+	{
+		if (GetPos().x < 272 * 32)
+			Input()->m_Direction = 1;
+		/*
+		##    <- deep and spikes and clu skip
+		#
+	######
+	######
+	##      <-- stuck here
+	######
+	######
+		#
+		#  <-- or stuck here
+		##
+		 #    police entrance
+	######      |
+	#           v
+		*/
+	}
+	// jumping over the big freeze to get into the tunnel
+	else if (GetPos().y > 260 * 32 && GetPos().x < 325 * 32 && GetPos().y < 328 * 32 && GetPos().x > 275 * 32)
 	{
 		Input()->m_Direction = -1;
 		Input()->m_Jump = 0;
@@ -454,7 +626,8 @@ void CDummyBlmapChillPolice::OnTick()
 		if (Server()->Tick() % 5 == 0)
 			SetWeapon(1);
 	}
-	else if (GetPos().y > 328 * 32 && GetPos().y < 345 * 32 && GetPos().x > 236 * 32 && GetPos().x < 365 * 32) // after grenade jump and being down going into the tunnel to police staion
+	// after grenade jump and being down going into the tunnel to police staion
+	else if (GetPos().y > 328 * 32 && GetPos().y < 345 * 32 && GetPos().x > 236 * 32 && GetPos().x < 365 * 32)
 	{
 		Input()->m_Direction = 1;
 		if (GetPos().x > 265 * 32 && GetPos().x < 267 * 32)
@@ -466,18 +639,83 @@ void CDummyBlmapChillPolice::OnTick()
 		Input()->m_Direction = 1;
 	else if (GetPos().y > 337.4 * 32 && GetPos().y < 345 * 32 && GetPos().x > 295 * 32 && GetPos().x < 365 * 32) // walkking left in air to get on the little block
 		Input()->m_Direction = -1;
-	if (GetPos().y < 355 * 32 && GetPos().y > 346 * 32)
+	if (GetPos().y < 361 * 32 && GetPos().y > 346 * 32)
 	{
+		if (Server()->Tick() % 10 == 0)
+			SetWeapon(3);
 		Input()->m_Direction = 1;
+		// slow down and go back to enter the 2 tiles wide hole
+		if (GetPos().x > 321 * 32)
+			Input()->m_Direction = -1;
+		if (GetPos().x > 317 * 32 && GetVel().x > 5.5f)
+			Input()->m_Direction = 0;
+		if (GetPos().x > 316 * 32 && GetVel().x > 9.8f)
+			Input()->m_Direction = -1;
+		// Get enough speed before the rj
+		if (GetPos().x < 297 * 32 && GetPos().x > 296 * 32)
+			if (GetVel().x < 9.9f)
+				m_GetSpeed = true;
+		if (m_GetSpeed)
+		{
+			Input()->m_Direction = -1;
+			if ((GetPos().x < 294 * 32 && IsGrounded()) || GetPos().x < 280 * 32)
+				m_GetSpeed = false;
+		}
+		Input()->m_TargetX = -50;
+		Input()->m_TargetY = 100;
+		if (GetPos().x < 303 * 32)
+		{
+			if (GetPos().x > 296 * 32)
+				Fire();
+		}
+		else
+		{
+			Input()->m_TargetX = 50;
+			if (GetPos().x > 310 * 32 && GetPos().x < 312 * 32)
+				Fire();
+		}
 		Input()->m_Jump = 0;
 		if (GetVel().y > 0.0000001f && GetPos().y > 352.6 * 32 && GetPos().x < 315 * 32) // jump in air to get to the right
 			Input()->m_Jump = 1;
 	}
-	if (GetPos().x > 315.5 * 32 && GetPos().x < 327 * 32 && GetPos().y > 344 * 32 && GetPos().y < 418 * 32) // stop moving in air to get into the hole
-		Input()->m_Direction = 0;
-	if (GetPos().x > 290 * 32 && GetPos().x < 450 * 32 && GetPos().y < 450 * 32 && GetPos().y > 380 * 32) //police area
+	if (GetPos().x > 180 * 32 && GetPos().x < 450 * 32 && GetPos().y < 450 * 32 && GetPos().y > 358 * 32) // wider police area with left entrance
 	{
-		if (GetPos().x > 380 * 32 && GetPos().x < 450 * 32 && GetPos().y < 450 * 32 && GetPos().y > 380 * 32) //police area
+		if (GetPos().y < 408 * 32)
+			if (Server()->Tick() % 10 == 0)
+				SetWeapon(1);
+		// walking right again to get into the tunnel at the bottom
+		if (GetPos().x < 363 * 32)
+		{
+			Input()->m_Direction = 1;
+		}
+		// do not enter in pvp area or bank
+		if (GetPos().x > 323 * 32 && GetPos().y < 408 * 32)
+			Input()->m_Direction = -1;
+		// police area entrance tunnel (left side)
+		if (GetPos().x > 316 * 32 && GetPos().x < 366 * 32 && GetPos().y > 416 * 32)
+		{
+			// jump through freeze if one is close or go back if no vel
+			for (int i = 10; i < 160; i+=20)
+			{
+				// waiting for
+				// https://github.com/fokkonaut/F-DDrace/pull/76
+				// int tile = GameServer()->Collision()->GetTile(GetPos().x + i, GetPos().y);
+				// if (tile == TILE_FREEZE)
+				// {
+				// 	if (GetVel().y > 1.1f)
+				// 	{
+				// 		Input()->m_Direction = -1;
+				// 	}
+				// 	if (IsGrounded() && GetVel().x > 8.8f)
+				// 		Input()->m_Jump = 1;
+				// 	break;
+				// }
+			}
+		}
+		/* * * * * * * *
+		 * police area *
+		 * * * * * * * */
+		if (GetPos().x > 380 * 32 && GetPos().x < 450 * 32 && GetPos().y < 450 * 32 && GetPos().y > 380 * 32)
 		{
 			if (GetPos().x < 397 * 32 && GetPos().y > 436 * 32 && GetPos().x > 388 * 32) // on the money tile jump loop, to prevent blocking flappy there
 			{
@@ -759,12 +997,7 @@ void CDummyBlmapChillPolice::OnTick()
 					m_IsDJUsed = false;
 			}
 		}
-		if (GetPos().y > 380 * 32 && GetPos().x < 363 * 32) // walking right again to get into the tunnel at the bottom
-		{
-			Input()->m_Direction = 1;
-			if (IsGrounded())
-				Input()->m_Jump = 1;
-		}
+		// left side of police the freeze pit
 		if (GetPos().y > 380 * 32 && GetPos().x < 381 * 32 && GetPos().x > 363 * 32)
 		{
 			Input()->m_Direction = 1;
