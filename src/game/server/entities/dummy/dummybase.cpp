@@ -55,8 +55,8 @@ void CDummyBase::Fire(bool Stroke)
 
 void CDummyBase::AvoidFreeze()
 {
-	#define FREEZE(x, y) GameServer()->Collision()->GetTileRaw(x, y) == TILE_FREEZE
-	#define AIR(x, y) GameServer()->Collision()->GetTileRaw(x, y) == TILE_AIR
+	#define FREEZE(x, y) (GameServer()->Collision()->GetTileRaw(x, y) == TILE_FREEZE)
+	#define AIR(x, y) (GameServer()->Collision()->GetTileRaw(x, y) == TILE_AIR)
 	#define SOLID(x, y) GameServer()->Collision()->IsSolid(x, y)
 
 	int x = GetPos().x;
