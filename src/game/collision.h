@@ -81,6 +81,8 @@ public:
 	}
 
 	int GetTile(int x, int y);
+	int GetTileRaw(int x, int y);
+	int GetTileRaw(vec2 Pos) { return GetTileRaw(Pos.x, Pos.y); }
 	int GetFTile(int x, int y);
 	int Entity(int x, int y, int Layer);
 	int GetPureMapIndex(float x, float y);
@@ -145,6 +147,9 @@ public:
 	int GetSwitchByPlot(int PlotID);
 	int GetPlotBySwitch(int SwitchID);
 	int m_NumPlots;
+
+	int IsAir(int x, int y);
+	int IsFreeze(int x, int y);
 
 private:
 

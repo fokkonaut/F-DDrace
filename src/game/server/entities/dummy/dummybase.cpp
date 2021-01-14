@@ -7,6 +7,7 @@
 CGameContext *CDummyBase::GameServer() const { return m_pCharacter->GameServer(); }
 CGameWorld *CDummyBase::GameWorld() const { return m_pCharacter->GameWorld(); }
 IServer *CDummyBase::Server() const { return GameServer()->Server(); }
+CCollision *CDummyBase::Collision() const { return GameServer()->Collision(); }
 
 vec2 CDummyBase::GetPos() { return m_pCharacter->Core()->m_Pos; }
 vec2 CDummyBase::GetVel() { return m_pCharacter->Core()->m_Vel; }
@@ -51,4 +52,46 @@ void CDummyBase::Tick()
 
 	// Then start controlling
 	OnTick();
+}
+
+void CDummyBase::AvoidFreezes()
+{
+	int x = GetPos().x;
+	int y = GetPos().y;
+	//int xv = (int)GetVel().x * 32;
+	int yv = (int)GetVel().y * 32;
+
+	// sides
+	if(Collision()->IsFreeze(x+32, y))
+		Input()->m_Direction = -1;
+	if(Collision()->IsFreeze(x-32, y))
+		Input()->m_Direction = 1;
+
+	// corners
+	if(Collision()->IsFreeze(x+32, y-32) && !Collision()->IsFreeze(x-32, y))
+		Input()->m_Direction = -1;
+	if(Collision()->IsFreeze(x-32, y-32) && !Collision()->IsFreeze(x+32, y))
+		Input()->m_Direction = 1;
+
+	// small edges
+	if(Collision()->IsAir(x-32, y) && Collision()->IsFreeze(x-32, y+32))
+		Input()->m_Direction = 1;
+
+	if(Collision()->IsAir(x+32, y) && Collision()->IsFreeze(x+32, y+32))
+		Input()->m_Direction = -1;
+		
+	// big edges
+	if(Collision()->IsAir(x-32, y) && Collision()->IsAir(x-64, y) && Collision()->IsAir(x-64, y+32) && Collision()->IsFreeze(x-64, y+32))
+		Input()->m_Direction = 1;
+	if(Collision()->IsAir(x+32, y) && Collision()->IsAir(x+64, y) && Collision()->IsAir(x+64, y+32) && Collision()->IsFreeze(x+64, y+32))
+		Input()->m_Direction = -1;
+		
+	// while falling
+	if (Collision()->IsFreeze(x, y+yv))
+	{
+		if(Collision()->IsSolid(x-yv, y+yv))
+			Input()->m_Direction = 1;
+		if(Collision()->IsSolid(x+yv, y+yv))
+			Input()->m_Direction = -1;
+	}
 }

@@ -336,6 +336,14 @@ int CCollision::GetTile(int x, int y)
 	return 0;
 }
 
+int CCollision::GetTileRaw(int x, int y)
+{
+	if(!m_pTiles)
+		return 0;
+
+	return GetTileIndex(GetPureMapIndex(x, y));
+}
+
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
@@ -1466,4 +1474,18 @@ int CCollision::GetSwitchByPlot(int PlotID)
 int CCollision::GetPlotBySwitch(int SwitchID)
 {
 	return SwitchID - m_NumSwitchers;
+}
+
+// F-DDrace
+
+int CCollision::IsAir(int x, int y)
+{
+	int index = GetTileRaw(x, y);
+	return index == TILE_AIR;
+}
+
+int CCollision::IsFreeze(int x, int y)
+{
+	int index = GetTileRaw(x, y);
+	return index == TILE_FREEZE;
 }
