@@ -322,6 +322,33 @@ void CGameContext::CreateSound(vec2 Pos, int Sound, Mask128 Mask)
 	}
 }
 
+void CGameContext::SendChatMsg(CNetMsg_Sv_Chat *pMsg, int Flags, int To)
+{
+	if (Server()->IsSevendown(To) || str_length(pMsg->m_pMessage) < 128)
+	{
+		Server()->SendPackMsg(pMsg, Flags, To);
+		return;
+	}
+
+	const char *pText = pMsg->m_pMessage;
+
+	for (int i = 0; i < 2; i++)
+	{
+		char aTemp[128];
+		for (int pos = 0; pos < 128-1; pos++)
+		{
+			char c = pMsg->m_pMessage[pos+(i*128)-i];
+			aTemp[pos] = c;
+			if (c == 0)
+				break;
+		}
+		aTemp[128-1] = 0;
+		pMsg->m_pMessage = aTemp;
+		Server()->SendPackMsg(pMsg, Flags, To);
+		pMsg->m_pMessage = pText;
+	}
+}
+
 void CGameContext::SendChatTarget(int To, const char *pText)
 {
 	CNetMsg_Sv_Chat Msg;
@@ -345,7 +372,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		if (ProcessSpamProtection(SpamProtectionClientID))
 			return;
 
-	char aBuf[256], aText[256];
+	char aBuf[512], aText[256];
 	str_copy(aText, pText, sizeof(aText));
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 	{
@@ -378,7 +405,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, pModeStr, aBuf);
 	}
 
-
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Mode = Mode;
 	Msg.m_ClientID = ChatterClientID;
@@ -389,7 +415,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (CanReceiveMessage(ChatterClientID, i))
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else if(Mode == CHAT_TEAM)
 	{
@@ -410,14 +436,14 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 					{
-						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+						SendChatMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
 				else
 				{
 					if(Teams->Team(i) == GetDDRaceTeam(ChatterClientID) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 					{
-						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+						SendChatMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
 			}
@@ -427,25 +453,23 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+		SendChatMsg(&Msg, MSGFLAG_VITAL, To);
 		if (ChatterClientID >= 0)
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 	}
 	else if (Mode == CHAT_ATEVERYONE)
 	{
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
 
-		char aBuf[128];
-		char aMessage[128];
-		str_copy(aMessage, Msg.m_pMessage, sizeof(aMessage));
+		char aMsg[128];
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if (m_apPlayers[i])
 			{
-				str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(i), aMessage);
-				Msg.m_pMessage = aBuf;
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+				str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(i), aText);
+				Msg.m_pMessage = aMsg;
+				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 			}
 		}
 	}
@@ -456,7 +480,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (IsLocal(ChatterClientID, i))
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER
 	{
@@ -484,7 +508,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, ChatterClientID);
 			}
 			else
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+				SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 		}
 
 		// reset client ids
@@ -507,9 +531,11 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
 			}
 			else
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+				SendChatMsg(&Msg, MSGFLAG_VITAL, To);
 		}
 	}
+
+	#undef SEND
 }
 
 void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImportant)
@@ -1725,7 +1751,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
 
-			// trim right and set maximum length to 128 utf8-characters
+			// trim right and set maximum length to 256 utf8-characters
 			int Length = 0;
 			const char *p = pMsg->m_pMessage;
 			const char *pEnd = 0;
@@ -1742,7 +1768,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(pEnd == 0)
 					pEnd = pStrOld;
 
-				if(++Length >= 127)
+				if(++Length >= 256)
 				{
 					*(const_cast<char *>(p)) = 0;
 					break;

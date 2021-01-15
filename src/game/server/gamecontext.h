@@ -268,6 +268,7 @@ public:
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
 	// network
+	void SendChatMsg(CNetMsg_Sv_Chat *pMsg, int Flags, int To);
 	void SendChatTarget(int To, const char* pText);
 	void SendChatTeam(int Team, const char* pText);
 	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1);
