@@ -41,6 +41,21 @@ protected:
 	CCharacter *m_pCharacter;
 	CPlayer *m_pPlayer;
 
+	bool TicksPassed(int Ticks);
+
+	void Left();
+	void Right();
+	void StopMoving();
+	void Hook(bool Stroke = true);
+	void Jump(bool Stroke = true);
+	void Fire(bool Stroke = true);
+	void Aim(int X, int Y);
+	void AimX(int X);
+	void AimY(int Y);
+
+	vec2 GetPos();
+	vec2 GetVel();
+
 	int HookState();
 	int Jumped();
 	int Jumps();
