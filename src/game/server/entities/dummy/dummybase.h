@@ -41,20 +41,14 @@ protected:
 	CCharacter *m_pCharacter;
 	CPlayer *m_pPlayer;
 
-	vec2 GetPos();
-	vec2 GetVel();
 	int HookState();
 	int Jumped();
 	int Jumps();
 	bool IsGrounded();
 
 	void SetWeapon(int Weapon);
-	void Fire(bool Stroke = true);
 	void Die();
 	void AvoidFreeze();
-
-	CNetObj_PlayerInput *Input();
-	CNetObj_PlayerInput *LatestInput();
 };
 
 #endif
