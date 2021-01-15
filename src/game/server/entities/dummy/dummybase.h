@@ -50,6 +50,7 @@ protected:
 	void Jump(bool Stroke = true);
 	void Fire(bool Stroke = true);
 	void Aim(int TargetX, int TargetY);
+	void AimPos(vec2 Pos);
 	void AimX(int TargetX);
 	void AimY(int TargetY);
 

@@ -2,8 +2,6 @@
 
 #include "blmapchill_police.h"
 #include "../character.h"
-#include <game/server/player.h>
-#include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
 #include "macros.h"

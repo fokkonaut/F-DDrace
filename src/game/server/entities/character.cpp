@@ -20,7 +20,9 @@
 #include "trail.h"
 #include "portal.h"
 #include "money.h"
+
 #include "dummy/blmapchill_police.h"
+#include "dummy/house.h"
 
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
@@ -3316,7 +3318,11 @@ void CCharacter::CreateDummyHandle(int Dummymode)
 
 	switch (Dummymode)
 	{
+	case DUMMYMODE_IDLE: m_pDummyHandle = new CDummyBase(this, DUMMYMODE_IDLE); break;
 	case DUMMYMODE_BLMAPCHILL_POLICE: m_pDummyHandle = new CDummyBlmapChillPolice(this); break;
+	case DUMMYMODE_SHOP_DUMMY: // fallthrough
+	case DUMMYMODE_PLOT_SHOP_DUMMY: // fallthrough
+	case DUMMYMODE_BANK_DUMMY: m_pDummyHandle = new CDummyHouse(this, Dummymode); break;
 	}
 }
 

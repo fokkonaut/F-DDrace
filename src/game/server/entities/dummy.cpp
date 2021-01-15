@@ -25,11 +25,7 @@ void CCharacter::DummyTick()
 	ResetInput();
 	m_Input.m_Hook = 0;
 
-	if (m_pPlayer->GetDummyMode() == DUMMYMODE_IDLE)
-	{
-		// do nothing
-	}
-	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_V3_BLOCKER)  //ChillBlock5 blmapv3 1o1 mode // made by chillerdragon // improved by fokkonaut
+	if (m_pPlayer->GetDummyMode() == DUMMYMODE_V3_BLOCKER)  //ChillBlock5 blmapv3 1o1 mode // made by chillerdragon // improved by fokkonaut
 	{
 		int V3_OFFSET_X = Config()->m_SvV3OffsetX * 32;
 		int V3_OFFSET_Y = Config()->m_SvV3OffsetY * 32;
@@ -3304,32 +3300,6 @@ void CCharacter::DummyTick()
 				if (m_Core.m_Pos.x > 466 * 32 && m_Core.m_Pos.y > 240 * 32 + 8)
 					m_Input.m_Jump = 1;
 			}
-		}
-	}
-	else if (m_pPlayer->GetDummyMode() == DUMMYMODE_SHOP_DUMMY || m_pPlayer->GetDummyMode() == DUMMYMODE_PLOT_SHOP_DUMMY || m_pPlayer->GetDummyMode() == DUMMYMODE_BANK_DUMMY) // house dummy
-	{
-		int Type;
-		switch (m_pPlayer->GetDummyMode())
-		{
-		case DUMMYMODE_SHOP_DUMMY: Type = HOUSE_SHOP; break;
-		case DUMMYMODE_PLOT_SHOP_DUMMY: Type = HOUSE_PLOT_SHOP; break;
-		case DUMMYMODE_BANK_DUMMY: Type = HOUSE_BANK; break;
-		default: return;
-		}
-
-		CCharacter *pChr = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID(), 9);
-		if (pChr && GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
-		{
-			m_Input.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-			m_Input.m_TargetY = pChr->m_Pos.y - m_Pos.y;
-			m_LatestInput.m_TargetX = pChr->m_Pos.x - m_Pos.x;
-			m_LatestInput.m_TargetY = pChr->m_Pos.y - m_Pos.y;
-		}
-
-		if (!GameServer()->m_pHouses[Type]->IsInside(m_pPlayer->GetCID()) && m_pPlayer->m_ForceSpawnPos == vec2(-1, -1) && Server()->Tick() % 400 == 0)
-		{
-			Die();
-			return;
 		}
 	}
 }
