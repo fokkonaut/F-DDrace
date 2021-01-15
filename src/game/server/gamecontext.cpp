@@ -462,12 +462,12 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
 
-		char aMsg[128];
+		char aMsg[256];
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if (m_apPlayers[i])
 			{
-				str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(i), aText);
+				str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(i), aText);
 				Msg.m_pMessage = aMsg;
 				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 			}
@@ -486,9 +486,9 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		if (To < 0 || To >= MAX_CLIENTS || !Server()->ClientIngame(To))
 		{
-			char aBuf[32];
-			str_format(aBuf, sizeof(aBuf), "Invalid whisper");
-			SendChatTarget(ChatterClientID, aBuf);
+			char aMsg[32];
+			str_format(aMsg, sizeof(aMsg), "Invalid whisper");
+			SendChatTarget(ChatterClientID, aMsg);
 			return;
 		}
 
@@ -517,9 +517,9 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 		if (Server()->Translate(Msg.m_ClientID, To) && Server()->Translate(Msg.m_TargetID, To))
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%s: %s", Server()->ClientName(ChatterClientID), aText);
-			Msg.m_pMessage = aBuf;
+			char aMsg[256];
+			str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(ChatterClientID), aText);
+			Msg.m_pMessage = aMsg;
 			Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
 
 			if (Server()->IsSevendown(To))
