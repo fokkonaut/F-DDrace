@@ -32,9 +32,6 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 
 void CDummyBlmapChillPolice::OnTick()
 {
-	AvoidFreeze();
-	return;
-
 	if (X > 451 && X < 472 && Y > 74 && Y < 85) // new spawn area, walk into the left SPAWN teleporter
 	{
 		LEFT;
