@@ -49,9 +49,9 @@ protected:
 	void Hook(bool Stroke = true);
 	void Jump(bool Stroke = true);
 	void Fire(bool Stroke = true);
-	void Aim(int X, int Y);
-	void AimX(int X);
-	void AimY(int Y);
+	void Aim(int TargetX, int TargetY);
+	void AimX(int TargetX);
+	void AimY(int TargetY);
 
 	vec2 GetPos();
 	vec2 GetVel();

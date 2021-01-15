@@ -4,6 +4,8 @@
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
+#include "macros.h"
+
 CGameContext *CDummyBase::GameServer() const { return m_pCharacter->GameServer(); }
 CGameWorld *CDummyBase::GameWorld() const { return m_pCharacter->GameWorld(); }
 IServer *CDummyBase::Server() const { return GameServer()->Server(); }
@@ -23,9 +25,9 @@ void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = 1; }
 void CDummyBase::StopMoving() { m_pCharacter->Input()->m_Direction = 0; }
 void CDummyBase::Hook(bool Stroke) { m_pCharacter->Input()->m_Hook = Stroke; }
 void CDummyBase::Jump(bool Stroke) { m_pCharacter->Input()->m_Jump = Stroke; }
-void CDummyBase::Aim(int X, int Y) { AimX(X); AimY(Y); }
-void CDummyBase::AimX(int X) { m_pCharacter->LatestInput()->m_TargetX = X; m_pCharacter->Input()->m_TargetX = X; }
-void CDummyBase::AimY(int Y) { m_pCharacter->LatestInput()->m_TargetY = Y; m_pCharacter->Input()->m_TargetY = Y; }
+void CDummyBase::Aim(int TargetX, int TargetY) { AimX(TargetX); AimY(TargetY); }
+void CDummyBase::AimX(int TargetX) { m_pCharacter->LatestInput()->m_TargetX = TargetX; m_pCharacter->Input()->m_TargetX = TargetX; }
+void CDummyBase::AimY(int TargetY) { m_pCharacter->LatestInput()->m_TargetY = TargetY; m_pCharacter->Input()->m_TargetY = TargetY; }
 void CDummyBase::Fire(bool Stroke)
 {
 	if (Stroke)
@@ -39,8 +41,6 @@ void CDummyBase::Fire(bool Stroke)
 		m_pCharacter->Input()->m_Fire = 0;
 	}
 }
-
-#include "macros.h"
 
 CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 {
