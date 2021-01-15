@@ -1768,7 +1768,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(pEnd == 0)
 					pEnd = pStrOld;
 
-				if(++Length >= 256)
+				if(++Length >= 255)
 				{
 					*(const_cast<char *>(p)) = 0;
 					break;
