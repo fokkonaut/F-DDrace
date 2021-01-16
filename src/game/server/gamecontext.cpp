@@ -5241,7 +5241,7 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 	if (ClientID == Killer || !pChr || !pKiller || !pKiller->GetCharacter() || pKiller->m_IsDummy)
 		return;
 
-	if (IsSpawnArea(pKiller->GetCharacter()->GetPos()) && pChr->IsGrounded()) // if killer is in spawn area
+	if (IsSpawnArea(pKiller->GetCharacter()->GetPos())) // if killer is in spawn area
 	{
 		pKiller->m_SpawnBlockScore++;
 		if (Config()->m_SvSpawnBlockProtection)
