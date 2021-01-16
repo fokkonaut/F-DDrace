@@ -1370,16 +1370,23 @@ vec2 CCollision::GetRandomTile(int Index)
 	return vec2(-1, -1);
 }
 
-int CCollision::GetDoorNumber(vec2 Pos)
-{
-	return GetDTileNumber(GetPureMapIndex(Pos));
-}
-
 int CCollision::GetTileRaw(int x, int y)
 {
 	if(!m_pTiles)
 		return 0;
 	return GetTileIndex(GetPureMapIndex(x, y));
+}
+
+int CCollision::GetFTileRaw(int x, int y)
+{
+	if(!m_pFront)
+		return 0;
+	return GetFTileIndex(GetPureMapIndex(x, y));
+}
+
+int CCollision::GetDoorNumber(vec2 Pos)
+{
+	return GetDTileNumber(GetPureMapIndex(Pos));
 }
 
 bool CCollision::IsPlotTile(int Index)

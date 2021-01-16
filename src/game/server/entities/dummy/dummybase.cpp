@@ -65,8 +65,10 @@ void CDummyBase::Tick()
 
 void CDummyBase::AvoidFreeze()
 {
-	#define FREEZE(x, y) (GameServer()->Collision()->GetTileRaw(_(x), _(y)) == TILE_FREEZE)
-	#define AIR(x, y) (GameServer()->Collision()->GetTileRaw(_(x), _(y)) == TILE_AIR)
+	#define TILE(x, y) GameServer()->Collision()->GetTileRaw(_(x), _(y))
+	#define FTILE(x, y) GameServer()->Collision()->GetFTileRaw(_(x), _(y))
+	#define FREEZE(x, y) (TILE(x, y) == TILE_FREEZE || FTILE(x, y) == TILE_FREEZE || TILE(x, y) == TILE_DFREEZE || FTILE(x, y) == TILE_DFREEZE)
+	#define AIR(x, y) !FREEZE(x, y)
 	#define SOLID(x, y) GameServer()->Collision()->IsSolid(_(x), _(y))
 
 	// sides
@@ -76,9 +78,9 @@ void CDummyBase::AvoidFreeze()
 		Right();
 
 	// corners
-	if (FREEZE(X+1, Y-1) && !FREEZE(X-1, Y))
+	if (AIR(X-1, Y) && FREEZE(X+1, Y-1))
 		Left();
-	if (FREEZE(X-1, Y-1) && !FREEZE(X+1, Y))
+	if (AIR(X+1, Y) && FREEZE(X-1, Y-1))
 		Right();
 
 	// small edges
@@ -103,6 +105,8 @@ void CDummyBase::AvoidFreeze()
 			Left();
 	}
 
+	#undef TILE
+	#undef FTILE
 	#undef FREEZE
 	#undef AIR
 	#undef SOLID

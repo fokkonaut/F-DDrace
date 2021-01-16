@@ -139,6 +139,8 @@ public:
 
 	int GetTileRaw(int x, int y);
 	int GetTileRaw(vec2 Pos) { return GetTileRaw(Pos.x, Pos.y); }
+	int GetFTileRaw(int x, int y);
+	int GetFTileRaw(vec2 Pos) { return GetFTileRaw(Pos.x, Pos.y); }
 
 	// IntersectLineDoor: returns -1 when intersected with a plot built laserwall, otherwise returns the number of the intersected laser wall
 	int IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool PlotDoorOnly);
