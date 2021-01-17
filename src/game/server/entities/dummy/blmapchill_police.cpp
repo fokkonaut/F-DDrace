@@ -1,7 +1,6 @@
 // made by fokkonaut and ChillerDragon
 
 #include "blmapchill_police.h"
-#include "../character.h"
 #include <game/server/gamecontext.h>
 
 #include "macros.h"
@@ -150,7 +149,7 @@ void CDummyBlmapChillPolice::OnTick()
 				Left();
 			if (IsGrounded())
 				Jump();
-			if (RAW_Y < _(23) + 20 && GetVel().y < -1.1f)
+			if (RAW_Y < RAW(23) + 20 && GetVel().y < -1.1f)
 				Fire();
 		}
 		else if (X > 75 && X < 135) //gores stuff (the thign with freeze spikes from top and bottom)
@@ -186,7 +185,7 @@ void CDummyBlmapChillPolice::OnTick()
 			// gores (the long way to 5 jumps)
 			if (X < 220)
 			{
-				if ((RAW_Y > _(12) + 10 && GetVel().y > 4.1f) || (RAW_Y > _(12) + 30 && GetVel().y > -1.1f))
+				if ((RAW_Y > RAW(12) + 10 && GetVel().y > 4.1f) || (RAW_Y > RAW(12) + 30 && GetVel().y > -1.1f))
 				{
 					if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED)
 					{
@@ -241,7 +240,7 @@ void CDummyBlmapChillPolice::OnTick()
 						}
 						else
 						{
-							if (RAW_X > _(229) + 10 && !m_DidRocketjump)
+							if (RAW_X > RAW(229) + 10 && !m_DidRocketjump)
 								Left();
 						}
 					}
@@ -703,7 +702,7 @@ void CDummyBlmapChillPolice::OnTick()
 					}
 
 					//navigate to platform
-					if (RAW_Y < _(435) - 10)
+					if (RAW_Y < RAW(435) - 10)
 					{
 						Left();
 						if (Y < 433)
@@ -723,11 +722,11 @@ void CDummyBlmapChillPolice::OnTick()
 					{
 						if (X < 403)
 							Right();
-						else if (RAW_X > _(404) + 20)
+						else if (RAW_X > RAW(404) + 20)
 							Left();
 					}
 
-					if ((RAW_Y > _(441) + 10 && (X > 402 || RAW_X < _(399) + 10)) || m_pCharacter->m_IsFrozen) //check for fail position
+					if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || m_pCharacter->m_IsFrozen) //check for fail position
 						m_LowerPanic = 1; //lower panic mode to reposition
 				}
 			}
@@ -740,8 +739,8 @@ void CDummyBlmapChillPolice::OnTick()
 				{
 					if (Y > 435) // setting the destination of dummy to top left police entry bcs otherwise bot fails when trying to help --> walks into jail wall xd
 					{
-						m_LovedX = _(392 + rand() % 2);
-						m_LovedY = _(430);
+						m_LovedX = RAW(392 + rand() % 2);
+						m_LovedY = RAW(430);
 					}
 					//aimbot on heuzeueu
 					AimX(pChr->Core()->m_Pos.x - RAW_X);
@@ -752,7 +751,7 @@ void CDummyBlmapChillPolice::OnTick()
 					if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
 						m_IsClosestPolice = true;
 
-					if (pChr->GetCore().m_Pos.x > _(444) - 10) //police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)
+					if (pChr->Core()->m_Pos.x > RAW(444) - 10) //police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)
 					{
 						m_HelpMode = 2;
 						if (Jumped() > 1 && X > 431) //double jumped and above the freeze
@@ -771,7 +770,7 @@ void CDummyBlmapChillPolice::OnTick()
 					else
 						m_HelpMode = 1;
 
-					if (m_HelpMode == 1 && RAW_X > _(431) + 10)
+					if (m_HelpMode == 1 && RAW_X > RAW(431) + 10)
 						Left();
 					else if (m_HelpMode == 1 && X < 430)
 						Right();
@@ -786,7 +785,7 @@ void CDummyBlmapChillPolice::OnTick()
 								//	m_IsHelpHook = true;
 								//}
 							}
-							else if (pChr->GetCore().m_Pos.x > _(439)) //police dude in the middle
+							else if (pChr->Core()->m_Pos.x > RAW(439)) //police dude in the middle
 							{
 								if (IsGrounded())
 								{
@@ -853,40 +852,40 @@ void CDummyBlmapChillPolice::OnTick()
 						{
 							if ((rand() % 3) == 0)
 							{
-								m_LovedX = _(420) + rand() % 69;
-								m_LovedY = _(430);
+								m_LovedX = RAW(420) + rand() % 69;
+								m_LovedY = RAW(430);
 								GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
 							}
 							else
 							{
-								m_LovedX = _(392 + rand() % 2);
-								m_LovedY = _(430);
+								m_LovedX = RAW(392 + rand() % 2);
+								m_LovedY = RAW(430);
 							}
 							if ((rand() % 2) == 0)
 							{
-								m_LovedX = _(384) + rand() % 128;
-								m_LovedY = _(430);
+								m_LovedX = RAW(384) + rand() % 128;
+								m_LovedY = RAW(430);
 								GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_MUSIC);
 							}
 							else
 							{
 								if (rand() % 3 == 0)
 								{
-									m_LovedX = _(420) + rand() % 128;
-									m_LovedY = _(430);
+									m_LovedX = RAW(420) + rand() % 128;
+									m_LovedY = RAW(430);
 									GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
 								}
 								else if (rand() % 4 == 0)
 								{
-									m_LovedX = _(429) + rand() % 64;
-									m_LovedY = _(430);
+									m_LovedX = RAW(429) + rand() % 64;
+									m_LovedY = RAW(430);
 									GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
 								}
 							}
 							if (rand() % 5 == 0) //lower middel base
 							{
-								m_LovedX = _(410) + rand() % 64;
-								m_LovedY = _(443);
+								m_LovedX = RAW(410) + rand() % 64;
+								m_LovedY = RAW(443);
 							}
 						}
 						else

@@ -23,6 +23,7 @@
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
+#include "dummy/v3_blocker.h"
 
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
@@ -3323,6 +3324,7 @@ void CCharacter::CreateDummyHandle(int Dummymode)
 	case DUMMYMODE_SHOP_DUMMY: // fallthrough
 	case DUMMYMODE_PLOT_SHOP_DUMMY: // fallthrough
 	case DUMMYMODE_BANK_DUMMY: m_pDummyHandle = new CDummyHouse(this, Dummymode); break;
+	case DUMMYMODE_V3_BLOCKER: m_pDummyHandle = new CDummyV3Blocker(this); break;
 	}
 }
 

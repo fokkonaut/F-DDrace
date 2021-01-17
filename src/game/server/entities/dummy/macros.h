@@ -6,4 +6,4 @@
 #define RAW_Y GetPos().y
 #define X (RAW_X / 32)
 #define Y (RAW_Y / 32)
-#define _(pos) ((pos) * 32)
+#define RAW(pos) ((pos) * 32)

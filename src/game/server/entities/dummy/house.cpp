@@ -1,7 +1,6 @@
 // made by fokkonaut
 
 #include "house.h"
-#include "../character.h"
 #include <game/server/gamecontext.h>
 
 #include "macros.h"

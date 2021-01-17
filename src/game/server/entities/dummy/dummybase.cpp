@@ -1,7 +1,6 @@
 // made by fokkonaut and ChillerDragon
 
 #include "dummybase.h"
-#include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 
 #include "macros.h"
@@ -65,11 +64,11 @@ void CDummyBase::Tick()
 
 void CDummyBase::AvoidFreeze()
 {
-	#define TILE(x, y) GameServer()->Collision()->GetTileRaw(_(x), _(y))
-	#define FTILE(x, y) GameServer()->Collision()->GetFTileRaw(_(x), _(y))
+	#define TILE(x, y) GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y))
+	#define FTILE(x, y) GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y))
 	#define FREEZE(x, y) (TILE(x, y) == TILE_FREEZE || FTILE(x, y) == TILE_FREEZE || TILE(x, y) == TILE_DFREEZE || FTILE(x, y) == TILE_DFREEZE)
 	#define AIR(x, y) !FREEZE(x, y)
-	#define SOLID(x, y) GameServer()->Collision()->IsSolid(_(x), _(y))
+	#define SOLID(x, y) GameServer()->Collision()->IsSolid(RAW(x), RAW(y))
 
 	// sides
 	if (FREEZE(X+1, Y))
