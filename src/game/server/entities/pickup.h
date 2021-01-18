@@ -21,6 +21,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	int GetType() { return m_Type; }
+	int GetOwner() { return m_Owner; }
 
 private:
 	int m_Type;
