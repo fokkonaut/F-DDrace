@@ -628,6 +628,17 @@ void CDummyBlmapChillPolice::OnTick()
 	}
 	if (X > 180 && X < 450 && Y < 450 && Y > 358) // wider police area with left entrance
 	{
+		// kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
+		if (m_pCharacter->m_IsFrozen)
+		{
+			if (TicksPassed(60))
+				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
+			if (TicksPassed(3000) && (IsGrounded() || X > 430)) // kill when freeze
+			{
+				Die();
+				return;
+			}
+		}
 		if (Y < 408)
 			if (TicksPassed(10))
 				SetWeapon(WEAPON_GUN);
@@ -947,19 +958,6 @@ void CDummyBlmapChillPolice::OnTick()
 				Jump();
 			if (Y > 433.7f)
 				Jump();
-		}
-		if (X > 290 && X < 450 && Y > 415 && Y < 450)
-		{
-			if (m_pCharacter->m_IsFrozen) // kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
-			{
-				if (TicksPassed(60))
-					GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
-				if (TicksPassed(3000) && (IsGrounded() || X > 430)) // kill when freeze
-				{
-					Die();
-					return;
-				}
-			}
 		}
 	}
 }
