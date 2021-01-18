@@ -285,7 +285,7 @@ void CDummyBlmapChillPolice::OnTick()
 		}
 		// jump over chairs
 		else if (TicksPassed(10) && X > 505)
-			Right();
+			Jump();
 		// jump out of the chair room
 		if (X < 497 && X > 496)
 			Jump();
