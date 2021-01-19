@@ -13,6 +13,8 @@ public:
 	virtual void OnTick();
 
 private:
+	void CheckStuck();
+
 	int m_LovedX;
 	int m_LovedY;
 	int m_LowerPanic;
@@ -21,6 +23,8 @@ private:
 	int m_GrenadeJump;
 	int m_SpawnTeleporter;
 	int m_FailedAttempts;
+	int m_Confused;
+	int m_Sad;
 
 	bool m_IsHelpHook;
 	bool m_IsClosestPolice;
@@ -31,6 +35,8 @@ private:
 	bool m_IsDJUsed;
 	bool m_HasReachedCinemaEntrance;
 	bool m_GetSpeed;
+
+	vec2 m_LastStuckCheckPos;
 };
 
 #endif

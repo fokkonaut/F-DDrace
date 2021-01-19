@@ -16,6 +16,8 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_GrenadeJump = 0;
 	m_SpawnTeleporter = 0;
 	m_FailedAttempts = 0;
+	m_Confused = 0;
+	m_Sad = 0;
 
 	m_IsHelpHook = false;
 	m_IsClosestPolice = false;
@@ -25,6 +27,71 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_HasStartGrenade = false;
 	m_IsDJUsed = false;
 	m_HasReachedCinemaEntrance = false;
+
+	m_LastStuckCheckPos = vec2(0, 0);
+}
+
+void CDummyBlmapChillPolice::CheckStuck()
+{
+	bool IsStuck = false;
+	if (TicksPassed(400) && (m_pCharacter->Input()->m_Direction == 0 || GetVel().x == 0.0f))
+	{
+		if (distance(m_LastStuckCheckPos, GetPos()) < 20 * 32)
+		{
+			IsStuck = true;
+			m_Confused++;
+			if (m_Confused > 7)
+				m_Sad++;
+		}
+		m_LastStuckCheckPos = GetPos();
+	}
+	if (m_Confused < 7) // confused
+	{
+		if (IsStuck && m_Confused > 1)
+			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_QUESTION);
+		if (m_Confused == 3)
+			Jump();
+		else if (m_Confused == 4)
+		{
+			Fire();
+			AvoidFreeze();
+		}
+		else if (m_Confused == 5)
+		{
+			Right();
+			AvoidFreeze();
+		}
+		else if (m_Confused == 6)
+		{
+			Left();
+			AvoidFreeze();
+		}
+	}
+	else // too confused -> sad
+	{
+		if (IsStuck)
+			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP);
+		if (m_Sad > 3)
+			m_Sad % 2 ? Left() : Right();
+		if (m_Sad > 6)
+		{
+			Jump();
+			if (TicksPassed(random(10, 400)))
+				Jump(false);
+		}
+		if (m_Sad > 7)
+		{
+			Hook();
+			if (TicksPassed(random(10, 400)))
+				Hook(false);
+		}
+		if (m_Sad > 8 && (IsStuck || m_Sad > 9))
+			Aim(random(-100, 100), random(-100, 100));
+		if (m_Sad > 20)
+			Die();
+	}
+	if (m_Confused > 3)
+		AvoidDeath();
 }
 
 void CDummyBlmapChillPolice::OnTick()
@@ -285,7 +352,7 @@ void CDummyBlmapChillPolice::OnTick()
 		}
 		// jump over chairs
 		else if (TicksPassed(10) && X > 505)
-			Right();
+			Jump();
 		// jump out of the chair room
 		if (X < 497 && X > 496)
 			Jump();
@@ -628,6 +695,19 @@ void CDummyBlmapChillPolice::OnTick()
 	}
 	if (X > 180 && X < 450 && Y < 450 && Y > 358) // wider police area with left entrance
 	{
+		// kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
+		if (m_pCharacter->m_IsFrozen)
+		{
+			if (TicksPassed(60))
+				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
+			if (TicksPassed(3000) && (IsGrounded() || X > 430)) // kill when freeze
+			{
+				Die();
+				return;
+			}
+		}
+		m_Sad = 0; // so nice in police area
+		m_Confused = 0;
 		if (Y < 408)
 			if (TicksPassed(10))
 				SetWeapon(WEAPON_GUN);
@@ -948,18 +1028,10 @@ void CDummyBlmapChillPolice::OnTick()
 			if (Y > 433.7f)
 				Jump();
 		}
-		if (X > 290 && X < 450 && Y > 415 && Y < 450)
-		{
-			if (m_pCharacter->m_IsFrozen) // kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
-			{
-				if (TicksPassed(60))
-					GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
-				if (TicksPassed(3000) && (IsGrounded() || X > 430)) // kill when freeze
-				{
-					Die();
-					return;
-				}
-			}
-		}
+	}
+	else
+	{
+		// not in police area check if stuck somewhere
+		CheckStuck();
 	}
 }

@@ -65,7 +65,9 @@ protected:
 
 	void SetWeapon(int Weapon);
 	void Die();
+	void AvoidTile(int Tile);
 	void AvoidFreeze();
+	void AvoidDeath();
 };
 
 #endif
