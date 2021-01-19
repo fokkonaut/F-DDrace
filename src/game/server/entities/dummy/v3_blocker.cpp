@@ -56,13 +56,13 @@ void CDummyV3Blocker::OnTick()
 		**************************************************/
 
 		//swing enemy up
-		if (GetPos().y < pChr->GetPos().y - 20 && !IsGrounded() && !pChr->m_IsFrozen)
+		if (RAW_Y < pChr->GetPos().y - 20 && !IsGrounded() && !pChr->m_IsFrozen)
 		{
 			Hook();
 			float dist = distance(pChr->GetPos(), GetPos());
 			if (dist < 250.f)
 			{
-				if (GetPos().x < pChr->GetPos().x)
+				if (RAW_X < pChr->GetPos().x)
 					Left();
 				else
 					Right();
@@ -80,7 +80,7 @@ void CDummyV3Blocker::OnTick()
 		//attack in mid
 		if (pChr->GetPos().x > RAW(V3_OFFSET_X + 19) - 7 && pChr->GetPos().x < RAW(V3_OFFSET_X + 22) + 7)
 		{
-			if (pChr->GetPos().x < GetPos().x) // bot on the left
+			if (pChr->GetPos().x < RAW_X) // bot on the left
 			{
 				if (pChr->Core()->m_Vel.x < 0.0f)
 					Hook();
