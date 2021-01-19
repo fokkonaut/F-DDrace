@@ -8,7 +8,7 @@
 CDummyChillBlock5Police::CDummyChillBlock5Police(CCharacter *pChr)
 : CDummyBase(pChr, DUMMYMODE_CHILLBLOCK5_POLICE)
 {
-	m_PoliceGetSpeed = false;
+	m_GetSpeed = false;
 	m_GotStuck = false;
 	m_PoliceMode = 0;
 	m_AttackMode = 0;
@@ -173,16 +173,16 @@ void CDummyChillBlock5Police::OnTick()
 		if (RAW_X > RAW(482) + 20 && Y < 236)
 		{
 			if (GetVel().x > -8.2f && RAW_X < RAW(484) - 20)
-				m_PoliceGetSpeed = true;
+				m_GetSpeed = true;
 
 			if (X > 483 && !IsGrounded())
-				m_PoliceGetSpeed = true;
+				m_GetSpeed = true;
 
 			if (GetVel().y > 5.3f)
-				m_PoliceGetSpeed = true;
+				m_GetSpeed = true;
 
 			if (IsGrounded() && X > 485)
-				m_PoliceGetSpeed = false;
+				m_GetSpeed = false;
 
 			if (m_GotStuck)
 			{
@@ -208,7 +208,7 @@ void CDummyChillBlock5Police::OnTick()
 			}
 			else
 			{
-				if (m_PoliceGetSpeed)
+				if (m_GetSpeed)
 				{
 					Right();
 					if (TicksPassed(90))

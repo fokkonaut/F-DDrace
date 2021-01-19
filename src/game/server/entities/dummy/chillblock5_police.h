@@ -13,7 +13,7 @@ public:
 	virtual void OnTick();
 
 private:
-	bool m_PoliceGetSpeed;
+	bool m_GetSpeed;
 	bool m_GotStuck;
 	int m_PoliceMode;
 	int m_AttackMode;
