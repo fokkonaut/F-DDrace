@@ -64,9 +64,7 @@ void CDummyBase::Tick()
 
 void CDummyBase::AvoidTile(int Tile)
 {
-	#define TILE(x, y) GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y))
-	#define FTILE(x, y) GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y))
-	#define IS_TILE(x, y) (TILE(x, y) == Tile || FTILE(x, y) == Tile)
+	#define IS_TILE(x, y) (GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y)) == Tile || GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y)) == Tile)
 	#define AIR(x, y) !IS_TILE(x, y)
 	#define SOLID(x, y) GameServer()->Collision()->IsSolid(RAW(x), RAW(y))
 
@@ -104,8 +102,6 @@ void CDummyBase::AvoidTile(int Tile)
 			Left();
 	}
 
-	#undef TILE
-	#undef FTILE
 	#undef IS_TILE
 	#undef AIR
 	#undef SOLID
