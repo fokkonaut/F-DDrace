@@ -62,41 +62,41 @@ void CDummyBase::Tick()
 	OnTick();
 }
 
-void CDummyBase::AvoidFreeze()
+void CDummyBase::AvoidTile(int Tile)
 {
 	#define TILE(x, y) GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y))
 	#define FTILE(x, y) GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y))
-	#define FREEZE(x, y) (TILE(x, y) == TILE_FREEZE || FTILE(x, y) == TILE_FREEZE || TILE(x, y) == TILE_DFREEZE || FTILE(x, y) == TILE_DFREEZE)
-	#define AIR(x, y) !FREEZE(x, y)
+	#define IS_TILE(x, y) (TILE(x, y) == Tile || FTILE(x, y) == Tile)
+	#define AIR(x, y) !IS_TILE(x, y)
 	#define SOLID(x, y) GameServer()->Collision()->IsSolid(RAW(x), RAW(y))
 
 	// sides
-	if (FREEZE(X+1, Y))
+	if (IS_TILE(X+1, Y))
 		Left();
-	if (FREEZE(X-1, Y))
+	if (IS_TILE(X-1, Y))
 		Right();
 
 	// corners
-	if (AIR(X-1, Y) && FREEZE(X+1, Y-1))
+	if (AIR(X-1, Y) && IS_TILE(X+1, Y-1))
 		Left();
-	if (AIR(X+1, Y) && FREEZE(X-1, Y-1))
+	if (AIR(X+1, Y) && IS_TILE(X-1, Y-1))
 		Right();
 
 	// small edges
-	if (AIR(X-1, Y) && FREEZE(X-1, Y+1))
+	if (AIR(X-1, Y) && IS_TILE(X-1, Y+1))
 		Right();
 
-	if (AIR(X+1, Y) && FREEZE(X+1, Y+1))
+	if (AIR(X+1, Y) && IS_TILE(X+1, Y+1))
 		Left();
 		
 	// big edges
-	if (AIR(X-1, Y) && AIR(X-2, Y) && AIR(X-2, Y+1) && FREEZE(X-2, Y+1))
+	if (AIR(X-1, Y) && AIR(X-2, Y) && AIR(X-2, Y+1) && IS_TILE(X-2, Y+1))
 		Right();
-	if (AIR(X+1, Y) && AIR(X+2, Y) && AIR(X+2, Y+1) && FREEZE(X+2, Y+1))
+	if (AIR(X+1, Y) && AIR(X+2, Y) && AIR(X+2, Y+1) && IS_TILE(X+2, Y+1))
 		Left();
 		
 	// while falling
-	if (FREEZE(X, Y+GetVel().y))
+	if (IS_TILE(X, Y+GetVel().y))
 	{
 		if(SOLID(X-GetVel().y, Y+GetVel().y))
 			Right();
@@ -106,7 +106,22 @@ void CDummyBase::AvoidFreeze()
 
 	#undef TILE
 	#undef FTILE
-	#undef FREEZE
+	#undef IS_TILE
 	#undef AIR
 	#undef SOLID
+}
+
+void CDummyBase::AvoidFreeze()
+{
+	AvoidTile(TILE_FREEZE);
+	AvoidTile(TILE_DFREEZE);
+}
+
+void CDummyBase::AvoidDeath()
+{
+	AvoidTile(TILE_DEATH);
+	if (X+5 >= GameServer()->Collision()->GetWidth() + 200)
+		Left();
+	else if (X-5 <= -200)
+		Right();
 }
