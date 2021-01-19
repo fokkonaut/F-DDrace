@@ -216,7 +216,7 @@ void CDummyBlmapChillPolice::OnTick()
 				Left();
 			if (IsGrounded())
 				Jump();
-			if (RAW_Y < RAW(23) + 20 && GetVel().y < -1.1f)
+			if (Y < 23 + RAW(20) && GetVel().y < -1.1f)
 				Fire();
 		}
 		else if (X > 75 && X < 135) //gores stuff (the thign with freeze spikes from top and bottom)
@@ -252,7 +252,7 @@ void CDummyBlmapChillPolice::OnTick()
 			// gores (the long way to 5 jumps)
 			if (X < 220)
 			{
-				if ((RAW_Y > RAW(12) + 10 && GetVel().y > 4.1f) || (RAW_Y > RAW(12) + 30 && GetVel().y > -1.1f))
+				if ((Y > 12 + RAW(10) && GetVel().y > 4.1f) || (Y > 12 + RAW(30) && GetVel().y > -1.1f))
 				{
 					if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED)
 					{
@@ -307,7 +307,7 @@ void CDummyBlmapChillPolice::OnTick()
 						}
 						else
 						{
-							if (RAW_X > RAW(229) + 10 && !m_DidRocketjump)
+							if (X > 229 + RAW(10) && !m_DidRocketjump)
 								Left();
 						}
 					}
@@ -725,7 +725,7 @@ void CDummyBlmapChillPolice::OnTick()
 			// jump through freeze if one is close or go back if no vel
 			for (int i = 10; i < 160; i+=20)
 			{
-				if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE)
+				if (GameServer()->Collision()->GetTileRaw(GetPos().x + i, GetPos().y) == TILE_FREEZE)
 				{
 					if (GetVel().y > 1.1f)
 						Left();
@@ -748,7 +748,7 @@ void CDummyBlmapChillPolice::OnTick()
 					Jump();
 			}
 			//detect lower panic (accedentally fall into the lower police base 
-			if (!m_LowerPanic && Y > 437 && RAW_Y > m_LovedY)
+			if (!m_LowerPanic && Y > 437 && GetPos().y > m_LovedY)
 			{
 				m_LowerPanic = 1;
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SPLATTEE); //angry emote
@@ -782,7 +782,7 @@ void CDummyBlmapChillPolice::OnTick()
 					}
 
 					//navigate to platform
-					if (RAW_Y < RAW(435) - 10)
+					if (Y < 435 - RAW(10))
 					{
 						Left();
 						if (Y < 433)
@@ -802,11 +802,11 @@ void CDummyBlmapChillPolice::OnTick()
 					{
 						if (X < 403)
 							Right();
-						else if (RAW_X > RAW(404) + 20)
+						else if (X > 404 + RAW(20))
 							Left();
 					}
 
-					if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || m_pCharacter->m_IsFrozen) //check for fail position
+					if ((Y > 441 + RAW(10) && (X > 402 || X < 399 + RAW(10))) || m_pCharacter->m_IsFrozen) //check for fail position
 						m_LowerPanic = 1; //lower panic mode to reposition
 				}
 			}
@@ -823,8 +823,7 @@ void CDummyBlmapChillPolice::OnTick()
 						m_LovedY = RAW(430);
 					}
 					//aimbot on heuzeueu
-					AimX(pChr->Core()->m_Pos.x - RAW_X);
-					AimY(pChr->Core()->m_Pos.y - RAW_Y);
+					AimPos(pChr->GetPos());
 
 					m_IsClosestPolice = false;
 
@@ -850,7 +849,7 @@ void CDummyBlmapChillPolice::OnTick()
 					else
 						m_HelpMode = 1;
 
-					if (m_HelpMode == 1 && RAW_X > RAW(431) + 10)
+					if (m_HelpMode == 1 && X > 431 + RAW(10))
 						Left();
 					else if (m_HelpMode == 1 && X < 430)
 						Right();
@@ -913,9 +912,9 @@ void CDummyBlmapChillPolice::OnTick()
 					//NOTHING TO DO
 					//==============
 					//basic walk to destination
-					if (RAW_X < m_LovedX - 32)
+					if (GetPos().x < m_LovedX - 32)
 						Right();
-					else if (RAW_X > m_LovedX + 32 && X > 384)
+					else if (GetPos().x > m_LovedX + 32 && X > 384)
 						Left();
 
 					//change changing speed
@@ -987,7 +986,7 @@ void CDummyBlmapChillPolice::OnTick()
 			}
 
 			//jump over the police underground from entry to enty
-			if (RAW_Y > m_LovedY) //only if beloved place is an upper one
+			if (GetPos().y > m_LovedY) //only if beloved place is an upper one
 			{
 				if (X > 415 && X < 418) //right side
 				{
