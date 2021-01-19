@@ -823,8 +823,7 @@ void CDummyBlmapChillPolice::OnTick()
 						m_LovedY = RAW(430);
 					}
 					//aimbot on heuzeueu
-					AimX(pChr->Core()->m_Pos.x - RAW_X);
-					AimY(pChr->Core()->m_Pos.y - RAW_Y);
+					AimPos(pChr->GetPos());
 
 					m_IsClosestPolice = false;
 
