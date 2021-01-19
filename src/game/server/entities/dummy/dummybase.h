@@ -15,7 +15,7 @@ enum Dummymode
 	DUMMYMODE_V3_BLOCKER = -6,
 	DUMMYMODE_CHILLBLOCK5_RACER = 23,
 	DUMMYMODE_CHILLBLOCK5_BLOCKER = 29,
-	DUMMYMODE_CHILLBOCK5_POLICE = 31,
+	DUMMYMODE_CHILLBLOCK5_POLICE = 31,
 	DUMMYMODE_BLMAPCHILL_POLICE = 32,
 	DUMMYMODE_SHOP_DUMMY = 99,
 	DUMMYMODE_PLOT_SHOP_DUMMY = 98,
@@ -44,6 +44,7 @@ protected:
 
 	bool TicksPassed(int Ticks);
 
+	// Setters
 	void Left();
 	void Right();
 	void StopMoving();
@@ -55,6 +56,10 @@ protected:
 	void AimX(int TargetX);
 	void AimY(int TargetY);
 
+	void SetWeapon(int Weapon);
+	void Die();
+
+	// Getters
 	vec2 GetPos();
 	vec2 GetVel();
 
@@ -63,11 +68,21 @@ protected:
 	int Jumps();
 	bool IsGrounded();
 
-	void SetWeapon(int Weapon);
-	void Die();
+	int GetTargetX();
+	int GetTargetY();
+	int GetDirection();
+
+	//
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();
+
+	enum Directions
+	{
+		DIRECTION_LEFT = -1,
+		DIRECTION_NONE = 0,
+		DIRECTION_RIGHT = 1
+	};
 };
 
 #endif

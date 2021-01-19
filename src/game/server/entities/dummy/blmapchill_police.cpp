@@ -34,7 +34,7 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 void CDummyBlmapChillPolice::CheckStuck()
 {
 	bool IsStuck = false;
-	if (TicksPassed(400) && (m_pCharacter->Input()->m_Direction == 0 || GetVel().x == 0.0f))
+	if (TicksPassed(400) && (GetDirection() == DIRECTION_NONE || GetVel().x == 0.0f))
 	{
 		if (distance(m_LastStuckCheckPos, GetPos()) < 20 * 32)
 		{

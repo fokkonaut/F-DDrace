@@ -528,15 +528,6 @@ public:
 	int m_DummyBoredCounter;
 	int m_DummyBlockMode;
 
-	//dummymode 31 vars (ChillBlock5 police guard)
-	bool m_DummySpawnAnimation;
-	int m_DummySpawnAnimationDelay;
-	bool m_DummyPoliceGetSpeed;
-	bool m_DummyGotStuck;
-	bool m_DummyChillClosestPolice;
-	int m_DummyPoliceMode;
-	int m_DummyAttackMode;
-
 	//dummymode 23 vars
 	int m_DummyHelpBeforeHammerfly;
 	bool m_DummyHelpEmergency;

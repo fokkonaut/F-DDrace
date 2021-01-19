@@ -1660,6 +1660,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/dummy.cpp
   entities/dummy/blmapchill_police.cpp
   entities/dummy/blmapchill_police.h
+  entities/dummy/chillblock5_police.cpp
+  entities/dummy/chillblock5_police.h
   entities/dummy/dummybase.cpp
   entities/dummy/dummybase.h
   entities/dummy/house.cpp

@@ -5459,7 +5459,7 @@ void CGameContext::ConnectDefaultDummies()
 {
 	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
 	{
-		ConnectDummy(DUMMYMODE_CHILLBOCK5_POLICE);
+		ConnectDummy(DUMMYMODE_CHILLBLOCK5_POLICE);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_RACER);
