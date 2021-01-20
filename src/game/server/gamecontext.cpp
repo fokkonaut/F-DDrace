@@ -3213,7 +3213,7 @@ void CGameContext::OnInit()
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
-
+	m_pConfig->m_SvTestingCommands = 1;
 	m_GameUuid = RandomUuid();
 	Console()->SetTeeHistorianCommandCallback(CommandCallback, this);
 	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
