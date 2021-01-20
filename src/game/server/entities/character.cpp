@@ -1827,26 +1827,6 @@ void CCharacter::Snap(int SnappingClient)
 				pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		}
 	}
-	
-	if (SnappingClient == m_pPlayer->GetCID())
-	{
-		int Team = -1;
-		if (m_pPlayer->GetSpecMode() == SPEC_FLAGRED)
-			Team = TEAM_RED;
-		else if (m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
-			Team = TEAM_BLUE;
-
-		if (Team != -1)
-		{
-			CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Team];
-			if (pFlag && !pFlag->IsAtStand() && !pFlag->GetCarrier())
-			{
-				int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
-				int Amount = 10 - (DroppedSinceSeconds*10/Config()->m_SvFlagRespawnDropped);
-				pCharacter->m_Health = pCharacter->m_Armor = Amount;
-			}
-		}
-	}
 
 	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused())
 	{
