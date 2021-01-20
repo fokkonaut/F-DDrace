@@ -2955,6 +2955,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	{
 		return false;
 	}
+	m_aClients[ClientID].m_Sevendown = m_aClients[OrigID].m_Sevendown;
 
 	if(m_aClients[OrigID].m_Authed != AUTHED_NO)
 	{
