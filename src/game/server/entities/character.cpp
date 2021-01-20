@@ -1409,7 +1409,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 	// dont set a weapon if we dont have a tee for it
 	int Killer = m_Core.m_Killer.m_ClientID;
-	if (Killer != m_pPlayer->GetCID() && Weapon >= 0)
+	if (Killer != m_pPlayer->GetCID() && (Weapon >= 0 || Weapon == WEAPON_PLAYER))
 		Weapon = m_Core.m_Killer.m_Weapon;
 
 	// unset anyones telekinesis on us
