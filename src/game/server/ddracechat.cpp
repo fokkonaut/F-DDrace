@@ -1349,17 +1349,18 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Bank [%lld]", pAccount->m_Money);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->GetWalletMoney());
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-			// dont expose euros to other players than you
+			// dont expose some info to other players than you
 			if (ID == pResult->m_ClientID)
 			{
+				str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->GetWalletMoney());
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 				str_format(aBuf, sizeof(aBuf), "Euros [%d]", pAccount->m_Euros);
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			}
+
+			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} //fallthrough
 
 		case MINIGAME_BLOCK:
