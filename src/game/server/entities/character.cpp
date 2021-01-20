@@ -1810,16 +1810,21 @@ void CCharacter::Snap(int SnappingClient)
 	{
 		pCharacter->m_Health = m_Health;
 		pCharacter->m_Armor = m_Armor;
-		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
-			pCharacter->m_AmmoCount = m_FreezeTick + Config()->m_SvFreezeDelay * Server()->TickSpeed();
-		else if(GetActiveWeapon() == WEAPON_NINJA)
-			pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
-		else if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
+
+		if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
 		{
 			int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
 			if (GetActiveWeapon() == WEAPON_TASER)
 				Ammo /= 10;
 			pCharacter->m_AmmoCount = Ammo;
+		}
+
+		if (!Server()->IsSevendown(SnappingClient))
+		{
+			if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
+				pCharacter->m_AmmoCount = m_FreezeTick + Config()->m_SvFreezeDelay * Server()->TickSpeed();
+			else if(GetActiveWeapon() == WEAPON_NINJA)
+				pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		}
 	}
 
