@@ -180,7 +180,7 @@ void CFlag::Tick()
 
 	if (!GetCarrier() && !m_AtStand)
 	{
-		if (m_DropTick && Server()->Tick() > m_DropTick + Server()->TickSpeed() * 90)
+		if (m_DropTick && Config()->m_SvFlagRespawnDropped && Server()->Tick() > m_DropTick + Server()->TickSpeed() * Config()->m_SvFlagRespawnDropped)
 		{
 			Reset();
 			return;
