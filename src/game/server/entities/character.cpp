@@ -544,12 +544,26 @@ void CCharacter::FireWeapon()
 						int TargetCID = pTarget->GetPlayer()->GetCID();
 
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (10 minutes arrest)", Server()->ClientName(TargetCID));
+						int Minutes = clamp((int)(pTarget->GetPlayer()->m_EscapeTime / Server()->TickSpeed()) / 100, 10, 20);
+						int Corrupt = clamp(pTarget->GetPlayer()->m_SpawnBlockScore * 500, 500, 10000);
+						if (pTarget->GetPlayer()->GetAccID() >= ACC_START && GameServer()->m_Accounts[pTarget->GetPlayer()->GetAccID()].m_Money > Corrupt)
+						{
+							str_format(aBuf, sizeof(aBuf), "corrupted officer '%s'", Server()->ClientName(m_pPlayer->GetCID()));
+							pTarget->GetPlayer()->BankTransaction(-Corrupt, aBuf);
+							str_format(aBuf, sizeof(aBuf), "corrupted by gangster '%s'", Server()->ClientName(TargetCID));
+							m_pPlayer->BankTransaction(Corrupt, aBuf);
+							str_format(aBuf, sizeof(aBuf), "You paid %d money to '%s' to reduce your jailtime by 5 minutes", Corrupt, Server()->ClientName(m_pPlayer->GetCID()));
+							GameServer()->SendChatTarget(TargetCID, aBuf);
+							str_format(aBuf, sizeof(aBuf), "You got %d money from '%s' to reduce his jailtime by 5 minutes", Corrupt, Server()->ClientName(TargetCID));
+							GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+							Minutes -= 5;
+						}
+						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (%d minutes arrest)", Server()->ClientName(TargetCID), Minutes);
 						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 
-						str_format(aBuf, sizeof(aBuf), "You were arrested for 10 minutes by '%s'", Server()->ClientName(m_pPlayer->GetCID()));
+						str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes by '%s'", Minutes, Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChatTarget(TargetCID, aBuf);
-						GameServer()->JailPlayer(TargetCID, 600); // 10 minutes jail
+						GameServer()->JailPlayer(TargetCID, Minutes * 60); // minimum 5 maximum 20 minutes jail
 					}
 					else
 					{
