@@ -1628,41 +1628,6 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_Mode = pUnpacker->GetInt() ? CHAT_TEAM : CHAT_ALL;
 			pMsg->m_pMessage = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
 			pMsg->m_Target = -1;
-
-			if (pMsg->m_pMessage[0] == '/')
-			{
-				int WhisperOffset = -1;
-				int ConverseOffset = -1;
-
-				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "w ", 2) == 0) WhisperOffset = 3;
-				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "whisper ", 8) == 0) WhisperOffset = 9;
-				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "c ", 2) == 0) ConverseOffset = 3;
-				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "converse ", 9) == 0) ConverseOffset = 10;
-
-				if (WhisperOffset != -1)
-				{
-					char aWhisperMsg[256];
-					str_copy(aWhisperMsg, pMsg->m_pMessage + WhisperOffset, 256);
-					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &pMsg->m_Target);
-					pMsg->m_Mode = CHAT_WHISPER;
-				}
-				else if (ConverseOffset != -1)
-				{
-					if (pPlayer->m_LastWhisperTo >= 0)
-					{
-						char aWhisperMsg[256];
-						str_copy(aWhisperMsg, pMsg->m_pMessage + ConverseOffset, 256);
-						pMsg->m_pMessage = aWhisperMsg;
-						pMsg->m_Target = pPlayer->m_LastWhisperTo;
-						pMsg->m_Mode = CHAT_WHISPER;
-					}
-					else
-					{
-						SendChatTarget(ClientID, "You do not have an ongoing conversation. Whisper to someone to start one");
-						return 0; // dont process any further
-					}
-				}
-			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_SETSPECTATORMODE)
 		{
@@ -1841,18 +1806,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				if (pPlayer->m_LocalChat && GetPlayerChar(ClientID))
 					Mode = CHAT_LOCAL;
 			}
-
-			if (Mode != CHAT_WHISPER)
+			else
 			{
-				if (Config()->m_SvLolFilter && str_comp_nocase(pMsg->m_pMessage, "lol") == 0)
-				{
-					pMsg->m_pMessage = "I like turtles.";
-				}
-				else if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find_nocase(pMsg->m_pMessage, "@everyone"))
-				{
+				// @everyone mode
+				if (Server()->GetAuthedState(ClientID) >= Config()->m_SvAtEveryoneLevel && str_find_nocase(pMsg->m_pMessage, "@everyone"))
 					Mode = CHAT_ATEVERYONE;
-				}
-				else if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
+
+				// disallow pings
+				if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
@@ -1876,43 +1837,77 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 
+			if (str_comp_nocase(pMsg->m_pMessage, "lol") == 0 && Config()->m_SvLolFilter)
+				pMsg->m_pMessage = "I like turtles.";
+
 			if (pMsg->m_pMessage[0] == '/')
 			{
-				CPlayer *pPlayer = m_apPlayers[ClientID];
-				if (Config()->m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
-					&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + Server()->TickSpeed() > Server()->Tick()
-					&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + Server()->TickSpeed() > Server()->Tick()
-					&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + Server()->TickSpeed() > Server()->Tick()
-					&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + Server()->TickSpeed() > Server()->Tick()
-					)
-					return;
+				int WhisperOffset = -1;
+				int ConverseOffset = -1;
+				if (Server()->IsSevendown(ClientID))
+				{
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "w ", 2) == 0) WhisperOffset = 3;
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "whisper ", 8) == 0) WhisperOffset = 9;
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "c ", 2) == 0) ConverseOffset = 3;
+					if (str_comp_nocase_num(pMsg->m_pMessage + 1, "converse ", 9) == 0) ConverseOffset = 10;
+				}
 
-				int64 Now = Server()->Tick();
-				pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
-				pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
-
-				m_ChatResponseTargetID = ClientID;
-				Server()->RestrictRconOutput(ClientID);
-				Console()->SetFlagMask(CFGFLAG_CHAT);
-
-				int Authed = Server()->GetAuthedState(ClientID);
-				if (Authed)
-					Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+				if (WhisperOffset != -1)
+				{
+					int Target;
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + WhisperOffset, 256);
+					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &Target);
+					SendChat(ClientID, CHAT_WHISPER, Target, pMsg->m_pMessage, ClientID);
+				}
+				else if (ConverseOffset != -1)
+				{
+					char aWhisperMsg[256];
+					str_copy(aWhisperMsg, pMsg->m_pMessage + ConverseOffset, 256);
+					
+					if (pPlayer->m_LastWhisperTo >= 0)
+						SendChat(ClientID, CHAT_WHISPER, pPlayer->m_LastWhisperTo, aWhisperMsg, ClientID);
+					else
+						SendChatTarget(ClientID, "You do not have an ongoing conversation. Whisper to someone to start one");
+				}
 				else
-					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
-				Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
+				{
+					CPlayer *pPlayer = m_apPlayers[ClientID];
+					if (Config()->m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
+						&& pPlayer->m_LastCommands[0] && pPlayer->m_LastCommands[0] + Server()->TickSpeed() > Server()->Tick()
+						&& pPlayer->m_LastCommands[1] && pPlayer->m_LastCommands[1] + Server()->TickSpeed() > Server()->Tick()
+						&& pPlayer->m_LastCommands[2] && pPlayer->m_LastCommands[2] + Server()->TickSpeed() > Server()->Tick()
+						&& pPlayer->m_LastCommands[3] && pPlayer->m_LastCommands[3] + Server()->TickSpeed() > Server()->Tick()
+						)
+						return;
 
-				Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
-				// m_apPlayers[ClientID] can be NULL, if the player used a
-				// timeout code and replaced another client.
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
-				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+					int64 Now = Server()->Tick();
+					pPlayer->m_LastCommands[pPlayer->m_LastCommandPos] = Now;
+					pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
 
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-				Console()->SetFlagMask(CFGFLAG_SERVER);
-				m_ChatResponseTargetID = -1;
-				Server()->RestrictRconOutput(-1);
+					m_ChatResponseTargetID = ClientID;
+					Server()->RestrictRconOutput(ClientID);
+					Console()->SetFlagMask(CFGFLAG_CHAT);
+
+					int Authed = Server()->GetAuthedState(ClientID);
+					if (Authed)
+						Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+					else
+						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+					Console()->SetPrintOutputLevel(m_ChatPrintCBIndex, 0);
+
+					Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
+					// m_apPlayers[ClientID] can be NULL, if the player used a
+					// timeout code and replaced another client.
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+
+					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+					Console()->SetFlagMask(CFGFLAG_SERVER);
+					m_ChatResponseTargetID = -1;
+					Server()->RestrictRconOutput(-1);
+				}
 			}
 			else if (!pPlayer->m_ShowName)
 			{
