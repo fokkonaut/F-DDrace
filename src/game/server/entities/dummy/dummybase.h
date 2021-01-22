@@ -83,6 +83,27 @@ protected:
 		DIRECTION_NONE = 0,
 		DIRECTION_RIGHT = 1
 	};
+
+	enum SkinColor
+	{
+		COLOR_RED,
+		COLOR_ORANGE,
+		COLOR_YELLOW,
+		COLOR_GREEN,
+		COLOR_CYAN,
+		COLOR_CYAN_BLUE,
+		COLOR_BLUE,
+		COLOR_BLUE_MAGENTA,
+		COLOR_MAGENTA,
+
+		COLOR_BLACK,
+		COLOR_WHITE,
+
+		NUM_COLORS,
+	};
+
+	SkinColor m_DebugColor;
+	void DebugColor(SkinColor Color);
 };
 
 #endif
