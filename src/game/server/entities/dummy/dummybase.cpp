@@ -50,6 +50,7 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_pCharacter = pChr;
 	m_pPlayer = pChr->GetPlayer();
 	m_Mode = Mode;
+	m_DebugColor = NUM_COLORS;
 }
 
 void CDummyBase::Tick()
@@ -123,4 +124,35 @@ void CDummyBase::AvoidDeath()
 		Left();
 	else if (X-5 <= -200)
 		Right();
+}
+
+void CDummyBase::DebugColor(SkinColor Color)
+{
+	if (m_DebugColor == Color)
+		return;
+	if (Server()->Tick() % 6 != 0)
+		return;
+	m_DebugColor = Color;
+
+	CTeeInfo Info = m_pPlayer->m_CurrentInfo.m_TeeInfos;
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		int BaseColor = (Color*30) * 0x010000;
+		int c = 0xff32;
+		if (Color == COLOR_BLACK)
+			c = BaseColor = 0;
+		else if (Color == COLOR_WHITE)
+			c = BaseColor = 255;
+		if (p == SKINPART_MARKING)
+			c *= -256;
+		Info.m_aUseCustomColors[p] = 1;
+		Info.m_aSkinPartColors[p] = BaseColor + c;
+
+		Info.m_Sevendown.m_UseCustomColor = 1;
+		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = BaseColor + c;
+	}
+
+	// only send updates to people close to you, to reduce network traffic
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		GameServer()->SendSkinChange(Info, m_pPlayer->GetCID(), i);
 }
