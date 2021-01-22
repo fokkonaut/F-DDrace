@@ -1496,9 +1496,9 @@ void CPlayer::RainbowTick()
 		int Color = 0xff32;
 		if (p == SKINPART_MARKING)
 			Color *= -256;
+
 		Info.m_aUseCustomColors[p] = 1;
 		Info.m_aSkinPartColors[p] = BaseColor + Color;
-
 		Info.m_Sevendown.m_UseCustomColor = 1;
 		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = BaseColor + Color;
 	}

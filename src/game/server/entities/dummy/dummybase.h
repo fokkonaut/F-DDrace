@@ -72,11 +72,6 @@ protected:
 	int GetTargetY();
 	int GetDirection();
 
-	//
-	void AvoidTile(int Tile);
-	void AvoidFreeze();
-	void AvoidDeath();
-
 	enum Directions
 	{
 		DIRECTION_LEFT = -1,
@@ -84,6 +79,12 @@ protected:
 		DIRECTION_RIGHT = 1
 	};
 
+	//
+	void AvoidTile(int Tile);
+	void AvoidFreeze();
+	void AvoidDeath();
+
+	// Debug
 	enum SkinColor
 	{
 		COLOR_RED,
@@ -98,12 +99,10 @@ protected:
 
 		COLOR_BLACK,
 		COLOR_WHITE,
-
-		NUM_COLORS,
 	};
 
-	SkinColor m_DebugColor;
-	void DebugColor(SkinColor Color);
+	int m_DebugColor;
+	void DebugColor(int Color);
 };
 
 #endif
