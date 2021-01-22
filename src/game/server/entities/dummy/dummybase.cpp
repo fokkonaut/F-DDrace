@@ -128,9 +128,15 @@ void CDummyBase::AvoidDeath()
 
 void CDummyBase::DebugColor(int DebugColor)
 {
-	if (m_DebugColor == DebugColor)
+	if (DebugColor == m_DebugColor)
 		return;
 	m_DebugColor = DebugColor;
+
+	if (DebugColor == -1)
+	{
+		m_pPlayer->ResetSkin();
+		return;
+	}
 
 	CTeeInfo Info = m_pPlayer->m_CurrentInfo.m_TeeInfos;
 	for (int p = 0; p < NUM_SKINPARTS; p++)
