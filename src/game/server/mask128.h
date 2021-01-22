@@ -14,6 +14,8 @@ struct Mask128
 		m_aMask[1] = -1LL;
 	}
 
+	Mask128(const Mask128&) = default;
+
 	Mask128(int ClientID)
 	{
 		m_aMask[0] = 0;
