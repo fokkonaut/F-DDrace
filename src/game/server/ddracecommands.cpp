@@ -834,6 +834,15 @@ void CGameContext::ConUnDrawEditor(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_DRAW_EDITOR, true);
 }
 
+void CGameContext::ConSetJumps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr)
+		pChr->SetCoreJumps(pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 2);
+}
+
 void CGameContext::ConInfiniteJumps(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

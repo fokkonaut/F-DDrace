@@ -873,6 +873,7 @@ private:
 	static void ConInvisible(IConsole::IResult* pResult, void* pUserData);
 	static void ConHookPower(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConSetJumps(IConsole::IResult* pResult, void* pUserData);
 	static void ConInfiniteJumps(IConsole::IResult* pResult, void* pUserData);
 	static void ConEndlessHook(IConsole::IResult* pResult, void* pUserData);
 	static void ConJetpack(IConsole::IResult* pResult, void* pUserData);
