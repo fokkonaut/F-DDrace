@@ -709,22 +709,8 @@ void CDummyBlmapChillPolice::OnTick()
 		if (X > 323 && Y < 408)
 			LeftAntiStuck();
 		// police area entrance tunnel (left side)
-		if (X > 316 && X < 366 && Y > 416)
-		{
-			// jump through freeze if one is close or go back if no vel
-			for (int i = 10; i < 160; i+=20)
-			{
-				if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE)
-				{
-					if (GetVel().y > 1.1f)
-						Left();
-
-					if (IsGrounded() && GetVel().x > 8.8f)
-						Jump();
-					break;
-				}
-			}
-		}
+		if (X > 316 && X < 370 && Y > 416)
+			RightThroughFreeze();
 		/* * * * * * * *
 		 * police area *
 		 * * * * * * * */
