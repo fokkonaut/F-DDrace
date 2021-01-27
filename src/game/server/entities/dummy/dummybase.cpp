@@ -126,6 +126,28 @@ void CDummyBase::AvoidDeath()
 		Right();
 }
 
+void CDummyBase::LeftAntiStuck()
+{
+	Left();
+	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 60, RAW_Y), 0, 0))
+	{
+		Jump(random(5));
+		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 10, RAW_Y - 60), 0, 0))
+			Right();
+	}
+}
+
+void CDummyBase::RightAntiStuck()
+{
+	Right();
+	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 60, RAW_Y), 0, 0))
+	{
+		Jump(random(5));
+		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 10, RAW_Y + 60), 0, 0))
+			Left();
+	}
+}
+
 void CDummyBase::DebugColor(int DebugColor)
 {
 	if (DebugColor == m_DebugColor)

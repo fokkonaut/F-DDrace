@@ -84,6 +84,9 @@ protected:
 	void AvoidFreeze();
 	void AvoidDeath();
 
+	void RightAntiStuck();
+	void LeftAntiStuck();
+
 	// Debug
 	enum SkinColor
 	{
