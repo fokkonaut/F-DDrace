@@ -126,6 +126,126 @@ void CDummyBase::AvoidDeath()
 		Right();
 }
 
+void CDummyBase::RightAntiStuck()
+{
+	Right();
+	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 60, RAW_Y), 0, 0))
+	{
+		Jump(random(5));
+		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 10, RAW_Y + 60), 0, 0))
+			Left();
+	}
+}
+
+void CDummyBase::LeftAntiStuck()
+{
+	Left();
+	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 60, RAW_Y), 0, 0))
+	{
+		Jump(random(5));
+		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 10, RAW_Y - 60), 0, 0))
+			Right();
+	}
+}
+
+void CDummyBase::RightThroughFreeze()
+{
+	if(m_pCharacter->m_FreezeTime)
+	{
+		m_RtfGetSpeed = 0;
+		return;
+	}
+	Right();
+	if (m_RtfGetSpeed)
+	{
+		Left();
+		if (GameServer()->Collision()->GetTileRaw(RAW_X + m_RtfGetSpeed, RAW_Y) == TILE_FREEZE ||
+			GameServer()->Collision()->GetTileRaw(RAW_X + m_RtfGetSpeed, RAW_Y + 16) == TILE_FREEZE)
+			return;
+		m_RtfGetSpeed = 0;
+	}
+	// jump through freeze if one is close or go back if no vel
+	for (int i = 5; i < 160; i+=5)
+	{
+		if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE ||
+			GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y + 16) == TILE_FREEZE)
+		{
+			if (GetVel().y > 1.1f)
+			{
+				if (GameServer()->Collision()->GetTileRaw(RAW_X - 32, RAW_Y) != TILE_FREEZE &&
+					GameServer()->Collision()->GetTileRaw(RAW_X - 32, RAW_Y + 16) != TILE_FREEZE)
+					Left();
+			}
+			if (IsGrounded() && GetVel().x > 8.8f)
+				Jump(TicksPassed(2));
+			if (i < 22 && GetVel().x < 5.5f)
+			{
+				int k;
+				for (k = 5; k < 160; k+=5)
+				{
+					if (GameServer()->Collision()->GetTileRaw(RAW_X - k, RAW_Y) == TILE_FREEZE ||
+						GameServer()->Collision()->GetTileRaw(RAW_X - k, RAW_Y + 16) == TILE_FREEZE)
+					{
+						break;
+					}
+				}
+				m_RtfGetSpeed = k < 80 ? 20 : 40;
+				Left();
+			}
+			break;
+		}
+	}
+}
+
+void CDummyBase::LeftThroughFreeze()
+{
+	if(m_pCharacter->m_FreezeTime)
+	{
+		m_LtfGetSpeed = 0;
+		return;
+	}
+	Left();
+	if (m_LtfGetSpeed)
+	{
+		Right();
+		if (GameServer()->Collision()->GetTileRaw(RAW_X - m_LtfGetSpeed, RAW_Y) == TILE_FREEZE ||
+			GameServer()->Collision()->GetTileRaw(RAW_X - m_LtfGetSpeed, RAW_Y + 16) == TILE_FREEZE)
+			return;
+		m_LtfGetSpeed = 0;
+	}
+	// jump through freeze if one is close or go back if no vel
+	for (int i = 5; i < 160; i+=5)
+	{
+		if (GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y) == TILE_FREEZE ||
+			GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y + 16) == TILE_FREEZE)
+		{
+			if (GetVel().y > 1.1f)
+			{
+				if (GameServer()->Collision()->GetTileRaw(RAW_X + 32, RAW_Y) != TILE_FREEZE &&
+					GameServer()->Collision()->GetTileRaw(RAW_X + 32, RAW_Y + 16) != TILE_FREEZE)
+					Right();
+			}
+			if (IsGrounded() && GetVel().x < -8.8f)
+				Jump(TicksPassed(2));
+			if (i < 22 && GetVel().x > -5.5f)
+			{
+				int k;
+				for (k = 5; k < 160; k+=5)
+				{
+					if (GameServer()->Collision()->GetTileRaw(RAW_X + k, RAW_Y) == TILE_FREEZE ||
+						GameServer()->Collision()->GetTileRaw(RAW_X + k, RAW_Y + 16) == TILE_FREEZE)
+					{
+						break;
+					}
+				}
+				m_LtfGetSpeed = k < 80 ? 20 : 40;
+				Right();
+			}
+			break;
+		}
+	}
+}
+
 void CDummyBase::DebugColor(int DebugColor)
 {
 	if (DebugColor == m_DebugColor)

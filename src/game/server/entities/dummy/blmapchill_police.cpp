@@ -340,19 +340,8 @@ void CDummyBlmapChillPolice::OnTick()
 		// change to gun
 		if (TicksPassed(3) && X > 497)
 			SetWeapon(WEAPON_GUN);
-		Left();
-		if (X > 509 && Y > 62) // if bot gets under the table he will go right and jump out of the gap under the table
-		{
-			Right();
-			if (X > 511.5)
-			{
-				if (TicksPassed(10))
-					Jump();
-			}
-		}
-		// jump over chairs
-		else if (TicksPassed(10) && X > 505)
-			Jump();
+		// if bot gets under the table he will go right and jump out of the gap under the table
+		LeftAntiStuck();
 		// jump out of the chair room
 		if (X < 497 && X > 496)
 			Jump();
@@ -397,7 +386,7 @@ void CDummyBlmapChillPolice::OnTick()
 				m_FailedAttempts++;
 		}
 		// somebody is blocking flappy intentionally
-		if (m_FailedAttempts > 4 && X > 452)
+		if (m_FailedAttempts > 4 && X > 452 && X < 505)
 		{
 			// don't aim for edge and rather go full speed to bypass the blocker
 			Left();
@@ -718,24 +707,10 @@ void CDummyBlmapChillPolice::OnTick()
 		}
 		// do not enter in pvp area or bank
 		if (X > 323 && Y < 408)
-			Left();
+			LeftAntiStuck();
 		// police area entrance tunnel (left side)
-		if (X > 316 && X < 366 && Y > 416)
-		{
-			// jump through freeze if one is close or go back if no vel
-			for (int i = 10; i < 160; i+=20)
-			{
-				if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE)
-				{
-					if (GetVel().y > 1.1f)
-						Left();
-
-					if (IsGrounded() && GetVel().x > 8.8f)
-						Jump();
-					break;
-				}
-			}
-		}
+		if (X > 316 && X < 370 && Y > 416)
+			RightThroughFreeze();
 		/* * * * * * * *
 		 * police area *
 		 * * * * * * * */

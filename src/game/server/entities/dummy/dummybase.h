@@ -34,6 +34,9 @@ private:
 	virtual void OnTick() {}
 	int m_Mode;
 
+	int m_RtfGetSpeed;
+	int m_LtfGetSpeed;
+
 protected:
 	CGameContext *GameServer() const;
 	CGameWorld *GameWorld() const;
@@ -83,6 +86,32 @@ protected:
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();
+
+	/*
+		Function: RightAntiStuck
+
+		Walks right and trys to avoid getting stuck in simple obstacles
+		can jump over collision in the way and go back if there is collision on top
+	*/
+	void RightAntiStuck();
+	/*
+		Function: LeftAntiStuck
+
+		see RightAntiStuck
+	*/
+	void LeftAntiStuck();
+	/*
+		Function: RightThroughFreeze
+
+		Walks right and jumps through simple freeze walls
+	*/
+	void RightThroughFreeze();
+	/*
+		Function: LeftThroughFreeze
+
+		Walks left and jumps through simple freeze walls
+	*/
+	void LeftThroughFreeze();
 
 	// Debug
 	enum SkinColor
