@@ -83,10 +83,17 @@ protected:
 	};
 
 	//
+	bool IsFreezeTile(int _X, int _Y);
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();
 
+	/*
+		Function: AvoidFreezeWeapons
+
+		Avoid freeze floor and roof using jumps and grenade
+	*/
+	void AvoidFreezeWeapons();
 	/*
 		Function: RightAntiStuck
 

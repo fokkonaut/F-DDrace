@@ -1007,9 +1007,16 @@ void CDummyBlmapChillPolice::OnTick()
 		/* * * * * * * *
 		 * police area *
 		 * * * * * * * */
-		if (X > 380 && X < 450 && Y < 450 && Y > 380)
+		if (X > 363 && X < 450 && Y < 450 && Y > 380)
 		{
-			OldPoliceMoves();
+			// if (m_OldPoliceMoves)
+			// 	OldPoliceMoves();
+			// else
+			// 	NewPoliceMoves();
+			// if (TicksPassed(200))
+			// 	if (random(200))
+			// 		m_OldPoliceMoves ^= true;
+			NewPoliceMoves();
 		}
 	}
 	else
@@ -1018,4 +1025,10 @@ void CDummyBlmapChillPolice::OnTick()
 		if (CheckStuck())
 			return;
 	}
+}
+
+void CDummyBlmapChillPolice::NewPoliceMoves()
+{
+	AvoidFreeze();
+	AvoidFreezeWeapons();
 }

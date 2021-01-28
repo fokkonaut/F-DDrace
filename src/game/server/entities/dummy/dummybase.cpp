@@ -66,6 +66,14 @@ void CDummyBase::Tick()
 	OnTick();
 }
 
+bool CDummyBase::IsFreezeTile(int _X, int _Y)
+{
+	return GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_FREEZE ||
+		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_FREEZE ||
+		GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_DFREEZE ||
+		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_DFREEZE;
+}
+
 void CDummyBase::AvoidTile(int Tile)
 {
 	#define IS_TILE(x, y) (GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y)) == Tile || GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y)) == Tile)
@@ -124,6 +132,48 @@ void CDummyBase::AvoidDeath()
 		Left();
 	else if (X-5 <= -200)
 		Right();
+}
+
+void CDummyBase::AvoidFreezeWeapons()
+{
+	SetWeapon(WEAPON_GRENADE);
+	// avoid hitting freeze roof
+	if (GetVel().y < -0.05)
+	{
+		int distY = RAW_Y + GetVel().y * 4 - 40;
+		if (!GameServer()->Collision()->IntersectLine(GetPos(), vec2(GetPos().x, distY), 0, 0) && 
+			IsFreezeTile(RAW_X, distY))
+		{
+			Aim(GetVel().x, -200);
+			Fire();
+		}
+	}
+	// avoid hitting freeze floor
+	else if (GetVel().y > 0.05)
+	{
+		int distY = RAW_Y + GetVel().y * 3 + 20;
+		if (!GameServer()->Collision()->IntersectLine(GetPos(), vec2(GetPos().x, distY), 0 , 0) && 
+			IsFreezeTile(RAW_X, distY))
+		{
+			Aim(GetVel().x, 200);
+			Fire();
+			Jump();
+		}
+	}
+	// jump over freeze when flying into it from the right side
+	if (GetVel().x < -2.2f && (IsGrounded() || GetVel().y > 2.2f))
+	{
+		if (IsFreezeTile(RAW_X - 32, RAW_Y) ||
+			(GetVel().y > 2.2f && IsFreezeTile(RAW_X - 32, RAW_Y + 30)))
+			Jump();
+	}
+	// jump over freeze when flying into it from the left side
+	if (GetVel().x > 2.2f && (IsGrounded() || GetVel().y > 2.2f))
+	{
+		if (IsFreezeTile(RAW_X + 32, RAW_Y) ||
+			(GetVel().y < -2.2f && IsFreezeTile(RAW_X + 32, RAW_Y + 30)))
+			Jump();
+	}
 }
 
 void CDummyBase::RightAntiStuck()
