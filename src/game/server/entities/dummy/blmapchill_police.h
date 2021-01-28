@@ -13,7 +13,8 @@ public:
 	virtual void OnTick();
 
 private:
-	void CheckStuck();
+	bool CheckStuck();
+	void OldPoliceMoves();
 
 	int m_LovedX;
 	int m_LovedY;

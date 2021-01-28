@@ -167,7 +167,11 @@ void CDummyBase::RightThroughFreeze()
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE ||
+		int TileRight = GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y);
+		// ignore freeze behind collision
+		if (TileRight == TILE_SOLID || TileRight == TILE_NOHOOK)
+			break;
+		else if (TileRight == TILE_FREEZE ||
 			GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y + 16) == TILE_FREEZE)
 		{
 			if (GetVel().y > 1.1f)
@@ -216,7 +220,11 @@ void CDummyBase::LeftThroughFreeze()
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		if (GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y) == TILE_FREEZE ||
+		int TileLeft = GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y);
+		// ignore freeze behind collision
+		if (TileLeft == TILE_SOLID || TileLeft == TILE_NOHOOK)
+			break;
+		else if (TileLeft == TILE_FREEZE ||
 			GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y + 16) == TILE_FREEZE)
 		{
 			if (GetVel().y > 1.1f)
