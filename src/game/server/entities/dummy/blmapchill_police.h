@@ -16,6 +16,7 @@ private:
 	bool CheckStuck();
 	void OldPoliceMoves();
 	void NewPoliceMoves();
+	void HelpOfficerRight();
 
 	int m_LovedX;
 	int m_LovedY;
@@ -27,8 +28,8 @@ private:
 	int m_FailedAttempts;
 	int m_Confused;
 	int m_Sad;
-	bool m_OldPoliceMoves;
 
+	bool m_OldPoliceMoves;
 	bool m_IsHelpHook;
 	bool m_IsClosestPolice;
 	bool m_DidRocketjump;

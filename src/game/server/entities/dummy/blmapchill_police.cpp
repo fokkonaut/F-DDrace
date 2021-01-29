@@ -1029,6 +1029,81 @@ void CDummyBlmapChillPolice::OnTick()
 
 void CDummyBlmapChillPolice::NewPoliceMoves()
 {
+	if (TicksPassed(30))
+	{
+		m_WantedWeapon = WEAPON_GUN;
+		Aim(100, 10);
+	}
 	AvoidFreeze();
 	AvoidFreezeWeapons();
+	// freeze pit on left side of police
+	if (X > 366 && X < 382 && !IsGrounded())
+	{
+		if (GetVel().x < -6.6f && X < 372)
+			Left();
+		else
+			Right();
+	}
+	// freeze pit on right side of police
+	if (X > 430)
+		Left();
+	HelpOfficerRight();
+	if (m_WantedWeapon != -1)
+		SetWeapon(m_WantedWeapon);
+}
+
+void CDummyBlmapChillPolice::HelpOfficerRight()
+{
+	// check if officer needs help
+	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
+	if (pChr && pChr->IsAlive())
+	{
+		if (X < 422)
+		{
+			// fallen down
+			if (Y > 437)
+			{
+				m_WantedWeapon = WEAPON_GRENADE;
+				if (X < 399)
+					Right();
+				else if (X > 402 && X < 406)
+					Right();
+				else if (X > 412 * 32)
+					Left();
+				else
+				{
+					Aim(0, 200);
+					Fire();
+					if (IsGrounded())
+						Jump(random(3));
+				}
+			}
+			// when high enough stay there and move to the right freeze pit
+			else
+			{
+				Right();
+				if (GetVel().y > 2.2f && Y > 431)
+					Jump();
+			}
+		}
+		else
+		{
+			AimPos(pChr->GetPos());
+			RightThroughFreeze();
+			if (X > 441)
+				Left();
+			if (Jumped() > 2)
+				Left();
+			Hook(0);
+			float DistToOfficer = distance(GetPos(), pChr->GetPos());
+			if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
+				Hook(1);
+			if (HookState() == HOOK_GRABBED)
+				Left();
+			if (TicksPassed(30))
+				m_WantedWeapon = WEAPON_HAMMER;
+			if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+				Fire();
+		}
+	}
 }

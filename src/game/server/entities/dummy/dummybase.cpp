@@ -51,6 +51,7 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_pPlayer = pChr->GetPlayer();
 	m_Mode = Mode;
 	m_DebugColor = -1;
+	m_WantedWeapon = -1;
 }
 
 void CDummyBase::Tick()
@@ -136,7 +137,6 @@ void CDummyBase::AvoidDeath()
 
 void CDummyBase::AvoidFreezeWeapons()
 {
-	SetWeapon(WEAPON_GRENADE);
 	// avoid hitting freeze roof
 	if (GetVel().y < -0.05)
 	{
@@ -146,6 +146,9 @@ void CDummyBase::AvoidFreezeWeapons()
 		{
 			Aim(GetVel().x, -200);
 			Fire();
+			if (TicksPassed(10))
+				SetWeapon(WEAPON_GRENADE);
+			m_WantedWeapon = WEAPON_GRENADE;
 		}
 	}
 	// avoid hitting freeze floor
@@ -157,6 +160,9 @@ void CDummyBase::AvoidFreezeWeapons()
 		{
 			Aim(GetVel().x, 200);
 			Fire();
+			if (TicksPassed(10))
+				SetWeapon(WEAPON_GRENADE);
+			m_WantedWeapon = WEAPON_GRENADE;
 			Jump();
 		}
 	}

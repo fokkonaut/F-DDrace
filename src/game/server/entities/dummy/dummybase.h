@@ -82,6 +82,8 @@ protected:
 		DIRECTION_RIGHT = 1
 	};
 
+	int m_WantedWeapon;
+
 	//
 	bool IsFreezeTile(int _X, int _Y);
 	void AvoidTile(int Tile);
