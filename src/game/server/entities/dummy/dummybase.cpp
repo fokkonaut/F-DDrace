@@ -14,6 +14,7 @@ vec2 CDummyBase::GetPos() { return m_pCharacter->Core()->m_Pos; }
 vec2 CDummyBase::GetVel() { return m_pCharacter->Core()->m_Vel; }
 int CDummyBase::HookState() { return m_pCharacter->Core()->m_HookState; }
 int CDummyBase::Jumped() { return m_pCharacter->Core()->m_Jumped; }
+int CDummyBase::JumpedTotal() { return m_pCharacter->Core()->m_JumpedTotal; }
 int CDummyBase::Jumps() { return m_pCharacter->Core()->m_Jumps; }
 bool CDummyBase::IsGrounded() { return m_pCharacter->IsGrounded(); }
 int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
@@ -25,6 +26,7 @@ void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
 void CDummyBase::StopMoving() { m_pCharacter->Input()->m_Direction = DIRECTION_NONE; }
+void CDummyBase::SetDirection(int Direction) { m_pCharacter->Input()->m_Direction = Direction; }
 void CDummyBase::Hook(bool Stroke) { m_pCharacter->Input()->m_Hook = Stroke; }
 void CDummyBase::Jump(bool Stroke) { m_pCharacter->Input()->m_Jump = Stroke; }
 void CDummyBase::Aim(int TargetX, int TargetY) { AimX(TargetX); AimY(TargetY); }
@@ -65,6 +67,13 @@ void CDummyBase::Tick()
 
 	// Then start controlling
 	OnTick();
+}
+
+bool CDummyBase::IsPolice(CCharacter *pChr)
+{
+	if (!pChr)
+		return false;
+	return GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel || pChr->m_PoliceHelper;
 }
 
 bool CDummyBase::IsFreezeTile(int _X, int _Y)
@@ -159,10 +168,15 @@ void CDummyBase::AvoidFreezeWeapons()
 			IsFreezeTile(RAW_X, distY))
 		{
 			Aim(GetVel().x, 200);
-			Fire();
-			if (TicksPassed(10))
-				SetWeapon(WEAPON_GRENADE);
-			m_WantedWeapon = WEAPON_GRENADE;
+			if (JumpedTotal() == Jumps() - 1)
+			{
+				Fire();
+				// TODO: priotize weapons the bot actually has
+				int PanicWeapon = random(2) ? WEAPON_GRENADE : WEAPON_LASER;
+				if (TicksPassed(10))
+					SetWeapon(PanicWeapon);
+				m_WantedWeapon = PanicWeapon;
+			}
 			Jump();
 		}
 	}

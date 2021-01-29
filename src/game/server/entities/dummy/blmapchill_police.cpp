@@ -1047,63 +1047,203 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 	// freeze pit on right side of police
 	if (X > 430)
 		Left();
-	HelpOfficerRight();
+	if (!HelpOfficerRight())
+		HelpOfficerLeft();
 	if (m_WantedWeapon != -1)
 		SetWeapon(m_WantedWeapon);
 }
 
-void CDummyBlmapChillPolice::HelpOfficerRight()
+void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 {
-	// check if officer needs help
-	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
-	if (pChr && pChr->IsAlive())
+	// fallen down
+	if (Y > 437)
 	{
-		if (X < 422)
-		{
-			// fallen down
-			if (Y > 437)
-			{
-				m_WantedWeapon = WEAPON_GRENADE;
-				if (X < 399)
-					Right();
-				else if (X > 402 && X < 406)
-					Right();
-				else if (X > 412 * 32)
-					Left();
-				else
-				{
-					Aim(0, 200);
-					Fire();
-					if (IsGrounded())
-						Jump(random(3));
-				}
-			}
-			// when high enough stay there and move to the right freeze pit
-			else
-			{
-				Right();
-				if (GetVel().y > 2.2f && Y > 431)
-					Jump();
-			}
-		}
+		m_WantedWeapon = WEAPON_GRENADE;
+		if (X < 399)
+			Right();
+		else if (X > 402 && X < 406)
+			Right();
+		else if (X > 412)
+			Left();
 		else
 		{
-			AimPos(pChr->GetPos());
-			RightThroughFreeze();
-			if (X > 441)
-				Left();
-			if (Jumped() > 2)
-				Left();
-			Hook(0);
-			float DistToOfficer = distance(GetPos(), pChr->GetPos());
-			if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
-				Hook(1);
-			if (HookState() == HOOK_GRABBED)
-				Left();
-			if (TicksPassed(30))
-				m_WantedWeapon = WEAPON_HAMMER;
-			if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+			Aim(0, 200);
+			Fire();
+			if (IsGrounded())
+				Jump(random(3));
+		}
+	}
+	// when high enough stay there and move on the upper area
+	else
+	{
+		SetDirection(Direction);
+		if (GetVel().y > 2.2f && Y > 431 && X > 400 && X < 417)
+			Jump();
+		// grenade boosts floor
+		if (IsGrounded())
+		{
+			Aim(100 * -Direction, 20);
+			if (TicksPassed(10))
+				m_WantedWeapon = WEAPON_GRENADE;
+			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
+				Fire();
+		}
+		// grenade boosts roof
+		if (GetVel().y < 0.01 && GameServer()->Collision()->GetTileRaw(GetPos().x, GetPos().y - 32) == TILE_NOHOOK)
+		{
+			Aim(100 * -Direction, -25);
+			if (TicksPassed(10))
+				m_WantedWeapon = WEAPON_GRENADE;
+			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
 				Fire();
 		}
 	}
+}
+
+bool CDummyBlmapChillPolice::HelpOfficerLeft()
+{
+	// check if officer needs help
+	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 10);
+	if (!pChr || !pChr->IsAlive())
+		return true;
+	if (X > 383)
+		WalkPoliceLeft();
+	else
+	{
+		AimPos(pChr->GetPos());
+		LeftThroughFreeze();
+		if (JumpedTotal() > 2)
+			Right();
+		Hook(0);
+		float DistToOfficer = distance(GetPos(), pChr->GetPos());
+		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
+			Hook(1);
+		if (HookState() == HOOK_GRABBED)
+		{
+			Right();
+			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
+			CCharacter *pCharHooked = pHooked->GetCharacter();
+			if (pCharHooked)
+			{
+				// hooked a non police tee -> try to get rid of it
+				if (!IsPolice(pCharHooked))
+				{
+					// hook random to the left
+					Left();
+					if (JumpedTotal() > 3)
+						Hook(0);
+					if (pCharHooked->Core()->m_Vel.x < -8.8f)
+						Hook(0);
+				}
+			}
+		}
+		if (JumpedTotal() > 3)
+			Right();
+		if (X < 366)
+			Right();
+		if (X < 369)
+		{
+			CCharacter *pClosestChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID());
+			// if on left side and closes char is not police
+			// make sure that boi is blocked first otherwise he is just in the way
+			if (!IsPolice(pClosestChr) && !pClosestChr->m_IsFrozen)
+			{
+				AimPos(pClosestChr->GetPos());
+				// push into freeze when both grounded
+				if (IsGrounded() && pClosestChr->IsGrounded())
+				{
+					// avoid yeeting away when pushing
+					Jump(0);
+					if (pClosestChr->GetPos().x < RAW_X)
+						Left();
+					else
+						Right();
+				}
+				// if enemy other side of freeze just hook em in
+				if (pClosestChr->GetPos().x < RAW(363))
+				{
+					Hook(1);
+					Right();
+					if (X > 367)
+						Left();
+				}
+				// make sure hook does not get stuck
+				if (HookState() != HOOK_FLYING && HookState() != HOOK_GRABBED && TicksPassed(60))
+					Hook(0);
+				// do not walk into left freeze
+				if (X < 364)
+					Right();
+			}
+			// release hook on enemy when he is frozen on the left side
+			if (!IsPolice(pClosestChr) && pClosestChr->m_IsFrozen)
+				if (pClosestChr->GetPos().x < RAW(364))
+					if (m_pCharacter->Core()->m_HookedPlayer == pClosestChr->GetPlayer()->GetCID())
+						Hook(0);
+		}
+		if (TicksPassed(30))
+			m_WantedWeapon = WEAPON_HAMMER;
+		if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+			Fire();
+	}
+	return false;
+}
+
+bool CDummyBlmapChillPolice::HelpOfficerRight()
+{
+	// check if officer needs help
+	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
+	if (!pChr || !pChr->IsAlive())
+		return false;
+	if (X < 422)
+		WalkPoliceRight();
+	else
+	{
+		AimPos(pChr->GetPos());
+		RightThroughFreeze();
+		if (JumpedTotal() > 2)
+			Left();
+		Hook(0);
+		float DistToOfficer = distance(GetPos(), pChr->GetPos());
+		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
+			Hook(1);
+		if (HookState() == HOOK_GRABBED)
+		{
+			Left();
+			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
+			CCharacter *pCharHooked = pHooked->GetCharacter();
+			if (pCharHooked)
+			{
+				// hooked a non police tee -> try to get rid of it
+				if (!IsPolice(pCharHooked))
+				{
+					// officer on right side -> hook random to the left
+					if (pChr->GetPos().x > RAW(442))
+					{
+						if (!pCharHooked->m_IsFrozen)
+							Hook(0);
+					}
+					// officer on left side -> hook random to the right
+					else
+					{
+						Right();
+						if (JumpedTotal() > 3)
+							Hook(0);
+						if (pCharHooked->Core()->m_Vel.x > 8.8f)
+							Hook(0);
+					}
+				}
+			}
+		}
+		if (JumpedTotal() > 3)
+			Left();
+		if (X > 441)
+			Left();
+		if (TicksPassed(30))
+			m_WantedWeapon = WEAPON_HAMMER;
+		if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+			Fire();
+	}
+	return true;
 }

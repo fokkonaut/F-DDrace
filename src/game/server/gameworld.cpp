@@ -605,49 +605,54 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int Col
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
 			continue;
 
-		if (Mode == 1) //BlmapChill police freeze hole
+		if (Mode == 1) // BlmapChill police freeze hole right side
 		{
 			if ((!GameServer()->m_Accounts[p->GetPlayer()->GetAccID()].m_PoliceLevel && !p->m_PoliceHelper) || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
 				continue;
 		}
-		if (Mode == 2) //for dummy 29
+		if (Mode == 2) // for dummy 29
 		{
 			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 446 * 32 || p->m_Pos.y < 198 * 32)
 				continue;
 		}
-		if (Mode == 3) //for dummy 29
+		if (Mode == 3) // for dummy 29
 		{
 			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 434 * 32 || p->m_Pos.x > 441 * 32 || p->m_Pos.y < 198 * 32)
 				continue;
 		}
-		if (Mode == 4) //for dummy 29
+		if (Mode == 4) // for dummy 29
 		{
 			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 417 * 32 || p->m_Pos.x > 444 * 32 || p->m_Pos.y < 198 * 32)
 				continue;
 		}
-		if (Mode == 5) //for dummy 29
+		if (Mode == 5) // for dummy 29
 		{
 			if (p->m_Pos.y < 213 * 32 || p->m_Pos.x > 429 * 32 || p->m_Pos.x < 419 * 32 || p->m_Pos.y > 218 * 32 + 60)
 				continue;
 		}
-		if (Mode == 6) //for dummy 29
+		if (Mode == 6) // for dummy 29
 		{
 			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 417 * 32 - 10 || p->m_Pos.y < 198 * 32)
 				continue;
 		}
-		if (Mode == 7) //for dummy 23
+		if (Mode == 7) // for dummy 23
 		{
 			if (p->m_Pos.y > 200 * 32 || p->m_Pos.x < 466 * 32)
 				continue;
 		}
-		if (Mode == 8) //for dummy 23
+		if (Mode == 8) // for dummy 23
 		{
 			if (p->m_FreezeTime == 0)
 				continue;
 		}
-		if (Mode == 9) //for shopbot
+		if (Mode == 9) // for shopbot
 		{
 			if (GameServer()->IsHouseDummy(p->GetPlayer()->GetCID()))
+				continue;
+		}
+		if (Mode == 10) // BlmapChill police freeze pit left side
+		{
+			if ((!GameServer()->m_Accounts[p->GetPlayer()->GetAccID()].m_PoliceLevel && !p->m_PoliceHelper) || p->m_FreezeTime == 0 || p->m_Pos.y > 436 * 32 || p->m_Pos.x < 363 * 32 || p->m_Pos.x > 381 * 32 || p->m_Pos.y < 420 * 32)
 				continue;
 		}
 

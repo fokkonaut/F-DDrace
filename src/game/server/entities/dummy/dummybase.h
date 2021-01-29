@@ -50,6 +50,7 @@ protected:
 	// Setters
 	void Left();
 	void Right();
+	void SetDirection(int Direction);
 	void StopMoving();
 	void Hook(bool Stroke = true);
 	void Jump(bool Stroke = true);
@@ -68,6 +69,7 @@ protected:
 
 	int HookState();
 	int Jumped();
+	int JumpedTotal();
 	int Jumps();
 	bool IsGrounded();
 
@@ -83,6 +85,8 @@ protected:
 	};
 
 	int m_WantedWeapon;
+
+	bool IsPolice(CCharacter *pChr);
 
 	//
 	bool IsFreezeTile(int _X, int _Y);

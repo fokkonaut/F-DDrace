@@ -16,7 +16,12 @@ private:
 	bool CheckStuck();
 	void OldPoliceMoves();
 	void NewPoliceMoves();
-	void HelpOfficerRight();
+
+	void WalkPoliceDir(int Direction);
+	void WalkPoliceLeft() { WalkPoliceDir(-1); }
+	void WalkPoliceRight() { WalkPoliceDir(1); }
+	bool HelpOfficerRight();
+	bool HelpOfficerLeft();
 
 	int m_LovedX;
 	int m_LovedY;
@@ -29,7 +34,7 @@ private:
 	int m_Confused;
 	int m_Sad;
 
-	bool m_OldPoliceMoves;
+	// bool m_OldPoliceMoves;
 	bool m_IsHelpHook;
 	bool m_IsClosestPolice;
 	bool m_DidRocketjump;
