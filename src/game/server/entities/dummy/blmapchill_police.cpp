@@ -1049,8 +1049,6 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 		Left();
 	if (!HelpOfficerRight())
 		HelpOfficerLeft();
-	if (m_WantedWeapon != -1)
-		SetWeapon(m_WantedWeapon);
 }
 
 void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)

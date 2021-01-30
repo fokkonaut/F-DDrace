@@ -21,7 +21,7 @@ int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
 int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
 
-void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); }
+void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon);m_WantedWeapon = -1; }
 void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
@@ -67,6 +67,9 @@ void CDummyBase::Tick()
 
 	// Then start controlling
 	OnTick();
+
+	if (m_WantedWeapon != -1)
+		SetWeapon(m_WantedWeapon);
 }
 
 bool CDummyBase::IsPolice(CCharacter *pChr)
