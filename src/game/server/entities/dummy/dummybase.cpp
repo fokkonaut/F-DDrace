@@ -21,7 +21,7 @@ int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
 int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
 
-void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon);m_WantedWeapon = -1; }
+void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); m_WantedWeapon = -1; }
 void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
@@ -79,17 +79,33 @@ bool CDummyBase::IsPolice(CCharacter *pChr)
 	return GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel || pChr->m_PoliceHelper;
 }
 
-bool CDummyBase::IsFreezeTile(int _X, int _Y)
+int CDummyBase::GetTile(int PosX, int PosY)
 {
-	return GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_FREEZE ||
-		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_FREEZE ||
-		GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_DFREEZE ||
-		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_DFREEZE;
+	return GameServer()->Collision()->GetTileRaw(PosX, PosY);
+}
+
+int CDummyBase::GetFTile(int PosX, int PosY)
+{
+	return GameServer()->Collision()->GetFTileRaw(PosX, PosY);
+}
+
+bool CDummyBase::IsFreezeTile(int PosX, int PosY)
+{
+	int Tile = GetTile(PosX, PosY);
+	int FTile = GetFTile(PosX, PosY);
+	if (Tile == TILE_FREEZE || FTile == TILE_FREEZE || Tile == TILE_DFREEZE || FTile == TILE_DFREEZE)
+		return true;
+
+	int MapIndex = GameServer()->Collision()->GetMapIndex(vec2(PosX, PosY));
+	int STile = GameServer()->Collision()->IsSwitch(MapIndex);
+	if (STile == TILE_FREEZE || STile == TILE_DFREEZE)
+		return GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[m_pCharacter->Team()];
+	return false;
 }
 
 void CDummyBase::AvoidTile(int Tile)
 {
-	#define IS_TILE(x, y) (GameServer()->Collision()->GetTileRaw(RAW(x), RAW(y)) == Tile || GameServer()->Collision()->GetFTileRaw(RAW(x), RAW(y)) == Tile)
+	#define IS_TILE(x, y) (GetTile(RAW(x), RAW(y)) == Tile || GetFTile(RAW(x), RAW(y)) == Tile)
 	#define AIR(x, y) !IS_TILE(x, y)
 	#define SOLID(x, y) GameServer()->Collision()->IsSolid(RAW(x), RAW(y))
 
@@ -232,25 +248,22 @@ void CDummyBase::RightThroughFreeze()
 	if (m_RtfGetSpeed)
 	{
 		Left();
-		if (GameServer()->Collision()->GetTileRaw(RAW_X + m_RtfGetSpeed, RAW_Y) == TILE_FREEZE ||
-			GameServer()->Collision()->GetTileRaw(RAW_X + m_RtfGetSpeed, RAW_Y + 16) == TILE_FREEZE)
+		if (IsFreezeTile(RAW_X + m_RtfGetSpeed, RAW_Y) || IsFreezeTile(RAW_X + m_RtfGetSpeed, RAW_Y + 16))
 			return;
 		m_RtfGetSpeed = 0;
 	}
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		int TileRight = GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y);
 		// ignore freeze behind collision
-		if (TileRight == TILE_SOLID || TileRight == TILE_NOHOOK)
+		if (GameServer()->Collision()->IsSolid(RAW_X + i, RAW_Y))
 			break;
-		else if (TileRight == TILE_FREEZE ||
-			GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y + 16) == TILE_FREEZE)
+
+		if (IsFreezeTile(RAW_X + i, RAW_Y) || IsFreezeTile(RAW_X + i, RAW_Y + 16))
 		{
 			if (GetVel().y > 1.1f)
 			{
-				if (GameServer()->Collision()->GetTileRaw(RAW_X - 32, RAW_Y) != TILE_FREEZE &&
-					GameServer()->Collision()->GetTileRaw(RAW_X - 32, RAW_Y + 16) != TILE_FREEZE)
+				if (!IsFreezeTile(RAW_X - 32, RAW_Y) && !IsFreezeTile(RAW_X - 32, RAW_Y + 16))
 					Left();
 			}
 			if (IsGrounded() && GetVel().x > 8.8f)
@@ -260,8 +273,7 @@ void CDummyBase::RightThroughFreeze()
 				int k;
 				for (k = 5; k < 160; k+=5)
 				{
-					if (GameServer()->Collision()->GetTileRaw(RAW_X - k, RAW_Y) == TILE_FREEZE ||
-						GameServer()->Collision()->GetTileRaw(RAW_X - k, RAW_Y + 16) == TILE_FREEZE)
+					if (IsFreezeTile(RAW_X - k, RAW_Y) || IsFreezeTile(RAW_X - k, RAW_Y + 16))
 					{
 						break;
 					}
@@ -285,25 +297,22 @@ void CDummyBase::LeftThroughFreeze()
 	if (m_LtfGetSpeed)
 	{
 		Right();
-		if (GameServer()->Collision()->GetTileRaw(RAW_X - m_LtfGetSpeed, RAW_Y) == TILE_FREEZE ||
-			GameServer()->Collision()->GetTileRaw(RAW_X - m_LtfGetSpeed, RAW_Y + 16) == TILE_FREEZE)
+		if (IsFreezeTile(RAW_X - m_LtfGetSpeed, RAW_Y) || IsFreezeTile(RAW_X - m_LtfGetSpeed, RAW_Y + 16))
 			return;
 		m_LtfGetSpeed = 0;
 	}
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		int TileLeft = GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y);
 		// ignore freeze behind collision
-		if (TileLeft == TILE_SOLID || TileLeft == TILE_NOHOOK)
+		if (GameServer()->Collision()->IsSolid(RAW_X - i, RAW_Y))
 			break;
-		else if (TileLeft == TILE_FREEZE ||
-			GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y + 16) == TILE_FREEZE)
+
+		if (IsFreezeTile(RAW_X - i, RAW_Y) || IsFreezeTile(RAW_X - i, RAW_Y + 16))
 		{
 			if (GetVel().y > 1.1f)
 			{
-				if (GameServer()->Collision()->GetTileRaw(RAW_X + 32, RAW_Y) != TILE_FREEZE &&
-					GameServer()->Collision()->GetTileRaw(RAW_X + 32, RAW_Y + 16) != TILE_FREEZE)
+				if (!IsFreezeTile(RAW_X + 32, RAW_Y) && !IsFreezeTile(RAW_X + 32, RAW_Y + 16))
 					Right();
 			}
 			if (IsGrounded() && GetVel().x < -8.8f)
@@ -313,8 +322,7 @@ void CDummyBase::LeftThroughFreeze()
 				int k;
 				for (k = 5; k < 160; k+=5)
 				{
-					if (GameServer()->Collision()->GetTileRaw(RAW_X + k, RAW_Y) == TILE_FREEZE ||
-						GameServer()->Collision()->GetTileRaw(RAW_X + k, RAW_Y + 16) == TILE_FREEZE)
+					if (IsFreezeTile(RAW_X + k, RAW_Y) || IsFreezeTile(RAW_X + k, RAW_Y + 16))
 					{
 						break;
 					}

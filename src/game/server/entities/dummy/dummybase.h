@@ -89,7 +89,10 @@ protected:
 	bool IsPolice(CCharacter *pChr);
 
 	//
-	bool IsFreezeTile(int _X, int _Y);
+	int GetTile(int PosX, int PosY);
+	int GetFTile(int PosX, int PosY);
+	bool IsFreezeTile(int PosX, int PosY);
+
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();

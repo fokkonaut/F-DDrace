@@ -18,8 +18,8 @@ private:
 	void NewPoliceMoves();
 
 	void WalkPoliceDir(int Direction);
-	void WalkPoliceLeft() { WalkPoliceDir(-1); }
-	void WalkPoliceRight() { WalkPoliceDir(1); }
+	void WalkPoliceLeft() { WalkPoliceDir(DIRECTION_LEFT); }
+	void WalkPoliceRight() { WalkPoliceDir(DIRECTION_RIGHT); }
 	bool HelpOfficerRight();
 	bool HelpOfficerLeft();
 
