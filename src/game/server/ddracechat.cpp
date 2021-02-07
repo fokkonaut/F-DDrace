@@ -1297,8 +1297,11 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "--- Account Info ---");
 	str_format(aBuf, sizeof(aBuf), "Account Name: %s", pAccount->m_Username);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Euros: %d", pAccount->m_Euros);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	if (pSelf->Config()->m_SvEuroMode || pAccount->m_Euros > 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "Euros: %d", pAccount->m_Euros);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
 
 	if (pAccount->m_VIP)
 	{
@@ -1355,8 +1358,11 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 			{
 				str_format(aBuf, sizeof(aBuf), "Wallet [%lld]", pPlayer->GetWalletMoney());
 				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-				str_format(aBuf, sizeof(aBuf), "Euros [%d]", pAccount->m_Euros);
-				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				if (pSelf->Config()->m_SvEuroMode || pAccount->m_Euros > 0)
+				{
+					str_format(aBuf, sizeof(aBuf), "Euros [%d]", pAccount->m_Euros);
+					pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				}
 			}
 
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
@@ -1884,8 +1890,11 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Wallet: %lld", pPlayer->GetWalletMoney());
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-	str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	if (pSelf->Config()->m_SvEuroMode || pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros > 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "Euros: %d", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	for (int i = 0; i < 5; i++)
 		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);

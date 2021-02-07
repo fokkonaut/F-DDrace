@@ -2178,6 +2178,13 @@ int CServer::MapListEntryCallback(const char *pFilename, int IsDir, int DirType,
 	return 0;
 }
 
+void CServer::ConEuroMode(IConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvEuroMode);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CServer::ConTestingCommands(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
@@ -2878,8 +2885,10 @@ int main(int argc, const char **argv) // ignore_convention
 	// restore empty config strings to their defaults
 	pConfigManager->RestoreStrings();
 
+	// these variables cant be changed ingame
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Turns testing commands aka cheats on/off", AUTHED_ADMIN);
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pServer, "Allow /rescue command so players can teleport themselves out of freeze", AUTHED_ADMIN);
+	pConsole->Register("sv_euro_mode", "", CFGFLAG_SERVER, CServer::ConEuroMode, pServer, "Whether euro mode is enabled", AUTHED_ADMIN);
 
 	pEngine->InitLogfile();
 
