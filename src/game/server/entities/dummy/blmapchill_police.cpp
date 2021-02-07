@@ -31,7 +31,7 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_LastStuckCheckPos = vec2(0, 0);
 }
 
-void CDummyBlmapChillPolice::CheckStuck()
+bool CDummyBlmapChillPolice::CheckStuck()
 {
 	bool IsStuck = false;
 	if (TicksPassed(400) && (GetDirection() == DIRECTION_NONE || GetVel().x == 0.0f))
@@ -88,10 +88,303 @@ void CDummyBlmapChillPolice::CheckStuck()
 		if (m_Sad > 8 && (IsStuck || m_Sad > 9))
 			Aim(random(-100, 100), random(-100, 100));
 		if (m_Sad > 20)
+		{
 			Die();
+			return true;
+		}
 	}
 	if (m_Confused > 3)
 		AvoidDeath();
+	return false;
+}
+
+void CDummyBlmapChillPolice::OldPoliceMoves()
+{
+	if (X < 397 && Y > 436 && X > 388) // on the money tile jump loop, to prevent blocking flappy there
+	{
+		Jump(0);
+		if (TicksPassed(20))
+			Jump();
+	}
+	// detect lower panic (accedentally fall into the lower police base 
+	if (!m_LowerPanic && Y > 437 && RAW_Y > m_LovedY)
+	{
+		m_LowerPanic = 1;
+		GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SPLATTEE);
+	}
+
+	if (m_LowerPanic)
+	{
+		// check for end panic
+		if (Y < 434)
+		{
+			if (IsGrounded())
+				m_LowerPanic = 0; // made it up yay
+		}
+
+		if (m_LowerPanic == 1) // position to jump on stairs
+		{
+			if (X < 400)
+				Jump();
+			else if (X > 401)
+				Left();
+			else
+				m_LowerPanic = 2;
+		}
+		else if (m_LowerPanic == 2) // jump on the left starblock element
+		{
+			if (IsGrounded())
+			{
+				Jump();
+				if (TicksPassed(20))
+					Jump(0);
+			}
+
+			// navigate to platform
+			if (RAW_Y < RAW(435) - 10)
+			{
+				Left();
+				if (Y < 433)
+				{
+					if (GetVel().y > 0.01f && m_IsDJUsed == false)
+					{
+						Jump(); // double jump
+						if (!IsGrounded()) // this dummyuseddj is for only using default 2 jumps even if 5 jump is on
+							m_IsDJUsed = true;
+					}
+				}
+				if (m_IsDJUsed == true && IsGrounded())
+					m_IsDJUsed = false;
+			}
+
+			else if (Y < 438) // only if high enough focus on the first lower platform
+			{
+				if (X < 403)
+					Right();
+				else if (RAW_X > RAW(404) + 20)
+					Left();
+			}
+
+			// check for fail position
+			if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || m_pCharacter->m_IsFrozen)
+				m_LowerPanic = 1; // lower panic mode to reposition
+		}
+	}
+	else // no dummy lower panic
+	{
+		m_HelpMode = 0;
+		// check if officer needs help
+		CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
+		if (pChr && pChr->IsAlive())
+		{
+			if (Y > 435) // setting the destination of dummy to top left police entry bcs otherwise bot fails when trying to help --> walks into jail wall xd
+			{
+				m_LovedX = RAW(392 + rand() % 2);
+				m_LovedY = RAW(430);
+			}
+			AimPos(pChr->GetPos());
+
+			m_IsClosestPolice = false;
+
+			if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
+				m_IsClosestPolice = true;
+
+			if (pChr->Core()->m_Pos.x > RAW(444) - 10) // police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)
+			{
+				m_HelpMode = 2;
+				if (Jumped() > 1 && X > 431) // double jumped and above the freeze
+					Left();
+				else
+					Right();
+				// doublejump before falling in freeze
+				if ((X > 432 && Y > 432) || X > 437) // over the freeze and too low
+				{
+					Jump();
+					m_IsHelpHook = true;
+				}
+				if (IsGrounded() && X > 430 && TicksPassed(60))
+					Jump();
+			}
+			else
+				m_HelpMode = 1;
+
+			if (m_HelpMode == 1 && RAW_X > RAW(431) + 10)
+				Left();
+			else if (m_HelpMode == 1 && X < 430)
+				Right();
+			else
+			{
+				if (!m_IsHelpHook && m_IsClosestPolice)
+				{
+					if (m_HelpMode == 2) // police dude failed too far --> to be reached by hook
+					{
+						//if (X > 435) //moved too double jump
+						//{
+						//	m_IsHelpHook = true;
+						//}
+					}
+					else if (pChr->Core()->m_Pos.x > RAW(439)) // police dude in the middle
+					{
+						if (IsGrounded())
+						{
+							m_IsHelpHook = true;
+							Jump();
+							Hook();
+						}
+					}
+					else // police dude failed too near to hook from ground
+					{
+						if (GetVel().y < -4.20f && Y < 431)
+						{
+							m_IsHelpHook = true;
+							Jump();
+							Hook();
+						}
+					}
+				}
+				if (TicksPassed(8))
+					Right();
+			}
+
+			if (m_IsHelpHook)
+			{
+				Hook();
+				if (TicksPassed(200))
+				{
+					m_IsHelpHook = false; // timeout hook maybe failed
+					Hook(0);
+					Right();
+				}
+			}
+
+			// dont wait on ground
+			if (IsGrounded() && TicksPassed(900))
+				Jump();
+			// backup reset jump
+			if (TicksPassed(1337))
+				Jump(0);
+		}
+
+		if (!m_HelpMode)
+		{
+			//==============
+			//NOTHING TO DO
+			//==============
+			// basic walk to destination
+			if (RAW_X < m_LovedX - 32)
+				Right();
+			else if (RAW_X > m_LovedX + 32 && X > 384)
+				Left();
+
+			// change changing speed
+			if (TicksPassed(m_Speed))
+			{
+				if (rand() % 2 == 0)
+					m_Speed = rand() % 10000 + 420;
+			}
+
+			// choose beloved destination
+			if (TicksPassed(m_Speed))
+			{
+				if ((rand() % 2) == 0)
+				{
+					if ((rand() % 3) == 0)
+					{
+						m_LovedX = RAW(420) + rand() % 69;
+						m_LovedY = RAW(430);
+						GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
+					}
+					else
+					{
+						m_LovedX = RAW(392 + rand() % 2);
+						m_LovedY = RAW(430);
+					}
+					if ((rand() % 2) == 0)
+					{
+						m_LovedX = RAW(384) + rand() % 128;
+						m_LovedY = RAW(430);
+						GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_MUSIC);
+					}
+					else
+					{
+						if (rand() % 3 == 0)
+						{
+							m_LovedX = RAW(420) + rand() % 128;
+							m_LovedY = RAW(430);
+							GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
+						}
+						else if (rand() % 4 == 0)
+						{
+							m_LovedX = RAW(429) + rand() % 64;
+							m_LovedY = RAW(430);
+							GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
+						}
+					}
+					if (rand() % 5 == 0) //lower middel base
+					{
+						m_LovedX = RAW(410) + rand() % 64;
+						m_LovedY = RAW(443);
+					}
+				}
+				else
+					GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_EXCLAMATION);
+			}
+		}
+	}
+
+	//dont walk into the lower police base entry freeze
+	if (X > 425 && X < 429) //right side
+	{
+		if (GetVel().x < -0.02f && IsGrounded())
+			Jump();
+	}
+	else if (X > 389 && X < 391) //left side
+	{
+		if (GetVel().x > 0.02f && IsGrounded())
+			Jump();
+	}
+
+	//jump over the police underground from entry to enty
+	if (RAW_Y > m_LovedY) //only if beloved place is an upper one
+	{
+		if (X > 415 && X < 418) //right side
+		{
+			if (GetVel().x < -0.02f && IsGrounded())
+			{
+				Jump();
+				if (TicksPassed(5))
+					Jump(0);
+			}
+		}
+		else if (X > 398 && X < 401) //left side
+		{
+			if (GetVel().x > 0.02f && IsGrounded())
+			{
+				Jump();
+				if (TicksPassed(5))
+					Jump(0);
+			}
+		}
+
+		//do the doublejump
+		if (GetVel().y > 6.9f && Y > 430 && X < 433  && m_IsDJUsed == false) //falling and not too high to hit roof with head
+		{
+			Jump();
+			if (!IsGrounded()) // this dummyuseddj is for only using default 2 jumps even if 5 jump is on
+				m_IsDJUsed = true;
+		}
+		if (m_IsDJUsed == true && IsGrounded())
+			m_IsDJUsed = false;
+	}
+	// left side of police the freeze pit
+	if (Y > 380 && X < 381 && X > 363)
+	{
+		Right();
+		if (X > 367 && X < 368 && IsGrounded())
+			Jump();
+		if (Y > 433.7f)
+			Jump();
+	}
 }
 
 void CDummyBlmapChillPolice::OnTick()
@@ -639,12 +932,14 @@ void CDummyBlmapChillPolice::OnTick()
 			Jump();
 		if (X > 282 && X < 284)
 			Jump();
+		// walk left in air to get on the little block
+		if (Y > 337.4f && X > 295)
+			Left();
 	}
-	if (X > 294 && X < 297 && Y > 343 && Y < 345) // fix someone blocking flappy, he would just keep moving left into the wall and do nothing there
+	// fix someone blocking flappy, he would just keep moving left into the wall and do nothing there
+	else if (X > 294 && X < 297 && Y > 343 && Y < 345)
 		Right();
-	else if (Y > 337.4f && Y < 345 && X > 295 && X < 365) // walkking left in air to get on the little block
-		Left();
-	if (Y < 361 && Y > 346)
+	else if (Y < 361 && Y > 346)
 	{
 		if (TicksPassed(10))
 			SetWeapon(WEAPON_GRENADE);
@@ -682,7 +977,7 @@ void CDummyBlmapChillPolice::OnTick()
 		if (GetVel().y > 0.0000001f && Y > 352.6f && X < 315) // jump in air to get to the right
 			Jump();
 	}
-	if (X > 180 && X < 450 && Y < 450 && Y > 358) // wider police area with left entrance
+	else if (X > 180 && X < 450 && Y < 450 && Y > 358) // wider police area with left entrance
 	{
 		// kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
 		if (m_pCharacter->m_IsFrozen)
@@ -702,9 +997,7 @@ void CDummyBlmapChillPolice::OnTick()
 				SetWeapon(WEAPON_GUN);
 		// walking right again to get into the tunnel at the bottom
 		if (X < 363)
-		{
 			Right();
-		}
 		// do not enter in pvp area or bank
 		if (X > 323 && Y < 408)
 			LeftAntiStuck();
@@ -714,298 +1007,241 @@ void CDummyBlmapChillPolice::OnTick()
 		/* * * * * * * *
 		 * police area *
 		 * * * * * * * */
-		if (X > 380 && X < 450 && Y < 450 && Y > 380)
+		if (X > 363 && X < 450 && Y < 450 && Y > 380)
 		{
-			if (X < 397 && Y > 436 && X > 388) // on the money tile jump loop, to prevent blocking flappy there
-			{
-				Jump(0);
-				if (TicksPassed(20))
-					Jump();
-			}
-			//detect lower panic (accedentally fall into the lower police base 
-			if (!m_LowerPanic && Y > 437 && RAW_Y > m_LovedY)
-			{
-				m_LowerPanic = 1;
-				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SPLATTEE); //angry emote
-			}
-
-			if (m_LowerPanic)
-			{
-				//Check for end panic
-				if (Y < 434)
-				{
-					if (IsGrounded())
-						m_LowerPanic = 0; //made it up yay
-				}
-
-				if (m_LowerPanic == 1)//position to jump on stairs
-				{
-					if (X < 400)
-						Jump();
-					else if (X > 401)
-						Left();
-					else
-						m_LowerPanic = 2;
-				}
-				else if (m_LowerPanic == 2) //jump on the left starblock element
-				{
-					if (IsGrounded())
-					{
-						Jump();
-						if (TicksPassed(20))
-							Jump(0);
-					}
-
-					//navigate to platform
-					if (RAW_Y < RAW(435) - 10)
-					{
-						Left();
-						if (Y < 433)
-						{
-							if (GetVel().y > 0.01f && m_IsDJUsed == false)
-							{
-								Jump(); //double jump
-								if (!IsGrounded()) // this dummyuseddj is for only using default 2 jumps even if 5 jump is on
-									m_IsDJUsed = true;
-							}
-						}
-						if (m_IsDJUsed == true && IsGrounded())
-							m_IsDJUsed = false;
-					}
-
-					else if (Y < 438) //only if high enough focus on the first lower platform
-					{
-						if (X < 403)
-							Right();
-						else if (RAW_X > RAW(404) + 20)
-							Left();
-					}
-
-					if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || m_pCharacter->m_IsFrozen) //check for fail position
-						m_LowerPanic = 1; //lower panic mode to reposition
-				}
-			}
-			else //no dummy lower panic
-			{
-				m_HelpMode = 0;
-				//check if officer needs help
-				CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
-				if (pChr && pChr->IsAlive())
-				{
-					if (Y > 435) // setting the destination of dummy to top left police entry bcs otherwise bot fails when trying to help --> walks into jail wall xd
-					{
-						m_LovedX = RAW(392 + rand() % 2);
-						m_LovedY = RAW(430);
-					}
-					//aimbot on heuzeueu
-					AimPos(pChr->GetPos());
-
-					m_IsClosestPolice = false;
-
-					if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
-						m_IsClosestPolice = true;
-
-					if (pChr->Core()->m_Pos.x > RAW(444) - 10) //police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)
-					{
-						m_HelpMode = 2;
-						if (Jumped() > 1 && X > 431) //double jumped and above the freeze
-							Left();
-						else
-							Right();
-						//doublejump before falling in freeze
-						if ((X > 432 && Y > 432) || X > 437) //over the freeze and too low
-						{
-							Jump();
-							m_IsHelpHook = true;
-						}
-						if (IsGrounded() && X > 430 && TicksPassed(60))
-							Jump();
-					}
-					else
-						m_HelpMode = 1;
-
-					if (m_HelpMode == 1 && RAW_X > RAW(431) + 10)
-						Left();
-					else if (m_HelpMode == 1 && X < 430)
-						Right();
-					else
-					{
-						if (!m_IsHelpHook && m_IsClosestPolice)
-						{
-							if (m_HelpMode == 2) //police dude failed too far --> to be reached by hook
-							{
-								//if (X > 435) //moved too double jump
-								//{
-								//	m_IsHelpHook = true;
-								//}
-							}
-							else if (pChr->Core()->m_Pos.x > RAW(439)) //police dude in the middle
-							{
-								if (IsGrounded())
-								{
-									m_IsHelpHook = true;
-									Jump();
-									Hook();
-								}
-							}
-							else //police dude failed too near to hook from ground
-							{
-								if (GetVel().y < -4.20f && Y < 431)
-								{
-									m_IsHelpHook = true;
-									Jump();
-									Hook();
-								}
-							}
-						}
-						if (TicksPassed(8))
-							Right();
-					}
-
-					if (m_IsHelpHook)
-					{
-						Hook();
-						if (TicksPassed(200))
-						{
-							m_IsHelpHook = false; //timeout hook maybe failed
-							Hook(0);
-							Right();
-						}
-					}
-
-					//dont wait on ground
-					if (IsGrounded() && TicksPassed(900))
-						Jump();
-					//backup reset jump
-					if (TicksPassed(1337))
-						Jump(0);
-				}
-
-				if (!m_HelpMode)
-				{
-					//==============
-					//NOTHING TO DO
-					//==============
-					//basic walk to destination
-					if (RAW_X < m_LovedX - 32)
-						Right();
-					else if (RAW_X > m_LovedX + 32 && X > 384)
-						Left();
-
-					//change changing speed
-					if (TicksPassed(m_Speed))
-					{
-						if (rand() % 2 == 0)
-							m_Speed = rand() % 10000 + 420;
-					}
-
-					//choose beloved destination
-					if (TicksPassed(m_Speed))
-					{
-						if ((rand() % 2) == 0)
-						{
-							if ((rand() % 3) == 0)
-							{
-								m_LovedX = RAW(420) + rand() % 69;
-								m_LovedY = RAW(430);
-								GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_GHOST);
-							}
-							else
-							{
-								m_LovedX = RAW(392 + rand() % 2);
-								m_LovedY = RAW(430);
-							}
-							if ((rand() % 2) == 0)
-							{
-								m_LovedX = RAW(384) + rand() % 128;
-								m_LovedY = RAW(430);
-								GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_MUSIC);
-							}
-							else
-							{
-								if (rand() % 3 == 0)
-								{
-									m_LovedX = RAW(420) + rand() % 128;
-									m_LovedY = RAW(430);
-									GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
-								}
-								else if (rand() % 4 == 0)
-								{
-									m_LovedX = RAW(429) + rand() % 64;
-									m_LovedY = RAW(430);
-									GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_SUSHI);
-								}
-							}
-							if (rand() % 5 == 0) //lower middel base
-							{
-								m_LovedX = RAW(410) + rand() % 64;
-								m_LovedY = RAW(443);
-							}
-						}
-						else
-							GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_EXCLAMATION);
-					}
-				}
-			}
-
-			//dont walk into the lower police base entry freeze
-			if (X > 425 && X < 429) //right side
-			{
-				if (GetVel().x < -0.02f && IsGrounded())
-					Jump();
-			}
-			else if (X > 389 && X < 391) //left side
-			{
-				if (GetVel().x > 0.02f && IsGrounded())
-					Jump();
-			}
-
-			//jump over the police underground from entry to enty
-			if (RAW_Y > m_LovedY) //only if beloved place is an upper one
-			{
-				if (X > 415 && X < 418) //right side
-				{
-					if (GetVel().x < -0.02f && IsGrounded())
-					{
-						Jump();
-						if (TicksPassed(5))
-							Jump(0);
-					}
-				}
-				else if (X > 398 && X < 401) //left side
-				{
-					if (GetVel().x > 0.02f && IsGrounded())
-					{
-						Jump();
-						if (TicksPassed(5))
-							Jump(0);
-					}
-				}
-
-				//do the doublejump
-				if (GetVel().y > 6.9f && Y > 430 && X < 433  && m_IsDJUsed == false) //falling and not too high to hit roof with head
-				{
-					Jump();
-					if (!IsGrounded()) // this dummyuseddj is for only using default 2 jumps even if 5 jump is on
-						m_IsDJUsed = true;
-				}
-				if (m_IsDJUsed == true && IsGrounded())
-					m_IsDJUsed = false;
-			}
-		}
-		// left side of police the freeze pit
-		if (Y > 380 && X < 381 && X > 363)
-		{
-			Right();
-			if (X > 367 && X < 368 && IsGrounded())
-				Jump();
-			if (Y > 433.7f)
-				Jump();
+			// if (m_OldPoliceMoves)
+			// 	OldPoliceMoves();
+			// else
+			// 	NewPoliceMoves();
+			// if (TicksPassed(200))
+			// 	if (random(200))
+			// 		m_OldPoliceMoves ^= true;
+			NewPoliceMoves();
 		}
 	}
 	else
 	{
 		// not in police area check if stuck somewhere
-		CheckStuck();
+		if (CheckStuck())
+			return;
 	}
+}
+
+void CDummyBlmapChillPolice::NewPoliceMoves()
+{
+	if (TicksPassed(30))
+	{
+		m_WantedWeapon = WEAPON_GUN;
+		Aim(100, 10);
+	}
+	AvoidFreeze();
+	AvoidFreezeWeapons();
+	// freeze pit on left side of police
+	if (X > 366 && X < 382 && !IsGrounded())
+	{
+		if (GetVel().x < -6.6f && X < 372)
+			Left();
+		else
+			Right();
+	}
+	// freeze pit on right side of police
+	if (X > 430)
+		Left();
+	if (!HelpOfficerRight())
+		HelpOfficerLeft();
+}
+
+void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
+{
+	// fallen down
+	if (Y > 437)
+	{
+		m_WantedWeapon = WEAPON_GRENADE;
+		if (X < 399)
+			Right();
+		else if (X > 402 && X < 406)
+			Right();
+		else if (X > 412)
+			Left();
+		else
+		{
+			Aim(0, 200);
+			Fire();
+			if (IsGrounded())
+				Jump(random(3));
+		}
+	}
+	// when high enough stay there and move on the upper area
+	else
+	{
+		SetDirection(Direction);
+		if (GetVel().y > 2.2f && Y > 431 && X > 400 && X < 417)
+			Jump();
+		// grenade boosts floor
+		if (IsGrounded())
+		{
+			Aim(100 * -Direction, 20);
+			if (TicksPassed(10))
+				m_WantedWeapon = WEAPON_GRENADE;
+			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
+				Fire();
+		}
+		// grenade boosts roof
+		if (GetVel().y < 0.01 && GameServer()->Collision()->GetTileRaw(GetPos().x, GetPos().y - 32) == TILE_NOHOOK)
+		{
+			Aim(100 * -Direction, -25);
+			if (TicksPassed(10))
+				m_WantedWeapon = WEAPON_GRENADE;
+			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
+				Fire();
+		}
+	}
+}
+
+bool CDummyBlmapChillPolice::HelpOfficerLeft()
+{
+	// check if officer needs help
+	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 10);
+	if (!pChr || !pChr->IsAlive())
+		return true;
+	if (X > 383)
+		WalkPoliceLeft();
+	else
+	{
+		AimPos(pChr->GetPos());
+		LeftThroughFreeze();
+		if (JumpedTotal() > 2)
+			Right();
+		Hook(0);
+		float DistToOfficer = distance(GetPos(), pChr->GetPos());
+		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
+			Hook(1);
+		if (HookState() == HOOK_GRABBED)
+		{
+			Right();
+			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
+			CCharacter *pCharHooked = pHooked->GetCharacter();
+			if (pCharHooked)
+			{
+				// hooked a non police tee -> try to get rid of it
+				if (!IsPolice(pCharHooked))
+				{
+					// hook random to the left
+					Left();
+					if (JumpedTotal() > 3)
+						Hook(0);
+					if (pCharHooked->Core()->m_Vel.x < -8.8f)
+						Hook(0);
+				}
+			}
+		}
+		if (JumpedTotal() > 3)
+			Right();
+		if (X < 366)
+			Right();
+		if (X < 369)
+		{
+			CCharacter *pClosestChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID());
+			// if on left side and closes char is not police
+			// make sure that boi is blocked first otherwise he is just in the way
+			if (!IsPolice(pClosestChr) && !pClosestChr->m_IsFrozen)
+			{
+				AimPos(pClosestChr->GetPos());
+				// push into freeze when both grounded
+				if (IsGrounded() && pClosestChr->IsGrounded())
+				{
+					// avoid yeeting away when pushing
+					Jump(0);
+					if (pClosestChr->GetPos().x < RAW_X)
+						Left();
+					else
+						Right();
+				}
+				// if enemy other side of freeze just hook em in
+				if (pClosestChr->GetPos().x < RAW(363))
+				{
+					Hook(1);
+					Right();
+					if (X > 367)
+						Left();
+				}
+				// make sure hook does not get stuck
+				if (HookState() != HOOK_FLYING && HookState() != HOOK_GRABBED && TicksPassed(60))
+					Hook(0);
+				// do not walk into left freeze
+				if (X < 364)
+					Right();
+			}
+			// release hook on enemy when he is frozen on the left side
+			if (!IsPolice(pClosestChr) && pClosestChr->m_IsFrozen)
+				if (pClosestChr->GetPos().x < RAW(364))
+					if (m_pCharacter->Core()->m_HookedPlayer == pClosestChr->GetPlayer()->GetCID())
+						Hook(0);
+		}
+		if (TicksPassed(30))
+			m_WantedWeapon = WEAPON_HAMMER;
+		if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+			Fire();
+	}
+	return false;
+}
+
+bool CDummyBlmapChillPolice::HelpOfficerRight()
+{
+	// check if officer needs help
+	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 1);
+	if (!pChr || !pChr->IsAlive())
+		return false;
+	if (X < 422)
+		WalkPoliceRight();
+	else
+	{
+		AimPos(pChr->GetPos());
+		RightThroughFreeze();
+		if (JumpedTotal() > 2)
+			Left();
+		Hook(0);
+		float DistToOfficer = distance(GetPos(), pChr->GetPos());
+		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
+			Hook(1);
+		if (HookState() == HOOK_GRABBED)
+		{
+			Left();
+			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
+			CCharacter *pCharHooked = pHooked->GetCharacter();
+			if (pCharHooked)
+			{
+				// hooked a non police tee -> try to get rid of it
+				if (!IsPolice(pCharHooked))
+				{
+					// officer on right side -> hook random to the left
+					if (pChr->GetPos().x > RAW(442))
+					{
+						if (!pCharHooked->m_IsFrozen)
+							Hook(0);
+					}
+					// officer on left side -> hook random to the right
+					else
+					{
+						Right();
+						if (JumpedTotal() > 3)
+							Hook(0);
+						if (pCharHooked->Core()->m_Vel.x > 8.8f)
+							Hook(0);
+					}
+				}
+			}
+		}
+		if (JumpedTotal() > 3)
+			Left();
+		if (X > 441)
+			Left();
+		if (TicksPassed(30))
+			m_WantedWeapon = WEAPON_HAMMER;
+		if (DistToOfficer < 80 && pChr->m_FreezeTime && m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+			Fire();
+	}
+	return true;
 }

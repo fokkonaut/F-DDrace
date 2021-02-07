@@ -14,17 +14,19 @@ vec2 CDummyBase::GetPos() { return m_pCharacter->Core()->m_Pos; }
 vec2 CDummyBase::GetVel() { return m_pCharacter->Core()->m_Vel; }
 int CDummyBase::HookState() { return m_pCharacter->Core()->m_HookState; }
 int CDummyBase::Jumped() { return m_pCharacter->Core()->m_Jumped; }
+int CDummyBase::JumpedTotal() { return m_pCharacter->Core()->m_JumpedTotal; }
 int CDummyBase::Jumps() { return m_pCharacter->Core()->m_Jumps; }
 bool CDummyBase::IsGrounded() { return m_pCharacter->IsGrounded(); }
 int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
 int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
 
-void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); }
+void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon);m_WantedWeapon = -1; }
 void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
 void CDummyBase::StopMoving() { m_pCharacter->Input()->m_Direction = DIRECTION_NONE; }
+void CDummyBase::SetDirection(int Direction) { m_pCharacter->Input()->m_Direction = Direction; }
 void CDummyBase::Hook(bool Stroke) { m_pCharacter->Input()->m_Hook = Stroke; }
 void CDummyBase::Jump(bool Stroke) { m_pCharacter->Input()->m_Jump = Stroke; }
 void CDummyBase::Aim(int TargetX, int TargetY) { AimX(TargetX); AimY(TargetY); }
@@ -51,6 +53,7 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_pPlayer = pChr->GetPlayer();
 	m_Mode = Mode;
 	m_DebugColor = -1;
+	m_WantedWeapon = -1;
 }
 
 void CDummyBase::Tick()
@@ -64,6 +67,24 @@ void CDummyBase::Tick()
 
 	// Then start controlling
 	OnTick();
+
+	if (m_WantedWeapon != -1)
+		SetWeapon(m_WantedWeapon);
+}
+
+bool CDummyBase::IsPolice(CCharacter *pChr)
+{
+	if (!pChr)
+		return false;
+	return GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel || pChr->m_PoliceHelper;
+}
+
+bool CDummyBase::IsFreezeTile(int _X, int _Y)
+{
+	return GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_FREEZE ||
+		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_FREEZE ||
+		GameServer()->Collision()->GetTileRaw(_X, _Y) == TILE_DFREEZE ||
+		GameServer()->Collision()->GetFTileRaw(_X, _Y) == TILE_DFREEZE;
 }
 
 void CDummyBase::AvoidTile(int Tile)
@@ -126,6 +147,58 @@ void CDummyBase::AvoidDeath()
 		Right();
 }
 
+void CDummyBase::AvoidFreezeWeapons()
+{
+	// avoid hitting freeze roof
+	if (GetVel().y < -0.05)
+	{
+		int distY = RAW_Y + GetVel().y * 4 - 40;
+		if (!GameServer()->Collision()->IntersectLine(GetPos(), vec2(GetPos().x, distY), 0, 0) && 
+			IsFreezeTile(RAW_X, distY))
+		{
+			Aim(GetVel().x, -200);
+			Fire();
+			if (TicksPassed(10))
+				SetWeapon(WEAPON_GRENADE);
+			m_WantedWeapon = WEAPON_GRENADE;
+		}
+	}
+	// avoid hitting freeze floor
+	else if (GetVel().y > 0.05)
+	{
+		int distY = RAW_Y + GetVel().y * 3 + 20;
+		if (!GameServer()->Collision()->IntersectLine(GetPos(), vec2(GetPos().x, distY), 0 , 0) && 
+			IsFreezeTile(RAW_X, distY))
+		{
+			Aim(GetVel().x, 200);
+			if (JumpedTotal() == Jumps() - 1)
+			{
+				Fire();
+				// TODO: priotize weapons the bot actually has
+				int PanicWeapon = random(2) ? WEAPON_GRENADE : WEAPON_LASER;
+				if (TicksPassed(10))
+					SetWeapon(PanicWeapon);
+				m_WantedWeapon = PanicWeapon;
+			}
+			Jump();
+		}
+	}
+	// jump over freeze when flying into it from the right side
+	if (GetVel().x < -2.2f && (IsGrounded() || GetVel().y > 2.2f))
+	{
+		if (IsFreezeTile(RAW_X - 32, RAW_Y) ||
+			(GetVel().y > 2.2f && IsFreezeTile(RAW_X - 32, RAW_Y + 30)))
+			Jump();
+	}
+	// jump over freeze when flying into it from the left side
+	if (GetVel().x > 2.2f && (IsGrounded() || GetVel().y > 2.2f))
+	{
+		if (IsFreezeTile(RAW_X + 32, RAW_Y) ||
+			(GetVel().y < -2.2f && IsFreezeTile(RAW_X + 32, RAW_Y + 30)))
+			Jump();
+	}
+}
+
 void CDummyBase::RightAntiStuck()
 {
 	Right();
@@ -167,7 +240,11 @@ void CDummyBase::RightThroughFreeze()
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		if (GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y) == TILE_FREEZE ||
+		int TileRight = GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y);
+		// ignore freeze behind collision
+		if (TileRight == TILE_SOLID || TileRight == TILE_NOHOOK)
+			break;
+		else if (TileRight == TILE_FREEZE ||
 			GameServer()->Collision()->GetTileRaw(RAW_X + i, RAW_Y + 16) == TILE_FREEZE)
 		{
 			if (GetVel().y > 1.1f)
@@ -216,7 +293,11 @@ void CDummyBase::LeftThroughFreeze()
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
-		if (GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y) == TILE_FREEZE ||
+		int TileLeft = GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y);
+		// ignore freeze behind collision
+		if (TileLeft == TILE_SOLID || TileLeft == TILE_NOHOOK)
+			break;
+		else if (TileLeft == TILE_FREEZE ||
 			GameServer()->Collision()->GetTileRaw(RAW_X - i, RAW_Y + 16) == TILE_FREEZE)
 		{
 			if (GetVel().y > 1.1f)
