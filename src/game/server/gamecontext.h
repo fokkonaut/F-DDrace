@@ -102,7 +102,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 4,
+	ACC_CURRENT_VERSION = 5,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -487,6 +487,7 @@ public:
 		int m_TaserBattery;
 		char m_aContact[128];
 		char m_aTimeoutCode[64];
+		char m_aSecurityPin[5];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -537,6 +538,7 @@ public:
 		ACC_TASER_BATTERY,
 		ACC_CONTACT,
 		ACC_TIMEOUT_CODE,
+		ACC_SECURITY_PIN,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -776,6 +778,7 @@ private:
 	static void ConRegister(IConsole::IResult* pResult, void* pUserData);
 	static void ConChangePassword(IConsole::IResult* pResult, void* pUserData);
 	static void ConContact(IConsole::IResult* pResult, void* pUserData);
+	static void ConPin(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPayMoney(IConsole::IResult* pResult, void* pUserData);
 	static void ConMoney(IConsole::IResult* pResult, void* pUserData);

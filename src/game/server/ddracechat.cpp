@@ -1637,6 +1637,8 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully registered an account, you can login now");
 	dbg_msg("acc", "account created, file '%s/%s.acc'", pSelf->Config()->m_SvAccFilePath, aUsername);
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "Set a security pin to avoid account stealing. For more info, say '/pin'");
 }
 
 void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
@@ -1718,6 +1720,12 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 		return;
 	}
 
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_aSecurityPin[0] && !pPlayer->m_aSecurityPin[0])
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not verified, please enter your security pin using '/pin'");
+		return;
+	}
+
 	if (str_comp(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(0)))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Wrong password");
@@ -1760,6 +1768,12 @@ void CGameContext::ConContact(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_aSecurityPin[0] && !pPlayer->m_aSecurityPin[0])
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not verified, please enter your security pin using '/pin'");
+		return;
+	}
+
 	const char *pContact = pResult->GetString(0);
 	if (!pContact || !pContact[0])
 	{
@@ -1773,6 +1787,69 @@ void CGameContext::ConContact(IConsole::IResult* pResult, void* pUserData)
 	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_aContact, pContact, sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_aContact));
 	pSelf->WriteAccountStats(pPlayer->GetAccID());
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully updated contact information, check '/account'");
+}
+
+void CGameContext::ConPin(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!pSelf->Config()->m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
+		return;
+	}
+
+	if (pPlayer->GetAccID() < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		return;
+	}
+
+	if (!pResult->NumArguments())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "~~~ SECURITY PIN ~~~");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You should set a security pin to avoid account stealing. The pin itself has to be a 4-digit long number code.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "This pin will be required to change your contact information or your password.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "If your account is not secured yet, you can set a pin with '/pin <new-pin>'.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "If you want to change your pin, you first need to verify using '/pin <account-pin>'.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "After verifying, you can set a new pin with '/pin <new-pin>'.");
+		return;
+	}
+
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pPlayer->GetAccID()];
+
+	const char *pNewPin = pResult->GetString(0);
+	if (str_length(pNewPin) != 4)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You have to enter a 4-digit number");
+		return;
+	}
+
+	if (pAccount->m_aSecurityPin[0] == 0)
+	{
+		str_copy(pAccount->m_aSecurityPin, pNewPin, sizeof(pAccount->m_aSecurityPin));
+		pSelf->SendChatTarget(pResult->m_ClientID, "Successfully set the security pin");
+	}
+	else if (pPlayer->m_aSecurityPin[0] == 0)
+	{
+		if (pAccount->m_aSecurityPin[0] && str_comp(pAccount->m_aSecurityPin, pNewPin) != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Verification failed");
+			return;
+		}
+
+		str_copy(pPlayer->m_aSecurityPin, pNewPin, sizeof(pPlayer->m_aSecurityPin));
+		pSelf->SendChatTarget(pResult->m_ClientID, "Verification successful");
+	}
+	else
+	{
+		str_copy(pAccount->m_aSecurityPin, pNewPin, sizeof(pAccount->m_aSecurityPin));
+		str_copy(pPlayer->m_aSecurityPin, pNewPin, sizeof(pPlayer->m_aSecurityPin));
+		pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed the security pin");
+	}
 }
 
 void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)

@@ -201,11 +201,12 @@ void CPlayer::Reset()
 		m_pPortal[i] = 0;
 
 	m_PlotAuctionPrice = 0;
-	m_aPlotSwapUsername[0] = 0;
+	m_aPlotSwapUsername[0] = '\0';
 	m_PlotSpawn = false;
 	m_WalletMoney = 0;
 	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
+	m_aSecurityPin[0] = '\0';
 	m_LocalChat = false;
 
 	m_SpawnBlockScore = 0;
@@ -1696,6 +1697,11 @@ void CPlayer::OnLogin()
 		GameServer()->SendChatTarget(m_ClientID, "[WARNING] You did not set a contact, it can be used to recover your password or to get back the account after it got stolen.");
 		GameServer()->SendChatTarget(m_ClientID, "Set a contact with '/contact <option>' to hide this message and for a free XP reward.");
 	}
+
+	if (pAccount->m_aSecurityPin[0] == '\0')
+	{
+		GameServer()->SendChatTarget(m_ClientID, "[WARNING] You did not set security pin yet. Check '/pin' for more information.");
+	}
 }
 
 void CPlayer::OnLogout()
@@ -1715,6 +1721,8 @@ void CPlayer::OnLogout()
 
 	if (m_TimeoutCode[0] != '\0')
 		str_copy(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode, m_TimeoutCode, sizeof(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode));
+
+	m_aSecurityPin[0] = '\0';
 }
 
 void CPlayer::StopPlotEditing()

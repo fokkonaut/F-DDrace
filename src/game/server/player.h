@@ -332,6 +332,7 @@ public:
 	int64 GetWalletMoney() { return m_WalletMoney; }
 	void SetWalletMoney(int64 Amount) { m_WalletMoney = Amount; }
 
+	char m_aSecurityPin[5];
 	int64 m_LastMoneyXPBomb;
 
 	// plot

@@ -4477,6 +4477,7 @@ int CGameContext::AddAccount()
 	Account.m_TaserBattery = 0;
 	Account.m_aContact[0] = '\0';
 	Account.m_aTimeoutCode[0] = '\0';
+	Account.m_aSecurityPin[0] = '\0';
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4565,6 +4566,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_TASER_BATTERY:				m_Accounts[ID].m_TaserBattery = atoi(pData); break;
 	case ACC_CONTACT:					str_copy(m_Accounts[ID].m_aContact, pData, sizeof(m_Accounts[ID].m_aContact)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(m_Accounts[ID].m_aTimeoutCode, pData, sizeof(m_Accounts[ID].m_aTimeoutCode)); break;
+	case ACC_SECURITY_PIN:				str_copy(m_Accounts[ID].m_aSecurityPin, pData, sizeof(m_Accounts[ID].m_aSecurityPin)); break;
 	}
 }
 
@@ -4615,6 +4617,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_TASER_BATTERY:				return "taser_battery";
 	case ACC_CONTACT:					return "contact";
 	case ACC_TIMEOUT_CODE:				return "timeout_code";
+	case ACC_SECURITY_PIN:				return "security_pin";
 	}
 	return "Unknown";
 }
@@ -4669,6 +4672,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_TASER_BATTERY:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserBattery); break;
 	case ACC_CONTACT:					str_copy(aBuf, m_Accounts[ID].m_aContact, sizeof(aBuf)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(aBuf, m_Accounts[ID].m_aTimeoutCode, sizeof(aBuf)); break;
+	case ACC_SECURITY_PIN:				str_copy(aBuf, m_Accounts[ID].m_aSecurityPin, sizeof(aBuf)); break;
 	}
 	return aBuf;
 }
