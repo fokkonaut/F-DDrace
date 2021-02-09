@@ -2453,10 +2453,18 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if (m_apPlayers[ClientID]->m_SpawnBlockScore > 3 && Config()->m_SvSpawnBlockProtection == 2)
+			if (m_apPlayers[ClientID]->m_SpawnBlockScore > 3)
 			{
-				SendChatTarget(ClientID, "You can't kill yourself because you spawnblocked too much. Try again later.");
-				return;
+				if (Config()->m_SvSpawnBlockProtection == 2)
+				{
+					SendChatTarget(ClientID, "You can't kill yourself because you spawnblocked too much, try again later");
+					return;
+				}
+				else if (Config()->m_SvSpawnBlockProtection == 1 && pPlayer->m_DieTick > Server()->Tick() - Server()->TickSpeed() * 5)
+				{
+					SendChatTarget(ClientID, "You can only kill once in 5 seconds due to spawnblocking");
+					return;
+				}
 			}
 
 			//Kill Protection
