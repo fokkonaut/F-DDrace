@@ -3464,7 +3464,7 @@ void CCharacter::FDDraceTick()
 			m_pTeeControlCursor->SetPos(pControlledTee->m_CursorPos);
 	}
 
-	if (Server()->Tick() % 50 == 0 && GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick()))
+	if (Server()->Tick() % 50 == 0 && SendingPortalCooldown())
 	{
 		char aBuf[64];
 		int Seconds = Config()->m_SvPortalRifleDelay - ((Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed());
@@ -3512,6 +3512,11 @@ void CCharacter::HandleLastIndexTiles()
 			m_MoneyTile = false;
 		}
 	}
+}
+
+bool CCharacter::SendingPortalCooldown()
+{
+	return GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick());
 }
 
 bool CCharacter::RequestMinigameChange(int RequestedMinigame)

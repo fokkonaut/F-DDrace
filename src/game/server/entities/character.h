@@ -409,6 +409,7 @@ public:
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
+	bool SendingPortalCooldown();
 
 	int m_HookPower;
 	bool m_IsRainbowHooked;
