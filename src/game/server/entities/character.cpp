@@ -859,12 +859,14 @@ void CCharacter::FireWeapon()
 				if (GameServer()->Collision()->TestBox(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 					Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
 
+				bool PlotDoorOnly = GameServer()->GetTilePlotID(m_Pos) < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
+
 				if (!Found || !PortalPos
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), GameServer()->GetTilePlotID(m_Pos) < PLOT_START)
+					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					)
 				{
