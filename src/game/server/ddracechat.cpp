@@ -1822,7 +1822,7 @@ void CGameContext::ConPin(IConsole::IResult* pResult, void* pUserData)
 	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pPlayer->GetAccID()];
 
 	const char *pNewPin = pResult->GetString(0);
-	if (str_length(pNewPin) != 4)
+	if (str_length(pNewPin) != 4 || str_is_number(pNewPin) != 0)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You have to enter a 4-digit number");
 		return;
