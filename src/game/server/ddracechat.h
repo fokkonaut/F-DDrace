@@ -73,6 +73,7 @@ CHAT_COMMAND("money", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConMoney, this, "Sh
 
 CHAT_COMMAND("room", "s['invite'|'kick'] r[name]", CFGFLAG_CHAT, ConRoom, this, "Invite or kick player r from the room", AUTHED_NO)
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)
+CHAT_COMMAND("silentfarm", "?i['0'|'1']", CFGFLAG_CHAT, ConSilentFarm, this, "Mute sounds while on moneytile", AUTHED_NO)
 
 //plots
 CHAT_COMMAND("plot", "?s[command] ?s[price|helpcmd|swapname] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)

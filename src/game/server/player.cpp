@@ -212,6 +212,8 @@ void CPlayer::Reset()
 	m_SpawnBlockScore = 0;
 	m_EscapeTime = 0;
 	m_JailTime = 0;
+
+	m_SilentFarm = 0;
 }
 
 void CPlayer::Tick()

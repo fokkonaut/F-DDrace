@@ -91,6 +91,11 @@ void CEventHandler::Snap(int SnappingClient)
 					// reset id for others
 					pDamage->m_ClientID = ClientID;
 				}
+				else if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD && GameServer()->m_apPlayers[SnappingClient]->m_SilentFarm
+					&& GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->m_MoneyTile)
+				{
+					return;
+				}
 				else
 				{
 					void* d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);

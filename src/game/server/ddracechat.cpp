@@ -2424,6 +2424,22 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+	if (!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+		pPlayer->m_SilentFarm = pResult->GetInteger(0);
+	else
+		pPlayer->m_SilentFarm = !pPlayer->m_SilentFarm;
+}
+
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

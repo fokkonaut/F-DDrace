@@ -363,6 +363,8 @@ public:
 	void SetPlaying();
 	bool m_ResumeMoved;
 
+	bool m_SilentFarm;
+
 	bool JoinChat(bool Local);
 	bool m_LocalChat;
 	int GetAuthedHighlighted();
