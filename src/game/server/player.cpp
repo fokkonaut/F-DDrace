@@ -333,7 +333,7 @@ void CPlayer::Tick()
 	if (!m_ShowName && !m_RemovedName)
 	{
 		SetName(" ");
-		SetClan(Server()->ClientName(m_ClientID));
+		SetClan("");
 		UpdateInformation();
 		m_RemovedName = true;
 	}
