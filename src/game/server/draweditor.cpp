@@ -29,16 +29,24 @@ bool CDrawEditor::Active()
 
 bool CDrawEditor::CanPlace()
 {
+	if (m_DrawMode == DRAW_WALL)
+	{
+		int rx = round_to_int(m_Pos.x) / 32;
+		int ry = round_to_int(m_Pos.y) / 32;
+		if (rx <= 0 || rx >= GameServer()->Collision()->GetWidth()-1 || ry <= 0 || ry >= GameServer()->Collision()->GetHeight()-1)
+			return false;
+	}
+
 	int TilePlotID = GameServer()->GetTilePlotID(m_Pos);
 	int OwnPlotID = GetPlotID();
-	bool FreeDraw = m_pCharacter->IsFreeDraw() && (OwnPlotID < PLOT_START || m_pCharacter->GetCurrentTilePlotID() != OwnPlotID);
+	bool FreeDraw = OwnPlotID < PLOT_START || m_pCharacter->GetCurrentTilePlotID() != OwnPlotID;
 	return (!GameServer()->Collision()->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
 {
 	// check whether pEnt->m_PlotID >= 0 because -1 would mean its a map object, so we dont wanna be able to remove it
-	return CanPlace() && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0 && (pEnt->m_PlotID == GetPlotID() || m_pCharacter->IsFreeDraw());
+	return CanPlace() && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0;
 }
 
 int CDrawEditor::GetPlotID()

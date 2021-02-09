@@ -3666,11 +3666,6 @@ void CCharacter::SetLastTouchedSwitcher(int Number)
 	}
 }
 
-bool CCharacter::IsFreeDraw()
-{
-	return Server()->GetAuthedState(m_pPlayer->GetCID()) >= Config()->m_SvFreeDrawLevel;
-}
-
 void CCharacter::DropMoney(int64 Amount, int Dir)
 {
 	if (Amount <= 0 || Amount > m_pPlayer->GetWalletMoney())

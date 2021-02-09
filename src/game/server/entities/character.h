@@ -423,7 +423,6 @@ public:
 
 	// editor
 	CDrawEditor m_DrawEditor;
-	bool IsFreeDraw();
 
 	int GetCurrentTilePlotID();
 	void TeleOutOfPlot(int PlotID);
