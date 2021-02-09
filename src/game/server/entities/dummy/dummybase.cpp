@@ -93,14 +93,7 @@ bool CDummyBase::IsFreezeTile(int PosX, int PosY)
 {
 	int Tile = GetTile(PosX, PosY);
 	int FTile = GetFTile(PosX, PosY);
-	if (Tile == TILE_FREEZE || FTile == TILE_FREEZE || Tile == TILE_DFREEZE || FTile == TILE_DFREEZE)
-		return true;
-
-	int MapIndex = GameServer()->Collision()->GetMapIndex(vec2(PosX, PosY));
-	int STile = GameServer()->Collision()->IsSwitch(MapIndex);
-	if (STile == TILE_FREEZE || STile == TILE_DFREEZE)
-		return GameServer()->Collision()->GetSwitchNumber(MapIndex) == 0 || GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[m_pCharacter->Team()];
-	return false;
+	return Tile == TILE_FREEZE || FTile == TILE_FREEZE || Tile == TILE_DFREEZE || FTile == TILE_DFREEZE;
 }
 
 void CDummyBase::AvoidTile(int Tile)
