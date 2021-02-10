@@ -558,8 +558,9 @@ void CCharacter::FireWeapon()
 							GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 							Minutes -= 5;
 						}
-						str_format(aBuf, sizeof(aBuf), "You caught the gangster '%s' (%d minutes arrest)", Server()->ClientName(TargetCID), Minutes);
-						GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+
+						str_format(aBuf, sizeof(aBuf), "'%s' has been caught by '%s' (%d minutes arrest)", Server()->ClientName(TargetCID), Server()->ClientName(m_pPlayer->GetCID()), Minutes);
+						GameServer()->SendChatPolice(aBuf);
 
 						str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes by '%s'", Minutes, Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChatTarget(TargetCID, aBuf);

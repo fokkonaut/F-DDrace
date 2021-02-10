@@ -106,7 +106,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = GameServer()->Config()->m_SvShowOthersDefault;
 	m_ShowAll = GameServer()->Config()->m_SvShowAllDefault;
-	m_ShowDistance = vec2(1000, 800);
+	m_ShowDistance = vec2(1200, 800);
 	m_SpecTeam = false;
 	m_NinjaJetpack = false;
 
