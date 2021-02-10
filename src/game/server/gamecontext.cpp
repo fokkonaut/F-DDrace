@@ -4292,17 +4292,15 @@ void CGameContext::ClearPlot(int PlotID)
 
 bool CGameContext::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly)
 {
-	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, PlotDoorOnly);
+	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, Team, PlotDoorOnly);
 	if (Number == -1) // plot built laser wall
 		return true;
-	if (Number <= 0)
-		return false;
-	return Collision()->m_pSwitchers[Number].m_Status[Team];
+	return Number > 0;
 }
 
 void CGameContext::RemovePortalsFromPlot(int PlotID)
 {
-	if (PlotID >= 0 && PlotID <= Collision()->m_NumPlots)
+	if (PlotID >= PLOT_START && PlotID <= Collision()->m_NumPlots)
 	{
 		CPortal *pPortal = (CPortal *)m_World.FindFirst(CGameWorld::ENTTYPE_PORTAL);
 		for (; pPortal; pPortal = (CPortal *)pPortal->TypeNext())
