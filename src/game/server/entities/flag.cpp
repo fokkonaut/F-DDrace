@@ -21,6 +21,19 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
 
 void CFlag::Reset(bool Init)
 {
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (GameServer()->GetPlayerChar(i))
+		{
+			int Flag = m_Team == TEAM_RED ? HOOK_FLAG_RED : HOOK_FLAG_BLUE;
+			if (GameServer()->GetPlayerChar(i)->Core()->m_HookedPlayer == Flag)
+			{
+				GameServer()->GetPlayerChar(i)->Core()->m_HookedPlayer = -1;
+				GameServer()->GetPlayerChar(i)->Core()->m_HookState = HOOK_RETRACTED;
+			}
+		}
+	}
+
 	if (!Init)
 	{
 		if (Config()->m_SvFlagSounds)
