@@ -1206,7 +1206,6 @@ void CCharacter::ResetInput()
 
 void CCharacter::Tick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if(m_Paused)
 		return;
 
