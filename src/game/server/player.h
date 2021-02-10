@@ -333,7 +333,6 @@ public:
 	void SetWalletMoney(int64 Amount) { m_WalletMoney = Amount; }
 
 	char m_aSecurityPin[5];
-	int64 m_LastMoneyXPBomb;
 
 	// plot
 	void CancelPlotAuction();
@@ -364,6 +363,9 @@ public:
 	bool m_ResumeMoved;
 
 	bool m_SilentFarm;
+
+	int64 m_LastVote;
+	int64 m_LastMoneyXPBomb;
 
 	bool JoinChat(bool Local);
 	bool m_LocalChat;

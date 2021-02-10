@@ -2211,6 +2211,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
+			if(Config()->m_SvSpamprotection && pPlayer->m_LastVote && pPlayer->m_LastVote+Server()->TickSpeed()/4 > Server()->Tick())
+				return;
+
+			pPlayer->m_LastVote = Server()->Tick();
+
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 			CCharacter *pChr = pPlayer->GetCharacter();
 			CCharacter *pControlledTee = pPlayer->m_pControlledTee ? pPlayer->m_pControlledTee->GetCharacter() : 0;
@@ -2358,11 +2363,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Config()->m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode+Server()->TickSpeed()/4 > Server()->Tick())
 				return;
 
+			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
+
 			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID >= 0)
 				if (!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))
 					return;
 
-			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 			pPlayer->UpdatePlaytime();
 
 			if (pPlayer->m_TeeControlMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused())

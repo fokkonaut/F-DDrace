@@ -206,6 +206,7 @@ void CPlayer::Reset()
 	m_WalletMoney = 0;
 	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
+	m_LastVote = 0;
 	m_aSecurityPin[0] = '\0';
 	m_LocalChat = false;
 
