@@ -808,6 +808,7 @@ private:
 	static void ConTop5Spree(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
+	static void ConWanted(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConRainbowVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConBloodyVIP(IConsole::IResult* pResult, void* pUserData);

@@ -101,6 +101,7 @@ CHAT_COMMAND("top5spree", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Spree, 
 
 //police
 CHAT_COMMAND("policehelper", "s[add|remove] r[name]", CFGFLAG_CHAT, ConPoliceHelper, this, "Adds/removes player r to/from policehelpers", AUTHED_NO)
+CHAT_COMMAND("wanted", "", CFGFLAG_CHAT, ConWanted, this, "Shows a list of all players being wanted by police", AUTHED_NO)
 
 //vip
 CHAT_COMMAND("rainbow", "", CFGFLAG_CHAT, ConRainbowVIP, this, "Toggles rainbow for yourself", AUTHED_NO)

@@ -2738,6 +2738,54 @@ void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConWanted(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ WANTED ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Listing all wanted players:");
+
+	int Total = 0;
+	char aBuf[128];
+	int Bufcnt = 0;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->m_EscapeTime)
+		{
+			Total++;
+			const char* pName = pSelf->Server()->ClientName(i);
+			if (Bufcnt + str_length(pName) + 4 > 128)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+				Bufcnt = 0;
+			}
+			if (Bufcnt != 0)
+			{
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, ", %s", pName);
+				Bufcnt += 2 + str_length(pName);
+			}
+			else
+			{
+				str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+				Bufcnt += str_length(pName);
+			}
+		}
+	}
+	if (Bufcnt != 0)
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	if (Total)
+	{
+		str_format(aBuf, sizeof(aBuf), "%d wanted player%s", Total, Total == 1 ? "" : "s");
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "There are no wanted players right now");
+}
+
 void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
