@@ -92,9 +92,10 @@ void CEventHandler::Snap(int SnappingClient)
 					pDamage->m_ClientID = ClientID;
 				}
 				else if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD && SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->m_SilentFarm
-					&& GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->m_MoneyTile)
+					&& GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->m_MoneyTile
+					&& !GameServer()->m_apPlayers[SnappingClient]->IsPaused() && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS)
 				{
-					return;
+					continue;
 				}
 				else
 				{

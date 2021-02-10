@@ -2438,6 +2438,11 @@ void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->m_SilentFarm = pResult->GetInteger(0);
 	else
 		pPlayer->m_SilentFarm = !pPlayer->m_SilentFarm;
+
+	if (pPlayer->m_SilentFarm)
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will not receive sounds from the server while farming on a moneytile");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will receive all sounds again");
 }
 
 void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
