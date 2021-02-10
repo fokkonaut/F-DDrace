@@ -755,6 +755,43 @@ void CPlayer::FakeSnap()
 		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : 0;
 		((int*)pPlayerInfo)[4] = 0;
 	}
+
+	if (!m_pCharacter || m_pCharacter->NetworkClipped(m_ClientID))
+	{
+		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, m_FakeID, sizeof(CNetObj_Character)));
+		if(pCharacter)
+		{
+			FillFlagDropIndicator(pCharacter);
+			if (Server()->IsSevendown(m_ClientID))
+			{
+				int Health = pCharacter->m_Health;
+				int Armor = pCharacter->m_Armor;
+				int Offset = sizeof(CNetObj_CharacterCore) / 4;
+				((int*)pCharacter)[Offset+1] = Health;
+				((int*)pCharacter)[Offset+2] = Armor;
+			}
+		}
+	}
+}
+
+void CPlayer::FillFlagDropIndicator(CNetObj_Character *pCharacter)
+{
+	int Team = -1;
+	if (GetSpecMode() == SPEC_FLAGRED)
+		Team = TEAM_RED;
+	else if (GetSpecMode() == SPEC_FLAGBLUE)
+		Team = TEAM_BLUE;
+
+	if (Team != -1)
+	{
+		CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Team];
+		if (pFlag && !pFlag->IsAtStand() && !pFlag->GetCarrier())
+		{
+			int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
+			int Amount = 10 - (DroppedSinceSeconds*10/GameServer()->Config()->m_SvFlagRespawnDropped);
+			pCharacter->m_Health = pCharacter->m_Armor = Amount;
+		}
+	}
 }
 
 void CPlayer::SetFakeID()

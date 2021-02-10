@@ -294,6 +294,8 @@ public:
 	//flag name fix, because i dont send the gamemsgs for flag drop and capture, that means the names in the caption are wrong when owner changes
 	void ForceSetSpectatorID(int SpectatorID) { m_SpectatorID = SpectatorID; }
 
+	void FillFlagDropIndicator(CNetObj_Character *pCharacter);
+
 	//extras
 	int m_RainbowSpeed;
 	int m_RainbowColor;
