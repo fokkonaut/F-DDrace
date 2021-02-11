@@ -1332,6 +1332,14 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	if(Info.m_GotDDNetVersion)
+	{
+		if (OnClientDDNetVersionKnown(ClientID))
+			return; // kicked
+	}
+
 	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	if (Config()->m_SvWelcome[0] != 0)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
@@ -1361,13 +1369,6 @@ void CGameContext::OnClientEnter(int ClientID)
 			FakeInfo.m_aSkinPartColors[p] = 0;
 		}
 		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, ClientID);
-	}
-
-	IServer::CClientInfo Info;
-	Server()->GetClientInfo(ClientID, &Info);
-	if(Info.m_GotDDNetVersion)
-	{
-		OnClientDDNetVersionKnown(ClientID);
 	}
 }
 
@@ -1565,7 +1566,7 @@ const char *CGameContext::GetWhisper(char *pStr, int *pTarget)
 	return pStr;
 }
 
-void CGameContext::OnClientDDNetVersionKnown(int ClientID)
+bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 {
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);
@@ -1583,7 +1584,11 @@ void CGameContext::OnClientDDNetVersionKnown(int ClientID)
 
 	//autoban known bot versions
 	if(Config()->m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
+	{
 		Server()->Kick(ClientID, "unsupported client");
+		return true;
+	}
+	return false;
 }
 
 void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
