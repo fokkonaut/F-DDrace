@@ -3732,14 +3732,27 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 void CGameContext::OnPreShutdown()
 {
-	if (Config()->m_SvShutdownSaveTees)
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			SaveCharacter(i);
-	}
-	else
-	{
-		SaveOrDropWallet();
+		CPlayer *pPlayer = m_apPlayers[i];
+		if (!pPlayer)
+			continue;
+
+		// Move all money from wallet to bank
+		if (pPlayer->GetAccID() >= ACC_START)
+		{
+			pPlayer->BankTransaction(pPlayer->GetWalletMoney(), "automatic wallet to bank due to shutdown");
+			pPlayer->WalletTransaction(-pPlayer->GetWalletMoney());
+		}
+
+		if (pPlayer->GetCharacter())
+		{
+			// Either save the character and it's money or simply drop the money so it can get loaded on next server start
+			if (Config()->m_SvShutdownSaveTees)
+				SaveCharacter(i);
+			else
+				pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
+		}
 	}
 
 	LogoutAllAccounts();
@@ -4939,26 +4952,6 @@ void CGameContext::WriteMoneyListFile()
 		char aEntry[64];
 		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d%c", pMoney->GetPos().x/32.f, pMoney->GetPos().y/32.f, pMoney->GetAmount(), pMoney->TypeNext() ? ',' : '\0');
 		MoneyDropsFile << aEntry;
-	}
-}
-
-void CGameContext::SaveOrDropWallet()
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CPlayer *pPlayer = m_apPlayers[i];
-		if (!pPlayer)
-			continue;
-
-		// Move all money from wallet to bank, would be unfair to restart the server otherwise
-		// If player is not logged we just drop it so it will get reloaded after reload or on next server start
-		if (pPlayer->GetAccID() >= ACC_START)
-		{
-			pPlayer->BankTransaction(pPlayer->GetWalletMoney(), "automatic wallet to bank due to shutdown");
-			pPlayer->WalletTransaction(-pPlayer->GetWalletMoney());
-		}
-		else if (pPlayer->GetCharacter())
-			pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
 	}
 }
 
