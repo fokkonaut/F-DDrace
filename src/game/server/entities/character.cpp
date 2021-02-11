@@ -1718,9 +1718,6 @@ void CCharacter::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient) && !SendDroppedFlagCooldown(SnappingClient))
 		return;
 
-	if (m_pPlayer->GetCID() == 0)
-		dbg_msg("hi", "%d", SnappingClient);
-
 	if (SnappingClient > -1)
 	{
 		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
