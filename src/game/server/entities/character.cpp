@@ -1715,8 +1715,11 @@ void CCharacter::Snap(int SnappingClient)
 	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient))
+	if(NetworkClipped(SnappingClient) && !SendDroppedFlagCooldown(SnappingClient))
 		return;
+
+	if (m_pPlayer->GetCID() == 0)
+		dbg_msg("hi", "%d", SnappingClient);
 
 	if (SnappingClient > -1)
 	{
@@ -1845,9 +1848,32 @@ void CCharacter::Snap(int SnappingClient)
 		}
 	}
 	
-	if (SnappingClient == m_pPlayer->GetCID())
+	if (SendDroppedFlagCooldown(SnappingClient))
 	{
-		m_pPlayer->FillFlagDropIndicator(pCharacter);
+		int Team = -1;
+		if (m_pPlayer->GetSpecMode() == SPEC_FLAGRED)
+			Team = TEAM_RED;
+		else if (m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
+			Team = TEAM_BLUE;
+
+		if (Team != -1)
+		{
+			CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Team];
+			if (pFlag && !pFlag->GetCarrier())
+			{
+				if (!pFlag->IsAtStand())
+				{
+					int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
+					int Amount = 10 - (DroppedSinceSeconds*10/Config()->m_SvFlagRespawnDropped);
+					pCharacter->m_Health = pCharacter->m_Armor = Amount;
+				}
+				else
+				{
+					pCharacter->m_Health = pCharacter->m_Armor = 0;
+				}
+				pCharacter->m_AmmoCount = 0;
+			}
+		}
 	}
 
 	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused())
@@ -3523,6 +3549,13 @@ void CCharacter::HandleLastIndexTiles()
 bool CCharacter::SendingPortalCooldown()
 {
 	return GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick());
+}
+
+bool CCharacter::SendDroppedFlagCooldown(int SnappingClient)
+{
+	return SnappingClient == m_pPlayer->GetCID()
+		&& (m_pPlayer->GetSpecMode() == SPEC_FLAGRED || m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
+		&& (m_pPlayer->IsPaused() || m_pPlayer->GetTeam() == TEAM_SPECTATORS);
 }
 
 bool CCharacter::RequestMinigameChange(int RequestedMinigame)

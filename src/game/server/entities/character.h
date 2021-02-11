@@ -411,6 +411,8 @@ public:
 	bool m_CollectedPortalRifle;
 	bool SendingPortalCooldown();
 
+	bool SendDroppedFlagCooldown(int SnappingClient);
+
 	int m_HookPower;
 	bool m_IsRainbowHooked;
 
