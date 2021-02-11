@@ -1801,6 +1801,7 @@ void CCharacter::Snap(int SnappingClient)
 		Events &= ~COREEVENTFLAG_HOOK_HIT_NOHOOK;
 		Events &= ~COREEVENTFLAG_HOOK_ATTACH_PLAYER;
 
+		// 0.6 clients detect air jumps manually, so we pretend to never do an airjump :D
 		if (Server()->IsSevendown(SnappingClient))
 			pCharacter->m_Jumped &= ~2;
 	}
