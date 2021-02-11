@@ -1791,7 +1791,20 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_AmmoCount = 0;
 	pCharacter->m_Health = 0;
 	pCharacter->m_Armor = 0;
-	pCharacter->m_TriggeredEvents = m_TriggeredEvents;
+
+	int Events = m_TriggeredEvents;
+	if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->SilentFarmActive())
+	{
+		Events &= ~COREEVENTFLAG_GROUND_JUMP;
+		Events &= ~COREEVENTFLAG_AIR_JUMP;
+		Events &= ~COREEVENTFLAG_HOOK_ATTACH_GROUND;
+		Events &= ~COREEVENTFLAG_HOOK_HIT_NOHOOK;
+		Events &= ~COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+
+		if (Server()->IsSevendown(SnappingClient))
+			pCharacter->m_Jumped &= ~2;
+	}
+	pCharacter->m_TriggeredEvents = Events;
 
 	pCharacter->m_Weapon = GameServer()->GetWeaponType(m_ActiveWeapon);
 	pCharacter->m_AttackTick = m_AttackTick;

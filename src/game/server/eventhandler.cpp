@@ -51,6 +51,13 @@ void CEventHandler::Snap(int SnappingClient)
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
 			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, vec2(ev->m_X, ev->m_Y)) < 1500.0f)
 			{
+				if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD || m_aTypes[i] == NETEVENTTYPE_HAMMERHIT || m_aTypes[i] == NETEVENTTYPE_SPAWN)
+				{
+					CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+					if (pSnap && pSnap->SilentFarmActive())
+						continue;
+				}
+
 				if (m_aTypes[i] == NETEVENTTYPE_DEATH)
 				{
 					CNetEvent_Death *pDeath = (CNetEvent_Death *)&m_aData[m_aOffsets[i]];
@@ -90,12 +97,6 @@ void CEventHandler::Snap(int SnappingClient)
 
 					// reset id for others
 					pDamage->m_ClientID = ClientID;
-				}
-				else if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD && SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->m_SilentFarm
-					&& GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->m_MoneyTile
-					&& !GameServer()->m_apPlayers[SnappingClient]->IsPaused() && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS)
-				{
-					continue;
 				}
 				else
 				{

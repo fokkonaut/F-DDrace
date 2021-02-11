@@ -2015,6 +2015,11 @@ bool CPlayer::CheckClanProtection()
 	return true;
 }
 
+bool CPlayer::SilentFarmActive()
+{
+	return m_SilentFarm && m_pCharacter && m_pCharacter->m_MoneyTile && !m_Paused && m_Team != TEAM_SPECTATORS;
+}
+
 void CPlayer::OnSetAfk()
 {
 	// leave current minigame

@@ -363,6 +363,7 @@ public:
 	bool m_ResumeMoved;
 
 	bool m_SilentFarm;
+	bool SilentFarmActive();
 
 	int64 m_LastVote;
 	int64 m_LastMoneyXPBomb;
