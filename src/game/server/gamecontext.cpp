@@ -1332,13 +1332,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
-	IServer::CClientInfo Info;
-	Server()->GetClientInfo(ClientID, &Info);
-	if(Info.m_GotDDNetVersion)
-	{
-		OnClientDDNetVersionKnown(ClientID);
-	}
-
 	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	if (Config()->m_SvWelcome[0] != 0)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
@@ -1368,6 +1361,13 @@ void CGameContext::OnClientEnter(int ClientID)
 			FakeInfo.m_aSkinPartColors[p] = 0;
 		}
 		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, ClientID);
+	}
+
+	IServer::CClientInfo Info;
+	Server()->GetClientInfo(ClientID, &Info);
+	if(Info.m_GotDDNetVersion)
+	{
+		OnClientDDNetVersionKnown(ClientID);
 	}
 }
 
