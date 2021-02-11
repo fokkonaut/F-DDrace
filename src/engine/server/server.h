@@ -309,7 +309,7 @@ public:
 	void PumpNetwork();
 
 	virtual void ChangeMap(const char *pMap);
-	const char *GetMapName();
+	virtual const char *GetMapName();
 	int LoadMap(const char *pMapName);
 
 	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole);

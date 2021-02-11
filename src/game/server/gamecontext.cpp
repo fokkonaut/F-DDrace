@@ -1132,7 +1132,7 @@ void CGameContext::OnTick()
 	{
 		dbg_msg("saves", "removed all shutdown save files");
 		char aPath[IO_MAX_PATH_LENGTH];
-		str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
 		Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, RemoveShutdownSaves, this);
 	}
 
@@ -4147,7 +4147,7 @@ void CGameContext::ReadPlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Config()->m_SvMap, ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetMapName(), ID);
 	std::fstream PlotFile(aBuf);
 
 	for (int i = 0; i < NUM_PLOT_VARIABLES; i++)
@@ -4168,7 +4168,7 @@ void CGameContext::WritePlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Config()->m_SvMap, ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetMapName(), ID);
 	std::ofstream PlotFile(aBuf);
 
 	if (PlotFile.is_open())
@@ -4901,7 +4901,7 @@ void CGameContext::ReadMoneyListFile()
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
 	std::fstream MoneyDropsFile(aBuf);
 	getline(MoneyDropsFile, data);
 	const char *pStr = data.c_str();
@@ -4930,7 +4930,7 @@ void CGameContext::ReadMoneyListFile()
 void CGameContext::WriteMoneyListFile()
 {
 	char aFile[256];
-	str_format(aFile, sizeof(aFile), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
+	str_format(aFile, sizeof(aFile), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
 	std::ofstream MoneyDropsFile(aFile);
 
 	CMoney *pMoney = (CMoney *)m_World.FindFirst(CGameWorld::ENTTYPE_MONEY);
@@ -4985,7 +4985,7 @@ void CGameContext::SaveCharacter(int ClientID)
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap, aAddrStr);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), aAddrStr);
 	CSaveTee SaveTee(true);
 	SaveTee.SaveFile(aFilename, pChr);
 
@@ -5003,7 +5003,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	pPlayer->m_CheckedShutdownSaved = true;
 
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
 
 	m_ShutdownSave.m_ClientID = ClientID;
 	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, CheckShutdownSavedCallback, this);
@@ -5022,7 +5022,7 @@ void CGameContext::CheckShutdownSaved(int ClientID)
 	SwapAddrSeparator(aAddrStr);
 
 	// Get path and load
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap, aAddrStr);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), aAddrStr);
 	CSaveTee SaveTee(true);
 	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
 	{
@@ -5068,7 +5068,7 @@ int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageT
 	if (!IsDir && str_endswith(pName, ".save"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pSelf->Config()->m_SvMap, pName);
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pSelf->Server()->GetMapName(), pName);
 		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 	}
 	return 0;
@@ -5086,18 +5086,18 @@ void CGameContext::CreateFolders()
 
 	// plots
 	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Config()->m_SvMap);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// money drops
 	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Config()->m_SvMap);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// saved tee
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Config()->m_SvMap);
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
@@ -5496,18 +5496,18 @@ void CGameContext::ConnectHouseDummy(int Type)
 
 void CGameContext::ConnectDefaultDummies()
 {
-	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
+	if (!str_comp(Server()->GetMapName(), "ChillBlock5"))
 	{
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_POLICE);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_BLOCKER);
 		ConnectDummy(DUMMYMODE_CHILLBLOCK5_RACER);
 	}
-	else if (!str_comp(Config()->m_SvMap, "BlmapChill"))
+	else if (!str_comp(Server()->GetMapName(), "BlmapChill"))
 	{
 		ConnectDummy(DUMMYMODE_BLMAPCHILL_POLICE);
 	}
-	else if (!str_comp(Config()->m_SvMap, "blmapV3RoyalX"))
+	else if (!str_comp(Server()->GetMapName(), "blmapV3RoyalX"))
 	{
 		ConnectDummy(DUMMYMODE_V3_BLOCKER);
 	}
@@ -5527,17 +5527,17 @@ void CGameContext::ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pU
 
 void CGameContext::SetMapSpecificOptions()
 {
-	if (!str_comp(Config()->m_SvMap, "ChillBlock5"))
+	if (!str_comp(Server()->GetMapName(), "ChillBlock5"))
 	{
 		Config()->m_SvV3OffsetX = 374;
 		Config()->m_SvV3OffsetY = 59;
 	}
-	else if (!str_comp(Config()->m_SvMap, "blmapV3RoyalX"))
+	else if (!str_comp(Server()->GetMapName(), "blmapV3RoyalX"))
 	{
 		Config()->m_SvV3OffsetX = 97;
 		Config()->m_SvV3OffsetY = 19;
 	}
-	else if (!str_comp(Config()->m_SvMap, "BlmapChill"))
+	else if (!str_comp(Server()->GetMapName(), "BlmapChill"))
 	{
 		Config()->m_SvV3OffsetX = 696;
 		Config()->m_SvV3OffsetY = 617;
