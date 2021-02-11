@@ -3339,9 +3339,6 @@ void CCharacter::FDDraceInit()
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
 
-	for (int i = 0; i < NUM_HOUSES; i++)
-		GameServer()->m_pHouses[i]->Reset(m_pPlayer->GetCID());
-
 	m_LastTouchedSwitcher = -1;
 	m_LastTouchedPortalBy = -1;
 

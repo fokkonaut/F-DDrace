@@ -190,6 +190,9 @@ void CPlayer::Reset()
 		m_aSameIP[i] = false;
 	}
 
+	for (int i = 0; i < NUM_HOUSES; i++)
+		GameServer()->m_pHouses[i]->Reset(m_ClientID);
+
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;
 	m_TeeControlMode = false;
