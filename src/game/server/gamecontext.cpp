@@ -1576,18 +1576,19 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	else
 		dbg_msg("ddnet", "cid=%d ddnet_ver=%d version=%x", ClientID, ClientVersion, Server()->GetClientVersion(ClientID));
 
-	// update player map to send teams state
-	m_World.ForceUpdatePlayerMap(ClientID);
-
-	//update his teams state
-	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
-
 	//autoban known bot versions
 	if(Config()->m_SvBannedVersions[0] != '\0' && IsVersionBanned(ClientVersion))
 	{
 		Server()->Kick(ClientID, "unsupported client");
 		return true;
 	}
+
+	// update player map to send teams state
+	m_World.ForceUpdatePlayerMap(ClientID);
+
+	//update his teams state
+	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+
 	return false;
 }
 
