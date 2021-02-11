@@ -1713,7 +1713,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (UpdateInfo)
 				pPlayer->UpdateInformation();
 		}
-		else if (MsgID == 26 + NUM_NETMSGTYPES) // CL_ISDDNET
+		else if (MsgID == 26 + NUM_NETMSGTYPES) // NETMSGTYPE_CL_ISDDNET
 		{
 			IServer::CClientInfo Info;
 			Server()->GetClientInfo(ClientID, &Info);

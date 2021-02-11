@@ -1084,7 +1084,7 @@ static inline int MsgFromSevendown(int Msg, bool System)
 			Msg = NETMSGTYPE_CL_KILL;
 		else if(Msg >= 23 && Msg <= 25)
 			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 23;
-		else if(Msg == 26) // CL_ISDDNET
+		else if(Msg == 26) // NETMSGTYPE_CL_ISDDNET
 			Msg += NUM_NETMSGTYPES;
 		else if(Msg < OFFSET_UUID)
 			return -1;
