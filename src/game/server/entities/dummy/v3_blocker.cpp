@@ -15,7 +15,7 @@ void CDummyV3Blocker::OnTick()
 	int V3_OFFSET_X = GameServer()->Config()->m_SvV3OffsetX;
 	int V3_OFFSET_Y = GameServer()->Config()->m_SvV3OffsetY;
 
-	if (!str_comp(GameServer()->Config()->m_SvMap, "blmapV3RoyalX"))
+	if (!str_comp(Server()->GetMapName(), "blmapV3RoyalX"))
 	{
 		if (Y > 50 || X > 150 || m_pCharacter->IsSolo())
 		{
