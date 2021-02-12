@@ -3514,6 +3514,15 @@ void CGameContext::OnInit()
 
 	// F-DDrace
 
+	for (int i = 0; i < NUM_HOUSES; i++)
+	{
+		if (m_pHouses[i])
+			delete m_pHouses[i];
+	}
+	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
+	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
+	m_pHouses[HOUSE_BANK] = new CBank(this);
+
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
 	for (int i = 0; i < NUM_MINIGAMES; i++)
 		m_aMinigameDisabled[i] = false;
@@ -3565,15 +3574,6 @@ void CGameContext::OnInit()
 
 		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
 	}
-
-	for (int i = 0; i < NUM_HOUSES; i++)
-	{
-		if (m_pHouses[i])
-			delete m_pHouses[i];
-	}
-	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
-	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
-	m_pHouses[HOUSE_BANK] = new CBank(this);
 
 	ReadMoneyListFile();
 
