@@ -5214,6 +5214,18 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds)
 	return true;
 }
 
+bool CGameContext::ForceJailRelease(int ClientID)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if (!pPlayer || !pPlayer->m_JailTime)
+		return false;
+
+	pPlayer->m_JailTime = 1;
+	SendChatTarget(ClientID, "You were released from jail");
+	pPlayer->KillCharacter(WEAPON_GAME);
+	return true;
+}
+
 void CGameContext::SavePlayer(int ClientID)
 {
 	if (!m_apPlayers[ClientID])

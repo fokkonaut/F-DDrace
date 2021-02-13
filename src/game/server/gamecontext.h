@@ -645,6 +645,7 @@ public:
 	// police
 	void SendChatPolice(const char *pMessage);
 	bool JailPlayer(int ClientID, int Seconds);
+	bool ForceJailRelease(int ClientID);
 
 	// gangster
 	void ProcessSpawnBlockProtection(int ClientID);
