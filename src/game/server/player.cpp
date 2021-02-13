@@ -1536,7 +1536,7 @@ int CPlayer::GetAccID()
 
 void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEuro)
 {
-	if (GetAccID() < ACC_START)
+	if (GetAccID() < ACC_START || Amount == 0)
 		return;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
@@ -1557,6 +1557,8 @@ void CPlayer::BankTransaction(int64 Amount, const char *pDescription, bool IsEur
 
 void CPlayer::WalletTransaction(int64 Amount, const char *pDescription)
 {
+	if (Amount == 0)
+		return;
 	m_WalletMoney += Amount;
 	ApplyMoneyHistoryMsg(TRANSACTION_WALLET, Amount, pDescription);
 }
