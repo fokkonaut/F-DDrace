@@ -5195,11 +5195,11 @@ void CGameContext::SendChatPolice(const char *pMessage)
 			SendChatTarget(i, aBuf);
 }
 
-void CGameContext::JailPlayer(int ClientID, int Seconds)
+bool CGameContext::JailPlayer(int ClientID, int Seconds)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer || Seconds <= 0)
-		return;
+		return false;
 
 	// make sure we are not saved as killer for someone else after we got arrested, so we cant take the flag to the jail
 	UnsetKiller(ClientID);
@@ -5208,6 +5208,7 @@ void CGameContext::JailPlayer(int ClientID, int Seconds)
 	pPlayer->m_EscapeTime = 0;
 	if(pPlayer->GetCharacter())
 		pPlayer->KillCharacter(WEAPON_GAME);
+	return true;
 }
 
 void CGameContext::SavePlayer(int ClientID)

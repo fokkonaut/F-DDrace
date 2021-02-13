@@ -1640,6 +1640,37 @@ void CGameContext::ConSetMinigame(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	int Minutes = pResult->GetInteger(1);
+	if (pSelf->JailPlayer(Victim, Minutes * 60))
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d minutes", pSelf->Server()->ClientName(Victim), Minutes);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes", Minutes);
+		pSelf->SendChatTarget(Victim, aBuf);
+	}
+}
+
+void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->GetVictim();
+	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
+	if (!pPlayer || !pPlayer->m_JailTime)
+		return;
+
+	pPlayer->m_JailTime = 1;
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' was released from jail", pSelf->Server()->ClientName(Victim));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

@@ -2746,7 +2746,7 @@ void CGameContext::ConWanted(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ WANTED ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Listing all wanted players:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Listing all players that are wanted by the police:");
 
 	int Total = 0;
 	char aBuf[128];
