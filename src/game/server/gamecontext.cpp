@@ -513,7 +513,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			Server()->SendMsg(&Msg2, MSGFLAG_VITAL, ChatterClientID);
 		}
 		else
+		{
+			Server()->Translate(Msg.m_ClientID, ChatterClientID);
 			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
+		}
 
 		// send to target
 		str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(ChatterClientID), aText);
@@ -530,7 +533,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
 		}
 		else
+		{
+			Server()->Translate(Msg.m_TargetID, To);
 			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
+		}
 	}
 
 	#undef SEND
