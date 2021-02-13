@@ -1664,7 +1664,9 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer || !pPlayer->m_JailTime)
 		return;
 
+	// release
 	pPlayer->m_JailTime = 1;
+	pPlayer->KillCharacter(WEAPON_GAME);
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' was released from jail", pSelf->Server()->ClientName(Victim));
