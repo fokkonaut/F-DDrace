@@ -3410,6 +3410,21 @@ void CGameContext::OnInit()
 #endif
 		m_pScore = new CFileScore(this);
 
+	// F-DDrace
+	Collision()->m_vTiles.clear();
+	Collision()->m_vTiles.resize(NUM_INDICES);
+
+	for (int i = 0; i < NUM_HOUSES; i++)
+	{
+		if (m_pHouses[i])
+			delete m_pHouses[i];
+	}
+	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
+	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
+	m_pHouses[HOUSE_BANK] = new CBank(this);
+
+	InitPlots();
+
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
 	CTile *pTiles = (CTile *)Kernel()->RequestInterface<IMap>()->GetData(pTileMap->m_Data);
@@ -3420,12 +3435,6 @@ void CGameContext::OnInit()
 		pFront = (CTile*)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.FrontLayer()->m_Front);
 	if (m_Layers.SwitchLayer())
 		pSwitch = (CSwitchTile*)Kernel()->RequestInterface<IMap>()->GetData(m_Layers.SwitchLayer()->m_Switch);
-
-	// F-DDrace
-	Collision()->m_vTiles.clear();
-	Collision()->m_vTiles.resize(NUM_INDICES);
-
-	InitPlots();
 
 	for (int y = 0; y < pTileMap->m_Height; y++)
 	{
@@ -3522,15 +3531,6 @@ void CGameContext::OnInit()
 
 
 	// F-DDrace
-
-	for (int i = 0; i < NUM_HOUSES; i++)
-	{
-		if (m_pHouses[i])
-			delete m_pHouses[i];
-	}
-	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
-	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
-	m_pHouses[HOUSE_BANK] = new CBank(this);
 
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
 	for (int i = 0; i < NUM_MINIGAMES; i++)
