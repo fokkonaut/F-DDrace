@@ -1009,14 +1009,8 @@ void CDummyBlmapChillPolice::OnTick()
 		 * * * * * * * */
 		if (X > 363 && X < 450 && Y < 450 && Y > 380)
 		{
-			// if (m_OldPoliceMoves)
-			// 	OldPoliceMoves();
-			// else
-			// 	NewPoliceMoves();
-			// if (TicksPassed(200))
-			// 	if (random(200))
-			// 		m_OldPoliceMoves ^= true;
-			NewPoliceMoves();
+			//NewPoliceMoves();
+			OldPoliceMoves();
 		}
 	}
 	else
