@@ -9,9 +9,8 @@
 #include "dragger.h"
 #include "character.h"
 
-CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
-		int CaughtTeam, int Layer, int Number) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAGGER, Pos)
+CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int CaughtTeam, int Layer, int Number)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAGGER, Pos)
 {
 	m_Target = 0;
 	m_Layer = Layer;
@@ -40,8 +39,7 @@ void CDragger::Move()
 	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	CCharacter *TempEnts[MAX_CLIENTS];
 
-	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvDraggerRange,
-			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvDraggerRange, (CEntity**)m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
 
 	int Id = -1;
@@ -55,17 +53,14 @@ void CDragger::Move()
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-		if (m_Layer == LAYER_SWITCH && m_Number
-				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
+		if (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-		int Res =
-				m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-								Temp->GetPos(), 0, 0) :
-						GameServer()->Collision()->IntersectNoLaser(m_Pos,
-								Temp->GetPos(), 0, 0);
+
+		int Res = m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Temp->GetPos(), 0, 0)
+			: GameServer()->Collision()->IntersectNoLaser(m_Pos, Temp->GetPos(), 0, 0);
 
 		if (Res == 0)
 		{
@@ -112,13 +107,9 @@ void CDragger::Drag()
 			if (!Target)
 				continue;
 
-			int Res = 0;
-			if (!m_NW)
-				Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
-						Target->GetPos(), 0, 0);
-			else
-				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
-						Target->GetPos(), 0, 0);
+			int Res = m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Target->GetPos(), 0, 0)
+				: GameServer()->Collision()->IntersectNoLaser(m_Pos, Target->GetPos(), 0, 0);
+
 			if (Res || length(m_Pos - Target->GetPos()) > Config()->m_SvDraggerRange)
 			{
 				Target = 0;
@@ -146,9 +137,9 @@ void CDragger::Reset()
 
 void CDragger::Tick()
 {
-	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
-			m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
+	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
+
 	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
