@@ -1319,13 +1319,20 @@ void CCharacter::TickDefered()
 
 		// Some sounds are triggered client-side for the acting player so we need to avoid duplicating them
 		// hook sounds are clientside in 0.7, thats why we pass true here, to have sevendown only
-		Mask128 TeamMask = Teams()->TeamMask(Team(), -1, CID, true);
-		Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID, true);
 
-		if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
-		if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask);
-		if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
-		if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
+		if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
+		{
+			Mask128 TeamMask = Teams()->TeamMask(Team(), -1, CID, true);
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask);
+		}
+
+		if (Events&(COREEVENTFLAG_GROUND_JUMP|COREEVENTFLAG_HOOK_ATTACH_GROUND|COREEVENTFLAG_HOOK_HIT_NOHOOK))
+		{
+			Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID, true);
+			if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
+			if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
+			if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
+		}
 	}
 
 	if(Events&COREEVENTFLAG_HOOK_ATTACH_FLAG)
