@@ -415,6 +415,8 @@ public:
 
 	int m_HookPower;
 	bool m_IsRainbowHooked;
+	int GetPowerHooked();
+	int m_PowerHookedID;
 
 	int m_SavedGamemode;
 	int m_MaxJumps;

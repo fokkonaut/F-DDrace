@@ -1761,7 +1761,7 @@ void CCharacter::Snap(int SnappingClient)
 		for (int i = 0; i < 3; i++)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
-	else if (m_Bloody || m_pPlayer->IsHooked(BLOODY))
+	else if (m_Bloody || GetPowerHooked() == BLOODY)
 	{
 		if (Server()->Tick() % 3 == 0)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -3303,6 +3303,7 @@ void CCharacter::FDDraceInit()
 	m_StrongBloody = false;
 	m_ScrollNinja = false;
 	m_HookPower = HOOK_NORMAL;
+	m_PowerHookedID = -1;
 	m_IsRainbowHooked = false;
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aSpreadWeapon[i] = false;
@@ -3523,11 +3524,8 @@ void CCharacter::FDDraceTick()
 		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 	}
 
-	if (m_IsRainbowHooked && !m_pPlayer->IsHooked(RAINBOW))
-	{
-		m_IsRainbowHooked = false;
+	if (m_IsRainbowHooked && !m_pPlayer->m_InfRainbow && !m_Rainbow && GetPowerHooked() != RAINBOW)
 		m_pPlayer->ResetSkin();
-	}
 
 	// update
 	m_DrawEditor.Tick();
@@ -3571,6 +3569,21 @@ bool CCharacter::SendDroppedFlagCooldown(int SnappingClient)
 	return SnappingClient == m_pPlayer->GetCID()
 		&& (m_pPlayer->GetSpecMode() == SPEC_FLAGRED || m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
 		&& (m_pPlayer->IsPaused() || m_pPlayer->GetTeam() == TEAM_SPECTATORS);
+}
+
+int CCharacter::GetPowerHooked()
+{
+	if (m_PowerHookedID == -1)
+		return HOOK_NORMAL;
+
+	CCharacter *pHooker = GameServer()->GetPlayerChar(m_PowerHookedID);
+	if (!pHooker || pHooker->Core()->m_HookedPlayer != m_pPlayer->GetCID())
+	{
+		m_PowerHookedID = -1;
+		return HOOK_NORMAL;
+	}
+
+	return pHooker->m_HookPower;
 }
 
 bool CCharacter::RequestMinigameChange(int RequestedMinigame)
@@ -4040,6 +4053,9 @@ void CCharacter::OnPlayerHook()
 	CCharacter *pHookedTee = GameServer()->GetPlayerChar(m_Core.m_HookedPlayer);
 	if (!pHookedTee)
 		return;
+
+	if (m_HookPower != HOOK_NORMAL)
+		pHookedTee->m_PowerHookedID = m_pPlayer->GetCID();
 
 	// set hook extra stuff
 	if (m_HookPower == ATOM && !pHookedTee->m_Atom)

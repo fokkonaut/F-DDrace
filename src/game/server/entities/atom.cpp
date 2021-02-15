@@ -38,7 +38,7 @@ void CAtom::Tick()
 	{
 		CCharacter* pChr = GameServer()->GetPlayerChar(m_Owner);
 		CPlayer *pPlayer = GameServer()->m_apPlayers[m_Owner];
-		if (!pPlayer || (pChr && !pChr->m_Atom && !pPlayer->IsHooked(ATOM)))
+		if (!pPlayer || (pChr && !pChr->m_Atom && pChr->GetPowerHooked() != ATOM))
 		{
 			Reset();
 			return;

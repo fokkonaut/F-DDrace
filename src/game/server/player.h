@@ -358,7 +358,6 @@ public:
 	int m_SpawnBlockScore;
 
 	//others
-	bool IsHooked(int Power = -1);
 	void SetPlaying();
 	bool m_ResumeMoved;
 

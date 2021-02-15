@@ -1490,11 +1490,14 @@ void CPlayer::SpectatePlayerName(const char* pName)
 
 void CPlayer::RainbowTick()
 {
-	bool IsRainbowHooked = IsHooked(RAINBOW);
-	if (Server()->Tick() % 6 != 0 || (!m_InfRainbow && !IsRainbowHooked && !(m_pCharacter && m_pCharacter->m_Rainbow)))
+	if (Server()->Tick() % 6 != 0 || !m_pCharacter)
 		return;
 
-	if (m_pCharacter && IsRainbowHooked)
+	bool IsRainbowHooked = m_pCharacter->GetPowerHooked() == RAINBOW;
+	if (!m_InfRainbow && !m_pCharacter->m_Rainbow && !IsRainbowHooked)
+		return;
+
+	if (IsRainbowHooked)
 		m_pCharacter->m_IsRainbowHooked = true;
 
 	m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
@@ -1515,7 +1518,7 @@ void CPlayer::RainbowTick()
 
 	// only send rainbow updates to people close to you, to reduce network traffic
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (GameServer()->m_apPlayers[i] && m_pCharacter && !((CEntity *)m_pCharacter)->NetworkClipped(i))
+		if (GameServer()->m_apPlayers[i] && !((CEntity *)m_pCharacter)->NetworkClipped(i))
 			GameServer()->SendSkinChange(Info, m_ClientID, i);
 }
 
@@ -1841,20 +1844,6 @@ bool CPlayer::IsExpiredItem(int Item)
 			}
 		}
 		return true;
-	}
-	return false;
-}
-
-bool CPlayer::IsHooked(int Power)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CCharacter* pChr = GameServer()->GetPlayerChar(i);
-		if (!pChr)
-			continue;
-
-		if (pChr->Core()->m_HookedPlayer == m_ClientID)
-			return Power >= 0 ? pChr->m_HookPower == Power : true;
 	}
 	return false;
 }

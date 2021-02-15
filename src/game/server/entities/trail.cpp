@@ -35,7 +35,7 @@ void CTrail::Tick()
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner);
 		CPlayer *pPlayer = GameServer()->m_apPlayers[m_Owner];
-		if (!pPlayer || (pChr && !pChr->m_Trail && !pPlayer->IsHooked(TRAIL)))
+		if (!pPlayer || (pChr && !pChr->m_Trail && pChr->GetPowerHooked() != TRAIL))
 		{
 			Reset();
 			return;
