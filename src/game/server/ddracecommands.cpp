@@ -1660,7 +1660,6 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
-	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if (!pSelf->ForceJailRelease(Victim))
 		return;
 
