@@ -431,7 +431,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 	if(m_pWorld)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < m_Id; i++)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
 			if(!pCharCore)
@@ -444,6 +444,7 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+			vec2 otherDir = -Dir;
 
 			if(m_pWorld->m_Tuning.m_PlayerCollision && m_pTeams->CanCollide(m_Id, i) && Distance < PHYS_SIZE*1.25f && Distance > 0.0f)
 			{
@@ -458,15 +459,24 @@ void CCharacterCore::Tick(bool UseInput)
 				m_Vel += Dir*a*(Velocity*0.75f);
 				m_Vel *= 0.85f;
 
+
+				// make sure that we don't add excess force by checking the
+				// direction against the current velocity. if not zero.
+				if (length(pCharCore->m_Vel) > 0.0001)
+					Velocity = 1-(dot(normalize(pCharCore->m_Vel), otherDir)+1)/2;
+
+				pCharCore->m_Vel += otherDir*a*(Velocity*0.75f);
+				pCharCore->m_Vel *= 0.85f;
+
 				// F-DDrace // body check
 				// reset last hit weapon if someone new touches us
-				if (m_pCollision->m_pConfig->m_SvTouchedKills)
-				{
-					if (m_Killer.m_ClientID != pCharCore->m_Id)
-						m_Killer.m_Weapon = -1;
+				// if (m_pCollision->m_pConfig->m_SvTouchedKills)
+				// {
+				// 	if (m_Killer.m_ClientID != pCharCore->m_Id)
+				// 		m_Killer.m_Weapon = -1;
 
-					m_Killer.m_ClientID = pCharCore->m_Id;
-				}
+				// 	m_Killer.m_ClientID = pCharCore->m_Id;
+				// }
 			}
 
 			// handle hook influence
@@ -481,6 +491,29 @@ void CCharacterCore::Tick(bool UseInput)
 
 					// add a little bit force to the guy who has the grip
 					m_HookDragVel -= Dir*Accel*0.25f;
+
+					if (m_pCollision->m_pConfig->m_SvWeakHook)
+					{
+						pCharCore->AddDragVelocity();
+						pCharCore->ResetDragVelocity();
+						AddDragVelocity();
+						ResetDragVelocity();
+					}
+				}
+			}
+
+			// handle hook influence
+			if(pCharCore->m_Hook && pCharCore->m_HookedPlayer == m_Id && m_pWorld->m_Tuning.m_PlayerHooking)
+			{
+				if(Distance > PHYS_SIZE*1.50f) // TODO: fix tweakable variable
+				{
+					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
+
+					// add force to the hooked player
+					m_HookDragVel += otherDir*Accel*1.5f;
+
+					// add a little bit force to the guy who has the grip
+					pCharCore->m_HookDragVel -= otherDir*Accel*0.25f;
 
 					if (m_pCollision->m_pConfig->m_SvWeakHook)
 					{
