@@ -2056,18 +2056,11 @@ void str_append(char *dst, const char *src, int dst_size)
 	dst[dst_size-1] = 0; /* assure null termination */
 }
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation"
-#endif
 void str_copy(char *dst, const char *src, int dst_size)
 {
 	strncpy(dst, src, dst_size);
 	dst[dst_size-1] = 0; /* assure null termination */
 }
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
 {
