@@ -585,12 +585,12 @@ void CCharacterCore::Move()
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
 				if(!pCharCore || pCharCore == this || (!pCharCore->m_Collision || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p))))
 					continue;
-				float D = distance(Pos, pCharCore->m_Pos);
-				if(D < PHYS_SIZE && D >= 0.0f)
+				float D = distance_squared(Pos, pCharCore->m_Pos);
+				if(D < PHYS_SIZE*PHYS_SIZE && D >= 0.0f)
 				{
 					if(a > 0.0f)
 						m_Pos = LastPos;
-					else if(distance(NewPos, pCharCore->m_Pos) > D)
+					else if(distance_squared(NewPos, pCharCore->m_Pos) > D)
 						m_Pos = NewPos;
 					return;
 				}

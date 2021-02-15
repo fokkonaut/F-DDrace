@@ -60,6 +60,13 @@ inline T distance(const vector2_base<T> &a, const vector2_base<T> &b)
 }
 
 template<typename T>
+inline T distance_squared(const vector2_base<T> &a, const vector2_base<T> &b)
+{
+	vector2_base<T> v = a-b;
+	return v.x*v.x + v.y*v.y;
+}
+
+template<typename T>
 inline T dot(const vector2_base<T> &a, const vector2_base<T> &b)
 {
 	return a.x*b.x + a.y*b.y;
