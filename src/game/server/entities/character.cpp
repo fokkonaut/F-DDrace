@@ -3525,7 +3525,10 @@ void CCharacter::FDDraceTick()
 	}
 
 	if (m_IsRainbowHooked && !m_pPlayer->m_InfRainbow && !m_Rainbow && GetPowerHooked() != RAINBOW)
+	{
+		m_IsRainbowHooked = false;
 		m_pPlayer->ResetSkin();
+	}
 
 	// update
 	m_DrawEditor.Tick();
