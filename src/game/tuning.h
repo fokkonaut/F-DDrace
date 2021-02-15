@@ -62,12 +62,12 @@ MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
 
 MACRO_TUNING_PARAM(TaserFireDelay, taser_fire_delay, 1000, "Delay of firing taser")
+MACRO_TUNING_PARAM(PortalRifleFireDelay, portalrifle_fire_delay, 125, "Delay of using portal rifle")
 MACRO_TUNING_PARAM(HeartGunFireDelay, heart_gun_fire_delay, 125, "Delay of firing heart gun")
 MACRO_TUNING_PARAM(PlasmaRifleFireDelay, plasma_rifle_fire_delay, 500, "Delay of firing plasma rifle")
 MACRO_TUNING_PARAM(StraightGrenadeFireDelay, straight_grenade_fire_delay, 500, "Delay of firing straight grenade")
 MACRO_TUNING_PARAM(TelekinesisFireDelay, telekinesis_fire_delay, 125, "Delay of using telekinesis")
 MACRO_TUNING_PARAM(LightsaberFireDelay, lightsaber_fire_delay, 500, "Delay of using lightsaber")
-MACRO_TUNING_PARAM(PortalRifleFireDelay, portalrifle_fire_delay, 125, "Delay of using portal rifle")
 MACRO_TUNING_PARAM(ProjectileRifleFireDelay, projectile_rifle_fire_delay, 100, "Delay of firing projectile rifle")
 MACRO_TUNING_PARAM(BallGrenadeFireDelay, ball_grenade_fire_delay, 600, "Delay of firing ball grenade")
 MACRO_TUNING_PARAM(EditorFireDelay, editor_fire_delay, 0, "UNUSED") // unused, just to not break the order here
