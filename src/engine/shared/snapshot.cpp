@@ -724,7 +724,8 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 	}
 
 	// bubble sort by keys
-	bool Sorting = true;
+	// F-DDrace: no sorting here, client does that on its own and we try to save as many ressources as we can
+	/*bool Sorting = true;
 	while(Sorting)
 	{
 		Sorting = false;
@@ -739,7 +740,7 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 				tl_swap(aItemSizes[i], aItemSizes[i-1]);
 			}
 		}
-	}
+	}*/
 
 	// copy sorted items
 	int OffsetCur = 0;
