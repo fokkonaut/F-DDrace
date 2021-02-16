@@ -20,15 +20,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, in
 	m_NW = NW;
 	mem_zero(m_apTarget, sizeof(m_apTarget));
 	mem_zero(m_aapSoloEnts, sizeof(m_aapSoloEnts));
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_aIDs[i] = Server()->SnapNewID();
 	GameWorld()->InsertEntity(this);
-}
-
-CDragger::~CDragger()
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		Server()->SnapFreeID(m_aIDs[i]);
 }
 
 void CDragger::Move(int Team)
@@ -164,82 +156,77 @@ void CDragger::Tick()
 
 void CDragger::Snap(int SnappingClient)
 {
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.GetTeamState(i) != CGameTeams::TEAMSTATE_EMPTY)
-			Snap(SnappingClient, i);
-}
+	CCharacter *pChr = SnappingClient > -1 ? GameServer()->GetPlayerChar(SnappingClient) : 0;
 
-void CDragger::Snap(int SnappingClient, int Team)
-{
+	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused())
+		&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
+		pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
+
+	int Team = pChr ? pChr->Team() : 0;
 	CCharacter *pTarget = m_apTarget[Team];
-
-	for (int i = -1; i < MAX_CLIENTS; i++)
+	if (pChr && pChr->IsSolo())
 	{
-		if (i >= 0)
+		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			pTarget = m_aapSoloEnts[Team][i];
-			if (!pTarget)
-				continue;
+			if (m_aapSoloEnts[Team][i] == pChr)
+			{
+				pTarget = m_aapSoloEnts[Team][i];
+				break;
+			}
 		}
-
-		if (pTarget)
-		{
-			if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, pTarget->GetPos()))
-				continue;
-		}
-		else if (NetworkClipped(SnappingClient, m_Pos))
-			continue;
-
-		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
-
-		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused())
-			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
-			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
-
-		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number	&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
-			continue;
-		if (pChr && pChr->IsAlive())
-		{
-			if (pChr->Team() != Team)
-				continue;
-		}
-		else
-		{
-			// send to spectators only active draggers and some inactive from team 0
-			if (!((pTarget && pTarget->IsAlive()) || Team == 0))
-				continue;
-		}
-
-		if (pChr && pChr->IsAlive() && pTarget && pTarget->IsAlive() && pTarget->GetPlayer()->GetCID() != pChr->GetPlayer()->GetCID() && !pChr->GetPlayer()->m_ShowOthers &&
-			(pChr->Teams()->m_Core.GetSolo(SnappingClient) || pChr->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID())))
-		{
-			continue;
-		}
-
-		int ID = pTarget ? m_aIDs[pTarget->GetPlayer()->GetCID()] : GetID();
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, ID, sizeof(CNetObj_Laser)));
-		if (!pObj)
-			continue;
-
-		pObj->m_X = (int)m_Pos.x;
-		pObj->m_Y = (int)m_Pos.y;
-		if (pTarget)
-		{
-			pObj->m_FromX = (int)pTarget->GetPos().x;
-			pObj->m_FromY = (int)pTarget->GetPos().y;
-		}
-		else
-		{
-			pObj->m_FromX = (int)m_Pos.x;
-			pObj->m_FromY = (int)m_Pos.y;
-		}
-
-		int StartTick = m_EvalTick;
-		if (StartTick < Server()->Tick() - 4)
-			StartTick = Server()->Tick() - 4;
-		else if (StartTick > Server()->Tick())
-			StartTick = Server()->Tick();
-		pObj->m_StartTick = StartTick;
 	}
+
+	if (pTarget)
+	{
+		if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, pTarget->GetPos()))
+			return;
+	}
+	else if (NetworkClipped(SnappingClient, m_Pos))
+		return;
+
+	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+	if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number	&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
+		return;
+
+	if (pChr && pChr->IsAlive())
+	{
+		if (pChr->Team() != Team)
+			return;
+	}
+	else
+	{
+		// send to spectators only active draggers and some inactive from team 0
+		if (!((pTarget && pTarget->IsAlive()) || Team == 0))
+			return;
+	}
+
+	if (pChr && pChr->IsAlive() && pTarget && pTarget->IsAlive() && pTarget->GetPlayer()->GetCID() != pChr->GetPlayer()->GetCID() && !pChr->GetPlayer()->m_ShowOthers &&
+		(pChr->Teams()->m_Core.GetSolo(SnappingClient) || pChr->Teams()->m_Core.GetSolo(pTarget->GetPlayer()->GetCID())))
+	{
+		return;
+	}
+
+	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	if (!pObj)
+		return;
+
+	pObj->m_X = (int)m_Pos.x;
+	pObj->m_Y = (int)m_Pos.y;
+	if (pTarget)
+	{
+		pObj->m_FromX = (int)pTarget->GetPos().x;
+		pObj->m_FromY = (int)pTarget->GetPos().y;
+	}
+	else
+	{
+		pObj->m_FromX = (int)m_Pos.x;
+		pObj->m_FromY = (int)m_Pos.y;
+	}
+
+	int StartTick = m_EvalTick;
+	if (StartTick < Server()->Tick() - 4)
+		StartTick = Server()->Tick() - 4;
+	else if (StartTick > Server()->Tick())
+		StartTick = Server()->Tick();
+	pObj->m_StartTick = StartTick;
 }

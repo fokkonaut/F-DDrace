@@ -12,17 +12,14 @@ class CDragger: public CEntity
 	int m_EvalTick;
 	void Move(int Team);
 	void Drag(int Team);
-	void Snap(int SnappingClient, int Team);
 	bool m_NW;
 
 	CCharacter *m_apTarget[MAX_CLIENTS];
 	CCharacter *m_aapSoloEnts[MAX_CLIENTS][MAX_CLIENTS];
-	int m_aIDs[MAX_CLIENTS];
 
 public:
 
 	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int Layer = 0, int Number = 0);
-	virtual ~CDragger();
 
 	virtual void Reset();
 	virtual void Tick();
