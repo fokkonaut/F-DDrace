@@ -454,8 +454,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 			}
 		}
 
-		// This does not work correctly with dummies, we need to wait until teams are in the DDNetPlayer object, i think
-		/*int id = i;
+		int id = i;
 		Server()->ReverseTranslate(id, ClientID);
 
 		int Team = m_Core.Team(id);
@@ -464,7 +463,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		else if (Team > VANILLA_MAX_CLIENTS)
 			Team = 0;
 
-		Msg.AddInt(Team);*/
+		Msg.AddInt(Team);
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
