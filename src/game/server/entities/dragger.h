@@ -10,33 +10,23 @@ class CDragger: public CEntity
 	vec2 m_Core;
 	float m_Strength;
 	int m_EvalTick;
-	void Move();
-	void Drag();
-	CCharacter * m_Target;
+	void Move(int Team);
+	void Drag(int Team);
+	void Snap(int SnappingClient, int Team);
 	bool m_NW;
-	int m_CaughtTeam;
 
-	CCharacter * m_SoloEnts[MAX_CLIENTS];
-	int m_SoloIDs[MAX_CLIENTS];
+	CCharacter *m_apTarget[MAX_CLIENTS];
+	CCharacter *m_aapSoloEnts[MAX_CLIENTS][MAX_CLIENTS];
+	int m_aIDs[MAX_CLIENTS];
+
 public:
 
-	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
-			int CaughtTeam, int Layer = 0, int Number = 0);
+	CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int Layer = 0, int Number = 0);
+	virtual ~CDragger();
 
 	virtual void Reset();
 	virtual void Tick();
-	virtual void Snap(int snapping_client);
-};
-
-class CDraggerTeam
-{
-	CDragger * m_Draggers[MAX_CLIENTS];
-
-public:
-
-	CDraggerTeam(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW =
-			false, int Layer = 0, int Number = 0);
-	//~CDraggerTeam();
+	virtual void Snap(int SnappingClient);
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAGGER_H
