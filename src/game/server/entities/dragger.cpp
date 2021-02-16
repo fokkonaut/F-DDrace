@@ -9,10 +9,10 @@
 #include "dragger.h"
 #include "character.h"
 
-CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW, int CaughtTeam, int Layer, int Number)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAGGER, Pos)
+CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool NW,
+		int CaughtTeam, int Layer, int Number) :
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAGGER, Pos)
 {
-	m_Target = 0;
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Pos = Pos;
@@ -39,7 +39,8 @@ void CDragger::Move()
 	mem_zero(m_SoloEnts, sizeof(m_SoloEnts));
 	CCharacter *TempEnts[MAX_CLIENTS];
 
-	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvDraggerRange, (CEntity**)m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = GameWorld()->FindEntities(m_Pos, Config()->m_SvDraggerRange,
+			(CEntity**) m_SoloEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	mem_copy(TempEnts, m_SoloEnts, sizeof(TempEnts));
 
 	int Id = -1;
@@ -53,14 +54,17 @@ void CDragger::Move()
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-		if (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
+		if (m_Layer == LAYER_SWITCH && m_Number
+				&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Temp->Team()])
 		{
 			m_SoloEnts[i] = 0;
 			continue;
 		}
-
-		int Res = m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Temp->GetPos(), 0, 0)
-			: GameServer()->Collision()->IntersectNoLaser(m_Pos, Temp->GetPos(), 0, 0);
+		int Res =
+				m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
+								Temp->GetPos(), 0, 0) :
+						GameServer()->Collision()->IntersectNoLaser(m_Pos,
+								Temp->GetPos(), 0, 0);
 
 		if (Res == 0)
 		{
@@ -107,9 +111,13 @@ void CDragger::Drag()
 			if (!Target)
 				continue;
 
-			int Res = m_NW ? GameServer()->Collision()->IntersectNoLaserNW(m_Pos, Target->GetPos(), 0, 0)
-				: GameServer()->Collision()->IntersectNoLaser(m_Pos, Target->GetPos(), 0, 0);
-
+			int Res = 0;
+			if (!m_NW)
+				Res = GameServer()->Collision()->IntersectNoLaser(m_Pos,
+						Target->GetPos(), 0, 0);
+			else
+				Res = GameServer()->Collision()->IntersectNoLaserNW(m_Pos,
+						Target->GetPos(), 0, 0);
 			if (Res || length(m_Pos - Target->GetPos()) > Config()->m_SvDraggerRange)
 			{
 				Target = 0;
@@ -137,9 +145,9 @@ void CDragger::Reset()
 
 void CDragger::Tick()
 {
-	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
+	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
+			m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
-
 	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
@@ -160,7 +168,8 @@ void CDragger::Tick()
 
 void CDragger::Snap(int SnappingClient)
 {
-	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
+	if (((CGameControllerDDRace*) GameServer()->m_pController)->m_Teams.GetTeamState(
+			m_CaughtTeam) == CGameTeams::TEAMSTATE_EMPTY)
 		return;
 
 	CCharacter *Target = m_Target;
@@ -188,64 +197,72 @@ void CDragger::Snap(int SnappingClient)
 
 		if (Target)
 		{
-			if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, Target->GetPos()))
+			if (NetworkClipped(SnappingClient, m_Pos)
+					&& NetworkClipped(SnappingClient, Target->GetPos()))
 				continue;
 		}
 		else if (NetworkClipped(SnappingClient, m_Pos))
 			continue;
 
-		CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
+		CCharacter * Char = GameServer()->GetPlayerChar(SnappingClient);
 
-		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
+		if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
+					|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
+				&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (!Tick)))
+		if (Char && Char->IsAlive()
+				&& (m_Layer == LAYER_SWITCH && m_Number
+						&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
+						&& (!Tick)))
 			continue;
-		if(Char && Char->IsAlive())
+		if (Char && Char->IsAlive())
 		{
-			if(Char->Team() != m_CaughtTeam)
+			if (Char->Team() != m_CaughtTeam)
 				continue;
 		}
 		else
 		{
 			// send to spectators only active draggers and some inactive from team 0
-			if(!((Target && Target->IsAlive()) || m_CaughtTeam == 0))
+			if (!((Target && Target->IsAlive()) || m_CaughtTeam == 0))
 				continue;
 		}
 
-		if (Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && ((Char->GetPlayer()->m_ShowOthers == 0 && (Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID()))) || (Char->GetPlayer()->m_ShowOthers == 2 && !Target->SameTeam(SnappingClient))))
+		if (Char && Char->IsAlive() && Target && Target->IsAlive() && Target->GetPlayer()->GetCID() != Char->GetPlayer()->GetCID() && !Char->GetPlayer()->m_ShowOthers &&
+			(Char->Teams()->m_Core.GetSolo(SnappingClient) || Char->Teams()->m_Core.GetSolo(Target->GetPlayer()->GetCID())))
 		{
 			continue;
 		}
 
-		CNetObj_Laser *pObj;
+		CNetObj_Laser *obj;
 
 		if (i == -1)
 		{
-			pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
+					NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 		}
 		else
 		{
 			m_SoloIDs[pos] = Server()->SnapNewID();
-			pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_SoloIDs[pos], sizeof(CNetObj_Laser)));
+			obj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem( // TODO: Have to free IDs again?
+					NETOBJTYPE_LASER, m_SoloIDs[pos], sizeof(CNetObj_Laser)));
 			pos++;
 		}
 
-		if (!pObj)
+		if (!obj)
 			continue;
-
-		pObj->m_X = (int)m_Pos.x;
-		pObj->m_Y = (int)m_Pos.y;
+		obj->m_X = (int)m_Pos.x;
+		obj->m_Y = (int)m_Pos.y;
 		if (Target)
 		{
-			pObj->m_FromX = (int)Target->GetPos().x;
-			pObj->m_FromY = (int)Target->GetPos().y;
+			obj->m_FromX = (int)Target->GetPos().x;
+			obj->m_FromY = (int)Target->GetPos().y;
 		}
 		else
 		{
-			pObj->m_FromX = (int)m_Pos.x;
-			pObj->m_FromY = (int)m_Pos.y;
+			obj->m_FromX = (int)m_Pos.x;
+			obj->m_FromY = (int)m_Pos.y;
 		}
 
 		int StartTick = m_EvalTick;
@@ -253,7 +270,7 @@ void CDragger::Snap(int SnappingClient)
 			StartTick = Server()->Tick() - 4;
 		else if (StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
-		pObj->m_StartTick = StartTick;
+		obj->m_StartTick = StartTick;
 	}
 }
 
