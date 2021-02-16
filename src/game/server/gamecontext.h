@@ -657,6 +657,8 @@ public:
 
 	struct SavedPlayer
 	{
+		int64 m_SavedTick;
+
 		char m_aUsername[32];
 		NETADDR m_Addr;
 		char m_aTimeoutCode[64];

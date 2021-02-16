@@ -1051,6 +1051,12 @@ void CGameContext::OnTick()
 			m_aRegisterBans[i] = m_aRegisterBans[m_NumRegisterBans];
 		}
 	}
+	for (unsigned int i = 0; i < m_vSavedPlayers.size(); i++)
+	{
+		// remove after 6 hours
+		if (m_vSavedPlayers[i].m_SavedTick + Server()->TickSpeed() * 60 * 60 * 6 < Server()->Tick())
+			m_vSavedPlayers.erase(m_vSavedPlayers.begin() + i);
+	}
 
 	if (Server()->Tick() % (Config()->m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
@@ -5245,6 +5251,7 @@ void CGameContext::SavePlayer(int ClientID)
 		return;
 
 	SavedPlayer Info;
+	Info.m_SavedTick = Server()->Tick();
 	Server()->GetClientAddr(ClientID, &Info.m_Addr);
 	str_copy(Info.m_aName, Server()->ClientName(ClientID), sizeof(Info.m_aName));
 	str_copy(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Info.m_aUsername));
