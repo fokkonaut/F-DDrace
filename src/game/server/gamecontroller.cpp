@@ -51,8 +51,6 @@ IGameController::IGameController(CGameContext *pGameServer)
 
 bool IGameController::CanSpawn(vec2 *pOutPos, int Index) const
 {
-	*pOutPos = GameServer()->Collision()->GetRandomTile(TILE_FREEZE);
-	return true;
 	if (Index < TILE_AIR || Index >= NUM_INDICES)
 		return false;
 
