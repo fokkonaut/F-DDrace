@@ -3420,7 +3420,7 @@ void CGameContext::OnInit()
 		m_pScore = new CFileScore(this);
 
 	// F-DDrace
-	FDDraceInit();
+	FDDraceInitPreMapInit();
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
@@ -3526,6 +3526,8 @@ void CGameContext::OnInit()
 	if(Config()->m_SvMaxClients < Config()->m_SvPlayerSlots)
 		Config()->m_SvPlayerSlots = Config()->m_SvMaxClients;
 
+	FDDraceInit();
+
 #ifdef CONF_DEBUG
 	// clamp dbg_dummies to 0..MAX_CLIENTS-1
 	if(MAX_CLIENTS <= Config()->m_DbgDummies)
@@ -3538,26 +3540,12 @@ void CGameContext::OnInit()
 #endif
 }
 
-void CGameContext::FDDraceInit()
+void CGameContext::FDDraceInitPreMapInit()
 {
 	Collision()->m_vTiles.clear();
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
 	InitPlots();
-
-	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
-	for (int i = 0; i < NUM_MINIGAMES; i++)
-		m_aMinigameDisabled[i] = false;
-	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
-
-	m_SurvivalGameState = SURVIVAL_OFFLINE;
-	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
-	m_SurvivalTick = 0;
-	m_SurvivalWinner = -1;
-
-	if (Config()->m_SvDefaultDummies)
-		ConnectDefaultDummies();
-	SetMapSpecificOptions();
 
 	int64 NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
 	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
@@ -3576,6 +3564,32 @@ void CGameContext::FDDraceInit()
 	int PoliceLevel[] = { 18, 25, 30, 40, 50 };
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		m_aPoliceLevel[i] = PoliceLevel[i];
+
+	for (int i = 0; i < NUM_HOUSES; i++)
+	{
+		if (m_pHouses[i])
+			delete m_pHouses[i];
+	}
+	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
+	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
+	m_pHouses[HOUSE_BANK] = new CBank(this);
+}
+
+void CGameContext::FDDraceInit()
+{
+	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_aMinigameDisabled[i] = false;
+	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
+
+	m_SurvivalGameState = SURVIVAL_OFFLINE;
+	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+	m_SurvivalTick = 0;
+	m_SurvivalWinner = -1;
+
+	if (Config()->m_SvDefaultDummies)
+		ConnectDefaultDummies();
+	SetMapSpecificOptions();
 
 	CreateFolders();
 
@@ -3596,15 +3610,6 @@ void CGameContext::FDDraceInit()
 
 		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
 	}
-
-	for (int i = 0; i < NUM_HOUSES; i++)
-	{
-		if (m_pHouses[i])
-			delete m_pHouses[i];
-	}
-	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
-	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
-	m_pHouses[HOUSE_BANK] = new CBank(this);
 
 	ReadMoneyListFile();
 
