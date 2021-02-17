@@ -5249,7 +5249,7 @@ bool CGameContext::ForceJailRelease(int ClientID)
 
 void CGameContext::SavePlayer(int ClientID)
 {
-	if (!m_apPlayers[ClientID])
+	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
 		return;
 
 	// we dont have anything to save
@@ -5270,7 +5270,7 @@ void CGameContext::SavePlayer(int ClientID)
 
 void CGameContext::CheckLoadPlayer(int ClientID)
 {
-	if (!m_apPlayers[ClientID])
+	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
 		return;
 
 	NETADDR Addr;
