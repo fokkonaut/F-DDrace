@@ -3420,19 +3420,7 @@ void CGameContext::OnInit()
 		m_pScore = new CFileScore(this);
 
 	// F-DDrace
-	Collision()->m_vTiles.clear();
-	Collision()->m_vTiles.resize(NUM_INDICES);
-
-	for (int i = 0; i < NUM_HOUSES; i++)
-	{
-		if (m_pHouses[i])
-			delete m_pHouses[i];
-	}
-	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
-	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
-	m_pHouses[HOUSE_BANK] = new CBank(this);
-
-	InitPlots();
+	FDDraceInit();
 
 	// create all entities from the game layer
 	CMapItemLayerTilemap *pTileMap = m_Layers.GameLayer();
@@ -3538,8 +3526,24 @@ void CGameContext::OnInit()
 	if(Config()->m_SvMaxClients < Config()->m_SvPlayerSlots)
 		Config()->m_SvPlayerSlots = Config()->m_SvMaxClients;
 
+#ifdef CONF_DEBUG
+	// clamp dbg_dummies to 0..MAX_CLIENTS-1
+	if(MAX_CLIENTS <= Config()->m_DbgDummies)
+		Config()->m_DbgDummies = MAX_CLIENTS;
+	if(Config()->m_DbgDummies)
+	{
+		for(int i = 0; i < Config()->m_DbgDummies ; i++)
+			OnClientConnected(MAX_CLIENTS -i-1, true, false);
+	}
+#endif
+}
 
-	// F-DDrace
+void CGameContext::FDDraceInit()
+{
+	Collision()->m_vTiles.clear();
+	Collision()->m_vTiles.resize(NUM_INDICES);
+
+	InitPlots();
 
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
 	for (int i = 0; i < NUM_MINIGAMES; i++)
@@ -3593,6 +3597,15 @@ void CGameContext::OnInit()
 		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
 	}
 
+	for (int i = 0; i < NUM_HOUSES; i++)
+	{
+		if (m_pHouses[i])
+			delete m_pHouses[i];
+	}
+	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
+	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
+	m_pHouses[HOUSE_BANK] = new CBank(this);
+
 	ReadMoneyListFile();
 
 	m_ShutdownSave.m_ClientID = -1;
@@ -3600,18 +3613,6 @@ void CGameContext::OnInit()
 	m_ShutdownSave.m_aUsername[0] = '\0';
 
 	m_vSavedPlayers.clear();
-
-
-#ifdef CONF_DEBUG
-	// clamp dbg_dummies to 0..MAX_CLIENTS-1
-	if(MAX_CLIENTS <= Config()->m_DbgDummies)
-		Config()->m_DbgDummies = MAX_CLIENTS;
-	if(Config()->m_DbgDummies)
-	{
-		for(int i = 0; i < Config()->m_DbgDummies ; i++)
-			OnClientConnected(MAX_CLIENTS -i-1, true, false);
-	}
-#endif
 }
 
 void CGameContext::DeleteTempfile()

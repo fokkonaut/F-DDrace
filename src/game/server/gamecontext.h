@@ -974,6 +974,7 @@ private:
 	int m_NumRegisterBans;
 	int ProcessRegisterBan(int ClientID);
 	bool TryRegisterBan(const NETADDR *pAddr, int Secs);
+	void FDDraceInit();
 
 public:
 	CLayers* Layers() { return &m_Layers; }

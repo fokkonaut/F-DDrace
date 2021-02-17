@@ -30,7 +30,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweaponsinfo'.");
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taserinfo'.");
-		AddItem("Taser battery x 10", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taserinfo'.");
+		AddItem("Taser battery", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taserinfo'.");
 		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 500000, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", EuroMode);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
@@ -257,7 +257,7 @@ void CShop::BuyItem(int ClientID, int Item)
 			|| (Item == ITEM_SPAWN_GRENADE		&& pAccount->m_SpawnWeapon[1] == 5)
 			|| (Item == ITEM_SPAWN_RIFLE		&& pAccount->m_SpawnWeapon[2] == 5)
 			|| (Item == ITEM_NINJAJETPACK		&& pAccount->m_Ninjajetpack)
-			|| (Item == ITEM_TASER				&& pAccount->m_TaserLevel == NUM_TASER_LEVELS)
+			|| (Item == ITEM_TASER				&& pAccount->m_TaserLevel >= NUM_TASER_LEVELS)
 			|| (Item == ITEM_TASER_BATTERY && pAccount->m_TaserBattery >= MAX_TASER_BATTERY)
 			//|| (Item == ITEM_PORTAL_RIFLE		&& pAccount->m_PortalRifle) // portal rifle can be bought unlimited times
 			)
