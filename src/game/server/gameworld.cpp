@@ -180,10 +180,11 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 		if (ForcedID != -1 && i != ForcedID) continue; // only update specific player
 		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
 		int *pMap = Server()->GetIdMap(i);
+		int *rMap = Server()->GetReverseIdMap(i);
 
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-		int Reserved = 1;
+		int Reserved = 1; // update CPlayer::SetFakeID when modifying this
 
 		if (Server()->IsSevendown(i) && GameServer()->FlagsUsed())
 		{
@@ -192,13 +193,6 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 			pMap[SPEC_SELECT_FLAG_BLUE] = -1;
 			Reserved = VANILLA_MAX_CLIENTS - SPEC_SELECT_FLAG_BLUE;
 		}
-
-		int rMap[MAX_CLIENTS];
-		for (int j = 0; j < MAX_CLIENTS; j++)
-			rMap[j] = -1;
-		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-			if (pMap[j] != -1)
-				rMap[pMap[j]] = j;
 
 		bool UpdateTeamsStates = false;
 		for (int j = 0; j < MAX_CLIENTS; j++)

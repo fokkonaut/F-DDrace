@@ -5669,6 +5669,14 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		pIdMap[i] = pOrigIdMap[i];
 
+	int *pOrigReverseIdMap = Server()->GetReverseIdMap(OrigID);
+	int *pReverseIdMap = Server()->GetReverseIdMap(ClientID);
+
+	pOrigReverseIdMap[OrigID] = -1;
+	pOrigReverseIdMap[ClientID] = pOrig->m_FakeID;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		pReverseIdMap[i] = pOrigReverseIdMap[i];
+
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// move same ip list to the new player
@@ -5678,10 +5686,12 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 
 		// remove timeouted tee for others with the same ip (notice that we can use m_FakeID here because among players with the same ips the fake ids are the same)
 		Server()->GetIdMap(i)[pPlayer->m_FakeID] = -1;
+		Server()->GetReverseIdMap(i)[OrigID] = -1;
 		m_apPlayers[i]->SendDisconnect(ClientID, pPlayer->m_FakeID);
 
 		// and insert the new client with the old fake id
 		Server()->GetIdMap(i)[pOrig->m_FakeID] = ClientID;
+		Server()->GetReverseIdMap(i)[ClientID] = pOrig->m_FakeID;
 		m_apPlayers[i]->SendDisconnect(OrigID, pOrig->m_FakeID);
 		m_apPlayers[i]->SendConnect(ClientID, pOrig->m_FakeID);
 	}

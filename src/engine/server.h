@@ -52,6 +52,7 @@ public:
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
 
 	virtual int *GetIdMap(int ClientID) = 0;
+	virtual int *GetReverseIdMap(int ClientID) = 0;
 
 	virtual void DummyJoin(int DummyID) = 0;
 	virtual void DummyLeave(int DummyID) = 0;
@@ -158,23 +159,15 @@ public:
 
 	bool Translate(int& Target, int Client)
 	{
-		int *pMap = GetIdMap(Client);
-		bool Found = false;
-		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		{
-			if (Target == pMap[i])
-			{
-				Target = i;
-				Found = true;
-				break;
-			}
-		}
-		return Found;
+		int *pMap = GetReverseIdMap(Client);
+		if (pMap[Target] == -1)
+			return false;
+		Target = pMap[Target];
+		return true;
 	}
 
 	bool ReverseTranslate(int& Target, int Client)
 	{
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
 		int *pMap = GetIdMap(Client);
 		if (pMap[Target] == -1)
 			return false;

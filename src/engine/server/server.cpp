@@ -2981,9 +2981,14 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	return true;
 }
 
-int* CServer::GetIdMap(int ClientID)
+int *CServer::GetIdMap(int ClientID)
 {
-	return (int*)(IdMap + VANILLA_MAX_CLIENTS * ClientID);
+	return m_aClients[ClientID].m_aIdMap;
+}
+
+int *CServer::GetReverseIdMap(int ClientID)
+{
+	return m_aClients[ClientID].m_aReverseIdMap;
 }
 
 void CServer::DummyJoin(int DummyID)

@@ -170,6 +170,9 @@ public:
 
 		bool m_Sevendown;
 
+		int m_aIdMap[VANILLA_MAX_CLIENTS];
+		int m_aReverseIdMap[MAX_CLIENTS];
+
 		bool m_GotDDNetVersionPacket;
 		bool m_DDNetVersionSettled;
 		int m_DDNetVersion;
@@ -178,7 +181,6 @@ public:
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
-	int IdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 
 	CSnapshotDelta m_SnapshotDelta;
 	CSnapshotBuilder m_SnapshotBuilder;
@@ -376,6 +378,7 @@ public:
 	unsigned m_AnnouncementLastLine;
 
 	virtual int *GetIdMap(int ClientID);
+	virtual int *GetReverseIdMap(int ClientID);
 
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);

@@ -53,9 +53,14 @@ void CPlayer::Reset()
 
 	// pIdMap[0] = m_ClientID means that the id 0 of your fake map equals m_ClientID, which means you are always id 0 for yourself
 	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 0;i < VANILLA_MAX_CLIENTS;i++)
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
 		pIdMap[i] = -1;
+	}
+	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		pReverseIdMap[i] = -1;
 	}
 	//pIdMap[0] = m_ClientID;
 
@@ -789,10 +794,19 @@ void CPlayer::SetFakeID()
 		if (Break)
 			break;
 	}
-	m_FakeID = FakeID;
 
-	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	pIdMap[m_FakeID] = m_ClientID;
+	// CGameWorld::UpdatePlayerMaps as reference
+	int Reserved = Server()->IsSevendown(m_ClientID) && GameServer()->FlagsUsed() ? VANILLA_MAX_CLIENTS-SPEC_SELECT_FLAG_BLUE : 1;
+	m_FakeID = FakeID < VANILLA_MAX_CLIENTS-Reserved ? FakeID : -1;
+
+	if (m_FakeID != -1)
+	{
+		int *pIdMap = Server()->GetIdMap(m_ClientID);
+		pIdMap[m_FakeID] = m_ClientID;
+	}
+
+	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
+	pReverseIdMap[m_ClientID] = m_FakeID;
 }
 
 int CPlayer::GetHidePlayerTeam(int Asker)
