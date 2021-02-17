@@ -185,7 +185,7 @@ void CDragger::Snap(int SnappingClient)
 		return;
 
 	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-	if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number	&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
+	if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
 		return;
 
 	if (pChr && pChr->IsAlive())
