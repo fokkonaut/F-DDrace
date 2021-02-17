@@ -3547,7 +3547,7 @@ void CGameContext::FDDraceInitPreMapInit()
 
 	InitPlots();
 
-	int64 NeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
+	int64 aNeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
 	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
 	8000000, 9000000, 10000000, 11000000, 12000000, 13000000, 14000000, 15000000, 16000000, 17000000, 18000000, 19000000, 20000000, 21000000, 22000000, 23000000, 24000000, 25000000,
 	26000000, 27000000, 28000000, 29000000, 30000000, 31000000, 32000000, 33000000, 34000000, 35000000, 36000000, 37000000, 38000000, 39000000, 40000000, 41010000, 42020000, 43030000,
@@ -3555,15 +3555,15 @@ void CGameContext::FDDraceInitPreMapInit()
 	62400000, 63500000, 64600000, 65700000, 66800000, 68000000 };
 
 	for (int i = 0; i < DIFFERENCE_XP_END; i++)
-		m_aNeededXP[i] = NeededXP[i];
+		m_aNeededXP[i] = aNeededXP[i];
 
-	int TaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000 };
+	int aTaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000 };
 	for (int i = 0; i < NUM_TASER_LEVELS; i++)
-		m_aTaserPrice[i] = TaserPrice[i];
+		m_aTaserPrice[i] = aTaserPrice[i];
 
-	int PoliceLevel[] = { 18, 25, 30, 40, 50 };
+	int aPoliceLevel[] = { 18, 25, 30, 40, 50 };
 	for (int i = 0; i < NUM_POLICE_LEVELS; i++)
-		m_aPoliceLevel[i] = PoliceLevel[i];
+		m_aPoliceLevel[i] = aPoliceLevel[i];
 
 	for (int i = 0; i < NUM_HOUSES; i++)
 	{
@@ -3577,20 +3577,6 @@ void CGameContext::FDDraceInitPreMapInit()
 
 void CGameContext::FDDraceInit()
 {
-	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
-	for (int i = 0; i < NUM_MINIGAMES; i++)
-		m_aMinigameDisabled[i] = false;
-	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
-
-	m_SurvivalGameState = SURVIVAL_OFFLINE;
-	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
-	m_SurvivalTick = 0;
-	m_SurvivalWinner = -1;
-
-	if (Config()->m_SvDefaultDummies)
-		ConnectDefaultDummies();
-	SetMapSpecificOptions();
-
 	CreateFolders();
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
@@ -3598,6 +3584,8 @@ void CGameContext::FDDraceInit()
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
 	m_LastAccSaveTick = Server()->Tick();
+
+	ReadMoneyListFile();
 
 	{
 		time_t rawtime;
@@ -3611,13 +3599,25 @@ void CGameContext::FDDraceInit()
 		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
 	}
 
-	ReadMoneyListFile();
+	m_SurvivalGameState = SURVIVAL_OFFLINE;
+	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
+	m_SurvivalTick = 0;
+	m_SurvivalWinner = -1;
 
 	m_ShutdownSave.m_ClientID = -1;
 	m_ShutdownSave.m_Got = false;
 	m_ShutdownSave.m_aUsername[0] = '\0';
 
 	m_vSavedPlayers.clear();
+
+	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_aMinigameDisabled[i] = false;
+	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
+
+	SetMapSpecificOptions();
+	if (Config()->m_SvDefaultDummies)
+		ConnectDefaultDummies();
 }
 
 void CGameContext::DeleteTempfile()
