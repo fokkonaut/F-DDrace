@@ -1757,3 +1757,9 @@ void CGameContext::ConPlotInfo(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Expire date: %s", pSelf->m_aPlots[PlotID].m_ExpireDate == 0 ? "" : pSelf->GetDate(pSelf->m_aPlots[PlotID].m_ExpireDate));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
 }
+
+void CGameContext::ConDbgPreShutdown(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->OnPreShutdown();
+}
