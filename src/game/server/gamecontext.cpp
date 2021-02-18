@@ -5645,37 +5645,29 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
 	CPlayer *pOrig = m_apPlayers[OrigID];
 	CPlayer *pPlayer = m_apPlayers[ClientID];
-	int *pOrigIdMap = Server()->GetIdMap(OrigID);
-	int *pIdMap = Server()->GetIdMap(ClientID);
+	int *pIdMap = Server()->GetIdMap(OrigID);
+	int *pReverseIdMap = Server()->GetReverseIdMap(OrigID);
 
 	// remove timeouted tee
 	int id = ClientID;
-	Server()->Translate(id, OrigID);
-	pOrigIdMap[id] = -1;
-	pPlayer->SendDisconnect(ClientID, id);
-
-	// before we can add ourself we have to remove another tee at this id
-	if (pIdMap[pOrig->m_FakeID] != OrigID)
+	if (Server()->Translate(id, OrigID))
 	{
-		id = pIdMap[pOrig->m_FakeID];
-		Server()->Translate(id, OrigID);
-		pPlayer->SendDisconnect(pIdMap[pOrig->m_FakeID], id);
+		pIdMap[id] = -1;
+		pPlayer->SendDisconnect(ClientID, id);
 	}
 
 	// add ourself
-	pOrigIdMap[pOrig->m_FakeID] = ClientID;
+	pIdMap[pOrig->m_FakeID] = ClientID;
+	pReverseIdMap[ClientID] = pOrig->m_FakeID;
+	pReverseIdMap[OrigID] = -1;
 
 	// copy id map
-	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		pIdMap[i] = pOrigIdMap[i];
-
-	int *pOrigReverseIdMap = Server()->GetReverseIdMap(OrigID);
-	int *pReverseIdMap = Server()->GetReverseIdMap(ClientID);
-
-	pOrigReverseIdMap[OrigID] = -1;
-	pOrigReverseIdMap[ClientID] = pOrig->m_FakeID;
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		pReverseIdMap[i] = pOrigReverseIdMap[i];
+	{
+		if (i < VANILLA_MAX_CLIENTS)
+			Server()->GetIdMap(ClientID)[i] = pIdMap[i];
+		Server()->GetReverseIdMap(ClientID)[i] = pReverseIdMap[i];
+	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -5684,12 +5676,7 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 		if (!m_apPlayers[i] || !pOrig->m_aSameIP[i] || i == ClientID)
 			continue;
 
-		// remove timeouted tee for others with the same ip (notice that we can use m_FakeID here because among players with the same ips the fake ids are the same)
-		Server()->GetIdMap(i)[pPlayer->m_FakeID] = -1;
-		Server()->GetReverseIdMap(i)[OrigID] = -1;
-		m_apPlayers[i]->SendDisconnect(ClientID, pPlayer->m_FakeID);
-
-		// and insert the new client with the old fake id
+		// insert the new client with the old fake id
 		Server()->GetIdMap(i)[pOrig->m_FakeID] = ClientID;
 		Server()->GetReverseIdMap(i)[ClientID] = pOrig->m_FakeID;
 		m_apPlayers[i]->SendDisconnect(OrigID, pOrig->m_FakeID);
