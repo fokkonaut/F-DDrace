@@ -159,6 +159,7 @@ public:
 
 	bool Translate(int& Target, int Client)
 	{
+		Target = clamp(Target, 0, MAX_CLIENTS-1);
 		int *pMap = GetReverseIdMap(Client);
 		if (pMap[Target] == -1)
 			return false;
@@ -168,6 +169,7 @@ public:
 
 	bool ReverseTranslate(int& Target, int Client)
 	{
+		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS-1);
 		int *pMap = GetIdMap(Client);
 		if (pMap[Target] == -1)
 			return false;

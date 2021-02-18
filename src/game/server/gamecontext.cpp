@@ -866,7 +866,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_PlayerHooking = 0.f;
 
 		if (pChr->m_DrawEditor.Active())
-			Tuning.m_HookDragSpeed = 0.f;
+			Tuning.m_HookFireSpeed = 0.f;
 
 		if (pChr->m_DrawEditor.Active() || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{
