@@ -342,13 +342,14 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->GetPlayer()->m_HasSpookyGhost = m_HasSpookyGhost;
 	pChr->GetPlayer()->m_PlotSpawn = m_PlotSpawn;
 	pChr->GetPlayer()->m_HasRoomKey = m_HasRoomKey;
-	if (m_JailTime)
-		pChr->GameServer()->JailPlayer(pChr->GetPlayer()->GetCID(), m_JailTime/pChr->Server()->TickSpeed());
 	pChr->GetPlayer()->m_EscapeTime = m_EscapeTime;
 
 	// account
 	if (m_aAccUsername[0] != '$') // explanation: see CSaveTee::Save() @ m_aAccUsername
 		pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_aAccUsername, "", false);
+
+	if (m_JailTime) // keep this last, character is killed here
+		pChr->GameServer()->JailPlayer(pChr->GetPlayer()->GetCID(), m_JailTime/pChr->Server()->TickSpeed());
 }
 
 char* CSaveTee::GetString()
