@@ -1644,14 +1644,14 @@ void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
-	int Minutes = pResult->GetInteger(1);
-	if (pSelf->JailPlayer(Victim, Minutes * 60))
+	int Seconds = pResult->GetInteger(1);
+	if (pSelf->JailPlayer(Victim, Seconds))
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d minutes", pSelf->Server()->ClientName(Victim), Minutes);
+		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-		str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes", Minutes);
+		str_format(aBuf, sizeof(aBuf), "You were arrested for %d seconds", Seconds);
 		pSelf->SendChatTarget(Victim, aBuf);
 	}
 }
