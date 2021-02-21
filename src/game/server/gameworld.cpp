@@ -494,14 +494,14 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 		if(p == pNotThis)
 			continue;
 
-		if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
-			continue;
-
 		float Len = distance(Pos, p->m_Pos);
 		if(Len < p->m_ProximityRadius+Radius)
 		{
 			if(Len < ClosestRange)
 			{
+				if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
+					continue;
+
 				ClosestRange = Len;
 				pClosest = p;
 			}
@@ -526,14 +526,14 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
 			continue;
 
-		if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
-			continue;
-
 		float Len = distance(Pos, p->m_Pos);
 		if (Len < p->m_ProximityRadius + Radius)
 		{
 			if (Len < ClosestRange)
 			{
+				if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
+					continue;
+
 				ClosestRange = Len;
 				pClosest = p;
 			}
