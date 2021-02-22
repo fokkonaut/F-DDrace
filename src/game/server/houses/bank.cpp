@@ -102,11 +102,15 @@ void CBank::SetAssignment(int ClientID, int Dir)
 
 	switch (Dir)
 	{
-	case -1: m_aAssignmentMode[ClientID] = ASSIGNMENT_WITHDRAW; break;
-	case 1: m_aAssignmentMode[ClientID] = ASSIGNMENT_DEPOSIT; break;
+	case -1:
+		m_aAssignmentMode[ClientID] = ASSIGNMENT_WITHDRAW;
+		SetPage(ClientID, AMOUNT_100);
+		break;
+	case 1:
+		m_aAssignmentMode[ClientID] = ASSIGNMENT_DEPOSIT;
+		SetPage(ClientID, AMOUNT_EVERYTHING);
+		break;
 	}
-
-	SetPage(ClientID, AMOUNT_EVERYTHING);
 }
 
 void CBank::OnPageChange(int ClientID)
