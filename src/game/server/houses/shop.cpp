@@ -249,7 +249,7 @@ void CShop::BuyItem(int ClientID, int Item)
 		// Check whether we have the item already
 		if ((Item == ITEM_RAINBOW				&& (pChr->m_Rainbow || pPlayer->m_InfRainbow))
 			|| (Item == ITEM_BLOODY				&& (pChr->m_Bloody || pChr->m_StrongBloody))
-			|| (Item == ITEM_POLICE				&& pAccount->m_PoliceLevel == NUM_POLICE_LEVELS)
+			|| (Item == ITEM_POLICE				&& pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS)
 			|| (Item == ITEM_SPOOKY_GHOST		&& pAccount->m_SpookyGhost)
 			|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
 			//|| (Item == ITEM_VIP				&& pAccount->m_VIP) // vip can be bought unlimited times
