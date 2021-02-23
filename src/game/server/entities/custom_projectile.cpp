@@ -74,11 +74,11 @@ void CCustomProjectile::Tick()
 		{
 			if (m_Ghost && m_CollisionState == COLLIDED_ONCE)
 			{
-				if (Server()->Tick() % 5 == 0)
-					GameServer()->CreateDeath(m_PrevPos, m_Owner);
+				if (Server()->Tick() % 10 == 0)
+					GameServer()->CreateDeath(m_PrevPos, m_Owner, m_TeamMask);
 			}
 			else
-				GameServer()->CreateDeath(m_PrevPos, m_Owner);
+				GameServer()->CreateDeath(m_PrevPos, m_Owner, m_TeamMask);
 		}
 
 		if (m_CollisionState == NOT_COLLIDED)
@@ -124,7 +124,7 @@ void CCustomProjectile::HitCharacter()
 		return;
 
 	if (m_Bloody)
-		GameServer()->CreateDeath(m_PrevPos, pHit->GetPlayer()->GetCID());
+		GameServer()->CreateDeath(pHit->GetPos(), pHit->GetPlayer()->GetCID(), m_TeamMask);
 
 	if (m_Freeze)
 		pHit->Freeze();
