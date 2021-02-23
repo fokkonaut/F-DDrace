@@ -918,8 +918,6 @@ private:
 	static void ConAccAddEuros(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccEdit(IConsole::IResult* pResult, void* pUserData);
 
-	static void ConDbgPreShutdown(IConsole::IResult* pResult, void* pUserData);
-
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);

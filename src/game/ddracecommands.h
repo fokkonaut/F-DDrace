@@ -160,7 +160,4 @@ CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, thi
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_add_euros", "s[username] i[amount]", CFGFLAG_SERVER, ConAccAddEuros, this, "Adds i euros to account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_edit", "s[username] s[variable] ?s[value]", CFGFLAG_SERVER, ConAccEdit, this, "Prints or changes the value of account variable", AUTHED_ADMIN)
-
-//debug
-CONSOLE_COMMAND("dbg_preshutdown", "", CFGFLAG_SERVER, ConDbgPreShutdown, this, "Calls OnPreShutdown()", AUTHED_ADMIN)
 #undef CONSOLE_COMMAND
