@@ -170,16 +170,15 @@ void CAdvancedEntity::HandleTiles(int Index)
 	if (z && Controller->m_TeleOuts[z - 1].size())
 	{
 		int Num = Controller->m_TeleOuts[z - 1].size();
-		m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		m_PrevPos = m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
-		m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
-		m_Vel.x = 0;
-		m_Vel.y = 0;
+		m_PrevPos = m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		m_Vel = vec2(0, 0);
 		return;
 	}
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
@@ -190,9 +189,8 @@ void CAdvancedEntity::HandleTiles(int Index)
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
-				m_Vel.x = 0;
-				m_Vel.y = 0;
+				m_PrevPos = m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				m_Vel = vec2(0, 0);
 				return;
 			}
 		}
@@ -200,9 +198,8 @@ void CAdvancedEntity::HandleTiles(int Index)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
 		{
-			m_Pos = SpawnPos;
-			m_Vel.x = 0;
-			m_Vel.y = 0;
+			m_PrevPos = m_Pos = SpawnPos;
+			m_Vel = vec2(0, 0);
 		}
 		return;
 	}
@@ -214,14 +211,14 @@ void CAdvancedEntity::HandleTiles(int Index)
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				m_PrevPos = m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 				return;
 			}
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
-			m_Pos = SpawnPos;
+			m_PrevPos = m_Pos = SpawnPos;
 		return;
 	}
 }

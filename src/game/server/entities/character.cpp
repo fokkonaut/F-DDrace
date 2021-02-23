@@ -2842,7 +2842,7 @@ void CCharacter::HandleTiles(int Index)
 		if (m_Super)
 			return;
 		int Num = Controller->m_TeleOuts[z - 1].size();
-		m_Core.m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		if (!Config()->m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -2863,7 +2863,7 @@ void CCharacter::HandleTiles(int Index)
 		if (m_Super)
 			return;
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
-		m_Core.m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
 		if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -2891,7 +2891,7 @@ void CCharacter::HandleTiles(int Index)
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 				m_Core.m_Vel = vec2(0, 0);
 
 				if (!Config()->m_SvTeleportHoldHook)
@@ -2906,7 +2906,7 @@ void CCharacter::HandleTiles(int Index)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
 		{
-			m_Core.m_Pos = SpawnPos;
+			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0, 0);
 
 			if (!Config()->m_SvTeleportHoldHook)
@@ -2926,7 +2926,7 @@ void CCharacter::HandleTiles(int Index)
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 
 				if (!Config()->m_SvTeleportHoldHook)
 				{
@@ -2942,7 +2942,7 @@ void CCharacter::HandleTiles(int Index)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
 		{
-			m_Core.m_Pos = SpawnPos;
+			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
 
 			if (!Config()->m_SvTeleportHoldHook)
 			{
