@@ -460,7 +460,7 @@ void CPlayer::PostPostTick()
 		TryRespawn();
 }
 
-void CPlayer::SendConnect(int ClientID, int FakeID)
+void CPlayer::SendConnect(int FakeID, int ClientID)
 {
 	if (Server()->IsSevendown(m_ClientID))
 		return;
@@ -488,12 +488,9 @@ void CPlayer::SendConnect(int ClientID, int FakeID)
 	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
 }
 
-void CPlayer::SendDisconnect(int ClientID, int FakeID)
+void CPlayer::SendDisconnect(int FakeID)
 {
 	if (Server()->IsSevendown(m_ClientID))
-		return;
-
-	if (!GameServer()->m_apPlayers[ClientID])
 		return;
 
 	CNetMsg_Sv_ClientDrop ClientDropMsg;

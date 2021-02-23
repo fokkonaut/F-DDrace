@@ -408,8 +408,8 @@ public:
 	int m_SurvivalDieTick;
 
 	// 128p
-	void SendConnect(int ClientID, int FakeID);
-	void SendDisconnect(int ClientID, int FakeID);
+	void SendConnect(int FakeID, int ClientID);
+	void SendDisconnect(int FakeID);
 	void SetFakeID();
 	int m_FakeID;
 	bool m_aSameIP[MAX_CLIENTS];

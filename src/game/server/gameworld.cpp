@@ -216,7 +216,7 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 			{
 				if (rMap[j] != -1)
 				{
-					pPlayer->SendDisconnect(j, rMap[j]);
+					pPlayer->SendDisconnect(rMap[j]);
 					pMap[rMap[j]] = -1;
 					rMap[j] = -1;
 				}
@@ -229,12 +229,12 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 				{
 					if (pMap[Free] == -1)
 					{
-						pPlayer->SendConnect(j, Free);
+						pPlayer->SendConnect(Free, j);
 					}
 					else if (pMap[Free] != j)
 					{
-						pPlayer->SendDisconnect(pMap[Free], Free);
-						pPlayer->SendConnect(j, Free);
+						pPlayer->SendDisconnect(Free);
+						pPlayer->SendConnect(Free, j);
 						rMap[pMap[Free]] = -1;
 
 						if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
@@ -249,11 +249,11 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 					{
 						if (k != i && rMap[k] != -1 && !pPlayer->m_aSameIP[k] && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i, false))
 						{
-							pPlayer->SendDisconnect(k, rMap[k]);
+							pPlayer->SendDisconnect(rMap[k]);
 							rMap[j] = rMap[k];
 							pMap[rMap[j]] = j;
 							rMap[k] = -1;
-							pPlayer->SendConnect(j, rMap[j]);
+							pPlayer->SendConnect(rMap[j], j);
 
 							if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
 								UpdateTeamsStates = true;
@@ -382,12 +382,12 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 				if (!Server()->Translate(id, i))
 				{
 					if (rMap[j] != -1)
-						GameServer()->m_apPlayers[i]->SendDisconnect(j, rMap[j]);
+						GameServer()->m_apPlayers[i]->SendDisconnect(rMap[j]);
 				}
 				else
 				{
 					if (rMap[j] == -1)
-						GameServer()->m_apPlayers[i]->SendConnect(j, id);
+						GameServer()->m_apPlayers[i]->SendConnect(id, j);
 				}
 			}
 		}

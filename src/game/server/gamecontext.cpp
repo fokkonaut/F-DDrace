@@ -5659,7 +5659,7 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	if (Server()->Translate(id, OrigID))
 	{
 		pIdMap[id] = -1;
-		pPlayer->SendDisconnect(ClientID, id);
+		pPlayer->SendDisconnect(id);
 	}
 
 	// add ourself
@@ -5685,8 +5685,8 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 		// insert the new client with the old fake id
 		Server()->GetIdMap(i)[pOrig->m_FakeID] = ClientID;
 		Server()->GetReverseIdMap(i)[ClientID] = pOrig->m_FakeID;
-		m_apPlayers[i]->SendDisconnect(OrigID, pOrig->m_FakeID);
-		m_apPlayers[i]->SendConnect(ClientID, pOrig->m_FakeID);
+		m_apPlayers[i]->SendDisconnect(pOrig->m_FakeID);
+		m_apPlayers[i]->SendConnect(pOrig->m_FakeID, ClientID);
 	}
 
 	// set the old fake id for the new player
