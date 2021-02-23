@@ -1260,8 +1260,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_utf8_copy_num(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aName), MAX_NAME_LENGTH);
 	str_utf8_copy_num(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan), MAX_CLAN_LENGTH);
 	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
-	m_apPlayers[ClientID]->SetFakeID();
-
 	m_apPlayers[ClientID]->Respawn();
 
 	// load score
@@ -1274,61 +1272,12 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_VoteUpdate = true;
 
-	// update client infos (others before local)
-	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
-	NewClientInfoMsg.m_ClientID = ClientID;
-	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = m_apPlayers[ClientID]->GetTeam();
-	NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
-	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
-	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
-	NewClientInfoMsg.m_Silent = 1;
-
-	for(int p = 0; p < NUM_SKINPARTS; p++)
-	{
-		NewClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aaSkinPartNames[p];
-		NewClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aUseCustomColors[p];
-		NewClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[ClientID]->m_TeeInfos.m_aSkinPartColors[p];
-	}
-
-	// handled in CGameWorld::UpdatePlayerMaps()
-	/*for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(i == ClientID || !m_apPlayers[i] || (!Server()->ClientIngame(i) && !m_apPlayers[i]->IsDummy()))
-			continue;
-
-		// new info for others
-		if(Server()->ClientIngame(i))
-			Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-
-		// existing infos for new player
-		CNetMsg_Sv_ClientInfo ClientInfoMsg;
-		ClientInfoMsg.m_ClientID = i;
-		ClientInfoMsg.m_Local = 0;
-		ClientInfoMsg.m_Team = m_apPlayers[i]->GetTeam();
-		ClientInfoMsg.m_pName = m_apPlayers[i]->m_CurrentInfo.m_aName;
-		ClientInfoMsg.m_pClan = m_apPlayers[i]->m_CurrentInfo.m_aClan;
-		ClientInfoMsg.m_Country = Server()->ClientCountry(i);
-		ClientInfoMsg.m_Silent = 1;
-		for(int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			ClientInfoMsg.m_apSkinPartNames[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aaSkinPartNames[p];
-			ClientInfoMsg.m_aUseCustomColors[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aUseCustomColors[p];
-			ClientInfoMsg.m_aSkinPartColors[p] = m_apPlayers[i]->m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
-		}
-		Server()->SendPackMsg(&ClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-	}*/
-
-	// local info
-	NewClientInfoMsg.m_Local = 1;
-	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);
-
 	if(Server()->DemoRecorder_IsRecording())
 	{
 		CNetMsg_De_ClientEnter Msg;
-		Msg.m_pName = NewClientInfoMsg.m_pName;
+		Msg.m_pName = Server()->ClientName(ClientID);
 		Msg.m_ClientID = ClientID;
-		Msg.m_Team = NewClientInfoMsg.m_Team;
+		Msg.m_Team = m_apPlayers[ClientID]->GetTeam();
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, -1);
 	}
 
@@ -1344,6 +1293,8 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
+
+	m_apPlayers[ClientID]->InitIdMap();
 
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);
@@ -1363,25 +1314,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (!Server()->IsSevendown(ClientID))
 	{
 		m_pController->UpdateGameInfo(ClientID);
-
-		// send chat commands
 		SendChatCommands(ClientID);
-
-		CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
-		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_SPECTATORS;
-		FakeInfo.m_pName = " ";
-		FakeInfo.m_pClan = "";
-		FakeInfo.m_Country = -1;
-		FakeInfo.m_Silent = 1;
-		for(int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			FakeInfo.m_apSkinPartNames[p] = "standard";
-			FakeInfo.m_aUseCustomColors[p] = 0;
-			FakeInfo.m_aSkinPartColors[p] = 0;
-		}
-		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, ClientID);
 	}
 }
 
@@ -5663,8 +5596,9 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	}
 
 	// add ourself
-	pIdMap[pOrig->m_FakeID] = ClientID;
-	pReverseIdMap[ClientID] = pOrig->m_FakeID;
+	int OwnID = pReverseIdMap[OrigID];
+	pIdMap[OwnID] = ClientID;
+	pReverseIdMap[ClientID] = OwnID;
 	pReverseIdMap[OrigID] = -1;
 
 	// copy id map
@@ -5683,14 +5617,11 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 			continue;
 
 		// insert the new client with the old fake id
-		Server()->GetIdMap(i)[pOrig->m_FakeID] = ClientID;
-		Server()->GetReverseIdMap(i)[ClientID] = pOrig->m_FakeID;
-		m_apPlayers[i]->SendDisconnect(pOrig->m_FakeID);
-		m_apPlayers[i]->SendConnect(pOrig->m_FakeID, ClientID);
+		Server()->GetIdMap(i)[OwnID] = ClientID;
+		Server()->GetReverseIdMap(i)[ClientID] = OwnID;
+		m_apPlayers[i]->SendDisconnect(OwnID);
+		m_apPlayers[i]->SendConnect(OwnID, ClientID);
 	}
-
-	// set the old fake id for the new player
-	pPlayer->m_FakeID = pOrig->m_FakeID;
 
 	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
 }

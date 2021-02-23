@@ -51,19 +51,6 @@ void CPlayer::Reset()
 
 	// F-DDrace
 
-	// pIdMap[0] = m_ClientID means that the id 0 of your fake map equals m_ClientID, which means you are always id 0 for yourself
-	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-	{
-		pIdMap[i] = -1;
-	}
-	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		pReverseIdMap[i] = -1;
-	}
-	//pIdMap[0] = m_ClientID;
-
 	m_LastCommandPos = 0;
 	m_LastPlaytime = 0;
 	m_Sent1stAfkWarning = 0;
@@ -471,7 +458,7 @@ void CPlayer::SendConnect(int FakeID, int ClientID)
 
 	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientID = FakeID;
-	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Local = ClientID == m_ClientID;
 	NewClientInfoMsg.m_Team = pPlayer->GetHidePlayerTeam(m_ClientID);
 	NewClientInfoMsg.m_pName = pPlayer->m_CurrentInfo.m_aName;
 	NewClientInfoMsg.m_pClan = pPlayer->m_CurrentInfo.m_aClan;
@@ -763,11 +750,19 @@ void CPlayer::FakeSnap()
 	}
 }
 
-void CPlayer::SetFakeID()
+void CPlayer::InitIdMap()
 {
-	int FakeID = 0;
-	NETADDR Addr, Addr2;
-	Server()->GetClientAddr(m_ClientID, &Addr);
+	int *pIdMap = Server()->GetIdMap(m_ClientID);
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		pIdMap[i] = -1;
+
+	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		pReverseIdMap[i] = -1;
+
+	int NextFreeID = 0;
+	NETADDR OwnAddr, Addr;
+	Server()->GetClientAddr(m_ClientID, &OwnAddr);
 	while (1)
 	{
 		bool Break = true;
@@ -776,12 +771,12 @@ void CPlayer::SetFakeID()
 			if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
 				continue;
 
-			Server()->GetClientAddr(i, &Addr2);
-			if (net_addr_comp(&Addr, &Addr2, false) == 0)
+			Server()->GetClientAddr(i, &Addr);
+			if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
 			{
-				if (GameServer()->m_apPlayers[i]->m_FakeID == FakeID)
+				if (Server()->GetReverseIdMap(i)[i] == NextFreeID)
 				{
-					FakeID++;
+					NextFreeID++;
 					Break = false;
 				}
 				m_aSameIP[i] = true;
@@ -793,18 +788,43 @@ void CPlayer::SetFakeID()
 			break;
 	}
 
-	// CGameWorld::UpdatePlayerMaps as reference
-	int Reserved = Server()->IsSevendown(m_ClientID) && GameServer()->FlagsUsed() ? VANILLA_MAX_CLIENTS-SPEC_SELECT_FLAG_BLUE : 1;
-	m_FakeID = FakeID < VANILLA_MAX_CLIENTS-Reserved ? FakeID : -1;
+	m_NumMapReserved = 1;
+	pIdMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 
-	if (m_FakeID != -1)
+	if (!Server()->IsSevendown(m_ClientID))
 	{
-		int *pIdMap = Server()->GetIdMap(m_ClientID);
-		pIdMap[m_FakeID] = m_ClientID;
+		CNetMsg_Sv_ClientInfo FakeInfo;
+		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
+		FakeInfo.m_Local = 0;
+		FakeInfo.m_Team = TEAM_SPECTATORS;
+		FakeInfo.m_pName = " ";
+		FakeInfo.m_pClan = "";
+		FakeInfo.m_Country = -1;
+		FakeInfo.m_Silent = 1;
+		for(int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			FakeInfo.m_apSkinPartNames[p] = "standard";
+			FakeInfo.m_aUseCustomColors[p] = 0;
+			FakeInfo.m_aSkinPartColors[p] = 0;
+		}
+		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+	}
+	else
+	{
+		if (GameServer()->FlagsUsed())
+		{
+			m_NumMapReserved += 2;
+			pIdMap[SPEC_SELECT_FLAG_RED] = -1;
+			pIdMap[SPEC_SELECT_FLAG_BLUE] = -1;
+		}
 	}
 
-	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
-	pReverseIdMap[m_ClientID] = m_FakeID;
+	if (NextFreeID < VANILLA_MAX_CLIENTS - m_NumMapReserved)
+	{
+		pIdMap[NextFreeID] = m_ClientID;
+		pReverseIdMap[m_ClientID] = NextFreeID;
+		SendConnect(NextFreeID, m_ClientID);
+	}
 }
 
 int CPlayer::GetHidePlayerTeam(int Asker)

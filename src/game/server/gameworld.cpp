@@ -177,22 +177,15 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (ForcedID != -1 && i != ForcedID) continue; // only update specific player
-		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
-		int *pMap = Server()->GetIdMap(i);
-		int *rMap = Server()->GetReverseIdMap(i);
+		if (ForcedID != -1 && i != ForcedID)
+			continue; // only update specific player
+
+		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy))
+			continue;
 
 		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-		int Reserved = 1; // update CPlayer::SetFakeID when modifying this
-
-		if (Server()->IsSevendown(i) && GameServer()->FlagsUsed())
-		{
-			// reserved for flag selecting
-			pMap[SPEC_SELECT_FLAG_RED] = -1;
-			pMap[SPEC_SELECT_FLAG_BLUE] = -1;
-			Reserved = VANILLA_MAX_CLIENTS - SPEC_SELECT_FLAG_BLUE;
-		}
+		int *pMap = Server()->GetIdMap(i);
+		int *rMap = Server()->GetReverseIdMap(i);
 
 		bool UpdateTeamsStates = false;
 		for (int j = 0; j < MAX_CLIENTS; j++)
@@ -203,62 +196,72 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 			CPlayer *pChecked = GameServer()->m_apPlayers[j];
 
 			int Free = -1;
-			for (int k = 0; k < VANILLA_MAX_CLIENTS-Reserved; k++)
+			if (pPlayer->m_aSameIP[j])
 			{
-				if (pMap[k] == -1 || (pPlayer->m_aSameIP[j] && k == GameServer()->m_apPlayers[j]->m_FakeID))
+				Free = Server()->GetReverseIdMap(j)[j];
+			}
+			else
+			{
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-pPlayer->m_NumMapReserved; k++)
 				{
-					Free = k;
-					break;
+					if (pMap[k] == -1)
+					{
+						Free = k;
+						break;
+					}
+				}
+
+				if (!Server()->ClientIngame(j) || !pChecked || (!pChecked->GetCharacter() && Free == -1))
+				{
+					if (rMap[j] != -1)
+					{
+						pPlayer->SendDisconnect(rMap[j]);
+						pMap[rMap[j]] = -1;
+						rMap[j] = -1;
+					}
+					continue;
 				}
 			}
 
-			if (!pPlayer->m_aSameIP[j] && (!Server()->ClientIngame(j) || !pChecked || (!pChecked->GetCharacter() && Free == -1)))
-			{
-				if (rMap[j] != -1)
-				{
-					pPlayer->SendDisconnect(rMap[j]);
-					pMap[rMap[j]] = -1;
-					rMap[j] = -1;
-				}
+			if (rMap[j] != -1)
 				continue;
-			}
 
-			if (rMap[j] == -1 && (Free != -1 || (pChecked->GetCharacter() && !pChecked->GetCharacter()->NetworkClipped(i, false)) || pPlayer->m_aSameIP[j]))
+			if (Free != -1)
 			{
-				if (Free != -1)
+				if (pMap[Free] == -1)
 				{
-					if (pMap[Free] == -1)
-					{
-						pPlayer->SendConnect(Free, j);
-					}
-					else if (pMap[Free] != j)
-					{
-						pPlayer->SendDisconnect(Free);
-						pPlayer->SendConnect(Free, j);
-						rMap[pMap[Free]] = -1;
-
-						if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
-							UpdateTeamsStates = true;
-					}
-					pMap[Free] = j;
-					rMap[j] = Free;
+					pPlayer->SendConnect(Free, j);
 				}
-				else
+				else if (pMap[Free] != j)
 				{
-					for (int k = 0; k < MAX_CLIENTS; k++)
-					{
-						if (k != i && rMap[k] != -1 && !pPlayer->m_aSameIP[k] && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i, false))
-						{
-							pPlayer->SendDisconnect(rMap[k]);
-							rMap[j] = rMap[k];
-							pMap[rMap[j]] = j;
-							rMap[k] = -1;
-							pPlayer->SendConnect(rMap[j], j);
+					pPlayer->SendDisconnect(Free);
+					pPlayer->SendConnect(Free, j);
+					rMap[pMap[Free]] = -1;
 
-							if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
-								UpdateTeamsStates = true;
-							break;
-						}
+					if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
+						UpdateTeamsStates = true;
+				}
+				pMap[Free] = j;
+				rMap[j] = Free;
+			}
+			else if (pChecked->GetCharacter() && !pChecked->GetCharacter()->NetworkClipped(i, false))
+			{
+				for (int k = 0; k < MAX_CLIENTS; k++)
+				{
+					if (k == i || pPlayer->m_aSameIP[k])
+						continue;
+
+					if (rMap[k] != -1 && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i, false))
+					{
+						pPlayer->SendDisconnect(rMap[k]);
+						rMap[j] = rMap[k];
+						rMap[k] = -1;
+						pMap[rMap[j]] = j;
+						pPlayer->SendConnect(rMap[j], j);
+
+						if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
+							UpdateTeamsStates = true;
+						break;
 					}
 				}
 			}
