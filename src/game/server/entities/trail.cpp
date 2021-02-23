@@ -117,8 +117,9 @@ void CTrail::Tick()
 				//AdditionalLength = 0;
 			}
 		}
-		m_TrailProjs[i]->SetPos(m_TrailHistory[HistoryPos].m_Pos);
+		vec2 Pos = m_TrailHistory[HistoryPos].m_Pos;
 		//the line under this comment crashed the server, dont know why but it works without that line too since the position gets set above this line too
-		//m_TrailProjs[i]->m_Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - m_TrailProjs[i]->m_Pos)*(AdditionalLength / NextDist);
+		//Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - m_TrailProjs[i]->GetPos())*(AdditionalLength / NextDist);
+		m_TrailProjs[i]->SetPos(Pos);
 	}
 }
