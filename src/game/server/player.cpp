@@ -196,7 +196,8 @@ void CPlayer::Reset()
 	}
 
 	for (int i = 0; i < NUM_HOUSES; i++)
-		GameServer()->m_pHouses[i]->Reset(m_ClientID);
+		if (GameServer()->m_pHouses[i]) // if a bot is created by a tile the shops are not yet created
+			GameServer()->m_pHouses[i]->Reset(m_ClientID);
 
 	m_pControlledTee = 0;
 	m_TeeControllerID = -1;

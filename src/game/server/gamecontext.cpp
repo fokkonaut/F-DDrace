@@ -3546,6 +3546,31 @@ void CGameContext::FDDraceInitPreMapInit()
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
 	InitPlots();
+}
+
+void CGameContext::FDDraceInit()
+{
+	CreateFolders();
+
+	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
+	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
+	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
+
+	m_LastAccSaveTick = Server()->Tick();
+
+	ReadMoneyListFile();
+
+	{
+		time_t rawtime;
+		struct tm* timeinfo;
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+
+		int Seconds = 60 - timeinfo->tm_sec;
+		int Minutes = (60 - timeinfo->tm_min) - 1;
+
+		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
+	}
 
 	int64 aNeededXP[] = { 5000, 15000, 25000, 35000, 50000, 65000, 80000, 100000, 120000, 130000, 160000, 200000, 240000, 280000, 325000, 370000, 420000, 470000, 520000, 600000,
 	680000, 760000, 850000, 950000, 1200000, 1400000, 1600000, 1800000, 2000000, 2210000, 2430000, 2660000, 2900000, 3150000, 3500000, 3950000, 4500000, 5250000, 6100000, 7000000,
@@ -3573,31 +3598,6 @@ void CGameContext::FDDraceInitPreMapInit()
 	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
 	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
 	m_pHouses[HOUSE_BANK] = new CBank(this);
-}
-
-void CGameContext::FDDraceInit()
-{
-	CreateFolders();
-
-	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
-	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
-	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
-
-	m_LastAccSaveTick = Server()->Tick();
-
-	ReadMoneyListFile();
-
-	{
-		time_t rawtime;
-		struct tm* timeinfo;
-		time(&rawtime);
-		timeinfo = localtime(&rawtime);
-
-		int Seconds = 60 - timeinfo->tm_sec;
-		int Minutes = (60 - timeinfo->tm_min) - 1;
-
-		m_FullHourOffsetTicks = (Seconds * Server()->TickSpeed()) + (Minutes * 60 * Server()->TickSpeed());
-	}
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
