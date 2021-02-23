@@ -5306,9 +5306,15 @@ void CGameContext::CheckLoadPlayer(int ClientID)
 void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
+	if (!pChr)
+		return;
+
 	int Killer = pChr->Core()->m_Killer.m_ClientID;
-	CPlayer *pKiller = Killer >= 0 ? m_apPlayers[Killer] : 0;
-	if (ClientID == Killer || !pChr || !pKiller || !pKiller->GetCharacter() || pKiller->m_IsDummy)
+	if (Killer < 0 || Killer == ClientID)
+		return;
+
+	CPlayer *pKiller = m_apPlayers[Killer];
+	if (!pKiller || !pKiller->GetCharacter() || pKiller->m_IsDummy)
 		return;
 
 	if (IsSpawnArea(pKiller->GetCharacter()->GetPos())) // if killer is in spawn area
