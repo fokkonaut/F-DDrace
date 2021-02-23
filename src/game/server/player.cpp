@@ -758,7 +758,7 @@ void CPlayer::FakeSnap()
 		((int*)pPlayerInfo)[0] = 0;
 		((int*)pPlayerInfo)[1] = FakeID;
 		((int*)pPlayerInfo)[2] = TEAM_BLUE;
-		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : 0;
+		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : -1;
 		((int*)pPlayerInfo)[4] = 0;
 	}
 }
