@@ -58,32 +58,13 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 
 const float CCharacterCore::PHYS_SIZE = 28.0f;
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
-{
-	m_pWorld = pWorld;
-	m_pCollision = pCollision;
-	m_pTeleOuts = NULL;
-
-	m_pTeams = pTeams;
-	m_Id = -1;
-	m_Hook = true;
-	m_Collision = true;
-	m_JumpedTotal = 0;
-	m_Jumps = 2;
-}
-
 void CCharacterCore::Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
 	m_pTeleOuts = pTeleOuts;
-
 	m_pTeams = pTeams;
-	m_Id = -1;
-	m_Hook = true;
-	m_Collision = true;
-	m_JumpedTotal = 0;
-	m_Jumps = 2;
+	Reset();
 }
 
 void CCharacterCore::Reset()
@@ -108,6 +89,7 @@ void CCharacterCore::Reset()
 	m_Killer.m_ClientID = -1;
 	m_Killer.m_Weapon = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
+	m_ClosestCID = -1;
 
 	m_SpinBot = false;
 	m_SpinBotSpeed = 50;
@@ -431,6 +413,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 	if(m_pWorld)
 	{
+		float ClosestLen = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
@@ -438,12 +421,18 @@ void CCharacterCore::Tick(bool UseInput)
 				continue;
 
 			//player *p = (player*)ent;
-			if (pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
+			if (pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i, false)))
 				continue; // make sure that we don't nudge our self
 
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+
+			if (Distance < ClosestLen || ClosestLen == -1)
+			{
+				ClosestLen = Distance;
+				m_ClosestCID = i;
+			}
 
 			if(m_pWorld->m_Tuning.m_PlayerCollision && m_pTeams->CanCollide(m_Id, i) && Distance < PHYS_SIZE*1.25f && Distance > 0.0f)
 			{

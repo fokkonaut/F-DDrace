@@ -209,8 +209,7 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams);
-	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts);
+	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts = NULL);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
@@ -240,6 +239,8 @@ public:
 		int m_ClientID;
 		int m_Weapon;
 	} m_Killer;
+
+	int m_ClosestCID;
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
