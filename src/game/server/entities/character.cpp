@@ -1755,18 +1755,6 @@ void CCharacter::Snap(int SnappingClient)
 	if(!pCharacter)
 		return;
 
-	// F-DDrace
-	if (m_StrongBloody)
-	{
-		for (int i = 0; i < 3; i++)
-			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	}
-	else if (m_Bloody || GetPowerHooked() == BLOODY)
-	{
-		if (Server()->Tick() % 3 == 0)
-			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-	}
-
 	// write down the m_Core
 	if(!m_ReckoningTick || GameWorld()->m_Paused)
 	{
@@ -3528,6 +3516,17 @@ void CCharacter::FDDraceTick()
 	{
 		m_IsRainbowHooked = false;
 		m_pPlayer->ResetSkin();
+	}
+
+	if (m_StrongBloody)
+	{
+		for (int i = 0; i < 3; i++)
+			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	}
+	else if (m_Bloody || GetPowerHooked() == BLOODY)
+	{
+		if (Server()->Tick() % 3 == 0)
+			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
 
 	// update
