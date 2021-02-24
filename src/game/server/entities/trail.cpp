@@ -116,11 +116,7 @@ void CTrail::Tick()
 				HistoryPosLength += NextDist;
 				//AdditionalLength = 0;
 			}
-
-			if ((unsigned int)HistoryPos >= m_TrailHistory.size())
-				continue;
 		}
-
 		vec2 Pos = m_TrailHistory[HistoryPos].m_Pos;
 		//the line under this comment crashed the server, dont know why but it works without that line too since the position gets set above this line too
 		//Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - m_TrailProjs[i]->GetPos())*(AdditionalLength / NextDist);
