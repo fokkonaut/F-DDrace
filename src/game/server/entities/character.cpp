@@ -1619,7 +1619,9 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)
 {
-	if (GameServer()->m_apPlayers[From] && From != m_pPlayer->GetCID())
+	// avoid farming by shooting people with gun for example, because it doesnt change velocity so it doesnt influence whether you died or not
+	bool SetKiller = (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA || (Weapon != WEAPON_GUN && Weapon != WEAPON_HEART_GUN && Weapon != WEAPON_LIGHTSABER));
+	if (SetKiller && GameServer()->m_apPlayers[From] && From != m_pPlayer->GetCID())
 	{
 		m_Core.m_Killer.m_ClientID = From;
 		m_Core.m_Killer.m_Weapon = Weapon;
