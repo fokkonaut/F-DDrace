@@ -278,6 +278,11 @@ void CServer::CClient::Reset()
 	m_DDNetVersion = VERSION_NONE;
 	m_GotDDNetVersionPacket = false;
 	m_DDNetVersionSettled = false;
+
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		m_aIdMap[i] = -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aReverseIdMap[i] = -1;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_RegisterSevendown(true)
