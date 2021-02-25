@@ -3396,15 +3396,16 @@ void CCharacter::FDDraceTick()
 	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 
 	// fake tune collision
-	if (!Server()->IsSevendown(m_pPlayer->GetCID()))
+	if (!Server()->IsSevendown(m_pPlayer->GetCID()) && m_Core.m_FakeTuneCID != -1)
 	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(m_Core.m_ClosestCID);
+		CCharacter *pChr = GameServer()->GetPlayerChar(m_Core.m_FakeTuneCID);
 		m_FakeTuneCollision = (!m_Super && (m_Solo || m_Passive)) || (pChr && !pChr->m_Super && (pChr->m_Solo || pChr->m_Passive || (Team() != pChr->Team() && m_pPlayer->m_ShowOthers)));
 
 		if (m_FakeTuneCollision != m_OldFakeTuneCollision)
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 		m_OldFakeTuneCollision = m_FakeTuneCollision;
+		m_Core.m_FakeTuneCID = -1;
 	}
 
 	// update telekinesis entitiy position

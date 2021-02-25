@@ -89,7 +89,7 @@ void CCharacterCore::Reset()
 	m_Killer.m_ClientID = -1;
 	m_Killer.m_Weapon = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
-	m_ClosestCID = -1;
+	m_FakeTuneCID = -1;
 
 	m_SpinBot = false;
 	m_SpinBotSpeed = 50;
@@ -428,10 +428,10 @@ void CCharacterCore::Tick(bool UseInput)
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-			if (Distance < ClosestLen || ClosestLen == -1)
+			if (Distance < PHYS_SIZE*2 && (Distance < ClosestLen || ClosestLen == -1))
 			{
 				ClosestLen = Distance;
-				m_ClosestCID = i;
+				m_FakeTuneCID = i;
 			}
 
 			if(m_pWorld->m_Tuning.m_PlayerCollision && m_pTeams->CanCollide(m_Id, i) && Distance < PHYS_SIZE*1.25f && Distance > 0.0f)

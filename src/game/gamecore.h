@@ -240,7 +240,7 @@ public:
 		int m_Weapon;
 	} m_Killer;
 
-	int m_ClosestCID;
+	int m_FakeTuneCID;
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
 
