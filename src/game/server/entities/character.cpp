@@ -3523,12 +3523,13 @@ void CCharacter::FDDraceTick()
 
 	if (m_StrongBloody)
 	{
-		for (int i = 0; i < 3; i++)
-			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		if (Server()->Tick() % 2 == 0)
+			for (int i = 0; i < 3; i++)
+				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
 	else if (m_Bloody || GetPowerHooked() == BLOODY)
 	{
-		if (Server()->Tick() % 3 == 0)
+		if (Server()->Tick() % 6 == 0)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 	}
 
