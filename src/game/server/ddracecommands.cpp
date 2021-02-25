@@ -1482,6 +1482,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
+		pSelf->FreeAccount(ID);
 		return;
 	}
 
