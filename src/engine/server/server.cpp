@@ -1379,7 +1379,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					pPw = pAuth;
 				else
 				{
-					str_copy(aName, pAuth, min(sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
+					str_copy(aName, pAuth, min((unsigned long)sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
 					pPw = pDelim + 1;
 				}
 
