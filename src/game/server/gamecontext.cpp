@@ -1845,7 +1845,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 
-			if (pMsg->m_pMessage[0] == '/')
+			if (pMsg->m_pMessage[0] == '/' && Mode != CHAT_WHISPER)
 			{
 				CPlayer *pPlayer = m_apPlayers[ClientID];
 				if (Config()->m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
