@@ -482,6 +482,7 @@ bool CNetServer::SetTimedOut(int ClientID, int OrigID)
 
 	m_aSlots[ClientID].m_Connection.SetTimedOut(ClientAddr(OrigID), m_aSlots[OrigID].m_Connection.SeqSequence(), m_aSlots[OrigID].m_Connection.AckSequence(), m_aSlots[OrigID].m_Connection.Token(), m_aSlots[OrigID].m_Connection.ResendBuffer(), m_aSlots[OrigID].m_Connection.PeerToken(), m_aSlots[OrigID].m_Connection.m_Sevendown, m_aSlots[OrigID].m_Connection.m_SecurityToken);
 	m_aSlots[OrigID].m_Connection.Reset();
+	m_NumClients--;
 	return true;
 }
 
