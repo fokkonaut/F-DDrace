@@ -63,194 +63,200 @@ void CPickup::Tick()
 		}
 		else
 			Reset(true);
+
+		return;
 	}
-	else
+
+	Move();
+	// wait for respawn
+	if(m_SpawnTick > 0)
 	{
-		Move();
-		// wait for respawn
-		if(m_SpawnTick > 0)
+		if(Server()->Tick() > m_SpawnTick)
 		{
-			if(Server()->Tick() > m_SpawnTick)
-			{
-				// respawn
-				m_SpawnTick = -1;
+			// respawn
+			m_SpawnTick = -1;
 
-				if(m_Type == POWERUP_WEAPON)
-					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
-			}
-			else if (m_Type != POWERUP_BATTERY)
-				return;
+			if(m_Type == POWERUP_WEAPON)
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
 		}
-		// Check if a player intersected us
-		CCharacter* apEnts[MAX_CLIENTS];
-		int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity * *)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-		for (int i = 0; i < Num; ++i) {
-			CCharacter* pChr = apEnts[i];
-			if (pChr && pChr->IsAlive())
-			{
-				if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
-				bool Sound = false;
-				// player picked us up, is someone was hooking us, let them go
-				bool Picked = false;
-				switch (m_Type)
+		else if (m_Type != POWERUP_BATTERY)
+			return;
+	}
+
+	// Check if a player intersected us
+	CCharacter* apEnts[MAX_CLIENTS];
+	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, (CEntity * *)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	for (int i = 0; i < Num; ++i)
+	{
+		CCharacter* pChr = apEnts[i];
+		if (!pChr || !pChr->IsAlive())
+			continue;
+
+		// avoid affecting players through a wall when pickups on plots are placed at the edge of the wall without position rounding
+		if (m_PlotID >= PLOT_START && pChr->GetCurrentTilePlotID() != m_PlotID)
+			continue;
+
+		if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
+		bool Sound = false;
+		// player picked us up, is someone was hooking us, let them go
+		bool Picked = false;
+		switch (m_Type)
+		{
+			case POWERUP_HEALTH:
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
 				{
-					case POWERUP_HEALTH:
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
-						{
-							if (pChr->IncreaseHealth(1))
-							{
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
-								Picked = true;
-							}
-						}
-						else if (pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
-						break;
-
-					case POWERUP_ARMOR:
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
-						{
-							if (pChr->IncreaseArmor(1))
-							{
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
-								Picked = true;
-							}
-						}
-						else if (pChr->Team() == TEAM_SUPER) continue;
-						else if (pChr->GetPlayer()->m_SpookyGhost)
-						{
-							for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
-							{
-								if (!Sound && pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST])
-								{
-									GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
-									Sound = true;
-								}
-								pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST] = false;
-							}
-						}
-						else
-						{
-							for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
-							{
-								if (pChr->GetWeaponGot(i) && i != WEAPON_DRAW_EDITOR)
-								{
-									pChr->SetWeaponGot(i, false);
-									pChr->SetWeaponAmmo(i, 0);
-									Sound = true;
-								}
-							}
-							pChr->SetNinjaActivationDir(vec2(0, 0));
-							pChr->SetNinjaActivationTick(-500);
-							pChr->SetNinjaCurrentMoveTime(0);
-							if (pChr->m_ScrollNinja)
-								pChr->ScrollNinja(false);
-							if (pChr->GetActiveWeapon() >= WEAPON_SHOTGUN && pChr->GetActiveWeapon() != WEAPON_DRAW_EDITOR)
-								pChr->SetActiveWeapon(WEAPON_HAMMER);
-							if (Sound)
-							{
-								pChr->SetLastWeapon(WEAPON_GUN);
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
-							}
-						}
-						break;
-
-					case POWERUP_WEAPON:
-						if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
-						{
-							if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
-								break;
-
-							pChr->WeaponMoneyReward(m_Subtype);
-							if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
-								pChr->GiveWeapon(m_Subtype, false, 10);
-							else if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
-								pChr->GiveWeapon(m_Subtype);
-							else break;
-
-							Picked = true;
-
-							if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
-							else if (m_Subtype == WEAPON_SHOTGUN || m_Subtype == WEAPON_LASER || m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_PORTAL_RIFLE || m_Subtype == WEAPON_PROJECTILE_RIFLE)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
-							else if (m_Subtype == WEAPON_HAMMER || m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HEART_GUN)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
-							else if (m_Subtype == WEAPON_TELEKINESIS)
-								GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->Teams()->TeamMask(pChr->Team()));
-							else if (m_Subtype == WEAPON_LIGHTSABER)
-								GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team()));
-
-							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
-
-						}
-						break;
-
-					case POWERUP_NINJA:
+					if (pChr->IncreaseHealth(1))
 					{
-						if (pChr->GetPlayer()->m_SpookyGhost)
-							break;
-
-						// activate ninja on target player
-						pChr->GiveNinja();
-						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
-						{
-							Picked = true;
-
-							// loop through all players, setting their emotes
-							CCharacter* pC = static_cast<CCharacter*>(GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER));
-							for (; pC; pC = (CCharacter*)pC->TypeNext())
-							{
-								if (pC != pChr)
-									pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
-							}
-						}
-						break;
-					}
-
-					case POWERUP_BATTERY:
-						if (m_SpawnTick > 0)
-						{
-							int ClientID = pChr->GetPlayer()->GetCID();
-							if (m_aLastBatteryMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
-								return;
-
-							m_aLastBatteryMsg[ClientID] = Server()->Tick();
-
-							char aBuf[64];
-							int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
-							str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d seconds", Seconds);
-							GameServer()->SendChatTarget(ClientID, aBuf);
-							return;
-						}
-						else if (pChr->GetPlayer()->GiveTaserBattery(10))
-						{
-							Picked = true;
-							GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));
-						}
-						break;
-
-					default:
-						break;
-				};
-
-				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || m_Type == POWERUP_BATTERY)
-				{
-					if (Picked)
-					{
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
-							pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
-						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-						int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
-
-						if (m_Type == POWERUP_BATTERY)
-							RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
-
-						if (RespawnTime >= 0)
-							m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
+						Picked = true;
 					}
 				}
+				else if (pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
+				break;
+
+			case POWERUP_ARMOR:
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+				{
+					if (pChr->IncreaseArmor(1))
+					{
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+						Picked = true;
+					}
+				}
+				else if (pChr->Team() == TEAM_SUPER) continue;
+				else if (pChr->GetPlayer()->m_SpookyGhost)
+				{
+					for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+					{
+						if (!Sound && pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST])
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+							Sound = true;
+						}
+						pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST] = false;
+					}
+				}
+				else
+				{
+					for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+					{
+						if (pChr->GetWeaponGot(i) && i != WEAPON_DRAW_EDITOR)
+						{
+							pChr->SetWeaponGot(i, false);
+							pChr->SetWeaponAmmo(i, 0);
+							Sound = true;
+						}
+					}
+					pChr->SetNinjaActivationDir(vec2(0, 0));
+					pChr->SetNinjaActivationTick(-500);
+					pChr->SetNinjaCurrentMoveTime(0);
+					if (pChr->m_ScrollNinja)
+						pChr->ScrollNinja(false);
+					if (pChr->GetActiveWeapon() >= WEAPON_SHOTGUN && pChr->GetActiveWeapon() != WEAPON_DRAW_EDITOR)
+						pChr->SetActiveWeapon(WEAPON_HAMMER);
+					if (Sound)
+					{
+						pChr->SetLastWeapon(WEAPON_GUN);
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+					}
+				}
+				break;
+
+			case POWERUP_WEAPON:
+				if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+				{
+					if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
+						break;
+
+					pChr->WeaponMoneyReward(m_Subtype);
+					if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
+						pChr->GiveWeapon(m_Subtype, false, 10);
+					else if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
+						pChr->GiveWeapon(m_Subtype);
+					else break;
+
+					Picked = true;
+
+					if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
+					else if (m_Subtype == WEAPON_SHOTGUN || m_Subtype == WEAPON_LASER || m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_PORTAL_RIFLE || m_Subtype == WEAPON_PROJECTILE_RIFLE)
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
+					else if (m_Subtype == WEAPON_HAMMER || m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HEART_GUN)
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+					else if (m_Subtype == WEAPON_TELEKINESIS)
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->Teams()->TeamMask(pChr->Team()));
+					else if (m_Subtype == WEAPON_LIGHTSABER)
+						GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team()));
+
+					GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
+
+				}
+				break;
+
+			case POWERUP_NINJA:
+			{
+				if (pChr->GetPlayer()->m_SpookyGhost)
+					break;
+
+				// activate ninja on target player
+				pChr->GiveNinja();
+				if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+				{
+					Picked = true;
+
+					// loop through all players, setting their emotes
+					CCharacter* pC = static_cast<CCharacter*>(GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER));
+					for (; pC; pC = (CCharacter*)pC->TypeNext())
+					{
+						if (pC != pChr)
+							pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
+					}
+				}
+				break;
+			}
+
+			case POWERUP_BATTERY:
+				if (m_SpawnTick > 0)
+				{
+					int ClientID = pChr->GetPlayer()->GetCID();
+					if (m_aLastBatteryMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
+						return;
+
+					m_aLastBatteryMsg[ClientID] = Server()->Tick();
+
+					char aBuf[64];
+					int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
+					str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d seconds", Seconds);
+					GameServer()->SendChatTarget(ClientID, aBuf);
+					return;
+				}
+				else if (pChr->GetPlayer()->GiveTaserBattery(10))
+				{
+					Picked = true;
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));
+				}
+				break;
+
+			default:
+				break;
+		};
+
+		if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || m_Type == POWERUP_BATTERY)
+		{
+			if (Picked)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
+					pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+				int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+
+				if (m_Type == POWERUP_BATTERY)
+					RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
+
+				if (RespawnTime >= 0)
+					m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 			}
 		}
 	}
