@@ -1602,7 +1602,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					if (pPlayer->m_LastWhisperTo >= 0)
 					{
-						char aWhisperMsg[256];
+						static char aWhisperMsg[256];
 						str_copy(aWhisperMsg, pMsg->m_pMessage + ConverseOffset, 256);
 						pMsg->m_pMessage = aWhisperMsg;
 						pMsg->m_Target = pPlayer->m_LastWhisperTo;
