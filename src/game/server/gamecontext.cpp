@@ -4337,8 +4337,6 @@ void CGameContext::SetExpireDate(time_t *pDate, float Days)
 	ExpireDate = *localtime(&DateSeconds);
 
 	// we set minutes and seconds to 0 always :)
-	if (ExpireDate.tm_min != 0)
-		ExpireDate.tm_hour++;
 	ExpireDate.tm_min = 0;
 	ExpireDate.tm_sec = 0;
 	
