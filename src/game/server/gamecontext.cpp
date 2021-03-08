@@ -4320,10 +4320,6 @@ void CGameContext::SetExpireDate(time_t *pDate, float Days)
 	time(&Now);
 	ExpireDate = *localtime(&Now);
 
-	// we set minutes and seconds to 0 always :)
-	ExpireDate.tm_min = 0;
-	ExpireDate.tm_sec = 0;
-
 	// add another x days if we have the item already
 	if (*pDate != 0)
 	{
@@ -4339,6 +4335,12 @@ void CGameContext::SetExpireDate(time_t *pDate, float Days)
 	const time_t ONE_DAY = 24 * 60 * 60;
 	time_t DateSeconds = mktime(&ExpireDate) + (Days * ONE_DAY);
 	ExpireDate = *localtime(&DateSeconds);
+
+	// we set minutes and seconds to 0 always :)
+	if (ExpireDate.tm_min != 0)
+		ExpireDate.tm_hour++;
+	ExpireDate.tm_min = 0;
+	ExpireDate.tm_sec = 0;
 	
 	*pDate = mktime(&ExpireDate);
 }
