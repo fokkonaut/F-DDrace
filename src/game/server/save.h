@@ -24,6 +24,7 @@ public:
 	// F-DDrace
 	int GetMinigame() { return m_Minigame; }
 	void TeleOutOfPlot(vec2 ToTele);
+	void StopPlotEditing();
 
 	bool SaveFile(const char *pFileName, CCharacter *pChr);
 	bool LoadFile(const char *pFileName, CCharacter *pChr);

@@ -20,6 +20,11 @@ CSaveTee::~CSaveTee()
 void CSaveTee::TeleOutOfPlot(vec2 ToTele)
 {
 	m_Pos = m_PrevPos = m_CorePos = ToTele;
+	StopPlotEditing();
+}
+
+void CSaveTee::StopPlotEditing()
+{
 	m_aWeapons[WEAPON_DRAW_EDITOR].m_Got = false;
 }
 

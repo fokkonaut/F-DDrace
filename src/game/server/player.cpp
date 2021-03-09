@@ -1773,6 +1773,9 @@ void CPlayer::OnLogout()
 
 void CPlayer::StopPlotEditing()
 {
+	if (IsMinigame() && m_SavedMinigameTee)
+		m_MinigameTee.StopPlotEditing();
+
 	if (m_pCharacter && m_pCharacter->m_DrawEditor.Active())
 		m_pCharacter->GiveWeapon(WEAPON_DRAW_EDITOR, true);
 }
