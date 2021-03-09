@@ -1612,7 +1612,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 
 	if (!str_comp_nocase(pSelf->m_Accounts[ID].m_Username, aUsername))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Username already exsists");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Username already exists");
 		pSelf->FreeAccount(ID);
 		return;
 	}
