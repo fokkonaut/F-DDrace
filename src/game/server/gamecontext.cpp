@@ -5628,14 +5628,26 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	{
 		// move same ip list to the new player
 		pPlayer->m_aSameIP[i] = pOrig->m_aSameIP[i];
-		if (!m_apPlayers[i] || !pOrig->m_aSameIP[i] || i == ClientID)
+
+		if (!m_apPlayers[i] || i == ClientID)
 			continue;
 
-		// insert the new client with the old fake id
-		Server()->GetIdMap(i)[OwnID] = ClientID;
-		Server()->GetReverseIdMap(i)[ClientID] = OwnID;
-		m_apPlayers[i]->SendDisconnect(OwnID);
-		m_apPlayers[i]->SendConnect(OwnID, ClientID);
+		// reset, let the algorithmn handle this
+		id = ClientID;
+		if (Server()->Translate(id, i))
+		{
+			Server()->GetIdMap(i)[id] = -1;
+			Server()->GetReverseIdMap(i)[ClientID] = -1;
+			m_apPlayers[i]->SendDisconnect(id);
+		}
+
+		id = OrigID;
+		if (Server()->Translate(id, i))
+		{
+			Server()->GetIdMap(i)[id] = -1;
+			Server()->GetReverseIdMap(i)[OrigID] = -1;
+			m_apPlayers[i]->SendDisconnect(id);
+		}
 	}
 
 	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
