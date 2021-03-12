@@ -147,6 +147,15 @@ void CFlag::Grab(int NewCarrier)
 	UpdateSpectators(m_Carrier);
 }
 
+void CFlag::TeleToPlot(int PlotID)
+{
+	GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
+	if (GetCarrier())
+		Drop();
+	m_Vel = vec2(0, 0);
+	m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+}
+
 void CFlag::Tick()
 {
 	// for the CAdvancedEntity part
@@ -157,11 +166,14 @@ void CFlag::Tick()
 	int PlotID = GameServer()->GetTilePlotID(m_Pos);
 	if (PlotID >= PLOT_START)
 	{
-		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
-		if (GetCarrier())
-			Drop();
-		m_Vel = vec2(0, 0);
-		m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+		TeleToPlot(PlotID);
+	}
+	else
+	{
+		int Team = GetCarrier() ? GetCarrier()->Team() : GetLastCarrier() ? GetLastCarrier()->Team() : 0;
+		int Number = GameServer()->IntersectedLineDoor(m_Pos, m_PrevPos, Team, true, false);
+		if (Number > 0)
+			TeleToPlot(GameServer()->Collision()->GetPlotBySwitch(Number));
 	}
 
 	if (GetCarrier())

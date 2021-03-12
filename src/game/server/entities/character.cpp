@@ -875,11 +875,12 @@ void CCharacter::FireWeapon()
 					return;
 				}
 
+				int PlotDoorNumber = GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false);
 				for (int i = 0; i < NUM_PORTALS; i++)
 				{
 					if (!m_pPlayer->m_pPortal[i])
 					{
-						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID());
+						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), GameServer()->Collision()->GetPlotBySwitch(PlotDoorNumber));
 						if (i == PORTAL_SECOND)
 						{
 							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);

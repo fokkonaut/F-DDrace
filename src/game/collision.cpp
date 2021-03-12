@@ -1445,7 +1445,7 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 	return 0;
 }
 
-int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Team, bool PlotDoorOnly)
+int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	if (!m_pDoor || (PlotDoorOnly && !m_NumPlots))
 		return 0;
@@ -1461,7 +1461,7 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
 		int Number = m_pDoor[Ny * m_Width + Nx].m_Number;
-		bool IsDoor = (m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && m_pSwitchers[Number].m_Status[Team]);
+		bool IsDoor = (m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && (m_pSwitchers[Number].m_Status[Team] || !ClosedOnly));
 		bool PlotLaserWall = (Number == 0 && m_pSwitch[Ny * m_Width + Nx].m_Type == TILE_SWITCH_PLOT);
 		bool IsPlotDoor = (IsDoor && (PlotLaserWall || GetPlotBySwitch(Number) > 0));
 		if (IsPlotDoor || (!PlotDoorOnly && IsDoor))

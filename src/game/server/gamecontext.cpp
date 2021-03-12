@@ -4289,12 +4289,10 @@ void CGameContext::ClearPlot(int PlotID)
 	}
 }
 
-bool CGameContext::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly)
+int CGameContext::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
-	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, Team, PlotDoorOnly);
-	if (Number == -1) // plot built laser wall
-		return true;
-	return Number > 0;
+	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, Team, PlotDoorOnly, ClosedOnly);
+	return Number; // can be used as bool, -1 is plot built laser wall which would return true too
 }
 
 void CGameContext::RemovePortalsFromPlot(int PlotID)

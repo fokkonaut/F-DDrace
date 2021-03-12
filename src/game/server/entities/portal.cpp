@@ -3,17 +3,19 @@
 #include <engine/server.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
+#include <game/server/gamemodes/DDRace.h>
 #include "portal.h"
 #include "flag.h"
 #include "money.h"
 #include <engine/shared/config.h>
 #include <algorithm>
 
-CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner)
+CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTAL, Pos)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
+	m_ThroughPlotDoor = ThroughPlotDoor;
 	m_StartTick = Server()->Tick();
 	m_pLinkedPortal = 0;
 	m_LinkedTick = 0;
@@ -119,6 +121,12 @@ void CPortal::EntitiesEnter()
 			{
 				CCharacter *pChr = (CCharacter *)apEnts[i];
 				pAffectedChr = pChr;
+				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
+				{
+					int Flag = pChr->HasFlag();
+					if (Flag != -1)
+						((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Flag]->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
+				}
 				break;
 			}
 		case CGameWorld::ENTTYPE_FLAG:
@@ -126,6 +134,12 @@ void CPortal::EntitiesEnter()
 				CFlag *pFlag = (CFlag *)apEnts[i];
 				if (pFlag->GetCarrier())
 					continue; // owner is getting teleported with the flag
+
+				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
+				{
+					pFlag->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
+					continue;
+				}
 
 				if (pFlag->GetLastCarrier())
 					pAffectedChr = pFlag->GetLastCarrier();
@@ -146,11 +160,6 @@ void CPortal::EntitiesEnter()
 				break;
 			}
 		}
-
-		// disallow using the portal if its placed on the other side of a plot door
-		int Team = pAffectedChr ? pAffectedChr->Team() : 0;
-		if (GameServer()->IntersectedLineDoor(m_Pos, apEnts[i]->GetPos(), Team, true))
-			continue;
 
 		switch (apEnts[i]->GetObjType())
 		{

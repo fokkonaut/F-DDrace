@@ -20,13 +20,14 @@ class CPortal : public CEntity
 	CPortal *m_pLinkedPortal;
 
 	int m_Owner;
+	int m_ThroughPlotDoor; // for flags
 	int m_aID[NUM_IDS];
 
 	std::vector<CEntity*> m_vTeleported;
 	void EntitiesEnter();
 
 public:
-	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner);
+	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor = 0);
 	virtual ~CPortal();
 
 	virtual void Reset();
