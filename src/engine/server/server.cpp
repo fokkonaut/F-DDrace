@@ -1989,6 +1989,8 @@ int CServer::Run()
 	GameServer()->OnInit();
 	str_format(aBuf, sizeof(aBuf), "netversion %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+	str_format(aBuf, sizeof(aBuf), "netversion %s", GameServer()->NetVersionSevendown());
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	str_format(aBuf, sizeof(aBuf), "game version %s", GameServer()->Version());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
