@@ -203,6 +203,7 @@ void CPlayer::Reset()
 	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
 	m_LastVote = 0;
+	m_LastPlotAuction = 0;
 	m_aSecurityPin[0] = '\0';
 	m_LocalChat = false;
 
@@ -1788,7 +1789,7 @@ void CPlayer::CancelPlotAuction()
 	m_PlotAuctionPrice = 0;
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", Server()->ClientName(m_ClientID));
-	GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+	GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, m_ClientID);
 }
 
 void CPlayer::CancelPlotSwap()
@@ -1797,7 +1798,7 @@ void CPlayer::CancelPlotSwap()
 		return;
 
 	m_aPlotSwapUsername[0] = 0;
-	GameServer()->SendChat(-1, CHAT_ALL, -1, "Your plot swap offer got cancelled");
+	GameServer()->SendChatTarget(m_ClientID, "Your plot swap offer got cancelled");
 }
 
 void CPlayer::ExpireItems()

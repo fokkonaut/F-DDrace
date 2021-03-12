@@ -2306,6 +2306,12 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (pPlayer->m_LastPlotAuction && pPlayer->m_LastPlotAuction + pSelf->Server()->TickSpeed() * 60 > pSelf->Server()->Tick())
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You can only do auctions once a minute");
+			return;
+		}
+
 		if (pPlayer->m_PlotAuctionPrice != 0)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You already sell your plot");
@@ -2320,6 +2326,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		pPlayer->CancelPlotSwap();
 		pPlayer->m_PlotAuctionPrice = Price;
+		pPlayer->m_LastPlotAuction = pSelf->Server()->Tick();
 
 		str_format(aBuf, sizeof(aBuf), "'%s' started an auction on plot %d for %d money (plot expires on %s)",
 			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate));

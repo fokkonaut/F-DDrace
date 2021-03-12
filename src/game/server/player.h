@@ -365,6 +365,7 @@ public:
 	bool SilentFarmActive();
 
 	int64 m_LastVote;
+	int64 m_LastPlotAuction;
 	int64 m_LastMoneyXPBomb;
 
 	bool JoinChat(bool Local);
