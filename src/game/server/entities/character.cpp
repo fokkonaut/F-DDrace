@@ -2509,6 +2509,7 @@ void CCharacter::HandleTiles(int Index)
 			m_pPlayer->GiveXP(XP);
 
 			// broadcast
+			if (!SendingPortalCooldown())
 			{
 				char aMsg[256];
 				char aSurvival[32];
