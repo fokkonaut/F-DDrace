@@ -20,7 +20,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoo
 	m_pLinkedPortal = 0;
 	m_LinkedTick = 0;
 
-	for (int i = 0; i < NUM_IDS; i++)
+	for (int i = 0; i < NUM_PORTAL_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
 
 	GameWorld()->InsertEntity(this);
@@ -31,7 +31,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoo
 
 CPortal::~CPortal()
 {
-	for (int i = 0; i < NUM_IDS; i++)
+	for (int i = 0; i < NUM_PORTAL_IDS; i++)
 		Server()->SnapFreeID(m_aID[i]);
 }
 

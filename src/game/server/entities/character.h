@@ -14,6 +14,7 @@
 #include "pickup.h"
 #include "lightsaber.h"
 #include "stable_projectile.h"
+#include "helicopter.h"
 
 #include "dummy/dummybase.h"
 
@@ -433,6 +434,10 @@ public:
 
 	// editor
 	CDrawEditor m_DrawEditor;
+
+	// helicopter
+	CHelicopter *m_pHelicopter;
+	bool TryMountHelicopter();
 
 	int GetCurrentTilePlotID();
 	void TeleOutOfPlot(int PlotID);

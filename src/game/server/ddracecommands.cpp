@@ -1229,6 +1229,14 @@ void CGameContext::ConSendMotd(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendMotd(pText, Victim);
 }
 
+void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pSelf->SpawnHelicopter(pChr->GetPos());
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

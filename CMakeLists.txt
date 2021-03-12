@@ -1703,6 +1703,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/flyingpoint.h
   entities/gun.cpp
   entities/gun.h
+  entities/helicopter.cpp
+  entities/helicopter.h
   entities/laser.cpp
   entities/laser.h
   entities/lasertext.cpp

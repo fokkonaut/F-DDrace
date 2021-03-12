@@ -36,7 +36,6 @@ void CMoney::Tick()
 		return;
 
 	CAdvancedEntity::Tick();
-	HandleDropped();
 
 	// Remove small money drops after 10 minutes
 	if (m_Amount < SMALL_MONEY_AMOUNT && SecondsPassed(60 * 10))
@@ -44,6 +43,8 @@ void CMoney::Tick()
 		Reset();
 		return;
 	}
+
+	m_Gravity = true;
 
 	CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, SecondsPassed(2) ? 0 : GetOwner(), m_Owner, true, true);
 	if (pClosest)
@@ -83,6 +84,8 @@ void CMoney::Tick()
 			MoveTo(pMoney->GetPos(), RADIUS_FIND_MONEY);
 	}
 
+	HandleDropped();
+
 	m_PrevPos = m_Pos;
 }
 
@@ -92,13 +95,12 @@ void CMoney::MoveTo(vec2 Pos, int Radius)
 	if (MaxFlySpeed <= 0.f)
 		return;
 
+	m_Gravity = false;
+
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
 	float AddVelX = (Diff.x/Radius*5);
 	m_Vel.x = clamp(m_Vel.x+AddVelX, min(-MaxFlySpeed, m_Vel.x-AddVelX), max(MaxFlySpeed, m_Vel.x-AddVelX));
 
-	// Calculate out the gravity while we move to a position, we cant just not call HandleDropped() because we still want teleporter, stopper, etc...
-	float Gravity = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_Gravity : GameServer()->Tuning()->m_Gravity;
-	m_Vel.y -= Gravity;
 	float AddVelY = (Diff.y/Radius*5);
 	m_Vel.y = clamp(m_Vel.y+AddVelY, min(-MaxFlySpeed, m_Vel.y-AddVelY), max(MaxFlySpeed, m_Vel.y-AddVelY));
 }

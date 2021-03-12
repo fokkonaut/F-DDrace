@@ -6,22 +6,22 @@
 #include <game/server/entity.h>
 #include <vector>
 
-enum
-{
-	NUM_SIDE = 12,
-	NUM_PARTICLES = 12,
-	NUM_IDS = NUM_SIDE + NUM_PARTICLES,
-};
-
 class CPortal : public CEntity
 {
+	enum
+	{
+		NUM_SIDE = 12,
+		NUM_PARTICLES = 12,
+		NUM_PORTAL_IDS = NUM_SIDE + NUM_PARTICLES,
+	};
+
 	int m_StartTick;
 	int m_LinkedTick;
 	CPortal *m_pLinkedPortal;
 
 	int m_Owner;
 	int m_ThroughPlotDoor; // for flags
-	int m_aID[NUM_IDS];
+	int m_aID[NUM_PORTAL_IDS];
 
 	std::vector<CEntity*> m_vTeleported;
 	void EntitiesEnter();

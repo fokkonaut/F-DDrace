@@ -14,6 +14,9 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_TeleCheckpoint = GetOwner() ? GetOwner()->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
 	m_TeamMask = GetOwner() ? GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, m_Owner) : Mask128();
+	m_Gravity = true;
+	m_GroundVel = true;
+	m_AirVel = true;
 }
 
 void CAdvancedEntity::Reset()
@@ -43,12 +46,12 @@ void CAdvancedEntity::Tick()
 	}
 }
 
-bool CAdvancedEntity::IsGrounded(bool SetVel)
+bool CAdvancedEntity::IsGrounded(bool GroundVel, bool AirVel)
 {
 	if ((GameServer()->Collision()->CheckPoint(m_Pos.x + GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5))
 		|| (GameServer()->Collision()->CheckPoint(m_Pos.x - GetProximityRadius(), m_Pos.y + GetProximityRadius() + 5)))
 	{
-		if (SetVel)
+		if (GroundVel)
 			m_Vel.x *= 0.75f;
 		return true;
 	}
@@ -56,12 +59,12 @@ bool CAdvancedEntity::IsGrounded(bool SetVel)
 	int MoveRestrictionsBelow = GameServer()->Collision()->GetMoveRestrictions(m_Pos + vec2(0, GetProximityRadius() + 4), 0.0f, GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
 	if ((MoveRestrictionsBelow&CANTMOVE_DOWN) || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(m_Pos.x, m_Pos.y + GetProximityRadius() + 4))) == TILE_STOPA)
 	{
-		if (SetVel)
+		if (GroundVel)
 			m_Vel.x *= 0.925f;
 		return true;
 	}
 
-	if (SetVel)
+	if (AirVel)
 		m_Vel.x *= 0.98f;
 	return false;
 }
@@ -69,10 +72,13 @@ bool CAdvancedEntity::IsGrounded(bool SetVel)
 void CAdvancedEntity::HandleDropped()
 {
 	//Gravity
-	if (!m_TuneZone)
-		m_Vel.y += GameServer()->Tuning()->m_Gravity;
-	else
-		m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
+	if (m_Gravity)
+	{
+		if (!m_TuneZone)
+			m_Vel.y += GameServer()->Tuning()->m_Gravity;
+		else
+			m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
+	}
 
 	//Speedups
 	if (GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos)))
@@ -144,8 +150,8 @@ void CAdvancedEntity::HandleDropped()
 	{
 		HandleTiles(CurrentIndex);
 	}
-	IsGrounded(true);
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.5f);
+	IsGrounded(m_GroundVel, m_AirVel);
+	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
 }
 
 bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)

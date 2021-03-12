@@ -19,6 +19,7 @@
 
 #include "entities/character.h"
 #include "entities/money.h"
+#include "entities/helicopter.h"
 #include "gamemodes/DDRace.h"
 #include "teeinfo.h"
 #include "gamecontext.h"
@@ -982,10 +983,13 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_Passive && !pChr->m_Super)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->m_DrawEditor.Active())
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter)
 			Tuning.m_HookFireSpeed = 0.f;
 
-		if (pChr->m_DrawEditor.Active() || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
+		if (pChr->m_pHelicopter)
+			Tuning.m_HookDragAccel = 0.f;
+
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;
@@ -995,7 +999,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_AirControlAccel = 0.f;
 		}
 
-		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR)
+		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter)
 			Tuning.m_Gravity = 0.f;
 	}
 
@@ -2366,7 +2370,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 
 					if (!InHouse)
-						pChr->DropWeapon(pChr->GetActiveWeapon(), false);
+					{
+						if (pChr->m_pHelicopter)
+						{
+							pChr->m_pHelicopter->Dismount();
+						}
+						else if (!pChr->TryMountHelicopter())
+						{
+							pChr->DropWeapon(pChr->GetActiveWeapon(), false);
+						}
+					}
 				}
 			}
 
@@ -5905,6 +5918,11 @@ void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int S
 {
 	Pos.y -= 40.0 * 2.5;
 	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * Seconds, pText, (int)(strlen(pText)));
+}
+
+void CGameContext::SpawnHelicopter(vec2 Pos)
+{
+	new CHelicopter(&m_World, Pos);
 }
 
 void CGameContext::UpdateHidePlayers(int UpdateID)

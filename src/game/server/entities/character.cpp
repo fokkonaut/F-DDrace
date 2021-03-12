@@ -1209,6 +1209,13 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 			pNewInput->m_TargetY = m_Input.m_TargetY;
 		}
 	}
+	else if (m_pHelicopter)
+	{
+		m_pHelicopter->OnInput(pNewInput);
+		pNewInput->m_Direction = 0;
+		pNewInput->m_Jump = 0;
+		pNewInput->m_Hook = 0;
+	}
 
 	// check for changes
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
@@ -1671,6 +1678,10 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	// unset skin specific stuff
 	m_pPlayer->ResetSkin();
 
+	// dismount helicopter
+	if (m_pHelicopter)
+		m_pHelicopter->Dismount();
+
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
@@ -1853,7 +1864,13 @@ void CCharacter::Snap(int SnappingClient)
 	pCharacter->m_Armor = 0;
 
 	int Events = m_TriggeredEvents;
-	if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->SilentFarmActive())
+	// jump is used for flying up, annoying air jump effect otherwise
+	if (m_pHelicopter && SnappingClient == m_pPlayer->GetCID())
+	{
+		pCharacter->m_Jumped |= 2;
+		Events |= COREEVENTFLAG_AIR_JUMP;
+	}
+	else if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->SilentFarmActive())
 	{
 		Events &= ~COREEVENTFLAG_GROUND_JUMP;
 		Events &= ~COREEVENTFLAG_AIR_JUMP;
@@ -3470,6 +3487,7 @@ void CCharacter::FDDraceInit()
 	m_Item = -3;
 	m_pItem = 0;
 	m_DoorHammer = false;
+	m_pHelicopter = 0;
 
 	m_AlwaysTeleWeapon = Config()->m_SvAlwaysTeleWeapon;
 
@@ -4147,6 +4165,12 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(Pos))
 		m_pPlayer->StopPlotEditing();
 	m_Core.m_Pos = m_Pos = m_PrevPos = Pos;
+}
+
+bool CCharacter::TryMountHelicopter()
+{
+	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 48.f, CGameWorld::ENTTYPE_HELICOPTER, 0, true);
+	return pHelicopter && pHelicopter->Mount(m_pPlayer->GetCID());
 }
 
 int CCharacter::GetAliveState()

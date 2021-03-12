@@ -25,7 +25,7 @@ public:
 	virtual void ReleaseHooked() {}
 
 protected:
-	bool IsGrounded(bool SetVel = false);
+	bool IsGrounded(bool GroundVel = false, bool AirVel = false);
 	// HandleDropped() has to be called within the tick function of the child entity whenever the entity is dropped and not being carried
 	void HandleDropped();
 
@@ -39,6 +39,10 @@ protected:
 
 	bool m_CheckDeath;
 	Mask128 m_TeamMask;
+
+	bool m_Gravity;
+	bool m_GroundVel;
+	bool m_AirVel;
 
 	static bool IsSwitchActiveCb(int Number, void* pUser);
 	void HandleTiles(int Index);
