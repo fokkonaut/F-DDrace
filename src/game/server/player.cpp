@@ -1789,7 +1789,7 @@ void CPlayer::CancelPlotAuction()
 	m_PlotAuctionPrice = 0;
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "The plot auction by '%s' is cancelled", Server()->ClientName(m_ClientID));
-	GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, m_ClientID);
+	GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 }
 
 void CPlayer::CancelPlotSwap()
