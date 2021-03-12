@@ -1583,6 +1583,18 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pMsg->m_pMessage[0] == '/')
 			{
+				// manually catch these so we can give the correct output, not "No such command", because these commands are only "hacked in" for 0.6 clients
+				if (str_comp_nocase(pMsg->m_pMessage + 1, "w") == 0 || str_comp_nocase(pMsg->m_pMessage + 1, "whisper") == 0)
+				{
+					SendChatTarget(ClientID, "Invalid arguments... Usage: w s[player name] r[message]");
+					return 0;
+				}
+				else if (str_comp_nocase(pMsg->m_pMessage + 1, "c") == 0 || str_comp_nocase(pMsg->m_pMessage + 1, "converse") == 0)
+				{
+					SendChatTarget(ClientID, "Invalid arguments... Usage: c r[message]");
+					return 0;
+				}
+
 				int WhisperOffset = -1;
 				int ConverseOffset = -1;
 
@@ -1595,8 +1607,13 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					static char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + WhisperOffset, 256);
-					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &pMsg->m_Target);
 					pMsg->m_Mode = CHAT_WHISPER;
+					pMsg->m_pMessage = GetWhisper(aWhisperMsg, &pMsg->m_Target);
+					if (pMsg->m_Target == -1)
+					{
+						SendChatTarget(ClientID, "Invalid whisper");
+						return 0;
+					}
 				}
 				else if (ConverseOffset != -1)
 				{
