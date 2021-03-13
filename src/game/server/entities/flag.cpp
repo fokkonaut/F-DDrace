@@ -162,20 +162,6 @@ void CFlag::Tick()
 	m_Owner = GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1;
 	CAdvancedEntity::Tick();
 
-	// plots
-	int PlotID = GameServer()->GetTilePlotID(m_Pos);
-	if (PlotID >= PLOT_START)
-	{
-		TeleToPlot(PlotID);
-	}
-	else
-	{
-		int Team = GetCarrier() ? GetCarrier()->Team() : GetLastCarrier() ? GetLastCarrier()->Team() : 0;
-		int Number = GameServer()->IntersectedLineDoor(m_Pos, m_PrevPos, Team, true, false);
-		if (Number > 0)
-			TeleToPlot(GameServer()->Collision()->GetPlotBySwitch(Number));
-	}
-
 	if (GetCarrier())
 	{
 		if (GetCarrier()->m_IsFrozen && GetCarrier()->m_FirstFreezeTick != 0)
@@ -212,6 +198,20 @@ void CFlag::Tick()
 		}
 		else
 			HandleDropped();
+	}
+
+	// plots
+	int PlotID = GameServer()->GetTilePlotID(m_Pos);
+	if (PlotID >= PLOT_START)
+	{
+		TeleToPlot(PlotID);
+	}
+	else
+	{
+		int Team = GetCarrier() ? GetCarrier()->Team() : GetLastCarrier() ? GetLastCarrier()->Team() : 0;
+		int Number = GameServer()->IntersectedLineDoor(m_Pos, m_PrevPos, Team, true, false);
+		if (Number > 0)
+			TeleToPlot(GameServer()->Collision()->GetPlotBySwitch(Number));
 	}
 
 	if (m_SoundTick && Server()->Tick() % Server()->TickSpeed() == 0)
