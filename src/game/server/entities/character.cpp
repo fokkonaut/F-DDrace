@@ -1074,7 +1074,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
+	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN && Remove)
 		return;
 
 	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
