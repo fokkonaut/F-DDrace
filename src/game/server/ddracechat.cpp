@@ -2426,6 +2426,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		}
 
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
+		pChr->UnsetSpookyGhost();
 		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
 		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
 	}

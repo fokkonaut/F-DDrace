@@ -1074,7 +1074,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN && Remove)
+	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
 
 	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
@@ -3940,6 +3940,9 @@ void CCharacter::UnsetSpookyGhost()
 
 void CCharacter::SetActiveWeapon(int Weapon)
 {
+	if (!GetWeaponGot(Weapon))
+		return;
+
 	m_ActiveWeapon = Weapon;
 	UpdateWeaponIndicator();
 	m_DrawEditor.OnWeaponSwitch();
