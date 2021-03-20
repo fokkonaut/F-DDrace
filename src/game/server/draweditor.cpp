@@ -325,12 +325,12 @@ void CDrawEditor::OnWeaponSwitch()
 		int PlotID = GetPlotID();
 		if (m_pCharacter->GetCurrentTilePlotID() == PlotID)
 		{
+			GameServer()->SetPlotDoorStatus(PlotID, true);
+			GameServer()->RemovePortalsFromPlot(PlotID);
+
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (GameServer()->GetPlayerChar(i) && i != GetCID())
 					GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
-
-			GameServer()->SetPlotDoorStatus(PlotID, true);
-			GameServer()->RemovePortalsFromPlot(PlotID);
 		}
 	}
 	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
