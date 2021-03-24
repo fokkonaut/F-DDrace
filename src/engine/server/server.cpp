@@ -617,7 +617,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven
 				MsgId -= 4;
 			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 				MsgId -= 4;
-			else if (MsgId == NETMSG_CAPABILITIES)
+			else if(MsgId >= OFFSET_UUID)
 				;
 			else if(MsgId >= NUM_NETMSGTYPES)
 				MsgId -= NUM_NETMSGTYPES;
@@ -632,8 +632,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Seven
 				MsgId -= 1;
 			else if(MsgId >= NETMSGTYPE_SV_TUNEPARAMS && MsgId <= NETMSGTYPE_SV_VOTESTATUS)
 				;
-			else if (MsgId == NETMSGTYPE_SV_TEAMSSTATE)
-				MsgId = 30;
+			else if(MsgId >= OFFSET_UUID)
+				;
 			else if(MsgId >= NUM_NETMSGTYPES)
 				MsgId -= NUM_NETMSGTYPES;
 			else
