@@ -1482,3 +1482,25 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 		* pOutBeforeCollision = Pos1;
 	return 0;
 }
+
+bool CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly)
+{
+	int Index = GetPureMapIndex(Pos);
+	int Number = m_pDoor[Index].m_Number;
+	bool IsPlotDoor = GetPlotBySwitch(Number) > 0;
+	return m_pDoor[Index].m_Index == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && m_pSwitchers[Number].m_Status[Team];
+}
+
+bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly)
+{
+	Size *= 0.5f;
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y - Size.y), Team, PlotDoorOnly))
+		return true;
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y - Size.y), Team, PlotDoorOnly))
+		return true;
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly))
+		return true;
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly))
+		return true;
+	return false;
+}
