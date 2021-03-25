@@ -1389,6 +1389,16 @@ int CCollision::GetDoorNumber(vec2 Pos)
 	return GetDTileNumber(GetPureMapIndex(Pos));
 }
 
+int CCollision::GetDTile(int x, int y)
+{
+	if (!m_pDoor)
+		return 0;
+
+	int Nx = clamp(x / 32, 0, m_Width - 1);
+	int Ny = clamp(y / 32, 0, m_Height - 1);
+	return m_pDoor[Ny * m_Width + Nx].m_Index;
+}
+
 bool CCollision::IsPlotTile(int Index)
 {
 	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;
@@ -1485,10 +1495,9 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 
 bool CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly)
 {
-	int Index = GetPureMapIndex(Pos);
-	int Number = m_pDoor[Index].m_Number;
+	int Number = m_pDoor[GetPureMapIndex(Pos)].m_Number;
 	bool IsPlotDoor = GetPlotBySwitch(Number) > 0;
-	return m_pDoor[Index].m_Index == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && m_pSwitchers[Number].m_Status[Team];
+	return GetDTile(Pos.x, Pos.y) == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && m_pSwitchers[Number].m_Status[Team];
 }
 
 bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly)

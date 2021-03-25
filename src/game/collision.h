@@ -56,6 +56,7 @@ public:
 	int GetDTileIndex(int Index);
 	int GetDTileFlags(int Index);
 	int GetDTileNumber(int Index);
+	int GetDCollisionAt(float x, float y) { return GetDTile(round_to_int(x), round_to_int(y)); }
 	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
@@ -82,6 +83,7 @@ public:
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);
+	int GetDTile(int x, int y);
 	int Entity(int x, int y, int Layer);
 	int GetPureMapIndex(float x, float y);
 	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }

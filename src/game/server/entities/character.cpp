@@ -866,7 +866,7 @@ void CCharacter::FireWeapon()
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
-					|| GameServer()->Collision()->TestBoxDoor(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), Team(), true) // disallow portal placing too close to plot doors to get through them
+					|| GameServer()->Collision()->TestBoxDoor(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE * 2, CCharacterCore::PHYS_SIZE * 2), Team(), true) // disallow portal placing too close to plot doors to get through them (in combination with plot door skip preventing)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
@@ -2054,10 +2054,11 @@ void CCharacter::HandleSkippableTiles(int Index)
 	if ((GameServer()->Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
 		GameServer()->Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 		GameServer()->Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
+		GameServer()->Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 		GameServer()->Collision()->GetFCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
 		GameServer()->Collision()->GetFCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 		GameServer()->Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
+		GameServer()->Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
 		!m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
 	{
 		Die(WEAPON_WORLD);
@@ -2068,6 +2069,26 @@ void CCharacter::HandleSkippableTiles(int Index)
 	{
 		Die(WEAPON_WORLD);
 		return;
+	}
+
+	// prevent going through plot doors
+	vec2 Pos;
+	if (GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x + GetProximityRadius() / 3.f, Pos.y = m_Pos.y - GetProximityRadius() / 3.f) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x + GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y - GetProximityRadius() / 3.f) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA)
+	{
+		int Number = GameServer()->Collision()->GetDoorNumber(Pos);
+		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && GameServer()->Collision()->GetPlotBySwitch(Number) >= PLOT_START)
+		{
+			m_StoppedDoorSkip = true;
+			m_Core.m_Vel = vec2(0, 0);
+			m_Core.m_Pos = m_PrevPos;
+		}
+	}
+	else
+	{
+		m_StoppedDoorSkip = false;
 	}
 
 	if (Index < 0)
@@ -3373,6 +3394,8 @@ void CCharacter::FDDraceInit()
 
 	m_pDummyHandle = 0;
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
+
+	m_StoppedDoorSkip = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
