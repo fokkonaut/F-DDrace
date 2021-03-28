@@ -2430,6 +2430,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pChr->UnsetSpookyGhost();
 		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
 		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
+		pChr->Core()->m_Vel = vec2(0, 0);
 	}
 }
 
