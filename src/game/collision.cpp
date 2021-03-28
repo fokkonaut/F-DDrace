@@ -1493,23 +1493,23 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 	return 0;
 }
 
-bool CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly)
+bool CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	int Number = m_pDoor[GetPureMapIndex(Pos)].m_Number;
 	bool IsPlotDoor = GetPlotBySwitch(Number) > 0;
-	return GetDTile(Pos.x, Pos.y) == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && m_pSwitchers[Number].m_Status[Team];
+	return GetDTile(Pos.x, Pos.y) == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && (m_pSwitchers[Number].m_Status[Team] || !ClosedOnly);
 }
 
-bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly)
+bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	Size *= 0.5f;
-	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y - Size.y), Team, PlotDoorOnly))
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly))
 		return true;
-	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y - Size.y), Team, PlotDoorOnly))
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly))
 		return true;
-	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly))
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
 		return true;
-	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly))
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
 		return true;
 	return false;
 }
