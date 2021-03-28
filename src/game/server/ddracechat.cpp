@@ -2426,11 +2426,14 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		// disallow plot editing too close to doors to prevent getting our with editor
+		if (pSelf->Collision()->TestBoxDoor(pChr->GetPos(), vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), pChr->Team(), true))
+			return;
+
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are now editing your plot, switch to another weapon to exit the editor");
 		pChr->UnsetSpookyGhost();
 		pChr->GiveWeapon(WEAPON_DRAW_EDITOR);
 		pChr->SetActiveWeapon(WEAPON_DRAW_EDITOR);
-		pChr->Core()->m_Vel = vec2(0, 0);
 	}
 }
 
