@@ -4321,8 +4321,8 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 		{
 			if (GetTilePlotID(pPortal->GetPos()) == PlotID)
 			{
-				pPortal->Reset();
 				pPortal->DestroyLinkedPortal();
+				pPortal->Reset();
 			}
 		}
 	}

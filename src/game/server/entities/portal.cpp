@@ -61,6 +61,9 @@ void CPortal::DestroyLinkedPortal()
 
 void CPortal::Tick()
 {
+	if (IsMarkedForDestroy())
+		return;
+
 	if (m_Owner != -1 && !GameServer()->m_apPlayers[m_Owner])
 		m_Owner = -1;
 
