@@ -166,7 +166,7 @@ void CDummyBlmapChillPolice::OldPoliceMoves()
 			}
 
 			// check for fail position
-			if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || m_pCharacter->m_IsFrozen)
+			if ((RAW_Y > RAW(441) + 10 && (X > 402 || RAW_X < RAW(399) + 10)) || IsFrozen())
 				m_LowerPanic = 1; // lower panic mode to reposition
 		}
 	}
@@ -402,7 +402,7 @@ void CDummyBlmapChillPolice::OnTick()
 	}
 	else if (X < 240 && Y < 36) // the complete zone in the map intselfs. its for resetting the dummy when he is back in spawn using tp
 	{
-		if (m_pCharacter->m_IsFrozen && X > 32)
+		if (IsFrozen() && X > 32)
 		{
 			if (TicksPassed(60))
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
@@ -608,7 +608,7 @@ void CDummyBlmapChillPolice::OnTick()
 			}
 		}
 	}
-	if (m_pCharacter->m_IsFrozen && Y < 410) // kills when in freeze and not in policebase
+	if (IsFrozen() && Y < 410) // kills when in freeze and not in policebase
 	{
 		if (TicksPassed(60))
 			GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing
@@ -618,7 +618,7 @@ void CDummyBlmapChillPolice::OnTick()
 			return;
 		}
 	}
-	if (m_pCharacter->m_IsFrozen && X < 41 && X > 33 && Y < 10) // kills when on speedup right next to the newtee spawn to prevent infinite flappy blocking
+	if (IsFrozen() && X < 41 && X > 33 && Y < 10) // kills when on speedup right next to the newtee spawn to prevent infinite flappy blocking
 	{
 		if (TicksPassed(500)) // kill when freeze
 		{
@@ -925,7 +925,7 @@ void CDummyBlmapChillPolice::OnTick()
 			SetWeapon(WEAPON_GUN);
 	}
 	// after grenade jump and being down going into the tunnel to police staion
-	else if (Y > 328 && Y < 345 && X > 236 && X < 365)
+	else if (Y > 328 && Y < 346 && X > 236 && X < 365)
 	{
 		Right();
 		if (X > 265 && X < 267)
@@ -935,10 +935,37 @@ void CDummyBlmapChillPolice::OnTick()
 		// walk left in air to get on the little block
 		if (Y > 337.4f && X > 295)
 			Left();
+		// fix someone blocking flappy, he would just keep moving left into the wall and do nothing there
+		if (X > 294 && X < 297 && Y > 343 && Y < 345 && (IsGrounded() || GetVel().y < -1.1f))
+			m_GetSpeed = true;
+		if (m_GetSpeed)
+		{
+			if (X < 290)
+				m_GetSpeed = false;
+			Left();
+			if (Y > 337)
+			{
+				// rj the wall up
+				Aim(-200, 280);
+				if (TicksPassed(10))
+					SetWeapon(WEAPON_GRENADE);
+				if (GetVel().y > -4.1f && IsGrounded())
+					Jump(rand() % 3);
+				else if (GetVel().y > -1.5f)
+					Fire();
+			}
+			else
+			{
+				// avoid roof freeze
+				Aim(1, -200);
+				if (Y < 331)
+					Fire();
+			}
+		}
+		// reset get speed when falling through the freeze for next part
+		if (IsFrozen())
+			m_GetSpeed = false;
 	}
-	// fix someone blocking flappy, he would just keep moving left into the wall and do nothing there
-	else if (X > 294 && X < 297 && Y > 343 && Y < 345)
-		Right();
 	else if (Y < 361 && Y > 346)
 	{
 		if (TicksPassed(10))
@@ -980,7 +1007,7 @@ void CDummyBlmapChillPolice::OnTick()
 	else if (X > 180 && X < 450 && Y < 450 && Y > 358) // wider police area with left entrance
 	{
 		// kills when in freeze in policebase or left of it (takes longer that he kills bcs the way is so long he wait a bit longer for help)
-		if (m_pCharacter->m_IsFrozen)
+		if (IsFrozen())
 		{
 			if (TicksPassed(60))
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), EMOTICON_DROP); // tear emote before killing

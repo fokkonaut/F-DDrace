@@ -17,6 +17,7 @@ int CDummyBase::Jumped() { return m_pCharacter->Core()->m_Jumped; }
 int CDummyBase::JumpedTotal() { return m_pCharacter->Core()->m_JumpedTotal; }
 int CDummyBase::Jumps() { return m_pCharacter->Core()->m_Jumps; }
 bool CDummyBase::IsGrounded() { return m_pCharacter->IsGrounded(); }
+bool CDummyBase::IsFrozen() { return m_pCharacter->m_IsFrozen; }
 int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
 int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }

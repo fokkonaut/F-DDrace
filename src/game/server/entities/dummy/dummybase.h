@@ -72,6 +72,7 @@ protected:
 	int JumpedTotal();
 	int Jumps();
 	bool IsGrounded();
+	bool IsFrozen();
 
 	int GetTargetX();
 	int GetTargetY();
