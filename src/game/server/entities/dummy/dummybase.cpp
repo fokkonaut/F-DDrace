@@ -17,6 +17,7 @@ int CDummyBase::Jumped() { return m_pCharacter->Core()->m_Jumped; }
 int CDummyBase::JumpedTotal() { return m_pCharacter->Core()->m_JumpedTotal; }
 int CDummyBase::Jumps() { return m_pCharacter->Core()->m_Jumps; }
 bool CDummyBase::IsGrounded() { return m_pCharacter->IsGrounded(); }
+bool CDummyBase::IsFrozen() { return m_pCharacter->m_IsFrozen; }
 int CDummyBase::GetTargetX() { return m_pCharacter->Input()->m_TargetX; }
 int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
@@ -54,6 +55,12 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_Mode = Mode;
 	m_DebugColor = -1;
 	m_WantedWeapon = -1;
+	m_RtfGetSpeed = 0;
+	m_LtfGetSpeed = 0;
+	m_GoSlow = false;
+	m_AsBackwards = false;
+	m_AsTopFree = false;
+	m_AsBottomFree = false;
 }
 
 void CDummyBase::Tick()
@@ -210,23 +217,83 @@ void CDummyBase::AvoidFreezeWeapons()
 
 void CDummyBase::RightAntiStuck()
 {
-	Right();
-	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 60, RAW_Y), 0, 0))
-	{
-		Jump(random(5));
-		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X + 10, RAW_Y + 60), 0, 0))
-			Left();
-	}
+	AntiStuckDir(DIRECTION_RIGHT);
 }
 
 void CDummyBase::LeftAntiStuck()
 {
-	Left();
-	if (GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 60, RAW_Y), 0, 0))
+	AntiStuckDir(DIRECTION_LEFT);
+}
+
+void CDummyBase::AntiStuckDir(int Direction)
+{
+	SetDirection(Direction);
+	if (m_GoSlow)
+	{
+		StopMoving();
+		if(TicksPassed(3))
+			SetDirection(Direction);
+		if (TicksPassed(200))
+			m_GoSlow = false;
+		if (m_AsTopFree)
+			Jump(random(5));
+		return;
+	}
+	if (m_AsBackwards)
+	{
+		SetDirection(-Direction);
+		m_AsTopFree = !GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y - 20) &&
+				!GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y - 40) &&
+				!GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y - 70);
+		m_AsBottomFree = !GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y + 20) &&
+				!GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y + 40) &&
+				!GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y + 70);
+		if (m_AsTopFree || m_AsBottomFree)
+		{
+			Jump(random(5));
+			m_AsBackwards = false;
+			if (m_AsTopFree && !GameServer()->Collision()->IsSolid(RAW_X - 20 * Direction, RAW_Y - 20))
+			{
+				// when there is space go fast
+			}
+			else
+			{
+				m_GoSlow = true;
+			}
+		}
+		return;
+	}
+	if (GameServer()->Collision()->IsSolid(RAW_X + 60 * Direction, RAW_Y) ||
+		GameServer()->Collision()->IsSolid(RAW_X + 30 * Direction, RAW_Y) ||
+		GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y))
 	{
 		Jump(random(5));
-		if(GameServer()->Collision()->IntersectLine(GetPos(), vec2(RAW_X - 10, RAW_Y - 60), 0, 0))
-			Right();
+		// too slow? Check if in a dead end
+		if(((Direction == DIRECTION_LEFT && GetVel().x > -1.1f) || (Direction == DIRECTION_RIGHT && GetVel().x < 1.1f)) && IsGrounded())
+		{
+			if(
+				/* top blocked */
+				(
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y - 20) ||
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y - 40) ||
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y - 70)
+				) &&
+				/* bottom blocked */
+				(
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y + 20) ||
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y + 40) ||
+					GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y + 70)
+				) &&
+				/* left blocked */
+				(
+					GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y - 30) ||
+					GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y + 30)
+				)
+			)
+			{
+				m_AsBackwards = true;
+			}
+		}
 	}
 }
 
