@@ -36,6 +36,10 @@ private:
 
 	int m_RtfGetSpeed;
 	int m_LtfGetSpeed;
+	bool m_GoSlow;
+	bool m_AsBackwards;
+	bool m_AsTopFree;
+	bool m_AsBottomFree;
 
 protected:
 	CGameContext *GameServer() const;
@@ -72,6 +76,7 @@ protected:
 	int JumpedTotal();
 	int Jumps();
 	bool IsGrounded();
+	bool IsFrozen();
 
 	int GetTargetX();
 	int GetTargetY();
@@ -96,6 +101,7 @@ protected:
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();
+	void AntiStuckDir(int Direction);
 
 	/*
 		Function: AvoidFreezeWeapons
