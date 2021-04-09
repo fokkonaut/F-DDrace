@@ -179,6 +179,8 @@ void CAdvancedEntity::HandleTiles(int Index)
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		m_PrevPos = m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
 		m_Vel = vec2(0, 0);
+		if (!Config()->m_SvTeleportHoldHook)
+			ReleaseHooked();
 		return;
 	}
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
@@ -191,6 +193,8 @@ void CAdvancedEntity::HandleTiles(int Index)
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_PrevPos = m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 				m_Vel = vec2(0, 0);
+				if (!Config()->m_SvTeleportHoldHook)
+					ReleaseHooked();
 				return;
 			}
 		}
@@ -200,6 +204,8 @@ void CAdvancedEntity::HandleTiles(int Index)
 		{
 			m_PrevPos = m_Pos = SpawnPos;
 			m_Vel = vec2(0, 0);
+			if (!Config()->m_SvTeleportHoldHook)
+				ReleaseHooked();
 		}
 		return;
 	}

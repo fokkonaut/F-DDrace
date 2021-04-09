@@ -190,6 +190,7 @@ void CPortal::EntitiesEnter()
 		case CGameWorld::ENTTYPE_FLAG:
 			{
 				CFlag *pFlag = (CFlag *)apEnts[i];
+				pFlag->ReleaseHooked();
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
 				pFlag->SetPrevPos(m_pLinkedPortal->m_Pos);
 				break;

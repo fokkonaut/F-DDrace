@@ -21,6 +21,7 @@ public:
 	vec2 GetVel() { return m_Vel; }
 	void SetVel(vec2 Vel) { m_Vel = Vel; }
 	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
+	virtual void ReleaseHooked() {}
 
 protected:
 	bool IsGrounded(bool SetVel = false);

@@ -47,6 +47,7 @@ public:
 	CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos);
 
 	void TeleToPlot(int PlotID);
+	virtual void ReleaseHooked();
 
 	void Reset(bool Init);
 	virtual void Reset() { Reset(false); };
