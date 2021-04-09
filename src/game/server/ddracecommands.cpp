@@ -5,6 +5,7 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/version.h>
 #include <game/server/entities/character.h>
+#include <stdio.h>
 
 bool CheckClientID(int ClientID);
 
