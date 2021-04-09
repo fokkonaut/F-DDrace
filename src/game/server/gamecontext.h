@@ -488,6 +488,8 @@ public:
 		char m_aContact[128];
 		char m_aTimeoutCode[64];
 		char m_aSecurityPin[5];
+		time_t m_RegisterDate;
+		time_t m_LastLoginDate;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -539,6 +541,8 @@ public:
 		ACC_CONTACT,
 		ACC_TIMEOUT_CODE,
 		ACC_SECURITY_PIN,
+		ACC_REGISTER_DATE,
+		ACC_LAST_LOGIN_DATE,
 		NUM_ACCOUNT_VARIABLES
 	};
 

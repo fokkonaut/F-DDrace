@@ -1297,6 +1297,11 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "--- Account Info ---");
 	str_format(aBuf, sizeof(aBuf), "Account Name: %s", pAccount->m_Username);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+	tmp = pAccount->m_RegisterDate;
+	str_format(aBuf, sizeof(aBuf), "Registered on: %s", pSelf->GetDate(tmp, false));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
 	if (pSelf->Config()->m_SvEuroMode || pAccount->m_Euros > 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "Euros: %d", pAccount->m_Euros);
@@ -1629,6 +1634,9 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	str_copy(pSelf->m_Accounts[ID].m_Password, aPassword, sizeof(pSelf->m_Accounts[ID].m_Password));
 	str_copy(pSelf->m_Accounts[ID].m_Username, aUsername, sizeof(pSelf->m_Accounts[ID].m_Username));
 	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
+	time_t Now;
+	time(&Now);
+	pSelf->m_Accounts[ID].m_RegisterDate = Now;
 
 	// also update topaccounts
 	pSelf->SetTopAccStats(ID);

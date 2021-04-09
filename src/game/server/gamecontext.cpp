@@ -4498,6 +4498,8 @@ int CGameContext::AddAccount()
 	Account.m_aContact[0] = '\0';
 	Account.m_aTimeoutCode[0] = '\0';
 	Account.m_aSecurityPin[0] = '\0';
+	Account.m_RegisterDate = 0;
+	Account.m_LastLoginDate = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -4587,6 +4589,8 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_CONTACT:					str_copy(m_Accounts[ID].m_aContact, pData, sizeof(m_Accounts[ID].m_aContact)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(m_Accounts[ID].m_aTimeoutCode, pData, sizeof(m_Accounts[ID].m_aTimeoutCode)); break;
 	case ACC_SECURITY_PIN:				str_copy(m_Accounts[ID].m_aSecurityPin, pData, sizeof(m_Accounts[ID].m_aSecurityPin)); break;
+	case ACC_REGISTER_DATE:				m_Accounts[ID].m_RegisterDate = atoi(pData); break;
+	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoi(pData); break;
 	}
 }
 
@@ -4638,6 +4642,8 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_CONTACT:					return "contact";
 	case ACC_TIMEOUT_CODE:				return "timeout_code";
 	case ACC_SECURITY_PIN:				return "security_pin";
+	case ACC_REGISTER_DATE:				return "register_date";
+	case ACC_LAST_LOGIN_DATE:			return "last_login_date";
 	}
 	return "Unknown";
 }
@@ -4693,6 +4699,8 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_CONTACT:					str_copy(aBuf, m_Accounts[ID].m_aContact, sizeof(aBuf)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(aBuf, m_Accounts[ID].m_aTimeoutCode, sizeof(aBuf)); break;
 	case ACC_SECURITY_PIN:				str_copy(aBuf, m_Accounts[ID].m_aSecurityPin, sizeof(aBuf)); break;
+	case ACC_REGISTER_DATE:				str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_RegisterDate); break;
+	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_LastLoginDate); break;
 	}
 	return aBuf;
 }
@@ -4702,11 +4710,9 @@ void CGameContext::Logout(int ID, bool Silent)
 	if (ID < ACC_START)
 		return;
 
-	if (m_Accounts[ID].m_ClientID >= 0)
-	{
-		if (m_apPlayers[m_Accounts[ID].m_ClientID])
-			m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
-	}
+	if (m_Accounts[ID].m_ClientID >= 0 && m_apPlayers[m_Accounts[ID].m_ClientID])
+		m_apPlayers[m_Accounts[ID].m_ClientID]->OnLogout();
+
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
 	WriteAccountStats(ID);
@@ -4778,6 +4784,9 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		str_copy(m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(ClientID), sizeof(m_Accounts[ID].m_aLastPlayerName));
 		if (pPlayer->m_TimeoutCode[0] != '\0')
 			str_copy(m_Accounts[ID].m_aTimeoutCode, pPlayer->m_TimeoutCode, sizeof(m_Accounts[ID].m_aTimeoutCode));
+		time_t Now;
+		time(&Now);
+		m_Accounts[ID].m_LastLoginDate = Now;
 
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);

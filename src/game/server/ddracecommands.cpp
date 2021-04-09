@@ -1411,7 +1411,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 		const char *pValue = pSelf->GetAccVarValue(ID, i);
 		char aDate[64] = "";
 
-		if (i == ACC_EXPIRE_DATE_VIP || i == ACC_EXPIRE_DATE_PORTAL_RIFLE)
+		if (i == ACC_EXPIRE_DATE_VIP || i == ACC_EXPIRE_DATE_PORTAL_RIFLE || i == ACC_REGISTER_DATE || i == ACC_LAST_LOGIN_DATE)
 		{
 			if (str_comp_nocase(pValue, "0") != 0)
 				str_format(aDate, sizeof(aDate), " (%s)", pSelf->GetDate(str_toint(pValue)));
@@ -1496,7 +1496,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	{
 		const char *pValue = pResult->GetString(2);
 
-		if (VariableID == ACC_EXPIRE_DATE_VIP || VariableID == ACC_EXPIRE_DATE_PORTAL_RIFLE)
+		if (VariableID == ACC_EXPIRE_DATE_VIP || VariableID == ACC_EXPIRE_DATE_PORTAL_RIFLE || VariableID == ACC_REGISTER_DATE || VariableID == ACC_LAST_LOGIN_DATE)
 		{
 			time_t ExpireDate = 0;
 			time(&ExpireDate);
