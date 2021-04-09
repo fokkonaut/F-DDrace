@@ -4852,6 +4852,9 @@ void CGameContext::FreeAccount(int ID)
 
 const char *CGameContext::GetDate(time_t Time, bool ShowTime)
 {
+	if (Time < 0)
+		return "";
+
 	time_t tmp = Time;
 	struct tm Date = *localtime(&tmp);
 

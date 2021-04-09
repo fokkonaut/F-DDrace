@@ -159,5 +159,5 @@ CONSOLE_COMMAND("acc_logout", "s[username]", CFGFLAG_SERVER, ConAccLogout, this,
 CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, this, "Enables or disables account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_add_euros", "s[username] i[amount]", CFGFLAG_SERVER, ConAccAddEuros, this, "Adds i euros to account s", AUTHED_ADMIN)
-CONSOLE_COMMAND("acc_edit", "s[username] s[variable] ?s[value]", CFGFLAG_SERVER, ConAccEdit, this, "Prints or changes the value of account variable", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_edit", "s[username] s[variable] ?r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Prints or changes the value of account variable", AUTHED_ADMIN)
 #undef CONSOLE_COMMAND

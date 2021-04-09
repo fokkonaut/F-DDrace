@@ -1499,7 +1499,20 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		if (VariableID == ACC_EXPIRE_DATE_VIP || VariableID == ACC_EXPIRE_DATE_PORTAL_RIFLE)
 		{
 			time_t ExpireDate = 0;
-			pSelf->SetExpireDate(&ExpireDate, pResult->GetFloat(2));
+			time(&ExpireDate);
+			struct tm Date = *localtime(&ExpireDate);
+			int Num = sscanf(pResult->GetString(2), "%d.%d.%d (%d:%d)", &Date.tm_mday, &Date.tm_mon, &Date.tm_year, &Date.tm_hour, &Date.tm_min);
+			if (Num == 3 || Num == 5)
+			{
+				Date.tm_mon -= 1;
+				Date.tm_year -= 1900;
+				Date.tm_sec = 0;
+				if (Num == 3)
+					Date.tm_min = 0;
+				ExpireDate = mktime(&Date);
+			}
+			else
+				pSelf->SetExpireDate(&ExpireDate, pResult->GetFloat(2));
 
 			char aTime[64];
 			str_format(aTime, sizeof(aTime), "%d", (int)ExpireDate);
