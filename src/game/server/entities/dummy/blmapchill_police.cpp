@@ -1026,8 +1026,12 @@ void CDummyBlmapChillPolice::OnTick()
 		if (X < 363)
 			Right();
 		// do not enter in pvp area or bank
-		if (X > 323 && Y < 408)
-			LeftAntiStuck();
+		if (X > 324 && Y < 408)
+		{
+			Left();
+			if (X > 330)
+				LeftAntiStuck();
+		}
 		// police area entrance tunnel (left side)
 		if (X > 316 && X < 370 && Y > 416)
 			RightThroughFreeze();
