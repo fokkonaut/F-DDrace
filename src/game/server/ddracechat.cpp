@@ -1298,9 +1298,14 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Account Name: %s", pAccount->m_Username);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	tmp = pAccount->m_RegisterDate;
-	str_format(aBuf, sizeof(aBuf), "Registered on: %s", pSelf->GetDate(tmp, false));
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	if (pAccount->m_RegisterDate != 0)
+	{
+		tmp = pAccount->m_RegisterDate;
+		str_format(aBuf, sizeof(aBuf), "Registered on: %s", pSelf->GetDate(tmp, false));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "Registered on: unknown");
 
 	if (pSelf->Config()->m_SvEuroMode || pAccount->m_Euros > 0)
 	{
