@@ -1247,7 +1247,7 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int* Ox, int* Oy)
 	}
 }
 
-int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
+int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Number)
 {
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
@@ -1258,16 +1258,20 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+
+		bool IsPlotDoor = (Number < m_NumSwitchers + 1 && m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && GetPlotBySwitch(m_pDoor[Ny * m_Width + Nx].m_Number) > 0);
 		if (GetIndex(Nx, Ny) == TILE_SOLID
 			|| GetIndex(Nx, Ny) == TILE_NOHOOK
 			|| GetIndex(Nx, Ny) == TILE_NOLASER
-			|| GetFIndex(Nx, Ny) == TILE_NOLASER)
+			|| GetFIndex(Nx, Ny) == TILE_NOLASER
+			|| IsPlotDoor)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
+			if (IsPlotDoor) return GetDCollisionAt(Pos.x, Pos.y);
+			else if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 
 		}

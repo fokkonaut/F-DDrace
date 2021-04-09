@@ -42,7 +42,7 @@ void CDoor::SetLength(int Length)
 void CDoor::Update()
 {
 	vec2 To = m_Pos + normalize(m_Direction) * m_Length;
-	GameServer()->Collision()->IntersectNoLaser(m_Pos, To, &this->m_To, 0);
+	GameServer()->Collision()->IntersectNoLaser(m_Pos, To, &this->m_To, 0, m_Number);
 }
 
 void CDoor::Open(int Tick, bool ActivatedTeam[])
@@ -56,9 +56,15 @@ void CDoor::ResetCollision(bool Remove)
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
+
+		bool IsPlotDoor = (GameServer()->Collision()->GetDCollisionAt(CurrentPos.x, CurrentPos.y) == TILE_STOPA
+			&& GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(CurrentPos)) >= PLOT_START
+			&& m_Number < GameServer()->Collision()->m_NumSwitchers + 1); // extra check so plot doors dont invalidate theirselves
+
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(CurrentPos.x, CurrentPos.y)
-				|| GameServer()->Collision()->GetFTile(CurrentPos.x, CurrentPos.y))
+				|| GameServer()->Collision()->GetFTile(CurrentPos.x, CurrentPos.y)
+				|| IsPlotDoor)
 		{
 			break;
 		}
