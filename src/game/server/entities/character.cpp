@@ -4004,7 +4004,7 @@ void CCharacter::SetWeaponGot(int Type, bool Value)
 
 int CCharacter::GetTaserStrength()
 {
-	return clamp((int)((Server()->Tick() - m_LastTaserUse) * 2 / Server()->TickSpeed()), 0, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel);
+	return clamp((int)((Server()->Tick() - m_LastTaserUse) / Server()->TickSpeed()), 0, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel);
 }
 
 float CCharacter::GetTaserFreezeTime()
