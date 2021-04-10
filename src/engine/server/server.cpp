@@ -1238,10 +1238,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 					if (Chunk == 0)
 					{
-						for (int i = 0; i < m_MapChunksPerRequest; i++)
+						for (int i = 0; i < Config()->m_SvMapWindow; i++)
 							SendMapData(ClientID, i);
 					}
-					SendMapData(ClientID, m_MapChunksPerRequest + m_aClients[ClientID].m_MapChunk);
+					SendMapData(ClientID, Config()->m_SvMapWindow + m_aClients[ClientID].m_MapChunk);
 					m_aClients[ClientID].m_MapChunk++;
 					return;
 				}
