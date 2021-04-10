@@ -3532,7 +3532,7 @@ void CGameContext::FDDraceInit()
 	for (int i = 0; i < DIFFERENCE_XP_END; i++)
 		m_aNeededXP[i] = aNeededXP[i];
 
-	int aTaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000 };
+	int aTaserPrice[] = { 50000, 75000, 100000, 150000, 200000, 200000, 200000, 250000, 250000, 250000 };
 	for (int i = 0; i < NUM_TASER_LEVELS; i++)
 		m_aTaserPrice[i] = aTaserPrice[i];
 

@@ -8,7 +8,7 @@
 class CLaser : public CEntity
 {
 public:
-	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
+	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type, float TaserFreezeTime = 0.f);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -31,6 +31,8 @@ private:
 	Mask128 m_TeamMask;
 
 	// DDRace
+
+	float m_TaserFreezeTime;
 
 	vec2 m_PrevPos;
 	int m_Type;

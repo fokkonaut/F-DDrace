@@ -259,7 +259,7 @@ private:
 public:
 	CGameTeams* Teams();
 	void Pause(bool Pause);
-	bool Freeze(float Time);
+	bool Freeze(float Seconds);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
@@ -444,12 +444,15 @@ public:
 	int GetAliveState();
 
 	int64 m_SpawnTick;
-	bool m_GotLasered;
-
 	int m_KillStreak;
-
 	int64 m_LastWantedLogout;
 	bool m_StoppedDoorSkip;
+
+	bool m_GotLasered;
+
+	int64 m_LastTaserUse;
+	int GetTaserStrength();
+	float GetTaserFreezeTime();
 
 	// ResetNumInputs() gets called when player is paused or when (un)setting teecontrol. its to prevent weird shooting and weapon switching after unpause/(un)setting teecontrol
 	void ResetNumInputs() { m_NumInputs = 0; };

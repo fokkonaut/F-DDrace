@@ -10,7 +10,7 @@
 #include <engine/shared/config.h>
 #include <game/server/teams.h>
 
-CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type)
+CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type, float TaserFreezeTime)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER, Pos)
 {
 	m_Pos = Pos;
@@ -22,6 +22,7 @@ CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TelePos = vec2(0, 0);
 	m_WasTele = false;
 	m_Type = Type;
+	m_TaserFreezeTime = TaserFreezeTime;
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
@@ -116,7 +117,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		if (pOwnerChar)
 		{
-			pChr->Freeze(10.f * GameServer()->m_Accounts[pOwnerChar->GetPlayer()->GetAccID()].m_TaserLevel / 100.f);
+			pChr->Freeze(m_TaserFreezeTime);
 			pChr->m_GotLasered = true;
 		}
 	}

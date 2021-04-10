@@ -159,7 +159,7 @@ void CShop::OnPageChange(int ClientID)
 		else if (m_aClients[ClientID].m_Page == ITEM_TASER)
 		{
 			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()];
-			m_aBackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_7);
+			m_aBackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_10);
 		}
 	}
 

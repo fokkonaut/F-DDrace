@@ -728,7 +728,15 @@ void CCharacter::FireWeapon()
 				else
 					LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
 
-				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), GetActiveWeapon());
+				float TaserFreezeTime = 0.f;
+				if (GetActiveWeapon() == WEAPON_TASER)
+				{
+					TaserFreezeTime = GetTaserFreezeTime();
+					m_LastTaserUse = Server()->Tick();
+				}
+
+				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
+
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 			} break;
@@ -1845,7 +1853,7 @@ void CCharacter::Snap(int SnappingClient)
 		{
 			int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
 			if (GetActiveWeapon() == WEAPON_TASER)
-				Ammo /= 10;
+				Ammo = GetTaserStrength();
 			pCharacter->m_AmmoCount = Ammo;
 		}
 
@@ -3396,6 +3404,7 @@ void CCharacter::FDDraceInit()
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
 
 	m_StoppedDoorSkip = false;
+	m_LastTaserUse = Now;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -3991,6 +4000,16 @@ void CCharacter::SetWeaponGot(int Type, bool Value)
 	if (m_pPlayer->m_SpookyGhost)
 		m_aWeaponsBackupGot[Type][BACKUP_SPOOKY_GHOST] = Value;
 	m_aWeapons[Type].m_Got = Value;
+}
+
+int CCharacter::GetTaserStrength()
+{
+	return clamp((int)((Server()->Tick() - m_LastTaserUse) * 2 / Server()->TickSpeed()), 0, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel);
+}
+
+float CCharacter::GetTaserFreezeTime()
+{
+	return GetTaserStrength() / 10.f;
 }
 
 int CCharacter::GetSpawnWeaponIndex(int Weapon)
