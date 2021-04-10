@@ -972,8 +972,6 @@ void CServer::SendMap(int ClientID)
 		Msg.AddRaw(&m_CurrentMapSha256, sizeof(m_CurrentMapSha256));
 	}
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
-
-	m_aClients[ClientID].m_MapChunk = 0;
 }
 
 void CServer::SendConnectionReady(int ClientID)
