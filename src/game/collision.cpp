@@ -1259,7 +1259,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
-		bool IsPlotDoor = (Number < m_NumSwitchers + 1 && m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && GetPlotBySwitch(m_pDoor[Ny * m_Width + Nx].m_Number) > 0);
+		bool IsPlotDoor = (Number != -1 && Number < m_NumSwitchers + 1 && m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && GetPlotBySwitch(m_pDoor[Ny * m_Width + Nx].m_Number) > 0);
 		if (GetIndex(Nx, Ny) == TILE_SOLID
 			|| GetIndex(Nx, Ny) == TILE_NOHOOK
 			|| GetIndex(Nx, Ny) == TILE_NOLASER
