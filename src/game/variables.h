@@ -245,7 +245,7 @@ MACRO_CONFIG_INT(SvSpawnAreaLowY, sv_spawnarea_low_y, 0, 0, 9999, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvSpawnAreaHighX, sv_spawnarea_high_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "High X tile position of area for spawnblock protection", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSpawnAreaHighY, sv_spawnarea_high_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "High Y tile position of area for spawnblock protection", AUTHED_ADMIN)
 
-// fats download ddnet clients
+// fast download ddnet clients
 MACRO_CONFIG_INT(SvMapWindow, sv_map_window, 15, 0, 100, CFGFLAG_SERVER, "Map downloading send-ahead window", AUTHED_ADMIN)
 
 // other
