@@ -1077,13 +1077,8 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 			return;
 	}
 
-	if (Weapon == WEAPON_LASER)
-	{
-		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
-
-		if (!Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
-			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
-	}
+	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
+		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
@@ -1117,6 +1112,9 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	{
 		m_aWeapons[Weapon].m_Ammo = Ammo;
 	}
+
+	if (Weapon == WEAPON_LASER)
+		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 }
 
 void CCharacter::GiveAllWeapons()
