@@ -1252,7 +1252,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				for(int i = 0; i < m_MapChunksPerRequest && m_aClients[ClientID].m_MapChunk >= 0; ++i)
 				{
 					int Chunk = m_aClients[ClientID].m_MapChunk;
-					int Offset = Chunk * ChunkSize;
+					unsigned int Offset = Chunk * ChunkSize;
 
 					// check for last part
 					if(Offset+ChunkSize >= m_CurrentMapSize)
