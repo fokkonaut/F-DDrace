@@ -212,7 +212,7 @@ public:
 	SHA256_DIGEST m_CurrentMapSha256;
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
-	int m_CurrentMapSize;
+	unsigned int m_CurrentMapSize;
 	int m_MapChunksPerRequest;
 
 	//maplist
