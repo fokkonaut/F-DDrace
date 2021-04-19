@@ -1660,8 +1660,8 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 	if (pAccount->m_XP >= GameServer()->GetNeededXP(pAccount->m_Level))
 	{
 		pAccount->m_Level++;
-
 		str_format(aBuf, sizeof(aBuf), "You are now level %d!", pAccount->m_Level);
+		WalletTransaction(pAccount->m_Level <= 25 ? pAccount->m_Level * 25 + 500 : pAccount->m_Level * 1000 + 5000, "Levelup");
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 }
