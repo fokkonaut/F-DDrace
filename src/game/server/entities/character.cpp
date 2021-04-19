@@ -1483,7 +1483,9 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-			pKiller->GiveXP(250, "end a killing spree");
+			if (m_KillStreak >= 20) 
+				pKiller->WalletTransaction(m_KillStreak * 35, "end a killing spree");
+			pKiller->GiveXP(m_KillStreak * 35, "end a killing spree");
 		}
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
