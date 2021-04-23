@@ -462,6 +462,14 @@ void CCharacter::FireWeapon()
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
 
+	// doing this before the loop so that m_LastTaserUse is not yet updated when having spread taser
+	float TaserFreezeTime = 0.f;
+	if (GetActiveWeapon() == WEAPON_TASER)
+	{
+		TaserFreezeTime = GetTaserFreezeTime();
+		m_LastTaserUse = Server()->Tick();
+	}
+
 	float Spread[] = { 0, -0.1f, 0.1f, -0.2f, 0.2f, -0.3f, 0.3f, -0.4f, 0.4f };
 	if (Config()->m_SvNumSpreadShots % 2 == 0)
 		for (unsigned int i = 0; i < (sizeof(Spread)/sizeof(*Spread)); i++)
@@ -727,13 +735,6 @@ void CCharacter::FireWeapon()
 					LaserReach = GameServer()->Tuning()->m_LaserReach;
 				else
 					LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
-
-				float TaserFreezeTime = 0.f;
-				if (GetActiveWeapon() == WEAPON_TASER)
-				{
-					TaserFreezeTime = GetTaserFreezeTime();
-					m_LastTaserUse = Server()->Tick();
-				}
 
 				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
 
@@ -4316,7 +4317,7 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
 	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER
-		|| Type == WEAPON_PORTAL_RIFLE || Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TASER)
+		|| Type == WEAPON_PORTAL_RIFLE || Type == WEAPON_DRAW_EDITOR)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
