@@ -546,8 +546,8 @@ void CCharacter::FireWeapon()
 						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
 					// police catch gangster
-					if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel &&
-						pTarget->m_FreezeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->GetPlayer()->m_EscapeTime)
+					if (pTarget->GetPlayer()->m_EscapeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->m_FreezeTime
+						&& GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel)
 					{
 						int TargetCID = pTarget->GetPlayer()->GetCID();
 
