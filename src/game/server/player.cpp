@@ -1838,47 +1838,23 @@ bool CPlayer::IsExpiredItem(int Item)
 		return false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	time_t tmp;
+	bool *pVariable;
+	time_t *pDate;
 
 	switch (Item)
 	{
-	case ITEM_VIP:
-		{
-			if (!pAccount->m_VIP)
-				return false;
-
-			tmp = pAccount->m_ExpireDateVIP;
-			break;
-		}
-	case ITEM_PORTAL_RIFLE:
-		{
-			if (!pAccount->m_PortalRifle)
-				return false;
-
-			tmp = pAccount->m_ExpireDatePortalRifle;
-			break;
-		}
-	default:
-		return false;
+	case ITEM_VIP: pVariable = &pAccount->m_VIP; pDate = &pAccount->m_ExpireDateVIP; break;
+	case ITEM_PORTAL_RIFLE: pVariable = &pAccount->m_PortalRifle; pDate = &pAccount->m_ExpireDatePortalRifle; break;
+	default: return false;
 	}
 
-	if (GameServer()->IsExpired(tmp))
+	if (!*pVariable)
+		return false;
+
+	if (GameServer()->IsExpired(*pDate))
 	{
-		switch (Item)
-		{
-		case ITEM_VIP:
-			{
-				pAccount->m_VIP = false;
-				pAccount->m_ExpireDateVIP = 0;
-				break;
-			}
-		case ITEM_PORTAL_RIFLE:
-			{
-				pAccount->m_PortalRifle = false;
-				pAccount->m_ExpireDatePortalRifle = 0;
-				break;
-			}
-		}
+		*pVariable = false;
+		*pDate = 0;
 		return true;
 	}
 	return false;
