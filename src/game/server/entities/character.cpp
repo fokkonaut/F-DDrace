@@ -554,7 +554,7 @@ void CCharacter::FireWeapon()
 						char aBuf[256];
 						int Minutes = clamp((int)(pTarget->GetPlayer()->m_EscapeTime / Server()->TickSpeed()) / 100, 10, 20);
 						int Corrupt = clamp(pTarget->GetPlayer()->m_SpawnBlockScore * 500, 500, 10000);
-						if (pTarget->GetPlayer()->GetAccID() >= ACC_START && GameServer()->m_Accounts[pTarget->GetPlayer()->GetAccID()].m_Money > Corrupt)
+						if (pTarget->GetPlayer()->GetAccID() >= ACC_START && GameServer()->m_Accounts[pTarget->GetPlayer()->GetAccID()].m_Money >= Corrupt)
 						{
 							str_format(aBuf, sizeof(aBuf), "corrupted officer '%s'", Server()->ClientName(m_pPlayer->GetCID()));
 							pTarget->GetPlayer()->BankTransaction(-Corrupt, aBuf);
