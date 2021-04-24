@@ -1328,25 +1328,22 @@ void CCharacter::TickDefered()
 	// F-DDrace
 	int Events = m_Core.m_TriggeredEvents;
 
+	// Some sounds are triggered client-side for the acting player so we need to avoid duplicating them
+	// hook sounds are clientside in 0.7, thats why we pass true here, to have sevendown only
+
+	if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
 	{
-		int CID = m_pPlayer->GetCID();
+		Mask128 TeamMask = Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID(), true);
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask);
+		OnPlayerHook();
+	}
 
-		// Some sounds are triggered client-side for the acting player so we need to avoid duplicating them
-		// hook sounds are clientside in 0.7, thats why we pass true here, to have sevendown only
-
-		if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
-		{
-			Mask128 TeamMask = Teams()->TeamMask(Team(), -1, CID, true);
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask);
-		}
-
-		if (Events&(COREEVENTFLAG_GROUND_JUMP|COREEVENTFLAG_HOOK_ATTACH_GROUND|COREEVENTFLAG_HOOK_HIT_NOHOOK))
-		{
-			Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), CID, CID, true);
-			if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
-			if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
-			if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
-		}
+	if (Events&(COREEVENTFLAG_GROUND_JUMP|COREEVENTFLAG_HOOK_ATTACH_GROUND|COREEVENTFLAG_HOOK_HIT_NOHOOK))
+	{
+		Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), m_pPlayer->GetCID(), m_pPlayer->GetCID(), true);
+		if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
+		if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
+		if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
 	}
 
 	if(Events&COREEVENTFLAG_HOOK_ATTACH_FLAG)
@@ -1354,9 +1351,6 @@ void CCharacter::TickDefered()
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 		m_TriggeredEvents &= ~COREEVENTFLAG_HOOK_ATTACH_FLAG;
 	}
-
-	if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
-		OnPlayerHook();
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
 	{
