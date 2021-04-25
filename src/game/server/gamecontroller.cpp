@@ -146,6 +146,11 @@ void IGameController::OnCharacterSpawn(CCharacter *pChr)
 		pChr->SetActiveWeapon(WEAPON_LASER);
 		break;
 	}
+	case MINIGAME_1VS1:
+	{
+		if (GameServer()->Arenas()->OnCharacterSpawn(pChr->GetPlayer()->GetCID()))
+			break;
+	} // fall-through
 	default:
 	{
 		pChr->GiveWeapon(WEAPON_HAMMER);
@@ -539,11 +544,15 @@ void IGameController::Snap(int SnappingClient)
 		if (GameStateFlags&GAMESTATEFLAG_PAUSED)
 			TranslatedGameStateFlags |= 4;
 
+		int ScoreLimit = m_GameInfo.m_ScoreLimit;
+		if (GameServer()->Arenas()->FightStarted(SnappingClient))
+			ScoreLimit = GameServer()->Arenas()->GetScoreLimit(SnappingClient);
+
 		((int*)pGameData)[0] = m_GameFlags;
 		((int*)pGameData)[1] = TranslatedGameStateFlags;
 		((int*)pGameData)[2] = GameStartTick;
 		((int*)pGameData)[3] = 0;
-		((int*)pGameData)[4] = m_GameInfo.m_ScoreLimit;
+		((int*)pGameData)[4] = ScoreLimit;
 		((int*)pGameData)[5] = m_GameInfo.m_TimeLimit;
 		((int*)pGameData)[6] = 0;
 		((int*)pGameData)[7] = m_RoundCount+1;
@@ -592,7 +601,7 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG2_ENTITIES_FDDRACE
 		| GAMEINFOFLAG2_ALLOW_X_SKINS;
 
-	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK)
+	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK || pSnap->m_Minigame == MINIGAME_1VS1)
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
 	}
@@ -683,12 +692,16 @@ void IGameController::UpdateGameInfo(int ClientID)
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			if(!GameServer()->m_apPlayers[i] || !Server()->ClientIngame(i))
+			CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+			if(!pPlayer || !Server()->ClientIngame(i))
 				continue;
 
 			// F-DDrace
-			if (GameServer()->m_apPlayers[i]->m_ScoreMode == SCORE_TIME && !GameServer()->m_apPlayers[i]->IsMinigame())
+			if (pPlayer->m_ScoreMode == SCORE_TIME && !pPlayer->IsMinigame())
 				GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
+
+			if (GameServer()->Arenas()->FightStarted(i))
+				GameInfoMsg.m_ScoreLimit = GameServer()->Arenas()->GetScoreLimit(i);
 
 			CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(i) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
 			Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
@@ -697,8 +710,12 @@ void IGameController::UpdateGameInfo(int ClientID)
 	else
 	{
 		// F-DDrace
-		if (GameServer()->m_apPlayers[ClientID] && GameServer()->m_apPlayers[ClientID]->m_ScoreMode == SCORE_TIME && !GameServer()->m_apPlayers[ClientID]->IsMinigame())
+		CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+		if (pPlayer && pPlayer->m_ScoreMode == SCORE_TIME && !pPlayer->IsMinigame())
 			GameInfoMsg.m_GameFlags |= GAMEFLAG_RACE;
+
+		if (GameServer()->Arenas()->FightStarted(ClientID))
+			GameInfoMsg.m_ScoreLimit = GameServer()->Arenas()->GetScoreLimit(ClientID);
 
 		CNetMsg_Sv_GameInfo *pInfoMsg = (Server()->GetClientVersion(ClientID) < CGameContext::MIN_RACE_CLIENTVERSION) ? &GameInfoMsgNoRace : &GameInfoMsg;
 		Server()->SendPackMsg(pInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD, ClientID);

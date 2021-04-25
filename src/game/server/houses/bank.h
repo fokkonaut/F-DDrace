@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_BANK_H
-#define GAME_BANK_H
+#ifndef GAME_HOUSES_BANK_H
+#define GAME_HOUSES_BANK_H
 
 #include "house.h"
 #include <engine/shared/protocol.h>
@@ -53,4 +53,4 @@ public:
 	virtual void SetAssignment(int ClientID, int Dir);
 };
 
-#endif
+#endif // GAME_HOUSES_BANK_H

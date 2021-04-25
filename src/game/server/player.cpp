@@ -212,6 +212,8 @@ void CPlayer::Reset()
 	m_JailTime = 0;
 
 	m_SilentFarm = 0;
+
+	m_SkipSetViewPos = 0;
 }
 
 void CPlayer::Tick()
@@ -281,7 +283,7 @@ void CPlayer::Tick()
 			if (m_pCharacter->IsAlive())
 			{
 				ProcessPause();
-				if (!m_Paused && !m_pControlledTee)
+				if (!m_Paused && !m_pControlledTee && !GameServer()->Arenas()->IsConfiguring(m_ClientID))
 					m_ViewPos = m_pCharacter->GetPos();
 			}
 			else if (!m_pCharacter->IsPaused())
@@ -528,6 +530,11 @@ void CPlayer::Snap(int SnappingClient)
 			Score = m_InstagibScore;
 			AccUsed = false;
 		}
+		else if (pSnapping->m_Minigame == MINIGAME_1VS1 || (m_Minigame == MINIGAME_1VS1 && GameServer()->Arenas()->FightStarted(m_ClientID) && pSnapping->m_ScoreMode != SCORE_TIME)) // 1vs1 broadcasts 1vs1 score to everyone
+		{
+			Score = GameServer()->Arenas()->GetClientScore(m_ClientID);
+			AccUsed = false;
+		}
 		else if (pSnapping->m_ScoreMode == SCORE_TIME)
 		{
 			// send 0 if times of others are not shown
@@ -554,7 +561,7 @@ void CPlayer::Snap(int SnappingClient)
 			Score = 0;
 	}
 
-	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode))
+	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode || GameServer()->Arenas()->IsConfiguring(m_ClientID)))
 	{
 		int Size = Server()->IsSevendown(m_ClientID) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
 		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, Size));
@@ -571,10 +578,22 @@ void CPlayer::Snap(int SnappingClient)
 				SpecMode = SPEC_PLAYER;
 				SpectatorID = m_pControlledTee->GetCID();
 			}
-			else if (m_TeeControlMode)
+			else
 			{
-				SpecMode = SPEC_PLAYER;
-				SpectatorID = m_ClientID;
+				bool ClampViewPos = GameServer()->Arenas()->ClampViewPos(m_ClientID);
+				if (ClampViewPos)
+					SkipSetViewPos();
+
+				if (m_TeeControlMode || ClampViewPos)
+				{
+					SpecMode = SPEC_PLAYER;
+					SpectatorID = m_ClientID;
+				}
+				else if (GameServer()->Arenas()->IsConfiguring(m_ClientID))
+				{
+					SpecMode = SPEC_FREEVIEW;
+					SpectatorID = -1;
+				}
 			}
 		}
 
@@ -656,7 +675,7 @@ void CPlayer::Snap(int SnappingClient)
 
 		((int*)pPlayerInfo)[0] = (int)((m_ClientID == SnappingClient && (!m_pControlledTee || m_Paused)) || (m_TeeControllerID == SnappingClient && !pSnapping->m_Paused));
 		((int*)pPlayerInfo)[1] = id;
-		((int*)pPlayerInfo)[2] = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC && (!m_TeeControlMode || m_pControlledTee) ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
 	}
@@ -789,7 +808,6 @@ void CPlayer::InitIdMap()
 			break;
 	}
 
-	m_NumMapReserved = 1;
 	pIdMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 
 	if (!Server()->IsSevendown(m_ClientID))
@@ -814,13 +832,12 @@ void CPlayer::InitIdMap()
 	{
 		if (GameServer()->FlagsUsed())
 		{
-			m_NumMapReserved += 2;
 			pIdMap[SPEC_SELECT_FLAG_RED] = -1;
 			pIdMap[SPEC_SELECT_FLAG_BLUE] = -1;
 		}
 	}
 
-	if (NextFreeID < VANILLA_MAX_CLIENTS - m_NumMapReserved)
+	if (NextFreeID < VANILLA_MAX_CLIENTS - GameServer()->m_World.m_NumMapReserved)
 	{
 		pIdMap[NextFreeID] = m_ClientID;
 		pReverseIdMap[m_ClientID] = NextFreeID;
@@ -832,7 +849,7 @@ int CPlayer::GetHidePlayerTeam(int Asker)
 {
 	CPlayer *pAsker = GameServer()->m_apPlayers[Asker];
 	if (m_TeeControllerID != Asker && m_Team != TEAM_SPECTATORS && ((GameServer()->Config()->m_SvHideDummies && m_IsDummy)
-		|| (GameServer()->Config()->m_SvHideMinigamePlayers && pAsker->m_Minigame != m_Minigame)))
+		|| (GameServer()->Config()->m_SvHideMinigamePlayers && (m_Minigame != MINIGAME_1VS1 || !GameServer()->Arenas()->FightStarted(m_ClientID)) && pAsker->m_Minigame != m_Minigame)))
 		return TEAM_BLUE;
 	return m_Team;
 }
@@ -868,6 +885,7 @@ void CPlayer::OnDisconnect()
 	if (GameServer()->Config()->m_SvDropsOnDeath && m_pCharacter)
 		m_pCharacter->DropMoney(GetWalletMoney());
 	KillCharacter();
+	GameServer()->Arenas()->OnPlayerLeave(m_ClientID, true);
 
 	GameServer()->SavePlayer(m_ClientID);
 	GameServer()->Logout(GetAccID());
@@ -971,8 +989,15 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		return;
 	}
 
-	if (((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpecMode == SPEC_FREEVIEW)
-		m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
+	if ((((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpecMode == SPEC_FREEVIEW) || GameServer()->Arenas()->IsConfiguring(m_ClientID))
+	{
+		if (m_SkipSetViewPos <= 0)
+			m_ViewPos = vec2(NewInput->m_TargetX, NewInput->m_TargetY);
+		else
+			m_SkipSetViewPos--;
+	}
+	else
+		SkipSetViewPos();
 
 	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
 	{
@@ -992,7 +1017,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	if (m_pCharacter)
 	{
-		if (!m_Paused && (!m_TeeControlMode || TeeControlled))
+		if (!m_Paused && (!m_TeeControlMode || TeeControlled) && !GameServer()->Arenas()->IsConfiguring(m_ClientID))
 			m_pCharacter->OnDirectInput(NewInput);
 		else
 		{
@@ -1004,7 +1029,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		}
 	}
 
-	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (NewInput->m_Fire&1))
+	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && !GameServer()->Arenas()->FightStarted(m_ClientID) && (NewInput->m_Fire&1))
 		m_Spawning = true;
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && (NewInput->m_Fire&1)
@@ -1153,6 +1178,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 	if (Team == TEAM_SPECTATORS)
 	{
+		GameServer()->Arenas()->OnPlayerLeave(m_ClientID);
+
 		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
 	}
@@ -1245,6 +1272,13 @@ void CPlayer::TryRespawn()
 	{
 		Index = ENTITY_SPAWN_BLUE;
 	}
+	else if (m_Minigame == MINIGAME_1VS1)
+	{
+		if (GameServer()->Arenas()->FightStarted(m_ClientID))
+			SpawnPos = GameServer()->Arenas()->GetSpawnPos(m_ClientID);
+		else
+			Index = TILE_1VS1_LOBBY;
+	}
 	else if (m_JailTime == 1)
 	{
 		m_JailTime = 0;
@@ -1280,6 +1314,7 @@ void CPlayer::TryRespawn()
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	m_ViewPos = SpawnPos;
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
@@ -1432,6 +1467,8 @@ int CPlayer::Pause(int State, bool Force)
 		GameServer()->SendChatTarget(m_ClientID, "You can't pause while you are selecting a tee to control");
 		return 0;
 	}
+	if (GameServer()->Arenas()->IsConfiguring(m_ClientID))
+		return 0;
 
 	char aBuf[128];
 	if (State != m_Paused)
@@ -1448,6 +1485,7 @@ int CPlayer::Pause(int State, bool Force)
 					return m_Paused; // Do not update state. Do not collect $200
 				}
 				m_pCharacter->Pause(false);
+				m_ViewPos = m_pCharacter->GetPos();
 				GameServer()->CreatePlayerSpawn(m_pCharacter->GetPos(), m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 			}
 			// fall-thru
@@ -2057,7 +2095,7 @@ bool CPlayer::LoadMinigameTee()
 
 	m_MinigameTee.Load(m_pCharacter, 0);
 	m_pCharacter->Core()->m_Vel.y = -2.f; // avoid stacking in each other
-	m_pCharacter->Freeze(); // avoid too strong meta with backup tees in block areas
+	m_pCharacter->Freeze(3); // avoid too strong meta with backup tees in block areas
 
 	m_SavedMinigameTee = false;
 	return true;

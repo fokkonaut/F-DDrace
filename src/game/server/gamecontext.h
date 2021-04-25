@@ -14,6 +14,8 @@
 #include "entities/pickup_drop.h"
 #include "entities/money.h"
 #include "houses/house.h"
+#include "minigames/minigame.h"
+#include "minigames/arenas.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -53,16 +55,6 @@ typedef unsigned __int64 uint64_t;
 			All players (CPlayer::snap)
 
 */
-
-enum Minigames
-{
-	MINIGAME_NONE = 0,
-	MINIGAME_BLOCK,
-	MINIGAME_SURVIVAL,
-	MINIGAME_INSTAGIB_BOOMFNG,
-	MINIGAME_INSTAGIB_FNG,
-	NUM_MINIGAMES
-};
 
 enum Survival
 {
@@ -582,6 +574,8 @@ public:
 	int MoneyLaserTextTime(int64 Amount) { return Amount < SMALL_MONEY_AMOUNT ? 1 : 3; }
 
 	class CHouse *m_pHouses[NUM_HOUSES];
+	class CMinigame *m_pMinigames[NUM_MINIGAMES];
+	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);
@@ -598,6 +592,8 @@ public:
 
 	bool IsLocal(int CientID1, int ClientID2);
 	bool CanReceiveMessage(int Sender, int Receiver);
+
+	vec2 RoundPos(vec2 Pos);
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
@@ -793,13 +789,13 @@ private:
 	static void ConSpawn(IConsole::IResult* pResult, void* pUserData);
 	static void ConSilentFarm(IConsole::IResult* pResult, void* pUserData);
 
-	void PreSetMinigame(IConsole::IResult *pResult, void *pUserData, int Minigame);
 	static void ConMinigames(IConsole::IResult* pResult, void* pUserData);
 	static void ConLeaveMinigame(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinBlock(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinSurvival(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinBoomFNG(IConsole::IResult* pResult, void* pUserData);
 	static void ConJoinFNG(IConsole::IResult* pResult, void* pUserData);
+	static void Con1VS1(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);

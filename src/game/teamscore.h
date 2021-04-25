@@ -36,15 +36,8 @@ public:
 		return m_IsSolo[ClientID];
 	}
 
-	void SetPassive(int ClientID, bool Value)
-	{
-		m_IsPassive[ClientID] = Value;
-	}
-
-	bool GetPassive(int ClientID)
-	{
-		return m_IsPassive[ClientID];
-	}
+	void SetPassive(int ClientID, bool Value) { m_IsPassive[ClientID] = Value; }
+	bool GetPassive(int ClientID) { return m_IsPassive[ClientID]; }
 };
 
 #endif

@@ -61,10 +61,7 @@ void CDrawEditor::Tick()
 
 	m_Pos = m_pCharacter->m_CursorPos;
 	if (m_RoundPos && !m_Erasing)
-	{
-		m_Pos.x -= (int)m_Pos.x % 32 - 16;
-		m_Pos.y -= (int)m_Pos.y % 32 - 16;
-	}
+		m_Pos = GameServer()->RoundPos(m_Pos);
 
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);

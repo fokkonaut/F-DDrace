@@ -21,6 +21,11 @@ const char *CConsole::CResult::GetString(unsigned Index)
 	return m_apArgs[Index];
 }
 
+const char *CConsole::CResult::GetFullString()
+{
+	return m_aArgumentString;
+}
+
 int CConsole::CResult::GetInteger(unsigned Index)
 {
 	if (Index >= m_NumArgs)
@@ -83,6 +88,7 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 	}
 
 	pResult->m_pArgsStart = pStr;
+	str_copy(pResult->m_aArgumentString, pStr, sizeof(pResult->m_aArgumentString));
 	return 0;
 }
 
@@ -258,6 +264,7 @@ int CConsole::ParseCommandArgs(const char *pArgs, const char *pFormat, FCommandC
 	CResult Result;
 	str_copy(Result.m_aStringStorage, pArgs, sizeof(Result.m_aStringStorage));
 	Result.m_pArgsStart = Result.m_aStringStorage;
+	str_copy(Result.m_aArgumentString, Result.m_pArgsStart, sizeof(Result.m_aArgumentString));
 
 	int Error = ParseArgs(&Result, pFormat);
 	if(Error)

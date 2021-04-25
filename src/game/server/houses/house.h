@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_HOUSE_H
-#define GAME_HOUSE_H
+#ifndef GAME_HOUSES_HOUSE_H
+#define GAME_HOUSES_HOUSE_H
 
 #include <engine/shared/protocol.h>
 
@@ -33,7 +33,7 @@ class IServer;
 class CHouse
 {
 protected:
-	class CGameContext *m_pGameServer;
+	CGameContext *m_pGameServer;
 	CGameContext *GameServer() { return m_pGameServer; }
 	IServer *Server();
 
@@ -88,4 +88,4 @@ public:
 	virtual void SetAssignment(int ClientID, int Dir) {}
 };
 
-#endif
+#endif // GAME_HOUSES_HOUSE_H

@@ -180,6 +180,7 @@ class CCharacterCore
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2> >* m_pTeleOuts;
+
 public:
 	static const float PHYS_SIZE;
 	vec2 m_Pos;
@@ -209,7 +210,7 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts = NULL);
+	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts, CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pSwitchActiveUser);
 	void Reset();
 	void Tick(bool UseInput);
 	void Move();
@@ -251,6 +252,8 @@ public:
 	vec2 m_AimClosestPos;
 	int m_UpdateAngle;
 
+	bool m_FightStarted;
+
 	int m_Id;
 	class CCollision* Collision() { return m_pCollision; }
 
@@ -267,7 +270,8 @@ private:
 
 	CTeamsCore* m_pTeams;
 	int m_MoveRestrictions;
-	static bool IsSwitchActiveCb(int Number, void *pUser);
+	void *m_pSwitchActiveUser;
+	CALLBACK_SWITCHACTIVE m_pfnSwitchActive;
 };
 
 #endif

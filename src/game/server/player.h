@@ -189,6 +189,7 @@ private:
 
 	// F-DDrace
 	int m_DummyMode;
+	int m_SkipSetViewPos;
 
 public:
 	enum
@@ -372,6 +373,8 @@ public:
 	bool m_LocalChat;
 	int GetAuthedHighlighted();
 
+	void SkipSetViewPos() { m_SkipSetViewPos = 2; }
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 
@@ -412,7 +415,6 @@ public:
 	void SendConnect(int FakeID, int ClientID);
 	void SendDisconnect(int FakeID);
 	void InitIdMap();
-	int m_NumMapReserved;
 	bool m_aSameIP[MAX_CLIENTS];
 
 	// shutdown tee

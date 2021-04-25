@@ -22,6 +22,7 @@
 #include "player.h"
 #include "houses/shop.h"
 #include "houses/bank.h"
+#include "minigames/arenas.h"
 
 #include "entities/flag.h"
 #include "entities/lasertext.h"
@@ -72,6 +73,8 @@ void CGameContext::Construct(int Resetting)
 		m_NumVoteMutes = 0;
 		for (int i = 0; i < NUM_HOUSES; i++)
 			m_pHouses[i] = 0;
+		for (int i = 0; i < NUM_MINIGAMES; i++)
+			m_pMinigames[i] = 0;
 		m_NumRegisterBans = 0;
 	}
 
@@ -102,11 +105,14 @@ CGameContext::~CGameContext()
 
 	if (m_pScore)
 		delete m_pScore;
+
 	for (int i = 0; i < NUM_HOUSES; i++)
-	{
 		if (m_pHouses[i])
 			delete m_pHouses[i];
-	}
+
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		if (m_pMinigames[i])
+			delete m_pMinigames[i];
 }
 
 void CGameContext::Clear()
@@ -916,6 +922,9 @@ void CGameContext::OnTick()
 	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
 
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_pMinigames[i]->Tick();
+
 	if(m_TeeHistorianActive)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1477,19 +1486,18 @@ const char *CGameContext::GetWhisper(char *pStr, int *pTarget)
 		pName = pStr;
 		while(1)
 		{
-			if(pStr[0] == 0)
-			{
-				Error = 1;
-				break;
-			}
-			if(pStr[0] == ' ')
+			bool WasSpace = pStr[0] == ' ';
+			if(WasSpace || pStr[0] == 0)
 			{
 				pStr[0] = 0;
 				for(Victim = 0; Victim < MAX_CLIENTS; Victim++)
 					if (str_comp(pName, Server()->ClientName(Victim)) == 0)
 						break;
 
-				pStr[0] = ' ';
+				if (WasSpace)
+					pStr[0] = ' ';
+				else
+					break;
 
 				if (Victim < MAX_CLIENTS)
 					break;
@@ -1498,10 +1506,8 @@ const char *CGameContext::GetWhisper(char *pStr, int *pTarget)
 		}
 	}
 
-	if(pStr[0] != ' ')
-	{
-		Error = 1;
-	}
+	if (Victim >= MAX_CLIENTS)
+		Victim = -1;
 
 	*pStr = 0;
 	pStr++;
@@ -2444,13 +2450,25 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
-			if (m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (m_VoteKick || m_VoteSpec))
+			if (!Arenas()->FightStarted(ClientID))
+			{
+				int Fight = Arenas()->GetClientFight(ClientID);
+				if (Fight >= 0)
+				{
+					Arenas()->EndFight(Fight);
+					return;
+				}
+			}
+			else if (pChr->m_SpawnTick + Server()->TickSpeed() * 3 > Server()->Tick()) // 3 sec freeze on arena join, dont kill there
+				return;
+
+			/*if (m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (m_VoteKick || m_VoteSpec))
 			{
 				SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
 				return;
-			}
+			}*/
 
-			if (m_apPlayers[ClientID]->m_SpawnBlockScore > 3)
+			if (!m_apPlayers[ClientID]->IsMinigame() && m_apPlayers[ClientID]->m_SpawnBlockScore > 3)
 			{
 				if (Config()->m_SvSpawnBlockProtection == 2)
 				{
@@ -3561,13 +3579,20 @@ void CGameContext::FDDraceInit()
 		m_aPoliceLevel[i] = aPoliceLevel[i];
 
 	for (int i = 0; i < NUM_HOUSES; i++)
-	{
 		if (m_pHouses[i])
 			delete m_pHouses[i];
-	}
 	m_pHouses[HOUSE_SHOP] = new CShop(this, HOUSE_SHOP);
 	m_pHouses[HOUSE_PLOT_SHOP] = new CShop(this, HOUSE_PLOT_SHOP);
 	m_pHouses[HOUSE_BANK] = new CBank(this);
+
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		if (m_pMinigames[i])
+			delete m_pMinigames[i];
+	m_pMinigames[MINIGAME_BLOCK] = new CMinigame(this, MINIGAME_BLOCK);
+	m_pMinigames[MINIGAME_SURVIVAL] = new CMinigame(this, MINIGAME_SURVIVAL);
+	m_pMinigames[MINIGAME_1VS1] = new CArenas(this, MINIGAME_1VS1);
+	m_pMinigames[MINIGAME_INSTAGIB_BOOMFNG] = new CMinigame(this, MINIGAME_INSTAGIB_BOOMFNG);
+	m_pMinigames[MINIGAME_INSTAGIB_FNG] = new CMinigame(this, MINIGAME_INSTAGIB_FNG);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
@@ -3588,6 +3613,8 @@ void CGameContext::FDDraceInit()
 	SetMapSpecificOptions();
 	if (Config()->m_SvDefaultDummies)
 		ConnectDefaultDummies();
+
+	m_World.m_NumMapReserved = FlagsUsed() ? 3 : 1;
 }
 
 void CGameContext::DeleteTempfile()
@@ -3835,6 +3862,9 @@ void CGameContext::OnSnap(int ClientID)
 	m_World.Snap(ClientID);
 	m_pController->Snap(ClientID);
 	m_Events.Snap(ClientID);
+	// F-DDrace
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_pMinigames[i]->Snap(ClientID);
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -5297,7 +5327,7 @@ void CGameContext::ProcessSpawnBlockProtection(int ClientID)
 	if (!pKiller || !pKiller->GetCharacter() || pKiller->m_IsDummy)
 		return;
 
-	if (IsSpawnArea(pKiller->GetCharacter()->GetPos())) // if killer is in spawn area
+	if (IsSpawnArea(pKiller->GetCharacter()->GetPos()) && !Arenas()->FightStarted(Killer)) // if killer is in spawn area
 	{
 		pKiller->m_SpawnBlockScore++;
 		if (Config()->m_SvSpawnBlockProtection)
@@ -5322,6 +5352,13 @@ bool CGameContext::IsSpawnArea(vec2 Pos)
 		&& Pos.x <= Config()->m_SvSpawnAreaHighX * 32
 		&& Pos.y >= Config()->m_SvSpawnAreaLowY * 32
 		&& Pos.y <= Config()->m_SvSpawnAreaHighY * 32);
+}
+
+vec2 CGameContext::RoundPos(vec2 Pos)
+{
+	Pos.x -= (int)Pos.x % 32 - 16;
+	Pos.y -= (int)Pos.y % 32 - 16;
+	return Pos;
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
@@ -5999,6 +6036,8 @@ const char *CGameContext::GetMinigameName(int Minigame)
 		return "Instagib Boom FNG";
 	case MINIGAME_INSTAGIB_FNG:
 		return "Instagib FNG";
+	case MINIGAME_1VS1:
+		return "1vs1";
 	}
 	return "Unknown";
 }
@@ -6017,6 +6056,8 @@ const char* CGameContext::GetMinigameCommand(int Minigame)
 		return "boomfng";
 	case MINIGAME_INSTAGIB_FNG:
 		return "fng";
+	case MINIGAME_1VS1:
+		return "1vs1";
 	}
 	return "unknown";
 }
@@ -6066,6 +6107,10 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
 			pPlayer->m_ShowName = true;
 		}
+		else if (pPlayer->m_Minigame == MINIGAME_1VS1)
+		{
+			Arenas()->OnPlayerLeave(ClientID);
+		}
 	}
 	// join minigame
 	else if (!pPlayer->IsMinigame())
@@ -6078,7 +6123,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		pPlayer->SaveMinigameTee();
 
 		//set minigame required stuff
-		((CGameControllerDDRace*)m_pController)->m_Teams.SetCharacterTeam(pPlayer->GetCID(), 0);
+		((CGameControllerDDRace *)m_pController)->m_Teams.SetForceCharacterTeam(ClientID, 0);
 
 		if (Minigame == MINIGAME_SURVIVAL)
 		{
@@ -6086,6 +6131,11 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 			if (pPlayer->GetCharacter())
 				pPlayer->GetCharacter()->m_SavedGamemode = pPlayer->m_Gamemode;
 			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
+		}
+		else if (Minigame == MINIGAME_1VS1)
+		{
+			SendChatTarget(ClientID, "Type '/1vs1 <playername>' to start a fight with someone");
+			SendChatTarget(ClientID, "For custom scorelimits or a kill-border use '/1vs1 <playername> <scorelimit> <killborder>'");
 		}
 	}
 	else

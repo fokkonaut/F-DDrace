@@ -1719,6 +1719,10 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   houses/shop.cpp
   houses/shop.h
   mask128.h
+  minigames/arenas.cpp
+  minigames/arenas.h
+  minigames/minigame.cpp
+  minigames/minigame.h
   player.cpp
   player.h
   save.cpp

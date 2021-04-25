@@ -58,12 +58,14 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 
 const float CCharacterCore::PHYS_SIZE = 28.0f;
 
-void CCharacterCore::Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts)
+void CCharacterCore::Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts, CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pSwitchActiveUser)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
 	m_pTeleOuts = pTeleOuts;
 	m_pTeams = pTeams;
+	m_pfnSwitchActive = pfnSwitchActive;
+	m_pSwitchActiveUser = pSwitchActiveUser;
 	Reset();
 }
 
@@ -97,6 +99,7 @@ void CCharacterCore::Reset()
 	m_AimClosest = false;
 	m_AimClosestPos = vec2(0, 0);
 	m_UpdateAngle = 0;
+	m_FightStarted = false;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -105,7 +108,7 @@ void CCharacterCore::Tick(bool UseInput)
 	m_UpdateFlagVel = 0;
 	m_UpdateFlagAtStand = 0;
 
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? m_pfnSwitchActive : 0, m_pSwitchActiveUser, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
 
 	m_TriggeredEvents = 0;
 
@@ -471,7 +474,7 @@ void CCharacterCore::Tick(bool UseInput)
 					// add a little bit force to the guy who has the grip
 					m_HookDragVel -= Dir*Accel*0.25f;
 
-					if (m_pCollision->m_pConfig->m_SvWeakHook)
+					if (m_pCollision->m_pConfig->m_SvWeakHook && !m_FightStarted)
 					{
 						pCharCore->AddDragVelocity();
 						pCharCore->ResetDragVelocity();
@@ -647,15 +650,6 @@ void CCharacterCore::SetFlagInfo(int Team, vec2 Pos, int Stand, vec2 Vel, bool C
 	m_AtStand[Team] = Stand;
 	m_FlagVel[Team] = Vel;
 	m_Carried[Team] = Carried;
-}
-
-bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
-{
-	CCharacterCore *pThis = (CCharacterCore *)pUser;
-	if(pThis->Collision()->m_pSwitchers)
-		if(pThis->m_pTeams->Team(pThis->m_Id) != TEAM_SUPER)
-			return pThis->Collision()->m_pSwitchers[Number].m_Status[pThis->m_pTeams->Team(pThis->m_Id)];
-	return false;
 }
 
 vec2 CCharacterCore::LimitVel(vec2 Vel)

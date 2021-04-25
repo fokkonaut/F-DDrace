@@ -88,10 +88,11 @@ CHAT_COMMAND("weapon", "i[weapon]", CFGFLAG_CHAT, ConWeapon, this, "Sets active 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)
 CHAT_COMMAND("leave", "", CFGFLAG_CHAT, ConLeaveMinigame, this, "Leaves the current minigame", AUTHED_NO)
-CHAT_COMMAND("block", "?s['enable'|'disable']", CFGFLAG_CHAT, ConJoinBlock, this, "Joins the block minigame", AUTHED_NO)
-CHAT_COMMAND("survival", "?s['enable'|'disable']", CFGFLAG_CHAT, ConJoinSurvival, this, "Joins the survival minigame", AUTHED_NO)
-CHAT_COMMAND("boomfng", "?s['enable'|'disable']", CFGFLAG_CHAT, ConJoinBoomFNG, this, "Joins the boom fng minigame", AUTHED_NO)
-CHAT_COMMAND("fng", "?s['enable'|'disable']", CFGFLAG_CHAT, ConJoinFNG, this, "Joins the fng minigame", AUTHED_NO)
+CHAT_COMMAND("block", "", CFGFLAG_CHAT, ConJoinBlock, this, "Joins the block minigame", AUTHED_NO)
+CHAT_COMMAND("survival", "", CFGFLAG_CHAT, ConJoinSurvival, this, "Joins the survival minigame", AUTHED_NO)
+CHAT_COMMAND("boomfng", "", CFGFLAG_CHAT, ConJoinBoomFNG, this, "Joins the boom fng minigame", AUTHED_NO)
+CHAT_COMMAND("fng", "", CFGFLAG_CHAT, ConJoinFNG, this, "Joins the fng minigame", AUTHED_NO)
+CHAT_COMMAND("1vs1", "?s[playername] ?i[scorelimit] ?i[killborder]", CFGFLAG_CHAT, Con1VS1, this, "Joins the 1vs1 minigame or accepts/creates a fight/new arena", AUTHED_NO)
 
 //account top5s
 CHAT_COMMAND("top5level", "?i[rank to start with]", CFGFLAG_CHAT, ConTop5Level, this, "Shows top5 accounts sorted by level", AUTHED_NO)

@@ -662,7 +662,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 {
 	m_Core.SetSolo(ClientID, false);
 
-	if (m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)])
+	if ((m_Core.Team(ClientID) >= TEAM_SUPER || !m_TeamLocked[m_Core.Team(ClientID)]) && !GameServer()->Arenas()->FightStarted(ClientID))
 		// Important to only set a new team here, don't remove from an existing
 		// team since a newly joined player does by definition not have an old team
 		// to remove from. Doing so would destroy the count in m_MembersCount.
@@ -672,6 +672,10 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 {
 	m_Core.SetSolo(ClientID, false);
+
+	// we don't need team updating on every kill
+	if (GameServer()->Arenas()->FightStarted(ClientID))
+		return;
 
 	int Team = m_Core.Team(ClientID);
 	bool Locked = TeamLocked(Team) && Weapon != WEAPON_GAME;

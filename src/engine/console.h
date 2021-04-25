@@ -56,6 +56,7 @@ public:
 		// F-DDrace
 
 		virtual int GetVictim() = 0;
+		virtual const char *GetFullString() = 0;
 	};
 
 	class CCommandInfo

@@ -1169,7 +1169,7 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 	if (m_pDoor[Ny * m_Width + Nx].m_Number == 0)
 		m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 
-	if (Number == 0)
+	if (Number <= 0)
 		m_pDoor[Ny * m_Width + Nx].m_Usage++;
 }
 
@@ -1185,7 +1185,7 @@ void CCollision::UnsetDCollisionAt(float x, float y)
 
 	m_pDoor[Ny * m_Width + Nx].m_Usage--;
 
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number == 0)
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number <= 0)
 	{
 		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
 		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;

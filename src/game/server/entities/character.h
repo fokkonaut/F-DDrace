@@ -105,7 +105,7 @@ public:
 	void ResetInput();
 	void FireWeapon();
 
-	void Die(int Weapon = WEAPON_SELF, bool UpdateTeeControl = true);
+	void Die(int Weapon = WEAPON_SELF, bool UpdateTeeControl = true, bool OnArenaDie = true);
 	bool TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon);
 
 	bool Spawn(class CPlayer *pPlayer, vec2 Pos);

@@ -58,6 +58,7 @@ private:
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
+	bool m_aUpdateTeamsNext[MAX_CLIENTS];
 	void UpdatePlayerMaps(int ForcedID = -1);
 
 public:
@@ -68,6 +69,9 @@ public:
 	bool m_ResetRequested;
 	bool m_Paused;
 	CWorldCore m_Core;
+
+	// F-DDrace
+	int m_NumMapReserved;
 
 	CGameWorld();
 	~CGameWorld();

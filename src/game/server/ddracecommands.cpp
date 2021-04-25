@@ -1638,7 +1638,7 @@ void CGameContext::ConSetMinigame(IConsole::IResult* pResult, void* pUserData)
 	if (!pSelf->m_apPlayers[Victim])
 		return;
 
-	for (int i = 0; i < NUM_MINIGAMES; i++)
+	for (int i = MINIGAME_NONE; i < NUM_MINIGAMES; i++)
 	{
 		if (str_comp_nocase(pMinigame, pSelf->GetMinigameCommand(i)) == 0)
 		{

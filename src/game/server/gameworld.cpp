@@ -26,6 +26,9 @@ CGameWorld::CGameWorld()
 	m_ResetRequested = false;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		m_apFirstEntityTypes[i] = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aUpdateTeamsNext[i] = false;
 }
 
 CGameWorld::~CGameWorld()
@@ -187,7 +190,10 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 		int *pMap = Server()->GetIdMap(i);
 		int *rMap = Server()->GetReverseIdMap(i);
 
-		bool UpdateTeamsStates = false;
+		// when update wanted, we do it on next call
+		bool UpdateTeamsStates = m_aUpdateTeamsNext[i];
+		m_aUpdateTeamsNext[i] = false;
+
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
 			if (i == j)
@@ -196,13 +202,37 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 			CPlayer *pChecked = GameServer()->m_apPlayers[j];
 
 			int Free = -1;
+			bool TryReset = true;
 			if (pPlayer->m_aSameIP[j])
 			{
 				Free = Server()->GetReverseIdMap(j)[j];
+				TryReset = false;
+			}
+			else if (pChecked && GameServer()->Arenas()->FightStarted(j))
+			{
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-m_NumMapReserved; k++)
+				{
+					int CID = pMap[k];
+					if (CID == -1 || (CID != i && !pPlayer->m_aSameIP[CID] && GameServer()->m_apPlayers[CID] && GameServer()->m_apPlayers[CID]->m_Minigame != MINIGAME_1VS1) || CID == j)
+					{
+						Free = k;
+						if (CID != j)
+						{
+							m_aUpdateTeamsNext[i] = true;
+							if (rMap[j] != -1)
+							{
+								pPlayer->SendDisconnect(rMap[j]);
+								pMap[rMap[j]] = -1;
+								rMap[j] = -1;
+							}
+						}
+						break;
+					}
+				}
 			}
 			else
 			{
-				for (int k = 0; k < VANILLA_MAX_CLIENTS-pPlayer->m_NumMapReserved; k++)
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-m_NumMapReserved; k++)
 				{
 					if (pMap[k] == -1)
 					{
@@ -210,7 +240,10 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 						break;
 					}
 				}
+			}
 
+			if (TryReset)
+			{
 				if (!Server()->ClientIngame(j) || !pChecked || (!pChecked->GetCharacter() && Free == -1))
 				{
 					if (rMap[j] != -1)
@@ -239,7 +272,7 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 					rMap[pMap[Free]] = -1;
 
 					if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
-						UpdateTeamsStates = true;
+						m_aUpdateTeamsNext[i] = true;
 				}
 				pMap[Free] = j;
 				rMap[j] = Free;
@@ -248,7 +281,7 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 			{
 				for (int k = 0; k < MAX_CLIENTS; k++)
 				{
-					if (k == i || pPlayer->m_aSameIP[k])
+					if (k == i || pPlayer->m_aSameIP[k] || GameServer()->Arenas()->FightStarted(k))
 						continue;
 
 					if (rMap[k] != -1 && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i, false))
@@ -260,7 +293,7 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 						pPlayer->SendConnect(rMap[j], j);
 
 						if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
-							UpdateTeamsStates = true;
+							m_aUpdateTeamsNext[i] = true;
 						break;
 					}
 				}

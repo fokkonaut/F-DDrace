@@ -141,6 +141,9 @@ class CConsole : public IConsole
 		void SetVictim(int Victim);
 		void SetVictim(const char* pVictim);
 		virtual int GetVictim();
+
+		char m_aArgumentString[256];
+		virtual const char *GetFullString();
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);

@@ -92,7 +92,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Pos = Pos;
 
 	m_Core.Reset();
-	m_Core.Init(&GameWorld()->m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
+	m_Core.Init(&GameWorld()->m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts, IsSwitchActiveCb, this);
 	m_Core.m_Pos = m_Pos;
 	SetActiveWeapon(WEAPON_GUN);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
@@ -105,8 +105,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Alive = true;
 
 	FDDraceInit();
-	GameServer()->m_pController->OnCharacterSpawn(this);
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
+	GameServer()->m_pController->OnCharacterSpawn(this);
 	DDraceInit();
 
 	m_pPlayer->LoadMinigameTee();
@@ -1078,7 +1078,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 			return;
 	}
 
-	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
+	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
 		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
@@ -1166,9 +1166,20 @@ void CCharacter::SetEmote(int Emote, int Tick)
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
-	if (m_DrawEditor.Active())
+	bool ResetInput = false;
+	if (GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()))
+	{
+		GameServer()->Arenas()->OnInput(m_pPlayer->GetCID(), pNewInput);
+		ResetInput = true;
+	}
+	else if (m_DrawEditor.Active())
 	{
 		m_DrawEditor.OnInput(pNewInput);
+		ResetInput = true;
+	}
+
+	if (ResetInput)
+	{
 		pNewInput->m_Direction = 0;
 		pNewInput->m_Jump = 0;
 		pNewInput->m_Hook = 0;
@@ -1271,7 +1282,7 @@ void CCharacter::TickDefered()
 	// advance the dummy
 	{
 		CWorldCore TempWorld;
-		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &Teams()->m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts);
+		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &Teams()->m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts, IsSwitchActiveCb, this);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
@@ -1406,11 +1417,14 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Weapon, bool UpdateTeeControl)
+void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 {
 	// make sure we are not saved as killer for someone else after we joined a minigame, so we cant take the flag to a minigame
 	if (Weapon == WEAPON_MINIGAME_CHANGE)
 		GameServer()->UnsetKiller(m_pPlayer->GetCID());
+
+	if (OnArenaDie)
+		GameServer()->Arenas()->OnPlayerDie(m_pPlayer->GetCID());
 
 	m_DrawEditor.OnPlayerDeath();
 
@@ -1740,7 +1754,7 @@ void CCharacter::Snap(int SnappingClient)
 		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 		CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpectatorID() != -1
+		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpecMode() != SPEC_FREEVIEW
 			&& !CanCollide(SnapPlayer->GetSpectatorID(), false) && !SnapPlayer->m_ShowOthers)
 			return;
 
@@ -2163,6 +2177,9 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 {
 	CCharacter *pThis = (CCharacter *)pUser;
 	CCollision *pCollision = pThis->GameServer()->Collision();
+	CArenas *pArenas = pThis->GameServer()->Arenas();
+	if (Number < 0)
+		return (pArenas->FightStarted(pThis->m_pPlayer->GetCID()) && -Number == pArenas->GetClientFight(pThis->m_pPlayer->GetCID()) + 1);
 	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[pThis->Team()] && pThis->Team() != TEAM_SUPER;
 }
 
@@ -2219,42 +2236,183 @@ void CCharacter::HandleTiles(int Index)
 	if (tcp)
 		m_TeleCheckpoint = tcp;
 
-	// start
-	if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && Config()->m_SvTeam != 3)))
+	// 1vs1 over the whole map, we need to avoid some stuff here
+	bool FightStarted = GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID());
+	if (!FightStarted)
 	{
-		if (Config()->m_SvResetPickups)
+		// start
+		if (((m_TileIndex == TILE_BEGIN) || (m_TileFIndex == TILE_BEGIN) || FTile1 == TILE_BEGIN || FTile2 == TILE_BEGIN || FTile3 == TILE_BEGIN || FTile4 == TILE_BEGIN || Tile1 == TILE_BEGIN || Tile2 == TILE_BEGIN || Tile3 == TILE_BEGIN || Tile4 == TILE_BEGIN) && (m_DDRaceState == DDRACE_NONE || m_DDRaceState == DDRACE_FINISHED || (m_DDRaceState == DDRACE_STARTED && !Team() && Config()->m_SvTeam != 3)))
 		{
-			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
+			if (Config()->m_SvResetPickups)
 			{
-				m_aWeapons[i].m_Got = false;
-				if (GetActiveWeapon() == i)
-					SetActiveWeapon(WEAPON_GUN);
+				for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
+				{
+					m_aWeapons[i].m_Got = false;
+					if (GetActiveWeapon() == i)
+						SetActiveWeapon(WEAPON_GUN);
+				}
+			}
+			if (Config()->m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
+			{
+				if (m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+				{
+					GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have to be in a team with other tees to start");
+					m_LastStartWarning = Server()->Tick();
+				}
+				Die(WEAPON_WORLD);
+				return;
+			}
+
+			Teams()->OnCharacterStart(m_pPlayer->GetCID());
+			m_CpActive = -2;
+
+			// F-DDrace
+			// allow re-finishing the special race after touching start tiles without a kill
+			m_HasFinishedSpecialRace = false;
+		}
+
+		// finish
+		if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
+		{
+			Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
+			m_pPlayer->GiveXP(500, "finish the race");
+		}
+
+		//shop
+		for (int i = 0; i < NUM_HOUSES; i++)
+		{
+			int Index = -1;
+			switch (i)
+			{
+			case HOUSE_SHOP: Index = TILE_SHOP; break;
+			case HOUSE_PLOT_SHOP: Index = TILE_PLOT_SHOP; break;
+			case HOUSE_BANK: Index = TILE_BANK; break;
+			}
+
+			if (m_TileIndex == Index || m_TileFIndex == Index)
+			{
+				if (m_LastIndexTile != Index && m_LastIndexFrontTile != Index)
+					GameServer()->m_pHouses[i]->OnEnter(m_pPlayer->GetCID());
 			}
 		}
-		if (Config()->m_SvTeam == 2 && (Team() == TEAM_FLOCK || Teams()->Count(Team()) <= 1))
+
+		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
+		bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
+		if (MoneyTile || PoliceMoneyTile)
 		{
-			if (m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
+			m_MoneyTile = true;
+
+			bool Plot = GetCurrentTilePlotID() >= PLOT_START;
+			int Seconds = Server()->TickSpeed();
+			if (m_pPlayer->m_JailTime) // every 3 seconds only while arrested
+				Seconds *= 3;
+			else if (Plot) // every 2 seconds only on plot money tile
+				Seconds *= 2;
+
+			if (Server()->Tick() % Seconds == 0)
 			{
-				GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have to be in a team with other tees to start");
-				m_LastStartWarning = Server()->Tick();
+				if (m_pPlayer->GetAccID() < ACC_START)
+				{
+					GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
+					return;
+				}
+
+				CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+				int XP = 0;
+				int Money = 0;
+				int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
+
+				// default
+				Money += 1;
+				XP += AliveState + 1;
+
+				// vip bonus
+				if (pAccount->m_VIP)
+				{
+					XP += 2;
+					Money += 2;
+				}
+
+				// police bonus
+				if (PoliceMoneyTile)
+				{
+					XP += 1;
+					Money += pAccount->m_PoliceLevel;
+				}
+
+				//flag bonus
+				bool FlagBonus = false;
+				if (!PoliceMoneyTile && !Plot && HasFlag() != -1)
+				{
+					XP += 1;
+					FlagBonus = true;
+				}
+
+				// give money and xp
+				m_pPlayer->WalletTransaction(Money);
+				m_pPlayer->GiveXP(XP);
+
+				// broadcast
+				if (!SendingPortalCooldown())
+				{
+					char aMsg[256];
+					char aSurvival[32];
+					char aPolice[32];
+					char aPlusXP[128];
+
+					str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
+					str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
+					str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+					str_format(aMsg, sizeof(aMsg),
+							"Money [%lld] +1%s%s\n"
+							"XP [%lld/%lld]%s\n"
+							"Level [%d]",
+							m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+							pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
+							pAccount->m_Level
+						);
+
+					// message gets cut off otherwise
+					if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
+					{
+						for (int i = 0; i < 32; i++)
+							str_append(aMsg, " ", sizeof(aMsg));
+					}
+					GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+				}
 			}
-			Die(WEAPON_WORLD);
-			return;
 		}
 
-		Teams()->OnCharacterStart(m_pPlayer->GetCID());
-		m_CpActive = -2;
+		// money xp bomb
+		if (!m_GotMoneyXPBomb && (m_TileIndex == TILE_MONEY_XP_BOMB || m_TileFIndex == TILE_MONEY_XP_BOMB))
+		{
+			if (m_pPlayer->GetAccID() < ACC_START)
+			{
+				if (Server()->Tick() % 50 == 0)
+					GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
+			}
+			else if (m_pPlayer->m_LastMoneyXPBomb < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonationLinked)
+			{
+				m_pPlayer->WalletTransaction(500, "from money-xp bomb");
+				m_pPlayer->GiveXP(2500);
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money-xp bomb)");
 
-		// F-DDrace
-		// allow re-finishing the special race after touching start tiles without a kill
-		m_HasFinishedSpecialRace = false;
-	}
+				m_GotMoneyXPBomb = true;
+				m_pPlayer->m_LastMoneyXPBomb = Server()->Tick();
+			}
+		}
 
-	// finish
-	if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
-	{
-		Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
-		m_pPlayer->GiveXP(500, "finish the race");
+		// special finish
+		if (!m_HasFinishedSpecialRace && m_DDRaceState != DDRACE_NONE && m_DDRaceState != DDRACE_CHEAT && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "'%s' finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+			m_pPlayer->GiveXP(750, "finish the special race");
+
+			m_HasFinishedSpecialRace = true;
+		}
 	}
 
 	// freeze
@@ -2428,24 +2586,6 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
-	//shop
-	for (int i = 0; i < NUM_HOUSES; i++)
-	{
-		int Index = -1;
-		switch (i)
-		{
-		case HOUSE_SHOP: Index = TILE_SHOP; break;
-		case HOUSE_PLOT_SHOP: Index = TILE_PLOT_SHOP; break;
-		case HOUSE_BANK: Index = TILE_BANK; break;
-		}
-
-		if (m_TileIndex == Index || m_TileFIndex == Index)
-		{
-			if (m_LastIndexTile != Index && m_LastIndexFrontTile != Index)
-				GameServer()->m_pHouses[i]->OnEnter(m_pPlayer->GetCID());
-		}
-	}
-
 	// helper only
 	if ((m_TileIndex == TILE_HELPERS_ONLY) || (m_TileFIndex == TILE_HELPERS_ONLY))
 	{
@@ -2479,124 +2619,7 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
-	bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
-	bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
-	if (MoneyTile || PoliceMoneyTile)
-	{
-		m_MoneyTile = true;
-
-		bool Plot = GetCurrentTilePlotID() >= PLOT_START;
-		int Seconds = Server()->TickSpeed();
-		if (m_pPlayer->m_JailTime) // every 3 seconds only while arrested
-			Seconds *= 3;
-		else if (Plot) // every 2 seconds only on plot money tile
-			Seconds *= 2;
-
-		if (Server()->Tick() % Seconds == 0)
-		{
-			if (m_pPlayer->GetAccID() < ACC_START)
-			{
-				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
-				return;
-			}
-
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-
-			int XP = 0;
-			int Money = 0;
-			int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
-
-			// default
-			Money += 1;
-			XP += AliveState + 1;
-
-			// vip bonus
-			if (pAccount->m_VIP)
-			{
-				XP += 2;
-				Money += 2;
-			}
-
-			// police bonus
-			if (PoliceMoneyTile)
-			{
-				XP += 1;
-				Money += pAccount->m_PoliceLevel;
-			}
-
-			//flag bonus
-			bool FlagBonus = false;
-			if (!PoliceMoneyTile && !Plot && HasFlag() != -1)
-			{
-				XP += 1;
-				FlagBonus = true;
-			}
-
-			// give money and xp
-			m_pPlayer->WalletTransaction(Money);
-			m_pPlayer->GiveXP(XP);
-
-			// broadcast
-			if (!SendingPortalCooldown())
-			{
-				char aMsg[256];
-				char aSurvival[32];
-				char aPolice[32];
-				char aPlusXP[128];
-
-				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-				str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
-				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-				str_format(aMsg, sizeof(aMsg),
-						"Money [%lld] +1%s%s\n"
-						"XP [%lld/%lld]%s\n"
-						"Level [%d]",
-						m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
-						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
-						pAccount->m_Level
-					);
-
-				// message gets cut off otherwise
-				if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
-				{
-					for (int i = 0; i < 32; i++)
-						str_append(aMsg, " ", sizeof(aMsg));
-				}
-				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
-			}
-		}
-	}
-
-	// money xp bomb
-	if (!m_GotMoneyXPBomb && (m_TileIndex == TILE_MONEY_XP_BOMB || m_TileFIndex == TILE_MONEY_XP_BOMB))
-	{
-		if (m_pPlayer->GetAccID() < ACC_START)
-		{
-			if (Server()->Tick() % 50 == 0)
-				GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
-		}
-		else if (m_pPlayer->m_LastMoneyXPBomb < Server()->Tick() - Server()->TickSpeed() * Config()->m_SvPortalDetonationLinked)
-		{
-			m_pPlayer->WalletTransaction(500, "from money-xp bomb");
-			m_pPlayer->GiveXP(2500);
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "+2500 XP, +500 money (money-xp bomb)");
-
-			m_GotMoneyXPBomb = true;
-			m_pPlayer->m_LastMoneyXPBomb = Server()->Tick();
-		}
-	}
-
-	// special finish
-	if (!m_HasFinishedSpecialRace && m_DDRaceState != DDRACE_CHEAT && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "'%s' finished the special race!", Server()->ClientName(m_pPlayer->GetCID()));
-		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-		m_pPlayer->GiveXP(750, "finish the special race");
-
-		m_HasFinishedSpecialRace = true;
-	}
-
+	// update this AFTER you are done using this var above
 	m_LastIndexTile = m_TileIndex;
 	m_LastIndexFrontTile = m_TileFIndex;
 
@@ -2861,6 +2884,13 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (m_Super)
 			return;
+
+		if (FightStarted)
+		{
+			Die(WEAPON_SELF);
+			return;
+		}
+
 		int Num = Controller->m_TeleOuts[z - 1].size();
 		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		if (!Config()->m_SvTeleportHoldHook)
@@ -2882,6 +2912,13 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (m_Super)
 			return;
+
+		if (FightStarted)
+		{
+			Die(WEAPON_SELF);
+			return;
+		}
+
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
 		if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons)
@@ -2910,6 +2947,12 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
+				if (FightStarted)
+				{
+					Die(WEAPON_SELF);
+					return;
+				}
+
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 				m_Core.m_Vel = vec2(0, 0);
@@ -2918,7 +2961,6 @@ void CCharacter::HandleTiles(int Index)
 				{
 					ReleaseHook();
 				}
-
 				return;
 			}
 		}
@@ -2926,6 +2968,12 @@ void CCharacter::HandleTiles(int Index)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
 		{
+			if (FightStarted)
+			{
+				Die(WEAPON_SELF);
+				return;
+			}
+
 			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
 			m_Core.m_Vel = vec2(0, 0);
 
@@ -2945,6 +2993,12 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
+				if (FightStarted)
+				{
+					Die(WEAPON_SELF);
+					return;
+				}
+
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
 
@@ -2954,7 +3008,6 @@ void CCharacter::HandleTiles(int Index)
 					m_Core.m_HookState = HOOK_RETRACTED;
 					m_Core.m_HookPos = m_Core.m_Pos;
 				}
-
 				return;
 			}
 		}
@@ -2962,6 +3015,12 @@ void CCharacter::HandleTiles(int Index)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN))
 		{
+			if (FightStarted)
+			{
+				Die(WEAPON_SELF);
+				return;
+			}
+
 			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
 
 			if (!Config()->m_SvTeleportHoldHook)
@@ -3403,6 +3462,11 @@ void CCharacter::FDDraceInit()
 
 	m_StoppedDoorSkip = false;
 	m_LastTaserUse = Now;
+
+	m_FirstFreezeTick = 0;
+
+	if (GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))
+		m_Core.m_FightStarted = true;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -3805,7 +3869,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got
+	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || m_pPlayer->m_Minigame == MINIGAME_1VS1
 		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
 		return;
 
@@ -3881,7 +3945,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 
 void CCharacter::DropLoot(int Weapon)
 {
-	if (!Config()->m_SvDropsOnDeath)
+	if (!Config()->m_SvDropsOnDeath || m_pPlayer->m_Minigame == MINIGAME_1VS1)
 		return;
 
 	// Drop money even if killed by the game, e.g. team change, but never when leaving a minigame (joining and being frozen drops too)

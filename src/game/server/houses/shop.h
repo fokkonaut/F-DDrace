@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SHOP_H
-#define GAME_SHOP_H
+#ifndef GAME_HOUSES_SHOP_H
+#define GAME_HOUSES_SHOP_H
 
 #include "house.h"
 #include <engine/shared/protocol.h>
@@ -103,4 +103,4 @@ public:
 	virtual const char *GetEndMessage(int ClientID);
 };
 
-#endif
+#endif // GAME_HOUSES_SHOP_H

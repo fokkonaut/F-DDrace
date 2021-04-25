@@ -2439,6 +2439,9 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
+		if (pSelf->Arenas()->FightStarted(pResult->m_ClientID))
+			return;
+
 		// disallow plot editing too close to doors to prevent getting our with editor
 		if (pSelf->Collision()->TestBoxDoor(pChr->GetPos(), vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), pChr->Team(), true, false))
 			return;
@@ -2569,7 +2572,7 @@ void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 	char aTemp2[256];
 	aMinigames[0] = 0;
 	aTemp2[0] = 0;
-	for (int i = MINIGAME_BLOCK; i < NUM_MINIGAMES; i++)
+	for (int i = 0; i < NUM_MINIGAMES; i++)
 	{
 		if (i != MINIGAME_BLOCK)
 			str_format(aTemp2, sizeof(aTemp2), "%s, ", aMinigames);
@@ -2583,60 +2586,62 @@ void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aMinigames);
 }
 
-void CGameContext::PreSetMinigame(IConsole::IResult *pResult, void *pUserData, int Minigame)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	// admins can enable or disable minigames with /<minigame> <enable/disable>
-	if (pResult->NumArguments() && pSelf->Server()->GetAuthedState(pResult->m_ClientID) && Minigame != MINIGAME_NONE)
-	{
-		bool Disable;
-		if (!str_comp_nocase(pResult->GetString(0), "enable"))
-			Disable = false;
-		else if (!str_comp_nocase(pResult->GetString(0), "disable"))
-			Disable = true;
-		else return;
-
-		char aMsg[128];
-		str_format(aMsg, sizeof(aMsg), "Minigame '%s' %s%sd", pSelf->GetMinigameName(Minigame), (pSelf->m_aMinigameDisabled[Minigame] == Disable ? "is already " : ""), pResult->GetString(0));
-		pSelf->SendChatTarget(pResult->m_ClientID, aMsg);
-
-		pSelf->m_aMinigameDisabled[Minigame] = Disable;
-		return;
-	}
-
-	// join minigame
-	pSelf->SetMinigame(pResult->m_ClientID, Minigame);
-}
-
 void CGameContext::ConLeaveMinigame(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_NONE);
+	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_NONE);
 }
 
 void CGameContext::ConJoinBlock(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_BLOCK);
+	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_BLOCK);
 }
 
 void CGameContext::ConJoinSurvival(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_SURVIVAL);
+	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_SURVIVAL);
 }
 
 void CGameContext::ConJoinBoomFNG(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_BOOMFNG);
+	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_INSTAGIB_BOOMFNG);
 }
 
 void CGameContext::ConJoinFNG(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->PreSetMinigame(pResult, pUserData, MINIGAME_INSTAGIB_FNG);
+	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_INSTAGIB_FNG);
+}
+
+void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->m_Minigame != MINIGAME_1VS1 || !pResult->NumArguments())
+	{
+		pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_1VS1);
+		return;
+	}
+
+	int OtherID;
+	char aBuf[MAX_NAME_LENGTH];
+	str_copy(aBuf, pResult->GetFullString(), sizeof(aBuf));
+	const char *pRest = pSelf->GetWhisper(aBuf, &OtherID);
+	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID))
+		return;
+
+	int ScoreLimit = 10;
+	int KillBorder = 0;
+	if (pResult->NumArguments() > 1) // more than just name
+		sscanf(pRest, "%d %d", &ScoreLimit, &KillBorder);
+
+	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, ScoreLimit, KillBorder);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)

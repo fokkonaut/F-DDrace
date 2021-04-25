@@ -217,6 +217,9 @@ void CPickup::Tick()
 			}
 
 			case POWERUP_BATTERY:
+				if (GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID()))
+					break;
+
 				if (m_SpawnTick > 0)
 				{
 					int ClientID = pChr->GetPlayer()->GetCID();
