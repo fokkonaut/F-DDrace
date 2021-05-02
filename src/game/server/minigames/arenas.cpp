@@ -57,10 +57,10 @@ int CArenas::GetFreeArena()
 
 bool CArenas::IsInArena(int Fight, vec2 Pos)
 {
-	return (Pos.x > m_aFights[Fight].m_aCorners[POINT_TOP_LEFT].x
-		&& Pos.x < m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT].x
-		&& Pos.y > m_aFights[Fight].m_aCorners[POINT_TOP_LEFT].y
-		&& Pos.y < m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT].y);
+	return (Pos.x >= m_aFights[Fight].m_aCorners[POINT_TOP_LEFT].x
+		&& Pos.x <= m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT].x
+		&& Pos.y >= m_aFights[Fight].m_aCorners[POINT_TOP_LEFT].y
+		&& Pos.y <= m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT].y);
 }
 
 bool CArenas::TouchingBorder(int Fight, int ClientID)
