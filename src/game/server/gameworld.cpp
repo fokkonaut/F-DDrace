@@ -213,7 +213,7 @@ void CGameWorld::UpdatePlayerMaps(int ForcedID)
 				for (int k = 0; k < VANILLA_MAX_CLIENTS-m_NumMapReserved; k++)
 				{
 					int CID = pMap[k];
-					if (CID == -1 || (CID != i && !pPlayer->m_aSameIP[CID] && GameServer()->m_apPlayers[CID] && GameServer()->m_apPlayers[CID]->m_Minigame != MINIGAME_1VS1) || CID == j)
+					if (CID == -1 || (CID != i && !pPlayer->m_aSameIP[CID] && !GameServer()->Arenas()->FightStarted(CID)) || CID == j)
 					{
 						Free = k;
 						if (CID != j)
