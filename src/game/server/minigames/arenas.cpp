@@ -395,13 +395,18 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' has accepted your invite", Server()->ClientName(ClientID));
 	GameServer()->SendChatTarget(Creator, aBuf);
 
-	m_aInFight[ClientID] = true;
-	m_aInFight[Creator] = true;
-	((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(ClientID, Fight + 1);
-	((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(Creator, Fight + 1);
 	KillParticipants(Fight);
-	GameServer()->m_pController->UpdateGameInfo(ClientID);
-	GameServer()->m_pController->UpdateGameInfo(Creator);
+	int aID[2] = { ClientID, Creator };
+	for (int i = 0; i < 2; i++)
+	{
+		m_aInFight[aID[i]] = true;
+		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(aID[i], Fight + 1);
+		GameServer()->m_pController->UpdateGameInfo(aID[i]);
+
+		if (GameServer()->m_apPlayers[aID[i]])
+			GameServer()->m_apPlayers[aID[i]]->SetPlaying();
+	}
+
 	return true;
 }
 
