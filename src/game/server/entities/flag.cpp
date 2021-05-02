@@ -220,7 +220,8 @@ void CFlag::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->Arenas()->FightStarted(SnappingClient))
+	CPlayer* pPlayer = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused() && GameServer()->Arenas()->FightStarted(SnappingClient))
 		return;
 
 	if (GameServer()->GetPlayerChar(SnappingClient))

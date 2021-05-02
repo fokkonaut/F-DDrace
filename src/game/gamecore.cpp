@@ -288,7 +288,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 			}
 
-			if (m_pCollision->m_pConfig->m_SvFlagHooking)
+			if (m_pCollision->m_pConfig->m_SvFlagHooking && !m_FightStarted)
 			{
 				for (int i = 0; i < 2; i++)
 				{
