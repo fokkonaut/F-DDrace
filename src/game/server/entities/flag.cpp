@@ -176,7 +176,7 @@ void CFlag::Tick()
 				continue;
 
 			// take the flag
-			if (apCloseCCharacters[i]->HasFlag() == -1)
+			if (apCloseCCharacters[i]->HasFlag() == -1 && !GameServer()->Arenas()->FightStarted(apCloseCCharacters[i]->GetPlayer()->GetCID()))
 			{
 				Grab(apCloseCCharacters[i]->GetPlayer()->GetCID());
 				break;
@@ -220,12 +220,12 @@ void CFlag::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && GetCarrier())
-	{
-		if (GetCarrier()->IsPaused())
-			return;
+	if (GameServer()->Arenas()->FightStarted(SnappingClient))
+		return;
 
-		if (!CmaskIsSet(GetCarrier()->Teams()->TeamMask(GetCarrier()->Team(), -1, GetCarrier()->GetPlayer()->GetCID()), SnappingClient))
+	if (GameServer()->GetPlayerChar(SnappingClient))
+	{
+		if (GetCarrier() && (GetCarrier()->IsPaused() || !CmaskIsSet(GetCarrier()->Teams()->TeamMask(GetCarrier()->Team(), -1, GetCarrier()->GetPlayer()->GetCID()), SnappingClient)))
 			return;
 	}
 
