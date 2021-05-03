@@ -439,11 +439,11 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
+		int Team = -1;
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
-			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)
-				Team = 1; // red colored team
+				Team = 63; // red colored team, used 1 before but that is the most common team for 1vs1
 			else if (i == SPEC_SELECT_FLAG_BLUE)
 				Team = 36; // blue colored team
 
@@ -457,7 +457,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		int id = i;
 		Server()->ReverseTranslate(id, ClientID);
 
-		int Team = m_Core.Team(id);
+		Team = m_Core.Team(id);
 		if (Team == TEAM_SUPER)
 			Team = VANILLA_MAX_CLIENTS;
 		else if (Team > VANILLA_MAX_CLIENTS)
