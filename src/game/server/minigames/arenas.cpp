@@ -424,7 +424,10 @@ void CArenas::EndFight(int Fight)
 			continue;
 
 		if (IsConfiguring(ClientID))
+		{
 			GameServer()->SendBroadcast("", ClientID, false);
+			GameServer()->SendTeamChange(ClientID, GameServer()->m_apPlayers[ClientID]->GetTeam(), true, Server()->Tick(), ClientID);
+		}
 
 		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(ClientID, 0);
 		GameServer()->m_pController->UpdateGameInfo(ClientID);
@@ -501,9 +504,6 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 	int Fight = GetClientFight(ClientID, !Disconnect);
 	if (Fight < 0)
 		return;
-
-	if (IsConfiguring(ClientID))
-		GameServer()->SendTeamChange(ClientID, GameServer()->m_apPlayers[ClientID]->GetTeam(), true, Server()->Tick(), ClientID);
 
 	int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
 	if (HasJoined(Fight, Other))

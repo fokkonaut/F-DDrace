@@ -2589,7 +2589,14 @@ void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConLeaveMinigame(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_NONE);
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pPlayer->m_Minigame == MINIGAME_1VS1 && pSelf->Arenas()->FightStarted(pResult->m_ClientID))
+		pSelf->Arenas()->OnPlayerLeave(pResult->m_ClientID);
+	else
+		pSelf->SetMinigame(pResult->m_ClientID, MINIGAME_NONE);
 }
 
 void CGameContext::ConJoinBlock(IConsole::IResult *pResult, void *pUserData)
