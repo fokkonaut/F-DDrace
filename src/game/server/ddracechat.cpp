@@ -2639,7 +2639,11 @@ void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
 	int ScoreLimit = 10;
 	int KillBorder = 0;
 	if (pResult->NumArguments() > 1) // more than just name
-		sscanf(pRest, "%d %d", &ScoreLimit, &KillBorder);
+	{
+		int Num = sscanf(pRest, "%d %d", &ScoreLimit, &KillBorder);
+		if (Num == 1)
+			KillBorder = 0;
+	}
 
 	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, ScoreLimit, KillBorder);
 }
