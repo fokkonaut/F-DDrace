@@ -411,6 +411,12 @@ public:
 	int m_SurvivalState;
 	int m_SurvivalDieTick;
 
+	// minigame join/leave request
+	bool MinigameRequestTick();
+	bool RequestMinigameChange(int RequestedMinigame);
+	int m_RequestedMinigame;
+	int64 m_LastMinigameRequest;
+
 	// 128p
 	void SendConnect(int FakeID, int ClientID);
 	void SendDisconnect(int FakeID);

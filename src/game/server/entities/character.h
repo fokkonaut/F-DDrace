@@ -475,12 +475,6 @@ public:
 	// money xp bomb
 	bool m_GotMoneyXPBomb;
 
-	// minigame join/leave request
-	bool MinigameRequestTick();
-	bool RequestMinigameChange(int RequestedMinigame);
-	int m_RequestedMinigame;
-	int64 m_LastMinigameRequest;
-
 	int64 m_LastMoneyDrop;
 
 	// true if the character is constantly getting freezed by Freeze() function, e.g. on a freeze tile or while deepfrozen

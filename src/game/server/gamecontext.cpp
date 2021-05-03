@@ -6088,8 +6088,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		return;
 	}
 
-	CCharacter *pChr = GetPlayerChar(ClientID);
-	if (!Force && (!pChr || pChr->RequestMinigameChange(Minigame)))
+	if (!Force && pPlayer->RequestMinigameChange(Minigame))
 		return;
 
 	// leave minigame
@@ -6144,6 +6143,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 
 	pPlayer->KillCharacter(WEAPON_MINIGAME_CHANGE);
 	pPlayer->m_Minigame = Minigame;
+	pPlayer->SetPlaying();
 
 	UpdateHidePlayers();
 

@@ -210,10 +210,12 @@ void CPlayer::Reset()
 	m_SpawnBlockScore = 0;
 	m_EscapeTime = 0;
 	m_JailTime = 0;
-
 	m_SilentFarm = 0;
-
 	m_SkipSetViewPos = 0;
+
+	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
+	m_RequestedMinigame = MINIGAME_NONE;
+	m_LastMinigameRequest = 0;
 }
 
 void CPlayer::Tick()
@@ -415,6 +417,8 @@ void CPlayer::Tick()
 			}
 		}
 	}
+
+	MinigameRequestTick();
 }
 
 void CPlayer::PostTick()
@@ -2104,4 +2108,62 @@ bool CPlayer::LoadMinigameTee()
 bool CPlayer::CanLoadMinigameTee()
 {
 	return m_SavedMinigameTee && m_Minigame == m_MinigameTee.GetMinigame();
+}
+
+bool CPlayer::RequestMinigameChange(int RequestedMinigame)
+{
+	if (m_LastMinigameRequest && m_LastMinigameRequest > Server()->Tick() - Server()->TickSpeed() * 5)
+		return true;
+
+	if (RequestedMinigame == m_RequestedMinigame)
+		return false; // only return false here, to actually join the minigame
+
+	if (m_JailTime)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being arrested");
+		return true;
+	}
+
+	if (GetCharacter())
+	{
+		if (GetCharacter()->m_FreezeTime)
+			GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being frozen");
+
+		m_RequestedMinigame = RequestedMinigame;
+		m_LastMinigameRequest = Server()->Tick();
+		GameServer()->SendChatTarget(m_ClientID, "Minigame request sent, please don't move for 5 seconds");
+		return true;
+	}
+
+	// if we dont have a character we can instantly join (e.g. spectator mode)
+	return false;
+}
+
+bool CPlayer::MinigameRequestTick()
+{
+	if (!m_LastMinigameRequest || m_RequestedMinigame == m_Minigame || !GetCharacter())
+		return false;
+
+	if (m_LastMinigameRequest < Server()->Tick() - Server()->TickSpeed() * 5)
+	{
+		GameServer()->SetMinigame(m_ClientID, m_RequestedMinigame);
+		m_RequestedMinigame = MINIGAME_NONE;
+		m_LastMinigameRequest = 0;
+		return true;
+	}
+	else if (GetCharacter()->GetPos() != GetCharacter()->m_PrevPos)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "Your minigame request was cancelled because you moved");
+		m_RequestedMinigame = MINIGAME_NONE;
+		m_LastMinigameRequest = 0;
+	}
+	else if ((Server()->Tick() - m_LastMinigameRequest - 1) % Server()->TickSpeed() == 0)
+	{
+		int Remaining = ((m_LastMinigameRequest + Server()->TickSpeed() * 5) - Server()->Tick()) / Server()->TickSpeed();
+		char aBuf[4];
+		str_format(aBuf, sizeof(aBuf), "%d", Remaining+1);
+		GameServer()->CreateLaserText(GetCharacter()->GetPos(), m_ClientID, aBuf, 1);
+	}
+
+	return false;
 }

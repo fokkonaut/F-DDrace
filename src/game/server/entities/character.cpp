@@ -1235,10 +1235,6 @@ void CCharacter::Tick()
 	if(m_Paused)
 		return;
 
-	// F-DDrace
-	if (MinigameRequestTick())
-		return; // We need to return here because in SetMinigame() the player is killed already
-
 	DummyTick();
 	FDDraceTick();
 	HandleLastIndexTiles();
@@ -3453,10 +3449,6 @@ void CCharacter::FDDraceInit()
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		m_aHadWeapon[i] = false;
 
-	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
-	m_RequestedMinigame = MINIGAME_NONE;
-	m_LastMinigameRequest = 0;
-
 	m_pDummyHandle = 0;
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
 
@@ -3687,61 +3679,6 @@ int CCharacter::GetPowerHooked()
 	return pHooker->m_HookPower;
 }
 
-bool CCharacter::RequestMinigameChange(int RequestedMinigame)
-{
-	if (m_LastMinigameRequest && m_LastMinigameRequest > Server()->Tick() - Server()->TickSpeed() * 5)
-		return true;
-
-	if (RequestedMinigame == m_RequestedMinigame)
-		return false; // only return false here, to actually join the minigame
-
-	if (m_FreezeTime)
-	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't join a minigame while being frozen");
-		return true;
-	}
-
-	if (m_pPlayer->m_JailTime)
-	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't join a minigame while being arrested");
-		return true;
-	}
-
-	m_RequestedMinigame = RequestedMinigame;
-	m_LastMinigameRequest = Server()->Tick();
-	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Minigame request sent, please don't move for 5 seconds");
-	return true;
-}
-
-bool CCharacter::MinigameRequestTick()
-{
-	if (!m_LastMinigameRequest || m_RequestedMinigame == m_pPlayer->m_Minigame)
-		return false;
-
-	if (m_LastMinigameRequest < Server()->Tick() - Server()->TickSpeed() * 5)
-	{
-		GameServer()->SetMinigame(m_pPlayer->GetCID(), m_RequestedMinigame);
-		m_RequestedMinigame = MINIGAME_NONE;
-		m_LastMinigameRequest = 0;
-		return true;
-	}
-	else if (m_Pos != m_PrevPos)
-	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Your minigame request was cancelled because you moved");
-		m_RequestedMinigame = MINIGAME_NONE;
-		m_LastMinigameRequest = 0;
-	}
-	else if ((Server()->Tick() - m_LastMinigameRequest - 1) % Server()->TickSpeed() == 0)
-	{
-		int Remaining = ((m_LastMinigameRequest + Server()->TickSpeed() * 5) - Server()->Tick()) / Server()->TickSpeed();
-		char aBuf[4];
-		str_format(aBuf, sizeof(aBuf), "%d", Remaining+1);
-		GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf, 1);
-	}
-
-	return false;
-}
-
 int CCharacter::GetCurrentTilePlotID()
 {
 	return GameServer()->GetTilePlotID(m_Pos);
@@ -3949,7 +3886,7 @@ void CCharacter::DropLoot(int Weapon)
 		return;
 
 	// Drop money even if killed by the game, e.g. team change, but never when leaving a minigame (joining and being frozen drops too)
-	if ((Weapon != WEAPON_MINIGAME_CHANGE || m_RequestedMinigame != MINIGAME_NONE) && m_FreezeTime)
+	if ((Weapon != WEAPON_MINIGAME_CHANGE || m_pPlayer->m_RequestedMinigame != MINIGAME_NONE) && m_FreezeTime)
 		DropMoney(m_pPlayer->GetWalletMoney());
 
 	if (Weapon == WEAPON_GAME || Weapon == WEAPON_MINIGAME_CHANGE)
