@@ -1535,12 +1535,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		return true;
 	}
 
-	// update player map to send teams state
-	m_World.ForceUpdatePlayerMap(ClientID);
-
-	//update his teams state
-	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
-
+	// teams states are sent from the algorithm in gameworld
 	return false;
 }
 

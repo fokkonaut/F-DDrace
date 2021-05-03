@@ -9,6 +9,7 @@
 
 class CEntity;
 class CCharacter;
+class CPlayer;
 
 /*
 	Class: Game World
@@ -58,8 +59,20 @@ private:
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
-	bool m_aUpdateTeamsNext[MAX_CLIENTS];
-	void UpdatePlayerMaps(int ForcedID = -1);
+	struct PlayerMap
+	{
+		void Init(int ClientID, CGameWorld *pGameWorld);
+		CGameWorld *m_pGameWorld;
+		CPlayer *GetPlayer();
+		int m_ClientID;
+		bool m_UpdateTeamsState;
+		int *m_pMap;
+		int *m_pReverseMap;
+		void Update();
+		void Add(int MapID, int ClientID);
+		int Remove(int MapID);
+	} m_aMap[MAX_CLIENTS];
+	void UpdatePlayerMap(int ClientID);
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -77,8 +90,6 @@ public:
 	~CGameWorld();
 
 	void SetGameServer(CGameContext *pGameServer);
-
-	void ForceUpdatePlayerMap(int ClientID) { UpdatePlayerMaps(ClientID); }
 
 	CEntity *FindFirst(int Type);
 
