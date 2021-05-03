@@ -2127,15 +2127,21 @@ bool CPlayer::RequestMinigameChange(int RequestedMinigame)
 	if (GetCharacter())
 	{
 		if (GetCharacter()->m_FreezeTime)
+		{
 			GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being frozen");
-
-		m_RequestedMinigame = RequestedMinigame;
-		m_LastMinigameRequest = Server()->Tick();
-		GameServer()->SendChatTarget(m_ClientID, "Minigame request sent, please don't move for 5 seconds");
+		}
+		else
+		{
+			m_RequestedMinigame = RequestedMinigame;
+			m_LastMinigameRequest = Server()->Tick();
+			GameServer()->SendChatTarget(m_ClientID, "Minigame request sent, please don't move for 5 seconds");
+		}
 		return true;
 	}
 
 	// if we dont have a character we can instantly join (e.g. spectator mode)
+	m_RequestedMinigame = RequestedMinigame;
+	m_LastMinigameRequest = Server()->Tick();
 	return false;
 }
 
