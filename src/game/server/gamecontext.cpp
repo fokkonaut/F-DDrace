@@ -1822,6 +1822,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Mode = CHAT_NONE;
 			}
 
+			bool Command = pMsg->m_pMessage[0] == '/';
+
 			if (Mode == CHAT_WHISPER)
 			{
 				if (!Server()->IsSevendown(ClientID))
@@ -1844,7 +1846,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					Mode = CHAT_ATEVERYONE;
 				}
-				else if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel)
+				else if (Server()->GetAuthedState(ClientID) < Config()->m_SvChatAdminPingLevel && !Command)
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
@@ -1868,7 +1870,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 			}
 
-			if (pMsg->m_pMessage[0] == '/' && Mode != CHAT_WHISPER)
+			if (Command && Mode != CHAT_WHISPER)
 			{
 				CPlayer *pPlayer = m_apPlayers[ClientID];
 				if (Config()->m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ")
