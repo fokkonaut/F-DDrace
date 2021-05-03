@@ -26,6 +26,9 @@ CGameWorld::CGameWorld()
 	m_ResetRequested = false;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		m_apFirstEntityTypes[i] = 0;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aUpdateTeamsNext[i] = false;
 }
 
 CGameWorld::~CGameWorld()
@@ -41,9 +44,6 @@ void CGameWorld::SetGameServer(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 	m_pConfig = m_pGameServer->Config();
 	m_pServer = m_pGameServer->Server();
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_aMap[i].Init(i, this);
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
@@ -168,143 +168,269 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-void CGameWorld::UpdatePlayerMap(int ClientID)
+bool distCompare(std::pair<float,int> a, std::pair<float,int> b)
 {
-	if (ClientID == -1)
-	{
-		if (Server()->Tick() % Config()->m_SvMapUpdateRate == 0)
-			for (int i = 0; i < MAX_CLIENTS; i++)
-				m_aMap[i].Update();
-	}
-	else
-	{
-		m_aMap[ClientID].Update();
-	}
+	return (a.first < b.first);
 }
 
-void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
+void CGameWorld::UpdatePlayerMaps(int ForcedID)
 {
-	m_ClientID = ClientID;
-	m_pGameWorld = pGameWorld;
-	m_pMap = m_pGameWorld->Server()->GetIdMap(m_ClientID);
-	m_pReverseMap = m_pGameWorld->Server()->GetReverseIdMap(m_ClientID);
-}
-
-CPlayer *CGameWorld::PlayerMap::GetPlayer()
-{
-	return m_pGameWorld->GameServer()->m_apPlayers[m_ClientID];
-}
-
-void CGameWorld::PlayerMap::Add(int MapID, int ClientID)
-{
-	if (MapID == -1 || m_pReverseMap[MapID] == ClientID)
-		return;
-
-	Remove(m_pReverseMap[ClientID]);
-
-	int OldClientID = Remove(MapID);
-	if ((OldClientID == -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
-		|| (OldClientID != -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(OldClientID) != m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID)))
-		m_UpdateTeamsState = true;
-
-	m_pMap[MapID] = ClientID;
-	m_pReverseMap[ClientID] = MapID;
-	GetPlayer()->SendConnect(MapID, ClientID);
-}
-
-int CGameWorld::PlayerMap::Remove(int MapID)
-{
-	if (MapID == -1)
-		return -1;
-
-	int ClientID = m_pMap[MapID];
-	if (ClientID != -1)
-	{
-		if (m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
-			m_UpdateTeamsState = true;
-
-		GetPlayer()->SendDisconnect(MapID);
-		m_pReverseMap[ClientID] = -1;
-		m_pMap[MapID] = -1;
-	}
-	return ClientID;
-}
-
-void CGameWorld::PlayerMap::Update()
-{
-	if (!m_pGameWorld->Server()->ClientIngame(m_ClientID) || !GetPlayer() || GetPlayer()->m_IsDummy)
+	if (ForcedID == -1 && Server()->Tick() % Config()->m_SvMapUpdateRate != 0)
 		return;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i == m_ClientID)
+		if (ForcedID != -1 && i != ForcedID)
+			continue; // only update specific player
+
+		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy))
 			continue;
 
-		CPlayer *pPlayer = m_pGameWorld->GameServer()->m_apPlayers[i];
+		CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+		int *pMap = Server()->GetIdMap(i);
+		int *rMap = Server()->GetReverseIdMap(i);
 
-		if (!m_pGameWorld->Server()->ClientIngame(i) || !pPlayer)
-		{
-			Remove(m_pReverseMap[i]);
-			continue;
-		}
+		// when update wanted, we do it on next call
+		bool UpdateTeamsStates = m_aUpdateTeamsNext[i];
+		m_aUpdateTeamsNext[i] = false;
 
-		int Insert = -1;
-		if (GetPlayer()->m_aSameIP[i])
+		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
-			Insert = m_pGameWorld->m_aMap[i].m_pReverseMap[i];
-		}
-		else if (m_pGameWorld->GameServer()->Arenas()->FightStarted(i))
-		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved; j++)
+			if (i == j)
+				continue;
+
+			CPlayer *pChecked = GameServer()->m_apPlayers[j];
+
+			int Free = -1;
+			bool TryReset = true;
+			if (pPlayer->m_aSameIP[j])
 			{
-				int CID = m_pMap[j];
-				if (CID == -1 || (CID != m_ClientID && !GetPlayer()->m_aSameIP[CID] && !m_pGameWorld->GameServer()->Arenas()->FightStarted(CID)) || CID == i)
+				Free = Server()->GetReverseIdMap(j)[j];
+				TryReset = false;
+			}
+			else if (pChecked && GameServer()->Arenas()->FightStarted(j))
+			{
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-m_NumMapReserved; k++)
 				{
-					Insert = j;
-					break;
+					int CID = pMap[k];
+					if (CID == -1 || (CID != i && !pPlayer->m_aSameIP[CID] && !GameServer()->Arenas()->FightStarted(CID)) || CID == j)
+					{
+						Free = k;
+						if (CID != j)
+						{
+							m_aUpdateTeamsNext[i] = true;
+							if (rMap[j] != -1)
+							{
+								pPlayer->SendDisconnect(rMap[j]);
+								pMap[rMap[j]] = -1;
+								rMap[j] = -1;
+							}
+						}
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (int k = 0; k < VANILLA_MAX_CLIENTS-m_NumMapReserved; k++)
+				{
+					if (pMap[k] == -1)
+					{
+						Free = k;
+						break;
+					}
+				}
+			}
+
+			if (TryReset)
+			{
+				if (!Server()->ClientIngame(j) || !pChecked || (!pChecked->GetCharacter() && Free == -1))
+				{
+					if (rMap[j] != -1)
+					{
+						pPlayer->SendDisconnect(rMap[j]);
+						pMap[rMap[j]] = -1;
+						rMap[j] = -1;
+					}
+					continue;
+				}
+			}
+
+			if (rMap[j] != -1)
+				continue;
+
+			if (Free != -1)
+			{
+				if (pMap[Free] == -1)
+				{
+					pPlayer->SendConnect(Free, j);
+				}
+				else if (pMap[Free] != j)
+				{
+					pPlayer->SendDisconnect(Free);
+					pPlayer->SendConnect(Free, j);
+					rMap[pMap[Free]] = -1;
+
+					if (GameServer()->GetDDRaceTeam(pMap[Free]) != GameServer()->GetDDRaceTeam(j))
+						m_aUpdateTeamsNext[i] = true;
+				}
+				pMap[Free] = j;
+				rMap[j] = Free;
+			}
+			else if (pChecked->GetCharacter() && !pChecked->GetCharacter()->NetworkClipped(i, false))
+			{
+				for (int k = 0; k < MAX_CLIENTS; k++)
+				{
+					if (k == i || pPlayer->m_aSameIP[k] || GameServer()->Arenas()->FightStarted(k))
+						continue;
+
+					if (rMap[k] != -1 && GameServer()->GetPlayerChar(k) && GameServer()->GetPlayerChar(k)->NetworkClipped(i, false))
+					{
+						pPlayer->SendDisconnect(rMap[k]);
+						rMap[j] = rMap[k];
+						rMap[k] = -1;
+						pMap[rMap[j]] = j;
+						pPlayer->SendConnect(rMap[j], j);
+
+						if (GameServer()->GetDDRaceTeam(k) != GameServer()->GetDDRaceTeam(j))
+							m_aUpdateTeamsNext[i] = true;
+						break;
+					}
 				}
 			}
 		}
-		else if (m_pReverseMap[i] != -1)
+
+		if (UpdateTeamsStates)
+			((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
+	}
+}
+
+/*void CGameWorld::UpdatePlayerMaps()
+{
+	if (Server()->Tick() % Config()->m_SvMapUpdateRate != 0) return;
+
+	std::pair<float,int> Dist[MAX_CLIENTS];
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!Server()->ClientIngame(i) || (GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDummy)) continue;
+		int *pMap = Server()->GetIdMap(i);
+
+		// compute reverse map
+		int rMap[MAX_CLIENTS];
+
+		// compute distances
+		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
-			Insert = m_pReverseMap[i];
-		}
-		else
-		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved; j++)
-				if (m_pMap[j] == -1)
-				{
-					Insert = j;
-					break;
-				}
+			rMap[j] = -1;
+
+			Dist[j].second = j;
+			if (!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
+			{
+				Dist[j].first = 1e10;
+				continue;
+			}
+
+			// set distance for same ip players to very close, so we always send it
+			if (GameServer()->m_apPlayers[i]->m_aSameIP[j])
+			{
+				Dist[j].first = 0;
+				continue;
+			}
+
+			CCharacter* ch = GameServer()->m_apPlayers[j]->GetCharacter();
+			if (!ch)
+			{
+				Dist[j].first = 1e8;
+				continue;
+			}
+			// copypasted chunk from character.cpp Snap() follows
+			CCharacter* SnapChar = GameServer()->GetPlayerChar(i);
+			if(SnapChar && !SnapChar->m_Super &&
+				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != -1 &&
+				!ch->CanCollide(i, false)
+			)
+				Dist[j].first = 1e7;
+			else
+				Dist[j].first = 0;
+
+			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
 		}
 
-		if (Insert != -1)
+		// always send the player himself
+		Dist[i].first = 0;
+
+		for (int j = 0; j < VANILLA_MAX_CLIENTS; j++)
 		{
-			Add(Insert, i);
+			if (pMap[j] == -1) continue;
+			// the ip check here so we keep the ones with the same ip so we can set the rMap[j] below on the second run of this function
+			if (GameServer()->m_apPlayers[i]->m_aSameIP[pMap[j]]) continue;
+			if (Dist[pMap[j]].first > 5e9) pMap[j] = -1;
+			else rMap[pMap[j]] = j;
 		}
-		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(i, false))
+
+		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
+
+		// get amount of same ip players
+		int SameIP = 0;
+		for (int j = 0; j < MAX_CLIENTS; j++)
+		{
+			if (GameServer()->m_apPlayers[i]->m_aSameIP[j])
+			{
+				SameIP++;
+
+				// manually insert players with same ip, they wont get inserted by the algorithm
+				// set rMap[j] on the second run of this function, so we can first send disconnect of the tee before
+				int FakeID = GameServer()->m_apPlayers[j]->m_FakeID;
+				if (pMap[FakeID] == j)
+					rMap[j] = FakeID;
+				pMap[FakeID] = j;
+			}
+		}
+
+		int Mapc = SameIP;
+		int Demand = 0;
+		for (int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
+		{
+			int k = Dist[j].second;
+			// skip player with same ip, manually inserted it already
+			if (GameServer()->m_apPlayers[i]->m_aSameIP[k]) continue;
+			if (rMap[k] != -1 || Dist[j].first > 5e9) continue;
+			while (Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1) Mapc++;
+			if (Mapc < VANILLA_MAX_CLIENTS - 1)
+				pMap[Mapc] = k;
+			else
+				Demand++;
+		}
+		for (int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
+		{
+			int k = Dist[j].second;
+			// skip player with same ip, manually inserted it already
+			if (GameServer()->m_apPlayers[i]->m_aSameIP[k]) continue;
+			if (rMap[k] != -1 && Demand-- > 0)
+				pMap[rMap[k]] = -1;
+		}
+
+		if (!Server()->IsSevendown(i))
 		{
 			for (int j = 0; j < MAX_CLIENTS; j++)
 			{
-				if (j == i || j == m_ClientID || GetPlayer()->m_aSameIP[j] || m_pGameWorld->GameServer()->Arenas()->FightStarted(j))
-					continue;
-
-				if (m_pReverseMap[j] != -1 && (!m_pGameWorld->GameServer()->GetPlayerChar(j) || m_pGameWorld->GameServer()->GetPlayerChar(j)->NetworkClipped(m_ClientID, false)))
+				int id = j;
+				if (!Server()->Translate(id, i))
 				{
-					Add(m_pReverseMap[j], i);
-					break;
+					if (rMap[j] != -1)
+						GameServer()->m_apPlayers[i]->SendDisconnect(rMap[j]);
+				}
+				else
+				{
+					if (rMap[j] == -1)
+						GameServer()->m_apPlayers[i]->SendConnect(id, j);
 				}
 			}
 		}
-	}
 
-	if (m_UpdateTeamsState)
-	{
-		((CGameControllerDDRace *)m_pGameWorld->GameServer()->m_pController)->m_Teams.SendTeamsState(m_ClientID);
-		m_UpdateTeamsState = false;
+		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 	}
-}
+}*/
 
 void CGameWorld::Tick()
 {
@@ -344,7 +470,7 @@ void CGameWorld::Tick()
 
 	RemoveEntities();
 
-	UpdatePlayerMap(-1);
+	UpdatePlayerMaps();
 
 	int StrongWeakID = 0;
 	for (CCharacter* pChar = (CCharacter*)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter*)pChar->TypeNext())
