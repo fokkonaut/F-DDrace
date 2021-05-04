@@ -716,18 +716,29 @@ void CPlayer::Snap(int SnappingClient)
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
-	bool ShowSpec = m_pCharacter && m_pCharacter->IsPaused();
-	if(SnappingClient >= 0)
+	bool ShowSpec = false;
+	vec2 SpecPos;
+	if (m_pCharacter)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(id) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == 1 || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
+		ShowSpec = m_pCharacter->IsPaused();
+		SpecPos = m_pCharacter->Core()->m_Pos;
+	}
+
+	if (IsMinigame() && m_SavedMinigameTee)
+	{
+		ShowSpec = true;
+		SpecPos = m_MinigameTee.GetPos();
+	}
+	else if(SnappingClient >= 0)
+	{
+		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
 	}
 
 	if(ShowSpec)
 	{
 		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
-		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
-		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
+		pSpecChar->m_X = SpecPos.x;
+		pSpecChar->m_Y = SpecPos.y;
 	}
 }
 
