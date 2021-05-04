@@ -121,7 +121,7 @@ public:
 	vec2 GetSpawnPos(int ClientID);
 	bool FightStarted(int ClientID) { return m_aInFight[ClientID]; }
 	bool IsInArena(int Fight, vec2 Pos);
-	bool TouchingBorder(int Fight, int ClientID);
+	bool IsKillBorder(int Fight) { return m_aFights[Fight].m_KillBorder; }
 
 	bool IsConfiguring(int ClientID) { return m_aState[ClientID] != STATE_1VS1_NONE && m_aState[ClientID] != STATE_1VS1_DONE; }
 	bool HasJoined(int Fight, int Index) { return m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_OWNER || m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_ACCEPTED; }

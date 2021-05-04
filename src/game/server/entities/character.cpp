@@ -2175,7 +2175,19 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 	CCollision *pCollision = pThis->GameServer()->Collision();
 	CArenas *pArenas = pThis->GameServer()->Arenas();
 	if (Number < 0)
-		return (pArenas->FightStarted(pThis->m_pPlayer->GetCID()) && -Number == pArenas->GetClientFight(pThis->m_pPlayer->GetCID()) + 1);
+	{
+		if (pArenas->FightStarted(pThis->m_pPlayer->GetCID()))
+		{
+			int Fight = pArenas->GetClientFight(pThis->m_pPlayer->GetCID());
+			if (-Number == Fight + 1)
+			{
+				if (pArenas->IsKillBorder(Fight))
+					pThis->Die(WEAPON_SELF);
+				return true;
+			}
+		}
+		return false;
+	}
 	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[pThis->Team()] && pThis->Team() != TEAM_SUPER;
 }
 

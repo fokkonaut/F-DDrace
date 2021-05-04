@@ -304,6 +304,8 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		if(pfnSwitchActive)
 		{
 			int SwitchNumber = GetDTileNumber(ModMapIndex);
+			if (SwitchNumber < 0 && IsSolid(ModPos.x, ModPos.y)) // fight border inside of a wall
+				SwitchNumber = 0;
 			if(pfnSwitchActive(SwitchNumber, pUser))
 			{
 				int Tile = GetDTileIndex(ModMapIndex);

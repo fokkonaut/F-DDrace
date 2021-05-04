@@ -63,20 +63,6 @@ bool CArenas::IsInArena(int Fight, vec2 Pos)
 		&& Pos.y <= m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT].y);
 }
 
-bool CArenas::TouchingBorder(int Fight, int ClientID)
-{
-	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
-	if (!m_aFights[Fight].m_KillBorder || !pChr)
-		return false;
-
-	#define IS_BORDER(x, y) ((-GameServer()->Collision()->GetDTileNumber(GameServer()->Collision()->GetPureMapIndex(vec2(x, y))) == Fight + 1) && !GameServer()->Collision()->IsSolid(x, y))
-
-	return (IS_BORDER(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius()) || IS_BORDER(pChr->GetPos().x, pChr->GetPos().y - pChr->GetProximityRadius())
-		|| IS_BORDER(pChr->GetPos().x + pChr->GetProximityRadius(), pChr->GetPos().y) || IS_BORDER(pChr->GetPos().x - pChr->GetProximityRadius(), pChr->GetPos().y));
-
-	#undef IS_BORDER
-}
-
 vec2 CArenas::GetShowDistance(int ClientID)
 {
 	vec2 ShowDistance = GameServer()->m_apPlayers[ClientID]->m_ShowDistance;
@@ -546,7 +532,7 @@ void CArenas::Tick()
 			if (HasJoined(f, i) && FightStarted(ClientID) && pChr)
 			{
 				int Other = i == 0 ? 1 : 0;
-				if (!pChr->m_Super && (!IsInArena(f, pChr->GetPos()) || TouchingBorder(f, ClientID)))
+				if (!pChr->m_Super && !IsInArena(f, pChr->GetPos()))
 				{
 					IncreaseScore(f, Other);
 					KillParticipants(f, Other);
