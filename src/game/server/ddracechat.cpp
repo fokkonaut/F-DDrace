@@ -1702,6 +1702,12 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
+	if (pPlayer->m_EscapeTime)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't logout while being searched by the police");
+		return;
+	}
+
 	if (pSelf->Config()->m_SvKillLogout && pPlayer->GetCharacter())
 	{
 		char aBuf[128];
