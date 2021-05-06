@@ -8,6 +8,7 @@
 #include <vector>
 
 class CPlayer;
+class CCharacter;
 
 enum
 {
@@ -89,6 +90,7 @@ class CArenas : public CMinigame
 	void KillParticipants(int Fight, int Killer = -1);
 	void IncreaseScore(int Fight, int Index);
 	vec2 GetShowDistance(int ClientID);
+	bool IsGrounded(CCharacter *pChr);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];

@@ -73,6 +73,14 @@ vec2 CArenas::GetShowDistance(int ClientID)
 	return ShowDistance;
 }
 
+bool CArenas::IsGrounded(CCharacter *pChr)
+{
+	if (!pChr)
+		return false;
+	return pChr->IsGrounded() || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y))) == TILE_STOPA
+		|| GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4))) == TILE_STOPA;
+}
+
 int CArenas::GetClientFight(int ClientID, bool HasToBeJoined)
 {
 	if (ClientID == -1)
@@ -544,14 +552,14 @@ void CArenas::Tick()
 
 				if (!m_aFirstGroundedFreezeTick[ClientID])
 				{
-					if (pChr->m_IsFrozen && (pChr->IsGrounded()
-						|| GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4))) == TILE_STOPA
-						|| GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y))) == TILE_STOPA))
+					if (pChr->m_IsFrozen && IsGrounded(pChr))
 						m_aFirstGroundedFreezeTick[ClientID] = Server()->Tick();
 				}
 				else if (m_aFirstGroundedFreezeTick[ClientID] < Server()->Tick() - Server()->TickSpeed())
 				{
-					IncreaseScore(f, Other);
+					CCharacter *pOther = GameServer()->GetPlayerChar(pFight->m_aParticipants[Other].m_ClientID);
+					if (pOther && !pOther->m_IsFrozen && (!pOther->m_FreezeTime || IsGrounded(pOther))) // draw -> no point
+						IncreaseScore(f, Other);
 					KillParticipants(f, Other);
 					return;
 				}
