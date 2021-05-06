@@ -3256,7 +3256,7 @@ bool CCharacter::UnFreeze()
 
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
-		if (!m_GotLasered)
+		if (!m_GotLasered && !GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))
 		{
 			m_Core.m_Killer.m_ClientID = -1;
 			m_Core.m_Killer.m_Weapon = -1;
