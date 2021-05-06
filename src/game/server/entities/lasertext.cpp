@@ -272,6 +272,9 @@ CLaserText::CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int AliveTic
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwner)
+		m_TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
 	GameWorld()->InsertEntity(this);
 	
 	m_CurTicks = Server()->Tick();
@@ -313,6 +316,10 @@ void CLaserText::Reset()
 void CLaserText::Tick()
 {
 	if(++m_CurTicks - m_StartTick > m_AliveTicks) GameWorld()->DestroyEntity(this);
+
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwner)
+		m_TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
 }
 
 inline char NeighboursVert(const bool pCharVert[3], int pVertOff){
@@ -450,14 +457,8 @@ void CLaserText::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if (pOwner && pSnapChar)
-	{
-		Mask128 TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
-		if (!CmaskIsSet(TeamMask, SnappingClient))
-			return;
-	}
+	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
+		return;
 	
 	for(int i = 0; i < m_CharNum; ++i){
 		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_Chars[i]->getID(), sizeof(CNetObj_Laser)));

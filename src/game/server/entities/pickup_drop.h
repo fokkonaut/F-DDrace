@@ -4,7 +4,6 @@
 #define GAME_SERVER_ENTITIES_PICKUP_DROP_H
 
 #include "advanced_entity.h"
-#include <game/server/mask128.h>
 
 class CPickupDrop : public CAdvancedEntity
 {
@@ -24,7 +23,6 @@ private:
 	void IsShieldNear();
 	void Pickup();
 
-	Mask128 m_TeamMask;
 	bool m_DDraceMode;
 	int m_Type;
 	int m_Weapon;

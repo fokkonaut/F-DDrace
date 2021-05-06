@@ -108,14 +108,8 @@ void CMoney::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && GetOwner())
-	{
-		if (GetOwner()->IsPaused())
-			return;
-
-		if (!CmaskIsSet(GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, GetOwner()->GetPlayer()->GetCID()), SnappingClient))
-			return;
-	}
+	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
+		return;
 
 	CNetObj_Projectile *pBullet = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(!pBullet)

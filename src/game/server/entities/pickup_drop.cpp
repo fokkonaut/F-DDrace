@@ -69,8 +69,6 @@ void CPickupDrop::Tick()
 
 	CAdvancedEntity::Tick();
 
-	m_TeamMask = GetOwner() ? GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, m_Owner) : Mask128();
-
 	m_Lifetime--;
 	if (m_Lifetime <= 0)
 	{
@@ -213,11 +211,8 @@ void CPickupDrop::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient))
-	{
-		if (!CmaskIsSet(m_TeamMask, SnappingClient))
-			return;
-	}
+	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
+		return;
 
 	if (m_Type == POWERUP_BATTERY || m_Weapon == WEAPON_LIGHTSABER)
 	{
