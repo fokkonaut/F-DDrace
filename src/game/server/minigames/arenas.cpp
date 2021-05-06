@@ -493,19 +493,19 @@ bool CArenas::OnCharacterSpawn(int ClientID)
 
 void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 {
-	int Fight = GetClientFight(ClientID, !Disconnect);
-	if (Fight < 0)
-		return;
-
-	int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
-	if (HasJoined(Fight, Other))
+	int Fight;
+	while ((Fight = GetClientFight(ClientID, !Disconnect)) >= 0)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Fight has been cancelled because '%s' left", Server()->ClientName(ClientID));
-		GameServer()->SendChatTarget(m_aFights[Fight].m_aParticipants[Other].m_ClientID, aBuf);
-	}
+		int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
+		if (HasJoined(Fight, Other))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Fight has been cancelled because '%s' left", Server()->ClientName(ClientID));
+			GameServer()->SendChatTarget(m_aFights[Fight].m_aParticipants[Other].m_ClientID, aBuf);
+		}
 
-	EndFight(Fight);
+		EndFight(Fight);
+	}
 }
 
 void CArenas::OnPlayerDie(int ClientID)
