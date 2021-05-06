@@ -19,6 +19,7 @@ enum
 	POINT_BOTTOM_RIGHT,
 	POINT_BOTTOM_LEFT,
 
+	// swapping state order can cause bugs
 	STATE_1VS1_NONE = -1,
 	STATE_1VS1_PLACE_ARENA,
 	STATE_1VS1_PLACE_FIRST_SPAWN,
@@ -91,6 +92,7 @@ class CArenas : public CMinigame
 	void IncreaseScore(int Fight, int Index);
 	vec2 GetShowDistance(int ClientID);
 	bool IsGrounded(CCharacter *pChr);
+	bool ValidSpawnPos(vec2 Pos);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];

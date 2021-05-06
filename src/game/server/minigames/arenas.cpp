@@ -182,12 +182,7 @@ void CArenas::PlaceSpawn(int ClientID)
 		return;
 
 	int Index = m_aState[ClientID] == STATE_1VS1_PLACE_FIRST_SPAWN ? 0 : 1;
-	int TileIndex = GameServer()->Collision()->GetTileRaw(m_aFights[Fight].m_aSpawns[Index]);
-	int TileFIndex = GameServer()->Collision()->GetFTileRaw(m_aFights[Fight].m_aSpawns[Index]);
-
-	if (GameServer()->Collision()->IsSolid(m_aFights[Fight].m_aSpawns[Index].x, m_aFights[Fight].m_aSpawns[Index].y)
-		|| TileIndex == TILE_FREEZE || TileFIndex == TILE_FREEZE || TileIndex == TILE_DEATH || TileFIndex == TILE_DEATH
-		|| !IsInArena(Fight, m_aFights[Fight].m_aSpawns[Index]))
+	if (!ValidSpawnPos(m_aFights[Fight].m_aSpawns[Index]))
 		return;
 
 	m_aState[ClientID]++;
@@ -260,6 +255,20 @@ void CArenas::OnInput(int ClientID, CNetObj_PlayerInput *pNewInput)
 	m_aLastDirection[ClientID] = pNewInput->m_Direction;
 }
 
+bool CArenas::ValidSpawnPos(vec2 Pos)
+{
+	int TileIndex = GameServer()->Collision()->GetTileRaw(Pos);
+	int TileFIndex = GameServer()->Collision()->GetFTileRaw(Pos);
+	int MapIndex = GameServer()->Collision()->GetPureMapIndex(Pos);
+	bool IsTeleporter = GameServer()->Collision()->IsTeleport(MapIndex) || GameServer()->Collision()->IsEvilTeleport(MapIndex)
+		|| GameServer()->Collision()->IsCheckTeleport(MapIndex) || GameServer()->Collision()->IsCheckEvilTeleport(MapIndex);
+
+	if (GameServer()->Collision()->IsSolid(Pos.x, Pos.y) || TileIndex == TILE_FREEZE || TileFIndex == TILE_FREEZE
+		|| TileIndex == TILE_DEATH || TileFIndex == TILE_DEATH || IsTeleporter)
+		return false;
+	return true;
+}
+
 void CArenas::UpdateSnapPositions(int ClientID)
 {
 	int Fight = GetClientFight(ClientID);
@@ -268,13 +277,23 @@ void CArenas::UpdateSnapPositions(int ClientID)
 
 	vec2 Pos = GameServer()->m_apPlayers[ClientID]->m_ViewPos;
 
-	if (m_aState[ClientID] == STATE_1VS1_PLACE_FIRST_SPAWN)
+	if (m_aState[ClientID] == STATE_1VS1_PLACE_FIRST_SPAWN || m_aState[ClientID] == STATE_1VS1_PLACE_SECOND_SPAWN)
 	{
-		m_aFights[Fight].m_aSpawns[0] = GameServer()->RoundPos(Pos);
-	}
-	else if (m_aState[ClientID] == STATE_1VS1_PLACE_SECOND_SPAWN)
-	{
-		m_aFights[Fight].m_aSpawns[1] = GameServer()->RoundPos(Pos);
+		vec2 TempPos = Pos;
+		bool BorderBelow = false;
+		do
+		{
+			if (TempPos.y > GameServer()->Collision()->GetHeight() * 32 || !ValidSpawnPos(TempPos))
+				return;
+
+			if (!m_aFights[Fight].m_KillBorder)
+				BorderBelow = GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4))) == TILE_STOPA;
+
+			TempPos.y += 32.f;
+		} while (!GameServer()->Collision()->IsSolid(TempPos.x, TempPos.y) && !BorderBelow);
+
+		int Index = m_aState[ClientID] == STATE_1VS1_PLACE_FIRST_SPAWN ? 0 : 1;
+		m_aFights[Fight].m_aSpawns[Index] = GameServer()->RoundPos(Pos);
 	}
 	else if (m_aState[ClientID] == STATE_1VS1_PLACE_ARENA)
 	{
