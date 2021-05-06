@@ -66,10 +66,8 @@ bool CArenas::IsInArena(int Fight, vec2 Pos)
 vec2 CArenas::GetShowDistance(int ClientID)
 {
 	vec2 ShowDistance = GameServer()->m_apPlayers[ClientID]->m_ShowDistance;
-	ShowDistance.x *= 0.75f;
-	ShowDistance.y *= 0.8f;
-	ShowDistance.x = clamp(ShowDistance.x, 500.f, 8000.f);
-	ShowDistance.y = clamp(ShowDistance.y, 300.f, 4500.f);
+	ShowDistance.x = clamp(ShowDistance.x*0.75f, 500.f, 8000.f);
+	ShowDistance.y = clamp(ShowDistance.y*0.8f, 300.f, 4500.f);
 	return ShowDistance;
 }
 
