@@ -23,6 +23,8 @@ private:
 	bool HelpOfficerRight();
 	bool HelpOfficerLeft();
 
+	void AvoidFreezeRoofSg();
+
 	int m_LovedX;
 	int m_LovedY;
 	int m_LowerPanic;

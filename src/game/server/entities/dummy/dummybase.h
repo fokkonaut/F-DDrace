@@ -65,6 +65,7 @@ protected:
 	void AimY(int TargetY);
 
 	void SetWeapon(int Weapon);
+	int GetWeapon();
 	void Die();
 
 	// Getters

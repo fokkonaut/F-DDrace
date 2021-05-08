@@ -1066,19 +1066,38 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 	}
 	AvoidFreeze();
 	AvoidFreezeWeapons();
-	// freeze pit on left side of police
-	if (X > 366 && X < 382 && !IsGrounded())
+	if (X < 388)
 	{
-		if (GetVel().x < -6.6f && X < 372)
-			Left();
-		else
-			Right();
+		AvoidFreezeRoofSg();
+		// freeze pit on left side of police
+		if (X > 366 && X < 382 && !IsGrounded())
+		{
+			if (GetVel().x < -6.6f && X < 372)
+				Left();
+			else
+				Right();
+		}
 	}
 	// freeze pit on right side of police
 	if (X > 430)
 		Left();
 	if (!HelpOfficerRight())
 		HelpOfficerLeft();
+}
+
+void CDummyBlmapChillPolice::AvoidFreezeRoofSg()
+{
+	if (Y < 424)
+		return;
+	if (m_WantedWeapon != -1)
+		m_WantedWeapon = WEAPON_SHOTGUN;
+	if (GetWeapon() != WEAPON_SHOTGUN)
+		return;
+	if (GetVel().y < -12.6f)
+	{
+		Fire();
+		Aim(GetVel().x + (rand() % 10) - 5, 35);
+	}
 }
 
 void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)

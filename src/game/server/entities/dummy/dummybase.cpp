@@ -23,6 +23,7 @@ int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
 
 void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); m_WantedWeapon = -1; }
+int CDummyBase::GetWeapon() { return m_pCharacter->GetActiveWeapon(); }
 void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
@@ -76,7 +77,10 @@ void CDummyBase::Tick()
 	OnTick();
 
 	if (m_WantedWeapon != -1)
+	{
 		SetWeapon(m_WantedWeapon);
+		m_WantedWeapon = -1;
+	}
 }
 
 bool CDummyBase::IsPolice(CCharacter *pChr)
@@ -173,7 +177,8 @@ void CDummyBase::AvoidFreezeWeapons()
 			IsFreezeTile(RAW_X, distY))
 		{
 			Aim(GetVel().x, -200);
-			Fire();
+			if (GetWeapon() == WEAPON_GRENADE)
+				Fire();
 			if (TicksPassed(10))
 				SetWeapon(WEAPON_GRENADE);
 			m_WantedWeapon = WEAPON_GRENADE;
