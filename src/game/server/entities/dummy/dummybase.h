@@ -34,8 +34,7 @@ private:
 	virtual void OnTick() {}
 	int m_Mode;
 
-	int m_RtfGetSpeed;
-	int m_LtfGetSpeed;
+	int m_ThroughFreezeGetSpeed;
 	bool m_GoSlow;
 	bool m_AsBackwards;
 	bool m_AsTopFree;
@@ -99,10 +98,13 @@ protected:
 	int GetFTile(int PosX, int PosY);
 	bool IsFreezeTile(int PosX, int PosY);
 
+	bool IsVelXGt(int Direction, float Vel);
+	bool IsVelXLt(int Direction, float Vel);
 	void AvoidTile(int Tile);
 	void AvoidFreeze();
 	void AvoidDeath();
 	void AntiStuckDir(int Direction);
+	void ThroughFreezeDir(int Direction);
 
 	/*
 		Function: AvoidFreezeWeapons
