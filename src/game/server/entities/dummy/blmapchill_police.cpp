@@ -423,6 +423,11 @@ void CDummyBlmapChillPolice::OnTick()
 			Die();
 			return;
 		}
+		if (X > 446 && Y > 341) // plots
+		{
+			Die();
+			return;
+		}
 		if (Y > 35 && X < 43) // area bottom right from spawn, if he fall, he will kill
 		{
 			Die();
