@@ -1083,7 +1083,20 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 	}
 	// freeze pit on right side of police
 	if (X > 430)
-		Left();
+	{
+		// too high make sure to not go in left freeze
+		if (Y < 423)
+		{
+			if (X < 438)
+				Right();
+			else if (X > 442)
+				Left();
+		}
+		else
+		{
+			Left();
+		}
+	}
 	if (!HelpOfficerRight())
 		HelpOfficerLeft();
 }
