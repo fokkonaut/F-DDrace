@@ -23,6 +23,7 @@ int CDummyBase::GetTargetY() { return m_pCharacter->Input()->m_TargetY; }
 int CDummyBase::GetDirection() { return m_pCharacter->Input()->m_Direction; }
 
 void CDummyBase::SetWeapon(int Weapon) { m_pCharacter->SetWeapon(Weapon); m_WantedWeapon = -1; }
+int CDummyBase::GetWeapon() { return m_pCharacter->GetActiveWeapon(); }
 void CDummyBase::Die() { m_pCharacter->Die(); }
 void CDummyBase::Left() { m_pCharacter->Input()->m_Direction = DIRECTION_LEFT; }
 void CDummyBase::Right() { m_pCharacter->Input()->m_Direction = DIRECTION_RIGHT; }
@@ -55,8 +56,7 @@ CDummyBase::CDummyBase(CCharacter *pChr, int Mode)
 	m_Mode = Mode;
 	m_DebugColor = -1;
 	m_WantedWeapon = -1;
-	m_RtfGetSpeed = 0;
-	m_LtfGetSpeed = 0;
+	m_ThroughFreezeGetSpeed = 0;
 	m_GoSlow = false;
 	m_AsBackwards = false;
 	m_AsTopFree = false;
@@ -76,7 +76,24 @@ void CDummyBase::Tick()
 	OnTick();
 
 	if (m_WantedWeapon != -1)
+	{
 		SetWeapon(m_WantedWeapon);
+		m_WantedWeapon = -1;
+	}
+}
+
+bool CDummyBase::IsVelXGt(int Direction, float Vel)
+{
+	if (Direction == 1)
+		return GetVel().x > Vel;
+	return GetVel().x < -Vel;
+}
+
+bool CDummyBase::IsVelXLt(int Direction, float Vel)
+{
+	if (Direction == 1)
+		return GetVel().x < Vel;
+	return GetVel().x > -Vel;
 }
 
 bool CDummyBase::IsPolice(CCharacter *pChr)
@@ -173,7 +190,8 @@ void CDummyBase::AvoidFreezeWeapons()
 			IsFreezeTile(RAW_X, distY))
 		{
 			Aim(GetVel().x, -200);
-			Fire();
+			if (GetWeapon() == WEAPON_GRENADE)
+				Fire();
 			if (TicksPassed(10))
 				SetWeapon(WEAPON_GRENADE);
 			m_WantedWeapon = WEAPON_GRENADE;
@@ -269,7 +287,7 @@ void CDummyBase::AntiStuckDir(int Direction)
 	{
 		Jump(random(5));
 		// too slow? Check if in a dead end
-		if(((Direction == DIRECTION_LEFT && GetVel().x > -1.1f) || (Direction == DIRECTION_RIGHT && GetVel().x < 1.1f)) && IsGrounded())
+		if (IsVelXLt(Direction, 1.1f) && IsGrounded())
 		{
 			if(
 				/* top blocked */
@@ -297,102 +315,63 @@ void CDummyBase::AntiStuckDir(int Direction)
 	}
 }
 
-void CDummyBase::RightThroughFreeze()
+void CDummyBase::ThroughFreezeDir(int Direction)
 {
 	if(m_pCharacter->m_FreezeTime)
 	{
-		m_RtfGetSpeed = 0;
+		m_ThroughFreezeGetSpeed = 0;
 		return;
 	}
-	Right();
-	if (m_RtfGetSpeed)
+	SetDirection(Direction);
+	if (m_ThroughFreezeGetSpeed)
 	{
-		Left();
-		if (IsFreezeTile(RAW_X + m_RtfGetSpeed, RAW_Y) || IsFreezeTile(RAW_X + m_RtfGetSpeed, RAW_Y + 16))
+		SetDirection(-Direction);
+		if (IsFreezeTile(RAW_X + m_ThroughFreezeGetSpeed, RAW_Y) || IsFreezeTile(RAW_X + m_ThroughFreezeGetSpeed * Direction, RAW_Y + 16))
 			return;
-		m_RtfGetSpeed = 0;
+		m_ThroughFreezeGetSpeed = 0;
 	}
 	// jump through freeze if one is close or go back if no vel
 	for (int i = 5; i < 160; i+=5)
 	{
 		// ignore freeze behind collision
-		if (GameServer()->Collision()->IsSolid(RAW_X + i, RAW_Y))
+		if (GameServer()->Collision()->IsSolid(RAW_X + i * Direction, RAW_Y))
 			break;
 
-		if (IsFreezeTile(RAW_X + i, RAW_Y) || IsFreezeTile(RAW_X + i, RAW_Y + 16))
+		if (IsFreezeTile(RAW_X + i * Direction, RAW_Y) || IsFreezeTile(RAW_X + i * Direction, RAW_Y + 16))
 		{
 			if (GetVel().y > 1.1f)
 			{
-				if (!IsFreezeTile(RAW_X - 32, RAW_Y) && !IsFreezeTile(RAW_X - 32, RAW_Y + 16))
-					Left();
+				if (!IsFreezeTile(RAW_X - 32 * Direction, RAW_Y) && !IsFreezeTile(RAW_X - 32 * Direction, RAW_Y + 16))
+					SetDirection(-Direction);
 			}
-			if (IsGrounded() && GetVel().x > 8.8f)
+			if (IsGrounded() && IsVelXGt(Direction, 8.8f))
 				Jump(TicksPassed(2));
-			if (i < 22 && GetVel().x < 5.5f)
+			if (i < 22 && IsVelXLt(Direction, 5.5f))
 			{
 				int k;
 				for (k = 5; k < 160; k+=5)
 				{
-					if (IsFreezeTile(RAW_X - k, RAW_Y) || IsFreezeTile(RAW_X - k, RAW_Y + 16))
+					if (IsFreezeTile(RAW_X - k * Direction, RAW_Y) || IsFreezeTile(RAW_X - k * Direction, RAW_Y + 16))
 					{
 						break;
 					}
 				}
-				m_RtfGetSpeed = k < 80 ? 20 : 40;
-				Left();
+				m_ThroughFreezeGetSpeed = k < 80 ? 20 : 40;
+				SetDirection(-Direction);
 			}
 			break;
 		}
 	}
 }
 
+void CDummyBase::RightThroughFreeze()
+{
+	ThroughFreezeDir(DIRECTION_RIGHT);
+}
+
 void CDummyBase::LeftThroughFreeze()
 {
-	if(m_pCharacter->m_FreezeTime)
-	{
-		m_LtfGetSpeed = 0;
-		return;
-	}
-	Left();
-	if (m_LtfGetSpeed)
-	{
-		Right();
-		if (IsFreezeTile(RAW_X - m_LtfGetSpeed, RAW_Y) || IsFreezeTile(RAW_X - m_LtfGetSpeed, RAW_Y + 16))
-			return;
-		m_LtfGetSpeed = 0;
-	}
-	// jump through freeze if one is close or go back if no vel
-	for (int i = 5; i < 160; i+=5)
-	{
-		// ignore freeze behind collision
-		if (GameServer()->Collision()->IsSolid(RAW_X - i, RAW_Y))
-			break;
-
-		if (IsFreezeTile(RAW_X - i, RAW_Y) || IsFreezeTile(RAW_X - i, RAW_Y + 16))
-		{
-			if (GetVel().y > 1.1f)
-			{
-				if (!IsFreezeTile(RAW_X + 32, RAW_Y) && !IsFreezeTile(RAW_X + 32, RAW_Y + 16))
-					Right();
-			}
-			if (IsGrounded() && GetVel().x < -8.8f)
-				Jump(TicksPassed(2));
-			if (i < 22 && GetVel().x > -5.5f)
-			{
-				int k;
-				for (k = 5; k < 160; k+=5)
-				{
-					if (IsFreezeTile(RAW_X + k, RAW_Y) || IsFreezeTile(RAW_X + k, RAW_Y + 16))
-					{
-						break;
-					}
-				}
-				m_LtfGetSpeed = k < 80 ? 20 : 40;
-				Right();
-			}
-			break;
-		}
-	}
+	ThroughFreezeDir(DIRECTION_LEFT);
 }
 
 void CDummyBase::DebugColor(int DebugColor)
