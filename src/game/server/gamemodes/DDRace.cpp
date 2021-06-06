@@ -91,7 +91,7 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 			HadFlag |= 2;
 		if (F->GetCarrier() == pVictim)
 		{
-			if (HasFlag(pKiller->GetCharacter()) == -1)
+			if (HasFlag(pKiller->GetCharacter()) == -1 && pKiller->m_Minigame == pVictim->GetPlayer()->m_Minigame && !pKiller->m_JailTime) // avoid giving flags to unreachable places
 				ChangeFlagOwner(pVictim, pKiller->GetCharacter());
 			else
 				F->Drop();
