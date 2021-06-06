@@ -1353,6 +1353,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 
 	switch (Minigame)
 	{
+		case MINIGAME_1VS1:
 		case MINIGAME_NONE:
 		{
 			str_format(aBuf, sizeof(aBuf), "--- %s's Stats ---", pSelf->Server()->ClientName(ID));
