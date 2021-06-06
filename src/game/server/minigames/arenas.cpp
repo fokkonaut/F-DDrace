@@ -286,8 +286,15 @@ void CArenas::UpdateSnapPositions(int ClientID)
 			if (TempPos.y > GameServer()->Collision()->GetHeight() * 32 || !ValidSpawnPos(TempPos))
 				return;
 
-			if (!m_aFights[Fight].m_KillBorder)
+			if (m_aFights[Fight].m_KillBorder)
+			{
+				if (GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y))) == TILE_STOPA)
+					return;
+			}
+			else
+			{
 				BorderBelow = GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4))) == TILE_STOPA;
+			}
 
 			TempPos.y += 32.f;
 		} while (!GameServer()->Collision()->IsSolid(TempPos.x, TempPos.y) && !BorderBelow);
