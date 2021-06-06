@@ -239,7 +239,7 @@ MACRO_CONFIG_INT(SvLocalChat, sv_local_chat, 0, 0, 1, CFGFLAG_SERVER, "Whether l
 MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SERVER, "Whether authed players are highlighted in the scoreboard (deactivated by sv_local_chat)", AUTHED_ADMIN)
 
 // spawn block
-MACRO_CONFIG_INT(SvSpawnBlockProtection, sv_spawn_block_protection, 0, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "0 = off, 1 = escape time, 2 = esctime time + killban", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnBlockProtection, sv_spawn_block_protection, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether spawnblocking in a given area will add escape time", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSpawnAreaLowX, sv_spawnarea_low_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Low X tile position of area for spawnblock protection", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSpawnAreaLowY, sv_spawnarea_low_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Low Y tile position of area for spawnblock protection", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSpawnAreaHighX, sv_spawnarea_high_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "High X tile position of area for spawnblock protection", AUTHED_ADMIN)

@@ -2470,16 +2470,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}*/
 
-			if (!m_apPlayers[ClientID]->IsMinigame() && m_apPlayers[ClientID]->m_SpawnBlockScore > 3)
+			if (!m_apPlayers[ClientID]->IsMinigame() && m_apPlayers[ClientID]->m_EscapeTime)
 			{
-				if (Config()->m_SvSpawnBlockProtection == 2)
+				if (pPlayer->m_DieTick > Server()->Tick() - Server()->TickSpeed() * 10)
 				{
-					SendChatTarget(ClientID, "You can't kill yourself because you spawnblocked too much, try again later");
-					return;
-				}
-				else if (Config()->m_SvSpawnBlockProtection == 1 && pPlayer->m_DieTick > Server()->Tick() - Server()->TickSpeed() * 5)
-				{
-					SendChatTarget(ClientID, "You can only kill once in 5 seconds due to spawnblocking");
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "You need to wait %d seconds before killing again due to escaping", 10 - (Server()->Tick() - pPlayer->m_DieTick) / Server()->TickSpeed());
+					SendChatTarget(ClientID, aBuf);
 					return;
 				}
 			}
