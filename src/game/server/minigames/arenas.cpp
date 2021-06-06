@@ -536,6 +536,9 @@ void CArenas::OnPlayerDie(int ClientID)
 		return;
 
 	int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
+	if (!HasJoined(Fight, Other))
+		return;
+
 	IncreaseScore(Fight, Other);
 
 	CCharacter *pChr = GameServer()->GetPlayerChar(m_aFights[Fight].m_aParticipants[Other].m_ClientID);
