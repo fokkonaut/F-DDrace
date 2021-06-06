@@ -402,7 +402,7 @@ public:
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);
-	int GetAccount(const char* pUsername);
+	int GetAccount(const char *pUsername);
 	void FreeAccount(int ID);
 
 	const char *GetAccVarName(int VariableID);

@@ -4869,22 +4869,19 @@ int CGameContext::GetAccIDByUsername(const char *pUsername)
 	return 0;
 }
 
-int CGameContext::GetAccount(const char* pUsername)
+int CGameContext::GetAccount(const char *pUsername)
 {
-	bool AccountLoggedIn = false;
 	int ID = 0;
-
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (m_apPlayers[i] && m_apPlayers[i]->GetAccID() >= ACC_START && !str_comp(m_Accounts[m_apPlayers[i]->GetAccID()].m_Username, pUsername))
 		{
 			ID = m_apPlayers[i]->GetAccID();
-			AccountLoggedIn = true;
 			break;
 		}
 	}
 
-	if (!AccountLoggedIn)
+	if (ID < ACC_START)
 	{
 		ID = AddAccount();
 		ReadAccountStats(ID, pUsername);
