@@ -3786,10 +3786,6 @@ void CGameContext::OnPreShutdown()
 
 void CGameContext::OnShutdown(bool FullShutdown)
 {
-	// Map reload, we still want to save everything. For a full shutdown it's called in server.cpp
-	if (!FullShutdown)
-		OnPreShutdown();
-
 	if (FullShutdown)
 		Score()->OnShutdown();
 
@@ -5014,7 +5010,7 @@ void CGameContext::SaveCharacter(int ClientID)
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), aAddrStr);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), aAddrStr);
 	CSaveTee SaveTee(true);
 	SaveTee.SaveFile(aFilename, pChr);
 

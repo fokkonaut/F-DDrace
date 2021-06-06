@@ -1870,6 +1870,18 @@ void CServer::PumpNetwork()
 	m_Econ.Update();
 }
 
+const char *CServer::GetFileName(char *pPath)
+{
+	// get the name of the file without his path
+	char *pShortName = &pPath[0];
+	for(int i = 0; i < str_length(pPath)-1; i++)
+	{
+		if(pPath[i] == '/' || pPath[i] == '\\')
+			pShortName = &pPath[i+1];
+	}
+	return pShortName;
+}
+
 const char *CServer::GetMapName()
 {
 	// get the name of the map without his path
@@ -1880,6 +1892,12 @@ const char *CServer::GetMapName()
 			pMapShortName = &Config()->m_SvMap[i+1];
 	}
 	return pMapShortName;
+}
+
+const char *CServer::GetCurrentMapName()
+{
+	// Config()->m_SvMap gets updated immediately, so this will return the map name before a map change for example
+	return GetFileName(m_aCurrentMap);
 }
 
 void CServer::ChangeMap(const char *pMap)
@@ -1927,6 +1945,8 @@ int CServer::LoadMap(const char *pMapName)
 	str_format(aBufMsg, sizeof(aBufMsg), "%s crc is %08x", aBuf, m_CurrentMapCrc);
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
 
+	// call pre shutdown here so the mapname still is the correct one
+	GameServer()->OnPreShutdown();
 	str_copy(m_aCurrentMap, pMapName, sizeof(m_aCurrentMap));
 
 	// load complete map into memory for download

@@ -208,7 +208,7 @@ public:
 	{
 		MAP_CHUNK_SIZE=NET_MAX_PAYLOAD-NET_MAX_CHUNKHEADERSIZE-4, // msg type
 	};
-	char m_aCurrentMap[64];
+	char m_aCurrentMap[128];
 	SHA256_DIGEST m_CurrentMapSha256;
 	unsigned m_CurrentMapCrc;
 	unsigned char *m_pCurrentMapData;
@@ -312,6 +312,8 @@ public:
 	void PumpNetwork();
 
 	virtual void ChangeMap(const char *pMap);
+	virtual const char *GetFileName(char *pPath);
+	virtual const char *GetCurrentMapName();
 	virtual const char *GetMapName();
 	int LoadMap(const char *pMapName);
 
