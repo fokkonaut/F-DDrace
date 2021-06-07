@@ -136,6 +136,7 @@ void CPlayer::Reset()
 	m_vWeaponLimit.resize(NUM_WEAPONS);
 
 	m_Gamemode = GameServer()->Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
+	m_SavedGamemode = m_Gamemode;
 
 	m_FixNameID = -1;
 	m_RemovedName = false;
@@ -2135,25 +2136,21 @@ bool CPlayer::RequestMinigameChange(int RequestedMinigame)
 		return true;
 	}
 
-	if (GetCharacter())
-	{
-		if (GetCharacter()->m_FreezeTime)
-		{
-			GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being frozen");
-		}
-		else
-		{
-			m_RequestedMinigame = RequestedMinigame;
-			m_LastMinigameRequest = Server()->Tick();
-			GameServer()->SendChatTarget(m_ClientID, "Minigame request sent, please don't move for 5 seconds");
-		}
-		return true;
-	}
-
 	// if we dont have a character we can instantly join (e.g. spectator mode)
-	m_RequestedMinigame = RequestedMinigame;
-	m_LastMinigameRequest = Server()->Tick();
-	return false;
+	if (!GetCharacter())
+		return false;
+
+	if (GetCharacter()->m_FreezeTime)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being frozen");
+	}
+	else
+	{
+		m_RequestedMinigame = RequestedMinigame;
+		m_LastMinigameRequest = Server()->Tick();
+		GameServer()->SendChatTarget(m_ClientID, "Minigame request sent, please don't move for 5 seconds");
+	}
+	return true;
 }
 
 bool CPlayer::MinigameRequestTick()

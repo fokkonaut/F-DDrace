@@ -120,7 +120,6 @@ private:
 	int m_DoorHammer;
 	int m_AlwaysTeleWeapon;
 	int m_FreezeHammer;
-	int m_SavedGamemode;
 	int m_aSpawnWeaponActive[3];
 	int m_HasFinishedSpecialRace;
 	int m_GotMoneyXPBomb;
@@ -137,6 +136,7 @@ private:
 
 	// player
 	int m_Gamemode;
+	int m_SavedGamemode;
 	int m_Minigame;
 	int64 m_WalletMoney;
 	int m_RainbowSpeed;

@@ -1632,7 +1632,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	Teams()->OnCharacterDeath(m_pPlayer->GetCID(), Weapon);
 
 	// reset gamemode if it got changed by a tile but the setting says something different
-	m_pPlayer->m_Gamemode = m_SavedGamemode;
+	m_pPlayer->m_Gamemode = m_pPlayer->m_SavedGamemode;
 }
 
 bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weapon)
@@ -3408,7 +3408,7 @@ void CCharacter::FDDraceInit()
 	m_AlwaysTeleWeapon = Config()->m_SvAlwaysTeleWeapon;
 
 	m_pPlayer->m_Gamemode = (Config()->m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
-	m_SavedGamemode = m_pPlayer->m_Gamemode;
+	m_pPlayer->m_SavedGamemode = m_pPlayer->m_Gamemode;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
 
 	m_NumGhostShots = 0;
@@ -4236,7 +4236,7 @@ void CCharacter::VanillaMode(int FromID, bool Silent)
 
 	// set a new saved gamemode, forced by a command means this is the new default gamemode for this player
 	if (FromID >= 0)
-		m_SavedGamemode = GAMEMODE_VANILLA;
+		m_pPlayer->m_SavedGamemode = GAMEMODE_VANILLA;
 
 	m_pPlayer->m_Gamemode = GAMEMODE_VANILLA;
 	m_Armor = 0;
@@ -4261,7 +4261,7 @@ void CCharacter::DDraceMode(int FromID, bool Silent)
 
 	// set a new saved gamemode, forced by a command means this is the new default gamemode for this player
 	if (FromID >= 0)
-		m_SavedGamemode = GAMEMODE_DDRACE;
+		m_pPlayer->m_SavedGamemode = GAMEMODE_DDRACE;
 
 	m_pPlayer->m_Gamemode = GAMEMODE_DDRACE;
 	m_Health = 10;

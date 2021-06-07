@@ -6095,6 +6095,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 		//reset everything
 		if (pPlayer->m_Minigame == MINIGAME_SURVIVAL)
 		{
+			pPlayer->m_Gamemode = pPlayer->m_SavedGamemode = GAMEMODE_DDRACE;
 			pPlayer->m_SurvivalState = SURVIVAL_OFFLINE;
 			pPlayer->m_ShowName = true;
 		}
@@ -6118,9 +6119,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 
 		if (Minigame == MINIGAME_SURVIVAL)
 		{
-			pPlayer->m_Gamemode = GAMEMODE_VANILLA;
-			if (pPlayer->GetCharacter())
-				pPlayer->GetCharacter()->m_SavedGamemode = pPlayer->m_Gamemode;
+			pPlayer->m_Gamemode = pPlayer->m_SavedGamemode = GAMEMODE_VANILLA;
 			pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
 		}
 		else if (Minigame == MINIGAME_1VS1)

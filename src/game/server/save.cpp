@@ -167,7 +167,6 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_DoorHammer = pChr->m_DoorHammer;
 	m_AlwaysTeleWeapon = pChr->m_AlwaysTeleWeapon;
 	m_FreezeHammer = pChr->m_FreezeHammer;
-	m_SavedGamemode = pChr->m_SavedGamemode;
 	for (int i = 0; i < 3; i++)
 		m_aSpawnWeaponActive[i] = pChr->m_aSpawnWeaponActive[i];
 	m_HasFinishedSpecialRace = pChr->m_HasFinishedSpecialRace;
@@ -185,6 +184,7 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	// player
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
+	m_SavedGamemode = pChr->GetPlayer()->m_SavedGamemode;
 	m_Minigame = pChr->GetPlayer()->m_Minigame;
 	if (m_ShutdownSave)
 		m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
@@ -314,7 +314,6 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->m_DoorHammer = m_DoorHammer;
 	pChr->m_AlwaysTeleWeapon = m_AlwaysTeleWeapon;
 	pChr->m_FreezeHammer = m_FreezeHammer;
-	pChr->m_SavedGamemode = m_SavedGamemode;
 	for (int i = 0; i < 3; i++)
 		pChr->m_aSpawnWeaponActive[i] = m_aSpawnWeaponActive[i];
 	pChr->m_HasFinishedSpecialRace = m_HasFinishedSpecialRace;
@@ -338,6 +337,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 
 	// player
 	pChr->GetPlayer()->m_Gamemode = m_Gamemode;
+	pChr->GetPlayer()->m_SavedGamemode = m_SavedGamemode;
 	pChr->GetPlayer()->m_Minigame = m_Minigame;
 	if (m_ShutdownSave)
 		pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
@@ -396,11 +396,11 @@ char* CSaveTee::GetString()
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
-		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%lld\t%lld\t%s\t",
 		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
@@ -440,11 +440,11 @@ char* CSaveTee::GetString()
 		m_aSpreadWeapon[8], m_aSpreadWeapon[9], m_aSpreadWeapon[10], m_aSpreadWeapon[11], m_aSpreadWeapon[12], m_aSpreadWeapon[13], m_aSpreadWeapon[14], m_aSpreadWeapon[15],
 		m_aHadWeapon[0], m_aHadWeapon[1], m_aHadWeapon[2], m_aHadWeapon[3], m_aHadWeapon[4], m_aHadWeapon[5], m_aHadWeapon[6], m_aHadWeapon[7],
 		m_aHadWeapon[8], m_aHadWeapon[9], m_aHadWeapon[10], m_aHadWeapon[11], m_aHadWeapon[12], m_aHadWeapon[13], m_aHadWeapon[14], m_aHadWeapon[15],
-		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer, m_SavedGamemode,
+		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
 		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_MoveRestrictionExtraCanEnterRoom,
-		m_Gamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
+		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_JailTime, m_EscapeTime, m_aAccUsername
 	);
 	return m_aString;
@@ -490,11 +490,11 @@ int CSaveTee::LoadString(char* String)
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
-		%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
 		%lld\t%lld\t%s\t",
 		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
@@ -534,11 +534,11 @@ int CSaveTee::LoadString(char* String)
 		&m_aSpreadWeapon[8], &m_aSpreadWeapon[9], &m_aSpreadWeapon[10], &m_aSpreadWeapon[11], &m_aSpreadWeapon[12], &m_aSpreadWeapon[13], &m_aSpreadWeapon[14], &m_aSpreadWeapon[15],
 		&m_aHadWeapon[0], &m_aHadWeapon[1], &m_aHadWeapon[2], &m_aHadWeapon[3], &m_aHadWeapon[4], &m_aHadWeapon[5], &m_aHadWeapon[6], &m_aHadWeapon[7],
 		&m_aHadWeapon[8], &m_aHadWeapon[9], &m_aHadWeapon[10], &m_aHadWeapon[11], &m_aHadWeapon[12], &m_aHadWeapon[13], &m_aHadWeapon[14], &m_aHadWeapon[15],
-		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer, &m_SavedGamemode,
+		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
 		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_MoveRestrictionExtraCanEnterRoom,
-		&m_Gamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
+		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		&m_JailTime, &m_EscapeTime, m_aAccUsername
 	);
 

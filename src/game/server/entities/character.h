@@ -418,7 +418,6 @@ public:
 	int GetPowerHooked();
 	int m_PowerHookedID;
 
-	int m_SavedGamemode;
 	int m_MaxJumps;
 
 	// weapon money reward

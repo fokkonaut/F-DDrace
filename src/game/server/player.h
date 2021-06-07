@@ -264,6 +264,7 @@ public:
 
 	//gamemodes
 	int m_Gamemode;
+	int m_SavedGamemode;
 
 	//spooky ghost
 	bool m_SpookyGhost;
