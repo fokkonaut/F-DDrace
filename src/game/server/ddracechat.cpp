@@ -1958,6 +1958,10 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 		if (pPlayer->GetCharacter())
 		{
 			int Amount = pResult->GetInteger(1);
+			if(!str_comp(pResult->GetString(1), "all"))
+				Amount = pPlayer->GetWalletMoney();
+			if(*(pResult->GetString(1) + str_length(pResult->GetString(1)) - 1) == 'k')
+				Amount *= 1000;
 			if (Amount <= 0)
 			{
 				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop nothing");
