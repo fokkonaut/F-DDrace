@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
+#include <engine/antibot.h>
 #include <generated/protocol.h>
 
 #include <game/gamecore.h>
@@ -64,7 +65,9 @@ enum WeaponSpecial
 	SPECIAL_SCROLLNINJA = 1<<4,
 };
 
+class CAntibot;
 class CGameTeams;
+struct CAntibotCharacterData;
 
 class CCharacter : public CEntity
 {
@@ -202,11 +205,13 @@ private:
 	int m_LastNoAmmoSound;
 
 	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevPrevInput;
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
 	// input
 	CNetObj_PlayerInput m_SavedInput;
+	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
 	int m_NumInputs;
 	int m_Jumped;
@@ -246,6 +251,7 @@ private:
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	void SendZoneMsgs();
+	IAntibot *Antibot();
 
 	bool m_SetSavePos;
 	vec2 m_PrevSavePos;
@@ -258,6 +264,7 @@ private:
 
 public:
 	CGameTeams* Teams();
+	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(float Seconds);
 	bool Freeze();
@@ -443,6 +450,7 @@ public:
 	int GetAliveState();
 
 	int64 m_SpawnTick;
+	int64 m_WeaponChangeTick;
 	int m_KillStreak;
 	int64 m_LastWantedLogout;
 	bool m_StoppedDoorSkip;

@@ -24,10 +24,12 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool 
 	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam(ClientID);
 	m_DebugDummy = DebugDummy;
 	Reset();
+	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
 }
 
 CPlayer::~CPlayer()
 {
+	GameServer()->Antibot()->OnPlayerDestroy(m_ClientID);
 	delete m_pLastTarget;
 	delete m_pCharacter;
 	m_pCharacter = 0;

@@ -719,6 +719,25 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 	return 0;
 }
 
+void CServer::SendMsgRaw(int ClientID, const void *pData, int Size, int Flags)
+{
+	CNetChunk Packet;
+	mem_zero(&Packet, sizeof(CNetChunk));
+	Packet.m_ClientID = ClientID;
+	Packet.m_pData = pData;
+	Packet.m_DataSize = Size;
+	Packet.m_Flags = 0;
+	if(Flags & MSGFLAG_VITAL)
+	{
+		Packet.m_Flags |= NETSENDFLAG_VITAL;
+	}
+	if(Flags & MSGFLAG_FLUSH)
+	{
+		Packet.m_Flags |= NETSENDFLAG_FLUSH;
+	}
+	m_NetServer.Send(&Packet);
+}
+
 void CServer::DoSnapshot()
 {
 	GameServer()->OnPreSnap();
@@ -877,6 +896,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
 
 	return 0;
 }
@@ -914,6 +934,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sevendown = false;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
 	return 0;
 }
@@ -1131,6 +1152,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX);
+
+	int GameFlags = 0;
+	if (pPacket->m_Flags & NET_CHUNKFLAG_VITAL)
+	{
+		GameFlags |= MSGFLAG_VITAL;
+	}
+	Antibot()->OnEngineClientMessage(ClientID, pPacket->m_pData, pPacket->m_DataSize, GameFlags);
 
 	// unpack msgid and system flag
 	int Msg;
@@ -1968,13 +1996,14 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 	m_RegisterSevendown.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
-void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage)
+void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot)
 {
 	m_pConfig = pConfig;
 	m_pConsole = pConsole;
 	m_pGameServer = pGameServer;
 	m_pMap = pMap;
 	m_pStorage = pStorage;
+	m_pAntibot = pAntibot;
 }
 
 int CServer::Run()
@@ -2036,6 +2065,7 @@ int CServer::Run()
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", Config()->m_SvName);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
+	Antibot()->Init();
 	GameServer()->OnInit();
 	str_format(aBuf, sizeof(aBuf), "netversion %s", GameServer()->NetVersion());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
@@ -2144,6 +2174,8 @@ int CServer::Run()
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
+
+			Antibot()->OnEngineTick();
 
 			PumpNetwork();
 
@@ -2900,6 +2932,7 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfigManager *pConfigManager = CreateConfigManager();
+	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
 
 	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConfigManager->Values(), pConsole);
 
@@ -2916,6 +2949,8 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot*>(pEngineAntibot));
 
 		if(RegisterFail)
 			return -1;
@@ -2927,7 +2962,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pEngineMasterServer->Init();
 	pEngineMasterServer->Load();
 
-	pServer->InitInterfaces(pConfigManager->Values(), pConsole, pGameServer, pEngineMap, pStorage);
+	pServer->InitInterfaces(pConfigManager->Values(), pConsole, pGameServer, pEngineMap, pStorage, pEngineAntibot);
 	if(!UseDefaultConfig)
 	{
 		// register all console commands

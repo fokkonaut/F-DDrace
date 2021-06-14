@@ -12,6 +12,8 @@
 #include <engine/shared/protocol.h>
 #include <base/math.h>
 
+struct CAntibotRoundData;
+
 class IServer : public IInterface
 {
 	MACRO_INTERFACE("server", 0)
@@ -207,6 +209,8 @@ public:
 	virtual const char *GetCurrentMapName() = 0;
 	virtual const char *GetFileName(char *pPath) = 0;
 
+	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
+
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual bool DemoRecorder_IsRecording() = 0;
 
@@ -256,6 +260,8 @@ public:
 
 	virtual void OnClientEngineJoin(int ClientID) = 0;
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
+
+	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 };
 
 extern IGameServer *CreateGameServer();

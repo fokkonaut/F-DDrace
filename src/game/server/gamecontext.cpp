@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
+#include <antibot/antibot_data.h>
+
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
 #include <engine/shared/datafile.h>
@@ -156,6 +158,48 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !m_apPlayers[ClientID])
 		return 0;
 	return m_apPlayers[ClientID]->GetCharacter();
+}
+
+void CGameContext::FillAntibot(CAntibotRoundData *pData)
+{
+	if(!pData->m_Map.m_pTiles)
+	{
+		Collision()->FillAntibot(&pData->m_Map);
+	}
+	pData->m_Tick = Server()->Tick();
+	mem_zero(pData->m_aCharacters, sizeof(pData->m_aCharacters));
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CAntibotCharacterData *pChar = &pData->m_aCharacters[i];
+		for(auto &LatestInput : pChar->m_aLatestInputs)
+		{
+			LatestInput.m_TargetX = -1;
+			LatestInput.m_TargetY = -1;
+		}
+		pChar->m_Alive = false;
+		pChar->m_Pause = false;
+		pChar->m_Team = -1;
+
+		pChar->m_Pos = vec2(-1, -1);
+		pChar->m_Vel = vec2(0, 0);
+		pChar->m_Angle = -1;
+		pChar->m_HookedPlayer = -1;
+		pChar->m_SpawnTick = -1;
+		pChar->m_WeaponChangeTick = -1;
+
+		if(m_apPlayers[i])
+		{
+			str_copy(pChar->m_aName, Server()->ClientName(i), sizeof(pChar->m_aName));
+			CCharacter *pGameChar = m_apPlayers[i]->GetCharacter();
+			pChar->m_Alive = (bool)pGameChar;
+			pChar->m_Pause = m_apPlayers[i]->IsPaused();
+			pChar->m_Team = m_apPlayers[i]->GetTeam();
+			if(pGameChar)
+			{
+				pGameChar->FillAntibot(pChar);
+			}
+		}
+	}
 }
 
 void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, Mask128 Mask, int SevendownAmount)
@@ -3139,6 +3183,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option", AUTHED_ADMIN);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options", AUTHED_ADMIN);
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no", AUTHED_ADMIN);
+	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status", AUTHED_ADMIN);
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
@@ -3252,6 +3297,8 @@ void CGameContext::OnInit()
 	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pAntibot = Kernel()->RequestInterface<IAntibot>();
+	m_pAntibot->RoundStart(this);
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
@@ -3783,6 +3830,8 @@ void CGameContext::OnPreShutdown()
 
 void CGameContext::OnShutdown(bool FullShutdown)
 {
+	Antibot()->RoundEnd();
+
 	if (FullShutdown)
 		Score()->OnShutdown();
 

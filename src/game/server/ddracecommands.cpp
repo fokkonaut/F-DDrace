@@ -669,6 +669,12 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }
 
+void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Antibot()->Dump();
+}
+
 // F-DDrace
 
 void CGameContext::ConAllWeapons(IConsole::IResult* pResult, void* pUserData)

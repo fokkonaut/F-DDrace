@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
+#include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
 
@@ -114,6 +115,7 @@ enum
 
 class CRandomMapResult;
 class CMapVoteResult;
+struct CAntibotData;
 
 class CGameContext : public IGameServer
 {
@@ -121,6 +123,7 @@ class CGameContext : public IGameServer
 	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 	IStorage* m_pStorage;
+	IAntibot *m_pAntibot;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -158,6 +161,7 @@ class CGameContext : public IGameServer
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
 	static void ConVote(IConsole::IResult *pResult, void *pUserData);
+	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -188,6 +192,7 @@ public:
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CTuningParams* TuningList() { return &m_aTuningList[0]; }
+	IAntibot *Antibot() { return m_pAntibot; }
 
 	CGameContext();
 	~CGameContext();
@@ -333,6 +338,7 @@ public:
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionSevendown() const;
 
+	virtual void FillAntibot(CAntibotRoundData *pData);
 	bool OnClientDDNetVersionKnown(int ClientID);
 	int GetClientDDNetVersion(int ClientID);
 	int ProcessSpamProtection(int ClientID);
