@@ -204,6 +204,7 @@ public:
 	virtual const char *AuthName(int ClientID) const = 0;
 	virtual bool IsBanned(int ClientID) = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
+	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual const char *GetMapName() = 0;
 	virtual const char *GetCurrentMapName() = 0;
@@ -262,6 +263,7 @@ public:
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+	virtual void SetBotDetected(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();

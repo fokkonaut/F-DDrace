@@ -219,6 +219,8 @@ void CPlayer::Reset()
 	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
 	m_RequestedMinigame = MINIGAME_NONE;
 	m_LastMinigameRequest = 0;
+
+	m_BotDetected = false;
 }
 
 void CPlayer::Tick()

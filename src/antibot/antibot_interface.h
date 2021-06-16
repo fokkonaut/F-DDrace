@@ -21,7 +21,7 @@ void AntibotOnDirectInput(int ClientID);
 void AntibotOnCharacterTick(int ClientID);
 void AntibotOnHookAttach(int ClientID, bool Player);
 void AntibotOnEngineTick(void);
-void AntibotOnEngineClientJoin(int ClientID, bool Sixup);
+void AntibotOnEngineClientJoin(int ClientID, bool Sevendown);
 void AntibotOnEngineClientDrop(int ClientID, const char *pReason);
 void AntibotOnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags);
 }

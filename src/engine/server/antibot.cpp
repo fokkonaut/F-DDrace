@@ -44,6 +44,10 @@ void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
 }
+void CAntibot::BotDetected(int ClientID, void *pUser)
+{
+	((CAntibot *)pUser)->GameServer()->SetBotDetected(ClientID);
+}
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -60,6 +64,7 @@ void CAntibot::Init()
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
+	m_Data.m_pfnBotDetected = BotDetected;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
 
@@ -146,10 +151,10 @@ void CAntibot::OnEngineTick()
 	Update();
 	AntibotOnEngineTick();
 }
-void CAntibot::OnEngineClientJoin(int ClientID, bool Sixup)
+void CAntibot::OnEngineClientJoin(int ClientID, bool Sevendown)
 {
 	Update();
-	AntibotOnEngineClientJoin(ClientID, Sixup);
+	AntibotOnEngineClientJoin(ClientID, Sevendown);
 }
 void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason)
 {
@@ -207,7 +212,7 @@ void CAntibot::OnCharacterTick(int ClientID) {}
 void CAntibot::OnHookAttach(int ClientID, bool Player) {}
 
 void CAntibot::OnEngineTick() {}
-void CAntibot::OnEngineClientJoin(int ClientID, bool Sixup) {}
+void CAntibot::OnEngineClientJoin(int ClientID, bool Sevendown) {}
 void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason) {}
 void CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) {}
 #endif

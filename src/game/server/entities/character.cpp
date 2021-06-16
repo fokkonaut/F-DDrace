@@ -98,10 +98,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
-	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
-	m_LatestPrevPrevInput.m_TargetY = -1;
-	Antibot()->OnSpawn(m_pPlayer->GetCID());
-
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts, IsSwitchActiveCb, this);
 	m_Core.m_Pos = m_Pos;
@@ -119,6 +115,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	DDraceInit();
+
+	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
+	m_LatestPrevPrevInput.m_TargetY = -1;
+	Antibot()->OnSpawn(m_pPlayer->GetCID());
 
 	m_pPlayer->LoadMinigameTee();
 	GameServer()->CheckShutdownSaved(m_pPlayer->GetCID());

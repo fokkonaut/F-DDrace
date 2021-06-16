@@ -260,6 +260,7 @@ public:
 	virtual void SetClientScore(int ClientID, int Score);
 
 	void Kick(int ClientID, const char *pReason);
+	void Ban(int ClientID, int Seconds, const char *pReason); // bans ip of player with clientid
 
 	void DemoRecorder_HandleAutoStart();
 	bool DemoRecorder_IsRecording();

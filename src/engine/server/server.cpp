@@ -433,6 +433,11 @@ void CServer::Kick(int ClientID, const char *pReason)
 	m_NetServer.Drop(ClientID, pReason);
 }
 
+void CServer::Ban(int ClientID, int Seconds, const char *pReason)
+{
+	m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Seconds, pReason);
+}
+
 /*int CServer::Tick()
 {
 	return m_CurrentGameTick;
