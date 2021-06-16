@@ -1689,7 +1689,8 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	ADD_INT(p, Token);
  
 	p.AddString(GameServer()->VersionSevendown(), 32);
-	p.AddString(Config()->m_SvName, 64);
+	str_format(aBuf, sizeof(aBuf), "%s%s", Config()->m_SvName, Config()->m_SvNameExtra);
+	p.AddString(aBuf, 64);
 	p.AddString(GetMapName(), 32);
  
 	ADD_INT(p, m_CurrentMapCrc);
