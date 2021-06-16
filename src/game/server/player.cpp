@@ -24,10 +24,12 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool 
 	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam(ClientID);
 	m_DebugDummy = DebugDummy;
 	Reset();
+	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
 }
 
 CPlayer::~CPlayer()
 {
+	GameServer()->Antibot()->OnPlayerDestroy(m_ClientID);
 	delete m_pLastTarget;
 	delete m_pCharacter;
 	m_pCharacter = 0;
@@ -217,6 +219,8 @@ void CPlayer::Reset()
 	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
 	m_RequestedMinigame = MINIGAME_NONE;
 	m_LastMinigameRequest = 0;
+
+	m_BotDetected = false;
 }
 
 void CPlayer::Tick()

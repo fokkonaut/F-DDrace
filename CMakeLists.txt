@@ -68,6 +68,7 @@ endif()
 
 option(MYSQL "Enable mysql support" OFF)
 option(CLIENT "Compile client" ON)
+option(ANTIBOT "Enable support for a dynamic anticheat library" ON)
 option(DOWNLOAD_DEPENDENCIES "Download dependencies (only available on Windows)" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DOWNLOAD_GTEST "Download and compile GTest if not found" ${AUTO_DEPENDENCIES_DEFAULT})
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -226,6 +227,21 @@ function(set_src VAR GLOBBING DIRECTORY) # ...
   set(${VAR} ${${VAR}} PARENT_SCOPE)
 endfunction()
 
+function(set_own_rpath TARGET)
+  if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
+    if(CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
+      set_property(TARGET ${TARGET} PROPERTY BUILD_RPATH "$ORIGIN")
+    endif()
+    set_property(TARGET ${TARGET} PROPERTY INSTALL_RPATH "$ORIGIN/../lib/teeworlds")
+  endif()
+endfunction()
+
+if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
+  if(ANTIBOT)
+    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
+  endif()
+endif()
+
 ########################################################################
 # INITIALIZE TARGET LISTS
 ########################################################################
@@ -363,7 +379,7 @@ if(NOT(PYTHONINTERP_FOUND))
 endif()
 
 if(MYSQL AND NOT(MYSQL_FOUND))
-  message(SEND_ERROR "You must install MySQL to compile the DDNet server with MySQL support")
+  message(SEND_ERROR "You must install MySQL to compile the Teeworlds server with MySQL support")
 endif()
 
 if(CLIENT AND NOT(FREETYPE_FOUND))
@@ -1298,6 +1314,7 @@ set_src(BASE GLOB_RECURSE src/base
   vmath.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
+  antibot.h
   client.h
   config.h
   console.h
@@ -1622,7 +1639,15 @@ endif()
 ########################################################################
 
 # Sources
+set_src(ANTIBOT_SRC GLOB src/antibot
+  antibot_data.h
+  antibot_interface.h
+  antibot_null.cpp
+)
+
 set_src(ENGINE_SERVER GLOB src/engine/server
+  antibot.cpp
+  antibot.h
   authmanager.cpp
   authmanager.h
   register.cpp
@@ -1750,10 +1775,18 @@ else()
   set(SERVER_ICON)
 endif()
 
+# Antibot
+if(ANTIBOT)
+  set(TARGET_ANTIBOT antibot)
+  add_library(${TARGET_ANTIBOT} SHARED ${ANTIBOT_SRC})
+  list(APPEND TARGETS_OWN ${TARGET_ANTIBOT})
+endif()
+
 # Libraries
 set(LIBS_SERVER
   ${LIBS}
   ${MYSQL_LIBRARIES}
+  ${TARGET_ANTIBOT}
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}
@@ -2018,6 +2051,9 @@ if(NOT DEV)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/data DESTINATION share/${PROJECT_NAME} COMPONENT data)
   install(TARGETS ${TARGET_CLIENT} DESTINATION bin COMPONENT client)
   install(TARGETS ${TARGET_SERVER} DESTINATION bin COMPONENT server)
+  if(ANTIBOT)
+    install(TARGETS ${TARGET_ANTIBOT} DESTINATION lib/teeworlds COMPONENT server)
+  endif()
 endif()
 
 if(DEV)
@@ -2182,6 +2218,12 @@ macro(source_group_tree dir)
 endmacro()
 source_group_tree(src)
 
+if(ANTIBOT)
+  # Allow the antibot library to use functions from the server binary.
+  add_c_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
+  set_own_rpath(${TARGET_SERVER})
+endif()
+
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
 
 foreach(target ${TARGETS})
@@ -2253,6 +2295,9 @@ foreach(target ${TARGETS_OWN})
   if(MYSQL)
     target_compile_definitions(${target} PRIVATE CONF_SQL)
     target_include_directories(${target} PRIVATE ${MYSQL_INCLUDE_DIRS})
+  endif()
+  if(ANTIBOT)
+    target_compile_definitions(${target} PRIVATE CONF_ANTIBOT)
   endif()
 endforeach()
 

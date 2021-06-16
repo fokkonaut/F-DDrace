@@ -70,7 +70,7 @@ inline float GetAngle(vec2 Dir)
 	if (Dir.x < 0)
 		a = a + pi;
 	return a;
-} 
+}
 
 inline void StrToInts(int *pInts, int Num, const char *pStr)
 {

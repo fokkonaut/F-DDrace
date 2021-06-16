@@ -14,6 +14,8 @@
 #include <engine/shared/netban.h>
 #include "register.h"
 #include <engine/shared/fifo.h>
+
+#include "antibot.h"
 #include "authmanager.h"
 
 #if defined (CONF_SQL)
@@ -80,6 +82,7 @@ class CServer : public IServer
 	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IEngineAntibot *m_pAntibot;
 
 #if defined(CONF_SQL)
 	lock m_GlobalSqlLock;
@@ -92,6 +95,7 @@ public:
 	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
+	class IEngineAntibot *Antibot() { return m_pAntibot; }
 
 	enum
 	{
@@ -256,6 +260,7 @@ public:
 	virtual void SetClientScore(int ClientID, int Score);
 
 	void Kick(int ClientID, const char *pReason);
+	void Ban(int ClientID, int Seconds, const char *pReason); // bans ip of player with clientid
 
 	void DemoRecorder_HandleAutoStart();
 	bool DemoRecorder_IsRecording();
@@ -318,7 +323,7 @@ public:
 	int LoadMap(const char *pMapName);
 
 	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole);
-	void InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage);
+	void InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot);
 	int Run();
 
 	static int MapListEntryCallback(const char *pFilename, int IsDir, int DirType, void *pUser);
@@ -375,6 +380,8 @@ public:
 	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
 	bool SetTimedOut(int ClientID, int OrigID);
 	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
+
+	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags);
 
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
 	const char* GetAnnouncementLine(char const* FileName);
