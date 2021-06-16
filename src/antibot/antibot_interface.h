@@ -16,7 +16,7 @@ void AntibotOnPlayerDestroy(int ClientID);
 void AntibotOnSpawn(int ClientID);
 void AntibotOnHammerFireReloading(int ClientID);
 void AntibotOnHammerFire(int ClientID);
-void AntibotOnHammerHit(int ClientID);
+void AntibotOnHammerHit(int ClientID, int HitID);
 void AntibotOnDirectInput(int ClientID);
 void AntibotOnCharacterTick(int ClientID);
 void AntibotOnHookAttach(int ClientID, bool Player);

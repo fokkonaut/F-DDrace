@@ -565,12 +565,12 @@ void CCharacter::FireWeapon()
 					else
 						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
 
+					int TargetCID = pTarget->GetPlayer()->GetCID();
+
 					// police catch gangster
 					if (pTarget->GetPlayer()->m_EscapeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->m_FreezeTime
 						&& GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel)
 					{
-						int TargetCID = pTarget->GetPlayer()->GetCID();
-
 						char aBuf[256];
 						int Minutes = clamp((int)(pTarget->GetPlayer()->m_EscapeTime / Server()->TickSpeed()) / 100, 10, 20);
 						int Corrupt = clamp(pTarget->GetPlayer()->m_SpawnBlockScore * 500, 500, 10000);
@@ -621,7 +621,7 @@ void CCharacter::FireWeapon()
 							pTarget->Freeze();
 					}
 
-					Antibot()->OnHammerHit(m_pPlayer->GetCID());
+					Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
 
 					Hits++;
 				}
@@ -2108,6 +2108,7 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
 	pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
 	pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
+	mem_copy(pData->m_aSameIP, m_pPlayer->m_aSameIP, sizeof(pData->m_aSameIP));
 }
 
 void CCharacter::HandleBroadcast()

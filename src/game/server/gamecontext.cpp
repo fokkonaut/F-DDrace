@@ -193,6 +193,9 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 		pChar->m_SpawnTick = -1;
 		pChar->m_WeaponChangeTick = -1;
 
+		for (int j = 0; j < MAX_CLIENTS; j++)
+			pChar->m_aSameIP[j] = false;
+
 		if(m_apPlayers[i])
 		{
 			str_copy(pChar->m_aName, Server()->ClientName(i), sizeof(pChar->m_aName));
