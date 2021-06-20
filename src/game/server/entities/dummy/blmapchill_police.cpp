@@ -1072,12 +1072,18 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 		// jump over freeze pit
 		if (GetVel().x > 2.2f && IsGrounded() && X < 369)
 			Jump();
-		// freeze pit on left side of police
-		if (X > 366 && X < 382 && !IsGrounded())
+		if (!IsGrounded())
 		{
-			if (GetVel().x < -6.6f && X < 372)
-				Left();
-			else
+			// freeze pit on left side of police
+			if (X > 366 && X < 382)
+			{
+				if (GetVel().x < -6.6f && X < 372)
+					Left();
+				else
+					Right();
+			}
+			// do not run into freeze on the left
+			if (X < 368 && GetVel().x < -10.8)
 				Right();
 		}
 	}
@@ -1122,7 +1128,7 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 	if (Y > 437)
 	{
 		m_WantedWeapon = WEAPON_GRENADE;
-		if (X < 399)
+		if (X < 400)
 			Right();
 		else if (X > 402 && X < 406)
 			Right();
@@ -1145,7 +1151,10 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 		// grenade boosts floor
 		if (IsGrounded())
 		{
-			Aim(100 * -Direction, 20);
+			int angleY = 20;
+			if(Direction == DIRECTION_RIGHT && X > 379 && X < 391)
+				angleY = 300;
+			Aim(100 * -Direction, angleY);
 			if (TicksPassed(10))
 				m_WantedWeapon = WEAPON_GRENADE;
 			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
@@ -1159,6 +1168,14 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 				m_WantedWeapon = WEAPON_GRENADE;
 			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
 				Fire();
+		}
+		// hammer away fat tees in the way
+		if (IsVelXLt(-Direction, -0.1f) && IsGrounded())
+		{
+			Aim(100 * Direction, -1);
+			if (TicksPassed(10))
+				SetWeapon(WEAPON_HAMMER);
+			Fire();
 		}
 	}
 }
@@ -1267,6 +1284,9 @@ bool CDummyBlmapChillPolice::HelpOfficerRight()
 		if (JumpedTotal() > 2)
 			Left();
 		Hook(0);
+		// being hold back either by hook or by fat tees in the way -> jump
+		if (GetVel().x < -0.1f && IsGrounded())
+			Jump();
 		float DistToOfficer = distance(GetPos(), pChr->GetPos());
 		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
 			Hook(1);
