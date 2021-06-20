@@ -1128,7 +1128,7 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 	if (Y > 437)
 	{
 		m_WantedWeapon = WEAPON_GRENADE;
-		if (X < 399)
+		if (X < 400)
 			Right();
 		else if (X > 402 && X < 406)
 			Right();
