@@ -66,7 +66,7 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec = false);
+	CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec = false, bool Dummy = false);
 	~CPlayer();
 
 	void Reset();

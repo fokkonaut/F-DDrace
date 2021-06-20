@@ -193,6 +193,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 		pChar->m_SpawnTick = -1;
 		pChar->m_WeaponChangeTick = -1;
 
+		pChar->m_IsDummy = false;
 		for (int j = 0; j < MAX_CLIENTS; j++)
 			pChar->m_aSameIP[j] = false;
 
@@ -5538,9 +5539,8 @@ void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)
 	if (DummyID < 0 || DummyID >= MAX_CLIENTS || m_apPlayers[DummyID])
 		return;
 
-	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, false);
+	CPlayer *pDummy = m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, false, false, true);
 	Server()->DummyJoin(DummyID);
-	pDummy->m_IsDummy = true;
 	pDummy->SetDummyMode(DummyMode);
 	pDummy->m_ForceSpawnPos = Pos;
 	pDummy->m_Afk = false; // players are marked as afk when they first enter. dummies dont send real inputs, thats why we need to make them non-afk again

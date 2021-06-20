@@ -17,12 +17,13 @@ MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
-CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec)
+CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool AsSpec, bool Dummy)
 {
 	m_pGameServer = pGameServer;
 	m_ClientID = ClientID;
 	m_Team = AsSpec ? TEAM_SPECTATORS : GameServer()->m_pController->GetStartTeam(ClientID);
 	m_DebugDummy = DebugDummy;
+	m_IsDummy = Dummy;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
 }
@@ -131,7 +132,6 @@ void CPlayer::Reset()
 
 	// F-DDrace
 
-	m_IsDummy = false;
 	m_DummyMode = DUMMYMODE_IDLE;
 	m_FakePing = 0;
 
