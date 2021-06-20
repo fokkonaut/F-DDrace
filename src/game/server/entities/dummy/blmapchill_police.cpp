@@ -1145,7 +1145,10 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 		// grenade boosts floor
 		if (IsGrounded())
 		{
-			Aim(100 * -Direction, 20);
+			int angleY = 20;
+			if(Direction == DIRECTION_RIGHT && X > 379 && X < 391)
+				angleY = 300;
+			Aim(100 * -Direction, angleY);
 			if (TicksPassed(10))
 				m_WantedWeapon = WEAPON_GRENADE;
 			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
