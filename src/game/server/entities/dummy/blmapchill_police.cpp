@@ -1072,12 +1072,18 @@ void CDummyBlmapChillPolice::NewPoliceMoves()
 		// jump over freeze pit
 		if (GetVel().x > 2.2f && IsGrounded() && X < 369)
 			Jump();
-		// freeze pit on left side of police
-		if (X > 366 && X < 382 && !IsGrounded())
+		if (!IsGrounded())
 		{
-			if (GetVel().x < -6.6f && X < 372)
-				Left();
-			else
+			// freeze pit on left side of police
+			if (X > 366 && X < 382)
+			{
+				if (GetVel().x < -6.6f && X < 372)
+					Left();
+				else
+					Right();
+			}
+			// do not run into freeze on the left
+			if (X < 368 && GetVel().x < -10.8)
 				Right();
 		}
 	}
