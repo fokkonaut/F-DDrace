@@ -1169,6 +1169,14 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 			if (m_pCharacter->GetActiveWeapon() == WEAPON_GRENADE)
 				Fire();
 		}
+		// hammer away fat tees in the way
+		if (IsVelXLt(-Direction, -0.1f) && IsGrounded())
+		{
+			Aim(100 * Direction, -1);
+			if (TicksPassed(10))
+				SetWeapon(WEAPON_HAMMER);
+			Fire();
+		}
 	}
 }
 
@@ -1276,6 +1284,9 @@ bool CDummyBlmapChillPolice::HelpOfficerRight()
 		if (JumpedTotal() > 2)
 			Left();
 		Hook(0);
+		// being hold back either by hook or by fat tees in the way -> jump
+		if (GetVel().x < -0.1f && IsGrounded())
+			Jump();
 		float DistToOfficer = distance(GetPos(), pChr->GetPos());
 		if (HookState() == HOOK_FLYING || HookState() == HOOK_GRABBED || DistToOfficer < 10 * 32)
 			Hook(1);
