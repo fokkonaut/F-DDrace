@@ -1195,6 +1195,7 @@ void CCollision::SetCollisionAt(float x, float y, int id)
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)
 {
+	m_pConfig->m_SvTestingCommands = 1;
 	if (!m_pDoor)
 		return;
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
@@ -1225,7 +1226,7 @@ void CCollision::UnsetDCollisionAt(float x, float y, int Fight)
 
 	if (Fight)
 	{
-		if (-m_pDoor[Ny * m_Width + Nx].m_Fight == Fight + 1)
+		if (m_pDoor[Ny * m_Width + Nx].m_Fight == Fight)
 			m_pDoor[Ny * m_Width + Nx].m_Fight = 0;
 		return;
 	}

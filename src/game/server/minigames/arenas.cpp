@@ -747,7 +747,7 @@ void CArenas::SetArenaCollision(int Fight, bool Remove)
 			if (!Remove)
 				GameServer()->Collision()->SetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, TILE_STOPA, 0/*Flags*/, -(Fight+1));
 			else
-				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, Fight);
+				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, -(Fight+1));
 		}
 	}
 
@@ -762,7 +762,7 @@ void CArenas::SetArenaCollision(int Fight, bool Remove)
 			if (!Remove)
 				GameServer()->Collision()->SetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, TILE_STOPA, 0/*Flags*/, -(Fight+1));
 			else
-				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, Fight);
+				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, -(Fight+1));
 		}
 	}
 }
