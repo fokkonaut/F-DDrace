@@ -372,7 +372,8 @@ public:
 	virtual void *SnapNewItem(int Type, int ID, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
 
-	void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
+	virtual void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
+	virtual void SetRconAuthLevel(int AuthLevel) { m_RconAuthLevel = AuthLevel; }
 
 	// F-DDrace
 

@@ -47,6 +47,7 @@ public:
 	virtual int GetClientVersion(int ClientID) const = 0;
 	virtual void SetClientDDNetVersion(int ClientID, int DDNetVersion) = 0;
 	virtual void RestrictRconOutput(int ClientID) = 0;
+	virtual void SetRconAuthLevel(int AuthLevel) = 0;
 
 	// F-DDrace
 

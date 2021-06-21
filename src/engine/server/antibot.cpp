@@ -36,7 +36,9 @@ void CAntibot::Send(int ClientID, const void *pData, int Size, int Flags, void *
 void CAntibot::Log(const char *pMessage, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
+	pAntibot->Server()->SetRconAuthLevel(AUTHED_MOD); // Send antibot triggers to moderators
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
+	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
 void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 {
