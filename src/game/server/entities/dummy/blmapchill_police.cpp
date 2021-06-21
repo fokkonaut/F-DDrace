@@ -1170,12 +1170,13 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 				Fire();
 		}
 		// hammer away fat tees in the way
-		if (IsVelXLt(-Direction, -0.1f) && IsGrounded())
+		if (IsVelXLt(Direction, -0.1f) && IsGrounded())
 		{
 			Aim(100 * Direction, -1);
 			if (TicksPassed(10))
 				SetWeapon(WEAPON_HAMMER);
-			Fire();
+			if (m_pCharacter->GetActiveWeapon() == WEAPON_HAMMER)
+				Fire();
 		}
 	}
 }
