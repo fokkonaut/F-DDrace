@@ -225,9 +225,6 @@ void CArenas::FinishConfiguration(int Fight, int ClientID)
 
 void CArenas::OnInput(int ClientID, CNetObj_PlayerInput *pNewInput)
 {
-	if (m_aState[ClientID] != STATE_1VS1_SELECT_WEAPONS)
-		UpdateSnapPositions(ClientID);
-
 	if (pNewInput->m_Jump && m_aLastJump[ClientID] == 0)
 	{
 		switch (m_aState[ClientID])
@@ -626,6 +623,9 @@ void CArenas::Snap(int SnappingClient)
 
 	if (!IsConfiguring(SnappingClient) && !FightStarted(ClientID))
 		return;
+
+	if (m_aState[SnappingClient] != STATE_1VS1_SELECT_WEAPONS)
+		UpdateSnapPositions(SnappingClient);
 
 	CFight *pFight = &m_aFights[Fight];
 

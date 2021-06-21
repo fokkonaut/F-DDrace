@@ -2254,7 +2254,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 		{
-			if(Config()->m_SvSpamprotection && pPlayer->m_LastVote && pPlayer->m_LastVote+Server()->TickSpeed()/4 > Server()->Tick())
+			if(Config()->m_SvSpamprotection && pPlayer->m_LastVote && pPlayer->m_LastVote+Server()->TickSpeed()/8 > Server()->Tick())
 				return;
 
 			pPlayer->m_LastVote = Server()->Tick();
