@@ -75,8 +75,9 @@ bool CArenas::IsGrounded(CCharacter *pChr)
 {
 	if (!pChr)
 		return false;
-	return pChr->IsGrounded() || GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y))) == TILE_STOPA
-		|| GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4))) == TILE_STOPA;
+	int Fight = GetClientFight(pChr->GetPlayer()->GetCID());
+	return pChr->IsGrounded() || GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y))) == Fight
+		|| GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4))) == Fight;
 }
 
 int CArenas::GetClientFight(int ClientID, bool HasToBeJoined)
@@ -285,12 +286,12 @@ void CArenas::UpdateSnapPositions(int ClientID)
 
 			if (m_aFights[Fight].m_KillBorder)
 			{
-				if (GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y))) == TILE_STOPA)
+				if (GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y))) == Fight)
 					return;
 			}
 			else
 			{
-				BorderBelow = GameServer()->Collision()->GetDTileIndex(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4))) == TILE_STOPA;
+				BorderBelow = GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4))) == Fight;
 			}
 
 			TempPos.y += 32.f;

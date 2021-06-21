@@ -325,7 +325,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 				int SwitchNumber;
 				if (Fight)
 				{
-					SwitchNumber = GetFightNumber(ModMapIndex);
+					SwitchNumber = GetFightNumber(ModMapIndex, false);
 					if (!SwitchNumber || IsSolid(ModPos.x, ModPos.y))
 						continue;
 				}
@@ -1441,11 +1441,14 @@ int CCollision::GetDoorNumber(vec2 Pos)
 	return GetDTileNumber(GetPureMapIndex(Pos));
 }
 
-int CCollision::GetFightNumber(int Index)
+int CCollision::GetFightNumber(int Index, bool RealFight)
 {
 	if (!m_pDoor || Index < 0)
 		return 0;
-	return m_pDoor[Index].m_Fight;
+	int Fight = m_pDoor[Index].m_Fight;
+	if (RealFight)
+		Fight = -(Fight+1);
+	return Fight;
 }
 
 int CCollision::GetDTile(int x, int y)

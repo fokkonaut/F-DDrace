@@ -161,7 +161,7 @@ public:
 	int m_NumPlots;
 
 	// fights
-	int GetFightNumber(int Index);
+	int GetFightNumber(int Index, bool RealFight = true);
 
 private:
 
