@@ -1195,7 +1195,6 @@ void CCollision::SetCollisionAt(float x, float y, int id)
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)
 {
-	m_pConfig->m_SvTestingCommands = 1;
 	if (!m_pDoor)
 		return;
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
