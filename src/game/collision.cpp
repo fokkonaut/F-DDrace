@@ -971,6 +971,8 @@ bool CCollision::TileExistsNext(int Index)
 			return true;
 		if ((m_pDoor[TileBelow].m_Index == TILE_STOP && m_pDoor[TileBelow].m_Flags == ROTATION_0) || (m_pDoor[TileAbove].m_Index == TILE_STOP && m_pDoor[TileAbove].m_Flags == ROTATION_180))
 			return true;
+		if (GetFightNumber(TileOnTheRight) || GetFightNumber(TileOnTheLeft) || GetFightNumber(TileAbove) || GetFightNumber(TileBelow))
+			return true;
 	}
 	return false;
 }
