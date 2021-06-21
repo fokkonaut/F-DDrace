@@ -486,6 +486,7 @@ public:
 
 	// F-DDrace
 	int m_Usage;
+	int m_Fight;
 };
 
 class CTuneTile

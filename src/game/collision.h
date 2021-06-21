@@ -151,7 +151,7 @@ public:
 	bool TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
 	bool CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly);
 	int GetDoorNumber(vec2 Pos);
-	void UnsetDCollisionAt(float x, float y);
+	void UnsetDCollisionAt(float x, float y, int Fight = 0);
 
 	// plots
 	bool IsPlotTile(int Index);
@@ -159,6 +159,9 @@ public:
 	int GetSwitchByPlot(int PlotID);
 	int GetPlotBySwitch(int SwitchID);
 	int m_NumPlots;
+
+	// fights
+	int GetFightNumber(int Index);
 
 private:
 

@@ -320,21 +320,37 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
-			int SwitchNumber = GetDTileNumber(ModMapIndex);
-			if (SwitchNumber < 0 && IsSolid(ModPos.x, ModPos.y)) // fight border inside of a wall
-				continue;
-			if(pfnSwitchActive(SwitchNumber, pUser))
+			for (int Fight = 0; Fight < 2; Fight++)
 			{
-				int Tile = GetDTileIndex(ModMapIndex);
-				int Flags = GetDTileFlags(ModMapIndex);
-				//Restrictions |= ::GetMoveRestrictions(d, Tile, Flags, Extra);
+				int SwitchNumber;
+				if (Fight)
+				{
+					SwitchNumber = GetFightNumber(ModMapIndex);
+					if (!SwitchNumber || IsSolid(ModPos.x, ModPos.y))
+						continue;
+				}
+				else
+				{
+					SwitchNumber = GetDTileNumber(ModMapIndex);
+				}
+				
+				if (pfnSwitchActive(SwitchNumber, pUser))
+				{
+					int Tile = TILE_STOPA;
+					int Flags = 0;
+					if (!Fight)
+					{
+						Tile = GetDTileIndex(ModMapIndex);
+						Flags = GetDTileFlags(ModMapIndex);
+					}
 
-				// F-DDrace
-				int DoorRestrictions = 0|::GetMoveRestrictions(d, Tile, Flags, Extra);
-				Restrictions |= DoorRestrictions;
+					// F-DDrace
+					int DoorRestrictions = 0 | ::GetMoveRestrictions(d, Tile, Flags, Extra);
+					Restrictions |= DoorRestrictions;
 
-				if (DoorRestrictions&CANTMOVE_DOWN)
-					Restrictions |= CANTMOVE_DOWN_LASERDOOR;
+					if (DoorRestrictions & CANTMOVE_DOWN)
+						Restrictions |= CANTMOVE_DOWN_LASERDOOR;
+				}
 			}
 		}
 	}
@@ -1182,32 +1198,42 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
 
-	// plot wall or number 0 door, we dont want to unset the door collision when setting an arena
-	if ((m_pDoor[Ny * m_Width + Nx].m_Number == 0 && !m_pDoor[Ny * m_Width + Nx].m_Index)
-		|| (Number == 0 && m_pDoor[Ny * m_Width + Nx].m_Number < 0))
+	if (Number < 0)
+	{
+		if (!m_pDoor[Ny * m_Width + Nx].m_Fight)
+			m_pDoor[Ny * m_Width + Nx].m_Fight = Number;
+	}
+	else if (m_pDoor[Ny * m_Width + Nx].m_Number == 0 || m_pDoor[Ny * m_Width + Nx].m_Number == Number)
 	{
 		m_pDoor[Ny * m_Width + Nx].m_Index = Type;
 		m_pDoor[Ny * m_Width + Nx].m_Flags = Flags;
 		m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 	}
 
-	if (Number <= 0)
+	if (Number == 0)
 		m_pDoor[Ny * m_Width + Nx].m_Usage++;
 }
 
-void CCollision::UnsetDCollisionAt(float x, float y)
+void CCollision::UnsetDCollisionAt(float x, float y, int Fight)
 {
 	if(!m_pDoor)
 		return;
 	int Nx = clamp(round_to_int(x)/32, 0, m_Width-1);
 	int Ny = clamp(round_to_int(y)/32, 0, m_Height-1);
 
+	if (Fight)
+	{
+		if (-m_pDoor[Ny * m_Width + Nx].m_Fight == Fight + 1)
+			m_pDoor[Ny * m_Width + Nx].m_Fight = 0;
+		return;
+	}
+
 	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0)
 		return;
 
 	m_pDoor[Ny * m_Width + Nx].m_Usage--;
 
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number <= 0)
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number == 0)
 	{
 		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
 		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;
@@ -1413,6 +1439,13 @@ int CCollision::GetFTileRaw(int x, int y)
 int CCollision::GetDoorNumber(vec2 Pos)
 {
 	return GetDTileNumber(GetPureMapIndex(Pos));
+}
+
+int CCollision::GetFightNumber(int Index)
+{
+	if (!m_pDoor || Index < 0)
+		return 0;
+	return m_pDoor[Index].m_Fight;
 }
 
 int CCollision::GetDTile(int x, int y)
