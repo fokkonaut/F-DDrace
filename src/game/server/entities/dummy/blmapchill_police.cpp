@@ -1204,18 +1204,21 @@ bool CDummyBlmapChillPolice::HelpOfficerLeft()
 			Right();
 			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
 			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
-			CCharacter *pCharHooked = pHooked->GetCharacter();
-			if (pCharHooked)
+			if (pHooked)
 			{
-				// hooked a non police tee -> try to get rid of it
-				if (!IsPolice(pCharHooked))
+				CCharacter *pCharHooked = pHooked->GetCharacter();
+				if (pCharHooked)
 				{
-					// hook random to the left
-					Left();
-					if (JumpedTotal() > 3)
-						Hook(0);
-					if (pCharHooked->Core()->m_Vel.x < -8.8f)
-						Hook(0);
+					// hooked a non police tee -> try to get rid of it
+					if (!IsPolice(pCharHooked))
+					{
+						// hook random to the left
+						Left();
+						if (JumpedTotal() > 3)
+							Hook(0);
+						if (pCharHooked->Core()->m_Vel.x < -8.8f)
+							Hook(0);
+					}
 				}
 			}
 		}
