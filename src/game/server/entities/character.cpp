@@ -2108,8 +2108,6 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
 	pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
 	pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
-	pData->m_IsDummy = m_pPlayer->m_IsDummy;
-	mem_copy(pData->m_aSameIP, m_pPlayer->m_aSameIP, sizeof(pData->m_aSameIP));
 }
 
 void CCharacter::HandleBroadcast()

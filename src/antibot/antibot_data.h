@@ -37,9 +37,6 @@ struct CAntibotInputData
 
 struct CAntibotCharacterData
 {
-	bool m_aSameIP[ANTIBOT_MAX_CLIENTS];
-	bool m_IsDummy;
-
 	char m_aName[16];
 	CAntibotInputData m_aLatestInputs[3];
 

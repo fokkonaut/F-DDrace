@@ -193,11 +193,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 		pChar->m_SpawnTick = -1;
 		pChar->m_WeaponChangeTick = -1;
 
-		pChar->m_IsDummy = false;
-		for (int j = 0; j < MAX_CLIENTS; j++)
-			pChar->m_aSameIP[j] = false;
-
-		if(m_apPlayers[i])
+		if(m_apPlayers[i] && !m_apPlayers[i]->m_IsDummy)
 		{
 			str_copy(pChar->m_aName, Server()->ClientName(i), sizeof(pChar->m_aName));
 			CCharacter *pGameChar = m_apPlayers[i]->GetCharacter();
