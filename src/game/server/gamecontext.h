@@ -338,7 +338,6 @@ public:
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionSevendown() const;
 
-	virtual void SetBotDetected(int ClientID);
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	bool OnClientDDNetVersionKnown(int ClientID);
 	int GetClientDDNetVersion(int ClientID);

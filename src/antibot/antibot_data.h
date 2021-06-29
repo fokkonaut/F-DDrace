@@ -84,7 +84,6 @@ struct CAntibotData
 	void (*m_pfnLog)(const char *pMessage, void *pUser);
 	void (*m_pfnReport)(int ClientID, const char *pMessage, void *pUser);
 	void (*m_pfnSend)(int ClientID, const void *pData, int DataSize, int Flags, void *pUser);
-	void (*m_pfnBotDetected)(int ClientID, void *pUser);
 	void *m_pUser;
 };
 struct CAntibotRoundData

@@ -46,10 +46,6 @@ void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
 }
-void CAntibot::BotDetected(int ClientID, void *pUser)
-{
-	((CAntibot *)pUser)->GameServer()->SetBotDetected(ClientID);
-}
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -66,7 +62,6 @@ void CAntibot::Init()
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
-	m_Data.m_pfnBotDetected = BotDetected;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
 
