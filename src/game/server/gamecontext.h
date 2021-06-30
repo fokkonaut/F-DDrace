@@ -436,7 +436,7 @@ public:
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
 	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
-	const char *HashPassword(const char *pPassword);
+	unsigned long HashPassword(const char *pPassword);
 	void SetPassword(int ID, const char *pPassword);
 	bool CheckPassword(int ID, const char *pPassword);
 
@@ -454,7 +454,7 @@ public:
 		int m_Port;
 		bool m_LoggedIn;
 		bool m_Disabled;
-		char m_Password[MAX_PASSWORD_LENGTH];
+		unsigned long m_Password;
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
