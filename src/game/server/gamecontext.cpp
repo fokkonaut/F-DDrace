@@ -3,6 +3,7 @@
 #include <base/math.h>
 
 #include <antibot/antibot_data.h>
+#include <zlib.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
@@ -4506,6 +4507,12 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		if (ID < ACC_START)
 			return 0;
 
+		if (pSelf->m_Accounts[ID].m_Version <= 5)
+		{
+			pSelf->SetPassword(ID, pSelf->m_Accounts[ID].m_Password);
+			pSelf->WriteAccountStats(ID);
+		}
+
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
 
@@ -4864,11 +4871,14 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		return false;
 	}
 
-	if (PasswordRequired && str_comp(m_Accounts[ID].m_Password, pPassword))
+	if (PasswordRequired)
 	{
-		SendChatTarget(ClientID, "Wrong password");
-		FreeAccount(ID);
-		return false;
+		if (CheckPassword(ID, pPassword))
+		{
+			SendChatTarget(ClientID, "Wrong password");
+			FreeAccount(ID);
+			return false;
+		}
 	}
 
 	// set some variables and save the account with some new values
@@ -4902,6 +4912,32 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 
 	pPlayer->OnLogin();
 	return true;
+}
+
+const char *CGameContext::HashPassword(const char *pPassword)
+{
+	char aPassword[MAX_PASSWORD_LENGTH];
+	str_copy(aPassword, pPassword, sizeof(aPassword));
+	unsigned long Crc = crc32(0L, 0x0, 0);
+	Crc = crc32(Crc, (const unsigned char*)aPassword, sizeof(aPassword));
+	str_format(aPassword, sizeof(aPassword), "%lu", Crc);
+	return aPassword;
+}
+
+void CGameContext::SetPassword(int ID, const char *pPassword)
+{
+	if (ID < ACC_START)
+		return;
+
+	str_copy(m_Accounts[ID].m_Password, HashPassword(pPassword), sizeof(m_Accounts[ID].m_Password));
+}
+
+bool CGameContext::CheckPassword(int ID, const char *pPassword)
+{
+	if (ID < ACC_START)
+		return true;
+
+	return str_comp(m_Accounts[ID].m_Password, HashPassword(pPassword)) != 0;
 }
 
 int64 CGameContext::GetNeededXP(int Level)
