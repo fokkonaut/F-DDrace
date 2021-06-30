@@ -4907,7 +4907,7 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 
 unsigned long CGameContext::HashPassword(const char *pPassword)
 {
-	static char aPassword[MAX_PASSWORD_LENGTH];
+	char aPassword[MAX_PASSWORD_LENGTH];
 	str_copy(aPassword, pPassword, sizeof(aPassword));
 	unsigned long Crc = crc32(0L, 0x0, 0);
 	return crc32(Crc, (const unsigned char*)aPassword, sizeof(aPassword));
