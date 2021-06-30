@@ -1638,7 +1638,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 
 	ID = pSelf->AddAccount();
 
-	pSelf->SetPassword(ID, aPassword);
+	str_copy(pSelf->m_Accounts[ID].m_Password, aPassword, sizeof(pSelf->m_Accounts[ID].m_Password));
 	str_copy(pSelf->m_Accounts[ID].m_Username, aUsername, sizeof(pSelf->m_Accounts[ID].m_Username));
 	str_copy(pSelf->m_Accounts[ID].m_aLastPlayerName, pSelf->Server()->ClientName(pResult->m_ClientID), sizeof(pSelf->m_Accounts[ID].m_aLastPlayerName));
 	time_t Now;
@@ -1680,14 +1680,13 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 	if (!pPlayer)
 		return;
 
-	int ID = pPlayer->GetAccID();
-	if (!pSelf->Config()->m_SvAccounts && ID < ACC_START)
+	if (!pSelf->Config()->m_SvAccounts && pPlayer->GetAccID() < ACC_START)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are not supported on this server");
 		return;
 	}
 
-	if (ID < ACC_START)
+	if (pPlayer->GetAccID() < ACC_START)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
 		return;
@@ -1720,7 +1719,7 @@ void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)
 		return;
 	}
 
-	pSelf->Logout(ID);
+	pSelf->Logout(pPlayer->GetAccID());
 }
 
 void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData)
@@ -1736,20 +1735,19 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 		return;
 	}
 
-	int ID = pPlayer->GetAccID();
-	if (ID < ACC_START)
+	if (pPlayer->GetAccID() < ACC_START)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
 		return;
 	}
 
-	if (pSelf->m_Accounts[ID].m_aSecurityPin[0] && !pPlayer->m_aSecurityPin[0])
+	if (pSelf->m_Accounts[pPlayer->GetAccID()].m_aSecurityPin[0] && !pPlayer->m_aSecurityPin[0])
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You are not verified, please enter your security pin using '/pin'");
 		return;
 	}
 
-	if (pSelf->CheckPassword(ID, pResult->GetString(0)))
+	if (str_comp(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(0)))
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "Wrong password");
 		return;
@@ -1767,8 +1765,8 @@ void CGameContext::ConChangePassword(IConsole::IResult* pResult, void* pUserData
 		return;
 	}
 
-	pSelf->SetPassword(ID, pResult->GetString(1));
-	pSelf->WriteAccountStats(ID);
+	str_copy(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password, pResult->GetString(1), sizeof(pSelf->m_Accounts[pPlayer->GetAccID()].m_Password));
+	pSelf->WriteAccountStats(pPlayer->GetAccID());
 	pSelf->SendChatTarget(pResult->m_ClientID, "Successfully changed password");
 }
 

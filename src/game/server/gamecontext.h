@@ -95,7 +95,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 6,
+	ACC_CURRENT_VERSION = 5,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -436,9 +436,6 @@ public:
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
 	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
-	unsigned long HashPassword(const char *pPassword);
-	void SetPassword(int ID, const char *pPassword);
-	bool CheckPassword(int ID, const char *pPassword);
 
 	int m_aTaserPrice[NUM_TASER_LEVELS];
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];
@@ -454,7 +451,7 @@ public:
 		int m_Port;
 		bool m_LoggedIn;
 		bool m_Disabled;
-		unsigned long m_Password;
+		char m_Password[MAX_PASSWORD_LENGTH];
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
