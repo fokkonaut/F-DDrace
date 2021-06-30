@@ -4871,14 +4871,11 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		return false;
 	}
 
-	if (PasswordRequired)
+	if (PasswordRequired && CheckPassword(ID, pPassword))
 	{
-		if (CheckPassword(ID, pPassword))
-		{
-			SendChatTarget(ClientID, "Wrong password");
-			FreeAccount(ID);
-			return false;
-		}
+		SendChatTarget(ClientID, "Wrong password");
+		FreeAccount(ID);
+		return false;
 	}
 
 	// set some variables and save the account with some new values
