@@ -72,7 +72,7 @@ struct CAntibotVersion
 			sizeof(CAntibotCharacterData), \
 			sizeof(CAntibotInputData), \
 			sizeof(CAntibotMapData), \
-			sizeof(CAntibotRoundDataLegacy), \
+			sizeof(CAntibotRoundData), \
 	}
 
 struct CAntibotData
@@ -90,14 +90,6 @@ struct CAntibotRoundData
 {
 	int m_Tick;
 	CAntibotCharacterData m_aCharacters[ANTIBOT_MAX_CLIENTS];
-	CAntibotMapData m_Map;
-};
-
-// For ANTIBOT_VERSION, sizes mismatch due to 128 player array
-struct CAntibotRoundDataLegacy
-{
-	int m_Tick;
-	CAntibotCharacterData m_aCharacters[64];
 	CAntibotMapData m_Map;
 };
 
