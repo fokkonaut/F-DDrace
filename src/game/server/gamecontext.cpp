@@ -3655,6 +3655,7 @@ void CGameContext::FDDraceInit()
 	for (int i = 0; i < NUM_MINIGAMES; i++)
 		m_aMinigameDisabled[i] = false;
 	m_aMinigameDisabled[MINIGAME_BLOCK] = !Collision()->TileUsed(TILE_MINIGAME_BLOCK);
+	m_aMinigameDisabled[MINIGAME_1VS1] = !Collision()->TileUsed(TILE_1VS1_LOBBY);
 
 	SetMapSpecificOptions();
 	if (Config()->m_SvDefaultDummies)
