@@ -1188,16 +1188,16 @@ void CCharacter::SetEmote(int Emote, int Tick)
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
-	bool ResetInput = false;
+	int ResetInput = 0;
 	if (GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()))
 	{
 		GameServer()->Arenas()->OnInput(m_pPlayer->GetCID(), pNewInput);
-		ResetInput = true;
+		ResetInput |= 2;
 	}
 	else if (m_DrawEditor.Active())
 	{
 		m_DrawEditor.OnInput(pNewInput);
-		ResetInput = true;
+		ResetInput |= 1;
 	}
 
 	if (ResetInput)
@@ -1205,8 +1205,11 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		pNewInput->m_Direction = 0;
 		pNewInput->m_Jump = 0;
 		pNewInput->m_Hook = 0;
-		pNewInput->m_TargetX = m_Input.m_TargetX;
-		pNewInput->m_TargetY = m_Input.m_TargetY;
+		if (ResetInput&2)
+		{
+			pNewInput->m_TargetX = m_Input.m_TargetX;
+			pNewInput->m_TargetY = m_Input.m_TargetY;
+		}
 	}
 
 	// check for changes
