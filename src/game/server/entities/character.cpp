@@ -1205,6 +1205,8 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		pNewInput->m_Direction = 0;
 		pNewInput->m_Jump = 0;
 		pNewInput->m_Hook = 0;
+		pNewInput->m_TargetX = m_Input.m_TargetX;
+		pNewInput->m_TargetY = m_Input.m_TargetY;
 	}
 
 	// check for changes
@@ -1944,7 +1946,7 @@ void CCharacter::Snap(int SnappingClient)
 		}
 	}
 
-	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused())
+	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused() || GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()))
 	{
 		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
 			pCharacter->m_Emote = EMOTE_NORMAL;
