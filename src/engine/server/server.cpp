@@ -1713,7 +1713,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	if(PlayerCount > ClientCount)
 		PlayerCount = ClientCount;
 	ADD_INT(p, PlayerCount);
-	ADD_INT(p, max(Config()->m_SvPlayerSlots-DummyCount, PlayerCount));
+	ADD_INT(p, max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount));
 	ADD_INT(p, ClientCount);
 	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients-DummyCount));
 
@@ -1760,25 +1760,37 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool Send
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// DDNet clients can show x/128 as playercount, but the client info is still limited to 64
-		if (Sent >= VANILLA_MAX_CLIENTS)
-			break;
+		//if (Sent >= VANILLA_MAX_CLIENTS)
+		//	break;
 
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			int PreviousSize = pp.Size();
 
-			pp.AddString(ClientName(i), MAX_NAME_LENGTH);
-			pp.AddString(ClientClan(i), MAX_CLAN_LENGTH);
+			if (Sent < VANILLA_MAX_CLIENTS)
+			{
+				pp.AddString(ClientName(i), MAX_NAME_LENGTH);
+				pp.AddString(ClientClan(i), MAX_CLAN_LENGTH);
 
-			ADD_INT(pp, m_aClients[i].m_Country);
-			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
-			// thats why we just send -9999, because it will be displayed as nothing
-			int Score = -9999;
-			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
-				Score = abs(m_aClients[i].m_Score) * -1;
-			ADD_INT(pp, Score);
-			ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
-			pp.AddString("", 0);
+				ADD_INT(pp, m_aClients[i].m_Country);
+				// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
+				// thats why we just send -9999, because it will be displayed as nothing
+				int Score = -9999;
+				if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
+					Score = abs(m_aClients[i].m_Score) * -1;
+				ADD_INT(pp, Score);
+				ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
+				pp.AddString("", 0);
+			}
+			else
+			{
+				pp.AddString("", 0);
+				pp.AddString("", 0);
+				ADD_INT(pp, 0);
+				ADD_INT(pp, 0);
+				ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
+				pp.AddString("", 0);
+			}
 
 			if(pp.Size() >= NET_MAX_PAYLOAD)
 			{
