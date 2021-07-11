@@ -987,17 +987,27 @@ void CServer::SendMapData(int ClientID, int Chunk)
 
 void CServer::SendMap(int ClientID)
 {
-	CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
-	Msg.AddString(GetMapName(), 0);
-	Msg.AddInt(m_CurrentMapCrc);
-	Msg.AddInt(m_CurrentMapSize);
-	if (!m_aClients[ClientID].m_Sevendown)
 	{
-		Msg.AddInt(m_MapChunksPerRequest);
-		Msg.AddInt(MAP_CHUNK_SIZE);
-		Msg.AddRaw(&m_CurrentMapSha256, sizeof(m_CurrentMapSha256));
+		CMsgPacker Msg(NETMSG_MAP_DETAILS, true);
+		Msg.AddString(GetMapName(), 0);
+		Msg.AddRaw(&m_CurrentMapSha256.data, sizeof(m_CurrentMapSha256.data));
+		Msg.AddInt(m_CurrentMapCrc);
+		Msg.AddInt(m_CurrentMapSize);
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
-	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+	{
+		CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
+		Msg.AddString(GetMapName(), 0);
+		Msg.AddInt(m_CurrentMapCrc);
+		Msg.AddInt(m_CurrentMapSize);
+		if (!m_aClients[ClientID].m_Sevendown)
+		{
+			Msg.AddInt(m_MapChunksPerRequest);
+			Msg.AddInt(MAP_CHUNK_SIZE);
+			Msg.AddRaw(&m_CurrentMapSha256, sizeof(m_CurrentMapSha256));
+		}
+		SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+	}
 
 	m_aClients[ClientID].m_MapChunk = 0;
 }
