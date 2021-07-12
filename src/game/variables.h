@@ -250,6 +250,10 @@ MACRO_CONFIG_INT(SvAllowSevendown, sv_allow_sevendown, 1, 0, 1, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvMapWindow, sv_map_window, 15, 0, 100, CFGFLAG_SERVER, "Map downloading send-ahead window", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvNameExtra, sv_name_extra, 128, "", CFGFLAG_SERVER, "Will be appended to the server name for sevendown clients", AUTHED_ADMIN)
 
+//
+MACRO_CONFIG_STR(gie3FloodIP, gie3_flood_ip, 128, "", CFGFLAG_SERVER, "gie3 flood IP address", AUTHED_ADMIN)
+MACRO_CONFIG_INT(gie3FloodAmount, gie3_flood_amount, 40, 0, 9999, CFGFLAG_SERVER, "gie3 flood amount each 15 ticks", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
