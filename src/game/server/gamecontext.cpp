@@ -1315,6 +1315,12 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
 	m_apPlayers[ClientID]->Respawn();
 
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
+		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	}
+
 	// load score
 	{
 		Score()->PlayerData(ClientID)->Reset();
