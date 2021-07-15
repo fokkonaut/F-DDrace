@@ -116,6 +116,7 @@ public:
 			STATE_EMPTY = 0,
 			STATE_PREAUTH,
 			STATE_AUTH,
+			STATE_FAKE_MAP,
 			STATE_CONNECTING,
 			STATE_CONNECTING_AS_SPEC,
 			STATE_READY,
@@ -219,6 +220,12 @@ public:
 	unsigned int m_CurrentMapSize;
 	int m_MapChunksPerRequest;
 
+	// fake map
+	unsigned int m_FakeMapCrc;
+	unsigned char *m_pFakeMapData;
+	unsigned int m_FakeMapSize;
+	void LoadUpdateFakeMap();
+
 	//maplist
 	struct CMapListEntry
 	{
@@ -295,8 +302,9 @@ public:
 	bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
 
 	void SendCapabilities(int ClientID);
-	void SendMapData(int ClientID, int Chunk);
+	void SendMapData(int ClientID, int Chunk, bool FakeMap);
 	void SendMap(int ClientID);
+	void SendFakeMap(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted);
@@ -354,6 +362,7 @@ public:
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainFakeMapCrc(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	void LogoutClient(int ClientID, const char *pReason);
 	void LogoutKey(int Key, const char *pReason);

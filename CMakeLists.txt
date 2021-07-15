@@ -1650,6 +1650,8 @@ set_src(ENGINE_SERVER GLOB src/engine/server
   antibot.h
   authmanager.cpp
   authmanager.h
+  crc.cpp
+  crc.h
   register.cpp
   register.h
   server.cpp

@@ -31,6 +31,7 @@
 
 #include "register.h"
 #include "server.h"
+#include "crc.h"
 
 #include <string.h>
 #include <vector>
@@ -296,6 +297,10 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_Regi
 
 	m_pCurrentMapData = 0;
 	m_CurrentMapSize = 0;
+
+	m_pFakeMapData = 0;
+	m_FakeMapSize = 0;
+	m_FakeMapCrc = 0;
 
 	m_NumMapEntries = 0;
 	m_pFirstMapEntry = 0;
@@ -960,28 +965,62 @@ void CServer::SendCapabilities(int ClientID)
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CServer::SendMapData(int ClientID, int Chunk)
+void CServer::LoadUpdateFakeMap()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s.map", Config()->m_FakeMapFile);
+	modify_file_crc32(aBuf, m_FakeMapSize-4, m_FakeMapCrc, false);
+
+	// re-read file
+	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
+	if (File)
+	{
+		m_FakeMapSize = (unsigned int)io_length(File);
+		if(m_pFakeMapData)
+			mem_free(m_pFakeMapData);
+		m_pFakeMapData = (unsigned char *)mem_alloc(m_FakeMapSize, 1);
+		io_read(File, m_pFakeMapData, m_FakeMapSize);
+		io_close(File);
+	}
+}
+
+void CServer::SendFakeMap(int ClientID)
+{
+	CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
+	Msg.AddString(Config()->m_FakeMapName, 0);
+	Msg.AddInt(m_FakeMapCrc);
+	Msg.AddInt(m_FakeMapSize);
+	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+
+	m_aClients[ClientID].m_MapChunk = 0;
+}
+
+void CServer::SendMapData(int ClientID, int Chunk, bool FakeMap)
 {
 	unsigned int ChunkSize = 1024-128;
 	unsigned int Offset = Chunk * ChunkSize;
 	int Last = 0;
 
+	unsigned int MapSize = FakeMap ? m_FakeMapSize : m_CurrentMapSize;
+	unsigned char *pMapData = FakeMap ? m_pFakeMapData : m_pCurrentMapData;
+	unsigned int MapCrc = FakeMap ? m_FakeMapCrc : m_CurrentMapCrc;
+
 	// drop faulty map data requests
-	if(Chunk < 0 || Offset > m_CurrentMapSize)
+	if(Chunk < 0 || Offset > MapSize)
 		return;
 
-	if(Offset+ChunkSize >= m_CurrentMapSize)
+	if(Offset+ChunkSize >= MapSize)
 	{
-		ChunkSize = m_CurrentMapSize-Offset;
+		ChunkSize = MapSize-Offset;
 		Last = 1;
 	}
 
 	CMsgPacker Msg(NETMSG_MAP_DATA, true);
 	Msg.AddInt(Last);
-	Msg.AddInt(m_CurrentMapCrc);
+	Msg.AddInt(MapCrc);
 	Msg.AddInt(Chunk);
 	Msg.AddInt(ChunkSize);
-	Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
+	Msg.AddRaw(&pMapData[Offset], ChunkSize);
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 }
 
@@ -1261,30 +1300,39 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				m_aClients[ClientID].m_Version = Unpacker.GetInt();
 
-				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 				SendCapabilities(ClientID);
-				SendMap(ClientID);
+				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0])
+				{
+					m_aClients[ClientID].m_State = CClient::STATE_FAKE_MAP;
+					SendFakeMap(ClientID);
+				}
+				else
+				{
+					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+					SendMap(ClientID);
+				}
 			}
 		}
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
 		{
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
+			bool SendingFakeMap = m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP;
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
 				if (m_aClients[ClientID].m_Sevendown)
 				{
 					int Chunk = Unpacker.GetInt();
 					if (Chunk != m_aClients[ClientID].m_MapChunk)
 					{
-						SendMapData(ClientID, Chunk);
+						SendMapData(ClientID, Chunk, SendingFakeMap);
 						return;
 					}
 
 					if (Chunk == 0)
 					{
 						for (int i = 0; i < Config()->m_SvMapWindow; i++)
-							SendMapData(ClientID, i);
+							SendMapData(ClientID, i, SendingFakeMap);
 					}
-					SendMapData(ClientID, Config()->m_SvMapWindow + m_aClients[ClientID].m_MapChunk);
+					SendMapData(ClientID, Config()->m_SvMapWindow + m_aClients[ClientID].m_MapChunk, SendingFakeMap);
 					m_aClients[ClientID].m_MapChunk++;
 					return;
 				}
@@ -1321,8 +1369,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_READY)
 		{
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
+			bool SendingFakeMap = m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP;
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
+				if (SendingFakeMap)
+				{
+					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
+					SendMap(ClientID);
+					return;
+				}
+
 				char aAddrStr[NETADDR_MAXSTRSIZE];
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
@@ -2026,6 +2082,9 @@ int CServer::LoadMap(const char *pMapName)
 		io_read(File, m_pCurrentMapData, m_CurrentMapSize);
 		io_close(File);
 	}
+
+	LoadUpdateFakeMap();
+
 	return 1;
 }
 
@@ -2277,6 +2336,11 @@ int CServer::Run()
 	{
 		mem_free(m_pCurrentMapData);
 		m_pCurrentMapData = 0;
+	}
+	if(m_pFakeMapData)
+	{
+		mem_free(m_pFakeMapData);
+		m_pFakeMapData = 0;
 	}
 	if(m_pMapListHeap)
 	{
@@ -2875,6 +2939,14 @@ void CServer::ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void 
 	pfnCallback(pResult, pCallbackUserData);
 }
 
+void CServer::ConchainFakeMapCrc(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CServer *pThis = (CServer *)pUserData;
+	pThis->m_FakeMapCrc = strtoul(pThis->Config()->m_FakeMapCrc, 0, 16);
+	pThis->LoadUpdateFakeMap();
+}
+
 void CServer::RegisterCommands()
 {
 	// register console commands
@@ -2912,6 +2984,8 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_password", ConchainRconPasswordChange, this);
 	Console()->Chain("sv_rcon_mod_password", ConchainRconModPasswordChange, this);
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
+
+	Console()->Chain("fake_map_crc", ConchainFakeMapCrc, this);
 
 	// DDRace
 
