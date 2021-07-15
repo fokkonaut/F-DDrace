@@ -121,7 +121,7 @@ uint32_t get_crc32_and_length(FILE *f, uint64_t *length) {
 		char buffer[32 * 1024];
 		size_t n = fread(buffer, sizeof(buffer[0]), sizeof(buffer) / sizeof(buffer[0]), f);
 		if (ferror(f) != 0) {
-			perror("fread");
+			//perror("fread");
 			//exit(EXIT_FAILURE);
 			return 0;
 		}
