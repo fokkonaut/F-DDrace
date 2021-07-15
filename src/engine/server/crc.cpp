@@ -129,9 +129,9 @@ uint32_t get_crc32_and_length(FILE *f, uint64_t *length) {
 			for (int j = 0; j < 8; j++) {
 				uint32_t bit = ((uint8_t)buffer[i] >> j) & 1;
 				crc ^= bit << 31;
-				bool xor = (crc >> 31) != 0;
+				bool xor2 = (crc >> 31) != 0;
 				crc = (crc & UINT32_C(0x7FFFFFFF)) << 1;
-				if (xor)
+				if (xor2)
 					crc ^= (uint32_t)POLYNOMIAL;
 			}
 		}
