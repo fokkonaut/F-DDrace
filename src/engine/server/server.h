@@ -405,6 +405,8 @@ public:
 
 	const char *GetClientVersionStr(int ClientID) const;
 
+	bool IsUniqueAddress(int ClientID);
+
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);

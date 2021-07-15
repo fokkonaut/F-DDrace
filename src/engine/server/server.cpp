@@ -1301,7 +1301,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_Version = Unpacker.GetInt();
 
 				SendCapabilities(ClientID);
-				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0])
+				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0] && IsUniqueAddress(ClientID))
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_FAKE_MAP;
 					SendFakeMap(ClientID);
@@ -3207,6 +3207,18 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	//m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
+	return true;
+}
+
+bool CServer::IsUniqueAddress(int ClientID)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (i == ClientID || m_aClients[i].m_State == CClient::STATE_EMPTY)
+			continue;
+		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), m_NetServer.ClientAddr(i), false) == 0)
+			return false;
+	}
 	return true;
 }
 
