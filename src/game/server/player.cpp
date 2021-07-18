@@ -740,6 +740,8 @@ void CPlayer::Snap(int SnappingClient)
 	if(ShowSpec)
 	{
 		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		if (!pSpecChar)
+			return;
 		pSpecChar->m_X = SpecPos.x;
 		pSpecChar->m_Y = SpecPos.y;
 	}
