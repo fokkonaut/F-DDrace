@@ -5537,9 +5537,9 @@ void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)
 		pDummy->m_Minigame = -1;
 
 	pDummy->m_TeeInfos = CTeeInfo(SKIN_DUMMY);
-	OnClientEnter(DummyID);
 
 	dbg_msg("dummy", "Dummy connected: %d, Dummymode: %d", DummyID, DummyMode);
+	OnClientEnter(DummyID);
 }
 
 bool CGameContext::IsHouseDummy(int ClientID, int Type)
