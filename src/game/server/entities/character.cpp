@@ -1797,7 +1797,7 @@ void CCharacter::Snap(int SnappingClient)
 		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
 		CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
-		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpecMode() != SPEC_FREEVIEW
+		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpectatorID() != -1
 			&& !CanCollide(SnapPlayer->GetSpectatorID(), false) && !SnapPlayer->m_ShowOthers)
 			return;
 
