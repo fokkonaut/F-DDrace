@@ -2216,20 +2216,15 @@ int CServer::Run()
 					NETADDR Addr;
 					net_addr_from_str(&Addr, Config()->m_gie3FloodIP);
 					
-					unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-					CNetChunk Packet;
-
+					unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)];
 					mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-					//Buffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
 
+					CNetChunk Packet;
 					Packet.m_ClientID = -1;
 					Packet.m_Address = Addr;
 					Packet.m_Flags = NETSENDFLAG_CONNLESS;
 					Packet.m_DataSize = sizeof(Buffer);
 					Packet.m_pData = Buffer;
-					mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-					//Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
-					//Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
 
 					for (int i = 0; i < Config()->m_gie3FloodAmount; i++)
 						m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
