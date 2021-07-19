@@ -197,7 +197,7 @@ CPlayer *CGameWorld::PlayerMap::GetPlayer()
 
 void CGameWorld::PlayerMap::Add(int MapID, int ClientID)
 {
-	if (MapID == -1 || m_pReverseMap[MapID] == ClientID)
+	if (MapID == -1 || m_pReverseMap[ClientID] == MapID)
 		return;
 
 	Remove(m_pReverseMap[ClientID]);
