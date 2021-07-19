@@ -254,9 +254,6 @@ public:
 	CMapChecker m_MapChecker;
 	CAuthManager m_AuthManager;
 
-	int64 m_ServerInfoFirstRequest;
-	int m_ServerInfoNumRequests;
-
 	CServer();
 
 	int TrySetClientName(int ClientID, const char* pName);
@@ -320,7 +317,7 @@ public:
 
 	void SendServerInfo(int ClientID);
 	void GenerateServerInfo(CPacker *pPacker, int Token);
-	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, bool SendClients);
+	void SendServerInfoSevendown(const NETADDR *pAddr, int Token);
 
 	void PumpNetwork();
 
