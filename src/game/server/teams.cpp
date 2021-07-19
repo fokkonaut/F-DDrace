@@ -272,7 +272,7 @@ void CGameTeams::SetForceCharacterTeam(int ClientID, int Team)
 	{
 		for(int LoopClientID = 0; LoopClientID < MAX_CLIENTS; ++LoopClientID)
 			if(GetPlayer(LoopClientID))
-				SendTeamsState(LoopClientID);
+				GameServer()->m_World.UpdateTeamsState(LoopClientID);
 
 		if(GetPlayer(ClientID))
 			GetPlayer(ClientID)->m_VotedForPractice = false;

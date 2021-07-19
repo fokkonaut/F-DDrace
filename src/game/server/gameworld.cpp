@@ -253,12 +253,12 @@ void CGameWorld::PlayerMap::Update()
 		{
 			Insert = m_pGameWorld->m_aMap[i].m_pReverseMap[i];
 		}
-		else if (m_pGameWorld->GameServer()->Arenas()->FightStarted(i))
+		else if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
 		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved; j++)
+			for (int j = VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved-1; j >= 0; j--)
 			{
 				int CID = m_pMap[j];
-				if (CID == -1 || (CID != m_ClientID && !GetPlayer()->m_aSameIP[CID] && !m_pGameWorld->GameServer()->Arenas()->FightStarted(CID)) || CID == i)
+				if (CID == -1 || (CID != m_ClientID && !GetPlayer()->m_aSameIP[CID] && !m_pGameWorld->GameServer()->GetDDRaceTeam(CID)) || CID == i)
 				{
 					Insert = j;
 					break;
@@ -287,7 +287,7 @@ void CGameWorld::PlayerMap::Update()
 		{
 			for (int j = 0; j < MAX_CLIENTS; j++)
 			{
-				if (j == i || j == m_ClientID || GetPlayer()->m_aSameIP[j] || m_pGameWorld->GameServer()->Arenas()->FightStarted(j))
+				if (j == i || j == m_ClientID || GetPlayer()->m_aSameIP[j] || m_pGameWorld->GameServer()->GetDDRaceTeam(j))
 					continue;
 
 				if (m_pReverseMap[j] != -1 && (!m_pGameWorld->GameServer()->GetPlayerChar(j) || m_pGameWorld->GameServer()->GetPlayerChar(j)->NetworkClipped(m_ClientID, false)))

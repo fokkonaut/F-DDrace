@@ -5761,7 +5761,7 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 		}
 	}
 
-	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+	m_World.UpdateTeamsState(ClientID);
 }
 
 bool CGameContext::FlagsUsed()

@@ -85,6 +85,7 @@ public:
 
 	// F-DDrace
 	int m_NumMapReserved;
+	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; };
 
 	CGameWorld();
 	~CGameWorld();
