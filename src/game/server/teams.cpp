@@ -439,7 +439,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
-		int Team = -1;
+		int Team = 0;
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
 			if (i == SPEC_SELECT_FLAG_RED)
@@ -447,7 +447,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 			else if (i == SPEC_SELECT_FLAG_BLUE)
 				Team = 36; // blue colored team
 
-			if (Team != -1)
+			if (Team != 0)
 			{
 				Msg.AddInt(Team);
 				continue;
@@ -455,14 +455,14 @@ void CGameTeams::SendTeamsState(int ClientID)
 		}
 
 		int id = i;
-		Server()->ReverseTranslate(id, ClientID);
-
-		Team = m_Core.Team(id);
-		if (Team == TEAM_SUPER)
-			Team = VANILLA_MAX_CLIENTS;
-		else if (Team > VANILLA_MAX_CLIENTS)
-			Team = 0;
-
+		if (Server()->ReverseTranslate(id, ClientID))
+		{
+			Team = m_Core.Team(id);
+			if (Team == TEAM_SUPER)
+				Team = VANILLA_MAX_CLIENTS;
+			else if (Team > VANILLA_MAX_CLIENTS)
+				Team = 0;
+		}
 		Msg.AddInt(Team);
 	}
 
