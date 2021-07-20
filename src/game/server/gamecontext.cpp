@@ -5070,6 +5070,7 @@ void CGameContext::ReadBuildingsFile()
 						pPickup->m_PlotID = PlotID;
 						m_aPlots[PlotID].m_vObjects.push_back(pPickup);
 					}
+					break;
 				}
 				case CGameWorld::ENTTYPE_DOOR:
 				{
@@ -5083,6 +5084,7 @@ void CGameContext::ReadBuildingsFile()
 						pDoor->m_PlotID = PlotID;
 						m_aPlots[PlotID].m_vObjects.push_back(pDoor);
 					}
+					break;
 				}
 			}
 
@@ -5101,7 +5103,7 @@ void CGameContext::WriteBuildingsFile()
 		str_format(aFile, sizeof(aFile), "%s/%s/plot%d.txt", Config()->m_SvBuildingsFilePath, Server()->GetMapName(), i);
 		std::ofstream BuildingsFile(aFile);
 
-		for (int j = 0; j < m_aPlots[i].m_vObjects.size(); j++)
+		for (unsigned int j = 0; j < m_aPlots[i].m_vObjects.size(); j++)
 		{
 			char aEntry[128];
 			switch (m_aPlots[i].m_vObjects[j]->GetObjType())
@@ -5111,12 +5113,14 @@ void CGameContext::WriteBuildingsFile()
 					CPickup *pPickup = (CPickup *)m_aPlots[i].m_vObjects[j];
 					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, pPickup->m_PlotID, pPickup->GetPos().x/32.f, pPickup->GetPos().y/32.f, pPickup->GetType(), pPickup->GetSubtype());
 					BuildingsFile << aEntry;
+					break;
 				}
 				case CGameWorld::ENTTYPE_DOOR:
 				{
 					CDoor *pDoor = (CDoor *)m_aPlots[i].m_vObjects[j];
 					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength());
 					BuildingsFile << aEntry;
+					break;
 				}
 			}
 		}
