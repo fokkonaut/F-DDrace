@@ -5037,7 +5037,6 @@ void CGameContext::WriteMoneyListFile()
 
 void CGameContext::ReadBuildingsFile()
 {
-	Config()->m_SvTestingCommands = 1;
 	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
 	{
 		std::string data;
