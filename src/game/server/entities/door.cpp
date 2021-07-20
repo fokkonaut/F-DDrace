@@ -17,6 +17,7 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_Collision = Collision;
 	m_Length = Length;
 	
+	m_Rotation = Rotation;
 	SetDirection(Rotation);
 	ResetCollision();
 	GameWorld()->InsertEntity(this);

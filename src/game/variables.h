@@ -225,6 +225,7 @@ MACRO_CONFIG_INT(SvPortalMaxDistance, sv_portal_max_distance, 1000, 50, 2000, CF
 MACRO_CONFIG_INT(SvMaxObjectsPlotSmall, sv_max_objects_plot_small, 50, 0, 150, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within a small plot", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxObjectsPlotBig, sv_max_objects_plot_big, 150, 0, 500, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within a big plot", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxObjectsFreeDraw, sv_max_objects_free_draw, 500, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed in free draw", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvBuildingsFilePath, sv_buildings_file_path, 128, "data/buildings", CFGFLAG_SERVER, "The path where the server searches the draweditor buildings file", AUTHED_ADMIN)
 
 // taser battery
 MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFLAG_SERVER, "Time in minutes a taser battery respawns after pickup", AUTHED_ADMIN)

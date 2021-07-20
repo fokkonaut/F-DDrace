@@ -15,6 +15,7 @@ class CDoor: public CEntity
 	vec2 m_Direction;
 
 	// F-DDrace
+	float m_Rotation;
 	vec2 m_PrevPos;
 	bool m_Collision; // used for draw editor preview
 	void Update();
@@ -28,6 +29,8 @@ public:
 
 	void SetDirection(float Rotation);
 	void SetLength(int Length);
+	int GetLength() { return m_Length; }
+	float GetRotation() { return m_Rotation; }
 	virtual ~CDoor();
 
 	virtual void Reset();

@@ -1180,6 +1180,7 @@ void CGameContext::OnTick()
 		for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 			WritePlotStats(i);
 		WriteMoneyListFile();
+		WriteBuildingsFile();
 		m_LastAccSaveTick = Server()->Tick();
 	}
 
@@ -3594,6 +3595,7 @@ void CGameContext::FDDraceInit()
 	m_LastAccSaveTick = Server()->Tick();
 
 	ReadMoneyListFile();
+	ReadBuildingsFile();
 
 	{
 		time_t rawtime;
@@ -3828,6 +3830,7 @@ void CGameContext::OnPreShutdown()
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
 	WriteMoneyListFile();
+	WriteBuildingsFile();
 }
 
 void CGameContext::OnShutdown(bool FullShutdown)
@@ -5027,8 +5030,97 @@ void CGameContext::WriteMoneyListFile()
 	for (; pMoney; pMoney = (CMoney *)pMoney->TypeNext())
 	{
 		char aEntry[64];
-		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d%c", pMoney->GetPos().x/32.f, pMoney->GetPos().y/32.f, pMoney->GetAmount(), pMoney->TypeNext() ? ',' : '\0');
+		str_format(aEntry, sizeof(aEntry), "%.2f/%.2f:%d,", pMoney->GetPos().x/32.f, pMoney->GetPos().y/32.f, pMoney->GetAmount());
 		MoneyDropsFile << aEntry;
+	}
+}
+
+void CGameContext::ReadBuildingsFile()
+{
+	Config()->m_SvTestingCommands = 1;
+	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
+	{
+		std::string data;
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "%s/%s/plot%d.txt", Config()->m_SvBuildingsFilePath, Server()->GetMapName(), i);
+		std::fstream BuildingsFile(aBuf);
+		getline(BuildingsFile, data);
+		const char *pStr = data.c_str();
+
+		while (1)
+		{
+			if (!pStr)
+				break;
+
+			vec2 Pos = vec2(-1, -1);
+			int EntityType = -1;
+			int PlotID = -1;
+
+			sscanf(pStr, "%d", &EntityType);
+			switch (EntityType)
+			{
+				case CGameWorld::ENTTYPE_PICKUP:
+				{
+					int Type = -1;
+					int Subtype = -1;
+					sscanf(pStr, "%d:%d:%f/%f:%d:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Type, &Subtype);
+					pStr += 17; // skip the newly read data
+					if (Type >= 0 && Subtype >= 0 && PlotID >= 0)
+					{
+						CPickup *pPickup = new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype);
+						pPickup->m_PlotID = PlotID;
+						m_aPlots[PlotID].m_vObjects.push_back(pPickup);
+					}
+				}
+				case CGameWorld::ENTTYPE_DOOR:
+				{
+					float Rotation = -1.f;
+					int Length = 0.f;
+					sscanf(pStr, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
+					pStr += 17; // skip the newly read data
+					if (Rotation >= 0 && Length > 0 && PlotID >= 0)
+					{
+						CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
+						pDoor->m_PlotID = PlotID;
+						m_aPlots[PlotID].m_vObjects.push_back(pDoor);
+					}
+				}
+			}
+
+			// jump to next comma, if it exists skip it so we can start the next loop run with the next data
+			if ((pStr = str_find(pStr, ",")))
+				pStr++;
+		}
+	}
+}
+
+void CGameContext::WriteBuildingsFile()
+{
+	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
+	{
+		char aFile[256];
+		str_format(aFile, sizeof(aFile), "%s/%s/plot%d.txt", Config()->m_SvBuildingsFilePath, Server()->GetMapName(), i);
+		std::ofstream BuildingsFile(aFile);
+
+		for (int j = 0; j < m_aPlots[i].m_vObjects.size(); j++)
+		{
+			char aEntry[128];
+			switch (m_aPlots[i].m_vObjects[j]->GetObjType())
+			{
+				case CGameWorld::ENTTYPE_PICKUP:
+				{
+					CPickup *pPickup = (CPickup *)m_aPlots[i].m_vObjects[j];
+					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, pPickup->m_PlotID, pPickup->GetPos().x/32.f, pPickup->GetPos().y/32.f, pPickup->GetType(), pPickup->GetSubtype());
+					BuildingsFile << aEntry;
+				}
+				case CGameWorld::ENTTYPE_DOOR:
+				{
+					CDoor *pDoor = (CDoor *)m_aPlots[i].m_vObjects[j];
+					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength());
+					BuildingsFile << aEntry;
+				}
+			}
+		}
 	}
 }
 
@@ -5162,6 +5254,11 @@ void CGameContext::CreateFolders()
 	// money drops
 	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
+	// draweditor buildings
+	Storage()->CreateFolder(Config()->m_SvBuildingsFilePath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvBuildingsFilePath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// saved tee

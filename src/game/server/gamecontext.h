@@ -548,6 +548,10 @@ public:
 	void WriteMoneyListFile();
 	void ReadMoneyListFile();
 
+	// draweditor buildings
+	void WriteBuildingsFile();
+	void ReadBuildingsFile();
+
 	//motd
 	const char *FormatMotd(const char *pMsg);
 	const char *AppendMotdFooter(const char *pMsg, const char *pFooter);
