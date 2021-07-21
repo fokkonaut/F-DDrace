@@ -5008,9 +5008,6 @@ void CGameContext::ReadMoneyListFile()
 		int Amount = 0;
 
 		sscanf(pStr, "%f/%f:%d", &Pos.x, &Pos.y, &Amount);
-		pStr += 8; // skip the newly read data
-
-		// insert money into world
 		if (Amount > 0)
 			new CMoney(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Amount);
 
@@ -5063,7 +5060,6 @@ void CGameContext::ReadBuildingsFile()
 					int Type = -1;
 					int Subtype = -1;
 					sscanf(pStr, "%d:%d:%f/%f:%d:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Type, &Subtype);
-					pStr += 17; // skip the newly read data
 					if (Type >= 0 && Subtype >= 0 && PlotID >= 0)
 					{
 						CPickup *pPickup = new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype);
@@ -5077,7 +5073,6 @@ void CGameContext::ReadBuildingsFile()
 					float Rotation = -1.f;
 					int Length = 0.f;
 					sscanf(pStr, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
-					pStr += 17; // skip the newly read data
 					if (Rotation >= 0 && Length > 0 && PlotID >= 0)
 					{
 						CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
