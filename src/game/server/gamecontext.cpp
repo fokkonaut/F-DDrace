@@ -3663,8 +3663,6 @@ void CGameContext::FDDraceInit()
 	SetMapSpecificOptions();
 	if (Config()->m_SvDefaultDummies)
 		ConnectDefaultDummies();
-
-	m_World.m_NumMapReserved = FlagsUsed() ? 3 : 1;
 }
 
 void CGameContext::DeleteTempfile()

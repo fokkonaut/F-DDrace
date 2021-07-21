@@ -255,7 +255,7 @@ void CGameWorld::PlayerMap::Update()
 		}
 		else if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
 		{
-			for (int j = VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved-1; j >= 0; j--)
+			for (int j = VANILLA_MAX_CLIENTS-GetPlayer()->m_NumMapReserved-1; j >= 0; j--)
 			{
 				int CID = m_pMap[j];
 				if (CID == -1 || (CID != m_ClientID && !GetPlayer()->m_aSameIP[CID] && !m_pGameWorld->GameServer()->GetDDRaceTeam(CID)) || CID == i)
@@ -271,7 +271,7 @@ void CGameWorld::PlayerMap::Update()
 		}
 		else
 		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_pGameWorld->m_NumMapReserved; j++)
+			for (int j = 0; j < VANILLA_MAX_CLIENTS-GetPlayer()->m_NumMapReserved; j++)
 				if (m_pMap[j] == -1)
 				{
 					Insert = j;

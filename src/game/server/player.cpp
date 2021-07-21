@@ -828,6 +828,7 @@ void CPlayer::InitIdMap()
 			break;
 	}
 
+	m_NumMapReserved = 1;
 	pIdMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 
 	if (!Server()->IsSevendown(m_ClientID))
@@ -852,12 +853,13 @@ void CPlayer::InitIdMap()
 	{
 		if (GameServer()->FlagsUsed())
 		{
+			m_NumMapReserved += 2;
 			pIdMap[SPEC_SELECT_FLAG_RED] = -1;
 			pIdMap[SPEC_SELECT_FLAG_BLUE] = -1;
 		}
 	}
 
-	if (NextFreeID < VANILLA_MAX_CLIENTS - GameServer()->m_World.m_NumMapReserved)
+	if (NextFreeID < VANILLA_MAX_CLIENTS - m_NumMapReserved)
 	{
 		pIdMap[NextFreeID] = m_ClientID;
 		pReverseIdMap[m_ClientID] = NextFreeID;
