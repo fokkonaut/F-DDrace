@@ -1203,6 +1203,8 @@ bool CDummyBlmapChillPolice::HelpOfficerLeft()
 		{
 			Right();
 			int HookedID = m_pCharacter->Core()->m_HookedPlayer;
+			if (HookedID == HOOK_FLAG_BLUE || HookedID == HOOK_FLAG_RED)
+				return;
 			CPlayer *pHooked = GameServer()->m_apPlayers[HookedID];
 			if (pHooked)
 			{
