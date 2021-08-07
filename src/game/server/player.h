@@ -426,7 +426,7 @@ public:
 	bool m_aSameIP[MAX_CLIENTS];
 
 	// shutdown tee
-	bool m_CheckedShutdownSaved;
+	bool m_CheckedSavePlayer;
 
 private:
 	int64 m_WalletMoney;

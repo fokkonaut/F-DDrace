@@ -202,8 +202,8 @@ void CPlayer::Reset()
 	m_PlotAuctionPrice = 0;
 	m_aPlotSwapUsername[0] = '\0';
 	m_PlotSpawn = false;
+	m_CheckedSavePlayer = false;
 	m_WalletMoney = 0;
-	m_CheckedShutdownSaved = false;
 	m_LastMoneyXPBomb = 0;
 	m_LastVote = 0;
 	m_LastPlotAuction = 0;
@@ -903,13 +903,14 @@ bool CPlayer::JoinChat(bool Local)
 
 void CPlayer::OnDisconnect()
 {
+	if (m_JailTime || m_EscapeTime)
+		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL);
+
 	// Make sure to call this before the character dies because on disconnect it should drop the money even when frozen
 	if (GameServer()->Config()->m_SvDropsOnDeath && m_pCharacter)
 		m_pCharacter->DropMoney(GetWalletMoney());
 	KillCharacter();
 	GameServer()->Arenas()->OnPlayerLeave(m_ClientID, true);
-
-	GameServer()->SavePlayer(m_ClientID);
 	GameServer()->Logout(GetAccID());
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
@@ -1356,6 +1357,14 @@ void CPlayer::TryRespawn()
 
 		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
 		m_pCharacter->SetSolo(true);
+	}
+
+	// keep this last, character might get killed in CheckLoadPlayer due to loading jail
+	if (!m_CheckedSavePlayer)
+	{
+		if (GameServer()->CheckLoadPlayer(m_ClientID) && !GetCharacter())
+			m_Spawning = true; // if the character got killed due to jail load for example, make him instantly respawn
+		m_CheckedSavePlayer = true;
 	}
 }
 

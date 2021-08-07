@@ -3,6 +3,7 @@
 #include <base/math.h>
 
 #include <antibot/antibot_data.h>
+#include <zlib.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
@@ -1104,12 +1105,6 @@ void CGameContext::OnTick()
 			m_aRegisterBans[i] = m_aRegisterBans[m_NumRegisterBans];
 		}
 	}
-	for (unsigned int i = 0; i < m_vSavedPlayers.size(); i++)
-	{
-		// remove after 6 hours
-		if (m_vSavedPlayers[i].m_SavedTick + Server()->TickSpeed() * 60 * 60 * 6 < Server()->Tick())
-			m_vSavedPlayers.erase(m_vSavedPlayers.begin() + i);
-	}
 
 	if (Server()->Tick() % (Config()->m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
@@ -1171,7 +1166,7 @@ void CGameContext::OnTick()
 	}
 
 	// F-DDrace
-	if (Server()->Tick() > m_LastAccSaveTick + Server()->TickSpeed() * Config()->m_SvAccSaveInterval * 60)
+	if (Server()->Tick() > m_LastDataSaveTick + Server()->TickSpeed() * Config()->m_SvDataSaveInterval * 60)
 	{
 		// save all accounts
 		dbg_msg("acc", "automatic account saving...");
@@ -1181,7 +1176,7 @@ void CGameContext::OnTick()
 			WritePlotStats(i);
 		WriteMoneyListFile();
 		WriteBuildingsFile();
-		m_LastAccSaveTick = Server()->Tick();
+		m_LastDataSaveTick = Server()->Tick();
 	}
 
 	// minigames
@@ -1194,14 +1189,6 @@ void CGameContext::OnTick()
 
 	if (IsFullHour())
 		ExpirePlots();
-
-	if (Server()->Tick() == Server()->TickSpeed() * 60 * Config()->m_SvRemoveSavedTees)
-	{
-		dbg_msg("saves", "removed all shutdown save files");
-		char aPath[IO_MAX_PATH_LENGTH];
-		str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
-		Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, RemoveShutdownSaves, this);
-	}
 
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1369,7 +1356,6 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
 
 	m_apPlayers[ClientID]->CheckClanProtection();
-	CheckLoadPlayer(ClientID);
 
 	if (!Server()->IsSevendown(ClientID))
 	{
@@ -3592,10 +3578,11 @@ void CGameContext::FDDraceInit()
 	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
-	m_LastAccSaveTick = Server()->Tick();
+	m_LastDataSaveTick = Server()->Tick();
 
 	ReadMoneyListFile();
 	ReadBuildingsFile();
+	ReadSavedPlayersFile();
 
 	{
 		time_t rawtime;
@@ -3647,12 +3634,6 @@ void CGameContext::FDDraceInit()
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;
 	m_SurvivalTick = 0;
 	m_SurvivalWinner = -1;
-
-	m_ShutdownSave.m_ClientID = -1;
-	m_ShutdownSave.m_Got = false;
-	m_ShutdownSave.m_aUsername[0] = '\0';
-
-	m_vSavedPlayers.clear();
 
 	// check if there are minigame spawns available (survival and instagib are checked in their own ticks)
 	for (int i = 0; i < NUM_MINIGAMES; i++)
@@ -3818,7 +3799,7 @@ void CGameContext::OnPreShutdown()
 		{
 			// Either save the character and it's money or simply drop the money so it can get loaded on next server start
 			if (Config()->m_SvShutdownSaveTees)
-				SaveCharacter(i);
+				SaveCharacter(i, SAVE_WALLET|SAVE_FLAG);
 			else
 				pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
 		}
@@ -5120,116 +5101,172 @@ void CGameContext::WriteBuildingsFile()
 	}
 }
 
-void CGameContext::SaveCharacter(int ClientID)
+void CGameContext::ReadSavedPlayersFile()
+{
+	m_vSavedIdentities.clear();
+	m_vSavedIdentitiesFiles.clear();
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
+	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadSavedPlayersCallback, this);
+
+	for (unsigned int i = 0; i < m_vSavedIdentitiesFiles.size(); i++)
+	{
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), m_vSavedIdentitiesFiles[i].c_str());
+		CSaveTee SaveTee;;
+		if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity())
+		{
+			m_vSavedIdentities.push_back(SaveTee.GetIdentity());
+		}
+	}
+	m_vSavedIdentitiesFiles.clear();
+}
+
+void CGameContext::SaveDrop(int ClientID, const char *pReason)
+{
+	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
+		return;
+
+	// Save character
+	SaveCharacter(ClientID);
+	// Remove wallet money so we dont automatically drop it on disconnect because it is saved already
+	m_apPlayers[ClientID]->SetWalletMoney(0);
+
+	// Drop the client
+	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
+}
+
+int CGameContext::LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if (!IsDir && str_endswith(pName, ".save"))
+	{
+		std::string Name = pName;
+		pSelf->m_vSavedIdentitiesFiles.push_back(Name);
+	}
+	return 0;
+}
+
+bool CGameContext::SaveCharacter(int ClientID, int Flags)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (!pChr)
-		return;
+		return false;
 
 	// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
 	// We cant use SetMinigame(MINIGAME_NONE) here because that would kill the character, ending in a crash
 	if (pChr->GetPlayer()->IsMinigame())
 		pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
-	// We save the acc username to save it in the account to automatically relogin after joining again
-	int AccID = pChr->GetPlayer()->GetAccID();
-	str_copy(m_ShutdownSave.m_aUsername, m_Accounts[AccID].m_Username, sizeof(m_ShutdownSave.m_aUsername));
-	Logout(AccID);
-
-	// Get address and swap : to _ for filename
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	Server()->GetClientAddr(ClientID, aAddrStr, sizeof(aAddrStr), true);
-	SwapAddrSeparator(aAddrStr);
+	// save identity to cache
+	SSavedIdentity Info;
+	Server()->GetClientAddr(ClientID, &Info.m_Addr);
+	str_copy(Info.m_aName, Server()->ClientName(ClientID), sizeof(Info.m_aName));
+	str_copy(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Info.m_aAccUsername));
+	Info.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
+	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
+	m_vSavedIdentities.push_back(Info);
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), aAddrStr);
-	CSaveTee SaveTee(true);
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%08x.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));
+	CSaveTee SaveTee(Flags|SAVE_IDENTITY);
 	SaveTee.SaveFile(aFilename, pChr);
-
-	// reset it again
-	m_ShutdownSave.m_aUsername[0] = '\0';
+	return true;
 }
 
-void CGameContext::CheckShutdownSaved(int ClientID)
+int CGameContext::FindSavedPlayer(int ClientID)
 {
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-	if (!pPlayer || !pPlayer->GetCharacter() || pPlayer->m_CheckedShutdownSaved || !Config()->m_SvShutdownSaveTees)
-		return;
+	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
+		return -1;
 
-	// checking right now...
-	pPlayer->m_CheckedShutdownSaved = true;
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
 
-	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
+	for (unsigned int i = 0; i < m_vSavedIdentities.size(); i++)
+	{
+		SSavedIdentity Info = m_vSavedIdentities[i];
+		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
+		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
+		bool SameTimeoutCode = m_apPlayers[ClientID]->m_TimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
+		bool SameAcc = Info.m_aAccUsername[0] != '\0' && str_comp(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
+		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
+		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
 
-	m_ShutdownSave.m_ClientID = ClientID;
-	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, CheckShutdownSavedCallback, this);
-	m_ShutdownSave.m_ClientID = -1;
+		bool SameClientInfo = SameAddr && (SameName || SameTeeInfo);
+		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
+		{
+			return i;
+		}
+	}
 
-	// result of ListDirectory
-	if (!m_ShutdownSave.m_Got)
-		return;
+	return -1;
+}
 
-	// make sure to reset this
-	m_ShutdownSave.m_Got = false;
+unsigned long CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
+{
+	// TODO: bad fix, otherwise after loading save files in ReadSavedPlayersFile() after a server restart causes a different hash leading in a file that cant be opened
+	// `Crc = crc32(Crc, (const unsigned char *)&Info, sizeof(Info));` works without server restarts tho, so it has to be an error in saving/loading the save file
+	struct
+	{
+		char m_aAccUsername[32];
+		NETADDR m_Addr;
+		char m_aTimeoutCode[64];
 
-	// Get address and swap : to _ for filenames
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	Server()->GetClientAddr(ClientID, aAddrStr, sizeof(aAddrStr), true);
-	SwapAddrSeparator(aAddrStr);
+		char m_aName[MAX_NAME_LENGTH];
+		
+		char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_ARRAY_SIZE];
+		int m_aUseCustomColors[NUM_SKINPARTS];
+		int m_aSkinPartColors[NUM_SKINPARTS];
+
+		struct
+		{
+			char m_SkinName[MAX_SKIN_LENGTH];
+			int m_UseCustomColor;
+			int m_ColorBody;
+			int m_ColorFeet;
+		} m_Sevendown;
+	} IdentityHash;
+
+	str_copy(IdentityHash.m_aAccUsername, Info.m_aAccUsername, sizeof(IdentityHash.m_aAccUsername));
+	IdentityHash.m_Addr = Info.m_Addr;
+	str_copy(IdentityHash.m_aTimeoutCode, Info.m_aTimeoutCode, sizeof(IdentityHash.m_aTimeoutCode));
+	str_copy(IdentityHash.m_aName, Info.m_aName, sizeof(IdentityHash.m_aName));
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		str_copy(IdentityHash.m_aaSkinPartNames[p], Info.m_TeeInfo.m_aaSkinPartNames[p], sizeof(IdentityHash.m_aaSkinPartNames[p]));
+		IdentityHash.m_aUseCustomColors[p] = Info.m_TeeInfo.m_aUseCustomColors[p];
+		IdentityHash.m_aSkinPartColors[p] = Info.m_TeeInfo.m_aSkinPartColors[p];
+	}
+	str_copy(IdentityHash.m_Sevendown.m_SkinName, Info.m_TeeInfo.m_Sevendown.m_SkinName, sizeof(IdentityHash.m_Sevendown.m_SkinName));
+	IdentityHash.m_Sevendown.m_UseCustomColor = Info.m_TeeInfo.m_Sevendown.m_UseCustomColor;
+	IdentityHash.m_Sevendown.m_ColorBody = Info.m_TeeInfo.m_Sevendown.m_ColorBody;
+	IdentityHash.m_Sevendown.m_ColorFeet = Info.m_TeeInfo.m_Sevendown.m_ColorFeet;
+
+	unsigned long Crc = crc32(0L, 0x0, 0);
+	Crc = crc32(Crc, (const unsigned char *)&IdentityHash, sizeof(IdentityHash));
+	return Crc;
+}
+
+bool CGameContext::CheckLoadPlayer(int ClientID)
+{
+	int Index = FindSavedPlayer(ClientID);
+	if (Index == -1)
+		return false;
 
 	// Get path and load
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), aAddrStr);
-	CSaveTee SaveTee(true);
-	if (SaveTee.LoadFile(aPath, pPlayer->GetCharacter()))
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%08x.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), GetSavedIdentityHash(m_vSavedIdentities[Index]));
+	CSaveTee SaveTee;
+	if (SaveTee.LoadFile(aPath, m_apPlayers[ClientID]->GetCharacter()))
 	{
 		// Remove file, this save has been used now
-		dbg_msg("save", "%d:%s used his shutdown save, removing save file", ClientID, Server()->ClientName(ClientID));
+		dbg_msg("save", "%d:%s used his save, removing save file", ClientID, Server()->ClientName(ClientID));
 		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+		m_vSavedIdentities.erase(m_vSavedIdentities.begin() + Index);
+		return true;
 	}
-}
-
-int CGameContext::CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	CGameContext *pSelf = (CGameContext *)pUser;
-
-	if (!IsDir && str_endswith(pName, ".save"))
-	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		str_copy(aAddrStr, pName, str_length(pName) - 4); // remove the .save
-		pSelf->SwapAddrSeparator(aAddrStr);
-
-		NETADDR OwnAddr, FileAddr;
-		pSelf->Server()->GetClientAddr(pSelf->m_ShutdownSave.m_ClientID, &OwnAddr);
-		net_addr_from_str(&FileAddr, aAddrStr);
-		if (net_addr_comp(&OwnAddr, &FileAddr, true) == 0)
-			pSelf->m_ShutdownSave.m_Got = true;
-	}
-
-	return 0;
-}
-
-void CGameContext::SwapAddrSeparator(char *pAddrStr)
-{
-	// Replace ':' by '_' as a valid symbol in filenames, or when trying to load such a file revert it back to a ':'
-	const char *pPos;
-	if ((pPos = str_find(pAddrStr, ":")))
-		*(const_cast<char *>(pPos)) = '_';
-	else if ((pPos = str_find(pAddrStr, "_")))
-		*(const_cast<char *>(pPos)) = ':';
-}
-
-int CGameContext::RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	CGameContext *pSelf = (CGameContext *)pUser;
-	if (!IsDir && str_endswith(pName, ".save"))
-	{
-		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s", pSelf->Config()->m_SvSavedTeesFilePath, pSelf->Server()->GetMapName(), pName);
-		pSelf->Storage()->RemoveFile(aFilename, IStorage::TYPE_SAVE);
-	}
-	return 0;
+	return false;
 }
 
 void CGameContext::CreateFolders()
@@ -5391,62 +5428,6 @@ bool CGameContext::ForceJailRelease(int ClientID)
 	SendChatTarget(ClientID, "You were released from jail");
 	pPlayer->KillCharacter(WEAPON_GAME);
 	return true;
-}
-
-void CGameContext::SavePlayer(int ClientID)
-{
-	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
-		return;
-
-	// we dont have anything to save
-	if (!m_apPlayers[ClientID]->m_JailTime && !m_apPlayers[ClientID]->m_EscapeTime)
-		return;
-
-	SavedPlayer Info;
-	Info.m_SavedTick = Server()->Tick();
-	Server()->GetClientAddr(ClientID, &Info.m_Addr);
-	str_copy(Info.m_aName, Server()->ClientName(ClientID), sizeof(Info.m_aName));
-	str_copy(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Info.m_aUsername));
-	Info.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
-	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
-	Info.m_JailTime = m_apPlayers[ClientID]->m_JailTime;
-	Info.m_EscapeTime = m_apPlayers[ClientID]->m_EscapeTime;
-	m_vSavedPlayers.push_back(Info);
-}
-
-void CGameContext::CheckLoadPlayer(int ClientID)
-{
-	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
-		return;
-
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientID, &Addr);
-
-	for (unsigned int i = 0; i < m_vSavedPlayers.size(); i++)
-	{
-		SavedPlayer Info = m_vSavedPlayers[i];
-		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
-		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
-		bool SameTimeoutCode = m_apPlayers[ClientID]->m_TimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
-		bool SameAcc = Info.m_aUsername[0] != '\0' && str_comp(Info.m_aUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
-		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
-		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
-
-		bool SameClientInfo = SameAddr && (SameName || SameTeeInfo);
-		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
-		{
-			// restore info
-			JailPlayer(ClientID, Info.m_JailTime/Server()->TickSpeed());
-			m_apPlayers[ClientID]->m_EscapeTime = Info.m_EscapeTime;
-
-			// login if possible
-			if (Info.m_aUsername[0] != '\0' && m_apPlayers[ClientID]->GetAccID() < ACC_START)
-				Login(ClientID, Info.m_aUsername, "", false);
-
-			m_vSavedPlayers.erase(m_vSavedPlayers.begin() + i);
-			break;
-		}
-	}
 }
 
 void CGameContext::ProcessSpawnBlockProtection(int ClientID)

@@ -115,13 +115,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	DDraceInit();
+	m_pPlayer->LoadMinigameTee();
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
 	Antibot()->OnSpawn(m_pPlayer->GetCID());
-
-	m_pPlayer->LoadMinigameTee();
-	GameServer()->CheckShutdownSaved(m_pPlayer->GetCID());
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn

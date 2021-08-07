@@ -5,16 +5,42 @@
 //#include "./entities/character.h"
 #include <engine/shared/protocol.h>
 #include <game/server/gamecontroller.h>
+#include "teeinfo.h"
 
 class CCharacter;
 class CGameContext;
 
+// F-DDrace
+struct SSavedIdentity
+{
+	SSavedIdentity()
+	{
+		m_aAccUsername[0] = '\0';
+		m_aTimeoutCode[0] = '\0';
+	}
+
+	char m_aAccUsername[32];
+	NETADDR m_Addr;
+	char m_aTimeoutCode[64];
+
+	char m_aName[MAX_NAME_LENGTH];
+	CTeeInfo m_TeeInfo;
+};
+
+enum
+{
+	SAVE_WALLET = 1<<0, // saves and loads wallet money
+	SAVE_FLAG = 1<<1, // saves and gives back flag if no one else has it
+	SAVE_IDENTITY = 1<<2, // saves the identity of a player aswell as logs him back in when this save gets loaded
+	SAVE_JAIL = 1<<3, // only saves and loads escape and jail time of a player
+};
+
 class CSaveTee
 {
 public:
-	CSaveTee(bool ShutdownSave = false);
+	CSaveTee(int Flags = 0);
 	~CSaveTee();
-	void Save(CCharacter* pchr); // F-DDrace TODO: extra weapons and mod specific stuff is not saved or loaded with the string, just in cache
+	void Save(CCharacter* pchr);
 	void Load(CCharacter* pchr, int Team);
 	char* GetString();
 	int LoadString(char* String);
@@ -23,11 +49,13 @@ public:
 
 	// F-DDrace
 	int GetMinigame() { return m_Minigame; }
+	SSavedIdentity GetIdentity() { return m_Identity; }
+	bool HasSavedIdentity() { return m_Flags&SAVE_IDENTITY; }
 	void TeleOutOfPlot(vec2 ToTele);
 	void StopPlotEditing();
 
 	bool SaveFile(const char *pFileName, CCharacter *pChr);
-	bool LoadFile(const char *pFileName, CCharacter *pChr);
+	bool LoadFile(const char *pFileName, CCharacter *pChr, CGameContext *pGameContext = 0);
 
 private:
 
@@ -95,7 +123,7 @@ private:
 	char aGameUuid[16];
 
 	// F-DDrace
-	int m_ShutdownSave;
+	int m_Flags;
 
 	// character
 	int m_Health;
@@ -148,8 +176,7 @@ private:
 	int64 m_JailTime;
 	int64 m_EscapeTime;
 
-	// account
-	char m_aAccUsername[32];
+	SSavedIdentity m_Identity;
 };
 
 class CSaveTeam

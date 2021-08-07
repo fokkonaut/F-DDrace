@@ -12,6 +12,7 @@
 #include <game/voting.h>
 
 #include <vector>
+#include <string>
 #include "entities/pickup_drop.h"
 #include "entities/money.h"
 #include "houses/house.h"
@@ -441,7 +442,7 @@ public:
 	int m_aPoliceLevel[NUM_POLICE_LEVELS];
 	int64 m_aNeededXP[DIFFERENCE_XP_END];
 	int64 GetNeededXP(int Level);
-	int m_LastAccSaveTick;
+	int m_LastDataSaveTick;
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
 	void WriteDonationFile(int Type, int Amount, int ID, const char *pDescription);
@@ -630,22 +631,6 @@ public:
 	//isdummy callback for console victim dummy
 	static void ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pUser);
 
-	// shutdown tee
-	struct
-	{
-		int m_ClientID;
-		bool m_Got;
-		char m_aUsername[32];
-	} m_ShutdownSave;
-
-	void CheckShutdownSaved(int ClientID);
-	static int CheckShutdownSavedCallback(const char *pName, int IsDir, int StorageType, void *pUser);
-	void SwapAddrSeparator(char *pAddrStr);
-	static int RemoveShutdownSaves(const char *pName, int IsDir, int StorageType, void *pUser);
-
-	// this function is used for shutdown tee but also for save drop
-	void SaveCharacter(int ClientID);
-
 	//
 	virtual void OnSetTimedOut(int ClientID, int OrigID);
 
@@ -662,25 +647,17 @@ public:
 	bool IsSpawnArea(vec2 Pos);
 
 	// saved
-	void SavePlayer(int ClientID);
-	void CheckLoadPlayer(int ClientID);
+	bool SaveCharacter(int ClientID, int Flags = 0);
+	int FindSavedPlayer(int ClientID);
+	bool CheckLoadPlayer(int ClientID);
+	unsigned long GetSavedIdentityHash(SSavedIdentity Info);
+	std::vector<SSavedIdentity> m_vSavedIdentities;
+	std::vector<std::string> m_vSavedIdentitiesFiles; // only for init, to read all saved identities structs to m_vSavedIdentities
 
-	struct SavedPlayer
-	{
-		int64 m_SavedTick;
-
-		char m_aUsername[32];
-		NETADDR m_Addr;
-		char m_aTimeoutCode[64];
-
-		char m_aName[MAX_NAME_LENGTH];
-		CTeeInfo m_TeeInfo;
-
-		// value that can get saved and restored
-		int64 m_JailTime;
-		int64 m_EscapeTime;
-	};
-	std::vector<SavedPlayer> m_vSavedPlayers;
+	void ReadSavedPlayersFile();
+	static int LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	
+	void SaveDrop(int ClientID, const char *pReason);
 
 private:
 
@@ -931,6 +908,7 @@ private:
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);
+	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
 

@@ -1661,6 +1661,14 @@ void CGameContext::ConSetMinigame(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = !pResult->NumArguments() ? pResult->m_ClientID : pResult->GetVictim();
+	const char *pReason = pResult->NumArguments() == 2 ? pResult->GetString(1) : "automatic kick due to save drop";
+	pSelf->SaveDrop(Victim, pReason);
+}
+
 void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

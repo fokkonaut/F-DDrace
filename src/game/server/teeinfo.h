@@ -76,7 +76,6 @@ public:
 		int m_UseCustomColor = 0;
 		int m_ColorBody = 0;
 		int m_ColorFeet = 0;
-
 	} m_Sevendown;
 
 	// skin id for when skin got set by rcon

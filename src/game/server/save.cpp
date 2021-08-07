@@ -8,9 +8,9 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 
-CSaveTee::CSaveTee(bool ShutdownSave)
+CSaveTee::CSaveTee(int Flags)
 {
-	m_ShutdownSave = (int)ShutdownSave;
+	m_Flags = Flags;
 }
 
 CSaveTee::~CSaveTee()
@@ -30,6 +30,9 @@ void CSaveTee::StopPlotEditing()
 
 bool CSaveTee::SaveFile(const char *pFileName, CCharacter *pChr)
 {
+	if (!pChr)
+		return false;
+
 	IOHANDLE File = pChr->GameServer()->Storage()->OpenFile(pFileName, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(File)
 	{
@@ -42,9 +45,13 @@ bool CSaveTee::SaveFile(const char *pFileName, CCharacter *pChr)
 	return false;
 }
 
-bool CSaveTee::LoadFile(const char *pFileName, CCharacter *pChr)
+bool CSaveTee::LoadFile(const char *pFileName, CCharacter *pChr, CGameContext *pGameContext)
 {
-	IOHANDLE File = pChr->GameServer()->Storage()->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_SAVE);
+	CGameContext *pGameServer = pChr ? pChr->GameServer() : pGameContext;
+	if (!pGameServer)
+		return false;
+
+	IOHANDLE File = pGameServer->Storage()->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if (File)
 	{
 		CLineReader lr;
@@ -58,7 +65,10 @@ bool CSaveTee::LoadFile(const char *pFileName, CCharacter *pChr)
 		}
 
 		LoadString(pString);
-		Load(pChr, 0);
+		if (pChr)
+		{
+			Load(pChr, 0);
+		}
 
 		io_close(File);
 		return true;
@@ -186,7 +196,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
 	m_SavedGamemode = pChr->GetPlayer()->m_SavedGamemode;
 	m_Minigame = pChr->GetPlayer()->m_Minigame;
-	if (m_ShutdownSave)
+	if (m_Flags&SAVE_WALLET)
 		m_WalletMoney = pChr->GetPlayer()->GetWalletMoney();
 	else
 		m_WalletMoney = 0;
@@ -199,166 +209,190 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_JailTime = pChr->GetPlayer()->m_JailTime;
 	m_EscapeTime = pChr->GetPlayer()->m_EscapeTime;
 
-	// account
+	if (m_Flags&SAVE_IDENTITY)
+	{
+		int Index = pChr->GameServer()->FindSavedPlayer(pChr->GetPlayer()->GetCID());
+		if (Index != -1)
+			m_Identity = pChr->GameServer()->m_vSavedIdentities[Index];
+	}
+
 	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
 	// we cant just set it to 0 or '\0' because that would fuck up the LoadString() as it is a null terminator
-	if (pChr->GameServer()->m_ShutdownSave.m_aUsername[0] == '\0')
-		str_copy(m_aAccUsername, "$", sizeof(m_aAccUsername));
-	else
-		str_copy(m_aAccUsername, pChr->GameServer()->m_ShutdownSave.m_aUsername, sizeof(m_aAccUsername));
+	if (m_Identity.m_aAccUsername[0] == '\0')
+		str_copy(m_Identity.m_aAccUsername, "$", sizeof(m_Identity.m_aAccUsername));
+
+	if (m_Identity.m_aTimeoutCode[0] == '\0')
+		str_copy(m_Identity.m_aTimeoutCode, "$", sizeof(m_Identity.m_aTimeoutCode));
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		if (m_Identity.m_TeeInfo.m_aaSkinPartNames[p][0] == '\0')
+			str_copy(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "x_", sizeof(m_Identity.m_TeeInfo.m_aaSkinPartNames[p]));
+	}
+
+	if (m_Identity.m_TeeInfo.m_Sevendown.m_SkinName[0] == '\0')
+		str_copy(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "x_", sizeof(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName));
 }
 
 void CSaveTee::Load(CCharacter *pChr, int Team)
 {
-	pChr->GetPlayer()->Pause(m_Paused, true);
-
-	pChr->SetAlive(m_Alive);
-
-	pChr->Teams()->SetForceCharacterTeam(pChr->GetPlayer()->GetCID(), Team);
-	pChr->Teams()->SetFinished(pChr->GetPlayer()->GetCID(), m_TeeFinished);
-
-	for(int i = 0; i< NUM_WEAPONS; i++)
+	if (!(m_Flags&SAVE_JAIL))
 	{
-		pChr->SetWeaponAmmoRegenStart(i, m_aWeapons[i].m_AmmoRegenStart);
-		pChr->SetWeaponAmmo(i, m_aWeapons[i].m_Ammo);
-		pChr->SetWeaponGot(i, m_aWeapons[i].m_Got);
+		pChr->GetPlayer()->Pause(m_Paused, true);
+
+		pChr->SetAlive(m_Alive);
+
+		pChr->Teams()->SetForceCharacterTeam(pChr->GetPlayer()->GetCID(), Team);
+		pChr->Teams()->SetFinished(pChr->GetPlayer()->GetCID(), m_TeeFinished);
+
+		for(int i = 0; i< NUM_WEAPONS; i++)
+		{
+			pChr->SetWeaponAmmoRegenStart(i, m_aWeapons[i].m_AmmoRegenStart);
+			pChr->SetWeaponAmmo(i, m_aWeapons[i].m_Ammo);
+			pChr->SetWeaponGot(i, m_aWeapons[i].m_Got);
+		}
+
+		pChr->SetLastWeapon(m_LastWeapon);
+		pChr->SetQueuedWeapon(m_QueuedWeapon);
+
+		pChr->m_SuperJump = m_SuperJump;
+		pChr->m_Jetpack = m_Jetpack;
+		pChr->m_NinjaJetpack = m_NinjaJetpack;
+		pChr->m_FreezeTime = m_FreezeTime;
+		pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
+
+		pChr->m_DeepFreeze = m_DeepFreeze;
+		pChr->m_EndlessHook = m_EndlessHook;
+		pChr->m_DDRaceState = m_DDRaceState;
+
+		pChr->m_Hit = m_Hit;
+		pChr->m_TuneZone = m_TuneZone;
+		pChr->m_TuneZoneOld = m_TuneZoneOld;
+
+		if(m_Time)
+			pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
+
+		pChr->SetPos(m_Pos);
+		pChr->SetPrevPos(m_PrevPos);
+		pChr->m_TeleCheckpoint = m_TeleCheckpoint;
+		pChr->m_LastPenalty = m_LastPenalty;
+
+		if(m_CpTime)
+			pChr->m_CpTick = pChr->Server()->Tick() - m_CpTime;
+
+		pChr->m_CpActive  = m_CpActive;
+		pChr->m_CpLastBroadcast = m_CpLastBroadcast;
+
+		for(int i = 0; i < 25; i++)
+			pChr->m_CpCurrent[i] = m_CpCurrent[i];
+
+		pChr->GetPlayer()->m_NotEligibleForFinish = pChr->GetPlayer()->m_NotEligibleForFinish || m_NotEligibleForFinish;
+
+		pChr->SetActiveWeapon(m_ActiveWeapon);
+
+		// Core
+		pChr->SetCorePos(m_CorePos);
+		pChr->SetCoreVel(m_Vel);
+		pChr->SetCoreHook(m_Hook);
+		pChr->SetCoreCollision(m_Collision);
+		pChr->SetCoreJumped(m_Jumped);
+		pChr->SetCoreJumpedTotal(m_JumpedTotal);
+		pChr->SetCoreJumps(m_Jumps);
+		pChr->SetCoreHookPos(m_HookPos);
+		pChr->SetCoreHookDir(m_HookDir);
+		pChr->SetCoreHookTeleBase(m_HookTeleBase);
+
+		pChr->SetCoreHookTick(m_HookTick);
+
+		if(m_HookState == HOOK_GRABBED)
+		{
+			pChr->SetCoreHookState(HOOK_FLYING);
+			pChr->SetCoreHookedPlayer(-1);
+		}
+		else
+		{
+			pChr->SetCoreHookState(m_HookState);
+		}
+
+		pChr->SetSolo(m_IsSolo);
+
+		// F-DDrace
+		// character
+		pChr->SetHealth(m_Health);
+		pChr->SetArmor(m_Armor);
+		pChr->m_Invisible = m_Invisible;
+		pChr->m_Rainbow = m_Rainbow;
+		pChr->Atom(m_Atom, -1, true);
+		pChr->Trail(m_Trail, -1, true);
+		pChr->Meteor(m_Meteors, -1, false, true);
+		pChr->m_Bloody = m_Bloody;
+		pChr->m_StrongBloody = m_StrongBloody;
+		pChr->ScrollNinja(m_ScrollNinja, -1, true);
+		pChr->m_HookPower = m_HookPower;
+		for (int i = 0; i < NUM_WEAPONS; i++)
+		{
+			pChr->m_aSpreadWeapon[i] = m_aSpreadWeapon[i];
+			pChr->m_aHadWeapon[i] = m_aHadWeapon[i];
+		}
+		pChr->m_FakeTuneCollision = m_FakeTuneCollision;
+		pChr->m_OldFakeTuneCollision = m_OldFakeTuneCollision;
+		pChr->Passive(m_Passive, -1, true);
+		pChr->m_PoliceHelper = m_PoliceHelper;
+		pChr->Item(m_Item, -1, true);
+		pChr->m_DoorHammer = m_DoorHammer;
+		pChr->m_AlwaysTeleWeapon = m_AlwaysTeleWeapon;
+		pChr->m_FreezeHammer = m_FreezeHammer;
+		for (int i = 0; i < 3; i++)
+			pChr->m_aSpawnWeaponActive[i] = m_aSpawnWeaponActive[i];
+		pChr->m_HasFinishedSpecialRace = m_HasFinishedSpecialRace;
+		pChr->m_GotMoneyXPBomb = m_GotMoneyXPBomb;
+		pChr->m_SpawnTick = pChr->Server()->Tick() - m_SpawnTick;
+		pChr->m_KillStreak = m_KillStreak;
+		pChr->m_MaxJumps = m_MaxJumps;
+		if (m_CarriedFlag != -1 && m_Flags&SAVE_FLAG)
+		{
+			CGameControllerDDRace *pController = ((CGameControllerDDRace *)pChr->GameServer()->m_pController);
+			CFlag *pFlag = pController->m_apFlags[m_CarriedFlag];
+			if (pFlag && !pFlag->GetCarrier())
+				pController->ForceFlagOwner(pChr->GetPlayer()->GetCID(), m_CarriedFlag);
+		}
+
+		// core
+		pChr->Core()->m_SpinBot = m_SpinBot;
+		pChr->Core()->m_SpinBotSpeed = m_SpinBotSpeed;
+		pChr->Core()->m_AimClosest = m_AimClosest;
+		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = m_MoveRestrictionExtraCanEnterRoom;
+
+		// player
+		pChr->GetPlayer()->m_Gamemode = m_Gamemode;
+		pChr->GetPlayer()->m_SavedGamemode = m_SavedGamemode;
+		pChr->GetPlayer()->m_Minigame = m_Minigame;
+		if (m_Flags&SAVE_WALLET)
+			pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
+		pChr->GetPlayer()->m_RainbowSpeed = m_RainbowSpeed;
+		pChr->GetPlayer()->m_InfRainbow = m_InfRainbow;
+		pChr->Meteor(m_InfMeteors, -1, true, true);
+		pChr->GetPlayer()->m_HasSpookyGhost = m_HasSpookyGhost;
+		pChr->GetPlayer()->m_PlotSpawn = m_PlotSpawn;
+		pChr->GetPlayer()->m_HasRoomKey = m_HasRoomKey;
 	}
 
-	pChr->SetLastWeapon(m_LastWeapon);
-	pChr->SetQueuedWeapon(m_QueuedWeapon);
-
-	pChr->m_SuperJump = m_SuperJump;
-	pChr->m_Jetpack = m_Jetpack;
-	pChr->m_NinjaJetpack = m_NinjaJetpack;
-	pChr->m_FreezeTime = m_FreezeTime;
-	pChr->m_FreezeTick = pChr->Server()->Tick() - m_FreezeTick;
-
-	pChr->m_DeepFreeze = m_DeepFreeze;
-	pChr->m_EndlessHook = m_EndlessHook;
-	pChr->m_DDRaceState = m_DDRaceState;
-
-	pChr->m_Hit = m_Hit;
-	pChr->m_TuneZone = m_TuneZone;
-	pChr->m_TuneZoneOld = m_TuneZoneOld;
-
-	if(m_Time)
-		pChr->m_StartTime = pChr->Server()->Tick() - m_Time;
-
-	pChr->SetPos(m_Pos);
-	pChr->SetPrevPos(m_PrevPos);
-	pChr->m_TeleCheckpoint = m_TeleCheckpoint;
-	pChr->m_LastPenalty = m_LastPenalty;
-
-	if(m_CpTime)
-		pChr->m_CpTick = pChr->Server()->Tick() - m_CpTime;
-
-	pChr->m_CpActive  = m_CpActive;
-	pChr->m_CpLastBroadcast = m_CpLastBroadcast;
-
-	for(int i = 0; i < 25; i++)
-		pChr->m_CpCurrent[i] = m_CpCurrent[i];
-
-	pChr->GetPlayer()->m_NotEligibleForFinish = pChr->GetPlayer()->m_NotEligibleForFinish || m_NotEligibleForFinish;
-
-	pChr->SetActiveWeapon(m_ActiveWeapon);
-
-	// Core
-	pChr->SetCorePos(m_CorePos);
-	pChr->SetCoreVel(m_Vel);
-	pChr->SetCoreHook(m_Hook);
-	pChr->SetCoreCollision(m_Collision);
-	pChr->SetCoreJumped(m_Jumped);
-	pChr->SetCoreJumpedTotal(m_JumpedTotal);
-	pChr->SetCoreJumps(m_Jumps);
-	pChr->SetCoreHookPos(m_HookPos);
-	pChr->SetCoreHookDir(m_HookDir);
-	pChr->SetCoreHookTeleBase(m_HookTeleBase);
-
-	pChr->SetCoreHookTick(m_HookTick);
-
-	if(m_HookState == HOOK_GRABBED)
+	if (m_Flags&SAVE_IDENTITY)
 	{
-		pChr->SetCoreHookState(HOOK_FLYING);
-		pChr->SetCoreHookedPlayer(-1);
-	}
-	else
-	{
-		pChr->SetCoreHookState(m_HookState);
+		if (m_Identity.m_aAccUsername[0] != '\0')
+			pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_Identity.m_aAccUsername, "", false);
 	}
 
-	pChr->SetSolo(m_IsSolo);
-
-	// F-DDrace
-	// character
-	pChr->SetHealth(m_Health);
-	pChr->SetArmor(m_Armor);
-	pChr->m_Invisible = m_Invisible;
-	pChr->m_Rainbow = m_Rainbow;
-	pChr->Atom(m_Atom, -1, true);
-	pChr->Trail(m_Trail, -1, true);
-	pChr->Meteor(m_Meteors, -1, false, true);
-	pChr->m_Bloody = m_Bloody;
-	pChr->m_StrongBloody = m_StrongBloody;
-	pChr->ScrollNinja(m_ScrollNinja, -1, true);
-	pChr->m_HookPower = m_HookPower;
-	for (int i = 0; i < NUM_WEAPONS; i++)
-	{
-		pChr->m_aSpreadWeapon[i] = m_aSpreadWeapon[i];
-		pChr->m_aHadWeapon[i] = m_aHadWeapon[i];
-	}
-	pChr->m_FakeTuneCollision = m_FakeTuneCollision;
-	pChr->m_OldFakeTuneCollision = m_OldFakeTuneCollision;
-	pChr->Passive(m_Passive, -1, true);
-	pChr->m_PoliceHelper = m_PoliceHelper;
-	pChr->Item(m_Item, -1, true);
-	pChr->m_DoorHammer = m_DoorHammer;
-	pChr->m_AlwaysTeleWeapon = m_AlwaysTeleWeapon;
-	pChr->m_FreezeHammer = m_FreezeHammer;
-	for (int i = 0; i < 3; i++)
-		pChr->m_aSpawnWeaponActive[i] = m_aSpawnWeaponActive[i];
-	pChr->m_HasFinishedSpecialRace = m_HasFinishedSpecialRace;
-	pChr->m_GotMoneyXPBomb = m_GotMoneyXPBomb;
-	pChr->m_SpawnTick = pChr->Server()->Tick() - m_SpawnTick;
-	pChr->m_KillStreak = m_KillStreak;
-	pChr->m_MaxJumps = m_MaxJumps;
-	if (m_CarriedFlag != -1 && m_ShutdownSave)
-	{
-		CGameControllerDDRace *pController = ((CGameControllerDDRace *)pChr->GameServer()->m_pController);
-		CFlag *pFlag = pController->m_apFlags[m_CarriedFlag];
-		if (pFlag && !pFlag->GetCarrier())
-			pController->ForceFlagOwner(pChr->GetPlayer()->GetCID(), m_CarriedFlag);
-	}
-
-	// core
-	pChr->Core()->m_SpinBot = m_SpinBot;
-	pChr->Core()->m_SpinBotSpeed = m_SpinBotSpeed;
-	pChr->Core()->m_AimClosest = m_AimClosest;
-	pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = m_MoveRestrictionExtraCanEnterRoom;
-
-	// player
-	pChr->GetPlayer()->m_Gamemode = m_Gamemode;
-	pChr->GetPlayer()->m_SavedGamemode = m_SavedGamemode;
-	pChr->GetPlayer()->m_Minigame = m_Minigame;
-	if (m_ShutdownSave)
-		pChr->GetPlayer()->SetWalletMoney(m_WalletMoney);
-	pChr->GetPlayer()->m_RainbowSpeed = m_RainbowSpeed;
-	pChr->GetPlayer()->m_InfRainbow = m_InfRainbow;
-	pChr->Meteor(m_InfMeteors, -1, true, true);
-	pChr->GetPlayer()->m_HasSpookyGhost = m_HasSpookyGhost;
-	pChr->GetPlayer()->m_PlotSpawn = m_PlotSpawn;
-	pChr->GetPlayer()->m_HasRoomKey = m_HasRoomKey;
 	pChr->GetPlayer()->m_EscapeTime = m_EscapeTime;
-
-	// account
-	if (m_aAccUsername[0] != '$') // explanation: see CSaveTee::Save() @ m_aAccUsername
-		pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_aAccUsername, "", false);
-
 	if (m_JailTime) // keep this last, character is killed here
 		pChr->GameServer()->JailPlayer(pChr->GetPlayer()->GetCID(), m_JailTime/pChr->Server()->TickSpeed());
 }
 
 char* CSaveTee::GetString()
 {
+	char aSavedAddress[NETADDR_MAXSTRSIZE];
+	net_addr_str(&m_Identity.m_Addr, aSavedAddress, sizeof(aSavedAddress), true);
+
 	str_format(m_aString, sizeof(m_aString),
 		"%s\t%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t\
@@ -401,7 +435,12 @@ char* CSaveTee::GetString()
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%lld\t%lld\t%s\t",
+		%lld\t%lld\t\
+		%s\t%s\t%s\t%s\t\
+		%s\t%s\t%s\t%s\t%s\t%s\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%s\t%d\t%d\t%d\t",
 		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
 		m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Got,
@@ -424,7 +463,7 @@ char* CSaveTee::GetString()
 		m_CpCurrent[20], m_CpCurrent[21], m_CpCurrent[22], m_CpCurrent[23], m_CpCurrent[24],
 		m_NotEligibleForFinish, aGameUuid,
 		/* F-DDrace */
-		m_ShutdownSave, m_Health, m_Armor,
+		m_Flags, m_Health, m_Armor,
 		m_aWeapons[6].m_AmmoRegenStart, m_aWeapons[6].m_Ammo, m_aWeapons[6].m_Got,
 		m_aWeapons[7].m_AmmoRegenStart, m_aWeapons[7].m_Ammo, m_aWeapons[7].m_Got,
 		m_aWeapons[8].m_AmmoRegenStart, m_aWeapons[8].m_Ammo, m_aWeapons[8].m_Got,
@@ -445,13 +484,19 @@ char* CSaveTee::GetString()
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
 		m_SpinBot, m_SpinBotSpeed, m_AimClosest, m_MoveRestrictionExtraCanEnterRoom,
 		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
-		m_JailTime, m_EscapeTime, m_aAccUsername
+		m_JailTime, m_EscapeTime,
+		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName,
+		m_Identity.m_TeeInfo.m_aaSkinPartNames[0], m_Identity.m_TeeInfo.m_aaSkinPartNames[1], m_Identity.m_TeeInfo.m_aaSkinPartNames[2], m_Identity.m_TeeInfo.m_aaSkinPartNames[3], m_Identity.m_TeeInfo.m_aaSkinPartNames[4], m_Identity.m_TeeInfo.m_aaSkinPartNames[5],
+		m_Identity.m_TeeInfo.m_aUseCustomColors[0], m_Identity.m_TeeInfo.m_aUseCustomColors[1], m_Identity.m_TeeInfo.m_aUseCustomColors[2], m_Identity.m_TeeInfo.m_aUseCustomColors[3], m_Identity.m_TeeInfo.m_aUseCustomColors[4], m_Identity.m_TeeInfo.m_aUseCustomColors[5],
+		m_Identity.m_TeeInfo.m_aSkinPartColors[0], m_Identity.m_TeeInfo.m_aSkinPartColors[1], m_Identity.m_TeeInfo.m_aSkinPartColors[2], m_Identity.m_TeeInfo.m_aSkinPartColors[3], m_Identity.m_TeeInfo.m_aSkinPartColors[4], m_Identity.m_TeeInfo.m_aSkinPartColors[5],
+		m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, m_Identity.m_TeeInfo.m_Sevendown.m_UseCustomColor, m_Identity.m_TeeInfo.m_Sevendown.m_ColorBody, m_Identity.m_TeeInfo.m_Sevendown.m_ColorFeet
 	);
 	return m_aString;
 }
 
 int CSaveTee::LoadString(char* String)
 {
+	char aSavedAddress[NETADDR_MAXSTRSIZE];
 	int Num;
 	Num = sscanf(String,
 		"%[^\t]\t%d\t%d\t%d\t%d\t\
@@ -495,7 +540,12 @@ int CSaveTee::LoadString(char* String)
 		%d\t%d\t%lld\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%d\t\
 		%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t\
-		%lld\t%lld\t%s\t",
+		%lld\t%lld\t\
+		%s\t%s\t%s\t%s\t\
+		%s\t%s\t%s\t%s\t%s\t%s\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%d\t%d\t%d\t%d\t%d\t%d\t\
+		%s\t%d\t%d\t%d\t",
 		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
 		&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Got,
@@ -518,7 +568,7 @@ int CSaveTee::LoadString(char* String)
 		&m_CpCurrent[20], &m_CpCurrent[21], &m_CpCurrent[22], &m_CpCurrent[23], &m_CpCurrent[24],
 		&m_NotEligibleForFinish, aGameUuid,
 		/* F-DDrace */
-		&m_ShutdownSave, &m_Health, &m_Armor,
+		&m_Flags, &m_Health, &m_Armor,
 		&m_aWeapons[6].m_AmmoRegenStart, &m_aWeapons[6].m_Ammo, &m_aWeapons[6].m_Got,
 		&m_aWeapons[7].m_AmmoRegenStart, &m_aWeapons[7].m_Ammo, &m_aWeapons[7].m_Got,
 		&m_aWeapons[8].m_AmmoRegenStart, &m_aWeapons[8].m_Ammo, &m_aWeapons[8].m_Got,
@@ -539,14 +589,37 @@ int CSaveTee::LoadString(char* String)
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
 		&m_SpinBot, &m_SpinBotSpeed, &m_AimClosest, &m_MoveRestrictionExtraCanEnterRoom,
 		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
-		&m_JailTime, &m_EscapeTime, m_aAccUsername
+		&m_JailTime, &m_EscapeTime,
+		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName,
+		m_Identity.m_TeeInfo.m_aaSkinPartNames[0], m_Identity.m_TeeInfo.m_aaSkinPartNames[1], m_Identity.m_TeeInfo.m_aaSkinPartNames[2], m_Identity.m_TeeInfo.m_aaSkinPartNames[3], m_Identity.m_TeeInfo.m_aaSkinPartNames[4], m_Identity.m_TeeInfo.m_aaSkinPartNames[5],
+		&m_Identity.m_TeeInfo.m_aUseCustomColors[0], &m_Identity.m_TeeInfo.m_aUseCustomColors[1], &m_Identity.m_TeeInfo.m_aUseCustomColors[2], &m_Identity.m_TeeInfo.m_aUseCustomColors[3], &m_Identity.m_TeeInfo.m_aUseCustomColors[4], &m_Identity.m_TeeInfo.m_aUseCustomColors[5],
+		&m_Identity.m_TeeInfo.m_aSkinPartColors[0], &m_Identity.m_TeeInfo.m_aSkinPartColors[1], &m_Identity.m_TeeInfo.m_aSkinPartColors[2], &m_Identity.m_TeeInfo.m_aSkinPartColors[3], &m_Identity.m_TeeInfo.m_aSkinPartColors[4], &m_Identity.m_TeeInfo.m_aSkinPartColors[5],
+		m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, &m_Identity.m_TeeInfo.m_Sevendown.m_UseCustomColor, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorBody, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorFeet
 	);
+
+	{
+		net_addr_from_str(&m_Identity.m_Addr, aSavedAddress);
+		if (m_Identity.m_aAccUsername[0] == '$')
+			str_copy(m_Identity.m_aAccUsername, "", sizeof(m_Identity.m_aAccUsername));
+
+		if (str_comp(m_Identity.m_aTimeoutCode, "$") == 0)
+			str_copy(m_Identity.m_aTimeoutCode, "", sizeof(m_Identity.m_aTimeoutCode));
+
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			if (str_comp(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "x_") == 0)
+				str_copy(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "", sizeof(m_Identity.m_TeeInfo.m_aaSkinPartNames[p]));
+		}
+
+		if (str_comp(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "x_") == 0)
+			str_copy(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "", sizeof(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName));
+	}
 
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 91:
 		return 0;
-	case 199: // F-DDrace extra vars
+	case 224: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
