@@ -5128,7 +5128,7 @@ void CGameContext::SaveDrop(int ClientID, const char *pReason)
 		return;
 
 	// Save character
-	SaveCharacter(ClientID);
+	SaveCharacter(ClientID, SAVE_WALLET);
 	// Remove wallet money so we dont automatically drop it on disconnect because it is saved already
 	m_apPlayers[ClientID]->SetWalletMoney(0);
 
