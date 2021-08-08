@@ -1339,6 +1339,23 @@ void CPlayer::TryRespawn()
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_ViewPos = SpawnPos;
 	m_pCharacter->Spawn(this, SpawnPos);
+
+	if (!m_CheckedSavePlayer)
+	{
+		m_CheckedSavePlayer = true;
+		if (GameServer()->CheckLoadPlayer(m_ClientID))
+		{
+			if (!GetCharacter())
+			{
+				m_Spawning = true; // if the character got killed due to jail load for example, make him instantly respawn
+				return; // return because the character got killed, probably due to loading jail and sending him there
+			}
+
+			// update spawnpos for the playerspawn effect
+			SpawnPos = m_pCharacter->GetPos();
+		}
+	}
+
 	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
 
 	// Freeze character on jail release
@@ -1357,14 +1374,6 @@ void CPlayer::TryRespawn()
 
 		Controller->m_Teams.SetForceCharacterTeam(GetCID(), NewTeam);
 		m_pCharacter->SetSolo(true);
-	}
-
-	// keep this last, character might get killed in CheckLoadPlayer due to loading jail
-	if (!m_CheckedSavePlayer)
-	{
-		if (GameServer()->CheckLoadPlayer(m_ClientID) && !GetCharacter())
-			m_Spawning = true; // if the character got killed due to jail load for example, make him instantly respawn
-		m_CheckedSavePlayer = true;
 	}
 }
 
