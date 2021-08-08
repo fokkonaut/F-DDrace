@@ -1572,7 +1572,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		return true;
 	}
 
-	// teams states are sent from the algorithm in gameworld
+	m_World.UpdateTeamsState(ClientID);
 	return false;
 }
 
