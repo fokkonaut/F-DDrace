@@ -5185,7 +5185,7 @@ int CGameContext::FindSavedPlayer(int ClientID)
 	return -1;
 }
 
-unsigned long CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
+unsigned int CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 {
 	// TODO: bad fix, otherwise after loading save files in ReadSavedPlayersFile() after a server restart causes a different hash leading in a file that cant be opened
 	// `Crc = crc32(Crc, (const unsigned char *)&Info, sizeof(Info));` works without server restarts tho, so it has to be an error in saving/loading the save file
@@ -5225,7 +5225,7 @@ unsigned long CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 	IdentityHash.m_Sevendown.m_ColorBody = Info.m_TeeInfo.m_Sevendown.m_ColorBody;
 	IdentityHash.m_Sevendown.m_ColorFeet = Info.m_TeeInfo.m_Sevendown.m_ColorFeet;
 
-	unsigned long Crc = crc32(0L, 0x0, 0);
+	unsigned int Crc = crc32(0L, 0x0, 0);
 	Crc = crc32(Crc, (const unsigned char *)&IdentityHash, sizeof(IdentityHash));
 	return Crc;
 }

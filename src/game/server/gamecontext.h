@@ -648,7 +648,7 @@ public:
 	bool SaveCharacter(int ClientID, int Flags = 0);
 	int FindSavedPlayer(int ClientID);
 	bool CheckLoadPlayer(int ClientID);
-	unsigned long GetSavedIdentityHash(SSavedIdentity Info);
+	unsigned int GetSavedIdentityHash(SSavedIdentity Info);
 	std::vector<SSavedIdentity> m_vSavedIdentities;
 	std::vector<std::string> m_vSavedIdentitiesFiles; // only for init, to read all saved identities structs to m_vSavedIdentities
 
