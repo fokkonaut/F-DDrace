@@ -1699,6 +1699,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/dummy/v3_blocker.h
   entities/flag.cpp
   entities/flag.h
+  entities/flyingpoint.cpp
+  entities/flyingpoint.h
   entities/gun.cpp
   entities/gun.h
   entities/laser.cpp

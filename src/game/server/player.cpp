@@ -3,6 +3,7 @@
 
 #include "entities/character.h"
 #include "entities/flag.h"
+#include "entities/flyingpoint.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "player.h"
@@ -1744,7 +1745,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 	}
 }
 
-void CPlayer::GiveBlockPoints(int Amount)
+void CPlayer::GiveBlockPoints(int Amount, int Victim)
 {
 	if (GetAccID() < ACC_START)
 		return;
@@ -1755,6 +1756,11 @@ void CPlayer::GiveBlockPoints(int Amount)
 		Amount += 1;
 
 	pAccount->m_BlockPoints += Amount;
+
+	// visually give the block point
+	CCharacter *pVictim = GameServer()->GetPlayerChar(Victim);
+	if (pVictim)
+		new CFlyingPoint(&GameServer()->m_World, pVictim->GetPos(), m_ClientID, Victim, pVictim->Core()->m_Vel);
 }
 
 bool CPlayer::GiveTaserBattery(int Amount)

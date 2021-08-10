@@ -1558,7 +1558,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 				if (Server()->Tick() >= m_SpawnTick + Server()->TickSpeed() * Config()->m_SvBlockPointsDelay)
 					if (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking)
-						pKiller->GiveBlockPoints(1);
+						pKiller->GiveBlockPoints(1, m_pPlayer->GetCID());
 			}
 		}
 
