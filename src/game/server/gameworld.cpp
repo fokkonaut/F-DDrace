@@ -421,7 +421,7 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall, bool CheckMinigameTee)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
@@ -437,6 +437,13 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
+		if (CheckMinigameTee && p->GetPlayer()->IsMinigame() && p->GetPlayer()->m_SavedMinigameTee)
+		{
+			float LenMinigame = distance(Pos, p->GetPlayer()->m_MinigameTee.GetPos());
+			if (LenMinigame < Len)
+				Len = LenMinigame;
+		}
+
 		if (Len < p->m_ProximityRadius + Radius)
 		{
 			if (Len < ClosestRange)
