@@ -391,6 +391,8 @@ public:
 		PLOT_OWNER_ACC_USERNAME,
 		PLOT_DISPLAY_NAME,
 		PLOT_EXPIRE_DATE,
+		PLOT_DOOR_STATUS,
+		PLOT_OBJECTS,
 		NUM_PLOT_VARIABLES
 	};
 
@@ -548,10 +550,6 @@ public:
 	// money drops
 	void WriteMoneyListFile();
 	void ReadMoneyListFile();
-
-	// draweditor buildings
-	void WriteBuildingsFile();
-	void ReadBuildingsFile();
 
 	//motd
 	const char *FormatMotd(const char *pMsg);

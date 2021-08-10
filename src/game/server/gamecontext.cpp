@@ -1172,10 +1172,9 @@ void CGameContext::OnTick()
 		dbg_msg("acc", "automatic account saving...");
 		for (unsigned int i = ACC_START; i < m_Accounts.size(); i++)
 			WriteAccountStats(i);
-		for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+		for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
 			WritePlotStats(i);
 		WriteMoneyListFile();
-		WriteBuildingsFile();
 		m_LastDataSaveTick = Server()->Tick();
 	}
 
@@ -3581,7 +3580,6 @@ void CGameContext::FDDraceInit()
 	m_LastDataSaveTick = Server()->Tick();
 
 	ReadMoneyListFile();
-	ReadBuildingsFile();
 	ReadSavedPlayersFile();
 
 	{
@@ -3806,10 +3804,9 @@ void CGameContext::OnPreShutdown()
 	}
 
 	LogoutAllAccounts();
-	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
+	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
 	WriteMoneyListFile();
-	WriteBuildingsFile();
 }
 
 void CGameContext::OnShutdown(bool FullShutdown)
@@ -4202,7 +4199,7 @@ void CGameContext::InitPlots()
 		m_aPlots[i].m_ToTele = vec2(-1, -1);
 		m_aPlots[i].m_vObjects.clear();
 
-		if (i >= PLOT_START && i < Collision()->m_NumPlots + 1)
+		if (i < Collision()->m_NumPlots + 1)
 			ReadPlotStats(i);
 	}
 	ExpirePlots();
@@ -4214,6 +4211,8 @@ void CGameContext::ReadPlotStats(int ID)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetMapName(), ID);
 	std::fstream PlotFile(aBuf);
+	if (!PlotFile.is_open())
+		return;
 
 	for (int i = 0; i < NUM_PLOT_VARIABLES; i++)
 	{
@@ -4225,6 +4224,54 @@ void CGameContext::ReadPlotStats(int ID)
 		case PLOT_OWNER_ACC_USERNAME:		str_copy(m_aPlots[ID].m_aOwner, pData, sizeof(m_aPlots[ID].m_aOwner)); break;
 		case PLOT_DISPLAY_NAME:				str_copy(m_aPlots[ID].m_aDisplayName, pData, sizeof(m_aPlots[ID].m_aDisplayName)); break;
 		case PLOT_EXPIRE_DATE:				m_aPlots[ID].m_ExpireDate = atoi(pData); break;
+		case PLOT_DOOR_STATUS:				SetPlotDoorStatus(ID, atoi(pData)); break;
+		case PLOT_OBJECTS:
+		{
+			while (1)
+			{
+				if (!pData)
+					break;
+
+				vec2 Pos = vec2(-1, -1);
+				int EntityType = -1;
+				int PlotID = -1;
+
+				sscanf(pData, "%d", &EntityType);
+				switch (EntityType)
+				{
+					case CGameWorld::ENTTYPE_PICKUP:
+					{
+						int Type = -1;
+						int Subtype = -1;
+						sscanf(pData, "%d:%d:%f/%f:%d:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Type, &Subtype);
+						if (Type >= 0 && Subtype >= 0 && PlotID >= 0)
+						{
+							CPickup *pPickup = new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype);
+							pPickup->m_PlotID = PlotID;
+							m_aPlots[PlotID].m_vObjects.push_back(pPickup);
+						}
+						break;
+					}
+					case CGameWorld::ENTTYPE_DOOR:
+					{
+						float Rotation = -1.f;
+						int Length = 0.f;
+						sscanf(pData, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
+						if (Rotation >= 0 && Length > 0 && PlotID >= 0)
+						{
+							CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
+							pDoor->m_PlotID = PlotID;
+							m_aPlots[PlotID].m_vObjects.push_back(pDoor);
+						}
+						break;
+					}
+				}
+
+				// jump to next comma, if it exists skip it so we can start the next loop run with the next data
+				if ((pData = str_find(pData, ",")))
+					pData++;
+			}
+		} break;
 		}
 	}
 }
@@ -4238,11 +4285,36 @@ void CGameContext::WritePlotStats(int ID)
 
 	if (PlotFile.is_open())
 	{
+		int PlotDoorStatus = Collision()->m_pSwitchers ? Collision()->m_pSwitchers[Collision()->GetSwitchByPlot(ID)].m_Status[0] : 0;
 		PlotFile << m_aPlots[ID].m_aOwner << "\n";
 		PlotFile << m_aPlots[ID].m_aDisplayName << "\n";
 		PlotFile << m_aPlots[ID].m_ExpireDate << "\n";
+		PlotFile << PlotDoorStatus << "\n";
+		
+		for (unsigned int i = 0; i < m_aPlots[ID].m_vObjects.size(); i++)
+		{
+			char aEntry[128];
+			switch (m_aPlots[ID].m_vObjects[i]->GetObjType())
+			{
+				case CGameWorld::ENTTYPE_PICKUP:
+				{
+					CPickup *pPickup = (CPickup *)m_aPlots[ID].m_vObjects[i];
+					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, pPickup->m_PlotID, pPickup->GetPos().x/32.f, pPickup->GetPos().y/32.f, pPickup->GetType(), pPickup->GetSubtype());
+					PlotFile << aEntry;
+					break;
+				}
+				case CGameWorld::ENTTYPE_DOOR:
+				{
+					CDoor *pDoor = (CDoor *)m_aPlots[ID].m_vObjects[i];
+					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength());
+					PlotFile << aEntry;
+					break;
+				}
+			}
+		}
+
+		PlotFile << "\n";
 	}
-	PlotFile.close();
 }
 
 int CGameContext::GetPlotID(int AccID)
@@ -5011,96 +5083,6 @@ void CGameContext::WriteMoneyListFile()
 	}
 }
 
-void CGameContext::ReadBuildingsFile()
-{
-	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
-	{
-		std::string data;
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "%s/%s/plot%d.txt", Config()->m_SvBuildingsFilePath, Server()->GetMapName(), i);
-		std::fstream BuildingsFile(aBuf);
-		getline(BuildingsFile, data);
-		const char *pStr = data.c_str();
-
-		while (1)
-		{
-			if (!pStr)
-				break;
-
-			vec2 Pos = vec2(-1, -1);
-			int EntityType = -1;
-			int PlotID = -1;
-
-			sscanf(pStr, "%d", &EntityType);
-			switch (EntityType)
-			{
-				case CGameWorld::ENTTYPE_PICKUP:
-				{
-					int Type = -1;
-					int Subtype = -1;
-					sscanf(pStr, "%d:%d:%f/%f:%d:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Type, &Subtype);
-					if (Type >= 0 && Subtype >= 0 && PlotID >= 0)
-					{
-						CPickup *pPickup = new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype);
-						pPickup->m_PlotID = PlotID;
-						m_aPlots[PlotID].m_vObjects.push_back(pPickup);
-					}
-					break;
-				}
-				case CGameWorld::ENTTYPE_DOOR:
-				{
-					float Rotation = -1.f;
-					int Length = 0.f;
-					sscanf(pStr, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
-					if (Rotation >= 0 && Length > 0 && PlotID >= 0)
-					{
-						CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
-						pDoor->m_PlotID = PlotID;
-						m_aPlots[PlotID].m_vObjects.push_back(pDoor);
-					}
-					break;
-				}
-			}
-
-			// jump to next comma, if it exists skip it so we can start the next loop run with the next data
-			if ((pStr = str_find(pStr, ",")))
-				pStr++;
-		}
-	}
-}
-
-void CGameContext::WriteBuildingsFile()
-{
-	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
-	{
-		char aFile[256];
-		str_format(aFile, sizeof(aFile), "%s/%s/plot%d.txt", Config()->m_SvBuildingsFilePath, Server()->GetMapName(), i);
-		std::ofstream BuildingsFile(aFile);
-
-		for (unsigned int j = 0; j < m_aPlots[i].m_vObjects.size(); j++)
-		{
-			char aEntry[128];
-			switch (m_aPlots[i].m_vObjects[j]->GetObjType())
-			{
-				case CGameWorld::ENTTYPE_PICKUP:
-				{
-					CPickup *pPickup = (CPickup *)m_aPlots[i].m_vObjects[j];
-					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, pPickup->m_PlotID, pPickup->GetPos().x/32.f, pPickup->GetPos().y/32.f, pPickup->GetType(), pPickup->GetSubtype());
-					BuildingsFile << aEntry;
-					break;
-				}
-				case CGameWorld::ENTTYPE_DOOR:
-				{
-					CDoor *pDoor = (CDoor *)m_aPlots[i].m_vObjects[j];
-					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength());
-					BuildingsFile << aEntry;
-					break;
-				}
-			}
-		}
-	}
-}
-
 void CGameContext::ReadSavedPlayersFile()
 {
 	m_vSavedIdentities.clear();
@@ -5122,6 +5104,17 @@ void CGameContext::ReadSavedPlayersFile()
 	m_vSavedIdentitiesFiles.clear();
 }
 
+int CGameContext::LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if (!IsDir && str_endswith(pName, ".save"))
+	{
+		std::string Name = pName;
+		pSelf->m_vSavedIdentitiesFiles.push_back(Name);
+	}
+	return 0;
+}
+
 void CGameContext::SaveDrop(int ClientID, const char *pReason)
 {
 	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
@@ -5134,17 +5127,6 @@ void CGameContext::SaveDrop(int ClientID, const char *pReason)
 
 	// Drop the client
 	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
-}
-
-int CGameContext::LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	CGameContext *pSelf = (CGameContext *)pUser;
-	if (!IsDir && str_endswith(pName, ".save"))
-	{
-		std::string Name = pName;
-		pSelf->m_vSavedIdentitiesFiles.push_back(Name);
-	}
-	return 0;
 }
 
 bool CGameContext::SaveCharacter(int ClientID, int Flags)
@@ -5287,11 +5269,6 @@ void CGameContext::CreateFolders()
 	// money drops
 	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-
-	// draweditor buildings
-	Storage()->CreateFolder(Config()->m_SvBuildingsFilePath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvBuildingsFilePath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// saved tee
