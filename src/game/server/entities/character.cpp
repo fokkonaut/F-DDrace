@@ -1197,6 +1197,11 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		m_DrawEditor.OnInput(pNewInput);
 		ResetInput |= 1;
 	}
+	else if (m_pHelicopter)
+	{
+		m_pHelicopter->OnInput(pNewInput);
+		ResetInput |= 1;
+	}
 
 	if (ResetInput)
 	{
@@ -1208,13 +1213,6 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 			pNewInput->m_TargetX = m_Input.m_TargetX;
 			pNewInput->m_TargetY = m_Input.m_TargetY;
 		}
-	}
-	else if (m_pHelicopter)
-	{
-		m_pHelicopter->OnInput(pNewInput);
-		pNewInput->m_Direction = 0;
-		pNewInput->m_Jump = 0;
-		pNewInput->m_Hook = 0;
 	}
 
 	// check for changes
