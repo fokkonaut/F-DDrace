@@ -1237,6 +1237,14 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pSelf->SpawnHelicopter(pChr->GetPos());
 }
 
+void CGameContext::ConRemoveHelicopters(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CHelicopter *pHelicopter = (CHelicopter *)pSelf->m_World.FindFirst(CGameWorld::ENTTYPE_HELICOPTER);
+	for (; pHelicopter; pHelicopter = (CHelicopter *)pHelicopter->TypeNext())
+		pSelf->m_World.DestroyEntity(pHelicopter);
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
