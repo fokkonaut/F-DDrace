@@ -158,6 +158,7 @@ class CGameContext : public IGameServer
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearVotes(IConsole::IResult *pResult, void *pUserData);
@@ -215,10 +216,10 @@ public:
 	int m_LockTeams;
 
 	// voting
-	void StartVote(const char *pDesc, const char *pCommand, const char *pReason);
+	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSevendownDesc);
 	void EndVote(int Type, bool Force);
 	void ForceVote(int Type, const char *pDescription, const char *pReason);
-	void SendVoteSet(int Type, int ToClientID);
+	void SendVoteSet(int Type, int ClientID);
 	void SendVoteStatus(int ClientID, int Total, int Yes, int No);
 	void AbortVoteOnDisconnect(int ClientID);
 	void AbortVoteOnTeamChange(int ClientID);
@@ -230,6 +231,7 @@ public:
 	bool m_VoteUpdate;
 	int m_VotePos;
 	char m_aVoteDescription[VOTE_DESC_LENGTH];
+	char m_aSevendownVoteDescription[VOTE_DESC_LENGTH];
 	char m_aVoteCommand[VOTE_CMD_LENGTH];
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_VoteClientID;
@@ -265,11 +267,17 @@ public:
 	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
+	enum
+	{
+		CHAT_SEVEN = 1<<0,
+		CHAT_SEVENDOWN = 1<<1,
+	};
+
 	// network
 	void SendChatMsg(CNetMsg_Sv_Chat *pMsg, int Flags, int To);
-	void SendChatTarget(int To, const char* pText);
+	void SendChatTarget(int To, const char* pText, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendChatTeam(int Team, const char* pText);
-	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1);
+	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
@@ -279,7 +287,7 @@ public:
 	// DDRace
 	void SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID);
 
-	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg);
+	void CallVote(int ClientID, const char *aDesc, const char *aCmd, const char *pReason, const char *aChatmsg, const char *pSevendownDesc);
 
 	void List(int ClientID, const char* filter); // ClientID -1 prints to console, otherwise to chat
 
