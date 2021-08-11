@@ -43,6 +43,7 @@ protected:
 	bool m_Gravity;
 	bool m_GroundVel;
 	bool m_AirVel;
+	float m_Elasticity;
 
 	static bool IsSwitchActiveCb(int Number, void* pUser);
 	void HandleTiles(int Index);

@@ -17,6 +17,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_Gravity = true;
 	m_GroundVel = true;
 	m_AirVel = true;
+	m_Elasticity = 0.5f;
 }
 
 void CAdvancedEntity::Reset()
@@ -151,7 +152,7 @@ void CAdvancedEntity::HandleDropped()
 		HandleTiles(CurrentIndex);
 	}
 	IsGrounded(m_GroundVel, m_AirVel);
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
+	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), m_Elasticity);
 }
 
 bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
