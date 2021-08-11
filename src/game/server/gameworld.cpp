@@ -285,17 +285,7 @@ void CGameWorld::PlayerMap::Update()
 		}
 		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(i, false))
 		{
-			for (int j = 0; j < MAX_CLIENTS; j++)
-			{
-				if (j == i || j == m_ClientID || GetPlayer()->m_aSameIP[j] || m_pGameWorld->GameServer()->GetDDRaceTeam(j))
-					continue;
-
-				if (m_pReverseMap[j] != -1 && (!m_pGameWorld->GameServer()->GetPlayerChar(j) || m_pGameWorld->GameServer()->GetPlayerChar(j)->NetworkClipped(m_ClientID, false)))
-				{
-					Add(m_pReverseMap[j], i);
-					break;
-				}
-			}
+			InsertNextEmpty(i);
 		}
 	}
 
@@ -303,6 +293,24 @@ void CGameWorld::PlayerMap::Update()
 	{
 		((CGameControllerDDRace *)m_pGameWorld->GameServer()->m_pController)->m_Teams.SendTeamsState(m_ClientID);
 		m_UpdateTeamsState = false;
+	}
+}
+
+void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
+{
+	if (m_pReverseMap[ClientID] != -1 || ClientID == -1)
+		return;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (i == ClientID || i == m_ClientID || GetPlayer()->m_aSameIP[i] || m_pGameWorld->GameServer()->GetDDRaceTeam(i))
+			continue;
+
+		if (m_pReverseMap[i] != -1 && (!m_pGameWorld->GameServer()->GetPlayerChar(i) || m_pGameWorld->GameServer()->GetPlayerChar(i)->NetworkClipped(m_ClientID, false)))
+		{
+			Add(m_pReverseMap[i], ClientID);
+			break;
+		}
 	}
 }
 

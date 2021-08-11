@@ -72,6 +72,7 @@ private:
 		void Update();
 		void Add(int MapID, int ClientID);
 		int Remove(int MapID);
+		void InsertNextEmpty(int ClientID);
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);
 
@@ -85,7 +86,8 @@ public:
 	CWorldCore m_Core;
 
 	// F-DDrace
-	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; };
+	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
+	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 
 	CGameWorld();
 	~CGameWorld();

@@ -877,18 +877,37 @@ void CGameContext::SendVoteSet(int Type, int ClientID)
 		{
 			if (!m_apPlayers[i])
 				continue;
-			if (Server()->IsSevendown(i))
-				Server()->SendMsg(&MsgSevendown, MSGFLAG_VITAL, i);
-			else
+
+			if (!Server()->IsSevendown(i))
+			{
+				m_World.ForceInsertPlayer(m_VoteCreator, i); // 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
+				int id = m_VoteCreator;
+				Server()->Translate(id, i);
+				Msg.m_ClientID = id;
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+				Msg.m_ClientID = m_VoteCreator;
+			}
+			else
+			{
+				Server()->SendMsg(&MsgSevendown, MSGFLAG_VITAL, i);
+			}
 		}
 	}
 	else
 	{
-		if (Server()->IsSevendown(ClientID))
-			Server()->SendMsg(&MsgSevendown, MSGFLAG_VITAL, ClientID);
-		else
+		if (!Server()->IsSevendown(ClientID))
+		{
+			m_World.ForceInsertPlayer(m_VoteCreator, ClientID);
+			int id = m_VoteCreator;
+			Server()->Translate(id, ClientID);
+			Msg.m_ClientID = id;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+			Msg.m_ClientID = m_VoteCreator;
+		}
+		else
+		{
+			Server()->SendMsg(&MsgSevendown, MSGFLAG_VITAL, ClientID);
+		}
 	}
 }
 
@@ -2126,7 +2145,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 					return;
 				}
-				//else if(!g_Config.m_SvVoteKick)
 				else if(!Config()->m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
 				{
 					SendChatTarget(ClientID, "Server does not allow voting to kick players");
