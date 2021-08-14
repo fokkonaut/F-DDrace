@@ -66,6 +66,8 @@ void CDrawEditor::Tick()
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
 
+	HandleInput();
+
 	if (Server()->Tick() % Server()->TickSpeed() == 0)
 	{
 		int PlotID = m_pCharacter->GetCurrentTilePlotID();
@@ -122,7 +124,14 @@ void CDrawEditor::OnPlayerFire()
 
 void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 {
-	if (pNewInput->m_Jump)
+	m_Input.m_Jump = pNewInput->m_Jump;
+	m_Input.m_Hook = pNewInput->m_Hook;
+	m_Input.m_Direction = pNewInput->m_Direction;
+}
+
+void CDrawEditor::HandleInput()
+{
+	if (m_Input.m_Jump)
 	{
 		if (!m_Selecting || Server()->Tick() % 100 == 0)
 			SendWindow();
@@ -136,7 +145,7 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 		m_Selecting = false;
 	}
 
-	if (pNewInput->m_Hook && !m_Selecting && !m_pCharacter->m_FreezeTime)
+	if (m_Input.m_Hook && !m_Selecting && !m_pCharacter->m_FreezeTime)
 	{
 		m_Erasing = true;
 
@@ -157,13 +166,13 @@ void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
 	else
 		m_Erasing = false;
 
-	if (pNewInput->m_Direction != 0 && m_DrawMode == DRAW_WALL)
+	if (m_Input.m_Direction != 0 && m_DrawMode == DRAW_WALL)
 	{
 		if (m_EditStartTick == 0)
 			m_EditStartTick = Server()->Tick();
 
 		bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
-		int Add = pNewInput->m_Direction * (1 + 4*(int)Faster);
+		float Add = m_Input.m_Direction * (0.5f + 2*(int)Faster);
 
 		if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 			AddLength(Add);
@@ -302,14 +311,14 @@ void CDrawEditor::SetAngle(float Angle)
 	((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
 }
 
-void CDrawEditor::AddAngle(int Add)
+void CDrawEditor::AddAngle(float Add)
 {
 	SetAngle(((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180);
 }
 
-void CDrawEditor::AddLength(int Add)
+void CDrawEditor::AddLength(float Add)
 {
-	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + (float)Add/10, 0.f, s_MaxLength);
+	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + Add/10.f, 0.f, s_MaxLength);
 	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
 }
 

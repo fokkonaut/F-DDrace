@@ -34,8 +34,16 @@ class CDrawEditor
 	CEntity *CreateEntity(bool Preview = false);
 
 	void SetAngle(float Angle);
-	void AddAngle(int Add);
-	void AddLength(int Add);
+	void AddAngle(float Add);
+	void AddLength(float Add);
+
+	void HandleInput();
+	struct
+	{
+		int m_Jump;
+		int m_Hook;
+		int m_Direction;
+	} m_Input;
 
 	bool CanPlace();
 	bool CanRemove(CEntity *pEnt);
