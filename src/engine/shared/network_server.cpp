@@ -295,7 +295,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 						}
 					}
 
-					int MaxClientsPerIP = Config()->m_SvCountTimeoutToMaxIP ? m_MaxClientsPerIP : m_MaxClientsPerIP+FoundTimeouts;
+					int MaxClientsPerIP = Config()->m_SvCountTimeoutToMaxIP ? m_MaxClientsPerIP : clamp(m_MaxClientsPerIP+FoundTimeouts, 0, m_MaxClientsPerIP*2);
 					if(FoundAddr >= MaxClientsPerIP)
 					{
 						char aBuf[128];
