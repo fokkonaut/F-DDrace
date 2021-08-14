@@ -237,8 +237,6 @@ void CHelicopter::InitPropellers()
 	{
 		BackPropeller()[i] = SBone(vec2(-110.f+Radius, -10.f), vec2(-110.f, -10.f));
 		Radius *= -1;
+		m_aTrails[i].m_pPos = &BackPropeller()[i].m_From;
 	}
-
-	m_aTrails[0].m_pPos = &BackPropeller()[0].m_From;
-	m_aTrails[1].m_pPos = &BackPropeller()[1].m_From;
 }
