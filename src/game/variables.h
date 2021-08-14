@@ -272,4 +272,5 @@ MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER,
 MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 0, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength or weak hook is also there", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvCountTimeoutToMaxIP, sv_count_timeout_to_max_ip, 1, 0, 1, CFGFLAG_SERVER, "Whether timeouted tees count to the limit of max clients per ip", AUTHED_ADMIN)
 #endif

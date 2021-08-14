@@ -278,9 +278,10 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 					}
 
 					// only allow a specific number of players with the same ip
-					int FoundAddr = 1;
-					
-					bool Continue = false;
+					int FoundAddr = 0;
+					// dont count timeouted tees to the same address because then not every timeout can be get back
+					int FoundTimeouts = 0;
+
 					for(int i = 0; i < NET_MAX_CLIENTS; i++)
 					{
 						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
@@ -288,19 +289,20 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown)
 
 						if(!net_addr_comp(&Addr, m_aSlots[i].m_Connection.PeerAddress(), false))
 						{
-							if(FoundAddr++ >= m_MaxClientsPerIP)
-							{
-								char aBuf[128];
-								str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-								SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, SecurityToken);
-								Continue = true;
-								break;
-							}
+							FoundAddr++;
+							if (m_aSlots[i].m_Connection.m_TimeoutSituation)
+								FoundTimeouts++;
 						}
 					}
 
-					if(Continue)
+					int MaxClientsPerIP = Config()->m_SvCountTimeoutToMaxIP ? m_MaxClientsPerIP : m_MaxClientsPerIP+FoundTimeouts;
+					if(FoundAddr >= MaxClientsPerIP)
+					{
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, SecurityToken);
 						continue;
+					}
 
 					for(int i = 0; i < NET_MAX_CLIENTS; i++)
 					{
