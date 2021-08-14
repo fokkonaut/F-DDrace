@@ -3,7 +3,7 @@
 #include <base/math.h>
 
 #include <antibot/antibot_data.h>
-#include <zlib.h>
+#include <base/hash_ctxt.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/memheap.h>
@@ -4427,7 +4427,7 @@ void CGameContext::ReadPlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetMapName(), ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetCurrentMapName(), ID);
 	std::fstream PlotFile(aBuf);
 	if (!PlotFile.is_open())
 		return;
@@ -4498,7 +4498,7 @@ void CGameContext::WritePlotStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetMapName(), ID);
+	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetCurrentMapName(), ID);
 	std::ofstream PlotFile(aBuf);
 
 	if (PlotFile.is_open())
@@ -5263,7 +5263,7 @@ void CGameContext::ReadMoneyListFile()
 {
 	std::string data;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
+	str_format(aBuf, sizeof(aBuf), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetCurrentMapName());
 	std::fstream MoneyDropsFile(aBuf);
 	getline(MoneyDropsFile, data);
 	const char *pStr = data.c_str();
@@ -5289,7 +5289,7 @@ void CGameContext::ReadMoneyListFile()
 void CGameContext::WriteMoneyListFile()
 {
 	char aFile[256];
-	str_format(aFile, sizeof(aFile), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
+	str_format(aFile, sizeof(aFile), "%s/%s/moneydrops.txt", Config()->m_SvMoneyDropsFilePath, Server()->GetCurrentMapName());
 	std::ofstream MoneyDropsFile(aFile);
 
 	CMoney *pMoney = (CMoney *)m_World.FindFirst(CGameWorld::ENTTYPE_MONEY);
@@ -5307,12 +5307,12 @@ void CGameContext::ReadSavedPlayersFile()
 	m_vSavedIdentitiesFiles.clear();
 
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName());
 	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadSavedPlayersCallback, this);
 
 	for (unsigned int i = 0; i < m_vSavedIdentitiesFiles.size(); i++)
 	{
-		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), m_vSavedIdentitiesFiles[i].c_str());
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), m_vSavedIdentitiesFiles[i].c_str());
 		CSaveTee SaveTee;
 		if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity())
 		{
@@ -5369,7 +5369,7 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags)
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%08x.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));
+	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));
 	CSaveTee SaveTee(Flags|SAVE_IDENTITY);
 	SaveTee.SaveFile(aFilename, pChr);
 	return true;
@@ -5403,49 +5403,14 @@ int CGameContext::FindSavedPlayer(int ClientID)
 	return -1;
 }
 
-unsigned int CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
+const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 {
-	// TODO: bad fix, otherwise after loading save files in ReadSavedPlayersFile() after a server restart causes a different hash leading in a file that cant be opened
-	// `Crc = crc32(Crc, (const unsigned char *)&Info, sizeof(Info));` works without server restarts tho, so it has to be an error in saving/loading the save file
-	struct
-	{
-		char m_aAccUsername[32];
-		NETADDR m_Addr;
-		char m_aTimeoutCode[64];
-
-		char m_aName[MAX_NAME_LENGTH];
-		
-		char m_aaSkinPartNames[NUM_SKINPARTS][MAX_SKIN_ARRAY_SIZE];
-		int m_aUseCustomColors[NUM_SKINPARTS];
-		int m_aSkinPartColors[NUM_SKINPARTS];
-
-		struct
-		{
-			char m_SkinName[MAX_SKIN_LENGTH];
-			int m_UseCustomColor;
-			int m_ColorBody;
-			int m_ColorFeet;
-		} m_Sevendown;
-	} IdentityHash;
-
-	str_copy(IdentityHash.m_aAccUsername, Info.m_aAccUsername, sizeof(IdentityHash.m_aAccUsername));
-	IdentityHash.m_Addr = Info.m_Addr;
-	str_copy(IdentityHash.m_aTimeoutCode, Info.m_aTimeoutCode, sizeof(IdentityHash.m_aTimeoutCode));
-	str_copy(IdentityHash.m_aName, Info.m_aName, sizeof(IdentityHash.m_aName));
-	for (int p = 0; p < NUM_SKINPARTS; p++)
-	{
-		str_copy(IdentityHash.m_aaSkinPartNames[p], Info.m_TeeInfo.m_aaSkinPartNames[p], sizeof(IdentityHash.m_aaSkinPartNames[p]));
-		IdentityHash.m_aUseCustomColors[p] = Info.m_TeeInfo.m_aUseCustomColors[p];
-		IdentityHash.m_aSkinPartColors[p] = Info.m_TeeInfo.m_aSkinPartColors[p];
-	}
-	str_copy(IdentityHash.m_Sevendown.m_SkinName, Info.m_TeeInfo.m_Sevendown.m_SkinName, sizeof(IdentityHash.m_Sevendown.m_SkinName));
-	IdentityHash.m_Sevendown.m_UseCustomColor = Info.m_TeeInfo.m_Sevendown.m_UseCustomColor;
-	IdentityHash.m_Sevendown.m_ColorBody = Info.m_TeeInfo.m_Sevendown.m_ColorBody;
-	IdentityHash.m_Sevendown.m_ColorFeet = Info.m_TeeInfo.m_Sevendown.m_ColorFeet;
-
-	unsigned int Crc = crc32(0L, 0x0, 0);
-	Crc = crc32(Crc, (const unsigned char *)&IdentityHash, sizeof(IdentityHash));
-	return Crc;
+	SHA256_CTX Sha256Ctx;
+	sha256_init(&Sha256Ctx);
+	sha256_update(&Sha256Ctx, &Info, sizeof(Info));
+	static char aSha256[SHA256_MAXSTRSIZE];
+	sha256_str(sha256_finish(&Sha256Ctx), aSha256, sizeof(aSha256));
+	return aSha256;
 }
 
 bool CGameContext::CheckLoadPlayer(int ClientID)
@@ -5456,7 +5421,7 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 
 	// Get path and load
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%08x.save", Config()->m_SvSavedTeesFilePath, Server()->GetMapName(), GetSavedIdentityHash(m_vSavedIdentities[Index]));
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(m_vSavedIdentities[Index]));
 	CSaveTee SaveTee;
 	if (SaveTee.LoadFile(aPath, m_apPlayers[ClientID]->GetCharacter()))
 	{

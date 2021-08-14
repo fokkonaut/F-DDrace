@@ -15,8 +15,10 @@ struct SSavedIdentity
 {
 	SSavedIdentity()
 	{
-		m_aAccUsername[0] = '\0';
-		m_aTimeoutCode[0] = '\0';
+		// mem_comp gets fucked up when using char arrays otherwise :)
+		mem_zero(m_aAccUsername, sizeof(m_aAccUsername));
+		mem_zero(m_aTimeoutCode, sizeof(m_aTimeoutCode));
+		mem_zero(m_aName, sizeof(m_aName));
 	}
 
 	char m_aAccUsername[32];
