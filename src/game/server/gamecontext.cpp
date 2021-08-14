@@ -5916,12 +5916,13 @@ void CGameContext::SetMapSpecificOptions()
 
 void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int Seconds)
 {
-	Pos.y -= 40.0 * 2.5;
+	Pos.y -= 40.f * 2.5f;
 	new CLaserText(&m_World, Pos, Owner, Server()->TickSpeed() * Seconds, pText, (int)(strlen(pText)));
 }
 
 void CGameContext::SpawnHelicopter(vec2 Pos)
 {
+	Pos.y -= 32.f;
 	new CHelicopter(&m_World, Pos);
 }
 

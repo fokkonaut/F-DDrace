@@ -107,7 +107,7 @@ CONSOLE_COMMAND("plot_info", "i[plotid]", CFGFLAG_SERVER, ConPlotInfo, this, "Sh
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
 CONSOLE_COMMAND("sendmotd", "v[id] i[footer] r[text]", CFGFLAG_SERVER, ConSendMotd, this, "Sends a motd containing text r to player v (i=1 with footer)", AUTHED_ADMIN)
-CONSOLE_COMMAND("helicopter", "?v[id]", CFGFLAG_SERVER, ConHelicopter, this, "Spawns a helicopter at position of player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("helicopter", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConHelicopter, this, "Spawns a helicopter at position of player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("remove_helicopters", "", CFGFLAG_SERVER, ConRemoveHelicopters, this, "Removes all helicopters", AUTHED_ADMIN)
 
 //client information
