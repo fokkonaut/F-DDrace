@@ -19,6 +19,8 @@ struct SSavedIdentity
 		mem_zero(m_aAccUsername, sizeof(m_aAccUsername));
 		mem_zero(m_aTimeoutCode, sizeof(m_aTimeoutCode));
 		mem_zero(m_aName, sizeof(m_aName));
+		m_aAccUsername[0] = '\0';
+		m_aTimeoutCode[0] = '\0';
 	}
 
 	char m_aAccUsername[32];

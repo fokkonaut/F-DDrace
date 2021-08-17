@@ -5388,12 +5388,13 @@ int CGameContext::FindSavedPlayer(int ClientID)
 		SSavedIdentity Info = m_vSavedIdentities[i];
 		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
 		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
-		bool SameTimeoutCode = m_apPlayers[ClientID]->m_TimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
+		bool SameTimeoutCode = Info.m_aTimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
 		bool SameAcc = Info.m_aAccUsername[0] != '\0' && str_comp(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
 		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
 		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
 
 		bool SameClientInfo = SameAddr && (SameName || SameTeeInfo);
+		SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
 		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
 		{
 			return i;
