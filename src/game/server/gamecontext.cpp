@@ -5183,7 +5183,7 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 
 SHA256_DIGEST CGameContext::HashPassword(const char *pPassword)
 {
-	char aPassword[MAX_PASSWORD_LENGTH];
+	char aPassword[SHA256_MAXSTRSIZE];
 	str_copy(aPassword, pPassword, sizeof(aPassword));
 	SHA256_CTX Sha256Ctx;
 	sha256_init(&Sha256Ctx);
