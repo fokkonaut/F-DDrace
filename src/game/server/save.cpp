@@ -64,7 +64,7 @@ bool CSaveTee::LoadFile(const char *pFileName, CCharacter *pChr, CGameContext *p
 			return false;
 		}
 
-		LoadString(pString);
+		LoadString(pString, pGameServer);
 		if (pChr)
 		{
 			Load(pChr, 0);
@@ -214,6 +214,13 @@ void CSaveTee::Save(CCharacter *pChr)
 		int Index = pChr->GameServer()->FindSavedPlayer(pChr->GetPlayer()->GetCID());
 		if (Index != -1)
 			m_Identity = pChr->GameServer()->m_vSavedIdentities[Index];
+	}
+
+	if (str_comp(m_Identity.m_aName, "fokkonaut") == 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "before changing %s %s", m_Identity.m_aAccUsername, m_Identity.m_aTimeoutCode);
+		pChr->GameServer()->SendChatTarget(-1, aBuf);
 	}
 
 	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
@@ -379,6 +386,13 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 
 	if (m_Flags&SAVE_IDENTITY)
 	{
+		if (str_comp(m_Identity.m_aName, "fokkonaut") == 0)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "trying to log %s %s", m_Identity.m_aAccUsername, m_Identity.m_aTimeoutCode);
+			pChr->GameServer()->SendChatTarget(-1, aBuf);
+		}
+
 		if (m_Identity.m_aAccUsername[0] != '\0')
 			pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_Identity.m_aAccUsername, "", false);
 	}
@@ -494,7 +508,7 @@ char* CSaveTee::GetString()
 	return m_aString;
 }
 
-int CSaveTee::LoadString(char* String)
+int CSaveTee::LoadString(char* String, CGameContext *pGameServer)
 {
 	char aSavedAddress[NETADDR_MAXSTRSIZE];
 	int Num;
@@ -596,6 +610,13 @@ int CSaveTee::LoadString(char* String)
 		&m_Identity.m_TeeInfo.m_aSkinPartColors[0], &m_Identity.m_TeeInfo.m_aSkinPartColors[1], &m_Identity.m_TeeInfo.m_aSkinPartColors[2], &m_Identity.m_TeeInfo.m_aSkinPartColors[3], &m_Identity.m_TeeInfo.m_aSkinPartColors[4], &m_Identity.m_TeeInfo.m_aSkinPartColors[5],
 		m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, &m_Identity.m_TeeInfo.m_Sevendown.m_UseCustomColor, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorBody, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorFeet
 	);
+
+	if (str_comp(m_Identity.m_aName, "fokkonaut") == 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "after load %s %s", m_Identity.m_aAccUsername, m_Identity.m_aTimeoutCode);
+		pGameServer->SendChatTarget(-1, aBuf);
+	}
 
 	{
 		net_addr_from_str(&m_Identity.m_Addr, aSavedAddress);
