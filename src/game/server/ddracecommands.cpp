@@ -1509,7 +1509,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	char aBuf[128];
+	char aBuf[256];
 	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
 	{
 		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
@@ -1540,6 +1540,12 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 			char aTime[64];
 			str_format(aTime, sizeof(aTime), "%d", (int)ExpireDate);
 			pValue = aTime;
+		}
+		else if (VariableID == ACC_PASSWORD)
+		{
+			char aPassword[128];
+			sha256_str(pSelf->HashPassword(pResult->GetString(2)), aPassword, sizeof(aPassword));
+			pValue = aPassword;
 		}
 
 		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, pSelf->GetAccVarValue(ID, VariableID), pValue);
