@@ -1681,8 +1681,9 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = !pResult->NumArguments() ? pResult->m_ClientID : pResult->GetVictim();
-	const char *pReason = pResult->NumArguments() == 2 ? pResult->GetString(1) : "automatic kick due to save drop";
-	pSelf->SaveDrop(Victim, pReason);
+	int Hours = pResult->NumArguments() >= 2 ? pResult->GetInteger(1) : 6;
+	const char *pReason = pResult->NumArguments() == 3 ? pResult->GetString(2) : "automatic kick due to save drop";
+	pSelf->SaveDrop(Victim, Hours, pReason);
 }
 
 void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)

@@ -1264,7 +1264,10 @@ void CGameContext::OnTick()
 			InstagibTick(i);
 
 	if (IsFullHour())
+	{
 		ExpirePlots();
+		ExpireSavedIdentities();
+	}
 
 #ifdef CONF_DEBUG
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3749,6 +3752,7 @@ void CGameContext::FDDraceInit()
 
 	ReadMoneyListFile();
 	ReadSavedPlayersFile();
+	ExpireSavedIdentities();
 
 	{
 		time_t rawtime;
@@ -3965,7 +3969,7 @@ void CGameContext::OnPreShutdown()
 		{
 			// Either save the character and it's money or simply drop the money so it can get loaded on next server start
 			if (Config()->m_SvShutdownSaveTees)
-				SaveCharacter(i, SAVE_WALLET|SAVE_FLAG);
+				SaveCharacter(i, SAVE_WALLET|SAVE_FLAG, Config()->m_SvShutdownSaveTeeExpire);
 			else
 				pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
 		}
@@ -4947,9 +4951,9 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_TASER_LEVEL:				m_Accounts[ID].m_TaserLevel = atoi(pData); break;
 	case ACC_KILLING_SPREE_RECORD:		m_Accounts[ID].m_KillingSpreeRecord = atoi(pData); break;
 	case ACC_EUROS:						m_Accounts[ID].m_Euros = atoi(pData); break;
-	case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoi(pData); break;
+	case ACC_EXPIRE_DATE_VIP:			m_Accounts[ID].m_ExpireDateVIP = atoll(pData); break;
 	case ACC_PORTAL_RIFLE:				m_Accounts[ID].m_PortalRifle = atoi(pData); break;
-	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoi(pData); break;
+	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	m_Accounts[ID].m_ExpireDatePortalRifle = atoll(pData); break;
 	case ACC_VERSION:					m_Accounts[ID].m_Version = atoi(pData); break;
 	case ACC_ADDR:						net_addr_from_str(&m_Accounts[ID].m_Addr, pData); break;
 	case ACC_LAST_ADDR:					net_addr_from_str(&m_Accounts[ID].m_LastAddr, pData); break;
@@ -4957,8 +4961,8 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_CONTACT:					str_copy(m_Accounts[ID].m_aContact, pData, sizeof(m_Accounts[ID].m_aContact)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(m_Accounts[ID].m_aTimeoutCode, pData, sizeof(m_Accounts[ID].m_aTimeoutCode)); break;
 	case ACC_SECURITY_PIN:				str_copy(m_Accounts[ID].m_aSecurityPin, pData, sizeof(m_Accounts[ID].m_aSecurityPin)); break;
-	case ACC_REGISTER_DATE:				m_Accounts[ID].m_RegisterDate = atoi(pData); break;
-	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoi(pData); break;
+	case ACC_REGISTER_DATE:				m_Accounts[ID].m_RegisterDate = atoll(pData); break;
+	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoll(pData); break;
 	}
 }
 
@@ -5057,9 +5061,9 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_TASER_LEVEL:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_TaserLevel); break;
 	case ACC_KILLING_SPREE_RECORD:		str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_KillingSpreeRecord); break;
 	case ACC_EUROS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Euros); break;
-	case ACC_EXPIRE_DATE_VIP:			str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_ExpireDateVIP); break;
+	case ACC_EXPIRE_DATE_VIP:			str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_ExpireDateVIP); break;
 	case ACC_PORTAL_RIFLE:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalRifle); break;
-	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_ExpireDatePortalRifle); break;
+	case ACC_EXPIRE_DATE_PORTAL_RIFLE:	str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_ExpireDatePortalRifle); break;
 	case ACC_VERSION:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Version); break;
 	case ACC_ADDR:						net_addr_str(&m_Accounts[ID].m_Addr, aBuf, sizeof(aBuf), true); break;
 	case ACC_LAST_ADDR:					net_addr_str(&m_Accounts[ID].m_LastAddr, aBuf, sizeof(aBuf), true); break;
@@ -5067,8 +5071,8 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_CONTACT:					str_copy(aBuf, m_Accounts[ID].m_aContact, sizeof(aBuf)); break;
 	case ACC_TIMEOUT_CODE:				str_copy(aBuf, m_Accounts[ID].m_aTimeoutCode, sizeof(aBuf)); break;
 	case ACC_SECURITY_PIN:				str_copy(aBuf, m_Accounts[ID].m_aSecurityPin, sizeof(aBuf)); break;
-	case ACC_REGISTER_DATE:				str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_RegisterDate); break;
-	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_LastLoginDate); break;
+	case ACC_REGISTER_DATE:				str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_RegisterDate); break;
+	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastLoginDate); break;
 	}
 	return aBuf;
 }
@@ -5333,13 +5337,29 @@ int CGameContext::LoadSavedPlayersCallback(const char *pName, int IsDir, int Sto
 	return 0;
 }
 
-void CGameContext::SaveDrop(int ClientID, const char *pReason)
+void CGameContext::ExpireSavedIdentities()
+{
+	for (int i = 0; i < (int)m_vSavedIdentities.size(); i++)
+	{
+		if (IsExpired(m_vSavedIdentities[i].m_ExpireDate))
+		{
+			char aPath[IO_MAX_PATH_LENGTH];
+			str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(m_vSavedIdentities[i]));
+			dbg_msg("save", "%s: removing saved identity due to expiration", m_vSavedIdentities[i].m_aName);
+			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+			m_vSavedIdentities.erase(m_vSavedIdentities.begin() + i);
+			i--;
+		}
+	}
+}
+
+void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
 {
 	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
 		return;
 
 	// Save character
-	SaveCharacter(ClientID, SAVE_WALLET);
+	SaveCharacter(ClientID, SAVE_WALLET, Hours);
 	// Remove wallet money so we dont automatically drop it on disconnect because it is saved already
 	m_apPlayers[ClientID]->SetWalletMoney(0);
 
@@ -5347,7 +5367,7 @@ void CGameContext::SaveDrop(int ClientID, const char *pReason)
 	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
 }
 
-bool CGameContext::SaveCharacter(int ClientID, int Flags)
+bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (!pChr)
@@ -5365,6 +5385,9 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags)
 	str_copy(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username, sizeof(Info.m_aAccUsername));
 	Info.m_TeeInfo = m_apPlayers[ClientID]->m_TeeInfos;
 	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
+	Info.m_ExpireDate = 0;
+	if (Hours != -1)
+		SetExpireDate(&Info.m_ExpireDate, (float)Hours / 24.f);
 	m_vSavedIdentities.push_back(Info);
 
 	// create file and save the character

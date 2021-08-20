@@ -905,7 +905,7 @@ bool CPlayer::JoinChat(bool Local)
 void CPlayer::OnDisconnect()
 {
 	if (m_JailTime || m_EscapeTime)
-		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL);
+		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
 
 	// Make sure to call this before the character dies because on disconnect it should drop the money even when frozen
 	if (GameServer()->Config()->m_SvDropsOnDeath && m_pCharacter)

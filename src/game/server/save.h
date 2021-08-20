@@ -27,6 +27,8 @@ struct SSavedIdentity
 
 	char m_aName[MAX_NAME_LENGTH];
 	CTeeInfo m_TeeInfo;
+
+	time_t m_ExpireDate;
 };
 
 enum
