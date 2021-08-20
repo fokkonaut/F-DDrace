@@ -5367,13 +5367,6 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags)
 	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
 	m_vSavedIdentities.push_back(Info);
 
-	if (str_comp(Info.m_aName, "fokkonaut") == 0)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "saving %s %s", Info.m_aAccUsername, Info.m_aTimeoutCode);
-		SendChatTarget(-1, aBuf);
-	}
-
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));

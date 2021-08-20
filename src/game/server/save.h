@@ -45,7 +45,7 @@ public:
 	void Save(CCharacter* pchr);
 	void Load(CCharacter* pchr, int Team);
 	char* GetString();
-	int LoadString(char* String, CGameContext *pGameServer = 0);
+	int LoadString(char* String);
 	vec2 GetPos() { return m_Pos; }
 	char* GetName() { return m_aName; }
 
