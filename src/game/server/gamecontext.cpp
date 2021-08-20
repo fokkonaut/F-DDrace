@@ -4783,12 +4783,6 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		if (ID < ACC_START)
 			return 0;
 
-		if (pSelf->m_Accounts[ID].m_Version <= 5)
-		{
-			pSelf->SetPassword(ID, pSelf->m_Accounts[ID].m_Password);
-			pSelf->WriteAccountStats(ID);
-		}
-
 		// load all accounts into the top account list too
 		pSelf->SetTopAccStats(ID);
 
@@ -4835,7 +4829,7 @@ int CGameContext::AddAccount()
 	Account.m_Port = Config()->m_SvPort;
 	Account.m_LoggedIn = false;
 	Account.m_Disabled = false;
-	Account.m_Password[0] = 0;
+	Account.m_Password.data[0] = 0;
 	Account.m_Username[0] = '\0';
 	Account.m_ClientID = -1;
 	Account.m_Level = 0;
@@ -4926,7 +4920,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_PORT:						m_Accounts[ID].m_Port = atoi(pData); break;
 	case ACC_LOGGED_IN:					m_Accounts[ID].m_LoggedIn = atoi(pData); break;
 	case ACC_DISABLED:					m_Accounts[ID].m_Disabled = atoi(pData); break;
-	case ACC_PASSWORD:					str_copy(m_Accounts[ID].m_Password, pData, sizeof(m_Accounts[ID].m_Password)); break;
+	case ACC_PASSWORD:					sha256_from_str(&m_Accounts[ID].m_Password, pData); break;
 	case ACC_USERNAME:					str_copy(m_Accounts[ID].m_Username, pData, sizeof(m_Accounts[ID].m_Username)); break;
 	case ACC_CLIENT_ID:					m_Accounts[ID].m_ClientID = atoi(pData); break;
 	case ACC_LEVEL:						m_Accounts[ID].m_Level = atoi(pData); break;
@@ -5036,7 +5030,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_PORT:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Port); break;
 	case ACC_LOGGED_IN:					str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_LoggedIn); break;
 	case ACC_DISABLED:					str_format(aBuf, sizeof(aBuf), "%d", (int)m_Accounts[ID].m_Disabled); break;
-	case ACC_PASSWORD:					str_copy(aBuf, m_Accounts[ID].m_Password, sizeof(aBuf)); break;
+	case ACC_PASSWORD:					sha256_str(m_Accounts[ID].m_Password, aBuf, sizeof(aBuf)); break;
 	case ACC_USERNAME:					str_copy(aBuf, m_Accounts[ID].m_Username, sizeof(aBuf)); break;
 	case ACC_CLIENT_ID:					str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_ClientID); break;
 	case ACC_LEVEL:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Level); break;
@@ -5187,29 +5181,28 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 	return true;
 }
 
-const char *CGameContext::HashPassword(const char *pPassword)
+SHA256_DIGEST CGameContext::HashPassword(const char *pPassword)
 {
-	static char aPassword[SHA256_MAXSTRSIZE];
+	char aPassword[MAX_PASSWORD_LENGTH];
 	str_copy(aPassword, pPassword, sizeof(aPassword));
 	SHA256_CTX Sha256Ctx;
 	sha256_init(&Sha256Ctx);
 	sha256_update(&Sha256Ctx, &aPassword, sizeof(aPassword));
-	sha256_str(sha256_finish(&Sha256Ctx), aPassword, sizeof(aPassword));
-	return aPassword;
+	return sha256_finish(&Sha256Ctx);
 }
 
 void CGameContext::SetPassword(int ID, const char *pPassword)
 {
 	if (ID < ACC_START)
 		return;
-	str_copy(m_Accounts[ID].m_Password, HashPassword(pPassword), sizeof(m_Accounts[ID].m_Password));
+	m_Accounts[ID].m_Password = HashPassword(pPassword);
 }
 
 bool CGameContext::CheckPassword(int ID, const char *pPassword)
 {
 	if (ID < ACC_START)
 		return true;
-	return str_comp(m_Accounts[ID].m_Password, HashPassword(pPassword)) != 0;
+	return sha256_comp(m_Accounts[ID].m_Password, HashPassword(pPassword)) != 0;
 }
 
 int64 CGameContext::GetNeededXP(int Level)

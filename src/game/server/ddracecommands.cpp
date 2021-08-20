@@ -1543,8 +1543,8 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		}
 		else if (VariableID == ACC_PASSWORD)
 		{
-			char aPassword[SHA256_MAXSTRSIZE];
-			str_format(aPassword, sizeof(aPassword), "%s", pSelf->HashPassword(pResult->GetString(2)));
+			char aPassword[128];
+			sha256_str(pSelf->HashPassword(pResult->GetString(2)), aPassword, sizeof(aPassword));
 			pValue = aPassword;
 		}
 
