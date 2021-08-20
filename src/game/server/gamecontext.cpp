@@ -5317,6 +5317,8 @@ void CGameContext::ReadSavedPlayersFile()
 	for (unsigned int i = 0; i < m_vSavedIdentitiesFiles.size(); i++)
 	{
 		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), m_vSavedIdentitiesFiles[i].c_str());
+		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+		continue;
 		CSaveTee SaveTee;
 		if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity())
 		{
