@@ -450,7 +450,7 @@ public:
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
 	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
-	SHA256_DIGEST HashPassword(const char *pPassword);
+	const char *HashPassword(const char *pPassword);
 	void SetPassword(int ID, const char *pPassword);
 	bool CheckPassword(int ID, const char *pPassword);
 
@@ -468,7 +468,7 @@ public:
 		int m_Port;
 		bool m_LoggedIn;
 		bool m_Disabled;
-		SHA256_DIGEST m_Password;
+		char m_Password[MAX_PASSWORD_LENGTH];
 		char m_Username[32];
 		int m_ClientID;
 		int m_Level;
