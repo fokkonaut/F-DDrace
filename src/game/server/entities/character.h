@@ -273,6 +273,8 @@ public:
 	void GiveAllWeapons();
 	int m_DDRaceState;
 	int Team();
+	Mask128 TeamMask(bool SevendownOnly = false);
+	Mask128 TeamMaskExceptSelf(bool SevendownOnly = false);
 	bool CanCollide(int ClientID, bool CheckPassive = true);
 	bool SameTeam(int ClientID);
 	bool m_Super;

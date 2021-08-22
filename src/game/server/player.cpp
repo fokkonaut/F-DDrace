@@ -1357,7 +1357,7 @@ void CPlayer::TryRespawn()
 		}
 	}
 
-	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+	GameServer()->CreatePlayerSpawn(SpawnPos, m_pCharacter->TeamMask());
 
 	// Freeze character on jail release
 	if (JailRelease)
@@ -1485,8 +1485,8 @@ void CPlayer::ProcessPause()
 	if (m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && m_pCharacter->IsGrounded() && m_pCharacter->GetPos() == m_pCharacter->m_PrevPos)
 	{
 		m_pCharacter->Pause(true);
-		GameServer()->CreateDeath(m_pCharacter->GetPos(), m_ClientID, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
-		GameServer()->CreateSound(m_pCharacter->GetPos(), SOUND_PLAYER_DIE, m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+		GameServer()->CreateDeath(m_pCharacter->GetPos(), m_ClientID, m_pCharacter->TeamMask());
+		GameServer()->CreateSound(m_pCharacter->GetPos(), SOUND_PLAYER_DIE, m_pCharacter->TeamMask());
 	}
 }
 
@@ -1527,7 +1527,7 @@ int CPlayer::Pause(int State, bool Force)
 				}
 				m_pCharacter->Pause(false);
 				m_ViewPos = m_pCharacter->GetPos();
-				GameServer()->CreatePlayerSpawn(m_pCharacter->GetPos(), m_pCharacter->Teams()->TeamMask(m_pCharacter->Team(), -1, m_ClientID));
+				GameServer()->CreatePlayerSpawn(m_pCharacter->GetPos(), m_pCharacter->TeamMask());
 			}
 			// fall-thru
 		case PAUSE_SPEC:

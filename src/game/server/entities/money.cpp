@@ -58,7 +58,7 @@ void CMoney::Tick()
 
 			str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
 			GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf, GameServer()->MoneyLaserTextTime(m_Amount));
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pClosest->Teams()->TeamMask(pClosest->Team(), -1, pClosest->GetPlayer()->GetCID()));
+			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pClosest->TeamMask());
 
 			Reset();
 			return;
@@ -77,7 +77,7 @@ void CMoney::Tick()
 
 			Mask128 TeamMask = Mask128();
 			if (GetOwner())
-				TeamMask = GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, GetOwner()->GetPlayer()->GetCID());
+				TeamMask = GetOwner()->TeamMask();
 			GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
 		}
 		else if (!pClosest)

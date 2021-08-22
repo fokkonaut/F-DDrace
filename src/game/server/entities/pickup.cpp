@@ -108,11 +108,11 @@ void CPickup::Tick()
 				{
 					if (pChr->IncreaseHealth(1))
 					{
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
 						Picked = true;
 					}
 				}
-				else if (pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->Teams()->TeamMask(pChr->Team()));
+				else if (pChr->Freeze()) GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
 				break;
 
 			case POWERUP_ARMOR:
@@ -120,7 +120,7 @@ void CPickup::Tick()
 				{
 					if (pChr->IncreaseArmor(1))
 					{
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 						Picked = true;
 					}
 				}
@@ -131,7 +131,7 @@ void CPickup::Tick()
 					{
 						if (!Sound && pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST])
 						{
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 							Sound = true;
 						}
 						pChr->m_aWeaponsBackupGot[i][BACKUP_SPOOKY_GHOST] = false;
@@ -158,7 +158,7 @@ void CPickup::Tick()
 					if (Sound)
 					{
 						pChr->SetLastWeapon(WEAPON_GUN);
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 					}
 				}
 				break;
@@ -179,15 +179,15 @@ void CPickup::Tick()
 					Picked = true;
 
 					if (m_Subtype == WEAPON_GRENADE || m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 					else if (m_Subtype == WEAPON_SHOTGUN || m_Subtype == WEAPON_LASER || m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_PORTAL_RIFLE || m_Subtype == WEAPON_PROJECTILE_RIFLE)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 					else if (m_Subtype == WEAPON_HAMMER || m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HEART_GUN)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 					else if (m_Subtype == WEAPON_TELEKINESIS)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->TeamMask());
 					else if (m_Subtype == WEAPON_LIGHTSABER)
-						GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team()));
+						GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 
 					GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCID(), m_Subtype);
 
@@ -237,7 +237,7 @@ void CPickup::Tick()
 				else if (pChr->GetPlayer()->GiveTaserBattery(10))
 				{
 					Picked = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->Teams()->TeamMask(pChr->Team()));
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
 				}
 				break;
 
@@ -301,7 +301,7 @@ void CPickup::Snap(int SnappingClient)
 
 	if (pOwner && Char)
 	{
-		if (!CmaskIsSet(pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner), SnappingClient))
+		if (!CmaskIsSet(pOwner->TeamMask(), SnappingClient))
 			return;
 	}
 

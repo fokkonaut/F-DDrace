@@ -150,7 +150,7 @@ void CCharacter::SetWeapon(int W)
 	m_LastWeapon = GetActiveWeapon();
 	m_QueuedWeapon = -1;
 	SetActiveWeapon(W);
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
 	if(GetActiveWeapon() < 0 || GetActiveWeapon() >= NUM_WEAPONS)
 		SetActiveWeapon(WEAPON_GUN);
@@ -239,7 +239,7 @@ void CCharacter::HandleNinja()
 
 		if (NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 		{
-			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), NinjaTime / Server()->TickSpeed(), 0, true, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), NinjaTime / Server()->TickSpeed(), 0, true, TeamMask());
 		}
 
 		// force ninja Weapon
@@ -296,7 +296,7 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Hit a player, give him damage and stuffs...
-				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT, TeamMask());
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
@@ -446,7 +446,7 @@ void CCharacter::FireWeapon()
 		if (m_PainSoundTimer <= 0)
 		{
 			m_PainSoundTimer = 1 * Server()->TickSpeed();
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG, TeamMask());
 		}
 		return;
 	}
@@ -458,7 +458,7 @@ void CCharacter::FireWeapon()
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
 		if (m_LastNoAmmoSound + Server()->TickSpeed() <= Server()->Tick())
 		{
-			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 			m_LastNoAmmoSound = Server()->Tick();
 		}
 		return;
@@ -538,7 +538,7 @@ void CCharacter::FireWeapon()
 				// reset objects Hit
 				m_NumObjectsHit = 0;
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask());
 
 				Antibot()->OnHammerFire(m_pPlayer->GetCID());
 
@@ -559,9 +559,9 @@ void CCharacter::FireWeapon()
 
 					// set his velocity to fast upward (for now)
 					if (length(pTarget->m_Pos - ProjStartPos) > 0.0f)
-						GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+						GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, TeamMask());
 					else
-						GameServer()->CreateHammerHit(ProjStartPos, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+						GameServer()->CreateHammerHit(ProjStartPos, TeamMask());
 
 					int TargetCID = pTarget->GetPlayer()->GetCID();
 
@@ -678,7 +678,7 @@ void CCharacter::FireWeapon()
 					}
 
 					if (Sound)
-						GameServer()->CreateSound(m_Pos, m_pPlayer->m_SpookyGhost ? SOUND_PICKUP_HEALTH : (m_Jetpack && !Config()->m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+						GameServer()->CreateSound(m_Pos, m_pPlayer->m_SpookyGhost ? SOUND_PICKUP_HEALTH : (m_Jetpack && !Config()->m_SvOldJetpackSound) ? SOUND_HOOK_LOOP : SOUND_GUN_FIRE, TeamMask());
 				}
 			} break;
 
@@ -714,7 +714,7 @@ void CCharacter::FireWeapon()
 					new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 				}
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask());
 			} break;
 
 			case WEAPON_STRAIGHT_GRENADE:
@@ -744,7 +744,7 @@ void CCharacter::FireWeapon()
 				);
 
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 			} break;
 
 			case WEAPON_TASER:
@@ -759,7 +759,7 @@ void CCharacter::FireWeapon()
 				new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
 
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
 
 			case WEAPON_NINJA:
@@ -772,7 +772,7 @@ void CCharacter::FireWeapon()
 				m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask());
 			} break;
 
 			case WEAPON_PLASMA_RIFLE:
@@ -792,7 +792,7 @@ void CCharacter::FireWeapon()
 					WEAPON_PLASMA_RIFLE	//type
 				);
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
 
 			case WEAPON_HEART_GUN:
@@ -812,7 +812,7 @@ void CCharacter::FireWeapon()
 					WEAPON_HEART_GUN		//type
 				);
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, TeamMask());
 			} break;
 
 			case WEAPON_TELEKINESIS:
@@ -866,7 +866,7 @@ void CCharacter::FireWeapon()
 				}
 
 				if (Sound && TelekinesisSound)
-					GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_NINJA_HIT, TeamMask());
 			} break;
 
 			case WEAPON_LIGHTSABER:
@@ -901,7 +901,7 @@ void CCharacter::FireWeapon()
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
 					)
 				{
-					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 					return;
 				}
 
@@ -949,7 +949,7 @@ void CCharacter::FireWeapon()
 				);
 
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask());
 			} break;
 
 			case WEAPON_BALL_GRENADE:
@@ -978,7 +978,7 @@ void CCharacter::FireWeapon()
 				}
 
 				if (Sound)
-					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 			} break;
 		}
 
@@ -1165,7 +1165,7 @@ void CCharacter::GiveNinja()
 	SetActiveWeapon(WEAPON_NINJA);
 
 	if (!m_aWeapons[WEAPON_NINJA].m_Got && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA)
-		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, TeamMask());
 }
 
 void CCharacter::RemoveNinja()
@@ -1390,22 +1390,21 @@ void CCharacter::TickDefered()
 
 	if(Events&COREEVENTFLAG_HOOK_ATTACH_PLAYER)
 	{
-		Mask128 TeamMask = Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID(), true);
-		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask);
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask(true));
 		OnPlayerHook();
 	}
 
 	if (Events&(COREEVENTFLAG_GROUND_JUMP|COREEVENTFLAG_HOOK_ATTACH_GROUND|COREEVENTFLAG_HOOK_HIT_NOHOOK))
 	{
-		Mask128 TeamMaskExceptSelf = Teams()->TeamMask(Team(), m_pPlayer->GetCID(), m_pPlayer->GetCID(), true);
-		if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMaskExceptSelf);
-		if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMaskExceptSelf);
-		if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
+		Mask128 TeamMask = TeamMaskExceptSelf(true);
+		if(Events&COREEVENTFLAG_GROUND_JUMP) GameServer()->CreateSound(m_Pos, SOUND_PLAYER_JUMP, TeamMask);
+		if(Events&COREEVENTFLAG_HOOK_ATTACH_GROUND) GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_GROUND, TeamMask);
+		if(Events&COREEVENTFLAG_HOOK_HIT_NOHOOK) GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMask);
 	}
 
 	if(Events&COREEVENTFLAG_HOOK_ATTACH_FLAG)
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask());
 		m_TriggeredEvents &= ~COREEVENTFLAG_HOOK_ATTACH_FLAG;
 	}
 
@@ -1660,7 +1659,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	}
 
 	// a nice sound
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
 
 	// this is for auto respawn after 3 secs
 	m_pPlayer->m_PreviousDieTick = m_pPlayer->m_DieTick;
@@ -1682,7 +1681,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
-	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 	Teams()->OnCharacterDeath(m_pPlayer->GetCID(), Weapon);
 
 	// reset gamemode if it got changed by a tile but the setting says something different
@@ -2140,6 +2139,16 @@ bool CCharacter::SameTeam(int ClientID)
 int CCharacter::Team()
 {
 	return Teams()->m_Core.Team(m_pPlayer->GetCID());
+}
+
+Mask128 CCharacter::TeamMask(bool SevendownOnly)
+{
+	return Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID(), SevendownOnly);
+}
+
+Mask128 CCharacter::TeamMaskExceptSelf(bool SevendownOnly)
+{
+	return Teams()->TeamMask(Team(), m_pPlayer->GetCID(), m_pPlayer->GetCID(), SevendownOnly);
 }
 
 CGameTeams* CCharacter::Teams()
@@ -3228,7 +3237,7 @@ void CCharacter::DDraceTick()
 	{
 		if (m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
 		{
-			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), (m_FreezeTime + 1) / Server()->TickSpeed(), 0, true, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), (m_FreezeTime + 1) / Server()->TickSpeed(), 0, true, TeamMask());
 		}
 		if (m_FreezeTime > 0)
 			m_FreezeTime--;
@@ -3324,12 +3333,12 @@ void CCharacter::DDracePostCoreTick()
 	// teleport gun
 	if (m_TeleGunTeleport)
 	{
-		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 		m_Core.m_Pos = m_TeleGunPos;
 		if (!m_IsBlueTeleGunTeleport)
 			m_Core.m_Vel = vec2(0, 0);
-		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), TeamMask());
+		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
 		m_TeleGunTeleport = false;
 		m_IsBlueTeleGunTeleport = false;
 	}
@@ -3747,12 +3756,12 @@ void CCharacter::FDDraceTick()
 
 	if (m_StrongBloody)
 	{
-		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 	}
 	else if (m_Bloody || GetPowerHooked() == BLOODY)
 	{
 		if (Server()->Tick() % 6 == 0)
-			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 	}
 
 	// update
@@ -3921,7 +3930,7 @@ void CCharacter::DropMoney(int64 Amount, int Dir)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "-%lld", Amount);
 	GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf, GameServer()->MoneyLaserTextTime(Amount));
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask());
 }
 
 void CCharacter::DropFlag()
@@ -3974,7 +3983,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		UpdateWeaponIndicator();
 	}
 
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, Ammo, Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
@@ -4012,7 +4021,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 		CPickupDrop *pPickupDrop = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir);
 		GameServer()->m_vPickupDropLimit.push_back(pPickupDrop);
 	}
-	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
+	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, TeamMask());
 }
 
 void CCharacter::DropLoot(int Weapon)

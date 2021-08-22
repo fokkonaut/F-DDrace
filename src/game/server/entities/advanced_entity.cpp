@@ -13,7 +13,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_CheckDeath = CheckDeath;
 	m_TeleCheckpoint = GetOwner() ? GetOwner()->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
-	m_TeamMask = GetOwner() ? GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, m_Owner) : Mask128();
+	m_TeamMask = GetOwner() ? GetOwner()->TeamMask() : Mask128();
 	m_Gravity = true;
 	m_GroundVel = true;
 	m_AirVel = true;
@@ -37,7 +37,7 @@ void CAdvancedEntity::Tick()
 		m_Owner = -1;
 
 	if (GetOwner())
-		m_TeamMask = GetOwner()->Teams()->TeamMask(GetOwner()->Team(), -1, m_Owner);
+		m_TeamMask = GetOwner()->TeamMask();
 
 	// weapon hits death-tile or left the game layer, reset it
 	if (GameLayerClipped(m_Pos) || (m_CheckDeath && (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH)))

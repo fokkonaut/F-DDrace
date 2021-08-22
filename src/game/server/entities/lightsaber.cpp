@@ -48,7 +48,7 @@ void CLightsaber::PlaySound()
 {
 	if (m_pOwner && m_SoundTick < Server()->Tick())
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner));
+		GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_pOwner->TeamMask());
 		m_SoundTick = Server()->Tick() + Server()->TickSpeed() / 10;
 	}
 }
@@ -82,7 +82,7 @@ void CLightsaber::Tick()
 	else
 		m_Pos = m_pOwner->GetPos();
 
-	m_TeamMask = m_pOwner ? m_pOwner->Teams()->TeamMask(m_pOwner->Team(), -1, m_Owner) : Mask128();
+	m_TeamMask = m_pOwner ? m_pOwner->TeamMask() : Mask128();
 
 	if (Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
 		m_EvalTick = Server()->Tick();

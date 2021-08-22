@@ -118,7 +118,7 @@ void CProjectile::Tick()
 	}
 	if (pOwnerChar && pOwnerChar->IsAlive())
 	{
-		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+		TeamMask = pOwnerChar->TeamMask();
 	}
 	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath))
 	{
@@ -241,7 +241,7 @@ void CProjectile::Tick()
 			Mask128 TeamMask = Mask128();
 			if (pOwnerChar && pOwnerChar->IsAlive())
 			{
-				TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+				TeamMask = pOwnerChar->TeamMask();
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
@@ -315,7 +315,7 @@ void CProjectile::Snap(int SnappingClient)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 	if (pOwnerChar && pOwnerChar->IsAlive())
-		TeamMask = pOwnerChar->Teams()->TeamMask(pOwnerChar->Team(), -1, m_Owner);
+		TeamMask = pOwnerChar->TeamMask();
 
 	if (m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
 		return;

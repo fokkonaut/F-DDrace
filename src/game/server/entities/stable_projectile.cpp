@@ -79,7 +79,7 @@ void CStableProjectile::Snap(int SnappingClient)
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwner && pSnapChar)
 	{
-		Mask128 TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+		Mask128 TeamMask = pOwner->TeamMask();
 		if (!CmaskIsSet(TeamMask, SnappingClient))
 			return;
 	}

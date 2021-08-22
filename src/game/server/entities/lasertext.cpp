@@ -274,7 +274,7 @@ CLaserText::CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int AliveTic
 	m_Owner = Owner;
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwner)
-		m_TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+		m_TeamMask = pOwner->TeamMask();
 	GameWorld()->InsertEntity(this);
 	
 	m_CurTicks = Server()->Tick();
@@ -319,7 +319,7 @@ void CLaserText::Tick()
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwner)
-		m_TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+		m_TeamMask = pOwner->TeamMask();
 }
 
 inline char NeighboursVert(const bool pCharVert[3], int pVertOff){

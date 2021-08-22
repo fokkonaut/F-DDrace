@@ -80,7 +80,7 @@ void CFlag::PlaySound(int Sound)
 			Mask128 TeamMask = Mask128();
 			CCharacter *pChr = GetCarrier() ? GetCarrier() : GetLastCarrier() ? GetLastCarrier() : 0;
 			if (pChr)
-				TeamMask = pChr->Teams()->TeamMask(pChr->Team(), -1, pChr->GetPlayer()->GetCID());
+				TeamMask = pChr->TeamMask();
 			GameServer()->CreateSound(m_Pos, Sound, TeamMask);
 		}
 	}
@@ -226,7 +226,7 @@ void CFlag::Snap(int SnappingClient)
 
 	if (GameServer()->GetPlayerChar(SnappingClient))
 	{
-		if (GetCarrier() && (GetCarrier()->IsPaused() || !CmaskIsSet(GetCarrier()->Teams()->TeamMask(GetCarrier()->Team(), -1, GetCarrier()->GetPlayer()->GetCID()), SnappingClient)))
+		if (GetCarrier() && (GetCarrier()->IsPaused() || !CmaskIsSet(GetCarrier()->TeamMask(), SnappingClient)))
 			return;
 	}
 

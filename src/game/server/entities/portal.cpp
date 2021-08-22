@@ -26,7 +26,7 @@ CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoo
 	GameWorld()->InsertEntity(this);
 	CCharacter *pChr = GameServer()->GetPlayerChar(m_Owner);
 	if (pChr)
-		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->Teams()->TeamMask(pChr->Team(), -1, m_Owner));
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
 }
 
 CPortal::~CPortal()
@@ -42,7 +42,7 @@ void CPortal::Reset()
 			GameServer()->m_apPlayers[m_Owner]->m_pPortal[i] = 0;
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	Mask128 TeamMask = pOwner ? pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner) : Mask128();
+	Mask128 TeamMask = pOwner ? pOwner->TeamMask() : Mask128();
 	GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
 	GameWorld()->DestroyEntity(this);
 }
@@ -212,7 +212,7 @@ void CPortal::EntitiesEnter()
 		}
 
 		int ID = pAffectedChr ? pAffectedChr->GetPlayer()->GetCID() : -1;
-		Mask128 TeamMask = pAffectedChr ? pAffectedChr->Teams()->TeamMask(pAffectedChr->Team(), -1, ID) : Mask128();
+		Mask128 TeamMask = pAffectedChr ? pAffectedChr->TeamMask() : Mask128();
 
 		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask);
 		GameServer()->CreateDeath(m_Pos, ID, TeamMask);
@@ -233,7 +233,7 @@ void CPortal::Snap(int SnappingClient)
 		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 		if (pOwner)
 		{
-			Mask128 TeamMask = pOwner->Teams()->TeamMask(pOwner->Team(), -1, m_Owner);
+			Mask128 TeamMask = pOwner->TeamMask();
 			if (!CmaskIsSet(TeamMask, SnappingClient))
 				return;
 		}
