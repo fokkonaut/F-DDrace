@@ -87,6 +87,7 @@ public:
 	virtual void TickDefered();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
+	void SnapCharacter(int SnappingClient, int ID);
 	virtual void PostSnap();
 
 	virtual int NetworkClipped(int SnappingClient, bool CheckShowAll = true);

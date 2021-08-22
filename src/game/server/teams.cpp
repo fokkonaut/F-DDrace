@@ -454,10 +454,10 @@ void CGameTeams::SendTeamsState(int ClientID)
 			}
 		}
 
-		int id = i;
-		if (Server()->ReverseTranslate(id, ClientID))
+		int ID = i;
+		if (Server()->ReverseTranslate(ID, ClientID))
 		{
-			Team = m_Core.Team(id);
+			Team = m_Core.Team(ID);
 			if (Team == TEAM_SUPER)
 				Team = VANILLA_MAX_CLIENTS;
 			else if (Team > VANILLA_MAX_CLIENTS)

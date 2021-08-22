@@ -504,12 +504,12 @@ void CPlayer::Snap(int SnappingClient)
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
-	int id = m_ClientID;
-	if (SnappingClient > -1 && !Server()->Translate(id, SnappingClient))
+	int ID = m_ClientID;
+	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 		return;
 
 	int Size = Server()->IsSevendown(SnappingClient) ? 5*4 : sizeof(CNetObj_PlayerInfo);
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, Size));
+	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, ID, Size));
 	if(!pPlayerInfo)
 		return;
 
@@ -618,7 +618,7 @@ void CPlayer::Snap(int SnappingClient)
 		{
 			if (m_pSpecFlag)
 			{
-				((int*)pSpectatorInfo)[0] = SpectatorID != -1 ? SpectatorID : id;
+				((int*)pSpectatorInfo)[0] = SpectatorID != -1 ? SpectatorID : ID;
 				((int*)pSpectatorInfo)[1] = m_pSpecFlag->GetPos().x;
 				((int*)pSpectatorInfo)[2] = m_pSpecFlag->GetPos().y;
 			}
@@ -669,7 +669,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(Server()->IsSevendown(SnappingClient))
 	{
-		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETMSGTYPES, id, 17*4); // NETOBJTYPE_CLIENTINFO
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETMSGTYPES, ID, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
 
@@ -682,7 +682,7 @@ void CPlayer::Snap(int SnappingClient)
 		pClientInfo[16] = m_CurrentInfo.m_TeeInfos.m_Sevendown.m_ColorFeet;
 
 		((int*)pPlayerInfo)[0] = (int)((m_ClientID == SnappingClient && (!m_pControlledTee || m_Paused)) || (m_TeeControllerID == SnappingClient && !pSnapping->m_Paused));
-		((int*)pPlayerInfo)[1] = id;
+		((int*)pPlayerInfo)[1] = ID;
 		((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
@@ -707,7 +707,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Score = Score;
 	}
 
-	CNetObj_DDNetPlayer *pDDNetPlayer = static_cast<CNetObj_DDNetPlayer *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPLAYER, id, sizeof(CNetObj_DDNetPlayer)));
+	CNetObj_DDNetPlayer *pDDNetPlayer = static_cast<CNetObj_DDNetPlayer *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPLAYER, ID, sizeof(CNetObj_DDNetPlayer)));
 	if(!pDDNetPlayer)
 		return;
 
@@ -740,7 +740,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(ShowSpec)
 	{
-		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, ID, sizeof(CNetObj_SpecChar)));
 		if (!pSpecChar)
 			return;
 		pSpecChar->m_X = SpecPos.x;

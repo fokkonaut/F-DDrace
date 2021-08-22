@@ -65,10 +65,10 @@ void CEventHandler::Snap(int SnappingClient)
 					int ClientID = pDeath->m_ClientID;
 
 					// translate id
-					int id = pDeath->m_ClientID;
-					if (!GameServer()->Server()->Translate(id, SnappingClient))
+					int ID = pDeath->m_ClientID;
+					if (!GameServer()->Server()->Translate(ID, SnappingClient))
 						continue;
-					pDeath->m_ClientID = id;
+					pDeath->m_ClientID = ID;
 
 					// create event
 					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
@@ -85,10 +85,10 @@ void CEventHandler::Snap(int SnappingClient)
 					int ClientID = pDamage->m_ClientID;
 
 					// translate id
-					int id = pDamage->m_ClientID;
-					if (!GameServer()->Server()->Translate(id, SnappingClient))
+					int ID = pDamage->m_ClientID;
+					if (!GameServer()->Server()->Translate(ID, SnappingClient))
 						continue;
-					pDamage->m_ClientID = id;
+					pDamage->m_ClientID = ID;
 
 					// create event
 					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);

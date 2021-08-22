@@ -6002,11 +6002,11 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	int *pReverseIdMap = Server()->GetReverseIdMap(OrigID);
 
 	// remove timeouted tee
-	int id = ClientID;
-	if (Server()->Translate(id, OrigID))
+	int ID = ClientID;
+	if (Server()->Translate(ID, OrigID))
 	{
-		pIdMap[id] = -1;
-		pPlayer->SendDisconnect(id);
+		pIdMap[ID] = -1;
+		pPlayer->SendDisconnect(ID);
 	}
 
 	// add ourself
@@ -6032,20 +6032,20 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 			continue;
 
 		// reset, let the algorithmn handle this
-		id = ClientID;
-		if (Server()->Translate(id, i))
+		ID = ClientID;
+		if (Server()->Translate(ID, i))
 		{
-			Server()->GetIdMap(i)[id] = -1;
+			Server()->GetIdMap(i)[ID] = -1;
 			Server()->GetReverseIdMap(i)[ClientID] = -1;
-			m_apPlayers[i]->SendDisconnect(id);
+			m_apPlayers[i]->SendDisconnect(ID);
 		}
 
-		id = OrigID;
-		if (Server()->Translate(id, i))
+		ID = OrigID;
+		if (Server()->Translate(ID, i))
 		{
-			Server()->GetIdMap(i)[id] = -1;
+			Server()->GetIdMap(i)[ID] = -1;
 			Server()->GetReverseIdMap(i)[OrigID] = -1;
-			m_apPlayers[i]->SendDisconnect(id);
+			m_apPlayers[i]->SendDisconnect(ID);
 		}
 	}
 
