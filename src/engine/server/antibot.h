@@ -10,7 +10,9 @@ class CAntibot : public IEngineAntibot
 	class IConsole *m_pConsole;
 	class IGameServer *m_pGameServer;
 
+public: // made public for F-DDrace
 	class IServer *Server() const { return m_pServer; }
+private:
 	class IConsole *Console() const { return m_pConsole; }
 	class IGameServer *GameServer() const { return m_pGameServer; }
 
