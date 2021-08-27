@@ -4489,7 +4489,7 @@ void CGameContext::ReadPlotStats(int ID)
 						float Rotation = -1.f;
 						int Length = 0.f;
 						sscanf(pData, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
-						if (Rotation >= 0 && Length > 0 && PlotID >= 0)
+						if (Rotation >= 0 && Length >= 0 && PlotID >= 0)
 						{
 							CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
 							pDoor->m_PlotID = PlotID;
