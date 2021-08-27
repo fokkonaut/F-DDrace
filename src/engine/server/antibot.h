@@ -3,18 +3,22 @@
 
 #include <antibot/antibot_data.h>
 #include <engine/antibot.h>
+#include <engine/engine.h>
+#include <list>
 
 class CAntibot : public IEngineAntibot
 {
 	class IServer *m_pServer;
 	class IConsole *m_pConsole;
 	class IGameServer *m_pGameServer;
+	class CConfig *m_pConfig;
 
 public: // made public for F-DDrace
 	class IServer *Server() const { return m_pServer; }
 private:
 	class IConsole *Console() const { return m_pConsole; }
 	class IGameServer *GameServer() const { return m_pGameServer; }
+	class CConfig *Config() const { return m_pConfig; }
 
 	CAntibotData m_Data;
 	CAntibotRoundData m_RoundData;
@@ -24,6 +28,10 @@ private:
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
 	static void Report(int ClientID, const char *pMessage, void *pUser);
+
+	// F-DDrace
+	static void WebhookReport(const char *pMessage, void *pUser);
+	std::list<CJob *> m_WebhookJobs;
 
 public:
 	CAntibot();

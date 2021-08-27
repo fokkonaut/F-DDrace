@@ -260,6 +260,10 @@ MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_S
 MACRO_CONFIG_STR(FakeMapName, fake_map_name, 128, "", CFGFLAG_SERVER, "Fake map name", AUTHED_ADMIN)
 MACRO_CONFIG_STR(FakeMapCrc, fake_map_crc, 128, "", CFGFLAG_SERVER, "Fake map crc", AUTHED_ADMIN)
 
+// webhook
+MACRO_CONFIG_STR(SvAntibotWebhookURL, sv_antibot_webhook_url, 128, "", CFGFLAG_SERVER, "Webhook URL for antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvAntibotWebhookID, sv_antibot_webhook_id, 128, "", CFGFLAG_SERVER, "Webhook ID for antibot reports", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
