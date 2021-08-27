@@ -4487,7 +4487,7 @@ void CGameContext::ReadPlotStats(int ID)
 					case CGameWorld::ENTTYPE_DOOR:
 					{
 						float Rotation = -1.f;
-						int Length = 0.f;
+						int Length = 0;
 						sscanf(pData, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
 						if (Rotation >= 0 && Length >= 0 && PlotID >= 0)
 						{
