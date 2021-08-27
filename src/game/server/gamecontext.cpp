@@ -3748,6 +3748,9 @@ void CGameContext::FDDraceInit()
 	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
+	if (Config()->m_SvBansFile[0])
+		Console()->ExecuteFile(Config()->m_SvBansFile);
+
 	m_LastDataSaveTick = Server()->Tick();
 
 	ReadMoneyListFile();
@@ -3979,6 +3982,13 @@ void CGameContext::OnPreShutdown()
 	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
 		WritePlotStats(i);
 	WriteMoneyListFile();
+
+	if (Config()->m_SvBansFile[0])
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "bans_save \"%s\"", Config()->m_SvBansFile);
+		Console()->ExecuteLine(aBuf);
+	}
 }
 
 void CGameContext::OnShutdown(bool FullShutdown)

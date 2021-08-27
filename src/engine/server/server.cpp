@@ -472,6 +472,7 @@ int CServer::Init()
 
 	m_AnnouncementLastLine = 0;
 	m_CurrentGameTick = 0;
+	m_aCurrentMap[0] = 0;
 
 	return 0;
 }
@@ -2057,7 +2058,8 @@ int CServer::LoadMap(const char *pMapName)
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
 
 	// call pre shutdown here so the mapname still is the correct one
-	GameServer()->OnPreShutdown();
+	if (m_aCurrentMap[0])
+		GameServer()->OnPreShutdown();
 	str_copy(m_aCurrentMap, pMapName, sizeof(m_aCurrentMap));
 
 	// load complete map into memory for download
