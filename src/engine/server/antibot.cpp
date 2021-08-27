@@ -5,6 +5,7 @@
 #include <engine/kernel.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <string.h>
 
 #ifdef CONF_ANTIBOT
 CAntibot::CAntibot() :
