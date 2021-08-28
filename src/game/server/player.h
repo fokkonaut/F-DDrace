@@ -377,6 +377,8 @@ public:
 
 	void SkipSetViewPos() { m_SkipSetViewPos = 2; }
 
+	int m_ViewCursorID;
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 

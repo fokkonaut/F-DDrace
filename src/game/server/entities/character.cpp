@@ -80,6 +80,7 @@ CCharacter::~CCharacter()
 {
 	if (m_pDummyHandle)
 		delete m_pDummyHandle;
+	Server()->SnapFreeID(m_ViewCursorSnapID);
 }
 
 void CCharacter::Reset()
@@ -1826,6 +1827,21 @@ void CCharacter::Snap(int SnappingClient)
 
 	SnapCharacter(SnappingClient, ID);
 
+	// Draw cursor
+	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	if (pSnap && (pSnap->m_ViewCursorID == -1 || pSnap->m_ViewCursorID == m_pPlayer->GetCID()))
+	{
+		CNetObj_Laser *pCursor = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ViewCursorSnapID, sizeof(CNetObj_Laser)));
+		if (!pCursor)
+			return;
+
+		pCursor->m_X = round_to_int(m_CursorPos.x);
+		pCursor->m_Y = round_to_int(m_CursorPos.y);
+		pCursor->m_FromX = round_to_int(m_CursorPos.x);
+		pCursor->m_FromY = round_to_int(m_CursorPos.y);
+		pCursor->m_StartTick = 0;
+	}
+
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)
 		return;
@@ -3568,6 +3584,8 @@ void CCharacter::FDDraceInit()
 
 	if (GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))
 		m_Core.m_FightStarted = true;
+
+	m_ViewCursorSnapID = Server()->SnapNewID();
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

@@ -929,6 +929,7 @@ private:
 	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
+	static void ConViewCursor(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);

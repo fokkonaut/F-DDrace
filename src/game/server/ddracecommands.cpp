@@ -1720,6 +1720,20 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
+void CGameContext::ConViewCursor(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+	int ID = pPlayer->m_ViewCursorID;
+	if (!pResult->NumArguments())
+		ID = ID == -2 ? -1 : -2;
+	else
+		ID = pResult->GetInteger(0);
+	pPlayer->m_ViewCursorID = ID;
+}
+
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

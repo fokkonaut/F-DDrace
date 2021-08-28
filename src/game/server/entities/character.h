@@ -483,6 +483,7 @@ public:
 	void RemoveTeeControlCursor();
 
 	vec2 m_CursorPos;
+	int m_ViewCursorSnapID;
 
 	// special race
 	bool m_HasFinishedSpecialRace;
