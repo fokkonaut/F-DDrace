@@ -17,6 +17,7 @@ class CStableProjectile : public CEntity
 	bool m_OnlyShowOwner;
 
 	void CalculateVel();
+	bool FillExtraInfo(CNetObj_DDNetProjectile* pProj);
 
 public:
 	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos=vec2(), bool HideOnSpec = false, bool OnlyShowOwner = false);
