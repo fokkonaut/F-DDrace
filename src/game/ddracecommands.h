@@ -96,7 +96,7 @@ CONSOLE_COMMAND("set_minigame", "v[id] s[minigame]", CFGFLAG_SERVER, ConSetMinig
 CONSOLE_COMMAND("save_drop", "?v[id] i[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
 CONSOLE_COMMAND("jail_arrest", "v[id] i[seconds]", CFGFLAG_SERVER, ConJailArrest, this, "Arrests player v for i minutes", AUTHED_ADMIN)
 CONSOLE_COMMAND("jail_release", "v[id]", CFGFLAG_SERVER, ConJailRelease, this, "Releases player v from jail", AUTHED_ADMIN)
-CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-1 = everyone)", AUTHED_ADMIN)
+CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
 
 //plots
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
