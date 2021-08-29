@@ -2206,7 +2206,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA)
 	{
 		int Number = GameServer()->Collision()->GetDoorNumber(Pos);
-		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && GameServer()->Collision()->GetPlotBySwitch(Number) >= PLOT_START)
+		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && Team() != TEAM_SUPER && GameServer()->Collision()->GetPlotBySwitch(Number) >= PLOT_START)
 		{
 			m_StoppedDoorSkip = true;
 			m_Core.m_Vel = vec2(0, 0);
