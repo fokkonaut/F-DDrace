@@ -721,33 +721,6 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
-
-	bool ShowSpec = false;
-	vec2 SpecPos;
-	if (m_pCharacter)
-	{
-		ShowSpec = m_pCharacter->IsPaused();
-		SpecPos = m_pCharacter->Core()->m_Pos;
-	}
-
-	if (IsMinigame() && m_SavedMinigameTee)
-	{
-		ShowSpec = true;
-		SpecPos = m_MinigameTee.GetPos();
-	}
-	else if(SnappingClient >= 0)
-	{
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
-	}
-
-	if(ShowSpec)
-	{
-		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, ID, sizeof(CNetObj_SpecChar)));
-		if (!pSpecChar)
-			return;
-		pSpecChar->m_X = SpecPos.x;
-		pSpecChar->m_Y = SpecPos.y;
-	}
 }
 
 void CPlayer::FakeSnap()
