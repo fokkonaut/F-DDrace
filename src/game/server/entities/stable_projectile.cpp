@@ -97,8 +97,8 @@ void CStableProjectile::Snap(int SnappingClient)
 	if(!m_CalculatedVel)
 		CalculateVel();
 
-	pProj->m_X = (int)m_LastResetPos.x;
-	pProj->m_Y = (int)m_LastResetPos.y;
+	pProj->m_X = round_to_int(m_LastResetPos.x);
+	pProj->m_Y = round_to_int(m_LastResetPos.y);
 	pProj->m_VelX = m_VelX;
 	pProj->m_VelY = m_VelY;
 	pProj->m_StartTick = m_LastResetTick;

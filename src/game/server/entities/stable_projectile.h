@@ -19,7 +19,7 @@ class CStableProjectile : public CEntity
 	void CalculateVel();
 
 public:
-	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos=vec2(), bool HideOnSpec = false, bool OnlyShowOwner = false);
+	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec = false, bool OnlyShowOwner = false);
 
 	virtual void Reset();
 	virtual void TickDefered();

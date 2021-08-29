@@ -10,7 +10,6 @@ CAtom::CAtom(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_ATOM, Pos)
 {
 	m_Owner = Owner;
-	m_Pos = Pos;
 	GameWorld()->InsertEntity(this);
 }
 
@@ -57,7 +56,7 @@ void CAtom::Tick()
 	{
 		for (int i = 0; i<NUM_ATOMS; i++)
 		{
-			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner, vec2(), true));
+			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner, m_Pos, true));
 		}
 		m_AtomPosition = 0;
 	}
