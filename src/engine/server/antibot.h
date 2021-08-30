@@ -3,8 +3,6 @@
 
 #include <antibot/antibot_data.h>
 #include <engine/antibot.h>
-#include <engine/engine.h>
-#include <list>
 
 class CAntibot : public IEngineAntibot
 {
@@ -28,10 +26,6 @@ private:
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
 	static void Report(int ClientID, const char *pMessage, void *pUser);
-
-	// F-DDrace
-	static void WebhookReport(const char *pMessage, void *pUser);
-	std::list<CJob *> m_WebhookJobs;
 
 public:
 	CAntibot();

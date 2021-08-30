@@ -2243,6 +2243,12 @@ int CServer::Run()
 
 				GameServer()->OnTick();
 
+				if (m_Jobs.size())
+				{
+					if (m_Jobs.front()->Status() == CJob::STATE_DONE)
+						m_Jobs.pop_front();
+				}
+
 				if (Config()->m_gie3FloodIP[0] && (m_CurrentGameTick % 10) == 0)
 				{
 					NETADDR Addr;
@@ -3204,6 +3210,48 @@ bool CServer::IsUniqueAddress(int ClientID)
 			return false;
 	}
 	return true;
+}
+
+void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
+{
+	CJob *pJob = new CJob();
+	Kernel()->RequestInterface<IEngine>()->AddJob(pJob, pfnFunc, pData);
+	m_Jobs.push_back(pJob);
+}
+
+static int WebhookThread(void *pArg)
+{
+	int ret = system((char *)pArg);
+	dbg_msg("antibot", "Sending message to webhook... Returned %d", ret);
+	return 0;
+}
+
+void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const char *pName)
+{
+	if (!pAddr[0] || !pMessage[0])
+		return;
+
+	if (!pName || !pName[0])
+		pName = "";
+
+	char *pMsg = strdup(pMessage);
+	for (char *ptr = pMsg; *ptr; ptr++)
+	{
+		if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '|' || *ptr == ';' || *ptr == '`')
+			*ptr = '-';
+		if (*ptr == '\n' || *ptr == '@')
+			*ptr = ' ';
+	}
+
+	const char *pPart1 = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data \"{\\\"username\\\": \\\"";
+	const char *pPart2 = "\\\", \\\"content\\\": \\\"";
+	const char *pPart3 = "\\\"}\"";
+
+	static char aBuf[2048];
+	str_format(aBuf, sizeof(aBuf), "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pAddr);
+	free(pMsg);
+
+	AddJob(WebhookThread, (void *)aBuf);
 }
 
 int *CServer::GetIdMap(int ClientID)

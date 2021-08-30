@@ -17,6 +17,8 @@
 
 #include "antibot.h"
 #include "authmanager.h"
+#include <engine/engine.h>
+#include <list>
 
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
@@ -393,6 +395,10 @@ public:
 	void GetClientAddr(int ClientID, NETADDR* pAddr);
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
+
+	virtual void SendWebhookMessage(const char *pAddr, const char *pMessage, const char *pName);
+	void AddJob(JOBFUNC pfnFunc, void *pData);
+	std::list<CJob *> m_Jobs;
 
 	virtual int *GetIdMap(int ClientID);
 	virtual int *GetReverseIdMap(int ClientID);

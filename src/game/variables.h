@@ -261,8 +261,9 @@ MACRO_CONFIG_STR(FakeMapName, fake_map_name, 128, "", CFGFLAG_SERVER, "Fake map 
 MACRO_CONFIG_STR(FakeMapCrc, fake_map_crc, 128, "", CFGFLAG_SERVER, "Fake map crc", AUTHED_ADMIN)
 
 // webhook
-MACRO_CONFIG_STR(SvAntibotWebhookURL, sv_antibot_webhook_url, 128, "", CFGFLAG_SERVER, "Webhook URL for antibot reports", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvAntibotWebhookID, sv_antibot_webhook_id, 128, "", CFGFLAG_SERVER, "Webhook ID for antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhookAntibotURL, sv_webhook_antibot_url, 128, "", CFGFLAG_SERVER, "Webhook URL for antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhookAntibotName, sv_webhook_antibot_name, 128, "", CFGFLAG_SERVER, "Webhook name for antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhookChatBridgeURL, sv_webhook_chat_bridge_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)

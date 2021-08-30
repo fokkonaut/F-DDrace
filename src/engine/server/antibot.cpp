@@ -5,7 +5,6 @@
 #include <engine/kernel.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
-#include <string.h>
 
 #ifdef CONF_ANTIBOT
 CAntibot::CAntibot() :
@@ -47,7 +46,9 @@ void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
-	WebhookReport(aBuf, pUser);
+
+	CAntibot *pAntibot = (CAntibot *)pUser;
+	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, pMessage, pAntibot->Config()->m_SvWebhookAntibotName);
 }
 void CAntibot::Init()
 {
@@ -99,43 +100,6 @@ void CAntibot::Update()
 		GameServer()->FillAntibot(&m_RoundData);
 		AntibotUpdateData();
 	}
-
-	if (m_WebhookJobs.size())
-	{
-		if (m_WebhookJobs.front()->Status() == CJob::STATE_DONE)
-			m_WebhookJobs.pop_front();
-	}
-}
-static int WebhookThread(void *pArg)
-{
-	int ret = system((char *)pArg);
-	dbg_msg("antibot", "Sending message to webhook... Returned %d", ret);
-	return 0;
-}
-void CAntibot::WebhookReport(const char *pMessage, void *pUser)
-{
-	CAntibot *pSelf = (CAntibot *)pUser;
-	if (!pSelf->Config()->m_SvAntibotWebhookURL[0] || !pSelf->Config()->m_SvAntibotWebhookID[0])
-		return;
-
-	char *pTemp = strdup(pMessage);
-	for (char *ptr = pTemp; *ptr; ptr++) {
-		if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '|' || *ptr == ';' || *ptr == '`')
-			*ptr = '-';
-		if (*ptr == '\n' || *ptr == '@')
-			*ptr = ' ';
-	}
-
-	const char *pPart1 = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data \"{\\\"content\\\": \\\"";
-	const char *pPart2 = "\\\"}\"";
-
-	static char aBuf[2048];
-	str_format(aBuf, sizeof(aBuf), "%s[%s] %s%s %s >nul 2>&1", pPart1, pSelf->Config()->m_SvAntibotWebhookID, pTemp, pPart2, pSelf->Config()->m_SvAntibotWebhookURL);
-	free(pTemp);
-
-	CJob *pJob = new CJob();
-	pSelf->Kernel()->RequestInterface<IEngine>()->AddJob(pJob, WebhookThread, (void *)aBuf);
-	pSelf->m_WebhookJobs.push_back(pJob);
 }
 
 void CAntibot::OnPlayerInit(int ClientID)
