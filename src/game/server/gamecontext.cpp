@@ -480,15 +480,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		char aWebhookName[MAX_NAME_ARRAY_SIZE];
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
-		char aWebhookMsg[256];
-		str_copy(aWebhookMsg, aText, sizeof(aWebhookMsg));
-
 		if (ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 			str_format(aWebhookName, sizeof(aWebhookName), "%s [%d]", Server()->ClientName(ChatterClientID), m_Accounts[m_apPlayers[ChatterClientID]->GetAccID()].m_Level);
-		else
-			str_format(aWebhookMsg, sizeof(aWebhookMsg), "*** %s", aText);
 
-		Server()->SendWebhookMessage(Config()->m_SvWebhookChatBridgeURL, aWebhookMsg, aWebhookName);
+		Server()->SendWebhookMessage(Config()->m_SvWebhookChatBridgeURL, aText, aWebhookName);
 	}
 
 	CNetMsg_Sv_Chat Msg;
