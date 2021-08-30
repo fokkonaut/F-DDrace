@@ -48,7 +48,7 @@ void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 	Log(aBuf, pUser);
 
 	CAntibot *pAntibot = (CAntibot *)pUser;
-	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, pMessage, pAntibot->Config()->m_SvWebhookAntibotName);
+	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 }
 void CAntibot::Init()
 {

@@ -3224,9 +3224,9 @@ int WebhookThread(void *pArg)
 	return 0;
 }
 
-void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const char *pName)
+void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pName)
 {
-	if (!pAddr[0] || !pMessage[0])
+	if (!pURL[0] || !pMessage[0])
 		return;
 
 	char *pMsg = strdup(pMessage);
@@ -3241,7 +3241,7 @@ void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const 
 	const char *pPart3 = "\\\"}\"";
 
 	char *pBuf = (char *)calloc(1, 2048);
-	str_format(pBuf, 2048, "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pAddr);
+	str_format(pBuf, 2048, "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL);
 	free(pMsg);
 
 	AddJob(WebhookThread, (void *)pBuf);
