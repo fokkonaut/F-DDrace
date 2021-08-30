@@ -3189,8 +3189,9 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	// important ot call OnSetTimedOut before we remove the original client but after we swapped already
 	GameServer()->OnSetTimedOut(ClientID, OrigID);
 
-	DelClientCallback(OrigID, "Timeout Protection used", this);
+	m_aClients[ClientID].m_Authed = AUTHED_NO;
 	//m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
+	DelClientCallback(OrigID, "Timeout Protection used", this);
 	return true;
 }
 
