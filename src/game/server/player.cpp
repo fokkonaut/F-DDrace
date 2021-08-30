@@ -27,7 +27,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool 
 	m_IsDummy = Dummy;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
-	InitIdMap();
 }
 
 CPlayer::~CPlayer()
