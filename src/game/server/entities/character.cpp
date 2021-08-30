@@ -2670,7 +2670,7 @@ void CCharacter::HandleTiles(int Index)
 	if ((m_TileIndex == TILE_SPOOKY_GHOST) || (m_TileFIndex == TILE_SPOOKY_GHOST))
 	{
 		if ((m_LastIndexTile != TILE_SPOOKY_GHOST) && (m_LastIndexFrontTile != TILE_SPOOKY_GHOST))
-			SpookyGhost(!m_pPlayer->m_SpookyGhost);
+			SpookyGhost(!m_pPlayer->m_HasSpookyGhost);
 	}
 
 	//add meteor
