@@ -3221,8 +3221,7 @@ void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
 
 static int WebhookThread(void *pArg)
 {
-	int ret = system((char *)pArg);
-	dbg_msg("antibot", "Sending message to webhook... Returned %d", ret);
+	system((char *)pArg);
 	return 0;
 }
 
@@ -3230,9 +3229,6 @@ void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const 
 {
 	if (!pAddr[0] || !pMessage[0])
 		return;
-
-	if (!pName || !pName[0])
-		pName = "";
 
 	char *pMsg = strdup(pMessage);
 	for (char *ptr = pMsg; *ptr; ptr++)
