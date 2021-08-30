@@ -3214,9 +3214,10 @@ void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
 	m_Jobs.push_back(pJob);
 }
 
-static int WebhookThread(void *pArg)
+int WebhookThread(void *pArg)
 {
 	system((char *)pArg);
+	free(pArg);
 	return 0;
 }
 
@@ -3236,11 +3237,11 @@ void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const 
 	const char *pPart2 = "\\\", \\\"content\\\": \\\"";
 	const char *pPart3 = "\\\"}\"";
 
-	static char aBuf[2048];
-	str_format(aBuf, sizeof(aBuf), "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pAddr);
+	char *pBuf = (char *)calloc(1, 2048);
+	str_format(pBuf, 2048, "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pAddr);
 	free(pMsg);
 
-	AddJob(WebhookThread, (void *)aBuf);
+	AddJob(WebhookThread, (void *)pBuf);
 }
 
 int *CServer::GetIdMap(int ClientID)

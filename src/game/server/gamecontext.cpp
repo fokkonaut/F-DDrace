@@ -478,7 +478,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 	if (Mode == CHAT_ALL || (Mode == CHAT_TEAM && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0))
 	{
-		char aWebhookName[MAX_NAME_ARRAY_SIZE];
+		char aWebhookName[32];
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
 		if (ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 			str_format(aWebhookName, sizeof(aWebhookName), "%s [%d]", Server()->ClientName(ChatterClientID), m_Accounts[m_apPlayers[ChatterClientID]->GetAccID()].m_Level);
