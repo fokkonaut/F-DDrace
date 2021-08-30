@@ -48,9 +48,8 @@ void CHelicopter::Tick()
 		GetOwner()->ForceSetPos(m_Pos);
 		GetOwner()->Core()->m_Vel = vec2(0, 0);
 
-		m_Gravity = false;
-		if (GetOwner()->m_FreezeTime)
-			m_Gravity = true;
+		m_Gravity = GetOwner()->m_FreezeTime;
+		m_GroundVel = GetOwner()->m_FreezeTime;
 	}
 
 	ApplyAcceleration();

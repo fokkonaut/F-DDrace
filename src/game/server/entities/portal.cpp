@@ -124,12 +124,6 @@ void CPortal::EntitiesEnter()
 			{
 				CCharacter *pChr = (CCharacter *)apEnts[i];
 				pAffectedChr = pChr;
-				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
-				{
-					int Flag = pChr->HasFlag();
-					if (Flag != -1)
-						((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Flag]->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
-				}
 				break;
 			}
 		case CGameWorld::ENTTYPE_FLAG:
@@ -137,12 +131,6 @@ void CPortal::EntitiesEnter()
 				CFlag *pFlag = (CFlag *)apEnts[i];
 				if (pFlag->GetCarrier())
 					continue; // owner is getting teleported with the flag
-
-				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
-				{
-					pFlag->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
-					continue;
-				}
 
 				if (pFlag->GetLastCarrier())
 					pAffectedChr = pFlag->GetLastCarrier();
@@ -185,12 +173,26 @@ void CPortal::EntitiesEnter()
 				pChr->Core()->m_Killer.m_ClientID = m_Owner;
 				pChr->Core()->m_Killer.m_Weapon = -1;
 				pChr->m_LastTouchedPortalBy = m_Owner;
+
+				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
+				{
+					int Flag = pChr->HasFlag();
+					if (Flag != -1)
+						((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Flag]->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
+				}
 				break;
 			}
 		case CGameWorld::ENTTYPE_FLAG:
 			{
 				CFlag *pFlag = (CFlag *)apEnts[i];
 				pFlag->ReleaseHooked();
+
+				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
+				{
+					pFlag->TeleToPlot(m_pLinkedPortal->m_ThroughPlotDoor);
+					continue;
+				}
+
 				pFlag->SetPos(m_pLinkedPortal->m_Pos);
 				pFlag->SetPrevPos(m_pLinkedPortal->m_Pos);
 				break;
