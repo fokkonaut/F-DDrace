@@ -476,7 +476,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, pModeStr, aBuf);
 	}
 
-	if (Mode == CHAT_ALL || Mode == CHAT_ATEVERYONE || ((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0))
+	if (!(Flags&CHAT_NO_WEBHOOK) && (Mode == CHAT_ALL || Mode == CHAT_ATEVERYONE ||
+		((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0)))
 	{
 		char aWebhookName[32];
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
@@ -1434,7 +1435,10 @@ void CGameContext::OnClientEnter(int ClientID)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
-		SendChat(-1, CHAT_ALL, -1, aBuf);
+		int Flags = CHAT_SEVEN|CHAT_SEVENDOWN;
+		if (m_apPlayers[ClientID]->m_IsDummy)
+			Flags |= CHAT_NO_WEBHOOK;
+		SendChat(-1, CHAT_ALL, -1, aBuf, -1, Flags);
 	}
 
 	m_apPlayers[ClientID]->InitIdMap();
@@ -1535,7 +1539,11 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 				str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
 			else
 				str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
-			SendChat(-1, CHAT_ALL, -1, aBuf);
+
+			int Flags = CHAT_SEVEN|CHAT_SEVENDOWN;
+			if (m_apPlayers[ClientID]->m_IsDummy)
+				Flags |= CHAT_NO_WEBHOOK;
+			SendChat(-1, CHAT_ALL, -1, aBuf, -1, Flags);
 		}
 	}
 

@@ -2331,6 +2331,14 @@ int CServer::Run()
 		delete m_pMapListHeap;
 		m_pMapListHeap = 0;
 	}
+
+	while (m_Jobs.size())
+	{
+		// wait for all threads to be done
+		if (m_Jobs.front()->Status() == CJob::STATE_DONE)
+			m_Jobs.pop_front();
+	}
+
 	return 0;
 }
 

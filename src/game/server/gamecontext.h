@@ -271,6 +271,7 @@ public:
 	{
 		CHAT_SEVEN = 1<<0,
 		CHAT_SEVENDOWN = 1<<1,
+		CHAT_NO_WEBHOOK = 1<<2,
 	};
 
 	// network
