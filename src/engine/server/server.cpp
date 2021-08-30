@@ -2331,14 +2331,6 @@ int CServer::Run()
 		delete m_pMapListHeap;
 		m_pMapListHeap = 0;
 	}
-
-	while (m_Jobs.size())
-	{
-		// wait for all threads to be done
-		if (m_Jobs.front()->Status() == CJob::STATE_DONE)
-			m_Jobs.pop_front();
-	}
-
 	return 0;
 }
 
@@ -3217,6 +3209,9 @@ bool CServer::IsUniqueAddress(int ClientID)
 
 void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
 {
+	if (!m_RunServer)
+		return;
+
 	CJob *pJob = new CJob();
 	Kernel()->RequestInterface<IEngine>()->AddJob(pJob, pfnFunc, pData);
 	m_Jobs.push_back(pJob);
