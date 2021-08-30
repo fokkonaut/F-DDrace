@@ -3755,7 +3755,16 @@ void CGameContext::FDDraceInitPreMapInit()
 	Collision()->m_vTiles.clear();
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
-	InitPlots();
+	// reset plots here but load them after the map init
+	for (int i = 0; i < MAX_PLOTS; i++)
+	{
+		m_aPlots[i].m_aOwner[0] = 0;
+		m_aPlots[i].m_aDisplayName[0] = 0;
+		m_aPlots[i].m_ExpireDate = 0;
+		m_aPlots[i].m_Size = 0;
+		m_aPlots[i].m_ToTele = vec2(-1, -1);
+		m_aPlots[i].m_vObjects.clear();
+	}
 }
 
 void CGameContext::FDDraceInit()
@@ -3765,6 +3774,11 @@ void CGameContext::FDDraceInit()
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
 	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
+
+	// load plot data AFTER map init
+	for (int i = 0; i < Collision()->m_NumPlots + 1; i++)
+			ReadPlotStats(i);
+	ExpirePlots();
 
 	if (Config()->m_SvBansFile[0])
 		Console()->ExecuteFile(Config()->m_SvBansFile);
@@ -4441,23 +4455,6 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 }
 
 // F-DDrace
-
-void CGameContext::InitPlots()
-{
-	for (int i = 0; i < MAX_PLOTS; i++)
-	{
-		m_aPlots[i].m_aOwner[0] = 0;
-		m_aPlots[i].m_aDisplayName[0] = 0;
-		m_aPlots[i].m_ExpireDate = 0;
-		m_aPlots[i].m_Size = 0;
-		m_aPlots[i].m_ToTele = vec2(-1, -1);
-		m_aPlots[i].m_vObjects.clear();
-
-		if (i < Collision()->m_NumPlots + 1)
-			ReadPlotStats(i);
-	}
-	ExpirePlots();
-}
 
 void CGameContext::ReadPlotStats(int ID)
 {

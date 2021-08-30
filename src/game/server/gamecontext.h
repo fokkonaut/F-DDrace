@@ -375,7 +375,6 @@ public:
 	void UpdateHidePlayers(int UpdateID = -1);
 
 	// plots
-	void InitPlots();
 	void ReadPlotStats(int ID);
 	void WritePlotStats(int ID);
 	void SetPlotInfo(int PlotID, int AccID);
