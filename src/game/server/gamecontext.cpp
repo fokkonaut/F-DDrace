@@ -476,7 +476,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, pModeStr, aBuf);
 	}
 
-	if (Mode == CHAT_ALL || (Mode == CHAT_TEAM && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0))
+	if (Mode == CHAT_ALL || Mode == CHAT_ATEVERYONE || ((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0))
 	{
 		char aWebhookName[32];
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
