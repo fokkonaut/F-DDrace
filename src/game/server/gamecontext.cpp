@@ -3991,6 +3991,10 @@ void CGameContext::OnPreShutdown()
 			else
 				pPlayer->GetCharacter()->DropMoney(pPlayer->GetWalletMoney());
 		}
+
+		// properly disconnect dummies on reload/shutdown
+		if (pPlayer->m_IsDummy)
+			Server()->DummyLeave(i);
 	}
 
 	LogoutAllAccounts();
