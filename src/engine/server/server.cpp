@@ -3229,7 +3229,7 @@ void CServer::SendWebhookMessage(const char *pAddr, const char *pMessage, const 
 	char *pMsg = strdup(pMessage);
 	for (char *ptr = pMsg; *ptr; ptr++)
 	{
-		if (*ptr == '\"' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`')
+		if (*ptr == '\"' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@')
 			*ptr = ' ';
 	}
 
