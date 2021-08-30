@@ -1442,10 +1442,10 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CHAT_ALL, -1, aBuf);
 	}
 
+	m_apPlayers[ClientID]->InitIdMap();
+
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
-
-	m_apPlayers[ClientID]->InitIdMap();
 
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);

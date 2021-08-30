@@ -355,10 +355,28 @@ void CGameWorld::Tick()
 	UpdatePlayerMap(-1);
 
 	int StrongWeakID = 0;
-	for (CCharacter* pChar = (CCharacter*)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter*)pChar->TypeNext())
+	for (CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
 		pChar->m_StrongWeakID = StrongWeakID;
 		StrongWeakID++;
+	}
+
+	// Translate StrongWeakID to clamp it to 64 players
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy)
+			continue;
+
+		int StrongWeakID = 0;
+		for (CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
+		{
+			int ID = pChar->GetPlayer()->GetCID();
+			if (Server()->Translate(ID, i))
+			{
+				GameServer()->m_apPlayers[i]->m_aStrongWeakID[ID] = StrongWeakID;
+				StrongWeakID++;
+			}
+		}
 	}
 }
 

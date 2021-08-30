@@ -27,6 +27,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, bool DebugDummy, bool 
 	m_IsDummy = Dummy;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientID);
+	InitIdMap();
 }
 
 CPlayer::~CPlayer()
@@ -222,6 +223,9 @@ void CPlayer::Reset()
 	m_LastMinigameRequest = 0;
 
 	m_ViewCursorID = -2;
+
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		m_aStrongWeakID[i] = 0;
 }
 
 void CPlayer::Tick()

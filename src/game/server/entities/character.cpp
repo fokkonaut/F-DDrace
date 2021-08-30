@@ -1913,7 +1913,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
-	pDDNetCharacter->m_StrongWeakID = m_StrongWeakID;
+	pDDNetCharacter->m_StrongWeakID = pSnap ? pSnap->m_aStrongWeakID[ID] : m_StrongWeakID;
 }
 
 void CCharacter::SnapCharacter(int SnappingClient, int ID)

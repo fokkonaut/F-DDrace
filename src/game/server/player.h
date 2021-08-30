@@ -379,6 +379,8 @@ public:
 
 	int m_ViewCursorID;
 
+	int m_aStrongWeakID[VANILLA_MAX_CLIENTS];
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 
