@@ -655,8 +655,8 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 
 	CCharacter* pChr = pSelf->GetPlayerChar(Target);
 
-	if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
-		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_SELF);
+	//if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
+	//	pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_SELF);
 
 	pController->m_Teams.SetForceCharacterTeam(Target, Team);
 }
