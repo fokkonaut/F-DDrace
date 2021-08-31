@@ -1837,9 +1837,9 @@ void CCharacter::Snap(int SnappingClient)
 
 		pCursor->m_X = round_to_int(m_CursorPos.x);
 		pCursor->m_Y = round_to_int(m_CursorPos.y);
-		pCursor->m_FromX = round_to_int(m_CursorPos.x);
-		pCursor->m_FromY = round_to_int(m_CursorPos.y);
-		pCursor->m_StartTick = 0;
+		pCursor->m_FromX = round_to_int(m_Pos.x);
+		pCursor->m_FromY = round_to_int(m_Pos.y);
+		pCursor->m_StartTick = Server()->Tick() - 5;
 	}
 
 	bool ShowSpec = IsPaused();
