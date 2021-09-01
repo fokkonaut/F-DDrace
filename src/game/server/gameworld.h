@@ -71,6 +71,7 @@ private:
 		int m_NumReserved;
 		bool m_UpdateTeamsState;
 		bool m_aReserved[MAX_CLIENTS];
+		bool m_ResortReserved;
 		int *m_pMap;
 		int *m_pReverseMap;
 		void Update();

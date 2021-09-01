@@ -3129,7 +3129,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 void CServer::GetClientAddr(int ClientID, NETADDR* pAddr)
 {
-	if (ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	if (ClientID >= 0 && ClientID < MAX_CLIENTS && (m_aClients[ClientID].m_State == CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_DUMMY))
 	{
 		*pAddr = *m_NetServer.ClientAddr(ClientID);
 	}
