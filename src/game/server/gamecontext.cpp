@@ -4817,7 +4817,7 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 
 		// logout account if needed
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
-			pSelf->Logout(ID, true, false);
+			pSelf->Logout(ID, true);
 		else
 			pSelf->FreeAccount(ID);
 	}
@@ -4921,7 +4921,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 	}
 }
 
-void CGameContext::WriteAccountStats(int ID, bool UpdateVersion)
+void CGameContext::WriteAccountStats(int ID)
 {
 	std::string data;
 	char aBuf[128];
@@ -4932,10 +4932,7 @@ void CGameContext::WriteAccountStats(int ID, bool UpdateVersion)
 	{
 		for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 		{
-			if (i == ACC_VERSION && UpdateVersion)
-				AccFile << ACC_CURRENT_VERSION << "\n";
-			else
-				AccFile << GetAccVarValue(ID, i) << "\n";
+			AccFile << GetAccVarValue(ID, i) << "\n";
 		}
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -5106,7 +5103,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	return aBuf;
 }
 
-void CGameContext::Logout(int ID, bool Silent, bool UpdateVersion)
+void CGameContext::Logout(int ID, bool Silent)
 {
 	if (ID < ACC_START)
 		return;
@@ -5116,7 +5113,7 @@ void CGameContext::Logout(int ID, bool Silent, bool UpdateVersion)
 
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
-	WriteAccountStats(ID, UpdateVersion);
+	WriteAccountStats(ID);
 
 	if (!Silent)
 		dbg_msg("acc", "logged out account '%s'", m_Accounts[ID].m_Username);
@@ -5194,6 +5191,7 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		m_Accounts[ID].m_Port = Config()->m_SvPort;
 		m_Accounts[ID].m_LoggedIn = true;
 		m_Accounts[ID].m_ClientID = ClientID;
+		m_Accounts[ID].m_Version = ACC_CURRENT_VERSION;
 		str_copy(m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(ClientID), sizeof(m_Accounts[ID].m_aLastPlayerName));
 		if (pPlayer->m_TimeoutCode[0] != '\0')
 			str_copy(m_Accounts[ID].m_aTimeoutCode, pPlayer->m_TimeoutCode, sizeof(m_Accounts[ID].m_aTimeoutCode));
