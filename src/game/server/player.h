@@ -426,9 +426,6 @@ public:
 	// 128p
 	void SendConnect(int FakeID, int ClientID);
 	void SendDisconnect(int FakeID);
-	void InitIdMap();
-	int m_NumMapReserved;
-	bool m_aSameIP[MAX_CLIENTS];
 
 	// shutdown tee
 	bool m_CheckedSavePlayer;

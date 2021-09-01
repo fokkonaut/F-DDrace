@@ -64,10 +64,13 @@ private:
 	struct PlayerMap
 	{
 		void Init(int ClientID, CGameWorld *pGameWorld);
+		void InitPlayer();
 		CGameWorld *m_pGameWorld;
 		CPlayer *GetPlayer();
 		int m_ClientID;
+		int m_NumReserved;
 		bool m_UpdateTeamsState;
+		bool m_aReserved[MAX_CLIENTS];
 		int *m_pMap;
 		int *m_pReverseMap;
 		void Update();
@@ -87,6 +90,7 @@ public:
 	CWorldCore m_Core;
 
 	// F-DDrace
+	void InitPlayerMap(int ClientID) { m_aMap[ClientID].InitPlayer(); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 

@@ -188,6 +188,108 @@ void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
 	m_pGameWorld = pGameWorld;
 	m_pMap = m_pGameWorld->Server()->GetIdMap(m_ClientID);
 	m_pReverseMap = m_pGameWorld->Server()->GetReverseIdMap(m_ClientID);
+	m_UpdateTeamsState = false;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aReserved[i] = false;
+}
+
+void CGameWorld::PlayerMap::InitPlayer()
+{
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		m_pMap[i] = -1;
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_pReverseMap[i] = -1;
+
+	if (GetPlayer()->m_IsDummy)
+		return; // just need to initialize the arrays
+
+	int NextFreeID = 0;
+	NETADDR OwnAddr, Addr;
+	m_pGameWorld->Server()->GetClientAddr(m_ClientID, &OwnAddr);
+	while (1)
+	{
+		bool Break = true;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (!m_pGameWorld->GameServer()->m_apPlayers[i] || m_pGameWorld->GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
+				continue;
+
+			m_pGameWorld->Server()->GetClientAddr(i, &Addr);
+			if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
+			{
+				if (m_pGameWorld->Server()->GetReverseIdMap(i)[i] == NextFreeID)
+				{
+					NextFreeID++;
+					Break = false;
+				}
+			}
+		}
+
+		if (Break)
+			break;
+	}
+
+	m_NumReserved = 1;
+	m_pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
+
+	if (!m_pGameWorld->Server()->IsSevendown(m_ClientID))
+	{
+		CNetMsg_Sv_ClientInfo FakeInfo;
+		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
+		FakeInfo.m_Local = 0;
+		FakeInfo.m_Team = TEAM_SPECTATORS;
+		FakeInfo.m_pName = " ";
+		FakeInfo.m_pClan = "";
+		FakeInfo.m_Country = -1;
+		FakeInfo.m_Silent = 1;
+		for(int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			FakeInfo.m_apSkinPartNames[p] = "standard";
+			FakeInfo.m_aUseCustomColors[p] = 0;
+			FakeInfo.m_aSkinPartColors[p] = 0;
+		}
+		m_pGameWorld->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+	}
+	else
+	{
+		if (m_pGameWorld->GameServer()->FlagsUsed())
+		{
+			m_NumReserved += 2;
+			m_pMap[SPEC_SELECT_FLAG_RED] = -1;
+			m_pMap[SPEC_SELECT_FLAG_BLUE] = -1;
+		}
+	}
+
+	if (NextFreeID < VANILLA_MAX_CLIENTS-m_NumReserved)
+	{
+		Add(NextFreeID, m_ClientID);
+		m_aReserved[m_ClientID] = true;
+	}
+
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_pGameWorld->GameServer()->m_apPlayers[i] || m_pGameWorld->GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
+			continue;
+
+		m_pGameWorld->Server()->GetClientAddr(i, &Addr);
+		if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
+		{
+			// update us with other same ip player infos
+			if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] < VANILLA_MAX_CLIENTS-m_NumReserved)
+			{
+				Add(m_pGameWorld->m_aMap[i].m_pReverseMap[i], i);
+				m_aReserved[i] = true;
+			}
+
+			// update other same ip players with our info
+			if (NextFreeID < VANILLA_MAX_CLIENTS-m_pGameWorld->m_aMap[i].m_NumReserved)
+			{
+				m_pGameWorld->m_aMap[i].Add(NextFreeID, m_ClientID);
+				m_pGameWorld->m_aMap[i].m_aReserved[m_ClientID] = true;
+			}
+		}
+	}
 }
 
 CPlayer *CGameWorld::PlayerMap::GetPlayer()
@@ -223,6 +325,7 @@ int CGameWorld::PlayerMap::Remove(int MapID)
 		if (m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
 			m_UpdateTeamsState = true;
 
+		m_aReserved[ClientID] = false;
 		GetPlayer()->SendDisconnect(MapID);
 		m_pReverseMap[ClientID] = -1;
 		m_pMap[MapID] = -1;
@@ -248,19 +351,29 @@ void CGameWorld::PlayerMap::Update()
 			continue;
 		}
 
-		int Insert = -1;
-		if (GetPlayer()->m_aSameIP[i])
+		if (m_aReserved[i])
 		{
-			Insert = m_pGameWorld->m_aMap[i].m_pReverseMap[i];
+			NETADDR OwnAddr, Addr;
+			m_pGameWorld->Server()->GetClientAddr(m_ClientID, &OwnAddr);
+			m_pGameWorld->Server()->GetClientAddr(i, &Addr);
+			if (net_addr_comp(&OwnAddr, &Addr, false) != 0)
+			{
+				if (!m_pGameWorld->GameServer()->GetDDRaceTeam(i)) // condition to unset reserved slot
+					m_aReserved[i] = false;
+			}
+			continue;
 		}
-		else if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
+
+		int Insert = -1;
+		if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
 		{
-			for (int j = VANILLA_MAX_CLIENTS-GetPlayer()->m_NumMapReserved-1; j >= 0; j--)
+			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_NumReserved; j++)
 			{
 				int CID = m_pMap[j];
-				if (CID == -1 || (CID != m_ClientID && !GetPlayer()->m_aSameIP[CID] && !m_pGameWorld->GameServer()->GetDDRaceTeam(CID)) || CID == i)
+				if (CID == -1 || CID == i || !m_aReserved[CID])
 				{
 					Insert = j;
+					m_aReserved[i] = true;
 					break;
 				}
 			}
@@ -271,7 +384,7 @@ void CGameWorld::PlayerMap::Update()
 		}
 		else
 		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-GetPlayer()->m_NumMapReserved; j++)
+			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_NumReserved; j++)
 				if (m_pMap[j] == -1)
 				{
 					Insert = j;
@@ -283,7 +396,7 @@ void CGameWorld::PlayerMap::Update()
 		{
 			Add(Insert, i);
 		}
-		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(i, false))
+		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientID, false))
 		{
 			InsertNextEmpty(i);
 		}
@@ -301,14 +414,15 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 	if (m_pReverseMap[ClientID] != -1 || ClientID == -1)
 		return;
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
 	{
-		if (i == ClientID || i == m_ClientID || GetPlayer()->m_aSameIP[i] || m_pGameWorld->GameServer()->GetDDRaceTeam(i))
+		int CID = m_pMap[i];
+		if (CID != -1 && m_aReserved[CID])
 			continue;
 
-		if (m_pReverseMap[i] != -1 && (!m_pGameWorld->GameServer()->GetPlayerChar(i) || m_pGameWorld->GameServer()->GetPlayerChar(i)->NetworkClipped(m_ClientID, false)))
+		if (CID == -1 || (!m_pGameWorld->GameServer()->GetPlayerChar(CID) || m_pGameWorld->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID, false)))
 		{
-			Add(m_pReverseMap[i], ClientID);
+			Add(i, ClientID);
 			break;
 		}
 	}

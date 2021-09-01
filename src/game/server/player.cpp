@@ -183,7 +183,6 @@ void CPlayer::Reset()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_HidePlayerTeam[i] = TEAM_RED;
-		m_aSameIP[i] = false;
 	}
 
 	for (int i = 0; i < NUM_HOUSES; i++)
@@ -769,83 +768,6 @@ void CPlayer::FakeSnap()
 	}
 }
 
-void CPlayer::InitIdMap()
-{
-	int *pIdMap = Server()->GetIdMap(m_ClientID);
-	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		pIdMap[i] = -1;
-
-	int *pReverseIdMap = Server()->GetReverseIdMap(m_ClientID);
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		pReverseIdMap[i] = -1;
-
-	int NextFreeID = 0;
-	NETADDR OwnAddr, Addr;
-	Server()->GetClientAddr(m_ClientID, &OwnAddr);
-	while (1)
-	{
-		bool Break = true;
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (!GameServer()->m_apPlayers[i] || GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
-				continue;
-
-			Server()->GetClientAddr(i, &Addr);
-			if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
-			{
-				if (Server()->GetReverseIdMap(i)[i] == NextFreeID)
-				{
-					NextFreeID++;
-					Break = false;
-				}
-				m_aSameIP[i] = true;
-				GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = true;
-			}
-		}
-
-		if (Break)
-			break;
-	}
-
-	m_NumMapReserved = 1;
-	pIdMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
-
-	if (!Server()->IsSevendown(m_ClientID))
-	{
-		CNetMsg_Sv_ClientInfo FakeInfo;
-		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
-		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_SPECTATORS;
-		FakeInfo.m_pName = " ";
-		FakeInfo.m_pClan = "";
-		FakeInfo.m_Country = -1;
-		FakeInfo.m_Silent = 1;
-		for(int p = 0; p < NUM_SKINPARTS; p++)
-		{
-			FakeInfo.m_apSkinPartNames[p] = "standard";
-			FakeInfo.m_aUseCustomColors[p] = 0;
-			FakeInfo.m_aSkinPartColors[p] = 0;
-		}
-		Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
-	}
-	else
-	{
-		if (GameServer()->FlagsUsed())
-		{
-			m_NumMapReserved += 2;
-			pIdMap[SPEC_SELECT_FLAG_RED] = -1;
-			pIdMap[SPEC_SELECT_FLAG_BLUE] = -1;
-		}
-	}
-
-	if (NextFreeID < VANILLA_MAX_CLIENTS - m_NumMapReserved)
-	{
-		pIdMap[NextFreeID] = m_ClientID;
-		pReverseIdMap[m_ClientID] = NextFreeID;
-		SendConnect(NextFreeID, m_ClientID);
-	}
-}
-
 int CPlayer::GetHidePlayerTeam(int Asker)
 {
 	CPlayer *pAsker = GameServer()->m_apPlayers[Asker];
@@ -920,7 +842,6 @@ void CPlayer::OnDisconnect()
 		if (GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = TEAM_RED;
-			GameServer()->m_apPlayers[i]->m_aSameIP[m_ClientID] = false;
 
 			if (GameServer()->m_apPlayers[i]->m_TeeControlForcedID == m_ClientID)
 			{

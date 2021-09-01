@@ -1441,7 +1441,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		SendChat(-1, CHAT_ALL, -1, aBuf, -1, Flags);
 	}
 
-	m_apPlayers[ClientID]->InitIdMap();
+	m_World.InitPlayerMap(ClientID);
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
@@ -6054,9 +6054,6 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		// move same ip list to the new player
-		pPlayer->m_aSameIP[i] = pOrig->m_aSameIP[i];
-
 		if (!m_apPlayers[i] || i == ClientID)
 			continue;
 
