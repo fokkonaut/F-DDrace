@@ -4458,7 +4458,6 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 
 void CGameContext::ReadPlotStats(int ID)
 {
-	Config()->m_SvTestingCommands = 1;
 	std::string data;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetCurrentMapName(), ID);
