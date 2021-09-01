@@ -144,7 +144,20 @@ void CCharacterCore::Tick(bool UseInput)
 				m_Angle = (int)(angle(vec2(m_AimClosestPos.x - m_Pos.x, m_AimClosestPos.y - m_Pos.y)) * 256.0f);
 		}
 		else
-			m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f);
+		{
+			// this is the ddnet/0.6 way of setting up the angle
+			float a = 0;
+			if(m_Input.m_TargetX == 0)
+				a = atanf((float)m_Input.m_TargetY);
+			else
+				a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
+
+			if(m_Input.m_TargetX < 0)
+				a = a + pi;
+
+			m_Angle = (int)(a * 256.0f);
+			//m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
+		}
 
 		if (m_UpdateAngle)
 			m_UpdateAngle--;
