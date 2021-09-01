@@ -6033,57 +6033,7 @@ void CGameContext::UnsetKiller(int ClientID)
 
 void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
-	CPlayer *pOrig = m_apPlayers[OrigID];
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-	int *pIdMap = Server()->GetIdMap(OrigID);
-	int *pReverseIdMap = Server()->GetReverseIdMap(OrigID);
-
-	// remove timeouted tee
-	int ID = ClientID;
-	if (Server()->Translate(ID, OrigID))
-	{
-		pIdMap[ID] = -1;
-		pPlayer->SendDisconnect(ID);
-	}
-
-	// add ourself
-	int OwnID = pReverseIdMap[OrigID];
-	pIdMap[OwnID] = ClientID;
-	pReverseIdMap[ClientID] = OwnID;
-	pReverseIdMap[OrigID] = -1;
-
-	// copy id map
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (i < VANILLA_MAX_CLIENTS)
-			Server()->GetIdMap(ClientID)[i] = pIdMap[i];
-		Server()->GetReverseIdMap(ClientID)[i] = pReverseIdMap[i];
-	}
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!m_apPlayers[i] || i == ClientID)
-			continue;
-
-		// reset, let the algorithmn handle this
-		ID = ClientID;
-		if (Server()->Translate(ID, i))
-		{
-			Server()->GetIdMap(i)[ID] = -1;
-			Server()->GetReverseIdMap(i)[ClientID] = -1;
-			m_apPlayers[i]->SendDisconnect(ID);
-		}
-
-		ID = OrigID;
-		if (Server()->Translate(ID, i))
-		{
-			Server()->GetIdMap(i)[ID] = -1;
-			Server()->GetReverseIdMap(i)[OrigID] = -1;
-			m_apPlayers[i]->SendDisconnect(ID);
-		}
-	}
-
-	m_World.UpdateTeamsState(ClientID);
+	m_World.OnSetTimedOut(ClientID, OrigID);
 }
 
 bool CGameContext::FlagsUsed()

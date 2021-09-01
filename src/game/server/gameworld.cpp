@@ -300,7 +300,7 @@ CPlayer *CGameWorld::PlayerMap::GetPlayer()
 
 void CGameWorld::PlayerMap::Add(int MapID, int ClientID)
 {
-	if (MapID == -1 || m_pReverseMap[ClientID] == MapID)
+	if (MapID == -1 || m_pReverseMap[ClientID] == MapID || ClientID == -1)
 		return;
 
 	Remove(m_pReverseMap[ClientID]);
@@ -433,6 +433,44 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 		{
 			Add(i, ClientID);
 			break;
+		}
+	}
+}
+
+void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
+{
+	// update own map
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+	{
+		int ClientID = m_pGameWorld->m_aMap[OrigID].m_pMap[i];
+		if (ClientID == -1)
+			continue;
+
+		if (!m_pGameWorld->m_aMap[OrigID].m_aReserved[ClientID])
+		{
+			Remove(i);
+			continue;
+		}
+
+		// set ourselves back to the position where we used to be
+		if (ClientID == OrigID)
+			ClientID = m_ClientID;
+
+		Add(i, ClientID);
+		m_aReserved[ClientID] = true;
+	}
+
+	// update others
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_pGameWorld->GameServer()->m_apPlayers[i])
+			continue;
+
+		// if the original tee was in a reserved slot, then set him back there but with our new client id
+		if (m_pGameWorld->m_aMap[i].m_aReserved[OrigID])
+		{
+			m_pGameWorld->m_aMap[i].Add(m_pGameWorld->m_aMap[i].m_pReverseMap[OrigID], m_ClientID);
+			m_pGameWorld->m_aMap[i].m_aReserved[m_ClientID] = true;
 		}
 	}
 }
