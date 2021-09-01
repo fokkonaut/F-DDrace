@@ -313,7 +313,12 @@ void CDrawEditor::SetAngle(float Angle)
 
 void CDrawEditor::AddAngle(float Add)
 {
-	SetAngle(((m_Data.m_Laser.m_Angle * 180 / pi) + Add) * pi / 180);
+	float NewAngle = (m_Data.m_Laser.m_Angle * 180 / pi) + Add;
+	if (NewAngle > 360.f)
+		NewAngle -= 360.f;
+	else if (NewAngle < 0.f)
+		NewAngle += 360.f;;
+	SetAngle(NewAngle * pi / 180);
 }
 
 void CDrawEditor::AddLength(float Add)
