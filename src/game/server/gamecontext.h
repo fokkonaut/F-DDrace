@@ -96,7 +96,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 6,
+	ACC_CURRENT_VERSION = 7,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -446,8 +446,8 @@ public:
 	static int InitAccounts(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
 	void ReadAccountStats(int ID, const char* pName);
-	void WriteAccountStats(int ID);
-	void Logout(int ID, bool Silent = false);
+	void WriteAccountStats(int ID, bool UpdateVersion = true);
+	void Logout(int ID, bool Silent = false, bool UpdateVersion = true);
 	void LogoutAllAccounts();
 	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
 	SHA256_DIGEST HashPassword(const char *pPassword);

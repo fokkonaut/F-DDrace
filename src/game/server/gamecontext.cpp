@@ -4817,7 +4817,7 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 
 		// logout account if needed
 		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
-			pSelf->Logout(ID, true);
+			pSelf->Logout(ID, true, false);
 		else
 			pSelf->FreeAccount(ID);
 	}
@@ -4921,7 +4921,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 	}
 }
 
-void CGameContext::WriteAccountStats(int ID)
+void CGameContext::WriteAccountStats(int ID, bool UpdateVersion)
 {
 	std::string data;
 	char aBuf[128];
@@ -4932,7 +4932,7 @@ void CGameContext::WriteAccountStats(int ID)
 	{
 		for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 		{
-			if (i == ACC_VERSION)
+			if (i == ACC_VERSION && UpdateVersion)
 				AccFile << ACC_CURRENT_VERSION << "\n";
 			else
 				AccFile << GetAccVarValue(ID, i) << "\n";
@@ -5106,7 +5106,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	return aBuf;
 }
 
-void CGameContext::Logout(int ID, bool Silent)
+void CGameContext::Logout(int ID, bool Silent, bool UpdateVersion)
 {
 	if (ID < ACC_START)
 		return;
@@ -5116,7 +5116,7 @@ void CGameContext::Logout(int ID, bool Silent)
 
 	m_Accounts[ID].m_LoggedIn = false;
 	m_Accounts[ID].m_ClientID = -1;
-	WriteAccountStats(ID);
+	WriteAccountStats(ID, UpdateVersion);
 
 	if (!Silent)
 		dbg_msg("acc", "logged out account '%s'", m_Accounts[ID].m_Username);
@@ -5170,6 +5170,18 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		return false;
 	}
 
+	if (PasswordRequired && pPassword[0] && m_Accounts[ID].m_Version < 7)
+	{
+		char aPassword[SHA256_MAXSTRSIZE];
+		str_copy(aPassword, pPassword, sizeof(aPassword));
+		SHA256_CTX Sha256Ctx;
+		sha256_init(&Sha256Ctx);
+		sha256_update(&Sha256Ctx, &aPassword, sizeof(aPassword));
+		SHA256_DIGEST Sha256 = sha256_finish(&Sha256Ctx);
+		if (sha256_comp(m_Accounts[ID].m_Password, Sha256) == 0)
+			SetPassword(ID, pPassword);
+	}
+
 	if (PasswordRequired && CheckPassword(ID, pPassword))
 	{
 		SendChatTarget(ClientID, "Wrong password");
@@ -5212,11 +5224,9 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 
 SHA256_DIGEST CGameContext::HashPassword(const char *pPassword)
 {
-	char aPassword[SHA256_MAXSTRSIZE];
-	str_copy(aPassword, pPassword, sizeof(aPassword));
 	SHA256_CTX Sha256Ctx;
 	sha256_init(&Sha256Ctx);
-	sha256_update(&Sha256Ctx, &aPassword, sizeof(aPassword));
+	sha256_update(&Sha256Ctx, pPassword, str_length(pPassword));
 	return sha256_finish(&Sha256Ctx);
 }
 
