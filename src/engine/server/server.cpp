@@ -3224,16 +3224,19 @@ int WebhookThread(void *pArg)
 	return 0;
 }
 
-void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pName)
+void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername)
 {
 	if (!pURL[0] || !pMessage[0])
 		return;
 
 	char *pMsg = strdup(pMessage);
-	for (char *ptr = pMsg; *ptr; ptr++)
+	char *pName = strdup(pUsername);
+	for (int i = 0; i < 2; i++)
 	{
-		if (*ptr == '\"' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@')
-			*ptr = ' ';
+		char *ptr = i == 0 ? pMsg : pName;
+		for (; *ptr; ptr++)
+			if (*ptr == '\"' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@')
+				*ptr = ' ';
 	}
 
 	const char *pPart1 = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data \"{\\\"username\\\": \\\"";
@@ -3243,6 +3246,7 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	char *pBuf = (char *)calloc(1, 2048);
 	str_format(pBuf, 2048, "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL);
 	free(pMsg);
+	free(pName);
 
 	AddJob(WebhookThread, (void *)pBuf);
 }

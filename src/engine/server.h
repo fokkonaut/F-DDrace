@@ -54,7 +54,7 @@ public:
 	virtual void GetClientAddr(int ClientID, NETADDR* pAddr) = 0;
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
 
-	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pName = "") = 0;
+	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "") = 0;
 
 	virtual int *GetIdMap(int ClientID) = 0;
 	virtual int *GetReverseIdMap(int ClientID) = 0;

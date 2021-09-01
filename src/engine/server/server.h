@@ -396,7 +396,7 @@ public:
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
-	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pName = "");
+	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "");
 	void AddJob(JOBFUNC pfnFunc, void *pData);
 	std::list<CJob *> m_Jobs;
 
