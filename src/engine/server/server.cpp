@@ -3219,7 +3219,9 @@ void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
 
 int WebhookThread(void *pArg)
 {
-	system((char *)pArg);
+	int ret = system((char *)pArg);
+	if (ret)
+		dbg_msg("webhook", "Sending webhook message failed, returned %d", ret);
 	free(pArg);
 	return 0;
 }
