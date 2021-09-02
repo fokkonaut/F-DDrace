@@ -507,6 +507,11 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	const char* pTimeout = pResult->NumArguments() > 0 ? pResult->GetString(0) : pPlayer->m_TimeoutCode;
+	if (str_length(pTimeout) < 8)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Timeout codes have to be at least 8 characters long, make sure to use a safe code.");
+		return;
+	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
