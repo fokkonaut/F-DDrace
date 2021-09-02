@@ -142,6 +142,7 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 			else if (m_AimClosest)
 				m_Angle = (int)(angle(vec2(m_AimClosestPos.x - m_Pos.x, m_AimClosestPos.y - m_Pos.y)) * 256.0f);
+			m_AngleSevendown = m_Angle;
 		}
 		else
 		{
@@ -155,8 +156,8 @@ void CCharacterCore::Tick(bool UseInput)
 			if(m_Input.m_TargetX < 0)
 				a = a + pi;
 
-			m_Angle = (int)(a * 256.0f);
-			//m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
+			m_AngleSevendown = (int)(a * 256.0f); // sevendown way for setting up angle causes jumpyness for 0.7 clients, but when looking upward. thats why we send angles individually
+			m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
 		}
 
 		if (m_UpdateAngle)

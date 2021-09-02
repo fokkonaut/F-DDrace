@@ -2079,6 +2079,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if(Server()->IsSevendown(SnappingClient))
 	{
+		pCharacter->m_Angle = Core()->m_AngleSevendown;
+
 		int PlayerFlags = 0;
 		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_CHATTING) PlayerFlags |= 4;
 		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) PlayerFlags |= 8;
