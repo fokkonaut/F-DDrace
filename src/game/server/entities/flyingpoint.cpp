@@ -44,6 +44,12 @@ void CFlyingPoint::Tick()
 
 void CFlyingPoint::Snap(int SnappingClient)
 {
+	if (GameServer()->GetPlayerChar(SnappingClient))
+	{
+		if (GameServer()->GetPlayerChar(m_To) && !CmaskIsSet(GameServer()->GetPlayerChar(m_To)->TeamMask(), SnappingClient))
+			return;
+	}
+
 	CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(pObj)
 	{
