@@ -3237,7 +3237,7 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	{
 		char *ptr = i == 0 ? pMsg : pName;
 		for (; *ptr; ptr++)
-			if (*ptr == '\"' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@' || *ptr == '\'')
+			if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@')
 				*ptr = ' ';
 	}
 
