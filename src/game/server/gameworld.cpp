@@ -264,8 +264,8 @@ void CGameWorld::PlayerMap::InitPlayer()
 
 	if (NextFreeID < VANILLA_MAX_CLIENTS-m_NumReserved)
 	{
-		Add(NextFreeID, m_ClientID);
 		m_aReserved[m_ClientID] = true;
+		Add(NextFreeID, m_ClientID);
 	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -280,15 +280,15 @@ void CGameWorld::PlayerMap::InitPlayer()
 		// update us with other same ip player infos
 		if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] < VANILLA_MAX_CLIENTS-m_NumReserved)
 		{
-			Add(m_pGameWorld->m_aMap[i].m_pReverseMap[i], i);
 			m_aReserved[i] = true;
+			Add(m_pGameWorld->m_aMap[i].m_pReverseMap[i], i);
 		}
 
 		// update other same ip players with our info
 		if (NextFreeID < VANILLA_MAX_CLIENTS-m_pGameWorld->m_aMap[i].m_NumReserved)
 		{
-			m_pGameWorld->m_aMap[i].Add(NextFreeID, m_ClientID);
 			m_pGameWorld->m_aMap[i].m_aReserved[m_ClientID] = true;
+			m_pGameWorld->m_aMap[i].Add(NextFreeID, m_ClientID);
 		}
 	}
 }
@@ -309,6 +309,9 @@ void CGameWorld::PlayerMap::Add(int MapID, int ClientID)
 	if ((OldClientID == -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
 		|| (OldClientID != -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(OldClientID) != m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID)))
 		m_UpdateTeamsState = true;
+
+	if (m_aReserved[ClientID])
+		m_ResortReserved = true;
 
 	m_pMap[MapID] = ClientID;
 	m_pReverseMap[ClientID] = MapID;
@@ -456,8 +459,8 @@ void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
 		if (ClientID == OrigID)
 			ClientID = m_ClientID;
 
-		Add(i, ClientID);
 		m_aReserved[ClientID] = true;
+		Add(i, ClientID);
 	}
 
 	// update others
@@ -469,8 +472,8 @@ void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
 		// if the original tee was in a reserved slot, then set him back there but with our new client id
 		if (m_pGameWorld->m_aMap[i].m_aReserved[OrigID])
 		{
-			m_pGameWorld->m_aMap[i].Add(m_pGameWorld->m_aMap[i].m_pReverseMap[OrigID], m_ClientID);
 			m_pGameWorld->m_aMap[i].m_aReserved[m_ClientID] = true;
+			m_pGameWorld->m_aMap[i].Add(m_pGameWorld->m_aMap[i].m_pReverseMap[OrigID], m_ClientID);
 		}
 	}
 }
