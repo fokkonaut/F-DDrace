@@ -1789,6 +1789,29 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 	return true;
 }
 
+bool CCharacter::CanSnapCharacter(int SnappingClient)
+{
+	if (SnappingClient < 0)
+		return true;
+
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+
+	if ((pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()) && pSnapPlayer->GetSpectatorID() != -1
+		&& !CanCollide(pSnapPlayer->GetSpectatorID(), false) && !pSnapPlayer->m_ShowOthers)
+		return false;
+
+	if (pSnapPlayer->GetTeam() != TEAM_SPECTATORS && !pSnapPlayer->IsPaused() && pSnapChar && !pSnapChar->m_Super
+		&& !CanCollide(SnappingClient, false) && !pSnapPlayer->m_ShowOthers)
+		return false;
+
+	if ((pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()) && pSnapPlayer->GetSpecMode() == SPEC_FREEVIEW
+		&& !CanCollide(SnappingClient, false) && pSnapPlayer->m_SpecTeam)
+		return false;
+
+	return true;
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
@@ -1799,31 +1822,13 @@ void CCharacter::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient) && !SendDroppedFlagCooldown(SnappingClient))
 		return;
 
-	if (SnappingClient > -1)
-	{
-		CCharacter* SnapChar = GameServer()->GetPlayerChar(SnappingClient);
-		CPlayer* SnapPlayer = GameServer()->m_apPlayers[SnappingClient];
-
-		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpectatorID() != -1
-			&& !CanCollide(SnapPlayer->GetSpectatorID(), false) && !SnapPlayer->m_ShowOthers)
-			return;
-
-		if (SnapPlayer->GetTeam() != TEAM_SPECTATORS && !SnapPlayer->IsPaused() && SnapChar && !SnapChar->m_Super
-			&& !CanCollide(SnappingClient, false) && !SnapPlayer->m_ShowOthers)
-			return;
-
-		if ((SnapPlayer->GetTeam() == TEAM_SPECTATORS || SnapPlayer->IsPaused()) && SnapPlayer->GetSpecMode() == SPEC_FREEVIEW
-			&& !CanCollide(SnappingClient, false) && SnapPlayer->m_SpecTeam)
-			return;
-
-		// F-DDrace
-		if (m_Invisible && SnappingClient != m_pPlayer->GetCID())
-			if (!Server()->GetAuthedState(SnappingClient) || Server()->Tick() % 200 == 0)
-				return;
-	}
-
-	if (m_Paused)
+	if (!CanSnapCharacter(SnappingClient))
 		return;
+
+	// F-DDrace
+	if (m_Invisible && SnappingClient != m_pPlayer->GetCID() && SnappingClient != -1)
+		if (!Server()->GetAuthedState(SnappingClient) || Server()->Tick() % 200 == 0)
+			return;
 
 	SnapCharacter(SnappingClient, ID);
 

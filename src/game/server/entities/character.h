@@ -93,6 +93,8 @@ public:
 	virtual int NetworkClipped(int SnappingClient, bool CheckShowAll = true);
 	virtual int NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll = true);
 
+	bool CanSnapCharacter(int SnappingClient);
+
 	bool IsGrounded();
 
 	void SetWeapon(int W);

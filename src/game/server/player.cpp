@@ -728,7 +728,7 @@ void CPlayer::Snap(int SnappingClient)
 	vec2 SpecPos;
 	if (m_pCharacter)
 	{
-		ShowSpec = m_pCharacter->IsPaused();
+		ShowSpec = m_pCharacter->IsPaused() && m_pCharacter->CanSnapCharacter(SnappingClient);
 		SpecPos = m_pCharacter->Core()->m_Pos;
 	}
 
