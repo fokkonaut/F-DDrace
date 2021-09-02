@@ -479,10 +479,10 @@ void CArenas::IncreaseScore(int Fight, int Index)
 	if (GameServer()->GetPlayerChar(OtherID) && GameServer()->GetPlayerChar(OtherID)->Core()->m_Killer.m_ClientID != ClientID)
 		return;
 
-	if (GameServer()->GetPlayerChar(ClientID))
-		GameServer()->CreateLaserText(GameServer()->GetPlayerChar(ClientID)->GetPos(), ClientID, "+1", 3);
-
 	std::swap(m_aFights[Fight].m_aSpawns[0], m_aFights[Fight].m_aSpawns[1]); // swap spawn positions when we score
+
+	if (GameServer()->GetPlayerChar(ClientID))
+		GameServer()->CreateLaserText(m_aFights[Fight].m_aSpawns[Index], ClientID, "+1", 3);
 
 	m_aFights[Fight].m_aParticipants[Index].m_Score++;
 	if (m_aFights[Fight].m_aParticipants[Index].m_Score >= m_aFights[Fight].m_ScoreLimit)
