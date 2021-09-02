@@ -3246,7 +3246,7 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	const char *pPart3 = "\"}'";
 
 	char *pBuf = (char *)calloc(1, 2048);
-	str_format(pBuf, 2048, "%s%s%s%s%s %s >nul 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL);
+	str_format(pBuf, 2048, "%s%s%s%s%s %s >./logs/webhook.txt 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL);
 	free(pMsg);
 	free(pName);
 
