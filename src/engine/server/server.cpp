@@ -2249,7 +2249,7 @@ int CServer::Run()
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
-						if (m_aClients[i].m_State == CClient::STATE_EMPTY)
+						if (m_aClients[i].m_State < CClient::STATE_READY)
 							continue;
 
 						if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
