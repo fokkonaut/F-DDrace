@@ -2101,6 +2101,15 @@ void str_format(char *buffer, int buffer_size, const char *format, ...)
 	buffer[buffer_size-1] = 0; /* assure null termination */
 }
 
+FILE *p_open(const char *cmd, const char *mode)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return _popen(cmd, mode);
+#else
+	return popen(cmd, mode);
+#endif
+}
+
 
 
 /* makes sure that the string only contains the characters between 32 and 127 */

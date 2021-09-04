@@ -911,6 +911,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
+	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
@@ -950,6 +951,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sevendown = false;
+	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
@@ -2243,6 +2245,45 @@ int CServer::Run()
 						m_Jobs.pop_front();
 				}
 
+				if (Config()->m_SvIPHubInfoXKey[0])
+				{
+					for (int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if (m_aClients[i].m_State == CClient::STATE_EMPTY)
+							continue;
+
+						if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
+						{
+							// initiate dnsbl lookup
+							InitDnsbl(i);
+						}
+						else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_DnsblLookup.Status() == CJob::STATE_DONE)
+						{
+							if(m_aClients[i].m_DnsblLookup.Result() == 0)
+							{
+								// good ip -> whitelisted
+								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+							}
+							else
+							{
+								// bad ip -> blacklisted
+								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+
+								// console output
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
+
+								char aBuf[256];
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> blacklisted", i, aAddrStr);
+								Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
+							}
+						}
+
+						if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
+							m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, "VPN detected, try connecting without");
+					}
+				}
+
 				if (Config()->m_gie3FloodIP[0] && (m_CurrentGameTick % 10) == 0)
 				{
 					NETADDR Addr;
@@ -3258,6 +3299,47 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	AddJob(WebhookThread, (void *)pBuf);
 }
 
+int DnsblLookupThread(void *pArg)
+{
+	FILE *pStream = p_open((char *)pArg, "r");
+	free(pArg);
+	if (!pStream)
+		return 0;
+
+	char aResult[512] = "";
+	if (fgets(aResult, sizeof(aResult), pStream))
+	{
+		fclose(pStream);
+		dbg_msg("dnsbl", "%s", aResult);
+	}
+	else
+	{
+		fclose(pStream);
+		return 0;
+	}
+
+	const char *pBlock = "\"block\":";
+	const char *ptr = str_find(aResult, pBlock);
+	if (ptr)
+		ptr += str_length(pBlock);
+
+	int Blocked = 0;
+	if (ptr)
+		sscanf(ptr, "%d", &Blocked);
+	return Blocked;
+}
+
+void CServer::InitDnsbl(int ClientID)
+{
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
+
+	char *pBuf = (char *)calloc(1, 512);
+	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubInfoXKey);
+	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
+	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+}
+
 int *CServer::GetIdMap(int ClientID)
 {
 	return m_aClients[ClientID].m_aIdMap;
@@ -3319,6 +3401,7 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
 	m_aClients[DummyID].m_Sevendown = false;
+	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 
 	m_NetServer.DummyDelete(DummyID);
 }

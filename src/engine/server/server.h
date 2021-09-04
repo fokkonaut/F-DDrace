@@ -123,13 +123,16 @@ public:
 			STATE_CONNECTING_AS_SPEC,
 			STATE_READY,
 			STATE_INGAME,
-
-			// F-DDrace
 			STATE_DUMMY,
 
 			SNAPRATE_INIT=0,
 			SNAPRATE_FULL,
-			SNAPRATE_RECOVER
+			SNAPRATE_RECOVER,
+
+			DNSBL_STATE_NONE = 0,
+			DNSBL_STATE_PENDING,
+			DNSBL_STATE_BLACKLISTED,
+			DNSBL_STATE_WHITELISTED,
 		};
 
 		class CInput
@@ -176,6 +179,8 @@ public:
 		int64 m_TrafficSince;
 
 		bool m_Sevendown;
+		int m_DnsblState;
+		CJob m_DnsblLookup;
 
 		int m_aIdMap[VANILLA_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
@@ -396,6 +401,7 @@ public:
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
+	void InitDnsbl(int ClientID);
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "");
 	void AddJob(JOBFUNC pfnFunc, void *pData);
 	std::list<CJob *> m_Jobs;

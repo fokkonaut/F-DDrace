@@ -265,6 +265,9 @@ MACRO_CONFIG_STR(SvWebhookAntibotURL, sv_webhook_antibot_url, 128, "", CFGFLAG_S
 MACRO_CONFIG_STR(SvWebhookAntibotName, sv_webhook_antibot_name, 128, "", CFGFLAG_SERVER, "Webhook name for antibot reports", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWebhookChatBridgeURL, sv_webhook_chat_bridge_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge", AUTHED_ADMIN)
 
+// vpn/proxy detection
+MACRO_CONFIG_STR(SvIPHubInfoXKey, sv_ip_hub_info_x_key, 128, "", CFGFLAG_SERVER, "IPHub.info X-Key", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
