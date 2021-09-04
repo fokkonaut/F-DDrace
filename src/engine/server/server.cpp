@@ -2259,12 +2259,7 @@ int CServer::Run()
 						}
 						else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_DnsblLookup.Status() == CJob::STATE_DONE)
 						{
-							if(m_aClients[i].m_DnsblLookup.Result() == 0)
-							{
-								// good ip -> whitelisted
-								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
-							}
-							else
+							if(m_aClients[i].m_DnsblLookup.Result() == 1) // only return on 1, not on 2 as that might be a false positive
 							{
 								// bad ip -> blacklisted
 								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
@@ -2276,6 +2271,11 @@ int CServer::Run()
 								char aBuf[256];
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> blacklisted", i, aAddrStr);
 								Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
+							}
+							else
+							{
+								// good ip -> whitelisted
+								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
 							}
 						}
 
