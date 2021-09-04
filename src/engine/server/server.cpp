@@ -2245,7 +2245,7 @@ int CServer::Run()
 						m_Jobs.pop_front();
 				}
 
-				if (Config()->m_SvIPHubInfoXKey[0])
+				if (Config()->m_SvIPHubXKey[0])
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
@@ -3335,7 +3335,7 @@ void CServer::InitDnsbl(int ClientID)
 	net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
 
 	char *pBuf = (char *)calloc(1, 512);
-	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubInfoXKey);
+	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
 	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
 }
