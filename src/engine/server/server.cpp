@@ -38,6 +38,7 @@
 #include <vector>
 #include <fstream>
 #include <engine/shared/linereader.h>
+#include <engine/external/json-parser/json.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -2254,13 +2255,13 @@ int CServer::Run()
 					m_DnsblCache.m_vWhitelist.clear();
 				}
 
-				if (Config()->m_SvIPHubXKey[0])
+				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
-					for (int i = 0; i < MAX_CLIENTS; i++)
-					{
-						if (m_aClients[i].m_State != CClient::STATE_INGAME)
-							continue;
+					if (m_aClients[i].m_State != CClient::STATE_INGAME)
+						continue;
 
+					if (Config()->m_SvIPHubXKey[0])
+					{
 						if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
 						{
 							// initiate dnsbl lookup
@@ -3332,15 +3333,21 @@ int DnsblLookupThread(void *pArg)
 		return 0;
 	}
 
-	const char *pBlock = "\"block\":";
-	const char *ptr = str_find(aResult, pBlock);
-	if (ptr)
-		ptr += str_length(pBlock);
+	// parse json data
+	json_settings JsonSettings;
+	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	char aError[256];
+	const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
+	if (pJsonData == 0)
+	{
+		dbg_msg("dnsbl", "Failed to parse json: %s", aError);
+		return 0;
+	}
 
-	int Blocked = 0;
-	if (ptr)
-		sscanf(ptr, "%d", &Blocked);
-	return Blocked;
+	const json_value &rBlocked = (*pJsonData)["block"];
+	if (rBlocked.type == json_integer)
+		return (int)rBlocked.u.integer;
+	return 0;
 }
 
 void CServer::InitDnsbl(int ClientID)
