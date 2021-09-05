@@ -3221,7 +3221,10 @@ int WebhookThread(void *pArg)
 {
 	int ret = system((char *)pArg);
 	if (ret)
+	{
 		dbg_msg("webhook", "Sending webhook message failed, returned %d", ret);
+		dbg_msg("webhook", "%s", (char *)pArg);
+	}
 	free(pArg);
 	return 0;
 }
