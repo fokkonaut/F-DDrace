@@ -3286,7 +3286,7 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	const char *pPart2 = "\", \"content\": \"";
 	const char *pPart3 = "\"}'";
 
-	const char *pRedirect = "/dev/null/";
+	const char *pRedirect = "/dev/null";
 #if defined(CONF_FAMILY_WINDOWS)
 	pRedirect = "nul";
 #endif
