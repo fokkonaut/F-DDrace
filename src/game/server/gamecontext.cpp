@@ -3782,6 +3782,8 @@ void CGameContext::FDDraceInit()
 
 	if (Config()->m_SvBansFile[0])
 		Console()->ExecuteFile(Config()->m_SvBansFile);
+	if (Config()->m_SvWhitelistFile[0])
+		Console()->ExecuteFile(Config()->m_SvWhitelistFile);
 
 	m_LastDataSaveTick = Server()->Tick();
 
@@ -4025,6 +4027,7 @@ void CGameContext::OnPreShutdown()
 		str_format(aBuf, sizeof(aBuf), "bans_save \"%s\"", Config()->m_SvBansFile);
 		Console()->ExecuteLine(aBuf);
 	}
+	Server()->SaveWhitelist();
 }
 
 void CGameContext::OnShutdown(bool FullShutdown)

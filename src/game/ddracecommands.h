@@ -98,6 +98,11 @@ CONSOLE_COMMAND("jail_arrest", "v[id] i[seconds]", CFGFLAG_SERVER, ConJailArrest
 CONSOLE_COMMAND("jail_release", "v[id]", CFGFLAG_SERVER, ConJailRelease, this, "Releases player v from jail", AUTHED_ADMIN)
 CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
 
+// white list in case iphub.info falsely flagged someone
+CONSOLE_COMMAND("iphub_whitelist_add", "s[ip]", CFGFLAG_SERVER, ConIPHubWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
+CONSOLE_COMMAND("iphub_whitelist_remove", "s[ip]", CFGFLAG_SERVER, ConIPHubWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
+CONSOLE_COMMAND("iphub_whitelist", "", CFGFLAG_SERVER, ConIPHubWhitelist, this, "Shows whitelist", AUTHED_ADMIN)
+
 //plots
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)

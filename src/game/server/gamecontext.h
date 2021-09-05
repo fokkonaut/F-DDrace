@@ -931,6 +931,10 @@ private:
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
 	static void ConViewCursor(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConIPHubWhitelistAdd(IConsole::IResult* pResult, void* pUserData);
+	static void ConIPHubWhitelistRemove(IConsole::IResult* pResult, void* pUserData);
+	static void ConIPHubWhitelist(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlotOwner(IConsole::IResult* pResult, void* pUserData);

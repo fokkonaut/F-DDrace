@@ -19,6 +19,7 @@
 #include "authmanager.h"
 #include <engine/engine.h>
 #include <list>
+#include <vector>
 
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
@@ -402,6 +403,19 @@ public:
 	unsigned m_AnnouncementLastLine;
 
 	void InitDnsbl(int ClientID);
+	struct
+	{
+		std::vector<NETADDR> m_vBlacklist;
+		std::vector<NETADDR> m_vWhitelist;
+	} m_DnsblCache;
+
+	// white list in case iphub.info falsely flagged someone
+	std::vector<NETADDR> m_vIPHubWhitelist;
+	virtual void SaveWhitelist();
+	virtual void AddWhitelist(const NETADDR *pAddr);
+	virtual void RemoveWhitelist(const NETADDR *pAddr);
+	virtual void PrintWhitelist();
+
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "");
 	void AddJob(JOBFUNC pfnFunc, void *pData);
 	std::list<CJob *> m_Jobs;

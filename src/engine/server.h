@@ -64,6 +64,11 @@ public:
 
 	virtual bool IsSevendown(int ClientID) = 0;
 
+	virtual void SaveWhitelist() = 0;
+	virtual void AddWhitelist(const NETADDR *pAddr) = 0;
+	virtual void RemoveWhitelist(const NETADDR *pAddr) = 0;
+	virtual void PrintWhitelist() = 0;
+
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T>

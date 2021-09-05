@@ -34,7 +34,9 @@
 #include "crc.h"
 
 #include <string.h>
+#include <string>
 #include <vector>
+#include <fstream>
 #include <engine/shared/linereader.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -2245,6 +2247,13 @@ int CServer::Run()
 						m_Jobs.pop_front();
 				}
 
+				// remove after 24 hours because iphub.info has 1000 free requests within 24 hours
+				if (Tick() % (TickSpeed() * 60 * 60 * 24))
+				{
+					m_DnsblCache.m_vBlacklist.clear();
+					m_DnsblCache.m_vWhitelist.clear();
+				}
+
 				if (Config()->m_SvIPHubXKey[0])
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
@@ -2263,6 +2272,7 @@ int CServer::Run()
 							{
 								// bad ip -> blacklisted
 								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+								m_DnsblCache.m_vBlacklist.push_back(*m_NetServer.ClientAddr(i));
 
 								// console output
 								char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -2276,6 +2286,7 @@ int CServer::Run()
 							{
 								// good ip -> whitelisted
 								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+								m_DnsblCache.m_vWhitelist.push_back(*m_NetServer.ClientAddr(i));
 							}
 						}
 
@@ -3331,6 +3342,25 @@ int DnsblLookupThread(void *pArg)
 
 void CServer::InitDnsbl(int ClientID)
 {
+	for (int i = 0; i < 3; i++)
+	{
+		std::vector<NETADDR> *pList = 0;
+		switch (i)
+		{
+		case 0: pList = &m_vIPHubWhitelist; break;
+		case 1: pList = &m_DnsblCache.m_vBlacklist; break;
+		case 2: pList = &m_DnsblCache.m_vWhitelist; break;
+		default: return;
+		}
+
+		std::vector<NETADDR>::iterator it = std::find_if(pList->begin(), pList->end(), [&Addr = *m_NetServer.ClientAddr(ClientID)](const NETADDR &Current) -> bool { return net_addr_comp(&Addr, &Current, false) == 0; });
+		if (it != pList->end())
+		{
+			m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
+			return;
+		}
+	}
+
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
 
@@ -3338,6 +3368,71 @@ void CServer::InitDnsbl(int ClientID)
 	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
 	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+}
+
+void CServer::AddWhitelist(const NETADDR *pAddr)
+{
+	m_vIPHubWhitelist.push_back(*pAddr);
+
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Added '%s' to whitelist", aAddrStr);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+}
+
+void CServer::RemoveWhitelist(const NETADDR *pAddr)
+{
+	for (int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	{
+		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[i], false) == 0)
+		{
+			char aAddrStr[NETADDR_MAXSTRSIZE];
+			net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
+
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Removed '%s' from whitelist", aAddrStr);
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+
+			m_vIPHubWhitelist.erase(m_vIPHubWhitelist.begin() + i);
+			break;
+		}
+	}
+}
+
+void CServer::PrintWhitelist()
+{
+	for (int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&m_vIPHubWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
+
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "#%d '%s'", i, aAddrStr);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+	}
+}
+
+void CServer::SaveWhitelist()
+{
+	std::string data;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s", Config()->m_SvWhitelistFile);
+	std::ofstream Whitelist(aBuf);
+	if (!Whitelist.is_open())
+		return;
+
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	{
+		net_addr_str(&m_vIPHubWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
+		str_format(aBuf, sizeof(aBuf), "iphub_whitelist_add \"%s\"", aAddrStr);
+		Whitelist << aBuf << "\n";
+	}
+
+	// clear to read it again in CGameContext::OnInit to not get double entries
+	m_vIPHubWhitelist.clear();
 }
 
 int *CServer::GetIdMap(int ClientID)
