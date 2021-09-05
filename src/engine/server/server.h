@@ -134,6 +134,10 @@ public:
 			DNSBL_STATE_PENDING,
 			DNSBL_STATE_BLACKLISTED,
 			DNSBL_STATE_WHITELISTED,
+
+			PGSC_STATE_NONE = 0,
+			PGSC_STATE_PENDING,
+			PGSC_STATE_DONE,
 		};
 
 		class CInput
@@ -180,8 +184,11 @@ public:
 		int64 m_TrafficSince;
 
 		bool m_Sevendown;
+
 		int m_DnsblState;
 		CJob m_DnsblLookup;
+		int m_PgscState; // Proxy Game Server Check
+		CJob m_PgscLookup;
 
 		int m_aIdMap[VANILLA_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
@@ -402,6 +409,7 @@ public:
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
+	void InitProxyGameServerCheck(int ClientID);
 	void InitDnsbl(int ClientID);
 	struct
 	{

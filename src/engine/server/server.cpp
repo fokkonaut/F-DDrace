@@ -915,6 +915,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
+	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
@@ -955,6 +956,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sevendown = false;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
+	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
@@ -2260,6 +2262,7 @@ int CServer::Run()
 					if (m_aClients[i].m_State != CClient::STATE_INGAME)
 						continue;
 
+					// vpn/proxy detection
 					if (Config()->m_SvIPHubXKey[0])
 					{
 						if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
@@ -2293,6 +2296,33 @@ int CServer::Run()
 
 						if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
 							m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, "VPN detected, try connecting without");
+					}
+
+					// proxy game server detection
+					if (Config()->m_SvProxyGameServerString[0])
+					{
+						if(m_aClients[i].m_PgscState == CClient::PGSC_STATE_NONE)
+						{
+							// initiate proxy game server check lookup
+							InitProxyGameServerCheck(i);
+						}
+						else if(m_aClients[i].m_PgscState == CClient::PGSC_STATE_PENDING && m_aClients[i].m_PgscLookup.Status() == CJob::STATE_DONE)
+						{
+							m_aClients[i].m_PgscState = CClient::PGSC_STATE_DONE;
+
+							if(m_aClients[i].m_PgscLookup.Result() == 1)
+							{
+								// console output
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
+
+								char aBuf[256];
+								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> broadcasts a proxy game server", i, aAddrStr);
+								Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "proxy", aBuf);
+
+								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60*60*6, "Proxy game server, try connecting to the real server");
+							}
+						}
 					}
 				}
 
@@ -3306,12 +3336,81 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	pRedirect = "nul";
 #endif
 
-	char *pBuf = (char *)calloc(1, 2048);
-	str_format(pBuf, 2048, "%s%s%s%s%s %s >%s 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL, pRedirect);
+	char *pBuf = (char *)calloc(1, 1024);
+	str_format(pBuf, 1024, "%s%s%s%s%s %s >%s 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL, pRedirect);
 	free(pMsg);
 	free(pName);
 
 	AddJob(WebhookThread, (void *)pBuf);
+}
+
+struct PgscData
+{
+	char m_aAddress[NETADDR_MAXSTRSIZE];
+	char m_aFindString[128];
+};
+
+int PgscLookupThread(void *pArg)
+{
+	PgscData *pPgscData = (PgscData *)pArg;
+
+	char aCmd[256];
+	str_copy(aCmd, "curl -s https://master1.ddnet.tw/ddnet/15/servers.json", sizeof(aCmd));
+
+	FILE *pStream = p_open(aCmd, "r");
+	if (!pStream)
+	{
+		free(pPgscData);
+		return 0;
+	}
+
+	char *pResult = (char *)calloc(1, 1);
+	char aPiece[1024];
+	int NewSize = 0;
+
+	while (fgets(aPiece, sizeof(aPiece), pStream))
+	{
+		// +1 below to allow room for null terminator
+		NewSize = str_length(pResult) + str_length(aPiece) + 1;
+		pResult = (char *)realloc(pResult, NewSize);
+		str_append(pResult, aPiece, NewSize);
+	}
+
+	const char *ptr = str_find(pResult, pPgscData->m_aAddress);
+	if (ptr)
+	{
+		const char *pFind = "\"name\":";
+		if ((ptr = str_find(ptr, pFind)))
+		{
+			ptr += str_length(pFind) + 1; // skip the starting " from the name
+			const char *ptr2 = str_find(ptr, "\"");
+			if (ptr2)
+			{
+				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
+				char aServerName[128];
+				str_copy(aServerName, ptr, NameLength);
+				if (str_find(aServerName, pPgscData->m_aFindString))
+				{
+					free(pPgscData);
+					free(pResult);
+					return 1;
+				}
+			}
+		}
+	}
+	free(pPgscData);
+	free(pResult);
+	return 0;
+}
+
+void CServer::InitProxyGameServerCheck(int ClientID)
+{
+	PgscData *pPgscData = new PgscData();
+	net_addr_str(m_NetServer.ClientAddr(ClientID), pPgscData->m_aAddress, sizeof(pPgscData->m_aAddress), false);
+	str_copy(pPgscData->m_aFindString, Config()->m_SvProxyGameServerString, sizeof(pPgscData->m_aAddress));
+
+	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_PgscLookup, PgscLookupThread, (void *)pPgscData);
+	m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_PENDING;
 }
 
 int DnsblLookupThread(void *pArg)
@@ -3323,20 +3422,13 @@ int DnsblLookupThread(void *pArg)
 
 	char aResult[512] = "";
 	if (fgets(aResult, sizeof(aResult), pStream))
-	{
-		fclose(pStream);
 		dbg_msg("dnsbl", "%s", aResult);
-	}
-	else
-	{
-		fclose(pStream);
-		return 0;
-	}
+	fclose(pStream);
 
 	// parse json data
 	json_settings JsonSettings;
 	mem_zero(&JsonSettings, sizeof(JsonSettings));
-	char aError[256];
+	char aError[128];
 	const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
 	if (pJsonData == 0)
 	{
@@ -3509,6 +3601,7 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
 	m_aClients[DummyID].m_Sevendown = false;
 	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
+	m_aClients[DummyID].m_PgscState = CClient::PGSC_STATE_NONE;
 
 	m_NetServer.DummyDelete(DummyID);
 }
