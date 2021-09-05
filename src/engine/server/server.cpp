@@ -3356,7 +3356,7 @@ void CServer::InitDnsbl(int ClientID)
 		default: return;
 		}
 
-		std::vector<NETADDR>::iterator it = std::find_if(pList->begin(), pList->end(), [&Addr = *m_NetServer.ClientAddr(ClientID)](const NETADDR &Current) -> bool { return net_addr_comp(&Addr, &Current, false) == 0; });
+		std::vector<NETADDR>::iterator it = std::find_if(pList->begin(), pList->end(), [&Addr = *m_NetServer.ClientAddr(ClientID)](NETADDR &Current) -> bool { return net_addr_comp(&Addr, &Current, false) == 0; });
 		if (it != pList->end())
 		{
 			m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
@@ -3387,7 +3387,7 @@ void CServer::AddWhitelist(const NETADDR *pAddr)
 
 void CServer::RemoveWhitelist(const NETADDR *pAddr)
 {
-	for (int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
 	{
 		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[i], false) == 0)
 		{
@@ -3406,7 +3406,7 @@ void CServer::RemoveWhitelist(const NETADDR *pAddr)
 
 void CServer::PrintWhitelist()
 {
-	for (int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&m_vIPHubWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
