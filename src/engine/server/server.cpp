@@ -3347,18 +3347,18 @@ void CServer::InitDnsbl(int ClientID)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		std::vector<NETADDR> pList;
+		std::vector<NETADDR> List;
 		switch (i)
 		{
-		case 0: pList = m_vIPHubWhitelist; break;
-		case 1: pList = m_DnsblCache.m_vBlacklist; break;
-		case 2: pList = m_DnsblCache.m_vWhitelist; break;
+		case 0: List = m_vIPHubWhitelist; break;
+		case 1: List = m_DnsblCache.m_vBlacklist; break;
+		case 2: List = m_DnsblCache.m_vWhitelist; break;
 		default: return;
 		}
 
-		for (unsigned int j = 0; j < pList.size(); j++)
+		for (unsigned int j = 0; j < List.size(); j++)
 		{
-			if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &pList[j], false) == 0)
+			if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &List[j], false) == 0)
 			{
 				m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
 				return;
