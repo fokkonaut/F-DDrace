@@ -3347,20 +3347,22 @@ void CServer::InitDnsbl(int ClientID)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		std::vector<NETADDR> *pList = 0;
+		std::vector<NETADDR> pList;
 		switch (i)
 		{
-		case 0: pList = &m_vIPHubWhitelist; break;
-		case 1: pList = &m_DnsblCache.m_vBlacklist; break;
-		case 2: pList = &m_DnsblCache.m_vWhitelist; break;
+		case 0: pList = m_vIPHubWhitelist; break;
+		case 1: pList = m_DnsblCache.m_vBlacklist; break;
+		case 2: pList = m_DnsblCache.m_vWhitelist; break;
 		default: return;
 		}
 
-		std::vector<NETADDR>::iterator it = std::find_if(pList->begin(), pList->end(), [&Addr = *m_NetServer.ClientAddr(ClientID)](NETADDR &Current) -> bool { return net_addr_comp(&Addr, &Current, false) == 0; });
-		if (it != pList->end())
+		for (unsigned int j = 0; j < pList.size(); j++)
 		{
-			m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
-			return;
+			if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &pList[j], false) == 0)
+			{
+				m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
+				return;
+			}
 		}
 	}
 
