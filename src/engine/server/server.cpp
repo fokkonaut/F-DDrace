@@ -3273,7 +3273,10 @@ int WebhookThread(void *pArg)
 {
 	int ret = system((char *)pArg);
 	if (ret)
+	{
 		dbg_msg("webhook", "Sending webhook message failed, returned %d", ret);
+		dbg_msg("webhook", "%s", (char *)pArg);
+	}
 	free(pArg);
 	return 0;
 }
@@ -3297,7 +3300,7 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	const char *pPart2 = "\", \"content\": \"";
 	const char *pPart3 = "\"}'";
 
-	const char *pRedirect = "/dev/null/";
+	const char *pRedirect = "/dev/null";
 #if defined(CONF_FAMILY_WINDOWS)
 	pRedirect = "nul";
 #endif
