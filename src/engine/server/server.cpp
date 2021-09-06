@@ -3476,6 +3476,11 @@ void CServer::InitDnsbl(int ClientID)
 
 void CServer::AddWhitelist(const NETADDR *pAddr)
 {
+	// avoid double entries
+	for (unsigned int j = 0; j < m_vIPHubWhitelist.size(); j++)
+		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[j], false) == 0)
+			return;
+
 	m_vIPHubWhitelist.push_back(*pAddr);
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -3534,9 +3539,6 @@ void CServer::SaveWhitelist()
 		str_format(aBuf, sizeof(aBuf), "iphub_whitelist_add \"%s\"", aAddrStr);
 		Whitelist << aBuf << "\n";
 	}
-
-	// clear to read it again in CGameContext::OnInit to not get double entries
-	m_vIPHubWhitelist.clear();
 }
 
 int *CServer::GetIdMap(int ClientID)
