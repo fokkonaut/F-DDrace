@@ -896,6 +896,7 @@ void CCharacter::FireWeapon()
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
+					|| GameLayerClipped(PortalPos)
 					|| GameServer()->Collision()->TestBoxDoor(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), Team(), true) // disallow portal placing too close to plot doors to get through them (in combination with plot door skip preventing)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
