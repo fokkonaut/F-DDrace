@@ -615,6 +615,7 @@ public:
 
 	bool IsLocal(int CientID1, int ClientID2);
 	bool CanReceiveMessage(int Sender, int Receiver);
+	bool IsMuted(int Sender, int Receiver);
 
 	vec2 RoundPos(vec2 Pos);
 
@@ -802,6 +803,7 @@ private:
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
+	static void ConMutePlayer(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

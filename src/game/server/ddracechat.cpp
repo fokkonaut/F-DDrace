@@ -2580,6 +2580,27 @@ void CGameContext::ConWeapon(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->SetQueuedWeapon(pResult->GetInteger(0));
 }
 
+void CGameContext::ConMutePlayer(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	int ID = pSelf->GetCIDByName(pResult->GetString(0));
+	if (ID == -1)
+		return;
+
+	pPlayer->m_aMuted[ID] = !pPlayer->m_aMuted[ID];
+
+	char aBuf[128];
+	if (pPlayer->m_aMuted[ID])
+		str_format(aBuf, sizeof(aBuf), "'%s' muted", pSelf->Server()->ClientName(ID));
+	else
+		str_format(aBuf, sizeof(aBuf), "'%s' unmuted", pSelf->Server()->ClientName(ID));
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

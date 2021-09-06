@@ -443,6 +443,9 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		if (ProcessSpamProtection(SpamProtectionClientID))
 			return;
 
+	// client id used to check against muted
+	int MuteChecked = ChatterClientID;
+
 	char aBuf[512], aText[256];
 	str_copy(aText, pText, sizeof(aText));
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
@@ -459,6 +462,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		str_format(aBuf, sizeof(aBuf), "### %s", aText);
 		str_copy(aText, aBuf, sizeof(aText));
 		ChatterClientID = -1;
+		// if '/me' is used, still dont send the message when sender is muted
+		MuteChecked = SpamProtectionClientID;
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
@@ -496,7 +501,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	if(Mode == CHAT_ALL)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (CanReceiveMessage(ChatterClientID, i))
+			if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i))
 			{
 				bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
 				if (Send)
@@ -515,7 +520,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		{
 			if(m_apPlayers[i] != 0)
 			{
-				if (!CanReceiveMessage(ChatterClientID, i))
+				if (IsMuted(MuteChecked, i) || !CanReceiveMessage(ChatterClientID, i))
 					continue;
 
 				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS)
@@ -565,7 +570,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Msg.m_Mode = CHAT_TEAM;
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (IsLocal(ChatterClientID, i))
+			if (!IsMuted(MuteChecked, i) && IsLocal(ChatterClientID, i))
 				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER
@@ -604,24 +609,27 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 		}
 
-		// send to target
-		str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(ChatterClientID), aText);
-		Msg.m_pMessage = aMsg;
-		Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
-		Msg.m_TargetID = To;
+		if (!IsMuted(MuteChecked, To))
+		{
+			// send to target
+			str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(ChatterClientID), aText);
+			Msg.m_pMessage = aMsg;
+			Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
+			Msg.m_TargetID = To;
 
-		if (Server()->IsSevendown(To))
-		{
-			CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
-			Msg2.AddInt(3); // CHAT_WHISPER_RECV
-			Msg2.AddInt(Msg.m_ClientID);
-			Msg2.AddString(Msg.m_pMessage, -1);
-			Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
-		}
-		else
-		{
-			Server()->Translate(Msg.m_TargetID, To);
-			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
+			if (Server()->IsSevendown(To))
+			{
+				CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
+				Msg2.AddInt(3); // CHAT_WHISPER_RECV
+				Msg2.AddInt(Msg.m_ClientID);
+				Msg2.AddString(Msg.m_pMessage, -1);
+				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
+			}
+			else
+			{
+				Server()->Translate(Msg.m_TargetID, To);
+				SendChatMsg(&Msg, MSGFLAG_VITAL, To);
+			}
 		}
 	}
 }
@@ -5621,7 +5629,7 @@ bool CGameContext::IsLocal(int ClientID1, int ClientID2)
 	CCharacter *p1 = GetPlayerChar(ClientID1);
 	CCharacter *p2 = GetPlayerChar(ClientID2);
 
-	if (!p1 || !p2)
+	if (!p1 || !p2 || p1->Team() != p2->Team())
 		return false;
 
 	float dx = p1->GetPos().x-p2->GetPos().x;
@@ -5639,6 +5647,11 @@ bool CGameContext::IsLocal(int ClientID1, int ClientID2)
 bool CGameContext::CanReceiveMessage(int Sender, int Receiver)
 {
 	return m_apPlayers[Receiver] && (!m_apPlayers[Receiver]->m_LocalChat || IsLocal(Sender, Receiver));
+}
+
+bool CGameContext::IsMuted(int Sender, int Receiver)
+{
+	return m_apPlayers[Receiver] && Sender >= 0 && m_apPlayers[Receiver]->m_aMuted[Sender];
 }
 
 void CGameContext::SendChatPolice(const char *pMessage)

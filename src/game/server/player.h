@@ -376,10 +376,9 @@ public:
 	int GetAuthedHighlighted();
 
 	void SkipSetViewPos() { m_SkipSetViewPos = 2; }
-
 	int m_ViewCursorID;
-
 	int m_aStrongWeakID[VANILLA_MAX_CLIENTS];
+	bool m_aMuted[MAX_CLIENTS];
 
 	// automatic actions when player enters afk mode
 	void OnSetAfk();

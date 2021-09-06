@@ -183,6 +183,7 @@ void CPlayer::Reset()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		m_HidePlayerTeam[i] = TEAM_RED;
+		m_aMuted[i] = false;
 	}
 
 	for (int i = 0; i < NUM_HOUSES; i++)
@@ -869,6 +870,7 @@ void CPlayer::OnDisconnect()
 		if (GameServer()->m_apPlayers[i])
 		{
 			GameServer()->m_apPlayers[i]->m_HidePlayerTeam[m_ClientID] = TEAM_RED;
+			GameServer()->m_apPlayers[i]->m_aMuted[m_ClientID] = false;
 
 			if (GameServer()->m_apPlayers[i]->m_TeeControlForcedID == m_ClientID)
 			{
