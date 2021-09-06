@@ -3389,7 +3389,7 @@ int PgscLookupThread(void *pArg)
 				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
 				char aServerName[128];
 				str_copy(aServerName, ptr, NameLength);
-				if (str_find(aServerName, pPgscData->m_aFindString))
+				if (str_find_nocase(aServerName, pPgscData->m_aFindString))
 				{
 					free(pPgscData);
 					free(pResult);
