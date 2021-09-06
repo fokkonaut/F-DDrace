@@ -1747,12 +1747,19 @@ void CGameContext::ConIPHubWhitelistAdd(IConsole::IResult* pResult, void* pUserD
 void CGameContext::ConIPHubWhitelistRemove(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	str_copy(aAddrStr, pResult->GetString(0), sizeof(aAddrStr));
+	char aBuf[NETADDR_MAXSTRSIZE];
+	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
 
-	NETADDR Addr;
-	if (net_addr_from_str(&Addr, aAddrStr) == 0)
-		pSelf->Server()->RemoveWhitelist(&Addr);
+	if (str_is_number(aBuf) == 0)
+	{
+		pSelf->Server()->RemoveWhitelistByIndex(pResult->GetInteger(0));
+	}
+	else
+	{
+		NETADDR Addr;
+		if (net_addr_from_str(&Addr, aBuf) == 0)
+			pSelf->Server()->RemoveWhitelist(&Addr);
+	}
 }
 
 void CGameContext::ConIPHubWhitelist(IConsole::IResult* pResult, void* pUserData)

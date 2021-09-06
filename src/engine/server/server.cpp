@@ -3497,17 +3497,25 @@ void CServer::RemoveWhitelist(const NETADDR *pAddr)
 	{
 		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[i], false) == 0)
 		{
-			char aAddrStr[NETADDR_MAXSTRSIZE];
-			net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
-
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Removed '%s' from whitelist", aAddrStr);
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
-
-			m_vIPHubWhitelist.erase(m_vIPHubWhitelist.begin() + i);
+			RemoveWhitelistByIndex(i);
 			break;
 		}
 	}
+}
+
+void CServer::RemoveWhitelistByIndex(unsigned int Index)
+{
+	if (Index >= m_vIPHubWhitelist.size())
+		return;
+
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&m_vIPHubWhitelist[Index], aAddrStr, sizeof(aAddrStr), false);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Removed '%s' from whitelist", aAddrStr);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+
+	m_vIPHubWhitelist.erase(m_vIPHubWhitelist.begin() + Index);
 }
 
 void CServer::PrintWhitelist()

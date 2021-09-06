@@ -422,6 +422,7 @@ public:
 	virtual void SaveWhitelist();
 	virtual void AddWhitelist(const NETADDR *pAddr);
 	virtual void RemoveWhitelist(const NETADDR *pAddr);
+	virtual void RemoveWhitelistByIndex(unsigned int Index);
 	virtual void PrintWhitelist();
 
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "");

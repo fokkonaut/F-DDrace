@@ -100,7 +100,7 @@ CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "V
 
 // white list in case iphub.info falsely flagged someone
 CONSOLE_COMMAND("iphub_whitelist_add", "s[ip]", CFGFLAG_SERVER, ConIPHubWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
-CONSOLE_COMMAND("iphub_whitelist_remove", "s[ip]", CFGFLAG_SERVER, ConIPHubWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
+CONSOLE_COMMAND("iphub_whitelist_remove", "s[ip/index]", CFGFLAG_SERVER, ConIPHubWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("iphub_whitelist", "", CFGFLAG_SERVER, ConIPHubWhitelist, this, "Shows whitelist", AUTHED_ADMIN)
 
 //plots
