@@ -1733,7 +1733,7 @@ void CGameContext::ConViewCursor(IConsole::IResult* pResult, void* pUserData)
 	pPlayer->m_ViewCursorID = ID;
 }
 
-void CGameContext::ConIPHubWhitelistAdd(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -1744,7 +1744,7 @@ void CGameContext::ConIPHubWhitelistAdd(IConsole::IResult* pResult, void* pUserD
 		pSelf->Server()->AddWhitelist(&Addr);
 }
 
-void CGameContext::ConIPHubWhitelistRemove(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConWhitelistRemove(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[NETADDR_MAXSTRSIZE];
@@ -1762,7 +1762,7 @@ void CGameContext::ConIPHubWhitelistRemove(IConsole::IResult* pResult, void* pUs
 	}
 }
 
-void CGameContext::ConIPHubWhitelist(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConWhitelist(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Server()->PrintWhitelist();

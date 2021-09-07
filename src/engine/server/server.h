@@ -417,8 +417,8 @@ public:
 		std::vector<NETADDR> m_vWhitelist;
 	} m_DnsblCache;
 
-	// white list in case iphub.info falsely flagged someone
-	std::vector<NETADDR> m_vIPHubWhitelist;
+	// white list in case iphub.info falsely flagged someone or to whitelist a server ip in case no proxy game server string is set and someone falsely got banned as "proxy game server"
+	std::vector<NETADDR> m_vWhitelist;
 	virtual void SaveWhitelist();
 	virtual void AddWhitelist(const NETADDR *pAddr);
 	virtual void RemoveWhitelist(const NETADDR *pAddr);

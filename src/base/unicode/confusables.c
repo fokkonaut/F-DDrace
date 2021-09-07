@@ -100,3 +100,30 @@ int str_utf8_comp_confusable(const char *str1, const char *str2)
 			return 1;
 	}
 }
+
+const char *str_utf8_find_confusable(const char *haystack, const char *needle)
+{
+	while(*haystack)
+	{
+		struct SKELETON skel1;
+		struct SKELETON skel2;
+
+		str_utf8_skeleton_begin(&skel1, haystack);
+		str_utf8_skeleton_begin(&skel2, needle);
+
+		while (1)
+		{
+			int ch1 = str_utf8_skeleton_next(&skel1);
+			int ch2 = str_utf8_skeleton_next(&skel2);
+
+			if (ch2 == 0) // needle is over
+				return haystack;
+
+			if (ch1 != ch2)
+				break;
+		}
+		haystack++;
+	}
+
+	return 0;
+}

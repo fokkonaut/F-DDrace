@@ -268,7 +268,8 @@ MACRO_CONFIG_STR(SvWebhookChatBridgeURL, sv_webhook_chat_bridge_url, 128, "", CF
 // vpn/proxy detection
 MACRO_CONFIG_STR(SvIPHubXKey, sv_iphub_x_key, 128, "", CFGFLAG_SERVER, "IPHub.info X-Key", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWhitelistFile, sv_whitelist_file, 128, "whitelist.cfg", CFGFLAG_SERVER, "Whitelist file in case IPHub.info falsely flagged someone", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvProxyGameServerString, sv_proxy_game_server_string, 128, "", CFGFLAG_SERVER, "String that has to be in a server name to ban players with that IP", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPgsc, sv_pgsc, 0, 0, 1, CFGFLAG_SERVER, "Whether to ban IPs of players that also broadcast a server", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvPgscString, sv_pgsc_string, 128, "", CFGFLAG_SERVER, "String that has to be in a server name to ban players with that IP (empty for direct ban)", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)

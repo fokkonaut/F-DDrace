@@ -2299,7 +2299,7 @@ int CServer::Run()
 					}
 
 					// proxy game server detection
-					if (Config()->m_SvProxyGameServerString[0])
+					if (Config()->m_SvPgsc)
 					{
 						if(m_aClients[i].m_PgscState == CClient::PGSC_STATE_NONE)
 						{
@@ -3376,20 +3376,20 @@ int PgscLookupThread(void *pArg)
 		str_append(pResult, aPiece, NewSize);
 	}
 
-	const char *ptr = str_find(pResult, pPgscData->m_aAddress);
-	if (ptr)
+	const char *ptr = pResult;
+	while ((ptr = str_find(ptr, pPgscData->m_aAddress)))
 	{
 		const char *pFind = "\"name\":";
-		if ((ptr = str_find(ptr, pFind)))
+		if ((ptr = str_find_nocase(ptr, pFind)))
 		{
 			ptr += str_length(pFind) + 1; // skip the starting " from the name
-			const char *ptr2 = str_find(ptr, "\"");
+			const char *ptr2 = str_find(ptr, "\""); // end "
 			if (ptr2)
 			{
 				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
 				char aServerName[128];
-				str_copy(aServerName, ptr, NameLength);
-				if (str_find_nocase(aServerName, pPgscData->m_aFindString))
+				str_copy(aServerName, ptr, min(NameLength, sizeof(aServerName)));
+				if (str_utf8_find_confusable(aServerName, pPgscData->m_aFindString)) // can be empty, then just ban ip if there is a game server broadcasted with this ip
 				{
 					free(pPgscData);
 					free(pResult);
@@ -3405,9 +3405,18 @@ int PgscLookupThread(void *pArg)
 
 void CServer::InitProxyGameServerCheck(int ClientID)
 {
+	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
+	{
+		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &m_vWhitelist[i], false) == 0)
+		{
+			m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_DONE;
+			return;
+		}
+	}
+
 	PgscData *pPgscData = new PgscData();
 	net_addr_str(m_NetServer.ClientAddr(ClientID), pPgscData->m_aAddress, sizeof(pPgscData->m_aAddress), false);
-	str_copy(pPgscData->m_aFindString, Config()->m_SvProxyGameServerString, sizeof(pPgscData->m_aAddress));
+	str_copy(pPgscData->m_aFindString, Config()->m_SvPgscString, sizeof(pPgscData->m_aAddress));
 
 	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_PgscLookup, PgscLookupThread, (void *)pPgscData);
 	m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_PENDING;
@@ -3449,7 +3458,7 @@ void CServer::InitDnsbl(int ClientID)
 		std::vector<NETADDR> List;
 		switch (i)
 		{
-		case 0: List = m_vIPHubWhitelist; break;
+		case 0: List = m_vWhitelist; break;
 		case 1: List = m_DnsblCache.m_vBlacklist; break;
 		case 2: List = m_DnsblCache.m_vWhitelist; break;
 		default: return;
@@ -3477,11 +3486,11 @@ void CServer::InitDnsbl(int ClientID)
 void CServer::AddWhitelist(const NETADDR *pAddr)
 {
 	// avoid double entries
-	for (unsigned int j = 0; j < m_vIPHubWhitelist.size(); j++)
-		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[j], false) == 0)
+	for (unsigned int j = 0; j < m_vWhitelist.size(); j++)
+		if (net_addr_comp(pAddr, &m_vWhitelist[j], false) == 0)
 			return;
 
-	m_vIPHubWhitelist.push_back(*pAddr);
+	m_vWhitelist.push_back(*pAddr);
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
@@ -3493,9 +3502,9 @@ void CServer::AddWhitelist(const NETADDR *pAddr)
 
 void CServer::RemoveWhitelist(const NETADDR *pAddr)
 {
-	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
-		if (net_addr_comp(pAddr, &m_vIPHubWhitelist[i], false) == 0)
+		if (net_addr_comp(pAddr, &m_vWhitelist[i], false) == 0)
 		{
 			RemoveWhitelistByIndex(i);
 			break;
@@ -3505,25 +3514,25 @@ void CServer::RemoveWhitelist(const NETADDR *pAddr)
 
 void CServer::RemoveWhitelistByIndex(unsigned int Index)
 {
-	if (Index >= m_vIPHubWhitelist.size())
+	if (Index >= m_vWhitelist.size())
 		return;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&m_vIPHubWhitelist[Index], aAddrStr, sizeof(aAddrStr), false);
+	net_addr_str(&m_vWhitelist[Index], aAddrStr, sizeof(aAddrStr), false);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Removed '%s' from whitelist", aAddrStr);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
 
-	m_vIPHubWhitelist.erase(m_vIPHubWhitelist.begin() + Index);
+	m_vWhitelist.erase(m_vWhitelist.begin() + Index);
 }
 
 void CServer::PrintWhitelist()
 {
-	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&m_vIPHubWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
+		net_addr_str(&m_vWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
 
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "#%d '%s'", i, aAddrStr);
@@ -3541,10 +3550,10 @@ void CServer::SaveWhitelist()
 		return;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	for (unsigned int i = 0; i < m_vIPHubWhitelist.size(); i++)
+	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
-		net_addr_str(&m_vIPHubWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
-		str_format(aBuf, sizeof(aBuf), "iphub_whitelist_add \"%s\"", aAddrStr);
+		net_addr_str(&m_vWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
+		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\"", aAddrStr);
 		Whitelist << aBuf << "\n";
 	}
 }
