@@ -27,7 +27,7 @@ static int ObjTypeToSevendown(int Seven)
 		Type = Seven - 2;
 	else if(Seven >= NUM_NETMSGTYPES)
 		Type = Seven - NUM_NETMSGTYPES;
-	else
+	else // NETEVENTTYPE_DAMAGE is missing, because we manually send damage indicators to 0.6 clients, so we just drop the packet for 0.7 clients
 		return -1;
 	return Type;
 }
@@ -813,7 +813,8 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	if(m_Sevendown)
 	{
 		Type = ObjTypeToSevendown(Type);
-		if(Type < 0) return pObj;
+		if(Type < 0)
+			return pObj->Data(); // return 0, but that would fuck up next snapshots in the same function
 	}
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
