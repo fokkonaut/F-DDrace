@@ -1428,6 +1428,10 @@ void CCharacter::TickDefered()
 		// only allow dead reackoning for a top of 3 seconds
 		if(m_ReckoningTick+Server()->TickSpeed()*3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
 		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "CID: %d, ReckoningTick: %d, ServerTick: %d", m_pPlayer->GetCID(), m_ReckoningTick, Server()->Tick());
+			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tickerror", aBuf);
+
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
@@ -2090,7 +2094,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 
 	if (pCharacter->m_Tick != 0 && pCharacter->m_Tick != m_ReckoningTick)
-		dbg_msg("tickerror", "CID: %d, Tick: %d, SnappingClient: %d, FakeID: %d", m_pPlayer->GetCID(), Server()->Tick(), SnappingClient, ID);
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "CID: %d, CharacterTick: %d, ServerTick: %d, SnappingClient: %d, FakeID: %d", m_pPlayer->GetCID(), pCharacter->m_Tick, Server()->Tick(), SnappingClient, ID);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tickerror", aBuf);
+	}
 }
 
 void CCharacter::PostSnap()
