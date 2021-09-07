@@ -3388,7 +3388,7 @@ int PgscLookupThread(void *pArg)
 			{
 				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
 				char aServerName[128];
-				str_copy(aServerName, ptr, min(NameLength, sizeof(aServerName)));
+				str_copy(aServerName, ptr, min(NameLength, (int)sizeof(aServerName)));
 				if (str_utf8_find_confusable(aServerName, pPgscData->m_aFindString)) // can be empty, then just ban ip if there is a game server broadcasted with this ip
 				{
 					free(pPgscData);

@@ -814,7 +814,7 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	{
 		Type = ObjTypeToSevendown(Type);
 		if(Type < 0)
-			return pObj->Data(); // return 0, but that would fuck up next snapshots in the same function
+			return pObj->Data(); // return 0, but that would fuck up next snapshots in the same function, so this is only temp memory that gets overwritten anyways
 	}
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
