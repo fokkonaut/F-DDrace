@@ -25,6 +25,7 @@ class CEventHandler
 	int m_aSizes[MAX_EVENTS];
 	Mask128 m_aClientMasks[MAX_EVENTS];
 	char m_aData[MAX_DATASIZE];
+	bool m_aSevendownOnly[MAX_DATASIZE];
 
 	class CGameContext *m_pGameServer;
 
@@ -35,7 +36,7 @@ public:
 	void SetGameServer(CGameContext *pGameServer);
 
 	CEventHandler();
-	void *Create(int Type, int Size, Mask128 Mask = Mask128());
+	void *Create(int Type, int Size, Mask128 Mask = Mask128(), bool SevendownOnly = false);
 	void Clear();
 	void Snap(int SnappingClient);
 };

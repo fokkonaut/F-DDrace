@@ -19,7 +19,7 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 }
 
-void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
+void *CEventHandler::Create(int Type, int Size, Mask128 Mask, bool SevendownOnly)
 {
 	if(m_NumEvents == MAX_EVENTS)
 		return 0;
@@ -31,6 +31,7 @@ void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
 	m_aTypes[m_NumEvents] = Type;
 	m_aSizes[m_NumEvents] = Size;
 	m_aClientMasks[m_NumEvents] = Mask;
+	m_aSevendownOnly[m_NumEvents] = SevendownOnly;
 	m_CurrentOffset += Size;
 	m_NumEvents++;
 	return p;
@@ -51,6 +52,10 @@ void CEventHandler::Snap(int SnappingClient)
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
 			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, vec2(ev->m_X, ev->m_Y)) < 1500.0f)
 			{
+				// for damage indicators for 0.6 clients
+				if (SnappingClient >= 0 && m_aSevendownOnly[i] && !GameServer()->Server()->IsSevendown(SnappingClient))
+					continue;
+
 				if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD || m_aTypes[i] == NETEVENTTYPE_HAMMERHIT || m_aTypes[i] == NETEVENTTYPE_SPAWN)
 				{
 					CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;

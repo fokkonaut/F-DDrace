@@ -215,7 +215,7 @@ void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount,
 	for(int i = 0; i < SevendownAmount; i++)
 	{
 		float f = mix(s, e, float(i+1)/float(SevendownAmount+2));
-		int *pEvent = (int*)m_Events.Create(20 + NUM_NETMSGTYPES, 3*4, Mask);
+		int *pEvent = (int*)m_Events.Create(20 + NUM_NETMSGTYPES, 3*4, Mask, true); // create as SevendownOnly
 		if(pEvent)
 		{
 			((int*)pEvent)[0] = (int)Pos.x;
