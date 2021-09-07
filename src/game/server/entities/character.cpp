@@ -2088,6 +2088,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		((int*)pCharacter)[Offset+5] = Emote;
 		((int*)pCharacter)[Offset+6] = AttackTick;
 	}
+
+	if (pCharacter->m_Tick != 0 && pCharacter->m_Tick != m_ReckoningTick)
+		dbg_msg("tickerror", "CID: %d, Tick: %d, SnappingClient: %d, FakeID: %d", m_pPlayer->GetCID(), Server()->Tick(), SnappingClient, ID);
 }
 
 void CCharacter::PostSnap()
