@@ -5511,7 +5511,7 @@ int CGameContext::FindSavedPlayer(int ClientID)
 
 		bool SameClientInfo = SameAddr && (SameName || SameTeeInfo);
 		SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
-		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
+		if (SameAddrAndPort || SameAcc || (SameTimeoutCode && SameName) || SameClientInfo)
 		{
 			return i;
 		}
@@ -5524,7 +5524,23 @@ const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 {
 	SHA256_CTX Sha256Ctx;
 	sha256_init(&Sha256Ctx);
-	sha256_update(&Sha256Ctx, &Info, sizeof(Info));
+
+	// manually update sha256 to no get bytes after 0 bytes in or so
+	sha256_update(&Sha256Ctx, &Info.m_aAccUsername, str_length(Info.m_aAccUsername));
+	sha256_update(&Sha256Ctx, &Info.m_Addr, sizeof(Info.m_Addr));
+	sha256_update(&Sha256Ctx, &Info.m_aTimeoutCode, str_length(Info.m_aTimeoutCode));
+	sha256_update(&Sha256Ctx, &Info.m_aName, str_length(Info.m_aName));
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aaSkinPartNames[p], str_length(Info.m_TeeInfo.m_aaSkinPartNames[p]));
+		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aUseCustomColors[p], sizeof(Info.m_TeeInfo.m_aUseCustomColors[p]));
+		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aSkinPartColors[p], sizeof(Info.m_TeeInfo.m_aSkinPartColors[p]));
+	}
+	sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_Sevendown.m_SkinName, str_length(Info.m_TeeInfo.m_Sevendown.m_SkinName));
+	sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_Sevendown.m_UseCustomColor, sizeof(Info.m_TeeInfo.m_Sevendown.m_UseCustomColor));
+	sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_Sevendown.m_ColorBody, sizeof(Info.m_TeeInfo.m_Sevendown.m_ColorBody));
+	sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_Sevendown.m_ColorFeet, sizeof(Info.m_TeeInfo.m_Sevendown.m_ColorFeet));
+
 	static char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(sha256_finish(&Sha256Ctx), aSha256, sizeof(aSha256));
 	return aSha256;
