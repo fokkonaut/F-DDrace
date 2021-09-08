@@ -544,7 +544,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		// send to the clients
 		Msg.m_Mode = CHAT_ALL;
-		SendChatMsg(&Msg, MSGFLAG_VITAL, To);
+		if (!IsMuted(MuteChecked, To))
+			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
 		if (ChatterClientID >= 0)
 			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 	}
