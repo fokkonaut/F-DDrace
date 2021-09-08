@@ -1534,7 +1534,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 				ExpireDate = mktime(&Date);
 			}
 			else
-				pSelf->SetExpireDate(&ExpireDate, pResult->GetFloat(2));
+				pSelf->SetExpireDateDays(&ExpireDate, pResult->GetFloat(2));
 
 			char aTime[64];
 			str_format(aTime, sizeof(aTime), "%d", (int)ExpireDate);

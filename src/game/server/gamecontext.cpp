@@ -4615,7 +4615,7 @@ void CGameContext::SetPlotExpire(int PlotID)
 		return;
 
 	int Days = m_aPlots[PlotID].m_Size == 0 ? ITEM_EXPIRE_PLOT_SMALL : m_aPlots[PlotID].m_Size == 1 ? ITEM_EXPIRE_PLOT_BIG : 0;
-	SetExpireDate(&m_aPlots[PlotID].m_ExpireDate, Days);
+	SetExpireDateDays(&m_aPlots[PlotID].m_ExpireDate, Days);
 }
 
 bool CGameContext::HasPlotByIP(int ClientID)
@@ -4744,7 +4744,12 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 	}
 }
 
-void CGameContext::SetExpireDate(time_t *pDate, float Days)
+void CGameContext::SetExpireDateDays(time_t *pDate, float Days)
+{
+	SetExpireDate(pDate, Days*24.f, true);
+}
+
+void CGameContext::SetExpireDate(time_t *pDate, float Hours, bool SetMinutesZero)
 {
 	time_t Now;
 	struct tm ExpireDate;
@@ -4763,12 +4768,13 @@ void CGameContext::SetExpireDate(time_t *pDate, float Days)
 		ExpireDate.tm_hour = AccDate.tm_hour;
 	}
 
-	const time_t ONE_DAY = 24 * 60 * 60;
-	time_t DateSeconds = mktime(&ExpireDate) + (Days * ONE_DAY);
+	const time_t ONE_HOUR = 60 * 60;
+	time_t DateSeconds = mktime(&ExpireDate) + (Hours * ONE_HOUR);
 	ExpireDate = *localtime(&DateSeconds);
 
 	// we set minutes and seconds to 0 always :)
-	ExpireDate.tm_min = 0;
+	if (SetMinutesZero)
+		ExpireDate.tm_min = 0;
 	ExpireDate.tm_sec = 0;
 	
 	*pDate = mktime(&ExpireDate);
@@ -5392,10 +5398,16 @@ void CGameContext::ReadSavedPlayersFile()
 
 	for (unsigned int i = 0; i < m_vSavedIdentitiesFiles.size(); i++)
 	{
-		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), m_vSavedIdentitiesFiles[i].c_str());
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), m_vSavedIdentitiesFiles[i].c_str());
 		CSaveTee SaveTee;
 		if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity())
 		{
+			if (IsExpired(SaveTee.GetIdentity().m_ExpireDate))
+			{
+				RemoveSavedIdentityFile(m_vSavedIdentitiesFiles[i].c_str(), SaveTee.GetIdentity().m_aName);
+				continue;
+			}
+
 			m_vSavedIdentities.push_back(SaveTee.GetIdentity());
 		}
 	}
@@ -5408,7 +5420,7 @@ int CGameContext::LoadSavedPlayersCallback(const char *pName, int IsDir, int Sto
 	if (!IsDir && str_endswith(pName, ".save"))
 	{
 		std::string Name = pName;
-		pSelf->m_vSavedIdentitiesFiles.push_back(Name);
+		pSelf->m_vSavedIdentitiesFiles.push_back(Name.erase(Name.size()-5)); // remove .save
 	}
 	return 0;
 }
@@ -5419,14 +5431,19 @@ void CGameContext::ExpireSavedIdentities()
 	{
 		if (IsExpired(m_vSavedIdentities[i].m_ExpireDate))
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(m_vSavedIdentities[i]));
-			dbg_msg("save", "%s: removing saved identity due to expiration", m_vSavedIdentities[i].m_aName);
-			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+			RemoveSavedIdentityFile(GetSavedIdentityHash(m_vSavedIdentities[i]), m_vSavedIdentities[i].m_aName);
 			m_vSavedIdentities.erase(m_vSavedIdentities.begin() + i);
 			i--;
 		}
 	}
+}
+
+void CGameContext::RemoveSavedIdentityFile(const char *pHash, const char *pName)
+{
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), pHash);
+	dbg_msg("save", "%s: removing saved identity due to expiration", pName);
+	Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 }
 
 void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
@@ -5446,7 +5463,7 @@ void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
 bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
-	if (!pChr)
+	if (!pChr || pChr->GetPlayer()->m_IsDummy)
 		return false;
 
 	// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
@@ -5463,7 +5480,7 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 	str_copy(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode, sizeof(Info.m_aTimeoutCode));
 	Info.m_ExpireDate = 0;
 	if (Hours != -1)
-		SetExpireDate(&Info.m_ExpireDate, (float)Hours / 24.f);
+		SetExpireDate(&Info.m_ExpireDate, Hours);
 	m_vSavedIdentities.push_back(Info);
 
 	// create file and save the character

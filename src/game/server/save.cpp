@@ -599,7 +599,7 @@ int CSaveTee::LoadString(char* String)
 	);
 
 	{
-		m_Identity.m_ExpireDate = ExpireDate;
+		m_Identity.m_ExpireDate = (time_t)ExpireDate;
 		net_addr_from_str(&m_Identity.m_Addr, aSavedAddress);
 		if (str_comp(m_Identity.m_aAccUsername, "$") == 0)
 			str_copy(m_Identity.m_aAccUsername, "", sizeof(m_Identity.m_aAccUsername));

@@ -383,7 +383,8 @@ public:
 	unsigned int GetMaxPlotObjects(int PlotID);
 	const char *GetPlotSizeString(int PlotID);
 
-	void SetExpireDate(time_t *pDate, float Days);
+	void SetExpireDateDays(time_t *pDate, float Days);
+	void SetExpireDate(time_t *pDate, float Hours, bool SetMinutesZero = false);
 	bool IsExpired(time_t Date);
 
 	struct SPlot
@@ -673,6 +674,7 @@ public:
 	void ReadSavedPlayersFile();
 	static int LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void ExpireSavedIdentities();
+	void RemoveSavedIdentityFile(const char *pHash, const char *pName);
 	
 	void SaveDrop(int ClientID, int Hours, const char *pReason);
 
