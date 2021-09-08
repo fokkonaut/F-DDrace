@@ -2295,7 +2295,7 @@ int CServer::Run()
 						}
 
 						if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
-							m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, "VPN detected, try connecting without");
+							m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, "VPN detected, try connecting without. Contact admin if mistaken");
 					}
 
 					// proxy game server detection
@@ -2320,7 +2320,7 @@ int CServer::Run()
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> broadcasts a proxy game server", i, aAddrStr);
 								Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "proxy", aBuf);
 
-								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60*60*6, "Proxy game server, try connecting to the real server");
+								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60*60*6, "Proxy server, try connecting to the real server. Contact admin if mistaken");
 							}
 						}
 					}
