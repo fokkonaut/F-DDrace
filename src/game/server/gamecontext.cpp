@@ -5511,9 +5511,8 @@ int CGameContext::FindSavedPlayer(int ClientID)
 
 		// SameTeeInfo is not really used, since players with the same skin and ip would get fucked up otherwise, in CSaveTee::Save() the identity of e.g. dummy would get saved then
 		bool SameClientInfo = SameAddr && SameName;
-		SameTimeoutCode = SameTimeoutCode && SameName;
 		SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
-		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
+		if (SameAddrAndPort || SameAcc || (SameTimeoutCode && SameName) || SameClientInfo)
 		{
 			return i;
 		}
