@@ -708,8 +708,12 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 		pSnap->SortedKeys()[i] = GetItem(i)->Key();
 	}
 
+	// F-DDrace: no sorting here, client does that on its own and we try to save as many ressources as we can, simply set the snapshots as we created them
+	mem_copy(pSnap->Offsets(), m_aOffsets, OffsetSize);
+	mem_copy(pSnap->DataStart(), m_aData, m_DataSize);
+
 	// get full item sizes
-	int aItemSizes[CSnapshotBuilder::MAX_ITEMS];
+	/*int aItemSizes[CSnapshotBuilder::MAX_ITEMS];
 
 	for(int i = 0; i < NumItems; i++)
 	{
@@ -724,8 +728,7 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 	}
 
 	// bubble sort by keys
-	// F-DDrace: no sorting here, client does that on its own and we try to save as many ressources as we can
-	/*bool Sorting = true;
+	bool Sorting = true;
 	while(Sorting)
 	{
 		Sorting = false;
@@ -740,7 +743,7 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 				tl_swap(aItemSizes[i], aItemSizes[i-1]);
 			}
 		}
-	}*/
+	}
 
 	// copy sorted items
 	int OffsetCur = 0;
@@ -749,7 +752,7 @@ int CSnapshotBuilder::Finish(void *pSnapdata)
 		pSnap->Offsets()[i] = OffsetCur;
 		mem_copy(pSnap->DataStart()+OffsetCur, m_aData + m_aOffsets[i], aItemSizes[i]);
 		OffsetCur += aItemSizes[i];
-	}
+	}*/
 
 	return sizeof(CSnapshot) + KeySize + OffsetSize + m_DataSize;
 }
