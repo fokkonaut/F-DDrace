@@ -1558,7 +1558,7 @@ void CPlayer::RainbowTick()
 
 	// only send rainbow updates to people close to you, to reduce network traffic
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (GameServer()->m_apPlayers[i] && !((CEntity *)m_pCharacter)->NetworkClipped(i))
+		if (GameServer()->m_apPlayers[i] && !m_pCharacter->NetworkClipped(i))
 			GameServer()->SendSkinChange(Info, m_ClientID, i);
 }
 

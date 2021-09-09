@@ -31,24 +31,24 @@ CEntity::~CEntity()
 	Server()->SnapFreeID(m_ID);
 }
 
-int CEntity::NetworkClipped(int SnappingClient)
+int CEntity::NetworkClipped(int SnappingClient, bool CheckShowAll)
 {
-	return NetworkClipped(SnappingClient, m_Pos);
+	return NetworkClipped(SnappingClient, m_Pos, CheckShowAll);
 }
 
-int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
+int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll)
 {
-	if(SnappingClient == -1)
+	if (SnappingClient == -1 || (CheckShowAll && GameServer()->m_apPlayers[SnappingClient]->m_ShowAll))
 		return 0;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
+	if(absolute(dx) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.x)
+		return 1;
+
 	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y-CheckPos.y;
-
-	if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
+	if(absolute(dy) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.y)
 		return 1;
 
-	if(distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, CheckPos) > 4000.0f)
-		return 1;
 	return 0;
 }
 

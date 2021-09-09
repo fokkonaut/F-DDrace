@@ -408,7 +408,7 @@ void CGameWorld::PlayerMap::Update()
 		{
 			Add(Insert, i);
 		}
-		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientID, false))
+		else if (pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientID))
 		{
 			InsertNextEmpty(i);
 		}
@@ -432,7 +432,7 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 		if (CID != -1 && m_aReserved[CID])
 			continue;
 
-		if (CID == -1 || (!m_pGameWorld->GameServer()->GetPlayerChar(CID) || m_pGameWorld->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID, false)))
+		if (CID == -1 || (!m_pGameWorld->GameServer()->GetPlayerChar(CID) || m_pGameWorld->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID)))
 		{
 			Add(i, ClientID);
 			break;

@@ -1822,7 +1822,10 @@ void CCharacter::Snap(int SnappingClient)
 	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 		return;
 
-	if(NetworkClipped(SnappingClient) && !SendDroppedFlagCooldown(SnappingClient))
+	// explicitly check for /showall, in case a client that doesnt support showdistance wants to see characters while zooming out
+	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
+	// when showdistance is supported, then all entities within that showdistance range are being sent
+	if(NetworkClipped(SnappingClient, true) && !SendDroppedFlagCooldown(SnappingClient))
 		return;
 
 	if (!CanSnapCharacter(SnappingClient))
@@ -2096,27 +2099,6 @@ void CCharacter::PostSnap()
 }
 
 // DDRace
-
-int CCharacter::NetworkClipped(int SnappingClient, bool CheckShowAll)
-{
-	return NetworkClipped(SnappingClient, m_Pos, CheckShowAll);
-}
-
-int CCharacter::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll)
-{
-	if (SnappingClient == -1 || (CheckShowAll && GameServer()->m_apPlayers[SnappingClient]->m_ShowAll))
-		return 0;
-
-	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
-	if(absolute(dx) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.x)
-		return 1;
-
-	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y-CheckPos.y;
-	if(absolute(dy) > GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance.y)
-		return 1;
-
-	return 0;
-}
 
 bool CCharacter::CanCollide(int ClientID, bool CheckPassive)
 {
