@@ -481,8 +481,11 @@ public:
 	void SetTeeControlCursor();
 	void RemoveTeeControlCursor();
 
-	vec2 m_CursorPos;
 	int m_ViewCursorSnapID;
+	vec2 GetCursorPos();
+	vec2 m_CursorPos;
+	vec2 m_CursorPosZoomed;
+	void CalculateCursorPosZoomed();
 
 	// special race
 	bool m_HasFinishedSpecialRace;

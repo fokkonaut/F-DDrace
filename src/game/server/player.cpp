@@ -222,6 +222,10 @@ void CPlayer::Reset()
 	m_LastMinigameRequest = 0;
 
 	m_ViewCursorID = -2;
+	m_ViewCursorZoomed = false;
+
+	m_ZoomCursor = false;
+	m_StandardShowDistance = m_ShowDistance;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_aStrongWeakID[i] = 0;
@@ -815,6 +819,12 @@ int CPlayer::GetAuthedHighlighted()
 	if (GameServer()->Config()->m_SvLocalChat)
 		return m_LocalChat ? AUTHED_HELPER : AUTHED_NO;
 	return GameServer()->Config()->m_SvAuthedHighlighted ? Server()->GetAuthedState(m_ClientID) : AUTHED_NO;
+}
+
+bool CPlayer::RestrictZoom()
+{
+	// allow zoom in block and 1vs1
+	return IsMinigame() && m_Minigame != MINIGAME_BLOCK && m_Minigame != MINIGAME_1VS1;
 }
 
 bool CPlayer::JoinChat(bool Local)

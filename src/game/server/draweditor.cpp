@@ -59,7 +59,7 @@ void CDrawEditor::Tick()
 	if (!Active())
 		return;
 
-	m_Pos = m_pCharacter->m_CursorPos;
+	m_Pos = m_pCharacter->GetCursorPos();
 	if (m_RoundPos && !m_Erasing)
 		m_Pos = GameServer()->RoundPos(m_Pos);
 

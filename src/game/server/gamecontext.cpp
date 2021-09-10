@@ -2730,6 +2730,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
 			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+
+			float Aspect = pPlayer->m_ShowDistance.x / pPlayer->m_ShowDistance.y;
+			CalcScreenParams(Aspect, 1.f, &pPlayer->m_StandardShowDistance.x, &pPlayer->m_StandardShowDistance.y);
 		}
 	}
 	else
@@ -5890,6 +5893,33 @@ const char *CGameContext::FormatExperienceBroadcast(const char *pMsg, int Client
 	}
 
 	return aRet;
+}
+
+void CGameContext::CalcScreenParams(float Aspect, float Zoom, float *w, float *h)
+{
+	const float Amount = 1150 * 1000;
+	const float WMax = 1500;
+	const float HMax = 1050;
+
+	float f = sqrtf(Amount) / sqrtf(Aspect);
+	*w = f * Aspect;
+	*h = f;
+
+	// limit the view
+	if(*w > WMax)
+	{
+		*w = WMax;
+		*h = *w / Aspect;
+	}
+
+	if(*h > HMax)
+	{
+		*h = HMax;
+		*w = *h * Aspect;
+	}
+
+	*w *= Zoom;
+	*h *= Zoom;
 }
 
 void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)

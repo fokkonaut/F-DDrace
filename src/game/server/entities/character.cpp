@@ -823,7 +823,7 @@ void CCharacter::FireWeapon()
 				if (!m_pTelekinesisEntity)
 				{
 					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
-					CEntity *pEntity = GameWorld()->ClosestEntityTypes(m_CursorPos, 20.f, Types, this, m_pPlayer->GetCID(), !m_Passive);
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f, Types, this, m_pPlayer->GetCID(), !m_Passive);
 
 					CCharacter *pChr = 0;
 					CFlag *pFlag = 0;
@@ -885,10 +885,10 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_PORTAL_RIFLE:
 			{
-				vec2 PortalPos = m_CursorPos;
+				vec2 PortalPos = GetCursorPos();
 				bool Found = true;
-				if (GameServer()->Collision()->TestBox(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
-					Found = GetNearestAirPos(m_CursorPos, m_Pos, &PortalPos);
+				if (GameServer()->Collision()->TestBox(PortalPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
+					Found = GetNearestAirPos(PortalPos, m_Pos, &PortalPos);
 
 				bool PlotDoorOnly = GameServer()->GetTilePlotID(m_Pos) < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
 
@@ -897,7 +897,7 @@ void CCharacter::FireWeapon()
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameLayerClipped(PortalPos)
-					|| GameServer()->Collision()->TestBoxDoor(m_CursorPos, vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), Team(), true) // disallow portal placing too close to plot doors to get through them (in combination with plot door skip preventing)
+					|| GameServer()->Collision()->TestBoxDoor(PortalPos, vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), Team(), true) // disallow portal placing too close to plot doors to get through them (in combination with plot door skip preventing)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
@@ -1846,8 +1846,9 @@ void CCharacter::Snap(int SnappingClient)
 		if (!pCursor)
 			return;
 
-		pCursor->m_X = round_to_int(m_CursorPos.x);
-		pCursor->m_Y = round_to_int(m_CursorPos.y);
+		vec2 CursorPos = pSnap->m_ViewCursorZoomed ? m_CursorPosZoomed : m_CursorPos;
+		pCursor->m_X = round_to_int(CursorPos.x);
+		pCursor->m_Y = round_to_int(CursorPos.y);
 		pCursor->m_FromX = round_to_int(m_Pos.x);
 		pCursor->m_FromY = round_to_int(m_Pos.y);
 		pCursor->m_StartTick = Server()->Tick() - 5;
@@ -3598,10 +3599,26 @@ void CCharacter::CreateDummyHandle(int Dummymode)
 	}
 }
 
+vec2 CCharacter::GetCursorPos()
+{
+	if (m_pPlayer->m_ZoomCursor && !m_pPlayer->RestrictZoom())
+		return m_CursorPosZoomed;
+	return m_CursorPos;
+}
+
+void CCharacter::CalculateCursorPosZoomed()
+{
+	int NewX = (m_Input.m_TargetX * m_pPlayer->m_ShowDistance.x) / m_pPlayer->m_StandardShowDistance.x;
+	int NewY = (m_Input.m_TargetY * m_pPlayer->m_ShowDistance.y) / m_pPlayer->m_StandardShowDistance.y;
+	m_CursorPosZoomed = vec2(m_Pos.x+NewX, m_Pos.y+NewY);
+}
+
 void CCharacter::FDDraceTick()
 {
 	// set cursorpos
 	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
+	CalculateCursorPosZoomed();
+	Config()->m_SvTestingCommands = 1;
 
 	// fake tune collision
 	if (!Server()->IsSevendown(m_pPlayer->GetCID()) && m_Core.m_FakeTuneCID != -1)
@@ -3628,28 +3645,28 @@ void CCharacter::FDDraceTick()
 				case (CGameWorld::ENTTYPE_CHARACTER): 
 				{
 					CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
-					pChr->Core()->m_Pos = m_CursorPos;
+					pChr->Core()->m_Pos = GetCursorPos();
 					pChr->Core()->m_Vel = Vel;
 					break;
 				}
 				case (CGameWorld::ENTTYPE_FLAG):
 				{
 					CFlag *pFlag = (CFlag *)m_pTelekinesisEntity;
-					pFlag->SetPos(m_CursorPos);
+					pFlag->SetPos(GetCursorPos());
 					pFlag->SetVel(Vel);
 					break;
 				}
 				case (CGameWorld::ENTTYPE_PICKUP_DROP):
 				{
 					CPickupDrop *pPickup = (CPickupDrop *)m_pTelekinesisEntity;
-					pPickup->SetPos(m_CursorPos);
+					pPickup->SetPos(GetCursorPos());
 					pPickup->SetVel(Vel);
 					break;
 				}
 				case (CGameWorld::ENTTYPE_MONEY):
 				{
 					CMoney *pMoney = (CMoney *)m_pTelekinesisEntity;
-					pMoney->SetPos(m_CursorPos);
+					pMoney->SetPos(GetCursorPos());
 					pMoney->SetVel(Vel);
 					break;
 				}
@@ -3708,7 +3725,7 @@ void CCharacter::FDDraceTick()
 	{
 		CCharacter *pControlledTee = m_pPlayer->m_pControlledTee->GetCharacter();
 		if (pControlledTee)
-			m_pTeeControlCursor->SetPos(pControlledTee->m_CursorPos);
+			m_pTeeControlCursor->SetPos(pControlledTee->m_CursorPos); // explicitly use m_CursorPos, as thats the real and normal position
 	}
 
 	if (Server()->Tick() % 50 == 0 && SendingPortalCooldown())

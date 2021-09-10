@@ -1509,6 +1509,31 @@ void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserD
 		pSelf->SendChatTarget(pResult->m_ClientID, "Weapon indicator disabled");
 }
 
+void CGameContext::ConZoomCursor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+	{
+		if (pPlayer->m_ZoomCursor == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_ZoomCursor = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_ZoomCursor = !pPlayer->m_ZoomCursor;
+	}
+
+	if (pPlayer->m_ZoomCursor)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your cursor will now zoom. If you use dynamic camera you have to set 'follow factor' to 0");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "You cursor will no longer be zoomed");
+}
+
 bool CGameContext::TryRegisterBan(const NETADDR *pAddr, int Secs)
 {
 	// find a matching register ban for this ip, update expiration time if found

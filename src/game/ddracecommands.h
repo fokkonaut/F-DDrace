@@ -97,6 +97,7 @@ CONSOLE_COMMAND("save_drop", "?v[id] ?i[hours] ?r[text]", CFGFLAG_SERVER, ConSav
 CONSOLE_COMMAND("jail_arrest", "v[id] i[seconds]", CFGFLAG_SERVER, ConJailArrest, this, "Arrests player v for i minutes", AUTHED_ADMIN)
 CONSOLE_COMMAND("jail_release", "v[id]", CFGFLAG_SERVER, ConJailRelease, this, "Releases player v from jail", AUTHED_ADMIN)
 CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
+CONSOLE_COMMAND("view_cursor_zoomed", "?i[id]", CFGFLAG_SERVER, ConViewCursorZoomed, this, "View zoomed cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
 
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
 CONSOLE_COMMAND("whitelist_add", "s[ip]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)

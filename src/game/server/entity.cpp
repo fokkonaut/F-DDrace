@@ -45,7 +45,7 @@ int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll
 	float Border = 32.f * 15.f;
 	vec2 ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
 	if (m_PlotID > 0)
-		ShowDistance = vec2(1200, 800); // quick fix to not show plots right now, will be made nice when defaultshowdistance is there
+		ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_StandardShowDistance;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;
 	if(absolute(dx) > ShowDistance.x/2.f + Border)

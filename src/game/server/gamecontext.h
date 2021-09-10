@@ -619,6 +619,7 @@ public:
 	bool IsMuted(int Sender, int Receiver);
 
 	vec2 RoundPos(vec2 Pos);
+	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
@@ -773,6 +774,7 @@ private:
 	//chat
 	static void ConScore(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeaponIndicator(IConsole::IResult* pResult, void* pUserData);
+	static void ConZoomCursor(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConVIPInfo(IConsole::IResult* pResult, void* pUserData);
@@ -933,7 +935,10 @@ private:
 	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
+
+	void SetViewCursor(IConsole::IResult* pResult, void* pUserData, bool Zoomed);
 	static void ConViewCursor(IConsole::IResult* pResult, void* pUserData);
+	static void ConViewCursorZoomed(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData);
 	static void ConWhitelistRemove(IConsole::IResult* pResult, void* pUserData);

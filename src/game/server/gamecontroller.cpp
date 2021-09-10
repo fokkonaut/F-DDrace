@@ -641,7 +641,7 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG2_ENTITIES_FDDRACE
 		| GAMEINFOFLAG2_ALLOW_X_SKINS;
 
-	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK || pSnap->m_Minigame == MINIGAME_1VS1)
+	if (!pSnap->RestrictZoom())
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
 	}
@@ -657,7 +657,7 @@ void IGameController::Snap(int SnappingClient)
 	if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
 
-	if (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active())
+	if (!pSnap->m_ZoomCursor && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active()))
 		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 }
 

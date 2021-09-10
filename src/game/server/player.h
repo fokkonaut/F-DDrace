@@ -375,8 +375,16 @@ public:
 	bool m_LocalChat;
 	int GetAuthedHighlighted();
 
-	void SkipSetViewPos() { m_SkipSetViewPos = 2; }
+	// zoom cursor
+	bool m_ZoomCursor;
+	vec2 m_StandardShowDistance;
+	bool RestrictZoom();
+
+	// view cursor
+	bool m_ViewCursorZoomed;
 	int m_ViewCursorID;
+
+	void SkipSetViewPos() { m_SkipSetViewPos = 2; }
 	int m_aStrongWeakID[VANILLA_MAX_CLIENTS];
 	bool m_aMuted[MAX_CLIENTS];
 
