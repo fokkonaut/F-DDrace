@@ -4117,21 +4117,19 @@ void CGameContext::OnSnap(int ClientID)
 		mem_copy(pTuneParams->m_aTuneParams, &m_Tuning, sizeof(pTuneParams->m_aTuneParams));
 	}
 
-	m_World.Snap(ClientID);
 	m_pController->Snap(ClientID);
-	m_Events.Snap(ClientID);
-	// F-DDrace
-	for (int i = 0; i < NUM_MINIGAMES; i++)
-		m_pMinigames[i]->Snap(ClientID);
-
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i])
 			m_apPlayers[i]->Snap(ClientID);
 	}
-
 	if (ClientID > -1)
 		m_apPlayers[ClientID]->FakeSnap();
+	m_World.Snap(ClientID);
+	m_Events.Snap(ClientID);
+	// F-DDrace
+	for (int i = 0; i < NUM_MINIGAMES; i++)
+		m_pMinigames[i]->Snap(ClientID);
 }
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
