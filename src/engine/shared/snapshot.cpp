@@ -800,9 +800,10 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	if(m_DataSize + sizeof(CSnapshot) + sizeof(CSnapshotItem) + Size + (m_NumItems+1) * sizeof(int)*2 >= CSnapshot::MAX_SIZE ||
 		m_NumItems+1 >= MAX_ITEMS)
 	{
+		// dont crash the server, just silently drop items
 		// key and offset per item
-		dbg_assert(m_DataSize + sizeof(CSnapshot) + m_NumItems * sizeof(int)*2 < CSnapshot::MAX_SIZE, "too much data");
-		dbg_assert(m_NumItems < MAX_ITEMS, "too many items");
+		//dbg_assert(m_DataSize + sizeof(CSnapshot) + m_NumItems * sizeof(int)*2 < CSnapshot::MAX_SIZE, "too much data");
+		//dbg_assert(m_NumItems < MAX_ITEMS, "too many items");
 		return 0;
 	}
 
