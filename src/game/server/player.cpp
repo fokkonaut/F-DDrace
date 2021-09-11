@@ -422,12 +422,9 @@ void CPlayer::Tick()
 		}
 		else if (Server()->Tick() % Server()->TickSpeed() * 60 == 0)
 		{
-			if (!m_pCharacter || !m_pCharacter->SendingPortalCooldown())
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Avoid policehammers for the next %lld seconds", m_EscapeTime / Server()->TickSpeed());
-				GameServer()->SendBroadcast(aBuf, m_ClientID, false);
-			}
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Avoid policehammers for the next %lld seconds", m_EscapeTime / Server()->TickSpeed());
+			GameServer()->SendBroadcast(aBuf, m_ClientID, false);
 		}
 	}
 

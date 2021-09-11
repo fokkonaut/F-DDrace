@@ -1992,7 +1992,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 10;
 	}
-
+	Config()->m_SvTestingCommands = 1;
 	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
 		(!Config()->m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID())
 		|| m_pPlayer->m_TeeControllerID == SnappingClient)
@@ -2000,13 +2000,25 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_Health = m_Health;
 		pCharacter->m_Armor = m_Armor;
 
-		if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0)
+		int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
+		if (GetActiveWeapon() == WEAPON_TASER)
 		{
-			int Ammo = m_aWeapons[GetActiveWeapon()].m_Ammo;
-			if (GetActiveWeapon() == WEAPON_TASER)
-				Ammo = GetTaserStrength();
-			pCharacter->m_AmmoCount = Ammo;
+			Ammo = GetTaserStrength();
 		}
+		else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE)
+		{
+			if (distance(GetCursorPos(), m_Pos) > Config()->m_SvPortalMaxDistance)
+			{
+				// indicate that we can't place portal right now
+				Ammo = 0;
+			}
+			else
+			{
+				int Seconds = (Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed();
+				Ammo = (Seconds*10/Config()->m_SvPortalRifleDelay);
+			}
+		}
+		pCharacter->m_AmmoCount = Ammo;
 
 		if (!Server()->IsSevendown(SnappingClient))
 		{
@@ -2466,33 +2478,30 @@ void CCharacter::HandleTiles(int Index)
 				m_pPlayer->GiveXP(XP);
 
 				// broadcast
-				if (!SendingPortalCooldown())
+				char aMsg[256];
+				char aSurvival[32];
+				char aPolice[32];
+				char aPlusXP[128];
+
+				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
+				str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
+				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+				str_format(aMsg, sizeof(aMsg),
+						"Money [%lld] +1%s%s\n"
+						"XP [%lld/%lld]%s\n"
+						"Level [%d]",
+						m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
+						pAccount->m_Level
+					);
+
+				// message gets cut off otherwise
+				if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
 				{
-					char aMsg[256];
-					char aSurvival[32];
-					char aPolice[32];
-					char aPlusXP[128];
-
-					str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-					str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
-					str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-					str_format(aMsg, sizeof(aMsg),
-							"Money [%lld] +1%s%s\n"
-							"XP [%lld/%lld]%s\n"
-							"Level [%d]",
-							m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
-							pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
-							pAccount->m_Level
-						);
-
-					// message gets cut off otherwise
-					if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
-					{
-						for (int i = 0; i < 32; i++)
-							str_append(aMsg, " ", sizeof(aMsg));
-					}
-					GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+					for (int i = 0; i < 32; i++)
+						str_append(aMsg, " ", sizeof(aMsg));
 				}
+				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
 		}
 
@@ -3618,7 +3627,6 @@ void CCharacter::FDDraceTick()
 	// set cursorpos
 	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
 	CalculateCursorPosZoomed();
-	Config()->m_SvTestingCommands = 1;
 
 	// fake tune collision
 	if (!Server()->IsSevendown(m_pPlayer->GetCID()) && m_Core.m_FakeTuneCID != -1)
@@ -3728,18 +3736,6 @@ void CCharacter::FDDraceTick()
 			m_pTeeControlCursor->SetPos(pControlledTee->m_CursorPos); // explicitly use m_CursorPos, as thats the real and normal position
 	}
 
-	if (Server()->Tick() % 50 == 0 && SendingPortalCooldown())
-	{
-		char aBuf[64];
-		int Seconds = Config()->m_SvPortalRifleDelay - ((Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed());
-
-		if (Seconds <= 0)
-			str_copy(aBuf, "[Portals unlocked]", sizeof(aBuf));
-		else
-			str_format(aBuf, sizeof(aBuf), "[Next portal: %ds]", Seconds);
-		GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
-	}
-
 	if (m_IsRainbowHooked && !m_pPlayer->m_InfRainbow && !m_Rainbow && GetPowerHooked() != RAINBOW)
 	{
 		m_IsRainbowHooked = false;
@@ -3786,11 +3782,6 @@ void CCharacter::HandleLastIndexTiles()
 			m_MoneyTile = false;
 		}
 	}
-}
-
-bool CCharacter::SendingPortalCooldown()
-{
-	return GetActiveWeapon() == WEAPON_PORTAL_RIFLE && (m_LastLinkedPortals + Server()->TickSpeed() * (Config()->m_SvPortalRifleDelay+1) > Server()->Tick());
 }
 
 bool CCharacter::SendDroppedFlagCooldown(int SnappingClient)

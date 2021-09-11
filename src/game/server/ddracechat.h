@@ -80,7 +80,7 @@ CHAT_COMMAND("plot", "?s[command] ?s[price|helpcmd|swapname] ?r[playername]", CF
 
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar", AUTHED_NO)
-CHAT_COMMAND("zoomcursor", "?i['0'|'1']", CFGFLAG_CHAT, ConZoomCursor, this, "Whether to zoom the cursor aswell, DO NOT use with dynamic camera", AUTHED_NO)
+CHAT_COMMAND("zoomcursor", "?i['0'|'1']", CFGFLAG_CHAT, ConZoomCursor, this, "Whether to zoom the cursor aswell, do not use with dynamic camera", AUTHED_NO)
 
 //other
 CHAT_COMMAND("resumemoved", "?i['0'|'1']", CFGFLAG_CHAT, ConResumeMoved, this, "Whether to resume from pause when someone moved your tee (off by default), optional i = 0 for off else for on", AUTHED_NO)

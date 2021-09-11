@@ -1529,7 +1529,7 @@ void CGameContext::ConZoomCursor(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	if (pPlayer->m_ZoomCursor)
-		pSelf->SendChatTarget(pResult->m_ClientID, "Your cursor will now zoom. If you use dynamic camera you have to set 'follow factor' to 0");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Your cursor will now zoom. This does not work properly in combination with dynamic camera");
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "You cursor will no longer be zoomed");
 }

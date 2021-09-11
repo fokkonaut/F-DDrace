@@ -419,7 +419,6 @@ public:
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
-	bool SendingPortalCooldown();
 
 	bool SendDroppedFlagCooldown(int SnappingClient);
 
