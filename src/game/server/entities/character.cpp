@@ -1992,7 +1992,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_Weapon = WEAPON_NINJA;
 		pCharacter->m_AmmoCount = 10;
 	}
-	Config()->m_SvTestingCommands = 1;
+
 	if(m_pPlayer->GetCID() == SnappingClient || SnappingClient == -1 ||
 		(!Config()->m_SvStrictSpectateMode && m_pPlayer->GetCID() == GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID())
 		|| m_pPlayer->m_TeeControllerID == SnappingClient)
