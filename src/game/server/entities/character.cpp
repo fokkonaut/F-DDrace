@@ -2018,8 +2018,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 				Ammo = (Seconds*10/Config()->m_SvPortalRifleDelay);
 			}
 		}
-		if (Ammo >= 0)
-			pCharacter->m_AmmoCount = Ammo;
+		pCharacter->m_AmmoCount = clamp(Ammo, 0, 10);
 
 		if (!Server()->IsSevendown(SnappingClient))
 		{
