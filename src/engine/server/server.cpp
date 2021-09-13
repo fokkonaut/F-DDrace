@@ -3357,7 +3357,7 @@ int PgscLookupThread(void *pArg)
 	char aCmd[256];
 	str_copy(aCmd, "curl -s https://master1.ddnet.tw/ddnet/15/servers.json", sizeof(aCmd));
 
-	FILE *pStream = p_open(aCmd, "r");
+	FILE *pStream = pipe_open(aCmd, "r");
 	if (!pStream)
 	{
 		free(pPgscData);
@@ -3375,6 +3375,7 @@ int PgscLookupThread(void *pArg)
 		pResult = (char *)realloc(pResult, NewSize);
 		str_append(pResult, aPiece, NewSize);
 	}
+	pipe_close(pStream);
 
 	const char *ptr = pResult;
 	while ((ptr = str_find(ptr, pPgscData->m_aAddress)))
@@ -3424,7 +3425,7 @@ void CServer::InitProxyGameServerCheck(int ClientID)
 
 int DnsblLookupThread(void *pArg)
 {
-	FILE *pStream = p_open((char *)pArg, "r");
+	FILE *pStream = pipe_open((char *)pArg, "r");
 	free(pArg);
 	if (!pStream)
 		return 0;
@@ -3432,7 +3433,7 @@ int DnsblLookupThread(void *pArg)
 	char aResult[512] = "";
 	if (fgets(aResult, sizeof(aResult), pStream))
 		dbg_msg("dnsbl", "%s", aResult);
-	fclose(pStream);
+	pipe_close(pStream);
 
 	// parse json data
 	json_settings JsonSettings;

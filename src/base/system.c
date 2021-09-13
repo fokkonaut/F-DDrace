@@ -2101,7 +2101,7 @@ void str_format(char *buffer, int buffer_size, const char *format, ...)
 	buffer[buffer_size-1] = 0; /* assure null termination */
 }
 
-FILE *p_open(const char *cmd, const char *mode)
+FILE *pipe_open(const char *cmd, const char *mode)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return _popen(cmd, mode);
@@ -2110,7 +2110,14 @@ FILE *p_open(const char *cmd, const char *mode)
 #endif
 }
 
-
+int pipe_close(FILE *stream)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return _pclose(stream);
+#else
+	return pclose(stream);
+#endif
+}
 
 /* makes sure that the string only contains the characters between 32 and 127 */
 void str_sanitize_strong(char *str_in)

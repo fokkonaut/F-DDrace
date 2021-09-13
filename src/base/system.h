@@ -954,7 +954,8 @@ int str_length(const char *str);
 void str_format(char *buffer, int buffer_size, const char *format, ...)
 GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
-FILE *p_open(const char *cmd, const char *mode);
+FILE *pipe_open(const char *cmd, const char *mode);
+int pipe_close(FILE *stream);
 
 /*
 	Function: str_sanitize_strong
