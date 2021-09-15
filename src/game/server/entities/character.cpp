@@ -3732,37 +3732,31 @@ void CCharacter::FDDraceTick()
 		m_pLightsaber->Retract();
 
 	// flag bonus
-	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
+	if (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START && !m_MoneyTile && Server()->Tick() % 50 == 0)
 	{
 		CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-		if (m_pPlayer->GetAccID() >= ACC_START)
+		int AliveState = GetAliveState();
+		int XP = 0;
+		XP += AliveState + 1;
+
+		if (pAccount->m_VIP)
+			XP += 2;
+
+		m_pPlayer->GiveXP(XP);
+
+		char aSurvival[32];
+		char aMsg[128];
+		str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
+		str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+
+		if (Server()->IsSevendown(m_pPlayer->GetCID()))
 		{
-			if (!m_MoneyTile)
-			{
-				int AliveState = GetAliveState();
-				int XP = 0;
-				XP += AliveState + 1;
-
-				if (pAccount->m_VIP)
-					XP += 2;
-
-				m_pPlayer->GiveXP(XP);
-
-				char aSurvival[32];
-				char aMsg[128];
-				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-				str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-
-				if (Server()->IsSevendown(m_pPlayer->GetCID()))
-				{
-					for (int i = 0; i < 128; i++)
-						str_append(aMsg, " ", sizeof(aMsg));
-				}
-
-				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
-			}
+			for (int i = 0; i < 128; i++)
+				str_append(aMsg, " ", sizeof(aMsg));
 		}
+
+		GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 	}
 
 	// stop spinning when we are paused
