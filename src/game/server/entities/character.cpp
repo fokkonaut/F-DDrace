@@ -3615,8 +3615,10 @@ void CCharacter::HandleCursor()
 	// check whether player uses dynamic camera, dynamic camera sends about 633 as maximal range
 	float CameraLength = length(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 	if (CameraLength > m_CameraMaxLength)
+	{
+		m_DynamicCamera = CameraLength > 632.f && CameraLength < 634.f;
 		m_CameraMaxLength = CameraLength;
-	m_DynamicCamera = m_CameraMaxLength > 632.f && m_CameraMaxLength < 634.f;
+	}
 
 	// normal cusor position for zoom 1.0 (level 10)
 	m_CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
