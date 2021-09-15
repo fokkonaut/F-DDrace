@@ -2496,9 +2496,9 @@ void CCharacter::HandleTiles(int Index)
 					);
 
 				// message gets cut off otherwise
-				if (Server()->IsSevendown(m_pPlayer->GetCID()) && AliveState && FlagBonus)
+				if (Server()->IsSevendown(m_pPlayer->GetCID()))
 				{
-					for (int i = 0; i < 32; i++)
+					for (int i = 0; i < 128; i++)
 						str_append(aMsg, " ", sizeof(aMsg));
 				}
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
@@ -3730,7 +3730,7 @@ void CCharacter::FDDraceTick()
 	// retract lightsaber
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))
 		m_pLightsaber->Retract();
-
+	Config()->m_SvTestingCommands = 1;
 	// flag bonus
 	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
 	{
@@ -3752,8 +3752,13 @@ void CCharacter::FDDraceTick()
 				char aSurvival[32];
 				char aMsg[128];
 				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-				str_format(aMsg, sizeof(aMsg), " \n \nXP [%lld/%lld] +1 flag%s%s",
-					pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+				str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+
+				if (Server()->IsSevendown(m_pPlayer->GetCID()))
+				{
+					for (int i = 0; i < 128; i++)
+						str_append(aMsg, " ", sizeof(aMsg));
+				}
 
 				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
@@ -4214,7 +4219,7 @@ void CCharacter::UpdateWeaponIndicator()
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), " \n \n> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
 	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
 }
