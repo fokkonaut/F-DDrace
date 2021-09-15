@@ -195,9 +195,6 @@ MACRO_CONFIG_INT(SvHideBotsStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERV
 // weapon indicator
 MACRO_CONFIG_INT(SvWeaponIndicatorDefault, sv_weapon_indicator_default, 0, 0, 1, CFGFLAG_SERVER, "Whether the weapon names are displayed in the broadcast", AUTHED_ADMIN)
 
-// zoom cursor (portal, draw editor, telekinesis...)
-MACRO_CONFIG_INT(SvZoomCursorDefault, sv_zoom_cursor_default, 0, 0, 1, CFGFLAG_SERVER, "Whether zoom cursor is enabled by default", AUTHED_ADMIN)
-
 // drops
 MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to allow dropping weapons with f4", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDropsOnDeath, sv_drops_on_death, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether there is a chance of dropping weapons on death (health and armor in survival, after 5min in no minigame)", AUTHED_ADMIN)

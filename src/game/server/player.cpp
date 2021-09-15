@@ -224,9 +224,8 @@ void CPlayer::Reset()
 	m_ViewCursorID = -2;
 	m_ViewCursorZoomed = false;
 
-	m_ZoomCursor = GameServer()->Config()->m_SvZoomCursorDefault;
+	m_ZoomCursor = false;
 	m_StandardShowDistance = m_ShowDistance;
-	m_AutoDisabledZoomCursor = false;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_aStrongWeakID[i] = 0;
