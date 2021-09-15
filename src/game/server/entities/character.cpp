@@ -3612,12 +3612,20 @@ void CCharacter::CreateDummyHandle(int Dummymode)
 
 void CCharacter::HandleCursor()
 {
+	Config()->m_SvTestingCommands = 1;
 	// check whether player uses dynamic camera, dynamic camera sends about 633 as maximal range
 	float CameraLength = length(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 	if (CameraLength > m_CameraMaxLength)
 	{
 		m_DynamicCamera = CameraLength > 632.f && CameraLength < 634.f;
 		m_CameraMaxLength = CameraLength;
+
+		// automatically disable zoomcursor once if dynamic camera gets detected, as it only works with dyncam when followfactor and deadzone are default values, possible to reactivate zoomcursor again
+		if (m_DynamicCamera && !m_pPlayer->m_AutoDisabledZoomCursor)
+		{
+			m_pPlayer->m_ZoomCursor = false;
+			m_pPlayer->m_AutoDisabledZoomCursor = true;
+		}
 	}
 
 	// normal cusor position for zoom 1.0 (level 10)

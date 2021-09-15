@@ -377,6 +377,7 @@ public:
 
 	// zoom cursor
 	bool m_ZoomCursor;
+	bool m_AutoDisabledZoomCursor;
 	vec2 m_StandardShowDistance;
 	float GetZoomLevel();
 	bool RestrictZoom();
