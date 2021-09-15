@@ -666,7 +666,7 @@ public:
 
 	// saved
 	bool SaveCharacter(int ClientID, int Flags = 0, int Hours = -1);
-	int FindSavedPlayer(int ClientID);
+	int FindSavedPlayer(int ClientID, bool SameAddrAndPortOnly = false);
 	bool CheckLoadPlayer(int ClientID);
 	const char *GetSavedIdentityHash(SSavedIdentity Info);
 	std::vector<SSavedIdentity> m_vSavedIdentities;

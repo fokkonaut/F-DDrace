@@ -5496,7 +5496,7 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 	return true;
 }
 
-int CGameContext::FindSavedPlayer(int ClientID)
+int CGameContext::FindSavedPlayer(int ClientID, bool SameAddrAndPortOnly)
 {
 	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
 		return -1;
@@ -5508,6 +5508,13 @@ int CGameContext::FindSavedPlayer(int ClientID)
 	{
 		SSavedIdentity Info = m_vSavedIdentities[i];
 		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
+		if (SameAddrAndPortOnly)
+		{
+			if (SameAddrAndPort)
+				return i; // for getting the correct savedidentity when shutting down or saving a tee for save drop
+			continue;
+		}
+
 		bool SameAddr = net_addr_comp(&Addr, &Info.m_Addr, false) == 0;
 		bool SameTimeoutCode = Info.m_aTimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
 		bool SameAcc = Info.m_aAccUsername[0] != '\0' && str_comp(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
