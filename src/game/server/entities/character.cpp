@@ -3730,7 +3730,7 @@ void CCharacter::FDDraceTick()
 	// retract lightsaber
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))
 		m_pLightsaber->Retract();
-	Config()->m_SvTestingCommands = 1;
+
 	// flag bonus
 	if (HasFlag() != -1 && Server()->Tick() % 50 == 0)
 	{
