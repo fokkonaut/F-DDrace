@@ -3588,6 +3588,8 @@ void CCharacter::FDDraceInit()
 		m_Core.m_FightStarted = true;
 
 	m_ViewCursorSnapID = Server()->SnapNewID();
+	m_DynamicCamera = false;
+	m_CameraMaxLength = 0.f;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -3608,6 +3610,50 @@ void CCharacter::CreateDummyHandle(int Dummymode)
 	}
 }
 
+void CCharacter::HandleCursor()
+{
+	// check whether player uses dynamic camera, dynamic camera sends about 633 as maximal range
+	if (!m_DynamicCamera)
+	{
+		float CameraLength = length(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
+		if (CameraLength > m_CameraMaxLength)
+			m_CameraMaxLength = CameraLength;
+		if (m_CameraMaxLength > 632.f && m_CameraMaxLength < 634.f)
+			m_DynamicCamera = true;
+	}
+
+	// normal cusor position for zoom 1.0 (level 10)
+	m_CursorPos = vec2(m_Pos.x + m_Input.m_TargetX, m_Pos.y + m_Input.m_TargetY);
+
+	// cursor pos that matches the current zoom level, this is perfectly on the cursor rendered by the client
+	CalculateCursorPosZoomed();
+}
+
+void CCharacter::CalculateCursorPosZoomed()
+{
+	vec2 Pos = m_Pos;
+	if (m_DynamicCamera)
+	{
+		vec2 TargetCameraOffset(0, 0);
+		vec2 MousePos = vec2(m_Input.m_TargetX, m_Input.m_TargetY);
+		float l = length(MousePos);
+		if(l > 0.0001f) // make sure that this isn't 0
+		{
+			// TODO: buggy if followfactor and deadzone don't match the default values
+			float DeadZone = 300;
+			float FollowFactor = 60 / 100.0f;
+			float OffsetAmount = max(l - DeadZone, 0.0f) * FollowFactor;
+
+			TargetCameraOffset = normalize(MousePos) * OffsetAmount;
+			Pos -= TargetCameraOffset * (m_pPlayer->GetZoomLevel() - 1.f);
+		}
+	}
+
+	float TargetX = m_Input.m_TargetX * m_pPlayer->GetZoomLevel();
+	float TargetY = m_Input.m_TargetY * m_pPlayer->GetZoomLevel();
+	m_CursorPosZoomed = vec2(Pos.x + TargetX, Pos.y + TargetY);
+}
+
 vec2 CCharacter::GetCursorPos()
 {
 	if (m_pPlayer->m_ZoomCursor && !m_pPlayer->RestrictZoom())
@@ -3615,18 +3661,10 @@ vec2 CCharacter::GetCursorPos()
 	return m_CursorPos;
 }
 
-void CCharacter::CalculateCursorPosZoomed()
-{
-	int NewX = (m_Input.m_TargetX * m_pPlayer->m_ShowDistance.x) / m_pPlayer->m_StandardShowDistance.x;
-	int NewY = (m_Input.m_TargetY * m_pPlayer->m_ShowDistance.y) / m_pPlayer->m_StandardShowDistance.y;
-	m_CursorPosZoomed = vec2(m_Pos.x+NewX, m_Pos.y+NewY);
-}
-
 void CCharacter::FDDraceTick()
 {
-	// set cursorpos
-	m_CursorPos = vec2(m_Pos.x+m_Input.m_TargetX, m_Pos.y+m_Input.m_TargetY);
-	CalculateCursorPosZoomed();
+	// cursor calculation
+	HandleCursor();
 
 	// fake tune collision
 	if (!Server()->IsSevendown(m_pPlayer->GetCID()) && m_Core.m_FakeTuneCID != -1)

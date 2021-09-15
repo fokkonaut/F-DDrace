@@ -481,10 +481,13 @@ public:
 	void RemoveTeeControlCursor();
 
 	int m_ViewCursorSnapID;
+	void HandleCursor();
 	vec2 GetCursorPos();
 	vec2 m_CursorPos;
 	vec2 m_CursorPosZoomed;
 	void CalculateCursorPosZoomed();
+	bool m_DynamicCamera;
+	float m_CameraMaxLength;
 
 	// special race
 	bool m_HasFinishedSpecialRace;

@@ -824,6 +824,11 @@ bool CPlayer::RestrictZoom()
 	return IsMinigame() && m_Minigame != MINIGAME_BLOCK && m_Minigame != MINIGAME_1VS1;
 }
 
+float CPlayer::GetZoomLevel()
+{
+	return m_ShowDistance.x / m_StandardShowDistance.x;
+}
+
 bool CPlayer::JoinChat(bool Local)
 {
 	if (m_LocalChat == Local || !GameServer()->Config()->m_SvLocalChat)
