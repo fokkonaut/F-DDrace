@@ -437,6 +437,7 @@ public:
 
 	// shutdown tee
 	bool m_CheckedSavePlayer;
+	bool m_LoadedSavedPlayer;
 
 private:
 	int64 m_WalletMoney;

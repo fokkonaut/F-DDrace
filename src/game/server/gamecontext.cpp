@@ -2707,8 +2707,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			// F-DDrace
 			pPlayer->CheckClanProtection();
-			if (pPlayer->GetAccID() < ACC_START)
-				CheckLoadPlayer(ClientID);
+			CheckLoadPlayer(ClientID);
 
 			if (pPlayer->m_SpookyGhost || pPlayer->m_ForcedSkin != SKIN_NONE)
 				return;
@@ -5562,7 +5561,7 @@ const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 bool CGameContext::CheckLoadPlayer(int ClientID)
 {
 	int Index = FindSavedPlayer(ClientID);
-	if (Index == -1)
+	if (Index == -1 || m_apPlayers[ClientID]->m_LoadedSavedPlayer)
 		return false;
 
 	// Get path and load
@@ -5575,6 +5574,7 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 		dbg_msg("save", "%d:%s used his save, removing save file", ClientID, Server()->ClientName(ClientID));
 		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 		m_vSavedIdentities.erase(m_vSavedIdentities.begin() + Index);
+		m_apPlayers[ClientID]->m_LoadedSavedPlayer = true;
 		return true;
 	}
 	return false;

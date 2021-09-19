@@ -204,6 +204,7 @@ void CPlayer::Reset()
 	m_aPlotSwapUsername[0] = '\0';
 	m_PlotSpawn = false;
 	m_CheckedSavePlayer = false;
+	m_LoadedSavedPlayer = false;
 	m_WalletMoney = 0;
 	m_LastMoneyXPBomb = 0;
 	m_LastVote = 0;
