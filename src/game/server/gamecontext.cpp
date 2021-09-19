@@ -5560,8 +5560,12 @@ const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 
 bool CGameContext::CheckLoadPlayer(int ClientID)
 {
+	// dont load two saves for one tee, because they are probably two clients with identical information, sending a info change can cause a second load, of the tee thats the 2nd client
+	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_LoadedSavedPlayer)
+		return false;
+
 	int Index = FindSavedPlayer(ClientID);
-	if (Index == -1 || m_apPlayers[ClientID]->m_LoadedSavedPlayer)
+	if (Index == -1)
 		return false;
 
 	// Get path and load
