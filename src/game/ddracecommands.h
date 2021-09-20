@@ -104,6 +104,9 @@ CONSOLE_COMMAND("whitelist_add", "s[ip]", CFGFLAG_SERVER, ConWhitelistAdd, this,
 CONSOLE_COMMAND("whitelist_remove", "s[ip/index]", CFGFLAG_SERVER, ConWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whitelist for DNSBL/PGSC", AUTHED_ADMIN)
 
+// bot lookup
+CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
+
 //plots
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)

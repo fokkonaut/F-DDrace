@@ -474,6 +474,7 @@ int CServer::Init()
 	}
 
 	m_AnnouncementLastLine = 0;
+	m_BotLookupState = BOTLOOKUP_STATE_DONE;
 	m_CurrentGameTick = 0;
 	m_aCurrentMap[0] = 0;
 
@@ -3342,6 +3343,73 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	free(pName);
 
 	AddJob(WebhookThread, (void *)pBuf);
+}
+
+int BotLookupThread(void *pArg)
+{
+	CServer *pSelf = (CServer *)pArg;
+	if (!pSelf->Config()->m_SvBotLookupURL[0])
+	{
+		pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+		return 0;
+	}
+
+	char aCmd[256];
+	str_format(aCmd, sizeof(aCmd), "curl -s %s", pSelf->Config()->m_SvBotLookupURL);
+
+	FILE *pStream = pipe_open(aCmd, "r");
+	if (!pStream)
+	{
+		pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+		return 0;
+	}
+
+	char *pResult = (char *)calloc(1, 1);
+	char aPiece[1024];
+	int NewSize = 0;
+
+	while (fgets(aPiece, sizeof(aPiece), pStream))
+	{
+		// +1 below to allow room for null terminator
+		NewSize = str_length(pResult) + str_length(aPiece) + 1;
+		pResult = (char *)realloc(pResult, NewSize);
+		str_append(pResult, aPiece, NewSize);
+	}
+	pipe_close(pStream);
+
+	bool Found = false;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME)
+			continue;
+
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(pSelf->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), false);
+		if (str_find(pResult, aAddrStr))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%d: %s", i, pSelf->ClientName(i));
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", aBuf);
+			Found = true;
+		}
+	}
+
+	if (!Found)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", "No results found");
+
+
+	pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+	free(pResult);
+	return 0;
+}
+
+void CServer::PrintBotLookup()
+{
+	if (m_BotLookupState == BOTLOOKUP_STATE_PENDING)
+		return;
+
+	AddJob(BotLookupThread, this);
+	m_BotLookupState = BOTLOOKUP_STATE_PENDING;
 }
 
 struct PgscData

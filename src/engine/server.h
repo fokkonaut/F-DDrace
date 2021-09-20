@@ -64,6 +64,8 @@ public:
 
 	virtual bool IsSevendown(int ClientID) = 0;
 
+	virtual void PrintBotLookup() = 0;
+
 	virtual void SaveWhitelist() = 0;
 	virtual void AddWhitelist(const NETADDR *pAddr) = 0;
 	virtual void RemoveWhitelist(const NETADDR *pAddr) = 0;

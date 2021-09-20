@@ -409,6 +409,14 @@ public:
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
+	enum
+	{
+		BOTLOOKUP_STATE_DONE = 0,
+		BOTLOOKUP_STATE_PENDING
+	};
+	virtual void PrintBotLookup();
+	int m_BotLookupState;
+
 	void InitProxyGameServerCheck(int ClientID);
 	void InitDnsbl(int ClientID);
 	struct

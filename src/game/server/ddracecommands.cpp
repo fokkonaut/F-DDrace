@@ -1789,6 +1789,12 @@ void CGameContext::ConWhitelist(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Server()->PrintWhitelist();
 }
 
+void CGameContext::ConBotLookup(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Server()->PrintBotLookup();
+}
+
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
