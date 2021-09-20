@@ -3354,8 +3354,15 @@ int BotLookupThread(void *pArg)
 		return 0;
 	}
 
+	char *pURL = strdup(pSelf->Config()->m_SvBotLookupURL);
+	char *ptr = pURL;
+	for (; *ptr; ptr++)
+		if (*ptr == '\'')
+			*ptr = ' ';
+
 	char aCmd[256];
-	str_format(aCmd, sizeof(aCmd), "curl -s %s", pSelf->Config()->m_SvBotLookupURL);
+	str_format(aCmd, sizeof(aCmd), "curl -s '%s'", pURL);
+	free(pURL);
 
 	FILE *pStream = pipe_open(aCmd, "r");
 	if (!pStream)
