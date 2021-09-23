@@ -172,8 +172,8 @@ MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money
 
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 2, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 12 hours", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 3, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAccSysBanPinFails, sv_acc_sys_ban_pin_fails, 3, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 2, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAccSysBanPinFails, sv_acc_sys_ban_pin_fails, 2, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
 
 // saved tees
 MACRO_CONFIG_INT(SvShutdownSaveTees, sv_shutdown_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before shutdown/reload to load them again", AUTHED_ADMIN)
