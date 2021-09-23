@@ -1803,6 +1803,7 @@ void CPlayer::OnLogout()
 
 	m_aSecurityPin[0] = '\0';
 
+	pAccount->m_Flags = 0;
 	if (m_ZoomCursor)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_ZOOMCURSOR;
 	if (m_PlotSpawn)
