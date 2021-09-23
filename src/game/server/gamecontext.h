@@ -96,7 +96,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 7,
+	ACC_CURRENT_VERSION = 8,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -506,6 +506,7 @@ public:
 		char m_aSecurityPin[5];
 		time_t m_RegisterDate;
 		time_t m_LastLoginDate;
+		int m_Flags;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -559,7 +560,15 @@ public:
 		ACC_SECURITY_PIN,
 		ACC_REGISTER_DATE,
 		ACC_LAST_LOGIN_DATE,
+		ACC_FLAGS,
 		NUM_ACCOUNT_VARIABLES
+	};
+
+	// flags for specific ingame variables that will be saved on logout and loaded on login again
+	enum AccountFlags
+	{
+		ACCFLAG_ZOOMCURSOR = 1<<0,
+		ACCFLAG_PLOTSPAWN = 1<<1,
 	};
 
 	// money drops

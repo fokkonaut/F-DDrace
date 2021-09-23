@@ -5014,6 +5014,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_SECURITY_PIN:				str_copy(m_Accounts[ID].m_aSecurityPin, pData, sizeof(m_Accounts[ID].m_aSecurityPin)); break;
 	case ACC_REGISTER_DATE:				m_Accounts[ID].m_RegisterDate = atoll(pData); break;
 	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoll(pData); break;
+	case ACC_FLAGS:						m_Accounts[ID].m_Flags = atoi(pData); break;
 	}
 }
 
@@ -5067,6 +5068,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_SECURITY_PIN:				return "security_pin";
 	case ACC_REGISTER_DATE:				return "register_date";
 	case ACC_LAST_LOGIN_DATE:			return "last_login_date";
+	case ACC_FLAGS:						return "flags";
 	}
 	return "Unknown";
 }
@@ -5124,6 +5126,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_SECURITY_PIN:				str_copy(aBuf, m_Accounts[ID].m_aSecurityPin, sizeof(aBuf)); break;
 	case ACC_REGISTER_DATE:				str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_RegisterDate); break;
 	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastLoginDate); break;
+	case ACC_FLAGS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Flags); break;
 	}
 	return aBuf;
 }

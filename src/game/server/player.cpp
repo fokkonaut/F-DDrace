@@ -1774,6 +1774,11 @@ void CPlayer::OnLogin()
 	{
 		GameServer()->SendChatTarget(m_ClientID, "[WARNING] You did not set security pin yet. Check '/pin' for more information.");
 	}
+
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_ZOOMCURSOR)
+		m_ZoomCursor = true;
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_PLOTSPAWN)
+		m_PlotSpawn = true;
 }
 
 void CPlayer::OnLogout()
@@ -1791,10 +1796,17 @@ void CPlayer::OnLogout()
 	CancelPlotAuction();
 	CancelPlotSwap();
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+
 	if (m_TimeoutCode[0] != '\0')
-		str_copy(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode, m_TimeoutCode, sizeof(GameServer()->m_Accounts[GetAccID()].m_aTimeoutCode));
+		str_copy(pAccount->m_aTimeoutCode, m_TimeoutCode, sizeof(pAccount->m_aTimeoutCode));
 
 	m_aSecurityPin[0] = '\0';
+
+	if (m_ZoomCursor)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_ZOOMCURSOR;
+	if (m_PlotSpawn)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_PLOTSPAWN;
 }
 
 void CPlayer::StopPlotEditing()
