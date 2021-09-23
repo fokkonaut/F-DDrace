@@ -507,6 +507,7 @@ public:
 		time_t m_RegisterDate;
 		time_t m_LastLoginDate;
 		int m_Flags;
+		char m_aEmail[128];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -561,6 +562,7 @@ public:
 		ACC_REGISTER_DATE,
 		ACC_LAST_LOGIN_DATE,
 		ACC_FLAGS,
+		ACC_EMAIL,
 		NUM_ACCOUNT_VARIABLES
 	};
 
