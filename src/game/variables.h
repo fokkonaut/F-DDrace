@@ -158,7 +158,6 @@ MACRO_CONFIG_INT(SvVotesPerTick, sv_votes_per_tick, 5, 1, 15, CFGFLAG_SERVER, "N
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 0, 0, 1, CFGFLAG_SERVER, "Whether accounts are activated or deactivated", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path where the server searches the account files", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDataSaveInterval, sv_data_save_interval, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between data saves", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvMaxRegistrationsPerIP, sv_max_registrations_per_ip, 2, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 12 hours", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvDonationFilePath, sv_donation_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the for the donation file", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvPlotFilePath, sv_plot_file_path, 128, "data/plots", CFGFLAG_SERVER, "The path where the server searches the plot files", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvKillLogout, sv_kill_logout, 0, 0, 60, CFGFLAG_SERVER, "Time in seconds a tee can kill after trying to logout (0 = disabled)", AUTHED_ADMIN)
@@ -170,6 +169,11 @@ MACRO_CONFIG_STR(SvExpMsgColorValue, sv_exp_msg_color_value, 4, "595", CFGFLAG_S
 
 MACRO_CONFIG_STR(SvMoneyDropsFilePath, sv_money_drops_file_path, 128, "data/money_drops", CFGFLAG_SERVER, "The path where the server searches the money drops file", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money_history", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
+
+// account system ban
+MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 2, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 12 hours", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 3, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAccSysBanPinFails, sv_acc_sys_ban_pin_fails, 3, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 12 hours", AUTHED_ADMIN)
 
 // saved tees
 MACRO_CONFIG_INT(SvShutdownSaveTees, sv_shutdown_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before shutdown/reload to load them again", AUTHED_ADMIN)

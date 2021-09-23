@@ -953,11 +953,11 @@ private:
 
 	enum
 	{
-		MAX_MUTES = 32,
-		MAX_VOTE_MUTES = 32,
+		MAX_MUTES = 64,
+		MAX_VOTE_MUTES = 64,
 
-		MAX_REGISTER_BANS = 256,
-		REGISTER_BAN_DELAY = 60 * 60 * 12, // 12 hours
+		MAX_ACC_SYS_BANS = 512,
+		ACC_SYS_BAN_DELAY = 60 * 60 * 12, // 12 hours
 	};
 	struct CMute
 	{
@@ -984,18 +984,29 @@ private:
 	const char *GetWhisper(char *pStr, int *pTarget);
 	bool IsVersionBanned(int Version);
 
-	struct CRegisterBan
+	struct CAccountSystemBan
 	{
 		NETADDR m_Addr;
 		int m_Expire;
 		int m_NumRegistrations;
+		int m_NumFailedLogins;
+		int m_NumFailedPins;
 		int64 m_LastAttempt;
 	};
 
-	CRegisterBan m_aRegisterBans[MAX_REGISTER_BANS];
-	int m_NumRegisterBans;
-	int ProcessRegisterBan(int ClientID);
-	bool TryRegisterBan(const NETADDR *pAddr, int Secs);
+	enum
+	{
+		ACC_SYS_REGISTER,
+		ACC_SYS_LOGIN,
+		ACC_SYS_PIN,
+	};
+
+	CAccountSystemBan m_aAccountSystemBans[MAX_ACC_SYS_BANS];
+	int m_NumAccountSystemBans;
+	int ProcessAccountSystemBan(int ClientID, int Type);
+	bool TryAccountSystemBan(const NETADDR *pAddr, int Type, int Secs);
+	bool IsAccountSystemBanned(int ClientID, bool ChatMsg = false);
+
 	void FDDraceInitPreMapInit();
 	void FDDraceInit();
 

@@ -79,7 +79,7 @@ void CGameContext::Construct(int Resetting)
 			m_pHouses[i] = 0;
 		for (int i = 0; i < NUM_MINIGAMES; i++)
 			m_pMinigames[i] = 0;
-		m_NumRegisterBans = 0;
+		m_NumAccountSystemBans = 0;
 	}
 
 	m_aDeleteTempfile[0] = 0;
@@ -1192,14 +1192,14 @@ void CGameContext::OnTick()
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
 		}
 	}
-	for (int i = 0; i < m_NumRegisterBans; i++)
+	for (int i = 0; i < m_NumAccountSystemBans; i++)
 	{
-		// either reset if expired or if ip did not get muted reset it after REGISTER_BAN_DELAY seconds
-		if ((m_aRegisterBans[i].m_Expire > 0 && m_aRegisterBans[i].m_Expire <= Server()->Tick())
-			|| (Server()->Tick() > m_aRegisterBans[i].m_LastAttempt + REGISTER_BAN_DELAY * Server()->TickSpeed()))
+		// either reset if expired or if ip did not get banned reset it after ACC_SYS_BAN_DELAY seconds
+		if ((m_aAccountSystemBans[i].m_Expire > 0 && m_aAccountSystemBans[i].m_Expire <= Server()->Tick())
+			|| (Server()->Tick() > m_aAccountSystemBans[i].m_LastAttempt + ACC_SYS_BAN_DELAY * Server()->TickSpeed()))
 		{
-			m_NumRegisterBans--;
-			m_aRegisterBans[i] = m_aRegisterBans[m_NumRegisterBans];
+			m_NumAccountSystemBans--;
+			m_aAccountSystemBans[i] = m_aAccountSystemBans[m_NumAccountSystemBans];
 		}
 	}
 
@@ -5159,6 +5159,9 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 	if (!pPlayer)
 		return false;
 
+	if (IsAccountSystemBanned(ClientID))
+		return false;
+
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
 		SendChatTarget(ClientID, "You are already logged in");
@@ -5208,6 +5211,8 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 	{
 		SendChatTarget(ClientID, "Wrong password");
 		FreeAccount(ID);
+
+		ProcessAccountSystemBan(ClientID, ACC_SYS_LOGIN);
 		return false;
 	}
 
@@ -5791,6 +5796,127 @@ vec2 CGameContext::RoundPos(vec2 Pos)
 	Pos.x -= (int)Pos.x % 32 - 16;
 	Pos.y -= (int)Pos.y % 32 - 16;
 	return Pos;
+}
+
+bool CGameContext::TryAccountSystemBan(const NETADDR *pAddr, int Type, int Secs)
+{
+	// find a matching register ban for this ip, update expiration time if found
+	for(int i = 0; i < m_NumAccountSystemBans; i++)
+	{
+		if(net_addr_comp(&m_aAccountSystemBans[i].m_Addr, pAddr, false) == 0)
+		{
+			m_aAccountSystemBans[i].m_LastAttempt = Server()->Tick();
+
+			bool Ban = false;
+			switch (Type)
+			{
+			case ACC_SYS_REGISTER:
+			{
+				m_aAccountSystemBans[i].m_NumRegistrations++;
+				Ban = m_aAccountSystemBans[i].m_NumRegistrations > Config()->m_SvAccSysBanRegistrations;
+				break;
+			}
+			case ACC_SYS_LOGIN:
+			{
+				m_aAccountSystemBans[i].m_NumFailedLogins++;
+				Ban = m_aAccountSystemBans[i].m_NumFailedLogins > Config()->m_SvAccSysBanPwFails;
+				break;
+			}
+			case ACC_SYS_PIN:
+			{
+				m_aAccountSystemBans[i].m_NumFailedPins++;
+				Ban = m_aAccountSystemBans[i].m_NumFailedPins > Config()->m_SvAccSysBanPinFails;
+				break;
+			}
+			}
+
+			if (Ban)
+			{
+				m_aAccountSystemBans[i].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+				return true;
+			}
+			return false;
+		}
+	}
+
+	// nothing to update create new one
+	if(m_NumAccountSystemBans < MAX_ACC_SYS_BANS)
+	{
+		m_aAccountSystemBans[m_NumAccountSystemBans].m_Addr = *pAddr;
+		m_aAccountSystemBans[m_NumAccountSystemBans].m_Expire = 0;
+		m_aAccountSystemBans[m_NumAccountSystemBans].m_LastAttempt = Server()->Tick();
+
+		switch (Type)
+		{
+		case ACC_SYS_REGISTER: m_aAccountSystemBans[m_NumAccountSystemBans].m_NumRegistrations = 1; break;
+		case ACC_SYS_LOGIN: m_aAccountSystemBans[m_NumAccountSystemBans].m_NumFailedLogins = 1; break;
+		case ACC_SYS_PIN: m_aAccountSystemBans[m_NumAccountSystemBans].m_NumFailedPins = 1; break;
+		}
+
+		m_NumAccountSystemBans++;
+		return false;
+	}
+	// no free slot found
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "acc", "account system ban array is full");
+	return false;
+}
+
+int CGameContext::ProcessAccountSystemBan(int ClientID, int Type)
+{
+	if(!m_apPlayers[ClientID])
+		return 0;
+
+	if (IsAccountSystemBanned(ClientID, true))
+		return 1;
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	if (TryAccountSystemBan(&Addr, Type, ACC_SYS_BAN_DELAY))
+	{
+		const char *pReason;
+		switch (Type)
+		{
+		case ACC_SYS_REGISTER: pReason = "Registration spam"; break;
+		case ACC_SYS_LOGIN: pReason = "Too many login fails"; break;
+		case ACC_SYS_PIN: pReason = "Too many pin fails"; break;
+		}
+
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You have been banned from the account system for %d seconds (%s)", ACC_SYS_BAN_DELAY, pReason);
+		SendChatTarget(ClientID, aBuf);
+		return 1;
+	}
+
+	return 0;
+}
+
+bool CGameContext::IsAccountSystemBanned(int ClientID, bool ChatMsg)
+{
+	if(!m_apPlayers[ClientID])
+		return false;
+
+	NETADDR Addr;
+	Server()->GetClientAddr(ClientID, &Addr);
+	int AccountSystemBanned = 0;
+
+	for(int i = 0; i < m_NumAccountSystemBans; i++)
+	{
+		if(net_addr_comp(&Addr, &m_aAccountSystemBans[i].m_Addr, false) == 0)
+		{
+			AccountSystemBanned = (m_aAccountSystemBans[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			break;
+		}
+	}
+
+	if (AccountSystemBanned > 0)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof aBuf, "You are banned from the account system for the next %d seconds.", AccountSystemBanned);
+		SendChatTarget(ClientID, aBuf);
+		return true;
+	}
+
+	return false;
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
