@@ -578,7 +578,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode || GameServer()->Arenas()->IsConfiguring(m_ClientID)))
 	{
-		int Size = Server()->IsSevendown(m_ClientID) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
+		int Size = Server()->IsSevendown(SnappingClient) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
 		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, Size));
 		if (!pSpectatorInfo)
 			return;

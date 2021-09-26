@@ -493,7 +493,7 @@ void IGameController::StartRound()
 
 void IGameController::Snap(int SnappingClient)
 {
-	int Size = Server()->IsSevendown(SnappingClient) ? 8*4 : sizeof(CNetObj_PlayerInfo);
+	int Size = Server()->IsSevendown(SnappingClient) ? 8*4 : sizeof(CNetObj_GameData);
 	CNetObj_GameData *pGameData = static_cast<CNetObj_GameData *>(Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, Size));
 	if(!pGameData)
 		return;

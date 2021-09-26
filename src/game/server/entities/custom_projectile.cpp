@@ -186,5 +186,7 @@ void CCustomProjectile::Snap(int SnappingClient)
 		pPickup->m_X = (int)m_Pos.x;
 		pPickup->m_Y = (int)m_Pos.y;
 		pPickup->m_Type = POWERUP_HEALTH;
+		if (Server()->IsSevendown(SnappingClient))
+			((int*)pPickup)[3] = 0;
 	}
 }
