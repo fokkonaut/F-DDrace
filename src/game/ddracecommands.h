@@ -107,6 +107,10 @@ CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whit
 // bot lookup
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
 
+// account system ban
+CONSOLE_COMMAND("acc_sys_bans", "", CFGFLAG_SERVER, ConAccSysBans, this, "Shows list for account system bans", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_sys_unban", "i[index]", CFGFLAG_SERVER, ConAccSysUnban, this, "Unbans index i from accont system bans", AUTHED_ADMIN)
+
 //plots
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)

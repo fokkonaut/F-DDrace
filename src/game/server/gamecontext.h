@@ -957,6 +957,9 @@ private:
 
 	static void ConBotLookup(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConAccSysBans(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccSysUnban(IConsole::IResult* pResult, void* pUserData);
+
 	static void ConToTelePlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlotOwner(IConsole::IResult* pResult, void* pUserData);

@@ -607,12 +607,12 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	if (Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;
 
-	pSelf->m_NumMutes--;
-	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
-
 	net_addr_str(&pSelf->m_aMutes[Victim].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
+
+	pSelf->m_NumMutes--;
+	pSelf->m_aMutes[Victim] = pSelf->m_aMutes[pSelf->m_NumMutes];
 }
 
 // list mutes
@@ -1793,6 +1793,40 @@ void CGameContext::ConBotLookup(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Server()->PrintBotLookup();
+}
+
+void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	for (int i = 0; i < pSelf->m_NumAccountSystemBans; i++)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pSelf->m_aAccountSystemBans[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+
+		char aBuf[256];
+		int Seconds = (pSelf->m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
+		str_format(aBuf, sizeof(aBuf), "#%d '%s', %d seconds left", i, aAddrStr, Seconds);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
+	}
+}
+
+void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Index = pResult->GetInteger(0);
+	if (Index < 0 || Index >= pSelf->m_NumAccountSystemBans)
+		return;
+
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&pSelf->m_aAccountSystemBans[Index].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Removed '%s' from account system bans", aAddrStr);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
+
+	pSelf->m_NumAccountSystemBans--;
+	pSelf->m_aMutes[Index] = pSelf->m_aMutes[pSelf->m_NumAccountSystemBans];
 }
 
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
