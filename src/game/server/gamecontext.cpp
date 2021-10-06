@@ -4926,6 +4926,8 @@ int CGameContext::AddAccount()
 	Account.m_aSecurityPin[0] = '\0';
 	Account.m_RegisterDate = 0;
 	Account.m_LastLoginDate = 0;
+	Account.m_Flags = 0;
+	Account.m_aEmail[0] = '\0';
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
