@@ -971,7 +971,7 @@ private:
 		MAX_VOTE_MUTES = 64,
 
 		MAX_ACC_SYS_BANS = 512,
-		ACC_SYS_BAN_DELAY = 60 * 60 * 12, // 12 hours
+		ACC_SYS_BAN_DELAY = 60 * 60 * 6, // 6 hours
 	};
 	struct CMute
 	{

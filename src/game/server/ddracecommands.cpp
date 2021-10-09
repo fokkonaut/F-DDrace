@@ -1799,16 +1799,24 @@ void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
+	char aBuf[256];
+	int Num = 0;
 	for (int i = 0; i < pSelf->m_NumAccountSystemBans; i++)
 	{
+		if (pSelf->m_aAccountSystemBans[i].m_Expire <= 0)
+			continue;
+
+		Num++;
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&pSelf->m_aAccountSystemBans[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
-		char aBuf[256];
 		int Seconds = (pSelf->m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
 		str_format(aBuf, sizeof(aBuf), "#%d '%s', %d seconds left", i, aAddrStr, Seconds);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
 	}
+
+	str_format(aBuf, sizeof(aBuf), "%d active account system bans", Num);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
 }
 
 void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
@@ -1826,7 +1834,7 @@ void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
 
 	pSelf->m_NumAccountSystemBans--;
-	pSelf->m_aMutes[Index] = pSelf->m_aMutes[pSelf->m_NumAccountSystemBans];
+	pSelf->m_aAccountSystemBans[Index] = pSelf->m_aAccountSystemBans[pSelf->m_NumAccountSystemBans];
 }
 
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
