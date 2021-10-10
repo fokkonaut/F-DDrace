@@ -211,7 +211,7 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	if (m_Flags&SAVE_IDENTITY)
 	{
-		int Index = pChr->GameServer()->FindSavedPlayer(pChr->GetPlayer()->GetCID(), true);
+		int Index = pChr->GameServer()->FindSavedPlayer(pChr->GetPlayer()->GetCID());
 		if (Index != -1)
 			m_Identity = pChr->GameServer()->m_vSavedIdentities[Index];
 	}

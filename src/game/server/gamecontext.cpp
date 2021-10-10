@@ -5508,7 +5508,7 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 	return true;
 }
 
-int CGameContext::FindSavedPlayer(int ClientID, bool SameAddrAndPortOnly)
+int CGameContext::FindSavedPlayer(int ClientID)
 {
 	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_IsDummy)
 		return -1;
@@ -5516,14 +5516,15 @@ int CGameContext::FindSavedPlayer(int ClientID, bool SameAddrAndPortOnly)
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
 
+	int Found = -1;
 	for (unsigned int i = 0; i < m_vSavedIdentities.size(); i++)
 	{
 		SSavedIdentity Info = m_vSavedIdentities[i];
 		bool SameAddrAndPort = net_addr_comp(&Addr, &Info.m_Addr, true) == 0;
-		if (SameAddrAndPortOnly)
+		if (Found != -1)
 		{
 			if (SameAddrAndPort)
-				return i; // for getting the correct savedidentity when shutting down or saving a tee for save drop
+				Found = i; // for getting the correct savedidentity when shutting down or saving a tee for save drop
 			continue;
 		}
 
@@ -5538,11 +5539,11 @@ int CGameContext::FindSavedPlayer(int ClientID, bool SameAddrAndPortOnly)
 		SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
 		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
 		{
-			return i;
+			Found = i;
 		}
 	}
 
-	return -1;
+	return Found;
 }
 
 const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
