@@ -3483,7 +3483,7 @@ void CServer::InitProxyGameServerCheck(int ClientID)
 {
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
-		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &m_vWhitelist[i], false) == 0)
+		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &m_vWhitelist[i].m_Addr, false) == 0)
 		{
 			m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_DONE;
 			return;
@@ -3534,7 +3534,12 @@ void CServer::InitDnsbl(int ClientID)
 		std::vector<NETADDR> List;
 		switch (i)
 		{
-		case 0: List = m_vWhitelist; break;
+		case 0:
+		{
+			for (unsigned int k = 0; k < m_vWhitelist.size(); k++)
+				List.push_back(m_vWhitelist[k].m_Addr);
+			break;
+		} 
 		case 1: List = m_DnsblCache.m_vBlacklist; break;
 		case 2: List = m_DnsblCache.m_vWhitelist; break;
 		default: return;
@@ -3559,20 +3564,27 @@ void CServer::InitDnsbl(int ClientID)
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
 }
 
-void CServer::AddWhitelist(const NETADDR *pAddr)
+void CServer::AddWhitelist(const NETADDR *pAddr, const char *pReason)
 {
 	// avoid double entries
 	for (unsigned int j = 0; j < m_vWhitelist.size(); j++)
-		if (net_addr_comp(pAddr, &m_vWhitelist[j], false) == 0)
+		if (net_addr_comp(pAddr, &m_vWhitelist[j].m_Addr, false) == 0)
 			return;
 
-	m_vWhitelist.push_back(*pAddr);
+	SWhitelist Entry;
+	Entry.m_Addr = *pAddr;
+	str_copy(Entry.m_aReason, pReason, sizeof(Entry.m_aReason));
+	m_vWhitelist.push_back(Entry);
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
 
+	char aReason[64] = "";
+	if (pReason[0])
+		str_format(aReason, sizeof(aReason), "(%s)", pReason);
+
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Added '%s' to whitelist", aAddrStr);
+	str_format(aBuf, sizeof(aBuf), "Added '%s' to whitelist %s", aAddrStr, aReason);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
 }
 
@@ -3580,7 +3592,7 @@ void CServer::RemoveWhitelist(const NETADDR *pAddr)
 {
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
-		if (net_addr_comp(pAddr, &m_vWhitelist[i], false) == 0)
+		if (net_addr_comp(pAddr, &m_vWhitelist[i].m_Addr, false) == 0)
 		{
 			RemoveWhitelistByIndex(i);
 			break;
@@ -3594,7 +3606,7 @@ void CServer::RemoveWhitelistByIndex(unsigned int Index)
 		return;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&m_vWhitelist[Index], aAddrStr, sizeof(aAddrStr), false);
+	net_addr_str(&m_vWhitelist[Index].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Removed '%s' from whitelist", aAddrStr);
@@ -3608,10 +3620,14 @@ void CServer::PrintWhitelist()
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&m_vWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
+		net_addr_str(&m_vWhitelist[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+
+		char aReason[64] = "";
+		if (m_vWhitelist[i].m_aReason[0])
+			str_format(aReason, sizeof(aReason), "(%s)", m_vWhitelist[i].m_aReason);
 
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "#%d '%s'", i, aAddrStr);
+		str_format(aBuf, sizeof(aBuf), "#%d '%s' %s", i, aAddrStr, aReason);
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
 	}
 }
@@ -3628,8 +3644,8 @@ void CServer::SaveWhitelist()
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
-		net_addr_str(&m_vWhitelist[i], aAddrStr, sizeof(aAddrStr), false);
-		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\"", aAddrStr);
+		net_addr_str(&m_vWhitelist[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\" \"%s\"", aAddrStr, m_vWhitelist[i].m_aReason);
 		Whitelist << aBuf << "\n";
 	}
 }

@@ -426,9 +426,14 @@ public:
 	} m_DnsblCache;
 
 	// white list in case iphub.info falsely flagged someone or to whitelist a server ip in case no proxy game server string is set and someone falsely got banned as "proxy game server"
-	std::vector<NETADDR> m_vWhitelist;
+	struct SWhitelist
+	{
+		NETADDR m_Addr;
+		char m_aReason[64];
+	};
+	std::vector<SWhitelist> m_vWhitelist;
 	virtual void SaveWhitelist();
-	virtual void AddWhitelist(const NETADDR *pAddr);
+	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason);
 	virtual void RemoveWhitelist(const NETADDR *pAddr);
 	virtual void RemoveWhitelistByIndex(unsigned int Index);
 	virtual void PrintWhitelist();

@@ -67,7 +67,7 @@ public:
 	virtual void PrintBotLookup() = 0;
 
 	virtual void SaveWhitelist() = 0;
-	virtual void AddWhitelist(const NETADDR *pAddr) = 0;
+	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason) = 0;
 	virtual void RemoveWhitelist(const NETADDR *pAddr) = 0;
 	virtual void RemoveWhitelistByIndex(unsigned int Index) = 0;
 	virtual void PrintWhitelist() = 0;

@@ -1759,10 +1759,11 @@ void CGameContext::ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	str_copy(aAddrStr, pResult->GetString(0), sizeof(aAddrStr));
+	const char *pReason = pResult->NumArguments() == 2 ? pResult->GetString(1) : "";
 
 	NETADDR Addr;
 	if (net_addr_from_str(&Addr, aAddrStr) == 0)
-		pSelf->Server()->AddWhitelist(&Addr);
+		pSelf->Server()->AddWhitelist(&Addr, pReason);
 }
 
 void CGameContext::ConWhitelistRemove(IConsole::IResult* pResult, void* pUserData)

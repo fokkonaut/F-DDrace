@@ -100,7 +100,7 @@ CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "V
 CONSOLE_COMMAND("view_cursor_zoomed", "?i[id]", CFGFLAG_SERVER, ConViewCursorZoomed, this, "View zoomed cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
 
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
-CONSOLE_COMMAND("whitelist_add", "s[ip]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
+CONSOLE_COMMAND("whitelist_add", "s[ip] ?s[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist_remove", "s[ip/index]", CFGFLAG_SERVER, ConWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whitelist for DNSBL/PGSC", AUTHED_ADMIN)
 
@@ -108,8 +108,8 @@ CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whit
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
 
 // account system ban
+CONSOLE_COMMAND("acc_sys_unban", "i[index]", CFGFLAG_SERVER, ConAccSysUnban, this, "Unbans index i from account system bans", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_sys_bans", "", CFGFLAG_SERVER, ConAccSysBans, this, "Shows list for account system bans", AUTHED_ADMIN)
-CONSOLE_COMMAND("acc_sys_unban", "i[index]", CFGFLAG_SERVER, ConAccSysUnban, this, "Unbans index i from accont system bans", AUTHED_ADMIN)
 
 //plots
 CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConToTelePlot, this, "Teleports player v to plot i", AUTHED_ADMIN)
