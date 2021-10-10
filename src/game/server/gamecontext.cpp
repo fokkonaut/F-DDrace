@@ -5881,7 +5881,7 @@ int CGameContext::ProcessAccountSystemBan(int ClientID, int Type)
 	Server()->GetClientAddr(ClientID, &Addr);
 	if (TryAccountSystemBan(&Addr, Type, ACC_SYS_BAN_DELAY))
 	{
-		const char *pReason;
+		const char *pReason = "";
 		switch (Type)
 		{
 		case ACC_SYS_REGISTER: pReason = "Registration spam"; break;
