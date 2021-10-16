@@ -488,9 +488,8 @@ void CArenas::IncreaseScore(int Fight, int Index)
 	if (m_aFights[Fight].m_aParticipants[Index].m_Score >= m_aFights[Fight].m_ScoreLimit)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "'%s' won the round, final scores: %d - %d", Server()->ClientName(ClientID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
-		GameServer()->SendChatTarget(ClientID, aBuf);
-		GameServer()->SendChatTarget(OtherID, aBuf);
+		str_format(aBuf, sizeof(aBuf), "'%s' won a 1vs1 round against '%s'! Final scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 
 		EndFight(Fight);
 	}
