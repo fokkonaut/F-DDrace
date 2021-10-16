@@ -1469,11 +1469,31 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_apPlayers[ClientID]->CheckClanProtection();
 
+	SendStartMessages(ClientID);
+}
+
+void CGameContext::SendStartMessages(int ClientID)
+{
+	// send active vote
+	if(m_VoteCloseTime)
+		SendVoteSet(m_VoteType, ClientID);
+
+	// send settings
+	SendSettings(ClientID);
+
 	if (!Server()->IsSevendown(ClientID))
 	{
 		m_pController->UpdateGameInfo(ClientID);
 		SendChatCommands(ClientID);
 	}
+}
+
+void CGameContext::MapDesignChangeDone(int ClientID)
+{
+	SendStartMessages(ClientID);
+
+	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
+	SendTuningParams(ClientID, Zone);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1498,18 +1518,11 @@ void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, Dummy, AsSpec);
 
-	if(Dummy)
+	if (Dummy)
 		return;
-
-	// send active vote
-	if(m_VoteCloseTime)
-		SendVoteSet(m_VoteType, ClientID);
 
 	// send motd
 	SendMotd(FormatMotd(Config()->m_SvMotd), ClientID);
-
-	// send settings
-	SendSettings(ClientID);
 }
 
 void CGameContext::OnClientTeamChange(int ClientID)
@@ -5622,6 +5635,12 @@ void CGameContext::CreateFolders()
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
+	// map designs
+	str_format(aPath, sizeof(aPath), "%s", Config()->m_SvMapDesignPath);
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 

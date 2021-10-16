@@ -63,6 +63,7 @@ public:
 	virtual void DummyLeave(int DummyID) = 0;
 
 	virtual bool IsSevendown(int ClientID) = 0;
+	virtual void ChangeMapDesign(int ClientID, const char *pName) = 0;
 
 	virtual void PrintBotLookup() = 0;
 
@@ -261,6 +262,7 @@ public:
 
 	virtual void OnClientConnected(int ClientID, bool AsSpec) = 0;
 	virtual void OnClientEnter(int ClientID) = 0;
+	virtual void MapDesignChangeDone(int ClientID) = 0;
 	virtual void OnClientDrop(int ClientID, const char *pReason) = 0;
 	virtual void OnClientAuth(int ClientID, int Level) = 0;
 	virtual void OnClientDirectInput(int ClientID, void *pInput) = 0;

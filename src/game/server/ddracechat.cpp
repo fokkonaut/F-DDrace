@@ -9,6 +9,7 @@
 #include <game/server/entities/character.h>
 #include <stdio.h>
 #include "score.h"
+#include <engine/server/server.h>
 
 bool CheckClientID(int ClientID);
 
@@ -2561,18 +2562,48 @@ void CGameContext::ConMutePlayer(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
+void CGameContext::ConDesign(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+	{
+		pSelf->Server()->ChangeMapDesign(pResult->m_ClientID, pResult->GetString(0));
+		return;
+	}
+
+	char aDesigns[256] = "default";
+	char aTemp[128];
+	aTemp[0] = 0;
+	for (int i = 0; i < CServer::NUM_MAP_DESIGNS; i++)
+	{
+		if (((CServer *)pSelf->Server())->m_aMapDesign[i].m_aName[0] == '\0')
+			continue;
+
+		str_format(aTemp, sizeof(aTemp), "%s, ", aDesigns);
+		str_format(aDesigns, sizeof(aDesigns), "%s%s", aTemp, ((CServer *)pSelf->Server())->m_aMapDesign[i].m_aName);
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Map Designs ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can set one of the following designs by using '/design <name>':");
+	pSelf->SendChatTarget(pResult->m_ClientID, aDesigns);
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aMinigames[256];
-	char aTemp2[256];
+	char aTemp[256];
 	aMinigames[0] = 0;
-	aTemp2[0] = 0;
+	aTemp[0] = 0;
 	for (int i = 0; i < NUM_MINIGAMES; i++)
 	{
 		if (i != MINIGAME_BLOCK)
-			str_format(aTemp2, sizeof(aTemp2), "%s, ", aMinigames);
-		str_format(aMinigames, sizeof(aMinigames), "%s%s", aTemp2, pSelf->GetMinigameCommand(i));
+			str_format(aTemp, sizeof(aTemp), "%s, ", aMinigames);
+		str_format(aMinigames, sizeof(aMinigames), "%s%s", aTemp, pSelf->GetMinigameCommand(i));
 	}
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Minigames ~~~");

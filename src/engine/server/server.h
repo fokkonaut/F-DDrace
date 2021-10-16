@@ -20,6 +20,7 @@
 #include <engine/engine.h>
 #include <list>
 #include <vector>
+#include <string>
 
 #if defined (CONF_SQL)
 	#include "sql_connector.h"
@@ -184,6 +185,8 @@ public:
 		int64 m_TrafficSince;
 
 		bool m_Sevendown;
+		bool m_DesignChange;
+		int m_CurrentMapDesign;
 
 		int m_DnsblState;
 		CJob m_DnsblLookup;
@@ -240,6 +243,25 @@ public:
 	unsigned char *m_pFakeMapData;
 	unsigned int m_FakeMapSize;
 	void LoadUpdateFakeMap();
+
+	// map designs
+	enum
+	{
+		NUM_MAP_DESIGNS = 8
+	};
+	struct MapDesign
+	{
+		char m_aName[128];
+		SHA256_DIGEST m_Sha256;
+		unsigned int m_Crc;
+		unsigned char *m_pData;
+		unsigned int m_Size;
+	} m_aMapDesign[NUM_MAP_DESIGNS];
+	std::vector<std::string> m_vMapDesignFiles;
+	void LoadMapDesigns();
+	static int InitMapDesign(const char *pName, int IsDir, int StorageType, void *pUser);
+	void ChangeMapDesign(int ClientID, const char *pName);
+	void SendMapDesign(int ClientID, int Design);
 
 	//maplist
 	struct CMapListEntry

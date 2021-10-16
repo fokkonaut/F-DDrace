@@ -632,6 +632,9 @@ public:
 	vec2 RoundPos(vec2 Pos);
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
 
+	virtual void MapDesignChangeDone(int ClientID);
+	void SendStartMessages(int ClientID);
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 
@@ -819,6 +822,7 @@ private:
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
 	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
 	static void ConMutePlayer(IConsole::IResult* pResult, void* pUserData);
+	static void ConDesign(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

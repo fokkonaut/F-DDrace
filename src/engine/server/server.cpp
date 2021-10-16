@@ -287,6 +287,9 @@ void CServer::CClient::Reset()
 		m_aIdMap[i] = -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aReverseIdMap[i] = -1;
+
+	m_CurrentMapDesign = -1;
+	m_DesignChange = false;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_RegisterSevendown(true)
@@ -1016,9 +1019,23 @@ void CServer::SendMapData(int ClientID, int Chunk, bool FakeMap)
 	unsigned int Offset = Chunk * ChunkSize;
 	int Last = 0;
 
-	unsigned int MapSize = FakeMap ? m_FakeMapSize : m_CurrentMapSize;
-	unsigned char *pMapData = FakeMap ? m_pFakeMapData : m_pCurrentMapData;
-	unsigned int MapCrc = FakeMap ? m_FakeMapCrc : m_CurrentMapCrc;
+	unsigned int MapSize = m_CurrentMapSize;
+	unsigned char *pMapData = m_pCurrentMapData;
+	unsigned int MapCrc = m_CurrentMapCrc;
+
+	int Design = m_aClients[ClientID].m_CurrentMapDesign;
+	if (FakeMap)
+	{
+		MapSize = m_FakeMapSize;
+		pMapData = m_pFakeMapData;
+		MapCrc = m_FakeMapCrc;
+	}
+	else if (m_aClients[ClientID].m_DesignChange && Design != -1)
+	{
+		MapSize = m_aMapDesign[Design].m_Size;
+		pMapData = m_aMapDesign[Design].m_pData;
+		MapCrc = m_aMapDesign[Design].m_Crc;
+	}
 
 	// drop faulty map data requests
 	if(Chunk < 0 || Offset > MapSize)
@@ -1324,7 +1341,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_REQUEST_MAP_DATA)
 		{
 			bool SendingFakeMap = m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP;
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_DesignChange || SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
 				if (m_aClients[ClientID].m_Sevendown)
 				{
@@ -1378,8 +1395,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_READY)
 		{
 			bool SendingFakeMap = m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP;
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_DesignChange || SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
+				if (m_aClients[ClientID].m_DesignChange)
+				{
+					m_aClients[ClientID].m_DesignChange = false;
+					SendConnectionReady(ClientID);
+					GameServer()->MapDesignChangeDone(ClientID);
+					return;
+				}
 				if (SendingFakeMap)
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
@@ -2076,6 +2100,7 @@ int CServer::LoadMap(const char *pMapName)
 	}
 
 	LoadUpdateFakeMap();
+	LoadMapDesigns();
 
 	return 1;
 }
@@ -3562,6 +3587,123 @@ void CServer::InitDnsbl(int ClientID)
 	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
 	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+}
+
+void CServer::LoadMapDesigns()
+{
+	for (int i = 0; i < NUM_MAP_DESIGNS; i++)
+	{
+		m_aMapDesign[i].m_aName[0] = '\0';
+		m_aMapDesign[i].m_Sha256 = SHA256_ZEROED;
+		m_aMapDesign[i].m_Crc = 0;
+		m_aMapDesign[i].m_pData = 0;
+		m_aMapDesign[i].m_Size = 0;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, GetCurrentMapName());
+	m_vMapDesignFiles.clear();
+	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, InitMapDesign, this);
+
+	for (unsigned int i = 0; i < m_vMapDesignFiles.size(); i++)
+	{
+		if (i >= NUM_MAP_DESIGNS)
+			break;
+
+		str_format(aPath, sizeof(aPath), "%s/%s/%s.map", Config()->m_SvMapDesignPath, GetCurrentMapName(), m_vMapDesignFiles[i].c_str());
+		str_copy(m_aMapDesign[i].m_aName, m_vMapDesignFiles[i].c_str(), sizeof(m_aMapDesign[i].m_aName));
+
+		IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL);
+		if (File)
+		{
+			m_aMapDesign[i].m_Size = (unsigned int)io_length(File);
+			if(m_aMapDesign[i].m_pData)
+				mem_free(m_aMapDesign[i].m_pData);
+			m_aMapDesign[i].m_pData = (unsigned char *)mem_alloc(m_aMapDesign[i].m_Size, 1);
+			io_read(File, m_aMapDesign[i].m_pData, m_aMapDesign[i].m_Size);
+			io_close(File);
+		}
+
+		CDataFileReader Reader;
+		Reader.Open(Storage(), aPath, IStorage::TYPE_ALL);
+		if (Reader.IsOpen())
+		{
+			m_aMapDesign[i].m_Sha256 = Reader.Sha256();
+			m_aMapDesign[i].m_Crc = Reader.Crc();
+		}
+		Reader.Close();
+	}
+}
+
+int CServer::InitMapDesign(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+
+	if (!IsDir && str_endswith(pName, ".map"))
+	{
+		std::string Name = pName;
+		pThis->m_vMapDesignFiles.push_back(Name.erase(Name.size() - 4)); // remove .map
+	}
+
+	return 0;
+}
+
+void CServer::ChangeMapDesign(int ClientID, const char *pName)
+{
+	int Design = m_aClients[ClientID].m_CurrentMapDesign;
+	if (str_comp_nocase(pName, "default") == 0)
+		Design = -1;
+
+	for (int i = 0; i < NUM_MAP_DESIGNS; i++)
+	{
+		if (str_comp_nocase(pName, m_aMapDesign[i].m_aName) == 0)
+		{
+			Design = i;
+			break;
+		}
+	}
+
+	if (Design != m_aClients[ClientID].m_CurrentMapDesign)
+		SendMapDesign(ClientID, Design);
+}
+
+void CServer::SendMapDesign(int ClientID, int Design)
+{
+	m_aClients[ClientID].m_DesignChange = true;
+	m_aClients[ClientID].m_CurrentMapDesign = Design;
+
+	if (Design == -1)
+	{
+		SendMap(ClientID);
+		return;
+	}
+
+	char aName[128];
+	str_format(aName, sizeof(aName), "%s_%s", GetMapName(), m_aMapDesign[Design].m_aName);
+
+	{
+		CMsgPacker Msg(NETMSG_MAP_DETAILS, true);
+		Msg.AddString(aName, 0);
+		Msg.AddRaw(&m_aMapDesign[Design].m_Sha256.data, sizeof(m_aMapDesign[Design].m_Sha256.data));
+		Msg.AddInt(m_aMapDesign[Design].m_Crc);
+		Msg.AddInt(m_aMapDesign[Design].m_Size);
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	}
+	{
+		CMsgPacker Msg(NETMSG_MAP_CHANGE, true);
+		Msg.AddString(aName, 0);
+		Msg.AddInt(m_aMapDesign[Design].m_Crc);
+		Msg.AddInt(m_aMapDesign[Design].m_Size);
+		if (!m_aClients[ClientID].m_Sevendown)
+		{
+			Msg.AddInt(m_MapChunksPerRequest);
+			Msg.AddInt(MAP_CHUNK_SIZE);
+			Msg.AddRaw(&m_aMapDesign[Design].m_Sha256, sizeof(m_aMapDesign[Design].m_Sha256));
+		}
+		SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+	}
+
+	m_aClients[ClientID].m_MapChunk = 0;
 }
 
 void CServer::AddWhitelist(const NETADDR *pAddr, const char *pReason)
