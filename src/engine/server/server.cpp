@@ -3630,8 +3630,8 @@ void CServer::LoadMapDesigns()
 		{
 			m_aMapDesign[i].m_Sha256 = Reader.Sha256();
 			m_aMapDesign[i].m_Crc = Reader.Crc();
+			Reader.Close();
 		}
-		Reader.Close();
 	}
 }
 
@@ -3642,7 +3642,12 @@ int CServer::InitMapDesign(const char *pName, int IsDir, int StorageType, void *
 	if (!IsDir && str_endswith(pName, ".map"))
 	{
 		std::string Name = pName;
-		pThis->m_vMapDesignFiles.push_back(Name.erase(Name.size() - 4)); // remove .map
+		Name = Name.erase(Name.size() - 4); // remove .map
+		for (unsigned int i = 0; i < pThis->m_vMapDesignFiles.size(); i++)
+			if (pThis->m_vMapDesignFiles[i] == Name)
+				return 0;
+
+		pThis->m_vMapDesignFiles.push_back(Name);
 	}
 
 	return 0;
