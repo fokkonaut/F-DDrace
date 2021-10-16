@@ -3630,8 +3630,8 @@ void CServer::LoadMapDesigns()
 		{
 			m_aMapDesign[i].m_Sha256 = Reader.Sha256();
 			m_aMapDesign[i].m_Crc = Reader.Crc();
-			Reader.Close();
 		}
+		Reader.Close();
 	}
 }
 
