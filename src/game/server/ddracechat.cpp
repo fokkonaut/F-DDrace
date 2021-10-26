@@ -1336,7 +1336,7 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
-		pSelf->SendChatTarget(pResult->m_ClientID, "Tele Rifle: not bought");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Portal Rifle: not bought");
 
 	str_format(aBuf, sizeof(aBuf), "Contact: %s", pAccount->m_aContact);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
