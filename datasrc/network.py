@@ -43,6 +43,8 @@ CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "END
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
                   "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA"])
 
+EntityClasses = Flags("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
+
 
 RawHeader = '''
 
@@ -100,6 +102,7 @@ Enums = [
 	ChatModes,
 	GameMsgIDs,
 	Authed,
+	EntityClasses,
 ]
 
 Flags = [
@@ -344,6 +347,13 @@ Objects = [
 		NetIntAny("m_Status6"),
 		NetIntAny("m_Status7"),
 		NetIntAny("m_Status8"),
+	]),
+
+	# Switch info for map items
+	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_Layer"),
+		NetIntAny("m_EntityClass"),
 	]),
 ]
 

@@ -120,17 +120,22 @@ void CLight::Snap(int SnappingClient)
 			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
-
-	if (Char && Char->IsAlive()
-			&& m_Layer == LAYER_SWITCH
-			&& !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]
-			&& (Tick))
+	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+	if(!pEntData)
 		return;
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-			NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	pEntData->m_SwitchNumber = m_Number;
+	pEntData->m_Layer = m_Layer;
+	pEntData->m_EntityClass = ENTITYCLASS_LIGHT;
 
+	if (SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_SWITCH)
+	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
+		if (Char && Char->IsAlive() && m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()] && (Tick))
+			return;
+	}
+
+	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 	if (!pObj)
 		return;
 

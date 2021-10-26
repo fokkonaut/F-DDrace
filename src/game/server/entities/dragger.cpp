@@ -184,9 +184,12 @@ void CDragger::Snap(int SnappingClient)
 	else if (NetworkClipped(SnappingClient, m_Pos))
 		return;
 
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-	if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
-		return;
+	if (SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_SWITCH)
+	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
+		if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && m_Number && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()] && (!Tick)))
+			return;
+	}
 
 	if (pChr && pChr->IsAlive())
 	{
@@ -206,6 +209,14 @@ void CDragger::Snap(int SnappingClient)
 		return;
 	}
 
+	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+	if(!pEntData)
+		return;
+
+	pEntData->m_SwitchNumber = m_Number;
+	pEntData->m_Layer = m_Layer;
+	pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
+
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
 	if (!pObj)
 		return;
@@ -223,10 +234,17 @@ void CDragger::Snap(int SnappingClient)
 		pObj->m_FromY = (int)m_Pos.y;
 	}
 
-	int StartTick = m_EvalTick;
-	if (StartTick < Server()->Tick() - 4)
-		StartTick = Server()->Tick() - 4;
-	else if (StartTick > Server()->Tick())
-		StartTick = Server()->Tick();
-	pObj->m_StartTick = StartTick;
+	if (SnappingClient == -1 || GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_SWITCH)
+	{
+		pObj->m_StartTick = 0;
+	}
+	else
+	{
+		int StartTick = m_EvalTick;
+		if (StartTick < Server()->Tick() - 4)
+			StartTick = Server()->Tick() - 4;
+		else if (StartTick > Server()->Tick())
+			StartTick = Server()->Tick();
+		pObj->m_StartTick = StartTick;
+	}
 }

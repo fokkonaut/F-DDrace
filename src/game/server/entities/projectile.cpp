@@ -303,10 +303,24 @@ void CProjectile::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient, m_CurPos))
 		return;
 
-	CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
-	if (pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
-		return;
+	if(m_LifeSpan == -2)
+	{
+		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(!pEntData)
+			return;
+
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PROJECTILE;
+	}
+
+	if (SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_SWITCH)
+	{
+		CCharacter* pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % ((m_Explosive) ? 6 : 20);
+		if (pSnapChar && pSnapChar->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pSnapChar->Team()] && (!Tick)))
+			return;
+	}
 
 	CCharacter* pOwnerChar = 0;
 	Mask128 TeamMask = Mask128();
