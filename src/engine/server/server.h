@@ -472,7 +472,7 @@ public:
 
 	const char *GetClientVersionStr(int ClientID) const;
 
-	bool IsUniqueAddress(int ClientID);
+	virtual bool IsUniqueAddress(int ClientID);
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters

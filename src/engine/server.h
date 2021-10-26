@@ -73,6 +73,8 @@ public:
 	virtual void RemoveWhitelistByIndex(unsigned int Index) = 0;
 	virtual void PrintWhitelist() = 0;
 
+	virtual bool IsUniqueAddress(int ClientID) = 0;
+
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T>

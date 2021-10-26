@@ -230,6 +230,8 @@ void CPlayer::Reset()
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_aStrongWeakID[i] = 0;
+
+	m_LastDesignChangeTry = 0;
 }
 
 void CPlayer::Tick()
