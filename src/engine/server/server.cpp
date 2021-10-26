@@ -3617,11 +3617,12 @@ void CServer::LoadMapDesigns()
 			break;
 
 		str_format(aPath, sizeof(aPath), "%s/%s/%s.map", Config()->m_SvMapDesignPath, GetCurrentMapName(), m_vMapDesignFiles[i].c_str());
-		str_copy(m_aMapDesign[i].m_aName, m_vMapDesignFiles[i].c_str(), sizeof(m_aMapDesign[i].m_aName));
 
 		IOHANDLE File = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL);
 		if (File)
 		{
+			str_copy(m_aMapDesign[i].m_aName, m_vMapDesignFiles[i].c_str(), sizeof(m_aMapDesign[i].m_aName));
+
 			m_aMapDesign[i].m_Size = (unsigned int)io_length(File);
 			if(m_aMapDesign[i].m_pData)
 				mem_free(m_aMapDesign[i].m_pData);
