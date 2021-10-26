@@ -1491,6 +1491,7 @@ void CGameContext::SendStartMessages(int ClientID)
 void CGameContext::MapDesignChangeDone(int ClientID)
 {
 	SendStartMessages(ClientID);
+	m_World.OnMapDesignChange(ClientID);
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);

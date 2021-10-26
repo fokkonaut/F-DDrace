@@ -79,6 +79,7 @@ private:
 		int Remove(int MapID);
 		void InsertNextEmpty(int ClientID);
 		void OnSetTimedOut(int OrigID);
+		void OnMapDesignChange();
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);
 
@@ -96,6 +97,7 @@ public:
 	void InitPlayerMap(int ClientID) { m_aMap[ClientID].InitPlayer(); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
+	void OnMapDesignChange(int ClientID) { m_aMap[ClientID].OnMapDesignChange(); }
 
 	CGameWorld();
 	~CGameWorld();
