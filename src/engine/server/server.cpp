@@ -1379,8 +1379,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					else
 						m_aClients[ClientID].m_MapChunk++;
 
+					unsigned char *pMapData = m_pCurrentMapData;
+
+					int Design = m_aClients[ClientID].m_CurrentMapDesign;
+					if (m_aClients[ClientID].m_DesignChange && Design != -1)
+						pMapData = m_aMapDesign[Design].m_pData;
+
 					CMsgPacker Msg(NETMSG_MAP_DATA, true);
-					Msg.AddRaw(&m_pCurrentMapData[Offset], ChunkSize);
+					Msg.AddRaw(&pMapData[Offset], ChunkSize);
 					SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 
 					if(Config()->m_Debug)
