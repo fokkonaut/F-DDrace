@@ -298,13 +298,16 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-	if(!pEntData)
-		return;
+	if (GameServer()->GetPlayerChar(SnappingClient) && !NetworkClipped(SnappingClient, false, true))
+	{
+		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(!pEntData)
+			return;
 
-	pEntData->m_SwitchNumber = m_Number;
-	pEntData->m_Layer = m_Layer;
-	pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
+		pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
+	}
 
 	if (SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_SWITCH)
 	{

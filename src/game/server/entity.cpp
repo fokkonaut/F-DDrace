@@ -31,12 +31,12 @@ CEntity::~CEntity()
 	Server()->SnapFreeID(m_ID);
 }
 
-int CEntity::NetworkClipped(int SnappingClient, bool CheckShowAll)
+int CEntity::NetworkClipped(int SnappingClient, bool CheckShowAll, bool DefaultRange)
 {
-	return NetworkClipped(SnappingClient, m_Pos, CheckShowAll);
+	return NetworkClipped(SnappingClient, m_Pos, CheckShowAll, DefaultRange);
 }
 
-int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll)
+int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll, bool DefaultRange)
 {
 	if (SnappingClient == -1 || (CheckShowAll && GameServer()->m_apPlayers[SnappingClient]->m_ShowAll))
 		return 0;
@@ -44,7 +44,7 @@ int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll
 	// Border to also receive objects a bit off the screen so they dont pop up, 15 blocks should be okay
 	float Border = 32.f * 15.f;
 	vec2 ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
-	if (m_PlotID > 0)
+	if (m_PlotID > 0 || DefaultRange)
 		ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_StandardShowDistance;
 
 	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x-CheckPos.x;

@@ -123,21 +123,24 @@ void CGun::Snap(int SnappingClient)
 			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-	CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-	if(!pEntData)
-		return;
+	if (GameServer()->GetPlayerChar(SnappingClient) && !NetworkClipped(SnappingClient, false, true))
+	{
+		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if(!pEntData)
+			return;
 
-	pEntData->m_SwitchNumber = m_Number;
-	pEntData->m_Layer = m_Layer;
+		pEntData->m_SwitchNumber = m_Number;
+		pEntData->m_Layer = m_Layer;
 
-	if(m_Explosive && !m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_NORMAL;
-	else if(m_Explosive && m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_EXPLOSIVE;
-	else if(!m_Explosive && m_Freeze)
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
-	else
-		pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
+		if(m_Explosive && !m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_NORMAL;
+		else if(m_Explosive && m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_EXPLOSIVE;
+		else if(!m_Explosive && m_Freeze)
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
+		else
+			pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
+	}
 
 	if (SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_SWITCH)
 	{
