@@ -723,8 +723,7 @@ void CGameContext::SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID)
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, TargetID);
 
 	// F-DDrace
-	if (m_apPlayers[ClientID])
-		m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
+	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = TeeInfos;
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)

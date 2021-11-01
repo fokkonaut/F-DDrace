@@ -1545,7 +1545,8 @@ void CPlayer::SpectatePlayerName(const char* pName)
 
 void CPlayer::RainbowTick()
 {
-	if (Server()->Tick() % 6 != 0 || !m_pCharacter)
+	// snapping happens every 2 ticks
+	if (Server()->Tick() % 2 != 0)
 		return;
 
 	bool IsRainbowHooked = m_pCharacter->GetPowerHooked() == RAINBOW;
@@ -1571,9 +1572,16 @@ void CPlayer::RainbowTick()
 		Info.m_Sevendown.m_ColorBody = Info.m_Sevendown.m_ColorFeet = BaseColor + Color;
 	}
 
+	// always update even if not sent to 0.7 clients yet and only updates 0.6 clients
+	m_CurrentInfo.m_TeeInfos = Info;
+
+	// 0.7 clients have heavy impact on rainbow, thats why they get a bit stopped here
+	if (!m_pCharacter)
+		return;
+
 	// only send rainbow updates to people close to you, to reduce network traffic
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (GameServer()->m_apPlayers[i] && !m_pCharacter->NetworkClipped(i))
+		if (GameServer()->m_apPlayers[i] && !m_pCharacter->NetworkClipped(i, false, true))
 			GameServer()->SendSkinChange(Info, m_ClientID, i);
 }
 
