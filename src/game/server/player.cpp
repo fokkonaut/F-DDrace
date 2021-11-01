@@ -1789,6 +1789,8 @@ void CPlayer::OnLogin()
 		m_ZoomCursor = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_PLOTSPAWN)
 		m_PlotSpawn = true;
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_SILENTFARM)
+		m_SilentFarm = true;
 }
 
 void CPlayer::OnLogout()
@@ -1818,6 +1820,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_ZOOMCURSOR;
 	if (m_PlotSpawn)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_PLOTSPAWN;
+	if (m_SilentFarm)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_SILENTFARM;
 }
 
 void CPlayer::StopPlotEditing()

@@ -571,6 +571,7 @@ public:
 	{
 		ACCFLAG_ZOOMCURSOR = 1<<0,
 		ACCFLAG_PLOTSPAWN = 1<<1,
+		ACCFLAG_SILENTFARM = 1<<2,
 	};
 
 	// money drops
