@@ -2071,7 +2071,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			pCharacter->m_Emote = EMOTE_BLINK;
 	}
 
-	if (m_pPlayer->m_Halloween)
+	if (m_pPlayer->m_Halloween && SnappingClient == m_pPlayer->GetCID())
 	{
 		if (1200 - ((Server()->Tick() - m_LastAction) % (1200)) < 5)
 		{
