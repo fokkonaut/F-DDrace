@@ -298,7 +298,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	if (m_Layer != LAYER_SWITCH)
+	if (m_Layer == LAYER_SWITCH)
 	{
 		if (GameServer()->GetPlayerChar(SnappingClient) && !NetworkClipped(SnappingClient, false, true))
 		{
