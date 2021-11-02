@@ -4216,6 +4216,12 @@ int CCharacter::HasFlag()
 	return ((CGameControllerDDRace*)GameServer()->m_pController)->HasFlag(this);
 }
 
+bool CCharacter::SendExtendedEntity(CEntity *pEntity)
+{
+	return !m_pPlayer->IsPaused() && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !pEntity->NetworkClipped(m_pPlayer->GetCID(), false, true)
+		&& (pEntity->m_PlotID < PLOT_START || pEntity->m_PlotID == GetCurrentTilePlotID());
+}
+
 void CCharacter::CheckMoved()
 {
 	if (!m_pPlayer->m_ResumeMoved || !m_pPlayer->IsPaused() || m_PrevPos == m_Pos)

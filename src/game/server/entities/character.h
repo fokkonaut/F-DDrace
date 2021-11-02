@@ -470,6 +470,9 @@ public:
 	// ResetNumInputs() gets called when player is paused or when (un)setting teecontrol. its to prevent weird shooting and weapon switching after unpause/(un)setting teecontrol
 	void ResetNumInputs() { m_NumInputs = 0; };
 
+	// EntityEx fills up the snap quite fast, so we try to avoid sending it as much as possible
+	bool SendExtendedEntity(CEntity *pEntity);
+
 	// spawnweapons
 	bool m_InitializedSpawnWeapons;
 	bool m_aSpawnWeaponActive[3];

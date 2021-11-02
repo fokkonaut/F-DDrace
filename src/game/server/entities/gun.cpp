@@ -123,7 +123,8 @@ void CGun::Snap(int SnappingClient)
 			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && !NetworkClipped(SnappingClient, false, true))
+	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+	if (pChr && pChr->SendExtendedEntity(this))
 	{
 		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 		if(!pEntData)

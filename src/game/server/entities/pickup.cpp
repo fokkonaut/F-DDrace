@@ -300,7 +300,8 @@ void CPickup::Snap(int SnappingClient)
 
 	if (m_Layer == LAYER_SWITCH)
 	{
-		if (GameServer()->GetPlayerChar(SnappingClient) && !NetworkClipped(SnappingClient, false, true))
+		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+		if (pChr && pChr->SendExtendedEntity(this))
 		{
 			CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 			if(!pEntData)
