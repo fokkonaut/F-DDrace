@@ -113,16 +113,19 @@ void CDoor::Snap(int SnappingClient)
 			return;
 	}
 
-	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
-	if (pChr && pChr->SendExtendedEntity(this))
+	if (m_Length > 0.f)
 	{
-		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-		if(!pEntData)
-			return;
+		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+		if (pChr && pChr->SendExtendedEntity(this))
+		{
+			CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+			if(!pEntData)
+				return;
 
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+			pEntData->m_SwitchNumber = m_Number;
+			pEntData->m_Layer = m_Layer;
+			pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+		}
 	}
 
 	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));

@@ -209,7 +209,8 @@ void CDragger::Snap(int SnappingClient)
 		return;
 	}
 
-	if (pChr && pChr->SendExtendedEntity(this))
+	CCharacter *pSnap = GameServer()->GetPlayerChar(SnappingClient);
+	if (pSnap && pSnap->SendExtendedEntity(this))
 	{
 		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 		if(!pEntData)
