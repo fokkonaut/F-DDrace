@@ -1549,11 +1549,10 @@ void CPlayer::RainbowTick()
 	if (Server()->Tick() % 2 != 0)
 		return;
 
-	bool IsRainbowHooked = m_pCharacter->GetPowerHooked() == RAINBOW;
-	if (!m_InfRainbow && !m_pCharacter->m_Rainbow && !IsRainbowHooked)
+	if (!m_InfRainbow && (!m_pCharacter || (!m_pCharacter->m_Rainbow && m_pCharacter->GetPowerHooked() != RAINBOW)))
 		return;
 
-	if (IsRainbowHooked)
+	if (m_pCharacter && m_pCharacter->GetPowerHooked() == RAINBOW)
 		m_pCharacter->m_IsRainbowHooked = true;
 
 	m_RainbowColor = (m_RainbowColor + m_RainbowSpeed) % 256;
