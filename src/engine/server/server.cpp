@@ -2568,8 +2568,14 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 					str_format(aAuthStr, sizeof(aAuthStr), " key=%s %s", pThis->m_AuthManager.KeyIdent(pThis->m_aClients[i].m_AuthKey), pAuthStr);
 				}
 
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d name='%s' score=%d %s", i, aAddrStr,
-						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aAuthStr);
+				char aDummy[64];
+				aDummy[0] = '\0';
+				int Dummy = pThis->GetDummy(i);
+				if (Dummy != -1)
+					str_format(aDummy, sizeof(aDummy), " dummy=%d:'%s'", Dummy, pThis->ClientName(Dummy));
+
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d name='%s' score=%d%s%s", i, aAddrStr,
+						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aDummy, aAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
@@ -3329,6 +3335,22 @@ bool CServer::IsUniqueAddress(int ClientID)
 	return true;
 }
 
+int CServer::GetDummy(int ClientID)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (IsDummy(ClientID, i))
+			return i;
+	return -1;
+}
+
+bool CServer::IsDummy(int ClientID1, int ClientID2)
+{
+	if (m_aClients[ClientID1].m_State == CClient::STATE_EMPTY || m_aClients[ClientID2].m_State == CClient::STATE_EMPTY || ClientID1 == ClientID2)
+		return false;
+	return (net_addr_comp(m_NetServer.ClientAddr(ClientID1), m_NetServer.ClientAddr(ClientID2), false) == 0
+		&& mem_comp(&m_aClients[ClientID1].m_ConnectionID, &m_aClients[ClientID2].m_ConnectionID, sizeof(m_aClients[ClientID1].m_ConnectionID)) == 0);
+}
+
 void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
 {
 	if (!m_RunServer)
@@ -3423,9 +3445,10 @@ int BotLookupThread(void *pArg)
 	pipe_close(pStream);
 
 	bool Found = false;
+	bool aDummy[MAX_CLIENTS] = { 0 };
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME)
+		if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || aDummy[i])
 			continue;
 
 		char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -3433,7 +3456,16 @@ int BotLookupThread(void *pArg)
 		if (str_find(pResult, aAddrStr))
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%d: %s", i, pSelf->ClientName(i));
+			int Dummy = pSelf->GetDummy(i);
+			if (Dummy == -1)
+			{
+				str_format(aBuf, sizeof(aBuf), "%d: %s, %d: %s", i, pSelf->ClientName(i), Dummy, pSelf->ClientName(Dummy));
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "%d: %s", i, pSelf->ClientName(i));
+				aDummy[Dummy] = true;
+			}
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", aBuf);
 			Found = true;
 		}
@@ -3441,7 +3473,6 @@ int BotLookupThread(void *pArg)
 
 	if (!Found)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", "No results found");
-
 
 	pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
 	free(pResult);

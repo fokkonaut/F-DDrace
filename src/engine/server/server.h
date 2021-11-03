@@ -473,6 +473,8 @@ public:
 	const char *GetClientVersionStr(int ClientID) const;
 
 	virtual bool IsUniqueAddress(int ClientID);
+	virtual int GetDummy(int ClientID);
+	virtual bool IsDummy(int ClientID1, int ClientID2);
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters
