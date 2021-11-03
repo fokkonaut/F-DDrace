@@ -106,7 +106,6 @@ CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whit
 
 // bot lookup
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
-CONSOLE_COMMAND("get_dummy", "v", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
 
 // account system ban
 CONSOLE_COMMAND("acc_sys_unban", "i[index]", CFGFLAG_SERVER, ConAccSysUnban, this, "Unbans index i from account system bans", AUTHED_ADMIN)
