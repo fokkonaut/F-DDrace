@@ -3460,14 +3460,14 @@ int BotLookupThread(void *pArg)
 		{
 			char aBuf[256];
 			int Dummy = pSelf->GetDummy(i);
-			if (Dummy == -1)
+			if (Dummy != -1)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d: %s, %d: %s", i, pSelf->ClientName(i), Dummy, pSelf->ClientName(Dummy));
+				aDummy[Dummy] = true;
 			}
 			else
 			{
 				str_format(aBuf, sizeof(aBuf), "%d: %s", i, pSelf->ClientName(i));
-				aDummy[Dummy] = true;
 			}
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", aBuf);
 			Found = true;
