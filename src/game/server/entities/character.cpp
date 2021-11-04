@@ -4218,7 +4218,8 @@ int CCharacter::HasFlag()
 
 bool CCharacter::SendExtendedEntity(CEntity *pEntity)
 {
-	return !m_pPlayer->IsPaused() && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !pEntity->NetworkClipped(m_pPlayer->GetCID(), false, true)
+	return GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) >= VERSION_DDNET_SWITCH
+		&& !m_pPlayer->IsPaused() && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !pEntity->NetworkClipped(m_pPlayer->GetCID(), false, true)
 		&& (pEntity->m_PlotID < PLOT_START || pEntity->m_PlotID == GetCurrentTilePlotID());
 }
 
