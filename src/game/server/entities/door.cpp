@@ -135,13 +135,13 @@ void CDoor::Snap(int SnappingClient)
 	pObj->m_X = (int)m_Pos.x;
 	pObj->m_Y = (int)m_Pos.y;
 
-	if (SnappingClient == -1 || GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_SWITCH)
+	/*if (SnappingClient == -1 || GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_SWITCH)
 	{
 		pObj->m_FromX = (int)m_To.x;
 		pObj->m_FromY = (int)m_To.y;
 		pObj->m_StartTick = 0;
 	}
-	else
+	else*/
 	{
 		CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
 
