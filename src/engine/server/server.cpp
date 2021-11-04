@@ -786,7 +786,7 @@ void CServer::DoSnapshot()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// client must be ingame to receive snapshots
-		if(m_aClients[i].m_State != CClient::STATE_INGAME)
+		if(m_aClients[i].m_State != CClient::STATE_INGAME || m_aClients[i].m_DesignChange)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
