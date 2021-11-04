@@ -1329,7 +1329,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_Version = Unpacker.GetInt();
 
 				SendCapabilities(ClientID);
-				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0] && IsUniqueAddress(ClientID))
+				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0] && GetDummy(ClientID) == -1)
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_FAKE_MAP;
 					SendFakeMap(ClientID);
