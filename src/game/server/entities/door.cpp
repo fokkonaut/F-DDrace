@@ -113,10 +113,12 @@ void CDoor::Snap(int SnappingClient)
 			return;
 	}
 
+	bool SendEntityEx = false;
 	if (m_Length > 0.f)
 	{
+		Config()->m_SvTestingCommands = 1;
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
-		if (pChr && pChr->SendExtendedEntity(this))
+		if (pChr && (SendEntityEx = pChr->SendExtendedEntity(this)))
 		{
 			CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 			if(!pEntData)
@@ -135,19 +137,28 @@ void CDoor::Snap(int SnappingClient)
 	pObj->m_X = (int)m_Pos.x;
 	pObj->m_Y = (int)m_Pos.y;
 
-	CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
-	if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
-		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
-
-	if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+	if (SnappingClient == -1 || SendEntityEx)
 	{
 		pObj->m_FromX = (int)m_To.x;
 		pObj->m_FromY = (int)m_To.y;
+		pObj->m_StartTick = 0;
 	}
 	else
 	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
+		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
+			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
+
+		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		{
+			pObj->m_FromX = (int)m_To.x;
+			pObj->m_FromY = (int)m_To.y;
+		}
+		else
+		{
+			pObj->m_FromX = (int)m_Pos.x;
+			pObj->m_FromY = (int)m_Pos.y;
+		}
+		pObj->m_StartTick = Server()->Tick();
 	}
-	pObj->m_StartTick = Server()->Tick();
 }
