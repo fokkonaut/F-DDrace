@@ -116,7 +116,6 @@ void CDoor::Snap(int SnappingClient)
 	bool SendEntityEx = false;
 	if (m_Length > 0.f)
 	{
-		Config()->m_SvTestingCommands = 1;
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 		if (pChr && (SendEntityEx = pChr->SendExtendedEntity(this)))
 		{
