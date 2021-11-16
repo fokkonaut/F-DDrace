@@ -26,6 +26,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
+	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 };
 
 #endif
