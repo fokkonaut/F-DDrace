@@ -45,10 +45,6 @@ CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "END
 
 EntityClasses = Flags("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
 
-ProjectileFlags = Flags("PROJECTILEFLAG", ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
-	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
-	"EXPLOSIVE", "FREEZE",
-])
 
 RawHeader = '''
 
@@ -119,7 +115,6 @@ Flags = [
 	GameInfoFlags,
 	GameInfoFlags2,
 	CharacterFlags,
-	ProjectileFlags,
 ]
 
 Objects = [
@@ -288,17 +283,6 @@ Objects = [
 		NetIntAny("m_Version"),
 		NetIntAny("m_Flags2"),
 	], fixup=False),
-
-	# The code assumes that this has the same in-memory representation as
-	# the Projectile net object.
-	NetObjectEx("DDNetProjectile", "projectile@netobj.ddnet.tw", [
-		NetIntAny("m_X"),
-		NetIntAny("m_Y"),
-		NetIntAny("m_Angle"),
-		NetIntAny("m_Data"),
-		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
-		NetTick("m_StartTick"),
-	]),
 
 	## Events
 

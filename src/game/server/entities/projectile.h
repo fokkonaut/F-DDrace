@@ -65,7 +65,7 @@ private:
 public:
 
 	void SetBouncing(int Value);
-	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj);
+
 	vec2 m_CurPos;
 };
 
