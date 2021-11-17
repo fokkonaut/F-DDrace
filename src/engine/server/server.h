@@ -188,6 +188,8 @@ public:
 		bool m_DesignChange;
 		int m_CurrentMapDesign;
 
+		char m_aLanguage[5]; // would be 2, but "none" is 4
+
 		int m_DnsblState;
 		CJob m_DnsblLookup;
 		int m_PgscState; // Proxy Game Server Check
@@ -260,7 +262,7 @@ public:
 	std::vector<std::string> m_vMapDesignFiles;
 	void LoadMapDesigns();
 	static int InitMapDesign(const char *pName, int IsDir, int StorageType, void *pUser);
-	void ChangeMapDesign(int ClientID, const char *pName);
+	virtual void ChangeMapDesign(int ClientID, const char *pName);
 	void SendMapDesign(int ClientID, int Design);
 
 	//maplist
@@ -332,8 +334,6 @@ public:
 
 	static int NewClientCallback(int ClientID, bool Sevendown, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
-
-	bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
 
 	void SendCapabilities(int ClientID);
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);
@@ -469,6 +469,18 @@ public:
 
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
+
+	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
+
+	enum
+	{
+		TRANSLATE_STATE_DONE = 0,
+		TRANSLATE_STATE_PENDING
+	};
+	virtual void TranslateChat(int ClientID, const char *pMsg);
+	int m_TranslateState;
+	virtual const char *GetLanguage(int ClientID) { return m_aClients[ClientID].m_aLanguage; }
+	virtual void SetLanguage(int ClientID, const char *pLanguage) { str_copy(m_aClients[ClientID].m_aLanguage, pLanguage, sizeof(m_aClients[ClientID].m_aLanguage)); }
 
 	const char *GetClientVersionStr(int ClientID) const;
 

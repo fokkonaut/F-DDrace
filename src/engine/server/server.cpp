@@ -290,6 +290,7 @@ void CServer::CClient::Reset()
 
 	m_CurrentMapDesign = -1;
 	m_DesignChange = false;
+	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_RegisterSevendown(true)
@@ -3634,6 +3635,98 @@ void CServer::InitDnsbl(int ClientID)
 	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
 	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+}
+
+struct TranslateData
+{
+	void *m_pUser;
+	int m_ClientID;
+	char m_aMessage[256];
+	char m_aLanguage[5];
+};
+
+int TranslateThread(void *pArg)
+{
+	TranslateData *pTranslateData = (TranslateData *)pArg;
+	CServer *pSelf = (CServer *)pTranslateData->m_pUser;
+
+	char *ptr = pTranslateData->m_aMessage;
+	for (; *ptr; ptr++)
+		if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`')
+			*ptr = ' ';
+
+	char aCmd[256];
+#ifdef CONF_FAMILY_WINDOWS
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data \"{\\\"q\\\":\\\"%s\\\",\\\"source\\\":\\\"auto\\\",\\\"target\\\":\\\"%s\\\"}\" %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL);
+#else
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"}' %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL);
+#endif
+
+	FILE *pStream = pipe_open(aCmd, "r");
+	if (!pStream)
+	{
+		free(pTranslateData);
+		return 0;
+	}
+
+	char aPiece[1024];
+	int NewSize = 0;
+
+	char aResult[512] = "";
+	fgets(aResult, sizeof(aResult), pStream);
+	pipe_close(pStream);
+
+	// parse json data
+	json_settings JsonSettings;
+	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	char aError[128];
+	const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
+	if (pJsonData == 0)
+	{
+		dbg_msg("translate", "Failed to parse json: %s", aError);
+		return 0;
+	}
+
+	aResult[0] = '\0';
+	const json_value &rTranslatedText = (*pJsonData)["translatedText"];
+	if (rTranslatedText.type == json_string)
+		str_copy(aResult, rTranslatedText, sizeof(aResult));
+
+	if (aResult[0])
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(pSelf->GetLanguage(i), pTranslateData->m_aLanguage) != 0)
+				continue;
+			pSelf->GameServer()->SendChatMessage(pTranslateData->m_ClientID, CHAT_SINGLE, i, aResult);
+		}
+	}
+
+	free(pTranslateData);
+	return 0;
+}
+
+void CServer::TranslateChat(int ClientID, const char *pMsg)
+{
+	std::vector<const char *> vLanguages;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(GetLanguage(i), "none") == 0)
+			continue;
+
+		if (std::find(vLanguages.begin(), vLanguages.end(), GetLanguage(i)) == vLanguages.end())
+			vLanguages.push_back(GetLanguage(i));
+	}
+
+	for (unsigned int i = 0; i < vLanguages.size(); i++)
+	{
+		TranslateData *pTranslateData = new TranslateData();
+		pTranslateData->m_pUser = this;
+		pTranslateData->m_ClientID = ClientID;
+		str_copy(pTranslateData->m_aMessage, pMsg, sizeof(pTranslateData->m_aMessage));
+		str_copy(pTranslateData->m_aLanguage, vLanguages[i], sizeof(pTranslateData->m_aLanguage));
+		AddJob(TranslateThread, (void *)pTranslateData);
+	}
 }
 
 void CServer::LoadMapDesigns()

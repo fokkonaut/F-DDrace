@@ -278,6 +278,7 @@ public:
 	void SendChatMsg(CNetMsg_Sv_Chat *pMsg, int Flags, int To);
 	void SendChatTarget(int To, const char* pText, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendChatTeam(int Team, const char* pText);
+	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) { SendChat(ChatterClientID, Mode, To, pText); }
 	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
@@ -824,6 +825,7 @@ private:
 	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
 	static void ConMutePlayer(IConsole::IResult* pResult, void* pUserData);
 	static void ConDesign(IConsole::IResult* pResult, void* pUserData);
+	static void ConLanguage(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

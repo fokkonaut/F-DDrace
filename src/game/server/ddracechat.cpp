@@ -2600,6 +2600,50 @@ void CGameContext::ConDesign(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aDesigns);
 }
 
+void CGameContext::ConLanguage(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	const char *apLanguages[] = { "none", "en", "ar", "zh", "fr", "de", "hi", "id", "ga", "it", "ja", "ko", "pl", "pt", "ru", "es", "tr", "vi" };
+	int NumLanguages = (sizeof(apLanguages)/sizeof(*apLanguages));
+
+	if (pResult->NumArguments())
+	{
+		for (int i = 0; i < NumLanguages; i++)
+		{
+			if (str_comp(pResult->GetString(0), apLanguages[i]) == 0)
+			{
+				pSelf->Server()->SetLanguage(pResult->m_ClientID, apLanguages[i]);
+				int Dummy = pSelf->Server()->GetDummy(pResult->m_ClientID);
+				if (Dummy != -1)
+					pSelf->Server()->SetLanguage(Dummy, apLanguages[i]);
+				pSelf->SendChatTarget(pResult->m_ClientID, "Successfully updated language");
+				return;
+			}
+		}
+
+		pSelf->SendChatTarget(pResult->m_ClientID, "Invalid language");
+		return;
+	}
+
+	char aLanguages[256] = "";
+	char aTemp[128];
+	aTemp[0] = 0;
+	for (int i = 0; i < NumLanguages; i++)
+	{
+		if (i > 0)
+			str_format(aTemp, sizeof(aTemp), "%s, ", aLanguages);
+		str_format(aLanguages, sizeof(aLanguages), "%s%s", aTemp, apLanguages[i]);
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Languages ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can set one of the following languages by using '/language <option>':");
+	pSelf->SendChatTarget(pResult->m_ClientID, aLanguages);
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

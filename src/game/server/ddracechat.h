@@ -87,6 +87,7 @@ CHAT_COMMAND("resumemoved", "?i['0'|'1']", CFGFLAG_CHAT, ConResumeMoved, this, "
 CHAT_COMMAND("weapon", "i[weapon]", CFGFLAG_CHAT, ConWeapon, this, "Sets active weapon", AUTHED_NO)
 CHAT_COMMAND("mute", "r[playername]", CFGFLAG_CHAT, ConMutePlayer, this, "Mutes player r until disconnect", AUTHED_NO)
 CHAT_COMMAND("design", "?s[name]", CFGFLAG_CHAT, ConDesign, this, "Changes map design or shows a list of available designs", AUTHED_NO)
+CHAT_COMMAND("language", "?s[language]", CFGFLAG_CHAT, ConLanguage, this, "Changes language or shows a list of availables languages", AUTHED_NO)
 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)

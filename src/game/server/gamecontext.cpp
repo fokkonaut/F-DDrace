@@ -498,10 +498,13 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_pMessage = aText;
 	Msg.m_TargetID = -1;
 
+	if (Mode == CHAT_ALL || Mode == CHAT_TEAM || Mode == CHAT_LOCAL)
+		Server()->TranslateChat(ChatterClientID, aText);
+
 	if(Mode == CHAT_ALL)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i))
+			if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i) && !str_comp(Server()->GetLanguage(i), "none"))
 			{
 				bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
 				if (Send)
@@ -520,7 +523,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		{
 			if(m_apPlayers[i] != 0)
 			{
-				if (IsMuted(MuteChecked, i) || !CanReceiveMessage(ChatterClientID, i))
+				if (IsMuted(MuteChecked, i) || !CanReceiveMessage(ChatterClientID, i) || str_comp(Server()->GetLanguage(i), "none"))
 					continue;
 
 				if(m_apPlayers[ChatterClientID]->GetTeam() == TEAM_SPECTATORS)
@@ -546,8 +549,6 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Msg.m_Mode = CHAT_ALL;
 		if (!IsMuted(MuteChecked, To))
 			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
-		if (ChatterClientID >= 0)
-			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
 	}
 	else if (Mode == CHAT_ATEVERYONE)
 	{
@@ -571,7 +572,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Msg.m_Mode = CHAT_TEAM;
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (!IsMuted(MuteChecked, i) && IsLocal(ChatterClientID, i))
+			if (!IsMuted(MuteChecked, i) && IsLocal(ChatterClientID, i) && !str_comp(Server()->GetLanguage(i), "none"))
 				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER

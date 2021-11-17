@@ -276,6 +276,9 @@ MACRO_CONFIG_INT(SvPgsc, sv_pgsc, 0, 0, 1, CFGFLAG_SERVER, "Whether to ban IPs o
 MACRO_CONFIG_STR(SvPgscString, sv_pgsc_string, 128, "", CFGFLAG_SERVER, "String that has to be in a server name to ban players with that IP (empty for direct ban)", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBotLookupURL, sv_bot_lookup_url, 128, "", CFGFLAG_SERVER, "Bot lookup URL", AUTHED_ADMIN)
 
+// translate
+MACRO_CONFIG_STR(SvLibreTranslateURL, sv_libretranslate_url, 128, "https://translate.argosopentech.com/translate", CFGFLAG_SERVER, "LibreTranslate URL for chat messages", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
