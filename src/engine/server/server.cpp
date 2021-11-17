@@ -1303,6 +1303,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_DDNetVersionSettled = true;
 				m_aClients[ClientID].m_GotDDNetVersionPacket = true;
 				m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+
+				int Dummy = GetDummy(ClientID);
+				if (Dummy != -1)
+				{
+					m_aClients[ClientID].m_CurrentMapDesign = m_aClients[Dummy].m_CurrentMapDesign;
+					SetLanguage(ClientID, GetLanguage(Dummy));
+				}
 			}
 		}
 		else if(Msg == NETMSG_INFO)
@@ -3714,8 +3721,18 @@ void CServer::TranslateChat(int ClientID, const char *pMsg)
 		if (m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(GetLanguage(i), "none") == 0)
 			continue;
 
-		if (std::find(vLanguages.begin(), vLanguages.end(), GetLanguage(i)) == vLanguages.end())
-			vLanguages.push_back(GetLanguage(i));
+		bool Continue = false;
+		for (unsigned int j = 0; j < vLanguages.size(); j++)
+			if (!str_comp(GetLanguage(i), vLanguages[j]))
+			{
+				Continue = true;
+				break;
+			}
+
+		if (Continue)
+			continue;
+
+		vLanguages.push_back(GetLanguage(i));
 	}
 
 	for (unsigned int i = 0; i < vLanguages.size(); i++)
