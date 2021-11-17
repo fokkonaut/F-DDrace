@@ -3662,7 +3662,7 @@ int TranslateThread(void *pArg)
 		if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`')
 			*ptr = ' ';
 
-	char aCmd[256];
+	char aCmd[512];
 	char aKey[128];
 #ifdef CONF_FAMILY_WINDOWS
 	if (pSelf->Config()->m_SvLibreTranslateKey[0])
