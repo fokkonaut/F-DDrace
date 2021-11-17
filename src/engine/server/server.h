@@ -193,8 +193,6 @@ public:
 		int m_PgscState; // Proxy Game Server Check
 		CJob m_PgscLookup;
 
-		char m_aLanguage[3];
-
 		int m_aIdMap[VANILLA_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
 
