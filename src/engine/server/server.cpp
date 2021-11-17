@@ -3669,17 +3669,16 @@ int TranslateThread(void *pArg)
 	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"}' %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL);
 #endif
 
+	char aResult[512] = "";
 	FILE *pStream = pipe_open(aCmd, "r");
 	if (!pStream)
 	{
-		free(pTranslateData);
-		return 0;
+		goto sendmsg;
 	}
 
 	char aPiece[1024];
 	int NewSize = 0;
 
-	char aResult[512] = "";
 	fgets(aResult, sizeof(aResult), pStream);
 	pipe_close(pStream);
 
@@ -3688,16 +3687,20 @@ int TranslateThread(void *pArg)
 	mem_zero(&JsonSettings, sizeof(JsonSettings));
 	char aError[128];
 	const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
+	aResult[0] = '\0';
 	if (pJsonData == 0)
 	{
 		dbg_msg("translate", "Failed to parse json: %s", aError);
-		return 0;
+		goto sendmsg;
 	}
 
-	aResult[0] = '\0';
 	const json_value &rTranslatedText = (*pJsonData)["translatedText"];
 	if (rTranslatedText.type == json_string)
 		str_copy(aResult, rTranslatedText, sizeof(aResult));
+
+sendmsg:
+	if (!aResult[0])
+		str_copy(aResult, pTranslateData->m_aMessage, sizeof(aResult));
 
 	if (aResult[0])
 	{
