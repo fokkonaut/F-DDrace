@@ -3663,10 +3663,15 @@ int TranslateThread(void *pArg)
 			*ptr = ' ';
 
 	char aCmd[256];
+	char aKey[128];
 #ifdef CONF_FAMILY_WINDOWS
-	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data \"{\\\"q\\\":\\\"%s\\\",\\\"source\\\":\\\"auto\\\",\\\"target\\\":\\\"%s\\\"}\" %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL);
+	if (pSelf->Config()->m_SvLibreTranslateKey[0])
+		str_format(aKey, sizeof(aKey), " \\\"api_key\\\":\\\"%s\\\"", pSelf->Config()->m_SvLibreTranslateKey);
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data \"{\\\"q\\\":\\\"%s\\\",\\\"source\\\":\\\"auto\\\",\\\"target\\\":\\\"%s\\\"}\" %s%s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL, aKey);
 #else
-	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"}' %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL);
+	if (pSelf->Config()->m_SvLibreTranslateKey[0])
+		str_format(aKey, sizeof(aKey), " \"api_key\":\"%s\"", pSelf->Config()->m_SvLibreTranslateKey);
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"%s}' %s%s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, pSelf->Config()->m_SvLibreTranslateURL, aKey);
 #endif
 
 	char aResult[512] = "";
