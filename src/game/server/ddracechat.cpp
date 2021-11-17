@@ -2612,6 +2612,12 @@ void CGameContext::ConLanguage(IConsole::IResult* pResult, void* pUserData)
 
 	if (pResult->NumArguments())
 	{
+		if (!str_comp(pSelf->Server()->GetLanguage(pResult->m_ClientID), pResult->GetString(0)))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "This language is already selected");
+			return;
+		}
+
 		for (int i = 0; i < NumLanguages; i++)
 		{
 			if (str_comp(pResult->GetString(0), apLanguages[i]) == 0)
