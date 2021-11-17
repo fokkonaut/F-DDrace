@@ -3676,27 +3676,27 @@ int TranslateThread(void *pArg)
 		goto sendmsg;
 	}
 
-	char aPiece[1024];
-	int NewSize = 0;
-
-	fgets(aResult, sizeof(aResult), pStream);
+	if (!fgets(aResult, sizeof(aResult), pStream))
+		aResult[0] = '\0'; // should be 0 already but i dont want to ignore output for warning.. xd
 	pipe_close(pStream);
 
-	// parse json data
-	json_settings JsonSettings;
-	mem_zero(&JsonSettings, sizeof(JsonSettings));
-	char aError[128];
-	const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
-	aResult[0] = '\0';
-	if (pJsonData == 0)
 	{
-		dbg_msg("translate", "Failed to parse json: %s", aError);
-		goto sendmsg;
-	}
+		// parse json data
+		json_settings JsonSettings;
+		mem_zero(&JsonSettings, sizeof(JsonSettings));
+		char aError[128];
+		const json_value *pJsonData = json_parse_ex(&JsonSettings, aResult, sizeof(aResult), aError);
+		aResult[0] = '\0';
+		if (pJsonData == 0)
+		{
+			dbg_msg("translate", "Failed to parse json: %s", aError);
+			goto sendmsg;
+		}
 
-	const json_value &rTranslatedText = (*pJsonData)["translatedText"];
-	if (rTranslatedText.type == json_string)
-		str_copy(aResult, rTranslatedText, sizeof(aResult));
+		const json_value &rTranslatedText = (*pJsonData)["translatedText"];
+		if (rTranslatedText.type == json_string)
+			str_copy(aResult, rTranslatedText, sizeof(aResult));
+	}
 
 sendmsg:
 	if (!aResult[0])
