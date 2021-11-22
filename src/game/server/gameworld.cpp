@@ -451,7 +451,7 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
 {
 	// update own map
-	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_pGameWorld->m_aMap[OrigID].m_NumReserved; i++)
+	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
 	{
 		int ClientID = m_pGameWorld->m_aMap[OrigID].m_pMap[i];
 		if (ClientID == -1 || ClientID == m_ClientID) // dont set ourselves from the original id map, we set ourselves at the same place where OrigID was, so where we used to be for ourselves
