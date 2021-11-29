@@ -224,7 +224,10 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	case CGameWorld::ENTTYPE_PICKUP:
 		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Pickup.m_Type, m_Data.m_Pickup.m_SubType);
 	case CGameWorld::ENTTYPE_DOOR:
-		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Laser.m_Angle, 32 * m_Data.m_Laser.m_Length, 0, !Preview);
+	{
+		bool Collision = !Preview && (m_pCharacter->Config()->m_SvDrawWallsCollision || GameServer()->GetTilePlotID(m_Pos) >= PLOT_START);
+		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Laser.m_Angle, 32 * m_Data.m_Laser.m_Length, 0, Collision);
+	}
 	}
 	return 0;
 }
