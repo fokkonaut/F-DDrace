@@ -455,7 +455,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		if ((Mode == CHAT_ALL || Mode == CHAT_TEAM) && m_apPlayers[ChatterClientID] && m_apPlayers[ChatterClientID]->JoinChat(Local))
 			Mode = Local ? CHAT_LOCAL : CHAT_ALL;
 
-		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), aText);
+		if (Mode == CHAT_WHISPER)
+			str_format(aBuf, sizeof(aBuf), "%d:%d:%s -> %d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), To, Server()->ClientName(To), aText);
+		else
+			str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Mode, Server()->ClientName(ChatterClientID), aText);
 	}
 	else if (ChatterClientID == -2)
 	{
@@ -469,7 +472,9 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 
 	const char *pModeStr;
-	if(Mode == CHAT_WHISPER || Mode == CHAT_SINGLE)
+	if (Mode == CHAT_WHISPER)
+		pModeStr = Config()->m_SvWhisperLog ? "whisper" : 0;
+	else if(Mode == CHAT_SINGLE)
 		pModeStr = 0;
 	else if(Mode == CHAT_TEAM)
 		pModeStr = "teamchat";

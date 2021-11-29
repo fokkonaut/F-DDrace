@@ -240,6 +240,7 @@ MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, 
 MACRO_CONFIG_INT(SvChatAdminPingLevel, sv_chat_admin_ping_level, AUTHED_NO, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to ping authed players in chat", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvLolFilter, sv_lol_filter, 0, 0, 1, CFGFLAG_SERVER, "I like turtles.", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvLocalChat, sv_local_chat, 0, 0, 1, CFGFLAG_SERVER, "Whether local chat is enabled (deactivates sv_authed_highlighted)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvWhisperLog, sv_whisper_log, 0, 0, 1, CFGFLAG_SERVER, "Whether whisper messages get logged aswell", AUTHED_ADMIN)
 
 // admin highlight
 MACRO_CONFIG_INT(SvAuthedHighlighted, sv_authed_highlighted, 1, 0, 1, CFGFLAG_SERVER, "Whether authed players are highlighted in the scoreboard (deactivated by sv_local_chat)", AUTHED_ADMIN)
