@@ -68,7 +68,7 @@ public:
 	virtual void ChangeMapDesign(int ClientID, const char *pName) = 0;
 
 	virtual void PrintBotLookup() = 0;
-	virtual void TranslateChat(int ClientID, const char *pMsg) = 0;
+	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode) = 0;
 
 	virtual void SaveWhitelist() = 0;
 	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason) = 0;

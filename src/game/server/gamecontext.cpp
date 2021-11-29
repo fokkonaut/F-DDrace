@@ -504,7 +504,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	Msg.m_TargetID = -1;
 
 	if (Mode == CHAT_ALL || Mode == CHAT_TEAM || Mode == CHAT_LOCAL)
-		Server()->TranslateChat(ChatterClientID, aText);
+		Server()->TranslateChat(ChatterClientID, aText, Mode);
 
 	if(Mode == CHAT_ALL)
 	{
@@ -548,10 +548,10 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			}
 		}
 	}
-	else if (Mode == CHAT_SINGLE)
+	else if (Mode == CHAT_SINGLE || Mode == CHAT_SINGLE_TEAM)
 	{
 		// send to the clients
-		Msg.m_Mode = CHAT_ALL;
+		Msg.m_Mode = Mode == CHAT_SINGLE_TEAM ? CHAT_TEAM : CHAT_ALL;
 		if (!IsMuted(MuteChecked, To))
 			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
 	}

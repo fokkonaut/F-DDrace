@@ -477,7 +477,7 @@ public:
 		TRANSLATE_STATE_DONE = 0,
 		TRANSLATE_STATE_PENDING
 	};
-	virtual void TranslateChat(int ClientID, const char *pMsg);
+	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode);
 	int m_TranslateState;
 	virtual const char *GetLanguage(int ClientID) { return m_aClients[ClientID].m_aLanguage; }
 	virtual void SetLanguage(int ClientID, const char *pLanguage) { str_copy(m_aClients[ClientID].m_aLanguage, pLanguage, sizeof(m_aClients[ClientID].m_aLanguage)); }

@@ -3648,6 +3648,7 @@ struct TranslateData
 {
 	void *m_pUser;
 	int m_ClientID;
+	int m_Mode;
 	char m_aMessage[256];
 	char m_aLanguage[5];
 };
@@ -3713,7 +3714,8 @@ sendmsg:
 		{
 			if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(pSelf->GetLanguage(i), pTranslateData->m_aLanguage) != 0)
 				continue;
-			pSelf->GameServer()->SendChatMessage(pTranslateData->m_ClientID, CHAT_SINGLE, i, aResult);
+			int Mode = (pTranslateData->m_Mode == CHAT_TEAM || pTranslateData->m_Mode == CHAT_LOCAL) ? CHAT_SINGLE_TEAM : CHAT_SINGLE;
+			pSelf->GameServer()->SendChatMessage(pTranslateData->m_ClientID, Mode, i, aResult);
 		}
 	}
 
@@ -3721,7 +3723,7 @@ sendmsg:
 	return 0;
 }
 
-void CServer::TranslateChat(int ClientID, const char *pMsg)
+void CServer::TranslateChat(int ClientID, const char *pMsg, int Mode)
 {
 	std::vector<const char *> vLanguages;
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -3748,6 +3750,7 @@ void CServer::TranslateChat(int ClientID, const char *pMsg)
 		TranslateData *pTranslateData = new TranslateData();
 		pTranslateData->m_pUser = this;
 		pTranslateData->m_ClientID = ClientID;
+		pTranslateData->m_Mode = Mode;
 		str_copy(pTranslateData->m_aMessage, pMsg, sizeof(pTranslateData->m_aMessage));
 		str_copy(pTranslateData->m_aLanguage, vLanguages[i], sizeof(pTranslateData->m_aLanguage));
 		AddJob(TranslateThread, (void *)pTranslateData);
