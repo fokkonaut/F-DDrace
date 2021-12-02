@@ -11,7 +11,7 @@
 #include <game/server/player.h>
 
 CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, float Direction, int Lifetime, int Weapon, int Bullets, int Special)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, ms_PhysSize, Owner)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP_DROP, Pos, vec2(ms_PhysSize, ms_PhysSize), Owner)
 {
 	m_Type = Type;
 	m_Weapon = Weapon;

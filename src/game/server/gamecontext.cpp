@@ -6234,7 +6234,7 @@ void CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int S
 
 void CGameContext::SpawnHelicopter(vec2 Pos)
 {
-	Pos.y -= 32.f;
+	Pos.y -= 64.f;
 	new CHelicopter(&m_World, Pos);
 }
 

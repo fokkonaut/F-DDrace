@@ -5,7 +5,7 @@
 #include "helicopter.h"
 
 CHelicopter::CHelicopter(CGameWorld *pGameWorld, vec2 Pos)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, 64)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, vec2(80, 128))
 {
 	m_Elasticity = 0.f;
 
@@ -49,7 +49,7 @@ void CHelicopter::Tick()
 		GetOwner()->Core()->m_Vel = vec2(0, 0);
 
 		m_Gravity = GetOwner()->m_FreezeTime;
-		m_GroundVel = GetOwner()->m_FreezeTime;
+		m_GroundVel = GetOwner()->m_FreezeTime || m_Accel.x == 0.f; // when on floor and not moving
 	}
 
 	ApplyAcceleration();

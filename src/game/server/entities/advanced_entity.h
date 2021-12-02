@@ -9,7 +9,7 @@
 class CAdvancedEntity : public CEntity
 {
 public:
-	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProimityRadius, int Owner = -1, bool CheckDeath = true);
+	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner = -1, bool CheckDeath = true);
 	virtual ~CAdvancedEntity() {}
 
 	virtual void Reset();
@@ -32,6 +32,8 @@ protected:
 	vec2 m_Vel;
 	// m_PrevPos has to be set at the end of the tick function of the child entity
 	vec2 m_PrevPos;
+
+	vec2 m_Size;
 
 	int m_Owner;
 	int m_TeleCheckpoint;

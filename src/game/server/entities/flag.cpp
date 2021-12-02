@@ -9,7 +9,7 @@
 #include "character.h"
 
 CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG, Pos, ms_PhysSize)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG, Pos, vec2(ms_PhysSize, ms_PhysSize))
 {
 	m_Pos = Pos;
 	m_StandPos = Pos;

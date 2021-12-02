@@ -16,6 +16,8 @@
 
 #include <engine/shared/config.h>
 
+const float MinStaticPhysSize = 30; // actually the smallest object right now is a map tile (32 x 32)
+
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
 	if(Vel.x > 0 && (MoveRestriction&CANTMOVE_RIGHT))
@@ -557,6 +559,12 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size)
 
 void CCollision::MoveBox(vec2* pInoutPos, vec2* pInoutVel, vec2 Size, float Elasticity)
 {
+	if (Size.x > MinStaticPhysSize || Size.y > MinStaticPhysSize)
+	{
+		MoveBoxBig(pInoutPos, pInoutVel, Size, Elasticity);
+		return;
+	}
+
 	// do the move
 	vec2 Pos = *pInoutPos;
 	vec2 Vel = *pInoutVel;
@@ -1574,6 +1582,135 @@ bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, b
 	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
 		return true;
 	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
+		return true;
+	return false;
+}
+
+bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
+{
+	if(TestBox(Pos, Size))
+		return true;
+
+	// multi sample the rest
+	const int MsCountX = (int)(Size.x / MinStaticPhysSize);
+	const float MsGapX = Size.x / MsCountX;
+	const int MsCountY = (int)(Size.y / MinStaticPhysSize);
+	const float MsGapY = Size.y / MsCountY;
+
+	if(!MsCountX && !MsCountY)
+		return false;
+
+	Size *= 0.5;
+
+	// top
+	for(int i = 0; i < MsCountX; i++)
+	{
+		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y-Size.y))
+			return true;
+	}
+
+	// bottom
+	for(int i = 0; i < MsCountX; i++)
+	{
+		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y+Size.y))
+			return true;
+	}
+
+	// left
+	for(int i = 0; i < MsCountY; i++)
+	{
+		if(CheckPoint(Pos.x-Size.x, Pos.y-Size.y + (i+1) * MsGapY))
+			return true;
+	}
+
+	// right
+	for(int i = 0; i < MsCountY; i++)
+	{
+		if(CheckPoint(Pos.x+Size.x, Pos.y-Size.y + (i+1) * MsGapY))
+			return true;
+	}
+	return false;
+}
+
+void CCollision::MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity)
+{
+	// do the move
+	vec2 Pos = *pInoutPos;
+	vec2 Vel = *pInoutVel;
+
+	float Distance = length(Vel);
+	int Max = (int)Distance;
+
+	if(Distance > 0.00001f)
+	{
+		//vec2 old_pos = pos;
+		float Fraction = 1.0f/(float)(Max+1);
+		for(int i = 0; i <= Max; i++)
+		{
+			//float amount = i/(float)max;
+			//if(max == 0)
+				//amount = 0;
+
+			vec2 NewPos = Pos + Vel*Fraction; // TODO: this row is not nice
+
+			if(TestBoxBig(vec2(NewPos.x, NewPos.y), Size))
+			{
+				int Hits = 0;
+
+				if(TestBoxBig(vec2(Pos.x, NewPos.y), Size))
+				{
+					NewPos.y = Pos.y;
+					Vel.y *= -Elasticity;
+					Hits++;
+				}
+
+				if(TestBoxBig(vec2(NewPos.x, Pos.y), Size))
+				{
+					NewPos.x = Pos.x;
+					Vel.x *= -Elasticity;
+					Hits++;
+				}
+
+				// neither of the tests got a collision.
+				// this is a real _corner case_!
+				if(Hits == 0)
+				{
+					NewPos.y = Pos.y;
+					Vel.y *= -Elasticity;
+					NewPos.x = Pos.x;
+					Vel.x *= -Elasticity;
+				}
+			}
+
+			Pos = NewPos;
+		}
+	}
+
+	*pInoutPos = Pos;
+	*pInoutVel = Vel;
+}
+
+bool CCollision::IsBoxGrounded(vec2 Pos, vec2 Size)
+{
+	// multi sample
+	const int MsCount = (int)(Size.x / MinStaticPhysSize);
+	const float MsGap = Size.x / MsCount;
+
+	Size *= 0.5;
+
+	if(MsCount)
+	{
+		// bottom
+		for(int i = 0; i < MsCount; i++)
+		{
+			if(CheckPoint(Pos.x-Size.x + (i+1) * MsGap, Pos.y+Size.y+5))
+				return true;
+		}
+	}
+
+	if(CheckPoint(Pos.x-Size.x, Pos.y+Size.y+5))
+		return true;
+	if(CheckPoint(Pos.x+Size.x, Pos.y+Size.y+5))
 		return true;
 	return false;
 }
