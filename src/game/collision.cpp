@@ -16,8 +16,6 @@
 
 #include <engine/shared/config.h>
 
-const float MinStaticPhysSize = 30; // actually the smallest object right now is a map tile (32 x 32)
-
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
 	if(Vel.x > 0 && (MoveRestriction&CANTMOVE_RIGHT))
@@ -559,7 +557,7 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size)
 
 void CCollision::MoveBox(vec2* pInoutPos, vec2* pInoutVel, vec2 Size, float Elasticity)
 {
-	if (Size.x > MinStaticPhysSize || Size.y > MinStaticPhysSize)
+	if (Size.x > ms_MinStaticPhysSize || Size.y > ms_MinStaticPhysSize)
 	{
 		MoveBoxBig(pInoutPos, pInoutVel, Size, Elasticity);
 		return;
@@ -1592,9 +1590,9 @@ bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
 		return true;
 
 	// multi sample the rest
-	const int MsCountX = (int)(Size.x / MinStaticPhysSize);
+	const int MsCountX = (int)(Size.x / ms_MinStaticPhysSize);
 	const float MsGapX = Size.x / MsCountX;
-	const int MsCountY = (int)(Size.y / MinStaticPhysSize);
+	const int MsCountY = (int)(Size.y / ms_MinStaticPhysSize);
 	const float MsGapY = Size.y / MsCountY;
 
 	if(!MsCountX && !MsCountY)
@@ -1693,7 +1691,7 @@ void CCollision::MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float E
 bool CCollision::IsBoxGrounded(vec2 Pos, vec2 Size)
 {
 	// multi sample
-	const int MsCount = (int)(Size.x / MinStaticPhysSize);
+	const int MsCount = (int)(Size.x / ms_MinStaticPhysSize);
 	const float MsGap = Size.x / MsCount;
 
 	Size *= 0.5;

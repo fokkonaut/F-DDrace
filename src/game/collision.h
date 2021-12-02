@@ -163,6 +163,8 @@ public:
 	// fights
 	int GetFightNumber(int Index, bool RealFight = true);
 
+	// Boxbig
+	const float ms_MinStaticPhysSize = 30; // actually the smallest object right now is a map tile (32 x 32)
 	bool TestBoxBig(vec2 Pos, vec2 Size);
 	void MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool IsBoxGrounded(vec2 Pos, vec2 Size);

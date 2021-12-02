@@ -50,7 +50,7 @@ void CAdvancedEntity::Tick()
 
 bool CAdvancedEntity::IsGrounded(bool GroundVel, bool AirVel)
 {
-	if (m_Size.x > 30 || m_Size.y > 30)
+	if (m_Size.x > GameServer()->Collision()->ms_MinStaticPhysSize || m_Size.y > GameServer()->Collision()->ms_MinStaticPhysSize)
 	{
 		if (GameServer()->Collision()->IsBoxGrounded(m_Pos, m_Size))
 		{
