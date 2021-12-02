@@ -4545,10 +4545,11 @@ void CGameContext::ReadPlotStats(int ID)
 					{
 						float Rotation = -1.f;
 						int Length = 0;
-						sscanf(pData, "%d:%d:%f/%f:%f:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length);
-						if (Rotation >= 0 && Length >= 0 && PlotID >= 0)
+						int Collision = -1;
+						sscanf(pData, "%d:%d:%f/%f:%f:%d:%d", &EntityType, &PlotID, &Pos.x, &Pos.y, &Rotation, &Length, &Collision);
+						if (Rotation >= 0 && Length >= 0 && PlotID >= 0 && Collision >= 0)
 						{
-							CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0);
+							CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, 0, Collision);
 							pDoor->m_PlotID = PlotID;
 							m_aPlots[PlotID].m_vObjects.push_back(pDoor);
 						}
@@ -4595,7 +4596,7 @@ void CGameContext::WritePlotStats(int ID)
 				case CGameWorld::ENTTYPE_DOOR:
 				{
 					CDoor *pDoor = (CDoor *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength());
+					str_format(aEntry, sizeof(aEntry), "%d:%d:%.2f/%.2f:%.2f:%d:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->m_PlotID, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->GetCollision());
 					PlotFile << aEntry;
 					break;
 				}

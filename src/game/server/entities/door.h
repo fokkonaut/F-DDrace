@@ -31,6 +31,7 @@ public:
 	void SetLength(int Length);
 	int GetLength() { return m_Length; }
 	float GetRotation() { return m_Rotation; }
+	bool GetCollision() { return m_Collision; }
 	virtual ~CDoor();
 
 	virtual void Reset();
