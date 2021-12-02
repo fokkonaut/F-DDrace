@@ -3356,7 +3356,8 @@ int CServer::GetDummy(int ClientID)
 
 bool CServer::IsDummy(int ClientID1, int ClientID2)
 {
-	if (m_aClients[ClientID1].m_State == CClient::STATE_EMPTY || m_aClients[ClientID2].m_State == CClient::STATE_EMPTY || ClientID1 == ClientID2)
+	if (ClientID1 == ClientID2 || m_aClients[ClientID1].m_State == CClient::STATE_EMPTY || m_aClients[ClientID2].m_State == CClient::STATE_EMPTY
+		|| m_aClients[ClientID1].m_State == CClient::STATE_DUMMY || m_aClients[ClientID2].m_State == CClient::STATE_DUMMY)
 		return false;
 	return (net_addr_comp(m_NetServer.ClientAddr(ClientID1), m_NetServer.ClientAddr(ClientID2), false) == 0
 		&& mem_comp(&m_aClients[ClientID1].m_ConnectionID, &m_aClients[ClientID2].m_ConnectionID, sizeof(m_aClients[ClientID1].m_ConnectionID)) == 0);

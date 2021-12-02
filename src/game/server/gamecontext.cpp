@@ -4339,6 +4339,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 		} while(0)
 
 	int Total = 0;
+	int Dummies = 0;
 	char aBuf[128];
 	int Bufcnt = 0;
 	if (pFilter[0])
@@ -4351,6 +4352,9 @@ void CGameContext::List(int ClientID, const char* pFilter)
 		if (m_apPlayers[i])
 		{
 			Total++;
+			if (Server()->GetDummy(i) != -1)
+				Dummies++;
+
 			const char* pName = Server()->ClientName(i);
 			if (str_find_nocase(pName, pFilter) == NULL)
 				continue;
@@ -4373,7 +4377,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 	}
 	if (Bufcnt != 0)
 		SEND(aBuf);
-	str_format(aBuf, sizeof(aBuf), "%d players online", Total);
+	str_format(aBuf, sizeof(aBuf), "%d players online, including %d client dummies", Total, Dummies/2);
 	SEND(aBuf);
 	#undef SEND
 }
