@@ -437,7 +437,7 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
 	{
 		int CID = m_pMap[i];
-		if (CID != -1 && m_aReserved[CID])
+		if (CID != -1 && m_aReserved[CID] != -1)
 			continue;
 
 		if (CID == -1 || (!m_pGameWorld->GameServer()->GetPlayerChar(CID) || m_pGameWorld->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID)))
