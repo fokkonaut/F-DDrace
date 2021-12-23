@@ -460,7 +460,7 @@ public:
 	virtual void RemoveWhitelistByIndex(unsigned int Index);
 	virtual void PrintWhitelist();
 
-	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "");
+	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "");
 	void AddJob(JOBFUNC pfnFunc, void *pData);
 	std::list<CJob *> m_Jobs;
 

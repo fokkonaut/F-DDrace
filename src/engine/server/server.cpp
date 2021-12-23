@@ -3385,7 +3385,7 @@ int WebhookThread(void *pArg)
 	return 0;
 }
 
-void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername)
+void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername, const char *pAvatarURL)
 {
 	if (!pURL[0] || !pMessage[0])
 		return;
@@ -3412,7 +3412,11 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 #endif
 
 	char aData[512];
-	str_format(aData, sizeof(aData), "%s{%susername%s: %s%s%s, %scontent%s: %s%s%s}%s", pSingleQuote, pQuote, pQuote, pQuote, pName, pQuote, pQuote, pQuote, pQuote, pMsg, pQuote, pSingleQuote);
+	str_format(aData, sizeof(aData), "%s{%susername%s: %s%s%s, %scontent%s: %s%s%s, %savatar_url%s: %s%s%s}%s", pSingleQuote,
+		pQuote, pQuote, pQuote, pName, pQuote,
+		pQuote, pQuote, pQuote, pMsg, pQuote,
+		pQuote, pQuote, pQuote, pAvatarURL, pQuote,
+		pSingleQuote);
 
 	char *pBuf = (char *)calloc(1, 1024);
 	str_format(pBuf, 1024, "%s %s %s >%s 2>&1", pBase, aData, pURL, pRedirect);

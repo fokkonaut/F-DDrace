@@ -490,11 +490,23 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0)))
 	{
 		char aWebhookName[32];
+		char aAvatarURL[128] = "";
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
 		if (ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
+		{
 			str_format(aWebhookName, sizeof(aWebhookName), "%s [%d]", Server()->ClientName(ChatterClientID), m_Accounts[m_apPlayers[ChatterClientID]->GetAccID()].m_Level);
+			str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName);
 
-		Server()->SendWebhookMessage(Config()->m_SvWebhookChatBridgeURL, aText, aWebhookName);
+			if (m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_UseCustomColor)
+			{
+				str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s&body_color=%d&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
+#if defined(CONF_FAMILY_WINDOWS)
+				str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s^&body_color=%d^&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
+#endif
+			}
+		}
+
+		Server()->SendWebhookMessage(Config()->m_SvWebhookChatBridgeURL, aText, aWebhookName, aAvatarURL);
 	}
 
 	CNetMsg_Sv_Chat Msg;
