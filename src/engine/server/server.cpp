@@ -3400,17 +3400,22 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 				*ptr = ' ';
 	}
 
-	const char *pPart1 = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data '{\"username\": \"";
-	const char *pPart2 = "\", \"content\": \"";
-	const char *pPart3 = "\"}'";
+	const char *pBase = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data";
 
 	const char *pRedirect = "/dev/null";
+	const char *pSingleQuote = "'";
+	const char *pQuote = "\"";
 #if defined(CONF_FAMILY_WINDOWS)
 	pRedirect = "nul";
+	pSingleQuote = "\"";
+	pQuote = "\\\"";
 #endif
 
+	char aData[512];
+	str_format(aData, sizeof(aData), "%s{%susername%s: %s%s%s, %scontent%s: %s%s%s}%s", pSingleQuote, pQuote, pQuote, pQuote, pName, pQuote, pQuote, pQuote, pQuote, pMsg, pQuote, pSingleQuote);
+
 	char *pBuf = (char *)calloc(1, 1024);
-	str_format(pBuf, 1024, "%s%s%s%s%s %s >%s 2>&1", pPart1, pName, pPart2, pMsg, pPart3, pURL, pRedirect);
+	str_format(pBuf, 1024, "%s %s %s >%s 2>&1", pBase, aData, pURL, pRedirect);
 	free(pMsg);
 	free(pName);
 
