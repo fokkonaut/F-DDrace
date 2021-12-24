@@ -504,7 +504,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				{
 #if defined(CONF_FAMILY_WINDOWS)
 					str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s^&body_color=%d^&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
-#elif
+#else
 					str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s&body_color=%d&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
 #endif
 				}
