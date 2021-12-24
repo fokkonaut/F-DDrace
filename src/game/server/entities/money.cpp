@@ -74,11 +74,7 @@ void CMoney::Tick()
 		{
 			m_Amount += pMoney->m_Amount;
 			pMoney->Reset();
-
-			Mask128 TeamMask = Mask128();
-			if (GetOwner())
-				TeamMask = GetOwner()->TeamMask();
-			GameServer()->CreateDeath(m_Pos, m_Owner, TeamMask);
+			GameServer()->CreateDeath(m_Pos, m_Owner, m_TeamMask);
 		}
 		else if (!pClosest)
 			MoveTo(pMoney->GetPos(), RADIUS_FIND_MONEY);
