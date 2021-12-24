@@ -2392,8 +2392,32 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastVote = Server()->Tick();
-
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
+
+			if (m_VoteCloseTime)
+			{
+				if(pPlayer->m_Vote == 0)
+				{
+					if(!pMsg->m_Vote)
+						return;
+
+					pPlayer->m_Vote = pMsg->m_Vote;
+					pPlayer->m_VotePos = ++m_VotePos;
+					m_VoteUpdate = true;
+				}
+				else if(m_VoteCreator == pPlayer->GetCID())
+				{
+					CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
+					if(pMsg->m_Vote != -1 || m_VoteCancelTime<time_get())
+						return;
+
+					m_VoteCloseTime = -1;
+				}
+
+				// Dont process further if a vote is running
+				return;
+			}
+
 			CCharacter *pChr = pPlayer->GetCharacter();
 			CCharacter *pControlledTee = pPlayer->m_pControlledTee ? pPlayer->m_pControlledTee->GetCharacter() : 0;
 
@@ -2451,27 +2475,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						}
 					}
 				}
-			}
-
-			if(!m_VoteCloseTime)
-				return;
-
-			if(pPlayer->m_Vote == 0)
-			{
-				if(!pMsg->m_Vote)
-					return;
-
-				pPlayer->m_Vote = pMsg->m_Vote;
-				pPlayer->m_VotePos = ++m_VotePos;
-				m_VoteUpdate = true;
-			}
-			else if(m_VoteCreator == pPlayer->GetCID())
-			{
-				CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
-				if(pMsg->m_Vote != -1 || m_VoteCancelTime<time_get())
-					return;
-
-				m_VoteCloseTime = -1;
 			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_SETTEAM)
