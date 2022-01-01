@@ -10,7 +10,7 @@
 
 #include "register.h"
 
-CRegister::CRegister(bool Sevendown)
+CRegister::CRegister(bool Sevendown, bool Two)
 {
 	m_pNetServer = 0;
 	m_pMasterServer = 0;
@@ -26,7 +26,11 @@ CRegister::CRegister(bool Sevendown)
 	m_RegisterRegisteredServer = -1;
 
 	m_Sevendown = Sevendown;
-	m_pPrintFrom = m_Sevendown ? "register6" : "register";
+	m_Two = Two;
+	if (m_Sevendown)
+		m_pPrintFrom = m_Two ? "register62" : "register6";
+	else
+		m_pPrintFrom = m_Two ? "register2" : "register";
 }
 
 void CRegister::RegisterNewState(int State)
@@ -43,13 +47,13 @@ void CRegister::RegisterSendFwcheckresponse(NETADDR *pAddr, TOKEN Token)
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(SERVERBROWSE_FWRESPONSE);
 	Packet.m_pData = SERVERBROWSE_FWRESPONSE;
-	m_pNetServer->Send(&Packet, Token, m_Sevendown);
+	m_pNetServer->Send(&Packet, Token, m_Sevendown, m_Two);
 }
 
 void CRegister::RegisterSendHeartbeat(NETADDR Addr)
 {
 	static unsigned char aData[sizeof(SERVERBROWSE_HEARTBEAT) + 2];
-	unsigned short Port = m_pConfig->m_SvPort;
+	unsigned short Port = m_Two ? m_pConfig->m_SvPortTwo : m_pConfig->m_SvPort;
 	CNetChunk Packet;
 
 	mem_copy(aData, SERVERBROWSE_HEARTBEAT, sizeof(SERVERBROWSE_HEARTBEAT));
@@ -65,7 +69,7 @@ void CRegister::RegisterSendHeartbeat(NETADDR Addr)
 		Port = m_pConfig->m_SvExternalPort;
 	aData[sizeof(SERVERBROWSE_HEARTBEAT)] = Port >> 8;
 	aData[sizeof(SERVERBROWSE_HEARTBEAT)+1] = Port&0xff;
-	m_pNetServer->Send(&Packet, NET_TOKEN_NONE, m_Sevendown);
+	m_pNetServer->Send(&Packet, NET_TOKEN_NONE, m_Sevendown, m_Two);
 }
 
 void CRegister::RegisterSendCountRequest(NETADDR Addr)
@@ -76,7 +80,7 @@ void CRegister::RegisterSendCountRequest(NETADDR Addr)
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(SERVERBROWSE_GETCOUNT);
 	Packet.m_pData = SERVERBROWSE_GETCOUNT;
-	m_pNetServer->Send(&Packet, NET_TOKEN_NONE, m_Sevendown);
+	m_pNetServer->Send(&Packet, NET_TOKEN_NONE, m_Sevendown, m_Two);
 }
 
 void CRegister::RegisterGotCount(CNetChunk *pChunk)
@@ -270,7 +274,7 @@ int CRegister::RegisterProcessPacket(CNetChunk *pPacket, TOKEN Token)
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, "no firewall/nat problems detected");
 		RegisterNewState(REGISTERSTATE_REGISTERED);
 		if (!m_Sevendown)
-			m_pNetServer->AddToken(&pPacket->m_Address, Token);
+			m_pNetServer->AddToken(&pPacket->m_Address, Token, m_Two);
 		return 1;
 	}
 	else if(!m_Sevendown && pPacket->m_DataSize == sizeof(SERVERBROWSE_FWERROR) &&
@@ -278,7 +282,7 @@ int CRegister::RegisterProcessPacket(CNetChunk *pPacket, TOKEN Token)
 	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, "ERROR: the master server reports that clients can not connect to this server.");
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "ERROR: configure your firewall/nat to let through udp on port %d.", m_pConfig->m_SvPort);
+		str_format(aBuf, sizeof(aBuf), "ERROR: configure your firewall/nat to let through udp on port %d.", m_Two ? m_pConfig->m_SvPortTwo : m_pConfig->m_SvPort);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, aBuf);
 		RegisterNewState(REGISTERSTATE_ERROR);
 		return 1;

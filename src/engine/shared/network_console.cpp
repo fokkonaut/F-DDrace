@@ -79,7 +79,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 	{
 		m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr);
 		if(m_pfnNewClient)
-			m_pfnNewClient(FreeSlot, false, m_UserPtr);
+			m_pfnNewClient(FreeSlot, false, false, m_UserPtr);
 		return 0;
 	}
 

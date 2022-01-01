@@ -17,7 +17,7 @@ bool CNetClient::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 	mem_zero(this, sizeof(*this));
 
 	// init
-	Init(Socket, pConfig, pConsole, pEngine);
+	Init(Socket, Socket, pConfig, pConsole, pEngine);
 	m_Connection.Init(this, false);
 
 	m_TokenManager.Init(this);
@@ -48,7 +48,7 @@ int CNetClient::Update()
 	if(m_Connection.State() == NET_CONNSTATE_ERROR)
 		Disconnect(m_Connection.ErrorString());
 	m_TokenManager.Update();
-	m_TokenCache.Update();
+	m_TokenCache.Update(false);
 	return 0;
 }
 
@@ -75,7 +75,7 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		// TODO: empty the recvinfo
 		NETADDR Addr;
 		bool Sevendown;
-		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, &Sevendown);
+		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, &Sevendown, false);
 		// no more packets for now
 		if(Result > 0)
 			break;
@@ -84,7 +84,7 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		{
 			if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr, true) == 0)
 			{
-				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, false))
+				if(m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, false, false))
 				{
 					if(!(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS))
 						m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
@@ -92,14 +92,14 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 			}
 			else
 			{
-				int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data);
+				int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, false);
 				if(!Accept)
 					continue;
 
 				if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
 				{
 					if(m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_TOKEN)
-						m_TokenCache.AddToken(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, NET_TOKENFLAG_ALLOWBROADCAST|NET_TOKENFLAG_RESPONSEONLY);
+						m_TokenCache.AddToken(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, NET_TOKENFLAG_ALLOWBROADCAST|NET_TOKENFLAG_RESPONSEONLY, false);
 				}
 				else if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS && Accept != -1)
 				{
@@ -138,7 +138,7 @@ int CNetClient::Send(CNetChunk *pChunk, TOKEN Token, CSendCBData *pCallbackData)
 
 		if(Token != NET_TOKEN_NONE)
 		{
-			SendPacketConnless(&pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize, false);
+			SendPacketConnless(&pChunk->m_Address, Token, m_TokenManager.GenerateToken(&pChunk->m_Address), pChunk->m_pData, pChunk->m_DataSize, false, false);
 		}
 		else
 		{
