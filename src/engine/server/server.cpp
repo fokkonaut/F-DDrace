@@ -360,9 +360,6 @@ int CServer::TrySetClientName(int ClientID, const char* pName)
 		}
 	}
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "'%s' -> '%s'", pName, aTrimmedName);
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 	pName = aTrimmedName;
 
 	// set the client name
