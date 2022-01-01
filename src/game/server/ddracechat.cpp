@@ -2552,6 +2552,12 @@ void CGameContext::ConMutePlayer(IConsole::IResult* pResult, void* pUserData)
 	if (ID == -1)
 		return;
 
+	if (ID == pResult->m_ClientID)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can't mute yourself");
+		return;
+	}
+
 	pPlayer->m_aMuted[ID] = !pPlayer->m_aMuted[ID];
 
 	char aBuf[128];
