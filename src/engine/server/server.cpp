@@ -2483,6 +2483,7 @@ int CServer::Run()
 			m_Register.RegisterUpdate(m_NetServer.NetType());
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
 
+			// dont spam console with warnings if we dont even want the second register right now
 			int ClientCount = 0, DummyCount = 0;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
