@@ -5606,7 +5606,7 @@ const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 	sha256_update(&Sha256Ctx, &Info.m_aName, str_length(Info.m_aName));
 	for (int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aaSkinPartNames[p], str_length(Info.m_TeeInfo.m_aaSkinPartNames[p]));
+		sha256_update(&Sha256Ctx, Info.m_TeeInfo.GetSkinPartName(p), str_length(Info.m_TeeInfo.m_aaSkinPartNames[p]));
 		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aUseCustomColors[p], sizeof(Info.m_TeeInfo.m_aUseCustomColors[p]));
 		sha256_update(&Sha256Ctx, &Info.m_TeeInfo.m_aSkinPartColors[p], sizeof(Info.m_TeeInfo.m_aSkinPartColors[p]));
 	}
