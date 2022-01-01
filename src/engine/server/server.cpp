@@ -1438,6 +1438,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
 				SendConnectionReady(ClientID);
+
+				if (Config()->m_SvDefaultMapDesign[0])
+					ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 			}
 		}
 		else if(Msg == NETMSG_ENTERGAME)
