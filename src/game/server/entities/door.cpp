@@ -113,6 +113,9 @@ void CDoor::Snap(int SnappingClient)
 			return;
 	}
 
+	if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->m_HideDrawings && m_PlotID == 0 && !m_Collision) // plot id 0 = free draw, dont hide objects on normal plots
+		return;
+
 	bool SendEntityEx = false;
 	if (m_Length > 0.f && m_Collision)
 	{

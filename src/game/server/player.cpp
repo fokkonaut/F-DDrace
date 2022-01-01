@@ -232,6 +232,7 @@ void CPlayer::Reset()
 		m_aStrongWeakID[i] = 0;
 
 	m_LastDesignChangeTry = 0;
+	m_HideDrawings = false;
 }
 
 void CPlayer::Tick()
@@ -1790,6 +1791,8 @@ void CPlayer::OnLogin()
 		m_PlotSpawn = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_SILENTFARM)
 		m_SilentFarm = true;
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
+		m_HideDrawings = true;
 }
 
 void CPlayer::OnLogout()
@@ -1821,6 +1824,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_PLOTSPAWN;
 	if (m_SilentFarm)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_SILENTFARM;
+	if (m_HideDrawings)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEDRAWINGS;
 }
 
 void CPlayer::StopPlotEditing()

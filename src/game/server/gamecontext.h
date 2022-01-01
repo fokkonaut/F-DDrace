@@ -573,6 +573,7 @@ public:
 		ACCFLAG_ZOOMCURSOR = 1<<0,
 		ACCFLAG_PLOTSPAWN = 1<<1,
 		ACCFLAG_SILENTFARM = 1<<2,
+		ACCFLAG_HIDEDRAWINGS = 1<<3,
 	};
 
 	// money drops
@@ -848,6 +849,7 @@ private:
 	static void ConAimClosestVIP(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
+	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);

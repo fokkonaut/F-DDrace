@@ -2430,6 +2430,31 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
+void CGameContext::ConHideDrawings(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pResult->NumArguments())
+	{
+		if (pPlayer->m_HideDrawings == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_HideDrawings = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_HideDrawings = !pPlayer->m_HideDrawings;
+	}
+
+	if (pPlayer->m_HideDrawings)
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer see drawings");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will now see drawings again");
+}
+
 void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

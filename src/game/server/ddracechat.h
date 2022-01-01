@@ -77,6 +77,7 @@ CHAT_COMMAND("silentfarm", "?i['0'|'1']", CFGFLAG_CHAT, ConSilentFarm, this, "Mu
 
 //plots
 CHAT_COMMAND("plot", "?s[command] ?s[price|helpcmd|swapname] ?r[playername]", CFGFLAG_CHAT, ConPlot, this, "Plot command", AUTHED_NO)
+CHAT_COMMAND("hidedrawings", "?i['0'|'1']", CFGFLAG_CHAT, ConHideDrawings, this, "Whether drawings are hidden", AUTHED_NO)
 
 //extras
 CHAT_COMMAND("weaponindicator", "", CFGFLAG_CHAT, ConWeaponIndicator, this, "Tells you which weapon you are holding under the heart and armor bar", AUTHED_NO)

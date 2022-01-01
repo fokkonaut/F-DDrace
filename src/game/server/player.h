@@ -345,6 +345,8 @@ public:
 	char m_aPlotSwapUsername[32];
 	bool m_PlotSpawn;
 
+	bool m_HideDrawings;
+
 	//room key
 	bool m_HasRoomKey;
 
