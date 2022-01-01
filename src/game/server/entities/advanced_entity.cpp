@@ -6,7 +6,7 @@
 #include <game/server/gamemodes/DDRace.h>
 
 CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner, bool CheckDeath)
-: CEntity(pGameWorld, Objtype, Pos, Size.x) // Set ProximityRadius to Size.x for now xd
+: CEntity(pGameWorld, Objtype, Pos, min(Size.x, Size.y)) // Set ProximityRadius to the smaller value for now
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
