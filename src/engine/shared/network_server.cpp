@@ -34,9 +34,14 @@ bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 	if(!SocketTwo.type)
 		return false;
 
+	BindAddr.port = pConfig->m_SvPortSurvival;
+	NETSOCKET SocketSurvival = net_udp_create(BindAddr, 0);
+	if(!SocketSurvival.type)
+		return false;
+
 	// init
 	m_pNetBan = pNetBan;
-	Init(Socket, SocketTwo, pConfig, pConsole, pEngine);
+	Init(Socket, SocketTwo, SocketSurvival, pConfig, pConsole, pEngine);
 
 	m_TokenManager.Init(this);
 	m_TokenCache.Init(this, &m_TokenManager);

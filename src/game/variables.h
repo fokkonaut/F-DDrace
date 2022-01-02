@@ -290,6 +290,8 @@ MACRO_CONFIG_STR(SvLibreTranslateKey, sv_libretranslate_key, 128, "", CFGFLAG_SE
 
 // sockets
 MACRO_CONFIG_INT(SvPortTwo, sv_port_two, 8304, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the second serverinfo", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortSurvival, sv_port_survival, 8305, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the survival serverinfo", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvSurvivalServerName, sv_survival_server_name, 128, "", CFGFLAG_SERVER, "Server name for survival", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
