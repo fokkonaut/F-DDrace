@@ -185,6 +185,8 @@ public:
 		int64 m_TrafficSince;
 
 		bool m_Sevendown;
+		int m_Socket;
+
 		bool m_DesignChange;
 		int m_CurrentMapDesign;
 
@@ -289,6 +291,7 @@ public:
 
 	CDemoRecorder m_DemoRecorder;
 	CRegister m_Register;
+	CRegister m_RegisterTwo;
 	CRegister m_RegisterSevendown;
 	CMapChecker m_MapChecker;
 	CAuthManager m_AuthManager;
@@ -332,7 +335,7 @@ public:
 
 	void DoSnapshot();
 
-	static int NewClientCallback(int ClientID, bool Sevendown, void *pUser);
+	static int NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 	void SendCapabilities(int ClientID);
@@ -353,8 +356,8 @@ public:
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	void SendServerInfo(int ClientID);
-	void GenerateServerInfo(CPacker *pPacker, int Token);
-	void SendServerInfoSevendown(const NETADDR *pAddr, int Token);
+	void GenerateServerInfo(CPacker *pPacker, int Token, int Socket);
+	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socket);
 
 	void PumpNetwork();
 

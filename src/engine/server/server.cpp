@@ -289,7 +289,7 @@ void CServer::CClient::Reset()
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 }
 
-CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false), m_RegisterSevendown(true)
+CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_MAIN), m_RegisterTwo(false, SOCKET_TWO), m_RegisterSevendown(true, SOCKET_MAIN)
 {
 	m_TickSpeed = SERVER_TICK_SPEED;
 
@@ -469,6 +469,7 @@ int CServer::Init()
 		m_aClients[i].m_Traffic = 0;
 		m_aClients[i].m_TrafficSince = 0;
 		m_aClients[i].m_Sevendown = false;
+		m_aClients[i].m_Socket = SOCKET_MAIN;
 	}
 
 	m_AnnouncementLastLine = 0;
@@ -889,7 +890,7 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
-int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
+int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
@@ -917,6 +918,7 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
+	pThis->m_aClients[ClientID].m_Socket = Socket;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->m_aClients[ClientID].Reset();
@@ -962,6 +964,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sevendown = false;
+	pThis->m_aClients[ClientID].m_Socket = SOCKET_MAIN;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
@@ -1697,7 +1700,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	}
 }
 
-void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
+void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 {
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
@@ -1711,6 +1714,8 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 			ClientCount++;
 		}
 	}
+
+	bool DoubleInfo = ClientCount >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS && (Socket == SOCKET_MAIN || Socket == SOCKET_TWO);
 
 	if(Token != -1)
 	{
@@ -1729,6 +1734,16 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, Config()->m_SvMaxClients);
+		if (DoubleInfo)
+		{
+			int Count = Socket == SOCKET_MAIN ? 1 : Socket == SOCKET_TWO ? 2 : 0;
+			if (Count)
+			{
+				char aDouble[8];
+				str_format(aDouble, sizeof(aDouble), " [%d/2]", Count);
+				str_append(aBuf, aDouble, sizeof(aBuf));
+			}
+		}
 		pPacker->AddString(aBuf, 64);
 	}
 
@@ -1747,20 +1762,27 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 	pPacker->AddInt(Flags);
 
 	int MaxClients = Config()->m_SvMaxClients;
-	int PlayerSlots = Config()->m_SvPlayerSlots;
-	if(ClientCount >= VANILLA_MAX_CLIENTS)
+	bool FillFirst = ClientCount >= MaxClients-1;
+	if (DoubleInfo)
 	{
-		if(ClientCount < MaxClients)
-			ClientCount = VANILLA_MAX_CLIENTS - 1;
-		else
-			ClientCount = VANILLA_MAX_CLIENTS;
+		int Diff = FillFirst ? VANILLA_MAX_CLIENTS : VANILLA_MAX_CLIENTS-1;
+
+		if (Socket == SOCKET_MAIN)
+		{
+			ClientCount = Diff;
+		}
+		else if (Socket == SOCKET_TWO)
+		{
+			ClientCount -= Diff;
+			MaxClients -= VANILLA_MAX_CLIENTS;
+		}
 	}
-	if(MaxClients > VANILLA_MAX_CLIENTS)
-		MaxClients = VANILLA_MAX_CLIENTS;
-	if(PlayerCount > ClientCount)
-		PlayerCount = ClientCount;
-	if (PlayerSlots > VANILLA_MAX_CLIENTS)
-		PlayerSlots = VANILLA_MAX_CLIENTS;
+
+	ClientCount = min(ClientCount, (int)VANILLA_MAX_CLIENTS);
+	PlayerCount = min(PlayerCount, ClientCount);
+	MaxClients = min(MaxClients, (int)VANILLA_MAX_CLIENTS);
+	int PlayerSlots = min(Config()->m_SvPlayerSlots, MaxClients);
+	PlayerSlots = max(PlayerCount, PlayerSlots);
 
 	pPacker->AddInt(Config()->m_SvSkillLevel);	// server skill level
 	pPacker->AddInt(PlayerCount); // num players
@@ -1770,26 +1792,36 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token)
 
 	if(Token != -1)
 	{
-		int Sent = 0;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (Sent >= VANILLA_MAX_CLIENTS)
-				break;
+		#define SENDPLAYER(i) do \
+		{ \
+			if (Sent >= ClientCount) \
+				break; \
+			if(m_aClients[i].m_State != CClient::STATE_EMPTY) \
+			{ \
+				pPacker->AddString(ClientName(i), 0); /*client name*/ \
+				pPacker->AddString(ClientClan(i), 0); /*client clan*/ \
+				pPacker->AddInt(m_aClients[i].m_Country); /*client country*/ \
+				pPacker->AddInt(m_aClients[i].m_Score); /*client score*/ \
+				pPacker->AddInt(m_aClients[i].m_State == CClient::STATE_DUMMY ? 2 : GameServer()->IsClientPlayer(i)?0:1); /*flag spectator=1, bot=2 (player=0)*/ \
+				Sent++; \
+			} \
+		} while(0)
 
-			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-			{
-				pPacker->AddString(ClientName(i), 0); // client name
-				pPacker->AddString(ClientClan(i), 0); // client clan
-				pPacker->AddInt(m_aClients[i].m_Country); // client country
-				pPacker->AddInt(m_aClients[i].m_Score); // client score
-				pPacker->AddInt(m_aClients[i].m_State == CClient::STATE_DUMMY ? 2 : GameServer()->IsClientPlayer(i)?0:1); // flag spectator=1, bot=2 (player=0)
-				Sent++;
-			}
+		int Sent = 0;
+		if (Socket == SOCKET_TWO)
+		{
+			for (int i = MAX_CLIENTS-1; i >= 0; i--)
+				SENDPLAYER(i);
+		}
+		else
+		{
+			for(int i = 0; i < MAX_CLIENTS; i++)
+				SENDPLAYER(i);
 		}
 	}
 }
 
-void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
+void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socket)
 {
 	CPacker p;
 	char aBuf[128];
@@ -1827,9 +1859,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
 
-	if(PlayerCount > ClientCount)
-		PlayerCount = ClientCount;
-	ADD_INT(p, PlayerCount);
+	ADD_INT(p, min(PlayerCount, ClientCount));
 	ADD_INT(p, max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount));
 	ADD_INT(p, ClientCount);
 	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients-DummyCount));
@@ -1851,7 +1881,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
 		{ \
 			Packet.m_pData = pp.Data(); \
 			Packet.m_DataSize = size; \
-			m_NetServer.Send(&Packet, NET_TOKEN_NONE, true); \
+			m_NetServer.Send(&Packet, NET_TOKEN_NONE, true, Socket); \
 			PacketsSent++; \
 		} while(0)
 
@@ -1911,8 +1941,11 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token)
 
 void CServer::SendServerInfo(int ClientID)
 {
-	CMsgPacker Msg(NETMSG_SERVERINFO, true);
-	GenerateServerInfo(&Msg, -1);
+	CMsgPacker MsgMain(NETMSG_SERVERINFO, true);
+	GenerateServerInfo(&MsgMain, -1, SOCKET_MAIN);
+	CMsgPacker MsgTwo(NETMSG_SERVERINFO, true);
+	GenerateServerInfo(&MsgTwo, -1, SOCKET_TWO);
+
 	if(ClientID == -1)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1920,18 +1953,28 @@ void CServer::SendServerInfo(int ClientID)
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
 				if (m_aClients[i].m_Sevendown)
-					SendServerInfoSevendown(m_NetServer.ClientAddr(i), -1);
+				{
+					SendServerInfoSevendown(m_NetServer.ClientAddr(i), -1, m_aClients[i].m_Socket);
+				}
 				else
-					SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, i);
+				{
+					CMsgPacker *pMsg = m_aClients[i].m_Socket == SOCKET_MAIN ? &MsgMain : &MsgTwo;
+					SendMsg(pMsg, MSGFLAG_VITAL|MSGFLAG_FLUSH, i);
+				}
 			}
 		}
 	}
 	else if(ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State != CClient::STATE_EMPTY)
 	{
 		if (m_aClients[ClientID].m_Sevendown)
-			SendServerInfoSevendown(m_NetServer.ClientAddr(ClientID), -1);
+		{
+			SendServerInfoSevendown(m_NetServer.ClientAddr(ClientID), -1, m_aClients[ClientID].m_Socket);
+		}
 		else
-			SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+		{
+			CMsgPacker *pMsg = m_aClients[ClientID].m_Socket == SOCKET_MAIN ? &MsgMain : &MsgTwo;
+			SendMsg(pMsg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+		}
 	}
 }
 
@@ -1945,73 +1988,94 @@ void CServer::PumpNetwork()
 	m_NetServer.Update();
 
 	// process packets
-	while(m_NetServer.Recv(&Packet, &ResponseToken, &Sevendown))
+	for (int Socket = 0; Socket < NUM_SOCKETS; Socket++)
 	{
-		if(Packet.m_Flags&NETSENDFLAG_CONNLESS)
+		while(m_NetServer.Recv(&Packet, &ResponseToken, &Sevendown, Socket))
 		{
-			if (Sevendown)
+			if(Packet.m_Flags&NETSENDFLAG_CONNLESS)
 			{
-				if(m_RegisterSevendown.RegisterProcessPacket(&Packet, ResponseToken))
-					continue;
-			}
-			else
-			{
-				if(m_Register.RegisterProcessPacket(&Packet, ResponseToken))
-					continue;
-			}
-
-			if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) &&
-				mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
-			{
-				CUnpacker Unpacker;
-				Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
-
-				int SrvBrwsToken;
 				if (Sevendown)
 				{
-					if (!Config()->m_SvAllowSevendown)
+					if (Socket == SOCKET_TWO)
 						continue;
 
-					int ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
-					SrvBrwsToken = ((unsigned char*)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
-					SrvBrwsToken |= ExtraToken << 8;
-					SendServerInfoSevendown(&Packet.m_Address, SrvBrwsToken);
+					if(m_RegisterSevendown.RegisterProcessPacket(&Packet, ResponseToken))
+						continue;
 				}
 				else
 				{
-					SrvBrwsToken = Unpacker.GetInt();
-					if (Unpacker.Error())
+					CRegister *pRegister = &m_Register;
+					if (Socket == SOCKET_TWO)
+					{
+						int ClientCount = 0;
+						for(int i = 0; i < MAX_CLIENTS; i++)
+							if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+								ClientCount++;
+
+						if (ClientCount < VANILLA_MAX_CLIENTS || Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
+							continue;
+
+						pRegister = &m_RegisterTwo;
+					}
+
+					if(pRegister->RegisterProcessPacket(&Packet, ResponseToken))
 						continue;
+				}
 
-					CPacker Packer;
-					CNetChunk Response;
+				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) &&
+					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
+				{
+					CUnpacker Unpacker;
+					Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
 
-					GenerateServerInfo(&Packer, SrvBrwsToken);
+					int SrvBrwsToken;
+					if (Sevendown)
+					{
+						if (!Config()->m_SvAllowSevendown)
+							continue;
 
-					Response.m_ClientID = -1;
-					Response.m_Address = Packet.m_Address;
-					Response.m_Flags = NETSENDFLAG_CONNLESS;
-					Response.m_pData = Packer.Data();
-					Response.m_DataSize = Packer.Size();
-					m_NetServer.Send(&Response, ResponseToken);
+						int ExtraToken = (Packet.m_aExtraData[0] << 8) | Packet.m_aExtraData[1];
+						SrvBrwsToken = ((unsigned char*)Packet.m_pData)[sizeof(SERVERBROWSE_GETINFO)];
+						SrvBrwsToken |= ExtraToken << 8;
+						SendServerInfoSevendown(&Packet.m_Address, SrvBrwsToken, Socket);
+					}
+					else
+					{
+						SrvBrwsToken = Unpacker.GetInt();
+						if (Unpacker.Error())
+							continue;
+
+						CPacker Packer;
+						CNetChunk Response;
+
+						GenerateServerInfo(&Packer, SrvBrwsToken, Socket);
+
+						Response.m_ClientID = -1;
+						Response.m_Address = Packet.m_Address;
+						Response.m_Flags = NETSENDFLAG_CONNLESS;
+						Response.m_pData = Packer.Data();
+						Response.m_DataSize = Packer.Size();
+						m_NetServer.Send(&Response, ResponseToken, false, Socket);
+					}
 				}
 			}
-		}
-		else
-		{
-			int GameFlags = 0;
-			if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
+			else
 			{
-				GameFlags |= MSGFLAG_VITAL;
-			}
-			if(Antibot()->OnEngineClientMessage(Packet.m_ClientID, Packet.m_pData, Packet.m_DataSize, GameFlags))
-			{
-				continue;
-			}
+				int GameFlags = 0;
+				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
+				{
+					GameFlags |= MSGFLAG_VITAL;
+				}
+				if(Antibot()->OnEngineClientMessage(Packet.m_ClientID, Packet.m_pData, Packet.m_DataSize, GameFlags))
+				{
+					continue;
+				}
 
-			ProcessClientPacket(&Packet);
+				ProcessClientPacket(&Packet);
+			}
 		}
 	}
+
 	{
 		unsigned char aBuffer[NET_MAX_PAYLOAD];
 		int Flags;
@@ -2127,6 +2191,7 @@ int CServer::LoadMap(const char *pMapName)
 void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
 {
 	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
+	m_RegisterTwo.Init(pNetServer, pMasterServer, pConfig, pConsole);
 	m_RegisterSevendown.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
@@ -2406,8 +2471,20 @@ int CServer::Run()
 			}
 
 			// master server stuff
-			m_Register.RegisterUpdate(m_NetServer.NetType());
-			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
+			m_Register.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
+			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
+
+			// dont spam console with warnings if we dont even want the second register right now
+			if (Tick() % TickSpeed() == 0) // lets not do this too often
+			{
+				int ClientCount = 0;
+				for(int i = 0; i < MAX_CLIENTS; i++)
+					if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+						ClientCount++;
+
+				if (ClientCount >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS)
+					m_RegisterTwo.RegisterUpdate(m_NetServer.NetType(SOCKET_TWO));
+			}
 
 			Antibot()->OnEngineTick();
 
@@ -2587,8 +2664,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				if (Dummy != -1)
 					str_format(aDummy, sizeof(aDummy), " dummy=%d:'%s'", Dummy, pThis->ClientName(Dummy));
 
-				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d name='%s' score=%d%s%s", i, aAddrStr,
-						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aDummy, aAuthStr);
+				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d socket=%d name='%s' score=%d%s%s", i, aAddrStr,
+						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_Socket, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aDummy, aAuthStr);
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
@@ -3320,6 +3397,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 		return false;
 	}
 	m_aClients[ClientID].m_Sevendown = m_aClients[OrigID].m_Sevendown;
+	m_aClients[ClientID].m_Socket = m_aClients[OrigID].m_Socket;
 
 	if(m_aClients[OrigID].m_Authed != AUTHED_NO)
 	{
@@ -4005,7 +4083,7 @@ void CServer::DummyJoin(int DummyID)
 		"17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32",
 		"33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48",
 		"49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64",
-		"55", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
+		"65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
 		"81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96",
 		"97", "98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112",
 		"113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128",
@@ -4015,6 +4093,7 @@ void CServer::DummyJoin(int DummyID)
 	m_aClients[DummyID].m_State = CClient::STATE_DUMMY;
 	m_aClients[DummyID].m_Authed = AUTHED_NO;
 	m_aClients[DummyID].m_Sevendown = false;
+	m_aClients[DummyID].m_Socket = SOCKET_MAIN;
 
 	str_utf8_copy_num(m_aClients[DummyID].m_aName, pNames[DummyID], sizeof(m_aClients[DummyID].m_aName), MAX_NAME_LENGTH);
 	str_utf8_copy_num(m_aClients[DummyID].m_aClan, pClans[DummyID], sizeof(m_aClients[DummyID].m_aClan), MAX_CLAN_LENGTH);
@@ -4039,6 +4118,7 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
 	m_aClients[DummyID].m_Sevendown = false;
+	m_aClients[DummyID].m_Socket = SOCKET_MAIN;
 	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	m_aClients[DummyID].m_PgscState = CClient::PGSC_STATE_NONE;
 

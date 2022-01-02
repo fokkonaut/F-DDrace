@@ -290,7 +290,7 @@ void CServerBrowser::Refresh(int RefreshFlags)
 		/* do the broadcast version */
 		CNetChunk Packet;
 		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = m_pNetClient->NetType()|NETTYPE_LINK_BROADCAST;
+		Packet.m_Address.type = m_pNetClient->NetType(0)|NETTYPE_LINK_BROADCAST;
 		Packet.m_ClientID = -1;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS;
 		Packet.m_DataSize = Packer.Size();
