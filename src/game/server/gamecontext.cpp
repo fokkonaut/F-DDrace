@@ -1496,14 +1496,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_apPlayers[ClientID]->CheckClanProtection();
 
 	SendStartMessages(ClientID);
-
-	if (Server()->GetSocket(ClientID) == SOCKET_SURVIVAL)
-	{
-		// Force unset afk because otherwise player would instantly get kicked out of survival again
-		m_apPlayers[ClientID]->m_pLastTarget = new CNetObj_PlayerInput();
-		m_apPlayers[ClientID]->UpdatePlaytime();
-		SetMinigame(ClientID, MINIGAME_SURVIVAL, true);
-	}
 }
 
 void CGameContext::SendStartMessages(int ClientID)
@@ -6962,17 +6954,6 @@ int CGameContext::CountSurvivalPlayers(int State)
 		if (m_apPlayers[i] && m_apPlayers[i]->m_Minigame == MINIGAME_SURVIVAL && (m_apPlayers[i]->m_SurvivalState == State || State == -1))
 			count++;
 	return count;
-}
-
-bool CGameContext::IsClientSurvival(int ClientID)
-{
-	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->m_Minigame == MINIGAME_SURVIVAL;
-}
-
-int CGameContext::GetClientSurvivalKills(int ClientID)
-{
-	int AccID = m_apPlayers[ClientID] ? m_apPlayers[ClientID]->GetAccID() : 0;
-	return m_Accounts[AccID].m_SurvivalKills;
 }
 
 void CGameContext::SetPlayerSurvivalState(int State)

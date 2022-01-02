@@ -63,7 +63,6 @@ public:
 	virtual void DummyLeave(int DummyID) = 0;
 
 	virtual bool IsSevendown(int ClientID) = 0;
-	virtual int GetSocket(int ClientID) = 0;
 	virtual const char *GetLanguage(int ClientID) = 0;
 	virtual void SetLanguage(int ClientID, const char *pLanguage) = 0;
 	virtual void ChangeMapDesign(int ClientID, const char *pName) = 0;
@@ -280,10 +279,6 @@ public:
 	virtual bool IsClientReady(int ClientID) const = 0;
 	virtual bool IsClientPlayer(int ClientID) const = 0;
 	virtual bool IsClientSpectator(int ClientID) const = 0;
-
-	virtual bool IsClientSurvival(int ClientID) = 0;
-	virtual int CountSurvivalPlayers(int State) = 0;
-	virtual int GetClientSurvivalKills(int ClientID) = 0;
 
 	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) = 0;
 

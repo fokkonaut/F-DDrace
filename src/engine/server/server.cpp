@@ -289,8 +289,7 @@ void CServer::CClient::Reset()
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 }
 
-CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_MAIN), m_RegisterTwo(false, SOCKET_TWO), m_RegisterSevendown(true, SOCKET_MAIN),
-	m_RegSurvival(false, SOCKET_SURVIVAL), m_RegSevendownSurvival(true, SOCKET_SURVIVAL)
+CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_MAIN), m_RegisterTwo(false, SOCKET_TWO), m_RegisterSevendown(true, SOCKET_MAIN)
 {
 	m_TickSpeed = SERVER_TICK_SPEED;
 
@@ -1703,21 +1702,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 {
-	bool Survival = Socket == SOCKET_SURVIVAL;
-
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
-	if (!Survival)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
-			if(m_aClients[i].m_State != CClient::STATE_EMPTY && (!GameServer()->IsClientSurvival(i) || !Config()->m_SvSurvivalServerName[0]))
-			{
-				if(GameServer()->IsClientPlayer(i))
-					PlayerCount++;
+			if(GameServer()->IsClientPlayer(i))
+				PlayerCount++;
 
-				ClientCount++;
-			}
+			ClientCount++;
 		}
 	}
 
@@ -1731,37 +1725,8 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 	}
 
 	pPacker->AddString(GameServer()->Version(), 32);
-
-	int MaxClients = Config()->m_SvMaxClients;
-	if (!Survival && Config()->m_SvSurvivalServerName[0])
-		MaxClients -= GameServer()->CountSurvivalPlayers(-1);
-
-	bool FillFirst = ClientCount >= MaxClients-1;
-	if (DoubleInfo)
-	{
-		int Diff = FillFirst ? VANILLA_MAX_CLIENTS : VANILLA_MAX_CLIENTS-1;
-
-		if (Socket == SOCKET_MAIN)
-		{
-			ClientCount = Diff;
-		}
-		else if (Socket == SOCKET_TWO)
-		{
-			ClientCount -= Diff;
-			MaxClients -= VANILLA_MAX_CLIENTS;
-		}
-	}
-	else if (Survival)
-	{
-		MaxClients = VANILLA_MAX_CLIENTS;
-		ClientCount = PlayerCount = GameServer()->CountSurvivalPlayers(-1);
-	}
 	
-	if (Survival)
-	{
-		pPacker->AddString(Config()->m_SvSurvivalServerName, 64);
-	}
-	else if(Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
+	if(Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
 	{
 		pPacker->AddString(Config()->m_SvName, 64);
 	}
@@ -1786,22 +1751,32 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 	pPacker->AddString(GetMapName(), 32);
 
 	// gametype
-	if (Survival)
-	{
-		pPacker->AddString("Survival", 16);
-	}
-	else
-	{
-		pPacker->AddString(GameServer()->GameType(), 16);
-	}
+	pPacker->AddString(GameServer()->GameType(), 16);
 
 	// flags
 	int Flags = 0;
 	if(Config()->m_Password[0])  // password set
 		Flags |= SERVERINFO_FLAG_PASSWORD;
-	if(Config()->m_SvDefaultScoreMode == 0 && !Survival) // F-DDrace // CPlayer::SCORE_TIME means 0
+	if(Config()->m_SvDefaultScoreMode == 0) // F-DDrace // CPlayer::SCORE_TIME means 0
 		Flags |= SERVERINFO_FLAG_TIMESCORE;
 	pPacker->AddInt(Flags);
+
+	int MaxClients = Config()->m_SvMaxClients;
+	bool FillFirst = ClientCount >= MaxClients-1;
+	if (DoubleInfo)
+	{
+		int Diff = FillFirst ? VANILLA_MAX_CLIENTS : VANILLA_MAX_CLIENTS-1;
+
+		if (Socket == SOCKET_MAIN)
+		{
+			ClientCount = Diff;
+		}
+		else if (Socket == SOCKET_TWO)
+		{
+			ClientCount -= Diff;
+			MaxClients -= VANILLA_MAX_CLIENTS;
+		}
+	}
 
 	ClientCount = min(ClientCount, (int)VANILLA_MAX_CLIENTS);
 	PlayerCount = min(PlayerCount, ClientCount);
@@ -1809,11 +1784,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 	int PlayerSlots = min(Config()->m_SvPlayerSlots, MaxClients);
 	PlayerSlots = max(PlayerCount, PlayerSlots);
 
-	int SkillLevel = Config()->m_SvSkillLevel;
-	if (Survival)
-		SkillLevel = 0; // Casual
-
-	pPacker->AddInt(SkillLevel);	// server skill level
+	pPacker->AddInt(Config()->m_SvSkillLevel);	// server skill level
 	pPacker->AddInt(PlayerCount); // num players
 	pPacker->AddInt(PlayerSlots); // max players
 	pPacker->AddInt(ClientCount); // num clients
@@ -1825,15 +1796,12 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 		{ \
 			if (Sent >= ClientCount) \
 				break; \
-			if (Config()->m_SvSurvivalServerName[0] && ((Survival && !GameServer()->IsClientSurvival(i)) || (!Survival && GameServer()->IsClientSurvival(i)))) \
-				continue; \
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY) \
 			{ \
-				int Score = Survival ? GameServer()->GetClientSurvivalKills(i) : m_aClients[i].m_Score; \
 				pPacker->AddString(ClientName(i), 0); /*client name*/ \
 				pPacker->AddString(ClientClan(i), 0); /*client clan*/ \
 				pPacker->AddInt(m_aClients[i].m_Country); /*client country*/ \
-				pPacker->AddInt(Score); /*client score*/ \
+				pPacker->AddInt(m_aClients[i].m_Score); /*client score*/ \
 				pPacker->AddInt(m_aClients[i].m_State == CClient::STATE_DUMMY ? 2 : GameServer()->IsClientPlayer(i)?0:1); /*flag spectator=1, bot=2 (player=0)*/ \
 				Sent++; \
 			} \
@@ -1858,15 +1826,13 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	CPacker p;
 	char aBuf[128];
 
-	bool Survival = Socket == SOCKET_SURVIVAL;
-
 	// count the players
 	int PlayerCount = 0, ClientCount = 0, DummyCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State == CClient::STATE_DUMMY)
 			DummyCount++;
-		else if(m_aClients[i].m_State != CClient::STATE_EMPTY && !Survival && (!GameServer()->IsClientSurvival(i) || !Config()->m_SvSurvivalServerName[0]))
+		else if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -1883,33 +1849,15 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	ADD_INT(p, Token);
  
 	p.AddString(GameServer()->VersionSevendown(), 32);
-	if (Survival)
-	{
-		p.AddString(Config()->m_SvSurvivalServerName, 64);
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "%s%s", Config()->m_SvName, Config()->m_SvNameExtra);
-		p.AddString(aBuf, 64);
-	}
+	str_format(aBuf, sizeof(aBuf), "%s%s", Config()->m_SvName, Config()->m_SvNameExtra);
+	p.AddString(aBuf, 64);
 	p.AddString(GetMapName(), 32);
  
 	ADD_INT(p, m_CurrentMapCrc);
 	ADD_INT(p, m_CurrentMapSize);
-
-	if (Survival)
-	{
-		p.AddString("Survival", 16);
-	}
-	else
-	{
-		p.AddString(GameServer()->GameType(), 16);
-	}
+	p.AddString(GameServer()->GameType(), 16);
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
-
-	if (Survival)
-		ClientCount = PlayerCount = GameServer()->CountSurvivalPlayers(-1);
 
 	ADD_INT(p, min(PlayerCount, ClientCount));
 	ADD_INT(p, max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount));
@@ -1952,9 +1900,6 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	int Sent = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (Config()->m_SvSurvivalServerName[0] && ((Survival && !GameServer()->IsClientSurvival(i)) || (!Survival && GameServer()->IsClientSurvival(i))))
-			continue;
-
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			int PreviousSize = pp.Size();
@@ -1966,9 +1911,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
 			// thats why we just send -9999, because it will be displayed as nothing
 			int Score = -9999;
-			if (Survival)
-				Score = GameServer()->GetClientSurvivalKills(i);
-			else if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
+			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
 				Score = abs(m_aClients[i].m_Score) * -1;
 			ADD_INT(pp, Score);
 			ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
@@ -2051,19 +1994,12 @@ void CServer::PumpNetwork()
 		{
 			if(Packet.m_Flags&NETSENDFLAG_CONNLESS)
 			{
-				if (Socket == SOCKET_SURVIVAL && !Config()->m_SvSurvivalServerName[0])
-					continue;
-
 				if (Sevendown)
 				{
 					if (Socket == SOCKET_TWO)
 						continue;
 
-					CRegister *pRegister = &m_RegisterSevendown;
-					if (Socket == SOCKET_SURVIVAL)
-						pRegister = &m_RegSevendownSurvival;
-
-					if(pRegister->RegisterProcessPacket(&Packet, ResponseToken))
+					if(m_RegisterSevendown.RegisterProcessPacket(&Packet, ResponseToken))
 						continue;
 				}
 				else
@@ -2073,7 +2009,7 @@ void CServer::PumpNetwork()
 					{
 						int ClientCount = 0;
 						for(int i = 0; i < MAX_CLIENTS; i++)
-							if(m_aClients[i].m_State != CClient::STATE_EMPTY && (!GameServer()->IsClientSurvival(i) || !Config()->m_SvSurvivalServerName[0]))
+							if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 								ClientCount++;
 
 						if (ClientCount < VANILLA_MAX_CLIENTS || Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
@@ -2081,8 +2017,6 @@ void CServer::PumpNetwork()
 
 						pRegister = &m_RegisterTwo;
 					}
-					else if (Socket == SOCKET_SURVIVAL)
-						pRegister = &m_RegSurvival;
 
 					if(pRegister->RegisterProcessPacket(&Packet, ResponseToken))
 						continue;
@@ -2259,8 +2193,6 @@ void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterS
 	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
 	m_RegisterTwo.Init(pNetServer, pMasterServer, pConfig, pConsole);
 	m_RegisterSevendown.Init(pNetServer, pMasterServer, pConfig, pConsole);
-	m_RegSurvival.Init(pNetServer, pMasterServer, pConfig, pConsole);
-	m_RegSevendownSurvival.Init(pNetServer, pMasterServer, pConfig, pConsole);
 }
 
 void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot)
@@ -2542,18 +2474,12 @@ int CServer::Run()
 			m_Register.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
 
-			if (Config()->m_SvSurvivalServerName[0])
-			{
-				m_RegSurvival.RegisterUpdate(m_NetServer.NetType(SOCKET_SURVIVAL));
-				m_RegSevendownSurvival.RegisterUpdate(m_NetServer.NetType(SOCKET_SURVIVAL));
-			}
-
 			// dont spam console with warnings if we dont even want the second register right now
 			if (Tick() % TickSpeed() == 0) // lets not do this too often
 			{
 				int ClientCount = 0;
 				for(int i = 0; i < MAX_CLIENTS; i++)
-					if(m_aClients[i].m_State != CClient::STATE_EMPTY && (!GameServer()->IsClientSurvival(i) || !Config()->m_SvSurvivalServerName[0]))
+					if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 						ClientCount++;
 
 				if (ClientCount >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS)
