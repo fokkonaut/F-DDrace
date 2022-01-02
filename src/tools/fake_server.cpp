@@ -120,7 +120,7 @@ static int Run()
 	{
 		CNetChunk p;
 		pNet->Update();
-		while(pNet->Recv(&p, 0, 0, 0))
+		while(pNet->Recv(&p, 0, 0))
 		{
 			if(p.m_ClientID == -1)
 			{

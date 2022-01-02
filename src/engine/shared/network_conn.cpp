@@ -37,7 +37,6 @@ void CNetConnection::Reset(bool Rejoin)
 	m_PeerToken = NET_TOKEN_NONE;
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 	m_Sevendown = false;
-	m_Two = false;
 	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
 
 	m_Buffer.Init();
@@ -107,7 +106,7 @@ int CNetConnection::Flush()
 	// send of the packets
 	m_Construct.m_Ack = m_Ack;
 	m_Construct.m_Token = m_PeerToken;
-	m_pNetBase->SendPacket(&m_PeerAddr, &m_Construct, m_Sevendown, m_Two, m_SecurityToken);
+	m_pNetBase->SendPacket(&m_PeerAddr, &m_Construct, m_Sevendown, m_SecurityToken);
 
 	// update send times
 	m_LastSendTime = time_get();
@@ -179,18 +178,18 @@ void CNetConnection::SendControl(int ControlMsg, const void *pExtra, int ExtraSi
 {
 	// send the control message
 	m_LastSendTime = time_get();
-	m_pNetBase->SendControlMsg(&m_PeerAddr, m_PeerToken, m_Ack, ControlMsg, pExtra, ExtraSize, m_Sevendown, m_Two, m_SecurityToken);
+	m_pNetBase->SendControlMsg(&m_PeerAddr, m_PeerToken, m_Ack, ControlMsg, pExtra, ExtraSize, m_Sevendown, m_SecurityToken);
 }
 
 void CNetConnection::SendPacketConnless(const char *pData, int DataSize)
 {
-	m_pNetBase->SendPacketConnless(&m_PeerAddr, m_PeerToken, m_Token, pData, DataSize, m_Sevendown, m_Two);
+	m_pNetBase->SendPacketConnless(&m_PeerAddr, m_PeerToken, m_Token, pData, DataSize, m_Sevendown);
 }
 
 void CNetConnection::SendControlWithToken(int ControlMsg)
 {
 	m_LastSendTime = time_get();
-	m_pNetBase->SendControlMsgWithToken(&m_PeerAddr, m_PeerToken, 0, ControlMsg, m_Token, true, m_Two);
+	m_pNetBase->SendControlMsgWithToken(&m_PeerAddr, m_PeerToken, 0, ControlMsg, m_Token, true);
 }
 
 void CNetConnection::ResendChunk(CNetChunkResend *pResend)
@@ -249,7 +248,7 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
-void CNetConnection::DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown, bool Two)
+void CNetConnection::DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown)
 {
 	Reset();
 
@@ -267,10 +266,9 @@ void CNetConnection::DirectInit(const NETADDR *pAddr, const CNetPacketConstruct 
 	m_Token = pPacket->m_Token;
 	m_PeerToken = pPacket->m_ResponseToken;
 	m_Sevendown = Sevendown;
-	m_Two = Two;
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, bool Two)
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown)
 {
 	if (Sevendown && State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
@@ -379,7 +377,6 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 						m_LastRecvTime = Now;
 						m_LastUpdateTime = Now;
 						m_Sevendown = Sevendown;
-						m_Two = Two;
 						SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 						if(Config()->m_Debug)
 							dbg_msg("connection", "got connection, sending accept");

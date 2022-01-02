@@ -7,7 +7,7 @@
 #include "protocol.h"
 
 
-int CEcon::NewClientCallback(int ClientID, bool Sevendown, bool Two, void *pUser)
+int CEcon::NewClientCallback(int ClientID, bool Sevendown, void *pUser)
 {
 	CEcon *pThis = (CEcon *)pUser;
 

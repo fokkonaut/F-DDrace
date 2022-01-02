@@ -150,7 +150,7 @@ enum
 };
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT)(int ClientID, bool Sevendown, bool Two, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT)(int ClientID, bool Sevendown, void *pUser);
 
 typedef unsigned int TOKEN;
 
@@ -219,7 +219,6 @@ class CNetBase
 	class CConfig *m_pConfig;
 	class IEngine *m_pEngine;
 	NETSOCKET m_Socket;
-	NETSOCKET m_Socket2;
 	IOHANDLE m_DataLogSent;
 	IOHANDLE m_DataLogRecv;
 	CHuffman m_Huffman;
@@ -232,16 +231,16 @@ public:
 	class IEngine *Engine() { return m_pEngine; }
 	int NetType() { return m_Socket.type; }
 	
-	void Init(NETSOCKET Socket, NETSOCKET Socket2, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine);
+	void Init(NETSOCKET Socket, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine);
 	void Shutdown();
 	void UpdateLogHandles();
 	void Wait(int Time);
 
-	void SendControlMsg(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, bool Sevendown, bool Two, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
-	void SendControlMsgWithToken(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended, bool Two);
-	void SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown, bool Two);
-	void SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bool Sevendown, bool Two, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
-	int UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, bool Two, class CNetServer *pNetServer = 0);
+	void SendControlMsg(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, bool Sevendown = false, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	void SendControlMsgWithToken(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended);
+	void SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown);
+	void SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bool Sevendown = false, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	int UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, class CNetServer *pNetServer = 0);
 };
 
 class CNetTokenManager
@@ -252,7 +251,7 @@ public:
 
 	void GenerateSeed();
 
-	int ProcessMessage(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, bool Two);
+	int ProcessMessage(const NETADDR *pAddr, const CNetPacketConstruct *pPacket);
 
 	bool CheckToken(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, bool *BroadcastResponse);
 	TOKEN GenerateToken(const NETADDR *pAddr) const;
@@ -285,12 +284,12 @@ public:
 	CNetTokenCache();
 	~CNetTokenCache();
 	void Init(CNetBase *pNetBase, const CNetTokenManager *pTokenManager);
-	void SendPacketConnless(const NETADDR *pAddr, const void *pData, int DataSize, bool Two, CSendCBData *pCallbackData = 0);
+	void SendPacketConnless(const NETADDR *pAddr, const void *pData, int DataSize, CSendCBData *pCallbackData = 0);
 	void PurgeStoredPacket(int TrackID);
-	void FetchToken(const NETADDR *pAddr, bool Two);
-	void AddToken(const NETADDR *pAddr, TOKEN PeerToken, int TokenFlag, bool Two);
+	void FetchToken(const NETADDR *pAddr);
+	void AddToken(const NETADDR *pAddr, TOKEN PeerToken, int TokenFlag);
 	TOKEN GetToken(const NETADDR *pAddr);
-	void Update(bool Two);
+	void Update();
 
 private:
 	class CConnlessPacketInfo
@@ -390,7 +389,7 @@ public:
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, bool Two);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 	void SendPacketConnless(const char *pData, int DataSize);
 
@@ -416,8 +415,7 @@ public:
 
 	SECURITY_TOKEN m_SecurityToken;
 	bool m_Sevendown;
-	bool m_Two;
-	void DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown, bool Two);
+	void DirectInit(const NETADDR *pAddr, const CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sevendown);
 
 	int SeqSequence() const { return m_Sequence; }
 	TStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *ResendBuffer() { return &m_Buffer; };
@@ -517,10 +515,10 @@ public:
 	void Close();
 
 	// the token parameter is only used for connless packets
-	int Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown, bool Two);
-	int Send(CNetChunk *pChunk, TOKEN Token = NET_TOKEN_NONE, bool Sevendown = false, bool Two = false); // Sevendown and Two is only for connless packets
+	int Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown);
+	int Send(CNetChunk *pChunk, TOKEN Token = NET_TOKEN_NONE, bool Sevendown = false);
 	int Update();
-	void AddToken(const NETADDR *pAddr, TOKEN Token, bool Two) { m_TokenCache.AddToken(pAddr, Token, 0, Two); };
+	void AddToken(const NETADDR *pAddr, TOKEN Token) { m_TokenCache.AddToken(pAddr, Token, 0); };
 
 	//
 	void Drop(int ClientID, const char *pReason);

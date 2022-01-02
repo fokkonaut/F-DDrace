@@ -31,7 +31,6 @@ class CRegister
 	class IConsole *m_pConsole;
 
 	bool m_Sevendown;
-	bool m_Two;
 	const char *m_pPrintFrom;
 
 	int m_RegisterState;
@@ -49,7 +48,7 @@ class CRegister
 	void RegisterGotCount(struct CNetChunk *pChunk);
 
 public:
-	CRegister(bool Sevendown, bool Two = false);
+	CRegister(bool Sevendown);
 	void Init(class CNetServer *pNetServer, class IEngineMasterServer *pMasterServer, class CConfig *pConfig, class IConsole *pConsole);
 	void RegisterUpdate(int Nettype);
 	int RegisterProcessPacket(struct CNetChunk *pPacket, TOKEN Token);
