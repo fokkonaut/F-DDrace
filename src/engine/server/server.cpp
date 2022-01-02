@@ -2482,19 +2482,8 @@ int CServer::Run()
 			// master server stuff
 			m_Register.RegisterUpdate(m_NetServer.NetType());
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType());
-
-			int ClientCount = 0, DummyCount = 0;
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_aClients[i].m_State == CClient::STATE_DUMMY)
-					DummyCount++;
-				else if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-					ClientCount++;
-			}
-			if (ClientCount > VANILLA_MAX_CLIENTS)
-				m_Register2.RegisterUpdate(m_NetServer.NetType());
-			if (ClientCount-DummyCount > VANILLA_MAX_CLIENTS)
-				m_RegisterSevendown2.RegisterUpdate(m_NetServer.NetType());
+			m_Register2.RegisterUpdate(m_NetServer.NetType());
+			m_RegisterSevendown2.RegisterUpdate(m_NetServer.NetType());
 
 			Antibot()->OnEngineTick();
 
