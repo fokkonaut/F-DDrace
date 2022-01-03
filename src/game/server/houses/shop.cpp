@@ -22,7 +22,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
 		AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
 		AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/policeinfo'.");
-		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghostinfo'.");
+		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghost'.");
 		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
 		AddItem("VIP", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP gives you some benefits, check '/vipinfo'.", EuroMode);
 		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
