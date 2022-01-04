@@ -258,7 +258,7 @@ void CGameWorld::PlayerMap::InitPlayer()
 			FakeInfo.m_aUseCustomColors[p] = 0;
 			FakeInfo.m_aSkinPartColors[p] = 0;
 		}
-		m_pGameWorld->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+		m_pGameWorld->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
 	}
 	else
 	{

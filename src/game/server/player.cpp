@@ -141,20 +141,8 @@ void CPlayer::Reset()
 	m_Gamemode = GameServer()->Config()->m_SvVanillaModeStart ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
 	m_SavedGamemode = m_Gamemode;
 
-	m_FixNameID = -1;
 	m_RemovedName = false;
 	m_ShowName = true;
-
-	m_SetRealName = false;
-	m_SetRealNameTick = Now;
-
-	m_ChatFix.m_Mode = CHAT_ALL;
-	m_ChatFix.m_Target = -1;
-	m_ChatFix.m_Message[0] = '\0';
-	m_KillMsgFix.m_Killer = -1;
-	m_KillMsgFix.m_Victim = -1;
-	m_KillMsgFix.m_Weapon = -1;
-	m_KillMsgFix.m_ModeSpecial = 0;
 
 	m_ResumeMoved = false;
 
@@ -349,14 +337,14 @@ void CPlayer::Tick()
 	}
 
 	// name
-	if (!m_ShowName && !m_RemovedName)
+	if (!m_RemovedName && !m_ShowName && !ShowNameShortRunning())
 	{
 		SetName(" ");
 		SetClan("");
 		UpdateInformation();
 		m_RemovedName = true;
 	}
-	if ((m_ShowName || m_SetRealName) && m_RemovedName)
+	if (m_RemovedName && (m_ShowName || ShowNameShortRunning()))
 	{
 		SetName(Server()->ClientName(m_ClientID));
 		SetClan(Server()->ClientClan(m_ClientID));
@@ -365,25 +353,18 @@ void CPlayer::Tick()
 	}
 
 	// fixing messages if name is hidden
-	if (m_SetRealName)
+	if (ShowNameShortRunning() && m_ShowNameShortTick < Server()->Tick())
 	{
-		if (m_SetRealNameTick < Server()->Tick())
-		{
-			if (m_FixNameID == FIX_CHAT_MSG)
-				GameServer()->SendChat(m_ClientID, m_ChatFix.m_Mode, m_ChatFix.m_Target, m_ChatFix.m_Message, m_ClientID);
-			else if (m_FixNameID == FIX_KILL_MSG)
-			{
-				CNetMsg_Sv_KillMsg Msg;
-				Msg.m_Killer = m_KillMsgFix.m_Killer;
-				Msg.m_Victim = GetCID();
-				Msg.m_Weapon = m_KillMsgFix.m_Weapon;
-				Msg.m_ModeSpecial = m_KillMsgFix.m_ModeSpecial;
-				for (int i = 0; i < MAX_CLIENTS; i++)
-					if (GameServer()->m_apPlayers[i] && (!GameServer()->Config()->m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
-						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
-			}
+		m_ShowNameShortTick = 0;
 
-			m_SetRealName = false;
+		if (m_pKillMsgNoName)
+		{
+			for (int i = 0; i < MAX_CLIENTS; i++)
+				if (GameServer()->m_apPlayers[i] && (!GameServer()->Config()->m_SvHideMinigamePlayers || (m_Minigame == GameServer()->m_apPlayers[i]->m_Minigame)))
+					Server()->SendPackMsg(m_pKillMsgNoName, MSGFLAG_VITAL, i);
+
+			delete m_pKillMsgNoName;
+			m_pKillMsgNoName = 0;
 		}
 	}
 
@@ -493,7 +474,7 @@ void CPlayer::SendConnect(int FakeID, int ClientID)
 		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_CurrentInfo.m_TeeInfos.m_aSkinPartColors[p];
 	}
 
-	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
 }
 
 void CPlayer::SendDisconnect(int FakeID)
@@ -506,7 +487,7 @@ void CPlayer::SendDisconnect(int FakeID)
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 
-	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NO_TRANSLATE, m_ClientID);
+	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
 }
 
 void CPlayer::Snap(int SnappingClient)
@@ -1585,11 +1566,15 @@ void CPlayer::RainbowTick()
 			GameServer()->SendSkinChange(Info, m_ClientID, i);
 }
 
-void CPlayer::FixForNoName(int ID)
+void CPlayer::KillMsgNoName(CNetMsg_Sv_KillMsg *pKillMsg)
 {
-	m_FixNameID = ID;
-	m_SetRealName = true;
-	m_SetRealNameTick = Server()->Tick() + Server()->TickSpeed() / 20;
+	m_pKillMsgNoName = new CNetMsg_Sv_KillMsg(*pKillMsg);
+	ShowNameShort();
+}
+
+void CPlayer::ShowNameShort()
+{
+	m_ShowNameShortTick = Server()->Tick() + Server()->TickSpeed() / 20;
 }
 
 int CPlayer::GetAccID()

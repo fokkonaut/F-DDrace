@@ -271,28 +271,16 @@ public:
 	bool m_SpookyGhost;
 
 	//no name fix
-	bool m_RemovedName;
-	void FixForNoName(int ID);
-	int m_FixNameID;
+	void KillMsgNoName(CNetMsg_Sv_KillMsg *pKillMsg);
+	CNetMsg_Sv_KillMsg *m_pKillMsgNoName;
+
+	void ShowNameShort();
+	bool ShowNameShortRunning() { return m_ShowNameShortTick != 0; }
+	int64 m_ShowNameShortTick;
+
+	// hide name
 	bool m_ShowName;
-
-	bool m_SetRealName;
-	int64 m_SetRealNameTick;
-
-	struct ChatFix
-	{
-		int m_Mode;
-		int m_Target;
-		char m_Message[256];
-	} m_ChatFix;
-
-	struct KillMsgFix
-	{
-		int m_Killer;
-		int m_Victim;
-		int m_Weapon;
-		int m_ModeSpecial;
-	} m_KillMsgFix;
+	bool m_RemovedName;
 
 	//flag name fix, because i dont send the gamemsgs for flag drop and capture, that means the names in the caption are wrong when owner changes
 	void ForceSetSpectatorID(int SpectatorID) { m_SpectatorID = SpectatorID; }

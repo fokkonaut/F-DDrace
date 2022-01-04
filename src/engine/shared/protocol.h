@@ -111,7 +111,9 @@ enum
 	MSGFLAG_NOSEND=16,
 
 	// for fake disconnect/connects
-	MSGFLAG_NO_TRANSLATE=32
+	MSGFLAG_NOTRANSLATE=32,
+	// for chat messages with no name, e.g. spookyghost or survival
+	MSGFLAG_NONAME=64,
 };
 
 enum

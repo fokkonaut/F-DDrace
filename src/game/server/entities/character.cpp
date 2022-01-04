@@ -1613,13 +1613,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	if (!m_pPlayer->m_ShowName || (pKiller && !pKiller->m_ShowName))
 	{
 		if (pKiller && !pKiller->m_ShowName)
-			pKiller->FixForNoName(FIX_SET_NAME_ONLY);
-
-		m_pPlayer->m_KillMsgFix.m_Killer = Msg.m_Killer;
-		m_pPlayer->m_KillMsgFix.m_Victim = Msg.m_Victim;
-		m_pPlayer->m_KillMsgFix.m_Weapon = Msg.m_Weapon;
-		m_pPlayer->m_KillMsgFix.m_ModeSpecial = Msg.m_ModeSpecial;
-		m_pPlayer->FixForNoName(FIX_KILL_MSG);
+			pKiller->ShowNameShort();
+		m_pPlayer->KillMsgNoName(&Msg);
 	}
 	else
 	{

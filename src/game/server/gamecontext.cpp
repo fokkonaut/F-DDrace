@@ -518,14 +518,18 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		Server()->SendWebhookMessage(Config()->m_SvWebhookChatURL, aText, aWebhookName, aAvatarURL);
 	}
 
+	if (Mode == CHAT_ALL || Mode == CHAT_TEAM || Mode == CHAT_LOCAL)
+		Server()->TranslateChat(ChatterClientID, aText, Mode);
+
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Mode = Mode;
 	Msg.m_ClientID = ChatterClientID;
 	Msg.m_pMessage = aText;
 	Msg.m_TargetID = -1;
 
-	if (Mode == CHAT_ALL || Mode == CHAT_TEAM || Mode == CHAT_LOCAL)
-		Server()->TranslateChat(ChatterClientID, aText, Mode);
+	int MsgFlags = 0;
+	if (ChatterClientID >= 0 && !m_apPlayers[ChatterClientID]->m_ShowName)
+		MsgFlags |= MSGFLAG_NONAME;
 
 	if(Mode == CHAT_ALL)
 	{
@@ -534,13 +538,13 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			{
 				bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
 				if (Send)
-					SendChatMsg(&Msg, MSGFLAG_VITAL, i);
+					SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 			}
 	}
 	else if(Mode == CHAT_TEAM)
 	{
 		// pack one for the recording only
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+		Server()->SendPackMsg(&Msg, MsgFlags|MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
 		CTeamsCore* Teams = &((CGameControllerDDRace*)m_pController)->m_Teams.m_Core;
 
@@ -556,14 +560,14 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				{
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
 					{
-						SendChatMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+						SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
 				else
 				{
 					if(Teams->Team(i) == GetDDRaceTeam(ChatterClientID) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 					{
-						SendChatMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+						SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
 			}
@@ -574,7 +578,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		// send to the clients
 		Msg.m_Mode = Mode == CHAT_SINGLE_TEAM ? CHAT_TEAM : CHAT_ALL;
 		if (!IsMuted(MuteChecked, To))
-			SendChatMsg(&Msg, MSGFLAG_VITAL, To);
+			SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, To);
 	}
 	else if (Mode == CHAT_ATEVERYONE)
 	{
@@ -588,7 +592,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			{
 				str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(i), aText);
 				Msg.m_pMessage = aMsg;
-				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
+				SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 			}
 		}
 	}
@@ -599,7 +603,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 		for (int i = 0; i < MAX_CLIENTS; i++)
 			if (!IsMuted(MuteChecked, i) && IsLocal(ChatterClientID, i) && !str_comp(Server()->GetLanguage(i), "none"))
-				SendChatMsg(&Msg, MSGFLAG_VITAL, i);
+				SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 	}
 	else // Mode == CHAT_WHISPER
 	{
@@ -611,53 +615,27 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			return;
 		}
 
-		char aMsg[256];
-		Msg.m_TargetID = To;
 		m_apPlayers[ChatterClientID]->m_LastWhisperTo = To;
 
-		// send to sender
-		if (!Server()->Translate(Msg.m_TargetID, ChatterClientID))
-		{
-			str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(To), aText);
-			Msg.m_pMessage = aMsg;
-			Msg.m_TargetID = VANILLA_MAX_CLIENTS-1;
-		}
-
-		if (Server()->IsSevendown(ChatterClientID))
-		{
-			CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
-			Msg2.AddInt(2); // CHAT_WHISPER_SEND
-			Msg2.AddInt(Msg.m_TargetID);
-			Msg2.AddString(Msg.m_pMessage, -1);
-			Server()->SendMsg(&Msg2, MSGFLAG_VITAL, ChatterClientID);
-		}
-		else
-		{
-			Server()->Translate(Msg.m_ClientID, ChatterClientID);
-			SendChatMsg(&Msg, MSGFLAG_VITAL, ChatterClientID);
-		}
-
+		// send to target
 		if (!IsMuted(MuteChecked, To))
 		{
-			// send to target
-			str_format(aMsg, sizeof(aMsg), "%s: %s", Server()->ClientName(ChatterClientID), aText);
-			Msg.m_pMessage = aMsg;
-			Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
+			Msg.m_Mode = CHAT_WHISPER_RECV;
 			Msg.m_TargetID = To;
+			SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, To);
+		}
 
-			if (Server()->IsSevendown(To))
-			{
-				CMsgPacker Msg2(NETMSGTYPE_SV_CHAT);
-				Msg2.AddInt(3); // CHAT_WHISPER_RECV
-				Msg2.AddInt(Msg.m_ClientID);
-				Msg2.AddString(Msg.m_pMessage, -1);
-				Server()->SendMsg(&Msg2, MSGFLAG_VITAL, To);
-			}
-			else
-			{
-				Server()->Translate(Msg.m_TargetID, To);
-				SendChatMsg(&Msg, MSGFLAG_VITAL, To);
-			}
+		// send to sender
+		{
+			MsgFlags = 0;
+			if (!m_apPlayers[To]->m_ShowName)
+				MsgFlags |= MSGFLAG_NONAME;
+
+			// reset ids bcs they got translated
+			Msg.m_Mode = CHAT_WHISPER_SEND;
+			Msg.m_TargetID = To;
+			Msg.m_ClientID = ChatterClientID;
+			SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, ChatterClientID);
 		}
 	}
 }
@@ -2103,13 +2081,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Console()->SetFlagMask(CFGFLAG_SERVER);
 				m_ChatResponseTargetID = -1;
 				Server()->RestrictRconOutput(-1);
-			}
-			else if (!pPlayer->m_ShowName)
-			{
-				pPlayer->m_ChatFix.m_Mode = Mode;
-				pPlayer->m_ChatFix.m_Target = pMsg->m_Target;
-				str_copy(pPlayer->m_ChatFix.m_Message, pMsg->m_pMessage, sizeof(pPlayer->m_ChatFix.m_Message));
-				pPlayer->FixForNoName(FIX_CHAT_MSG);
 			}
 			else if(Mode != CHAT_NONE)
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);

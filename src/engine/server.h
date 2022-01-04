@@ -119,25 +119,43 @@ public:
 		return SendMsg(&Packer, Flags, ClientID);
 	}
 
-	char msgbuf[1000];
+	char aBuf[512];
 
 	int SendPackMsgTranslate(CNetMsg_Sv_Chat *pMsg, int Flags, int ClientID)
 	{
 		// 128 player translation
-		if (pMsg->m_Mode != CHAT_WHISPER && pMsg->m_ClientID >= 0 && ((pMsg->m_Mode == CHAT_TEAM && pMsg->m_ClientID != ClientID) || !Translate(pMsg->m_ClientID, ClientID)))
+		int *pID = pMsg->m_Mode == CHAT_WHISPER_SEND ? &pMsg->m_TargetID : &pMsg->m_ClientID;
+		if (*pID >= 0 && ((Flags&MSGFLAG_NONAME) || (pMsg->m_Mode == CHAT_TEAM && *pID != ClientID) || pMsg->m_Mode == CHAT_WHISPER_RECV || !Translate(*pID, ClientID)))
 		{
-			str_format(msgbuf, sizeof(msgbuf), "%s: %s", ClientName(pMsg->m_ClientID), pMsg->m_pMessage);
-			pMsg->m_pMessage = msgbuf;
-			pMsg->m_ClientID = VANILLA_MAX_CLIENTS - 1;
+			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(*pID), pMsg->m_pMessage);
+			pMsg->m_pMessage = aBuf;
+
+			// with noname and sending a whisper to ourselves show our own client id as targetid because otherwise it would be two times id 63 with same text which gets shown twice the same msg
+			if (pMsg->m_Mode == CHAT_WHISPER_SEND && *pID == ClientID)
+				Translate(*pID, ClientID);
+			else
+				*pID = VANILLA_MAX_CLIENTS - 1;
 		}
 
 		if (!IsSevendown(ClientID))
+		{
+			if (pMsg->m_Mode == CHAT_WHISPER_SEND)
+			{
+				Translate(pMsg->m_ClientID, ClientID);
+				pMsg->m_Mode = CHAT_WHISPER;
+			}
+			else if (pMsg->m_Mode == CHAT_WHISPER_RECV)
+			{
+				Translate(pMsg->m_TargetID, ClientID);
+				pMsg->m_Mode = CHAT_WHISPER;
+			}
 			return SendPackMsgOne(pMsg, Flags, ClientID);
+		}
 
 		// 0.6 chat message translation
 		CMsgPacker Packer(pMsg->MsgID(), false);
-		Packer.AddInt((int)(pMsg->m_Mode == CHAT_TEAM));
-		Packer.AddInt(pMsg->m_ClientID);
+		Packer.AddInt(pMsg->m_Mode == CHAT_WHISPER_SEND ? 2 : pMsg->m_Mode == CHAT_WHISPER_RECV ? 3 : (int)(pMsg->m_Mode == CHAT_TEAM));
+		Packer.AddInt(*pID);
 		Packer.AddString(pMsg->m_pMessage, -1);
 		if (Packer.Error() != 0)
 			return -1;
@@ -168,12 +186,12 @@ public:
 
 	int SendPackMsgTranslate(CNetMsg_Sv_ClientInfo *pMsg, int Flags, int ClientID)
 	{
-		return (Flags&MSGFLAG_NO_TRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
+		return (Flags&MSGFLAG_NOTRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(CNetMsg_Sv_ClientDrop *pMsg, int Flags, int ClientID)
 	{
-		return (Flags&MSGFLAG_NO_TRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
+		return (Flags&MSGFLAG_NOTRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
