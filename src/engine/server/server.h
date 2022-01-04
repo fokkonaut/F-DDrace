@@ -474,6 +474,7 @@ public:
 	void DummyLeave(int DummyID);
 
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
+	bool IsDoubleInfo();
 
 	enum
 	{

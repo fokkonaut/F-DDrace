@@ -1715,7 +1715,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 		}
 	}
 
-	bool DoubleInfo = ClientCount >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS && (Socket == SOCKET_MAIN || Socket == SOCKET_TWO);
+	bool DoubleInfo = IsDoubleInfo() && (Socket == SOCKET_MAIN || Socket == SOCKET_TWO);
 
 	if(Token != -1)
 	{
@@ -1762,7 +1762,7 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 	pPacker->AddInt(Flags);
 
 	int MaxClients = Config()->m_SvMaxClients;
-	bool FillFirst = ClientCount >= MaxClients-1;
+	bool FillFirst = ClientCount >= MaxClients;
 	if (DoubleInfo)
 	{
 		int Diff = FillFirst ? VANILLA_MAX_CLIENTS : VANILLA_MAX_CLIENTS-1;
@@ -2007,12 +2007,7 @@ void CServer::PumpNetwork()
 					CRegister *pRegister = &m_Register;
 					if (Socket == SOCKET_TWO)
 					{
-						int ClientCount = 0;
-						for(int i = 0; i < MAX_CLIENTS; i++)
-							if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-								ClientCount++;
-
-						if (ClientCount < VANILLA_MAX_CLIENTS || Config()->m_SvMaxClients <= VANILLA_MAX_CLIENTS)
+						if (!IsDoubleInfo())
 							continue;
 
 						pRegister = &m_RegisterTwo;
@@ -2475,16 +2470,8 @@ int CServer::Run()
 			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
 
 			// dont spam console with warnings if we dont even want the second register right now
-			if (Tick() % TickSpeed() == 0) // lets not do this too often
-			{
-				int ClientCount = 0;
-				for(int i = 0; i < MAX_CLIENTS; i++)
-					if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-						ClientCount++;
-
-				if (ClientCount >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS)
-					m_RegisterTwo.RegisterUpdate(m_NetServer.NetType(SOCKET_TWO));
-			}
+			if (IsDoubleInfo())
+				m_RegisterTwo.RegisterUpdate(m_NetServer.NetType(SOCKET_TWO));
 
 			Antibot()->OnEngineTick();
 
@@ -3412,6 +3399,11 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	//m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	return true;
+}
+
+bool CServer::IsDoubleInfo()
+{
+	return m_NetServer.NumClients() >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS;
 }
 
 bool CServer::IsUniqueAddress(int ClientID)
