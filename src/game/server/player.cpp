@@ -34,6 +34,7 @@ CPlayer::~CPlayer()
 	GameServer()->Antibot()->OnPlayerDestroy(m_ClientID);
 	delete m_pLastTarget;
 	delete m_pCharacter;
+	delete m_pKillMsgNoName;
 	m_pCharacter = 0;
 }
 
