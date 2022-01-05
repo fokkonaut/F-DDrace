@@ -1574,7 +1574,7 @@ void CPlayer::KillMsgNoName(CNetMsg_Sv_KillMsg *pKillMsg)
 
 void CPlayer::ShowNameShort()
 {
-	m_ShowNameShortTick = Server()->Tick() + Server()->TickSpeed() / 20;
+	m_ShowNameShortTick = Server()->Tick() + Server()->TickSpeed() / 15;
 }
 
 int CPlayer::GetAccID()
