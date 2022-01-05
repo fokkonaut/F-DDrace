@@ -2681,6 +2681,23 @@ void CGameContext::ConLanguage(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aLanguages);
 }
 
+void CGameContext::ConDiscord(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (pSelf->Config()->m_SvDiscordURL[0])
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Discord server: %s", pSelf->Config()->m_SvDiscordURL);
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	}
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "This server does not have a linked Discord server");
+}
+
 void CGameContext::ConMinigames(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

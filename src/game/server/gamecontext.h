@@ -827,6 +827,7 @@ private:
 	static void ConMutePlayer(IConsole::IResult* pResult, void* pUserData);
 	static void ConDesign(IConsole::IResult* pResult, void* pUserData);
 	static void ConLanguage(IConsole::IResult* pResult, void* pUserData);
+	static void ConDiscord(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConStats(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccount(IConsole::IResult* pResult, void* pUserData);

@@ -344,8 +344,9 @@ int CNetBan::Unban(T *pBanPool, const typename T::CDataType *pData)
 	return -1;
 }
 
-void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
+void CNetBan::Init(IConsole *pConsole, IStorage *pStorage, CConfig *pConfig)
 {
+	m_pConfig = pConfig;
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
 	m_BanAddrPool.Reset();

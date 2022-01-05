@@ -156,7 +156,7 @@ void CSnapIDPool::FreeID(int ID)
 
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
 {
-	CNetBan::Init(pConsole, pStorage);
+	CNetBan::Init(pConsole, pStorage, pServer->Config());
 
 	m_pServer = pServer;
 
@@ -220,7 +220,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			CNetHash NetHash(&Data);
 			char aBuf[256];
 			MakeBanInfo(pBanPool->Find(&Data, &NetHash), aBuf, sizeof(aBuf), MSGTYPE_PLAYER);
-			Server()->m_NetServer.Drop(i, aBuf);
+			Server()->m_NetServer.Drop(i, aBuf, true);
 		}
 	}
 

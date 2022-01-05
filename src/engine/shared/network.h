@@ -529,7 +529,7 @@ public:
 	void AddToken(const NETADDR *pAddr, TOKEN Token, int Socket) { m_TokenCache.AddToken(pAddr, Token, 0, Socket); };
 
 	//
-	void Drop(int ClientID, const char *pReason);
+	void Drop(int ClientID, const char *pReason, bool Banned = false);
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientID) const { return m_aSlots[ClientID].m_Connection.PeerAddress(); }

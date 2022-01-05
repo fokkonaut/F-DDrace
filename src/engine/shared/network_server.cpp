@@ -67,7 +67,7 @@ void CNetServer::Close()
 	Shutdown();
 }
 
-void CNetServer::Drop(int ClientID, const char *pReason)
+void CNetServer::Drop(int ClientID, const char *pReason, bool Banned)
 {
 	if(ClientID < 0 || ClientID >= NET_MAX_CLIENTS || m_aSlots[ClientID].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 		return;
@@ -75,7 +75,12 @@ void CNetServer::Drop(int ClientID, const char *pReason)
 	if(m_pfnDelClient)
 		m_pfnDelClient(ClientID, pReason, m_UserPtr);
 
-	m_aSlots[ClientID].m_Connection.Disconnect(pReason);
+	char aBuf[256];
+	str_copy(aBuf, pReason, sizeof(aBuf));
+	if (Banned && Config()->m_SvDiscordURL[0])
+		str_format(aBuf, sizeof(aBuf), "%s - Appeal: %s", pReason, Config()->m_SvDiscordURL);
+
+	m_aSlots[ClientID].m_Connection.Disconnect(aBuf);
 	m_NumClients--;
 }
 
@@ -172,6 +177,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 				int Time = time_timestamp();
 				if(LastInfoQuery + 5 < Time)
 				{
+					if (Config()->m_SvDiscordURL[0])
+					{
+						char aTemp[128];
+						str_format(aTemp, sizeof(aTemp), " - Appeal: %s", Config()->m_SvDiscordURL);
+						str_append(aBuf, aTemp, sizeof(aBuf));
+					}
+
 					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, Socket, NET_SECURITY_TOKEN_UNSUPPORTED);
 				}
 				continue;
@@ -235,7 +247,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 			}
 			else
 			{
-				if (!CNetBase::Config()->m_SvAllowSevendown)
+				if (!Config()->m_SvAllowSevendown)
 					continue;
 
 				if(ControlMsg == NET_CTRLMSG_CONNECT)
@@ -459,9 +471,9 @@ bool CNetServer::Connlimit(NETADDR Addr)
 	{
 		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr, true))
 		{
-			if(m_aSpamConns[i].m_Time > Now - time_freq() * CNetBase::Config()->m_SvConnlimitTime)
+			if(m_aSpamConns[i].m_Time > Now - time_freq() * Config()->m_SvConnlimitTime)
 			{
-				if(m_aSpamConns[i].m_Conns >= CNetBase::Config()->m_SvConnlimit)
+				if(m_aSpamConns[i].m_Conns >= Config()->m_SvConnlimit)
 					return true;
 			}
 			else
