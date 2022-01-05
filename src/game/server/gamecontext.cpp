@@ -2083,23 +2083,28 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				Server()->RestrictRconOutput(-1);
 			}
 			else if(Mode != CHAT_NONE)
+			{
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 
-			char aLocalNames[256] = "";
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if (m_apPlayers[i] && str_find_nocase(pMsg->m_pMessage, Server()->ClientName(i)) && (!CanReceiveMessage(ClientID, i) || !CanReceiveMessage(i, ClientID)))
+				if (Mode != CHAT_WHISPER)
 				{
-					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), "%s%s", aLocalNames[0] ? ", " : "", Server()->ClientName(i));
-					str_append(aLocalNames, aBuf, sizeof(aLocalNames));
-				}
-			}
+					char aLocalNames[256] = "";
+					for (int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if (m_apPlayers[i] && str_find_nocase(pMsg->m_pMessage, Server()->ClientName(i)) && (!CanReceiveMessage(ClientID, i) || !CanReceiveMessage(i, ClientID)))
+						{
+							char aBuf[128];
+							str_format(aBuf, sizeof(aBuf), "%s%s", aLocalNames[0] ? ", " : "", Server()->ClientName(i));
+							str_append(aLocalNames, aBuf, sizeof(aLocalNames));
+						}
+					}
 
-			if (aLocalNames[0])
-			{
-				SendChatTarget(ClientID, "Following players can't receive your message because either you or they are in local chat mode");
-				SendChatTarget(ClientID, aLocalNames);
+					if (aLocalNames[0])
+					{
+						SendChatTarget(ClientID, "Following players can't receive your message because either you or they are in local chat mode:");
+						SendChatTarget(ClientID, aLocalNames);
+					}
+				}
 			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
