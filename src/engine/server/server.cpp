@@ -2356,7 +2356,8 @@ int CServer::Run()
 				}
 
 				// remove after 24 hours because iphub.info has 1000 free requests within 24 hours
-				if (Tick() % (TickSpeed() * 60 * 60 * 24))
+				// actually lets use 48 hours just to be safe
+				if (Tick() % (TickSpeed() * 60 * 60 * 48))
 				{
 					m_DnsblCache.m_vBlacklist.clear();
 					m_DnsblCache.m_vWhitelist.clear();
