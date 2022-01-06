@@ -1249,6 +1249,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		FireWeapon();
 	}
 
+	mem_copy(&m_LatestPrevPrevInput, &m_LatestPrevInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
