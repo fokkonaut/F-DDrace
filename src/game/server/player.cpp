@@ -965,18 +965,13 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 
-	if (m_pCharacter)
+	if (m_pCharacter && !ApplyDirectInput(TeeControlled))
 	{
-		if (!m_Paused && (!m_TeeControlMode || TeeControlled) && !GameServer()->Arenas()->IsConfiguring(m_ClientID))
-			m_pCharacter->OnDirectInput(NewInput);
-		else
-		{
-			m_pCharacter->ResetInput();
-			m_pCharacter->ResetNumInputs();
+		m_pCharacter->ResetInput();
+		m_pCharacter->ResetNumInputs();
 
-			if (m_pControlledTee && m_pControlledTee->m_pCharacter)
-				m_pControlledTee->m_pCharacter->ResetNumInputs();
-		}
+		if (m_pControlledTee && m_pControlledTee->m_pCharacter)
+			m_pControlledTee->m_pCharacter->ResetNumInputs();
 	}
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && !GameServer()->Arenas()->FightStarted(m_ClientID) && (NewInput->m_Fire&1))
@@ -1034,6 +1029,32 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
 		m_LastActionTick = Server()->Tick();
 	}
+}
+
+void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
+{
+	if (m_pControlledTee && !m_Paused && !TeeControlled)
+	{
+		TranslatePlayerFlags(NewInput);
+		m_pControlledTee->OnPredictedEarlyInput(NewInput, true);
+		return;
+	}
+	else if (m_TeeControllerID != -1 && !TeeControlled)
+		return;
+	else
+		TranslatePlayerFlags(NewInput);
+
+	// skip the input if chat is active
+	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+		return;
+
+	if(m_pCharacter && ApplyDirectInput(TeeControlled))
+		m_pCharacter->OnDirectInput(NewInput);
+}
+
+bool CPlayer::ApplyDirectInput(bool TeeControlled)
+{
+	return !m_Paused && (!m_TeeControlMode || TeeControlled) && !GameServer()->Arenas()->IsConfiguring(m_ClientID);
 }
 
 CCharacter *CPlayer::GetCharacter()
