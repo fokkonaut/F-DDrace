@@ -1504,7 +1504,17 @@ void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserD
 	if (!pPlayer)
 		return;
 
-	pPlayer->m_WeaponIndicator = !pPlayer->m_WeaponIndicator;
+	if (pResult->NumArguments())
+	{
+		if (pPlayer->m_WeaponIndicator == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_WeaponIndicator = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_WeaponIndicator = !pPlayer->m_WeaponIndicator;
+	}
 
 	if (pPlayer->m_WeaponIndicator)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Weapon indicator enabled");
