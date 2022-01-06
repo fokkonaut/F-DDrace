@@ -492,6 +492,11 @@ public:
 	bool m_DynamicCamera;
 	float m_CameraMaxLength;
 
+	// dummy
+	bool m_DummyHammer;
+	int m_DummyFire;
+	int64 m_LastSetDummyHammer;
+
 	// special race
 	bool m_HasFinishedSpecialRace;
 
