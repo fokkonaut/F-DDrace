@@ -1195,7 +1195,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	if (pChr->m_DoorHammer)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
 	if (pChr->m_DummyHammer)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer = True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");
 	str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
