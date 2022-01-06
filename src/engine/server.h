@@ -313,7 +313,6 @@ public:
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 	virtual void SetBotDetected(int ClientID) = 0;
-	virtual bool IsClientDummyHammer(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();

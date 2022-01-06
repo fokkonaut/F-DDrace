@@ -168,11 +168,6 @@ void CGameContext::SetBotDetected(int ClientID)
 		m_apPlayers[ClientID]->m_BotDetected = true;
 }
 
-bool CGameContext::IsClientDummyHammer(int ClientID)
-{
-	return GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_DummyHammer;
-}
-
 void CGameContext::FillAntibot(CAntibotRoundData *pData)
 {
 	if(!pData->m_Map.m_pTiles)
