@@ -162,6 +162,12 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
+void CGameContext::SetBotDetected(int ClientID)
+{
+	if (m_apPlayers[ClientID])
+		m_apPlayers[ClientID]->m_BotDetected = true;
+}
+
 void CGameContext::FillAntibot(CAntibotRoundData *pData)
 {
 	if(!pData->m_Map.m_pTiles)
@@ -1088,6 +1094,13 @@ void CGameContext::OnTick()
 	{
 		if(m_apPlayers[i])
 		{
+			// Do it safely here so we dont get any crashes
+			if (m_apPlayers[i]->m_BotDetected)
+			{
+				Server()->Ban(i, 60*Config()->m_SvAntibotBanMinutes, "Bot detected");
+				continue;
+			}
+
 			// send vote options
 			ProgressVoteOptions(i);
 

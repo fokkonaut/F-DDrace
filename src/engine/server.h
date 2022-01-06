@@ -311,6 +311,7 @@ public:
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+	virtual void SetBotDetected(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();

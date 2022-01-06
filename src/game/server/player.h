@@ -382,6 +382,8 @@ public:
 	int m_aStrongWeakID[VANILLA_MAX_CLIENTS];
 	bool m_aMuted[MAX_CLIENTS];
 
+	bool m_BotDetected;
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 

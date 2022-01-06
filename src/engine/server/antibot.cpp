@@ -54,7 +54,7 @@ void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser
 	{
 		str_format(aBuf, sizeof(aBuf), "%d: %s has been banned", ClientID, pAntibot->Server()->ClientName(ClientID));
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
-		pAntibot->Server()->Ban(ClientID, 60*pAntibot->Config()->m_SvAntibotBanMinutes, pMessage);
+		pAntibot->GameServer()->SetBotDetected(ClientID);
 	}
 }
 void CAntibot::Init()
