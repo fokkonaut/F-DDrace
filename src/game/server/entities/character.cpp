@@ -1242,22 +1242,16 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		m_LatestInput.m_TargetY = -1;
 
 	// Should be enough to set keep it for one second after setting it
-	/*if (m_LastSetDummyHammer < Server()->Tick() - Server()->TickSpeed())
+	if (m_LastSetDummyHammer < Server()->Tick() - Server()->TickSpeed())
 	{
 		// Reset dummyhammer after 2 seconds if we didnt re-set it
 		if (m_LastSetDummyHammer < Server()->Tick() - Server()->TickSpeed() * 2)
-			m_DummyHammer = false;*/
-
-		if (m_DummyFire)
-			m_DummyFire++;
-
-		if (m_DummyFire == 0 || m_DummyFire == 24)
-		{
 			m_DummyHammer = false;
-			m_DummyFire = 0;
 
+		if (m_LatestInput.m_Direction == 0 && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+		{
 			CCharacter *pDummy = GameServer()->GetPlayerChar(Server()->GetDummy(m_pPlayer->GetCID()));
-			if (pDummy && m_LatestInput.m_Direction == 0 && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+			if (pDummy)
 			{
 				vec2 WantedDir = normalize(pDummy->Core()->m_Pos - m_Core.m_Pos);
 				vec2 Dir = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
@@ -1267,18 +1261,10 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 				{
 					m_DummyHammer = true;
 					m_LastSetDummyHammer = Server()->Tick();
-					m_DummyFire = 1;
-					dbg_msg("hi", "close");
-				}
-				else
-				{
-					dbg_msg("hi", "not close");
 				}
 			}
-			else if (m_pPlayer->GetCID() != 0)
-				dbg_msg("hi", "not into hh");
 		}
-	//}
+	}
 
 	Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
