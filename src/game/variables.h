@@ -294,6 +294,10 @@ MACRO_CONFIG_INT(SvPortTwo, sv_port_two, 8304, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER
 // discord
 MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord server URL", AUTHED_ADMIN)
 
+// antibot
+MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 16, CFGFLAG_SERVER, "Treshold for antibot autoban (0=off)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotBanMinutes, sv_antibot_ban_minutes, 10000, 0, 99999, CFGFLAG_SERVER, "Time in minutes a player gets banned for by antibot", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)

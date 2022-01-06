@@ -41,7 +41,7 @@ void CAntibot::Log(const char *pMessage, void *pUser)
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
-void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
+void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
@@ -49,6 +49,13 @@ void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
 
 	CAntibot *pAntibot = (CAntibot *)pUser;
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
+
+	if (pAntibot->Config()->m_SvAntibotTreshold != 0 && Count > pAntibot->Config()->m_SvAntibotTreshold)
+	{
+		str_format(aBuf, sizeof(aBuf), "%d: %s has been banned", ClientID, pAntibot->Server()->ClientName(ClientID));
+		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
+		pAntibot->Server()->Ban(ClientID, 60*pAntibot->Config()->m_SvAntibotBanMinutes, pMessage);
+	}
 }
 void CAntibot::Init()
 {
