@@ -4209,8 +4209,8 @@ float CCharacter::GetTaserFreezeTime()
 
 bool CCharacter::IsWeaponIndicator()
 {
-	// 3 seconds of showing weapon indicator instead of money broadcast
-	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 3;
+	// 2 seconds of showing weapon indicator instead of money broadcast
+	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 2;
 }
 
 int CCharacter::GetSpawnWeaponIndex(int Weapon)
