@@ -2458,7 +2458,8 @@ void CCharacter::HandleTiles(int Index)
 			{
 				if (m_pPlayer->GetAccID() < ACC_START)
 				{
-					GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
+					if (!IsWeaponIndicator())
+						GameServer()->SendBroadcast("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'", m_pPlayer->GetCID(), false);
 					return;
 				}
 
@@ -2499,30 +2500,33 @@ void CCharacter::HandleTiles(int Index)
 				m_pPlayer->GiveXP(XP);
 
 				// broadcast
-				char aMsg[256];
-				char aSurvival[32];
-				char aPolice[32];
-				char aPlusXP[128];
-
-				str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-				str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
-				str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-				str_format(aMsg, sizeof(aMsg),
-						"Money [%lld] +1%s%s\n"
-						"XP [%lld/%lld]%s\n"
-						"Level [%d]",
-						m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
-						pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
-						pAccount->m_Level
-					);
-
-				// message gets cut off otherwise
-				if (Server()->IsSevendown(m_pPlayer->GetCID()))
+				if (!IsWeaponIndicator())
 				{
-					for (int i = 0; i < 128; i++)
-						str_append(aMsg, " ", sizeof(aMsg));
+					char aMsg[256];
+					char aSurvival[32];
+					char aPolice[32];
+					char aPlusXP[128];
+
+					str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
+					str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
+					str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+					str_format(aMsg, sizeof(aMsg),
+							"Money [%lld] +1%s%s\n"
+							"XP [%lld/%lld]%s\n"
+							"Level [%d]",
+							m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+							pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
+							pAccount->m_Level
+						);
+
+					// message gets cut off otherwise
+					if (Server()->IsSevendown(m_pPlayer->GetCID()))
+					{
+						for (int i = 0; i < 128; i++)
+							str_append(aMsg, " ", sizeof(aMsg));
+					}
+					GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 				}
-				GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
 			}
 		}
 
@@ -3615,6 +3619,8 @@ void CCharacter::FDDraceInit()
 	m_DummyHammer = false;
 	m_DummyFire = 0;
 	m_LastSetDummyHammer = 0;
+
+	m_LastWeaponIndTick = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -3763,18 +3769,21 @@ void CCharacter::FDDraceTick()
 
 		m_pPlayer->GiveXP(XP);
 
-		char aSurvival[32];
-		char aMsg[128];
-		str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
-		str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-
-		if (Server()->IsSevendown(m_pPlayer->GetCID()))
+		if (!IsWeaponIndicator())
 		{
-			for (int i = 0; i < 128; i++)
-				str_append(aMsg, " ", sizeof(aMsg));
-		}
+			char aSurvival[32];
+			char aMsg[128];
+			str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
+			str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 
-		GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+			if (Server()->IsSevendown(m_pPlayer->GetCID()))
+			{
+				for (int i = 0; i < 128; i++)
+					str_append(aMsg, " ", sizeof(aMsg));
+			}
+
+			GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+		}
 	}
 
 	// stop spinning when we are paused
@@ -4198,6 +4207,12 @@ float CCharacter::GetTaserFreezeTime()
 	return GetTaserStrength() / 10.f;
 }
 
+bool CCharacter::IsWeaponIndicator()
+{
+	// 3 seconds of showing weapon indicator instead of money broadcast
+	return m_LastWeaponIndTick > Server()->Tick() - Server()->TickSpeed() * 3;
+}
+
 int CCharacter::GetSpawnWeaponIndex(int Weapon)
 {
 	switch (Weapon)
@@ -4211,7 +4226,7 @@ int CCharacter::GetSpawnWeaponIndex(int Weapon)
 
 void CCharacter::UpdateWeaponIndicator()
 {
-	if (!m_pPlayer->m_WeaponIndicator || m_MoneyTile
+	if (!m_pPlayer->m_WeaponIndicator
 		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
 		return;
 	for (int i = 0; i < NUM_HOUSES; i++)
@@ -4234,6 +4249,7 @@ void CCharacter::UpdateWeaponIndicator()
 		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
 	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
+	m_LastWeaponIndTick = Server()->Tick();
 }
 
 int CCharacter::HasFlag()

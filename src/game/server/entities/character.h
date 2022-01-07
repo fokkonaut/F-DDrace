@@ -448,6 +448,8 @@ public:
 
 	//weapon indicator
 	void UpdateWeaponIndicator();
+	bool IsWeaponIndicator();
+	int64 m_LastWeaponIndTick;
 
 	//others
 	int HasFlag();
