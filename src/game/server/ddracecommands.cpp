@@ -1096,6 +1096,16 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	}
 	str_format(aBuf, sizeof(aBuf), "ClientID: %d", ID);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+	IServer::CClientInfo Info;
+	pSelf->Server()->GetClientInfo(ID, &Info);
+	if (Info.m_pConnectionID)
+	{
+		char aConnectionID[UUID_MAXSTRSIZE];
+		FormatUuid(*Info.m_pConnectionID, aConnectionID, sizeof(aConnectionID));
+		str_format(aBuf, sizeof(aBuf), "ConnectionID: %s", aConnectionID);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
 	if (pChr)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Ingame");
 	else if (pPlayer->GetTeam() == TEAM_SPECTATORS)
