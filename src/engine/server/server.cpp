@@ -1231,8 +1231,6 @@ static inline int MsgFromSevendown(int Msg, bool System)
 			Msg = NETMSGTYPE_CL_KILL;
 		else if(Msg >= 23 && Msg <= 25)
 			Msg = NETMSGTYPE_CL_EMOTICON + Msg - 23;
-		else if(Msg == 26) // NETMSGTYPE_CL_ISDDNET
-			Msg += NUM_NETMSGTYPES;
 		else if(Msg < OFFSET_UUID)
 			return -1;
 	}
@@ -1338,7 +1336,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				m_aClients[ClientID].m_Version = Unpacker.GetInt();
+				if (m_aClients[ClientID].m_Sevendown)
+				{
+					if (Config()->m_SvDropOldClients && !m_aClients[ClientID].m_GotDDNetVersionPacket)
+					{
+						m_NetServer.Drop(ClientID, "Version too old, please update");
+						return;
+					}
+				}
+				else
+				{
+					m_aClients[ClientID].m_Version = Unpacker.GetInt();
+				}
 
 				SendCapabilities(ClientID);
 				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0] && GetDummy(ClientID) == -1)

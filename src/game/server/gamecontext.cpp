@@ -1921,23 +1921,6 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_Reason = pUnpacker->GetString(CUnpacker::SANITIZE_CC|CUnpacker::SKIP_START_WHITESPACES);
 			pMsg->m_Force = 0;
 		}
-		else if (MsgID == 26 + NUM_NETMSGTYPES) // NETMSGTYPE_CL_ISDDNET
-		{
-			IServer::CClientInfo Info;
-			Server()->GetClientInfo(ClientID, &Info);
-			if(Info.m_GotDDNetVersion)
-			{
-				return 0;
-			}
-			int DDNetVersion = pUnpacker->GetInt();
-			if(pUnpacker->Error() || DDNetVersion < 0)
-			{
-				DDNetVersion = VERSION_DDNET;
-			}
-			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
-			OnClientDDNetVersionKnown(ClientID);
-			return 0;
-		}
 		else
 		{
 			ProcessedMsg = false;
