@@ -1266,7 +1266,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 		}
 	}
 
-	Antibot()->OnDirectInput(m_pPlayer->GetCID());
+	if (!m_pTelekinesisEntity)
+		Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
 	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
@@ -1301,7 +1302,8 @@ void CCharacter::Tick()
 
 	DDraceTick();
 
-	Antibot()->OnCharacterTick(m_pPlayer->GetCID());
+	if (!m_pTelekinesisEntity)
+		Antibot()->OnCharacterTick(m_pPlayer->GetCID());
 
 	// F-DDrace
 	for (int i = 0; i < 2; i++)
