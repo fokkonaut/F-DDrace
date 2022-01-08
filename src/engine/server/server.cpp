@@ -3980,6 +3980,14 @@ void CServer::SendMapDesign(int ClientID, int Design)
 	m_aClients[ClientID].m_MapChunk = 0;
 }
 
+const char *CServer::GetMapDesign(int ClientID)
+{
+	int Design = m_aClients[ClientID].m_CurrentMapDesign;
+	if (Design == -1)
+		return "default";
+	return m_aMapDesign[Design].m_aName;
+}
+
 void CServer::AddWhitelist(const NETADDR *pAddr, const char *pReason)
 {
 	// avoid double entries
