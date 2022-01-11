@@ -57,9 +57,15 @@ void CButton::Snap(int SnappingClient)
 	}
 
 	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
-	if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
-		pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
-	bool Status = GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()];
+	bool Status = pChr && pChr->GetActiveWeapon() == WEAPON_DRAW_EDITOR && GameServer()->Collision()->IsPlotDrawDoor(m_Number);
+
+	if (!Status)
+	{
+		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
+			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
+
+		Status = GameServer()->Collision()->m_pSwitchers && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()];
+	}
 
 	if (!Status && (Server()->Tick() % Server()->TickSpeed()) % 11 == 0)
 		return;

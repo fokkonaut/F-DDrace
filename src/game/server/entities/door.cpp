@@ -120,8 +120,11 @@ void CDoor::Snap(int SnappingClient)
 		&& (!GameServer()->GetPlayerChar(SnappingClient) || GameServer()->GetPlayerChar(SnappingClient)->GetActiveWeapon() != WEAPON_DRAW_EDITOR))
 		return;
 
+	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
+	bool ForceOn = Char && Char->GetActiveWeapon() == WEAPON_DRAW_EDITOR && GameServer()->Collision()->IsPlotDrawDoor(m_Number);
+
 	bool SendEntityEx = false;
-	if (m_Collision)
+	if (m_Collision && !ForceOn)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 		if (pChr && (SendEntityEx = pChr->SendExtendedEntity(this)))
@@ -151,11 +154,10 @@ void CDoor::Snap(int SnappingClient)
 	}
 	else
 	{
-		CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
 		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && (ForceOn || (GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])))
 		{
 			pObj->m_FromX = (int)m_To.x;
 			pObj->m_FromY = (int)m_To.y;
