@@ -4590,7 +4590,7 @@ void CGameContext::ReadPlotStats(int ID)
 							}
 							else
 							{
-								if (vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
+								if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
 									continue;
 
 								for (unsigned int i = 0; i < vNumbers.size(); i++)
@@ -4622,7 +4622,7 @@ void CGameContext::ReadPlotStats(int ID)
 						if (PlotID >= 0 && Number >= 0)
 						{
 							int NewNumber = -1;
-							if (vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
+							if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
 								continue;
 
 							for (unsigned int i = 0; i < vNumbers.size(); i++)
