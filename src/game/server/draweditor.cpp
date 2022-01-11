@@ -346,12 +346,12 @@ void CDrawEditor::SetCategory(int Category)
 		m_Entity = CGameWorld::ENTTYPE_DOOR;
 		m_RoundPos = true;
 		m_Laser.m_Collision = true;
+		m_Laser.m_Thickness = s_MaxThickness;
+		m_Laser.m_ButtonMode = false;
 	}
 	else if (Category == CAT_SPEEDUPS)
 	{
 		m_Entity = CGameWorld::ENTTYPE_SPEEDUP;
-		m_Laser.m_Thickness = s_MaxThickness;
-		m_Laser.m_ButtonMode = false;
 		m_RoundPos = true;
 	}
 
