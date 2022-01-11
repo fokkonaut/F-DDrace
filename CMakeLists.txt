@@ -1675,6 +1675,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/advanced_entity.h
   entities/atom.cpp
   entities/atom.h
+  entities/button.cpp
+  entities/button.h
   entities/character.cpp
   entities/character.h
   entities/clock.cpp
@@ -1727,6 +1729,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/portal.h
   entities/projectile.cpp
   entities/projectile.h
+  entities/speedup.cpp
+  entities/speedup.h
   entities/stable_projectile.cpp
   entities/stable_projectile.h
   entities/trail.cpp

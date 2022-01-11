@@ -20,6 +20,16 @@ enum
 	CANTMOVE_DOWN_LASERDOOR=1<<5, // used by prediction
 };
 
+enum
+{
+	PLOT_SMALL,
+	PLOT_BIG,
+	NUM_PLOT_SIZES,
+
+	PLOT_SMALL_MAX_DOORS = 2,
+	PLOT_BIG_MAX_DOORS = 5,
+};
+
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
 
 typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
@@ -31,6 +41,24 @@ class CCollision
 	int m_Width;
 	int m_Height;
 	class CLayers* m_pLayers;
+
+	class CTeleTile* m_pTele;
+	class CSpeedupTile* m_pSpeedup;
+	class CTile* m_pFront;
+	class CSwitchTile* m_pSwitch;
+	class CTuneTile* m_pTune;
+	class CDoorTile* m_pDoor;
+
+	struct SSwitchers
+	{
+		bool m_Status[MAX_CLIENTS];
+		bool m_Initial;
+		int m_EndTick[MAX_CLIENTS];
+		int m_Type[MAX_CLIENTS];
+		// F-DDrace
+		int m_ClientID[MAX_CLIENTS];
+		int m_StartTick[MAX_CLIENTS];
+	};
 
 public:
 	CCollision();
@@ -160,6 +188,22 @@ public:
 	int GetPlotBySwitch(int SwitchID);
 	int m_NumPlots;
 
+	int m_aNumPlots[NUM_PLOT_SIZES];
+	int *m_apPlotSize; // size: m_NumPlots
+
+	int GetSwitchByPlotLaserDoor(int Plot, int Door);
+	int GetNumPlotLaserDoors() { return m_aNumPlots[PLOT_SMALL] * PLOT_SMALL_MAX_DOORS + m_aNumPlots[PLOT_BIG] * PLOT_BIG_MAX_DOORS; }
+	SSwitchers *GetPlotLaserDoors(int PlotID);
+	int GetNumMaxDoors(int PlotID);
+
+	int GetNumAllSwitchers() { return m_NumSwitchers + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }
+	int GetNumFreeDrawDoors() { return 255 - m_NumSwitchers - m_NumPlots - GetNumPlotLaserDoors(); }
+
+	bool IsPlotDoor(int Number) { return Number > m_NumSwitchers && !IsPlotDrawDoor(Number); }
+	bool IsPlotDrawDoor(int Number) { return Number > m_NumSwitchers + m_NumPlots; }
+	void SetButtonNumber(vec2 Pos, int Number);
+	int GetButtonNumber(int Index);
+
 	// fights
 	int GetFightNumber(int Index, bool RealFight = true);
 
@@ -169,30 +213,11 @@ public:
 	void MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool IsBoxGrounded(vec2 Pos, vec2 Size);
 
-private:
-
-	class CTeleTile* m_pTele;
-	class CSpeedupTile* m_pSpeedup;
-	class CTile* m_pFront;
-	class CSwitchTile* m_pSwitch;
-	class CTuneTile* m_pTune;
-	class CDoorTile* m_pDoor;
-
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-		// F-DDrace
-		int m_ClientID[MAX_CLIENTS];
-		int m_StartTick[MAX_CLIENTS];
-	};
-
-public:
+	// speedups
+	void SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed);
 
 	// access to plots: PlotID + m_NumSwitchers && PlotID < m_NumPlots + 1
-	SSwitchers* m_pSwitchers;
+	SSwitchers *m_pSwitchers;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int* Ox, int* Oy);

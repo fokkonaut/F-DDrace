@@ -442,6 +442,7 @@ public:
 
 	int GetCurrentTilePlotID();
 	void TeleOutOfPlot(int PlotID);
+	int m_CurrentButtonNumber;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

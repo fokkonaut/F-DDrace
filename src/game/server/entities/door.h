@@ -18,6 +18,7 @@ class CDoor: public CEntity
 	float m_Rotation;
 	vec2 m_PrevPos;
 	bool m_Collision; // used for draw editor preview
+	int m_Thickness;
 	void Update();
 
 public:
@@ -25,13 +26,15 @@ public:
 	void Open(int Team);
 	void Close(int Team);
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-			int Number, bool Collision = true);
+			int Number, bool Collision = true, int Thickness = 4);
 
 	void SetDirection(float Rotation);
 	void SetLength(int Length);
+	void SetThickness(int Thickness) { m_Thickness = Thickness; }
 	int GetLength() { return m_Length; }
 	float GetRotation() { return m_Rotation; }
 	bool GetCollision() { return m_Collision; }
+	int GetThickness() { return m_Thickness; }
 	virtual ~CDoor();
 
 	virtual void Reset();

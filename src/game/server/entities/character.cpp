@@ -516,8 +516,8 @@ void CCharacter::FireWeapon()
 					// number 0 can't be opened and also functions as plot walls that can't be opened
 					// plotid -1: map objects
 					// plotid > 0: plot doors
-					if (pDoor->m_Number == 0 ||
-						(!m_DoorHammer && (pDoor->m_PlotID == -1 || (pDoor->m_PlotID >= PLOT_START && pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID())))))
+					if (pDoor->m_Number == 0 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) ||
+						(!m_DoorHammer && (pDoor->m_PlotID == -1 || !GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) || pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID()))))
 						continue;
 
 					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
@@ -2234,7 +2234,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA)
 	{
 		int Number = GameServer()->Collision()->GetDoorNumber(Pos);
-		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && Team() != TEAM_SUPER && GameServer()->Collision()->GetPlotBySwitch(Number) >= PLOT_START)
+		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && Team() != TEAM_SUPER && GameServer()->Collision()->IsPlotDoor(Number))
 		{
 			m_StoppedDoorSkip = true;
 			m_Core.m_Vel = vec2(0, 0);
@@ -2854,6 +2854,25 @@ void CCharacter::HandleTiles(int Index)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
 	// handle switch tiles
+	int ButtonNumber = GameServer()->Collision()->GetButtonNumber(MapIndex);
+	if (ButtonNumber > 0 && Team() != TEAM_SUPER)
+	{
+		if (ButtonNumber != m_CurrentButtonNumber)
+		{
+			// little sound for the button
+			if (GameServer()->Collision()->IsPlotDrawDoor(ButtonNumber))
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_Status[Team()] ^= 1;
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_EndTick[Team()] = 0;
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_ClientID[Team()] = m_pPlayer->GetCID();
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_StartTick[Team()] = Server()->Tick();
+		}
+		m_CurrentButtonNumber = ButtonNumber;
+	}
+	else
+		m_CurrentButtonNumber = 0;
+
 	if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
 		GameServer()->Collision()->m_pSwitchers[GameServer()->Collision()->GetSwitchNumber(MapIndex)].m_Status[Team()] = true;
@@ -3623,6 +3642,7 @@ void CCharacter::FDDraceInit()
 	m_LastSetDummyHammer = 0;
 
 	m_LastWeaponIndTick = 0;
+	m_CurrentButtonNumber = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

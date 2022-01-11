@@ -226,7 +226,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		int PlotID = GameServer()->Collision()->GetPlotBySwitch(Number);
 		GameServer()->m_aPlots[PlotID].m_ToTele = Pos;
-		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos));
+		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->m_apPlotSize[PlotID];
 	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
 	{
@@ -589,7 +589,7 @@ void IGameController::Snap(int SnappingClient)
 			if(!pSwitchState)
 				return;
 
-			pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->m_NumSwitchers + GameServer()->Collision()->m_NumPlots, 0, 255);
+			pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->GetNumAllSwitchers(), 0, 255);
 			pSwitchState->m_Status1 = 0;
 			pSwitchState->m_Status2 = 0;
 			pSwitchState->m_Status3 = 0;
@@ -599,7 +599,7 @@ void IGameController::Snap(int SnappingClient)
 			pSwitchState->m_Status7 = 0;
 			pSwitchState->m_Status8 = 0;
 
-			for(int i = 0; i < pSwitchState->m_NumSwitchers + GameServer()->Collision()->m_NumPlots + 1; i++)
+			for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
 			{
 				int Status = (int)GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
 

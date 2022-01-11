@@ -485,8 +485,9 @@ public:
 	int m_Number;
 
 	// F-DDrace
-	int m_Usage;
-	int m_Fight;
+	int m_Usage; // draw editor putting multiple doors on top of each other so we know when to remove the collision on removal of last door
+	int m_Fight; // fight number for arena border
+	int m_Button; // toggle button for switchers, only used for plot door buttons by draw editor
 };
 
 class CTuneTile

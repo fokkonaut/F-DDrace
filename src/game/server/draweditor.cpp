@@ -1,11 +1,14 @@
 #include "draweditor.h"
 #include <game/server/entities/character.h>
 #include <game/server/entities/door.h>
+#include <game/server/entities/button.h>
+#include <game/server/entities/speedup.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 
 static float s_MaxLength = 10.f;
+static int s_MaxThickness = 4;
 static float s_DefaultAngle = 90 * pi / 180;
 
 CGameContext *CDrawEditor::GameServer() const { return m_pCharacter->GameServer(); }
@@ -14,8 +17,17 @@ IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 CDrawEditor::CDrawEditor(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
-	m_DrawMode = DRAW_UNINITIALIZED;
-	SetDrawMode(DRAW_HEART);
+	m_Setting = -1;
+	m_Laser.m_Angle = s_DefaultAngle;
+	m_Laser.m_Length = 3;
+	m_Laser.m_Thickness = s_MaxThickness;
+	m_Laser.m_ButtonMode = false;
+	m_Laser.m_Number = 0;
+	m_Speedup.m_Angle = 0;
+	m_Speedup.m_Force = 2;
+	m_Speedup.m_MaxSpeed = 0;
+	m_Category = CAT_UNINITIALIZED;
+	SetCategory(CAT_PICKUPS);
 	m_RoundPos = true;
 	m_Erasing = false;
 	m_Selecting = false;
@@ -27,9 +39,9 @@ bool CDrawEditor::Active()
 	return m_pCharacter->GetActiveWeapon() == WEAPON_DRAW_EDITOR;
 }
 
-bool CDrawEditor::CanPlace()
+bool CDrawEditor::CanPlace(bool Remove)
 {
-	if (m_DrawMode == DRAW_WALL)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
 	{
 		int rx = round_to_int(m_Pos.x) / 32;
 		int ry = round_to_int(m_Pos.y) / 32;
@@ -37,21 +49,41 @@ bool CDrawEditor::CanPlace()
 			return false;
 	}
 
+	bool ValidTile = !GameServer()->Collision()->CheckPoint(m_Pos);
+	if (m_Category == CAT_SPEEDUPS && !Remove)
+	{
+		int Index = GameServer()->Collision()->GetMapIndex(m_Pos);
+		ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+	}
+
 	int TilePlotID = GameServer()->GetTilePlotID(m_Pos);
+	if (CurrentPlotID() != TilePlotID)
+		return false;
+
 	int OwnPlotID = GetPlotID();
-	bool FreeDraw = OwnPlotID < PLOT_START || m_pCharacter->GetCurrentTilePlotID() != OwnPlotID;
-	return (!GameServer()->Collision()->CheckPoint(m_Pos) && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
+	bool FreeDraw = OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID;
+	return (ValidTile && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
 {
 	// check whether pEnt->m_PlotID >= 0 because -1 would mean its a map object, so we dont wanna be able to remove it
-	return CanPlace() && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0;
+	return CanPlace(true) && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0;
 }
 
 int CDrawEditor::GetPlotID()
 {
 	return GameServer()->GetPlotID(m_pCharacter->GetPlayer()->GetAccID());
+}
+
+int CDrawEditor::CurrentPlotID()
+{
+	return m_pCharacter->GetCurrentTilePlotID();
+}
+
+int CDrawEditor::GetNumMaxDoors()
+{
+	return GameServer()->Collision()->GetNumMaxDoors(CurrentPlotID());
 }
 
 void CDrawEditor::Tick()
@@ -66,17 +98,22 @@ void CDrawEditor::Tick()
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
 
-	HandleInput();
-
-	if (Server()->Tick() % Server()->TickSpeed() == 0)
+	int PlotID = CurrentPlotID();
+	if (PlotID != m_PrevPlotID)
 	{
-		int PlotID = m_pCharacter->GetCurrentTilePlotID();
-		if (PlotID == GetPlotID() || PlotID == 0)
-		{
-			char aBuf[32];
-			str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
-			GameServer()->SendBroadcast(aBuf, GetCID(), false);
-		}
+		if (m_Category == CAT_LASERDOORS && m_Laser.m_Number >= GetNumMaxDoors())
+			m_Laser.m_Number = 0;
+	}
+
+	HandleInput();
+	m_PrevInput = m_Input;
+	m_PrevPlotID = PlotID;
+
+	if (Active() && Server()->Tick() % Server()->TickSpeed() == 0)
+	{
+		char aBuf[32];
+		str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
+		GameServer()->SendBroadcast(aBuf, GetCID(), false);
 	}
 }
 
@@ -88,20 +125,21 @@ void CDrawEditor::OnPlayerFire()
 	if (m_Selecting)
 	{
 		int Dir = m_pCharacter->GetAimDir();
-		int Mode = m_DrawMode;
+		int Setting = m_Setting;
+		int NumSettings = GetNumSettings();
 		if (Dir == 1)
 		{
-			Mode++;
-			if (Mode >= NUM_DRAW_MODES)
-				Mode = 0;
+			Setting++;
+			if (Setting >= NumSettings)
+				Setting = 0;
 		}
 		else if (Dir == -1)
 		{
-			Mode--;
-			if (Mode < 0)
-				Mode = NUM_DRAW_MODES-1;
+			Setting--;
+			if (Setting < 0)
+				Setting = NumSettings-1;
 		}
-		SetDrawMode(Mode);
+		SetSetting(Setting);
 		SendWindow();
 		return;
 	}
@@ -145,76 +183,192 @@ void CDrawEditor::HandleInput()
 		m_Selecting = false;
 	}
 
-	if (m_Input.m_Hook && !m_Selecting && !m_pCharacter->m_FreezeTime)
+	if (m_Input.m_Hook)
 	{
-		m_Erasing = true;
-
-		int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR);
-		CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
-
-		if (CanRemove(pEntity))
+		if (m_Selecting && !m_PrevInput.m_Hook)
 		{
-			for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
-				if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
-					GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+			int Dir = m_pCharacter->GetAimDir();
+			int Category = m_Category;
+			if (Dir == 1)
+			{
+				Category++;
+				if (Category >= NUM_DRAW_CATEGORIES)
+					Category = 0;
+			}
+			else if (Dir == -1)
+			{
+				Category--;
+				if (Category < 0)
+					Category = NUM_DRAW_CATEGORIES - 1;
+			}
+			SetCategory(Category);
+			SendWindow();
+		}
+		else if (!m_Selecting && !m_pCharacter->m_FreezeTime)
+		{
+			m_Erasing = true;
 
-			GameServer()->m_World.DestroyEntity(pEntity);
-			m_pCharacter->SetAttackTick(Server()->Tick());
-			GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
+			int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON);
+			CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
+
+			if (CanRemove(pEntity))
+			{
+				for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
+					if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
+						GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+
+				GameServer()->m_World.DestroyEntity(pEntity);
+				m_pCharacter->SetAttackTick(Server()->Tick());
+				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
+			}
 		}
 	}
 	else
 		m_Erasing = false;
 
-	if (m_Input.m_Direction != 0 && m_DrawMode == DRAW_WALL)
+	if (m_Input.m_Direction != 0)
 	{
 		if (m_EditStartTick == 0)
 			m_EditStartTick = Server()->Tick();
 
-		bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
-		float Add = m_Input.m_Direction * (0.5f + 2*(int)Faster);
+		if (m_Selecting && (m_PrevInput.m_Direction == 0 || m_EditStartTick < Server()->Tick() - Server()->TickSpeed() / 2))
+		{
+			if (m_Category == CAT_LASERWALLS)
+			{
+				if (m_Setting == LASERWALL_COLLISION)
+				{
+					m_Laser.m_Collision = !m_Laser.m_Collision;
+					m_Laser.m_Thickness = s_MaxThickness;
+					((CDoor *)m_pPreview)->SetThickness(m_Laser.m_Thickness);
+				}
+				else if (m_Setting == LASERWALL_THICKNESS)
+				{
+					m_Laser.m_Collision = false; // disallow collision with thickness change
+					m_Laser.m_Thickness += m_Input.m_Direction;
+					if (m_Laser.m_Thickness > s_MaxThickness)
+						m_Laser.m_Thickness = 0;
+					else if (m_Laser.m_Thickness < 0)
+						m_Laser.m_Thickness = s_MaxThickness;
+					((CDoor *)m_pPreview)->SetThickness(m_Laser.m_Thickness);
+				}
+			}
+			else if (m_Category == CAT_LASERDOORS)
+			{
+				if (m_Setting == LASERDOOR_NUMBER)
+				{
+					m_Laser.m_Number += m_Input.m_Direction;
+					if (m_Laser.m_Number >= GetNumMaxDoors())
+						m_Laser.m_Number = 0;
+					else if (m_Laser.m_Number < 0)
+						m_Laser.m_Number = GetNumMaxDoors()-1;
+				}
+				else if (m_Setting == LASERDOOR_MODE)
+				{
+					m_Laser.m_ButtonMode = !m_Laser.m_ButtonMode;
+					m_Entity = m_Laser.m_ButtonMode ? CGameWorld::ENTTYPE_BUTTON : CGameWorld::ENTTYPE_DOOR;
+					UpdatePreview();
+				}
+			}
+			else if (m_Category == CAT_SPEEDUPS)
+			{
+				if (m_Setting == SPEEDUP_FORCE)
+				{
+					m_Speedup.m_Force += m_Input.m_Direction;
+					if (m_Speedup.m_Force > 255)
+						m_Speedup.m_Force = 0;
+					else if (m_Speedup.m_Force < 0)
+						m_Speedup.m_Force = 255;
+				}
+				else if (m_Setting == SPEEDUP_MAXSPEED)
+				{
+					m_Speedup.m_MaxSpeed += m_Input.m_Direction;
+					if (m_Speedup.m_MaxSpeed > 255)
+						m_Speedup.m_MaxSpeed = 0;
+					else if (m_Speedup.m_MaxSpeed < 0)
+						m_Speedup.m_MaxSpeed = 255;
+				}
+			}
+			SendWindow();
+		}
+		else if (!m_Selecting)
+		{
+			bool Faster = m_EditStartTick < Server()->Tick() - Server()->TickSpeed();
+			float Add = m_Input.m_Direction * (1 + 2*(int)Faster);
+			if (IsCategoryLaser())
+				Add -= m_Input.m_Direction * 0.5f;
 
-		if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
-			AddLength(Add);
-		else
-			AddAngle(Add);
+			if ((IsCategoryLaser() && !m_Laser.m_ButtonMode) || m_Category == CAT_SPEEDUPS)
+			{
+				if ((m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) && IsCategoryLaser())
+					AddLength(Add);
+				else
+					AddAngle(Add);
+			}
+		}
 	}
 	else
 		m_EditStartTick = 0;
 }
 
-void CDrawEditor::SetDrawMode(int Mode)
+void CDrawEditor::SetPickup(int Pickup)
 {
-	if (m_DrawMode == Mode)
+	if (m_Setting == Pickup)
 		return;
 
-	if (Mode == DRAW_HEART || Mode == DRAW_SHIELD)
+	m_Entity = CGameWorld::ENTTYPE_PICKUP;
+	if (Pickup == DRAW_PICKUP_HEART || Pickup == DRAW_PICKUP_SHIELD)
 	{
-		m_Entity = CGameWorld::ENTTYPE_PICKUP;
-		m_Data.m_Pickup.m_Type = Mode; // POWERUP_HEALTH=0, POWERUP_ARMOR=1
-		m_Data.m_Pickup.m_SubType = 0;
+		m_Pickup.m_Type = Pickup; // POWERUP_HEALTH=0, POWERUP_ARMOR=1
+		m_Pickup.m_SubType = 0;
 	}
-	else if (Mode >= DRAW_HAMMER && Mode <= DRAW_LASER)
+	else if (Pickup >= DRAW_PICKUP_HAMMER && Pickup <= DRAW_PICKUP_LASER)
 	{
-		m_Entity = CGameWorld::ENTTYPE_PICKUP;
-		m_Data.m_Pickup.m_Type = POWERUP_WEAPON;
-		m_Data.m_Pickup.m_SubType = Mode - 2;
+		m_Pickup.m_Type = POWERUP_WEAPON;
+		m_Pickup.m_SubType = Pickup - 2;
 	}
-	else if (Mode == DRAW_WALL)
+
+	UpdatePreview();
+	m_Setting = Pickup;
+}
+
+void CDrawEditor::SetCategory(int Category)
+{
+	if (m_Category == Category)
+		return;
+
+	m_Setting = -1; // so we dont fuck up setpickup
+	if (Category == CAT_PICKUPS)
+	{
+		SetPickup(DRAW_PICKUP_HEART);
+	}
+	else if (Category == CAT_LASERWALLS || Category == CAT_LASERDOORS)
 	{
 		m_Entity = CGameWorld::ENTTYPE_DOOR;
-		m_Data.m_Laser.m_Angle = s_DefaultAngle;
-		m_Data.m_Laser.m_Length = 3;
+		m_RoundPos = true;
+		m_Laser.m_Collision = true;
 	}
-
-	if (m_DrawMode != DRAW_UNINITIALIZED)
+	else if (Category == CAT_SPEEDUPS)
 	{
-		// update the preview entity
-		RemovePreview();
-		SetPreview();
+		m_Entity = CGameWorld::ENTTYPE_SPEEDUP;
+		m_RoundPos = true;
 	}
 
-	m_DrawMode = Mode;
+	// done in SetPickup()
+	if (Category != CAT_PICKUPS)
+	{
+		UpdatePreview();
+		m_Setting = 0; // always first setting
+	}
+
+	m_Category = Category;
+}
+
+void CDrawEditor::SetSetting(int Setting)
+{
+	if (m_Category == CAT_PICKUPS)
+		SetPickup(Setting);
+	else
+		m_Setting = Setting;
 }
 
 CEntity *CDrawEditor::CreateEntity(bool Preview)
@@ -222,12 +376,19 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	switch (m_Entity)
 	{
 	case CGameWorld::ENTTYPE_PICKUP:
-		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Pickup.m_Type, m_Data.m_Pickup.m_SubType);
+		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Pickup.m_Type, m_Pickup.m_SubType);
 	case CGameWorld::ENTTYPE_DOOR:
 	{
-		bool Collision = !Preview && (m_pCharacter->Config()->m_SvDrawWallsCollision || GameServer()->GetTilePlotID(m_Pos) >= PLOT_START);
-		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Data.m_Laser.m_Angle, 32 * m_Data.m_Laser.m_Length, 0, Collision);
+		int Number = m_Category == CAT_LASERDOORS && !Preview ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(CurrentPlotID(), m_Laser.m_Number) : 0;
+		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Laser.m_Angle, 32 * m_Laser.m_Length, Number, !Preview && m_Laser.m_Collision, m_Laser.m_Thickness);
 	}
+	case CGameWorld::ENTTYPE_BUTTON:
+	{
+		int Number = !Preview ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(CurrentPlotID(), m_Laser.m_Number) : 0;
+		return new CButton(m_pCharacter->GameWorld(), m_Pos, Number, !Preview);
+	}
+	case CGameWorld::ENTTYPE_SPEEDUP:
+		return new CSpeedup(m_pCharacter->GameWorld(), m_Pos, m_Speedup.m_Angle, m_Speedup.m_Force, m_Speedup.m_MaxSpeed, !Preview);
 	}
 	return 0;
 }
@@ -235,55 +396,113 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 void CDrawEditor::SendWindow()
 {
 	char aMsg[900];
-	char aExtraOptions[256];
+	str_format(aMsg, sizeof(aMsg), "     > %s <\n\n", GetCategory(m_Category));
 
-	str_format(aExtraOptions, sizeof(aExtraOptions), "     %s options:\n\n"
-		"Change angle of wall: A/D\n"
-		"Change length of wall: TAB + A/D\n"
-		"Add 45 degree steps: TAB + kill\n", GetMode(DRAW_WALL));
+	str_append(aMsg,
+		"     Menu controls:\n\n"
+		"Change category: hook left/right\n"
+		"Move up/down: shoot left/right\n", sizeof(aMsg));
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
+		str_append(aMsg, "Change setting: A/D\n", sizeof(aMsg));
 
-	str_format(aMsg, sizeof(aMsg),
+	str_append(aMsg, "\n", sizeof(aMsg));
+	str_append(aMsg,
 		"     Controls:\n\n"
 		"Stop editing: Switch weapon\n"
-		"Object picker: Hold SPACE + shoot left/right\n"
 		"Place object: Left mouse\n"
-		"Eraser: Right mouse\n"
-		"Toggle position rounding: kill\n"
-		"\n%s"
-		"\n     Objects:\n\n", aExtraOptions);
+		"Eraser: Right mouse\n", sizeof(aMsg));
+	if (m_Category != CAT_SPEEDUPS)
+		str_append(aMsg, "Toggle position rounding: kill\n", sizeof(aMsg));
 
-	for (int i = 0; i < NUM_DRAW_MODES; i++)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
 	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s\n", i == m_DrawMode ? ">  " : "", GetMode(i), i == m_DrawMode ? "  <" : "");
-		str_append(aMsg, aBuf, sizeof(aMsg));
+		if (IsCategoryLaser())
+			str_append(aMsg, "Change length: TAB + A/D\n", sizeof(aMsg));
+		str_append(aMsg,
+			"Change angle: A/D\n"
+			"Add 45 degree steps: TAB + kill\n", sizeof(aMsg));
+	}
+
+	str_append(aMsg, "\n", sizeof(aMsg));
+	char aBuf[256];
+	if (m_Category == CAT_PICKUPS)
+	{
+		str_append(aMsg, "     Objects:\n\n", sizeof(aMsg));
+		for (int i = 0; i < NUM_DRAW_PICKUPS; i++)
+			str_append(aMsg, FormatSetting(GetPickup(i), i), sizeof(aMsg));
+	}
+	else if (m_Category == CAT_LASERWALLS)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Collision: %s", m_Laser.m_Collision ? "Yes" : "No");
+		str_append(aMsg, FormatSetting(aBuf, LASERWALL_COLLISION), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Thickness: %d/%d", m_Laser.m_Thickness+1, s_MaxThickness+1);
+		str_append(aMsg, FormatSetting(aBuf, LASERWALL_THICKNESS), sizeof(aMsg));
+	}
+	else if (m_Category == CAT_LASERDOORS)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Number: %d/%d", m_Laser.m_Number+1, GetNumMaxDoors());
+		str_append(aMsg, FormatSetting(aBuf, LASERDOOR_NUMBER), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Mode: %s", m_Laser.m_ButtonMode ? "Button" : "Door");
+		str_append(aMsg, FormatSetting(aBuf, LASERDOOR_MODE), sizeof(aMsg));
+	}
+	else if (m_Category == CAT_SPEEDUPS)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Force speed: %d", m_Speedup.m_Force);
+		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_FORCE), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Max speed: %d", m_Speedup.m_MaxSpeed);
+		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_MAXSPEED), sizeof(aMsg));
 	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
 }
 
-const char *CDrawEditor::GetMode(int Mode)
+const char *CDrawEditor::FormatSetting(const char *pSetting, int Setting)
 {
-	switch (Mode)
+	static char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%s%s%s\n", m_Setting == Setting ? "> " : "", pSetting, m_Setting == Setting ? " <" : "");
+	return aBuf;
+}
+
+const char *CDrawEditor::GetPickup(int Pickup)
+{
+	switch (Pickup)
 	{
-	case DRAW_HEART:
-		return "Heart";
-	case DRAW_SHIELD:
-		return "Shield";
-	case DRAW_HAMMER:
-		return "Hammer";
-	case DRAW_GUN:
-		return "Gun";
-	case DRAW_SHOTGUN:
-		return "Shotgun";
-	case DRAW_GRENADE:
-		return "Grenade";
-	case DRAW_LASER:
-		return "Rifle";
-	case DRAW_WALL:
-		return "Laser wall";
+	case DRAW_PICKUP_HEART: return "Heart";
+	case DRAW_PICKUP_SHIELD: return "Shield";
+	case DRAW_PICKUP_HAMMER: return "Hammer";
+	case DRAW_PICKUP_GUN: return "Gun";
+	case DRAW_PICKUP_SHOTGUN: return "Shotgun";
+	case DRAW_PICKUP_GRENADE: return "Grenade";
+	case DRAW_PICKUP_LASER: return "Rifle";
+	default: return "Unknown";
 	}
-	return "Unknown";
+}
+
+const char *CDrawEditor::GetCategory(int Category)
+{
+	switch (Category)
+	{
+	case CAT_PICKUPS: return "Pickups";
+	case CAT_LASERWALLS: return "Laser Walls";
+	case CAT_LASERDOORS: return "Laser Doors";
+	case CAT_SPEEDUPS: return "Speedups";
+	default: return "Unknown";
+	}
+}
+
+int CDrawEditor::GetNumSettings()
+{
+	switch (m_Category)
+	{
+	case CAT_PICKUPS: return NUM_DRAW_PICKUPS;
+	case CAT_LASERWALLS: return NUM_LASERWALL_SETTINGS;
+	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
+	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
+	default: return 0;
+	}
 }
 
 int CDrawEditor::GetCID()
@@ -295,39 +514,71 @@ void CDrawEditor::OnPlayerKill()
 {
 	if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 	{
-		if (m_DrawMode == DRAW_WALL)
+		int Angle = -1;
+		float DefaultAngle;
+		if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
 		{
-			int Angle = round_to_int(m_Data.m_Laser.m_Angle * 180 / pi);
-			if (Angle % 45 != 0 || Angle > 360) // its not precise enough when we rotate some rounds and get a higher value
-				SetAngle(s_DefaultAngle);
+			Angle = round_to_int(m_Laser.m_Angle * 180 / pi);
+			DefaultAngle = s_DefaultAngle;
+		}
+		else if (m_Category == CAT_SPEEDUPS)
+		{
+			Angle = m_Speedup.m_Angle;
+			DefaultAngle = 0;
+		}
+
+		if (Angle != -1)
+		{
+			if (Angle % 45 != 0 || Angle >= 360) // its not precise enough when we rotate some rounds and get a higher value
+				SetAngle(DefaultAngle);
 			else
 				AddAngle(45);
 		}
 	}
-	else
+	else if (m_Category != CAT_SPEEDUPS && m_Category != CAT_LASERDOORS)
 		m_RoundPos = !m_RoundPos;
 }
 
 void CDrawEditor::SetAngle(float Angle)
 {
-	m_Data.m_Laser.m_Angle = Angle;
-	((CDoor *)m_pPreview)->SetDirection(m_Data.m_Laser.m_Angle);
+	if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
+	{
+		m_Laser.m_Angle = Angle;
+		((CDoor *)m_pPreview)->SetDirection(m_Laser.m_Angle);
+	}
+	else if (m_Category == CAT_SPEEDUPS)
+	{
+		m_Speedup.m_Angle = Angle;
+		((CSpeedup *)m_pPreview)->SetAngle(m_Speedup.m_Angle);
+	}
 }
 
 void CDrawEditor::AddAngle(float Add)
 {
-	float NewAngle = (m_Data.m_Laser.m_Angle * 180 / pi) + Add;
-	if (NewAngle > 360.f)
-		NewAngle -= 360.f;
-	else if (NewAngle < 0.f)
-		NewAngle += 360.f;;
-	SetAngle(NewAngle * pi / 180);
+	if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
+	{
+		float NewAngle = (m_Laser.m_Angle * 180 / pi) + Add;
+		if (NewAngle >= 360.f)
+			NewAngle -= 360.f;
+		else if (NewAngle < 0.f)
+			NewAngle += 360.f;
+		SetAngle(NewAngle * pi / 180);
+	}
+	else if (m_Category == CAT_SPEEDUPS)
+	{
+		int NewAngle = m_Speedup.m_Angle - Add; // negative to move counter clockwise, same as laserwalls always did
+		if (NewAngle >= 360)
+			NewAngle -= 360;
+		else if (NewAngle < 0)
+			NewAngle += 360;
+		SetAngle(NewAngle);
+	}
 }
 
 void CDrawEditor::AddLength(float Add)
 {
-	m_Data.m_Laser.m_Length = clamp(m_Data.m_Laser.m_Length + Add/10.f, 0.f, s_MaxLength);
-	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Data.m_Laser.m_Length * 32));
+	m_Laser.m_Length = clamp(m_Laser.m_Length + Add/10.f, 0.0f, s_MaxLength);
+	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Laser.m_Length * 32));
 }
 
 void CDrawEditor::OnWeaponSwitch()
@@ -337,7 +588,7 @@ void CDrawEditor::OnWeaponSwitch()
 		SetPreview();
 
 		int PlotID = GetPlotID();
-		if (m_pCharacter->GetCurrentTilePlotID() == PlotID)
+		if (CurrentPlotID() == PlotID)
 		{
 			GameServer()->SetPlotDoorStatus(PlotID, true);
 			GameServer()->RemovePortalsFromPlot(PlotID);
@@ -352,7 +603,7 @@ void CDrawEditor::OnWeaponSwitch()
 		RemovePreview();
 
 		int PlotID = GetPlotID();
-		if (m_pCharacter->GetCurrentTilePlotID() == PlotID)
+		if (CurrentPlotID() == PlotID)
 		{
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (GameServer()->GetPlayerChar(i))
@@ -386,6 +637,15 @@ void CDrawEditor::RemovePreview()
 
 	GameServer()->m_World.DestroyEntity(m_pPreview);
 	m_pPreview = 0;
+}
+
+void CDrawEditor::UpdatePreview()
+{
+	if (m_Category == CAT_UNINITIALIZED)
+		return;
+
+	RemovePreview();
+	SetPreview();
 }
 
 bool CDrawEditor::OnSnapPreview(int SnappingClient)

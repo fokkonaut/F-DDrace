@@ -8,13 +8,14 @@
 #include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-		int Number, bool Collision) :
+		int Number, bool Collision, int Thickness) :
 		CEntity(pGameWorld, CGameWorld::ENTTYPE_DOOR, Pos)
 {
 	m_Number = Number;
 	m_Pos = Pos;
 	m_PrevPos = m_Pos;
 	m_Collision = Collision;
+	m_Thickness = Thickness;
 	m_Length = Length;
 	
 	m_Rotation = Rotation;
@@ -53,14 +54,15 @@ void CDoor::Open(int Tick, bool ActivatedTeam[])
 
 void CDoor::ResetCollision(bool Remove)
 {
-	for (int i = 0; i < m_Length - 1; i++)
+	int Length = max(m_Length - 1, 1); // make sure to always set at least the one tile
+	for (int i = 0; i < Length; i++)
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
 
 		bool IsPlotDoor = (GameServer()->Collision()->GetDCollisionAt(CurrentPos.x, CurrentPos.y) == TILE_STOPA
-			&& GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(CurrentPos)) >= PLOT_START
-			&& m_Number < GameServer()->Collision()->m_NumSwitchers + 1); // extra check so plot doors dont invalidate theirselves
+			&& GameServer()->Collision()->IsPlotDoor(GameServer()->Collision()->GetDoorNumber(CurrentPos))
+			&& !GameServer()->Collision()->IsPlotDoor(m_Number)); // extra check so plot doors dont invalidate theirselves
 
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(CurrentPos.x, CurrentPos.y)
@@ -119,7 +121,7 @@ void CDoor::Snap(int SnappingClient)
 		return;
 
 	bool SendEntityEx = false;
-	if (m_Length > 0.f && m_Collision)
+	if (m_Collision)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 		if (pChr && (SendEntityEx = pChr->SendExtendedEntity(this)))
@@ -153,7 +155,7 @@ void CDoor::Snap(int SnappingClient)
 		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->m_NumSwitchers > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
 		{
 			pObj->m_FromX = (int)m_To.x;
 			pObj->m_FromY = (int)m_To.y;
@@ -163,6 +165,6 @@ void CDoor::Snap(int SnappingClient)
 			pObj->m_FromX = (int)m_Pos.x;
 			pObj->m_FromY = (int)m_Pos.y;
 		}
-		pObj->m_StartTick = Server()->Tick();
+		pObj->m_StartTick = Server()->Tick() - 4 + m_Thickness;
 	}
 }

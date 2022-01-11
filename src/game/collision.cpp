@@ -51,6 +51,7 @@ CCollision::CCollision()
 	m_pDoor = 0;
 	m_pSwitchers = 0;
 	m_pTune = 0;
+	m_apPlotSize = 0;
 }
 
 CCollision::~CCollision()
@@ -63,6 +64,8 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 	Dest();
 	m_NumSwitchers = 0;
 	m_NumPlots = 0;
+	for (int i = 0; i < NUM_PLOT_SIZES; i++)
+		m_aNumPlots[i] = 0;
 	m_pLayers = pLayers;
 	m_pConfig = pConfig;
 	m_Width = m_pLayers->GameLayer()->m_Width;
@@ -146,24 +149,38 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 	// F-DDrace
 	if (m_pSwitch && m_pDoor)
 	{
+		m_apPlotSize = (int *)calloc(m_NumPlots+1, sizeof(int)*(m_NumPlots+1));
+		m_apPlotSize[0] = -1; // plot id 0
+
 		// loop over the map again and correctly set the plot numbers
 		for (int i = 0; i < m_Width * m_Height; i++)
 		{
 			if (IsPlotTile(m_pSwitch[i].m_Type) && m_pSwitch[i].m_Number > 0)
 			{
-				m_pSwitch[i].m_Number = GetSwitchByPlot(m_pSwitch[i].m_Number);
+				int PlotID = m_pSwitch[i].m_Number;
+				m_pSwitch[i].m_Number = GetSwitchByPlot(PlotID);
 
 				if (m_pSwitch[i].m_Type == TILE_SWITCH_PLOT_DOOR)
+				{
 					m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
+				}
+				else if (m_pSwitch[i].m_Type == TILE_SWITCH_PLOT_TOTELE)
+				{
+					if (m_pSwitch[i].m_Delay >= 0 && m_pSwitch[i].m_Delay < NUM_PLOT_SIZES)
+					{
+						m_aNumPlots[m_pSwitch[i].m_Delay]++;
+						m_apPlotSize[PlotID] = m_pSwitch[i].m_Delay;
+					}
+				}
 			}
 		}
 	}
 
 	if (m_NumSwitchers || m_NumPlots)
 	{
-		m_pSwitchers = new SSwitchers[m_NumSwitchers + m_NumPlots + 1];
+		m_pSwitchers = new SSwitchers[GetNumAllSwitchers() + 1]; // always 256, GetNumFreeDrawDoors() fills up the rest from whats available up to 256
 
-		for (int i = 0; i < m_NumSwitchers + m_NumPlots + 1; ++i)
+		for (int i = 0; i < GetNumAllSwitchers() + 1; ++i)
 		{
 			m_pSwitchers[i].m_Initial = true;
 			for (int j = 0; j < MAX_CLIENTS; ++j)
@@ -630,6 +647,8 @@ void CCollision::Dest()
 		delete[] m_pDoor;
 	if (m_pSwitchers)
 		delete[] m_pSwitchers;
+	if (m_apPlotSize)
+		delete[] m_apPlotSize;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -641,6 +660,7 @@ void CCollision::Dest()
 	m_pTune = 0;
 	m_pDoor = 0;
 	m_pSwitchers = 0;
+	m_apPlotSize = 0;
 }
 
 int CCollision::IsSolid(int x, int y)
@@ -926,7 +946,7 @@ bool CCollision::TileExists(int Index)
 		return true;
 	if (m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
 		return true;
-	if (m_pDoor && m_pDoor[Index].m_Index)
+	if (m_pDoor && (m_pDoor[Index].m_Index || m_pDoor[Index].m_Button))
 		return true;
 	if (m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
@@ -1218,7 +1238,7 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 		m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 	}
 
-	if (Number == 0)
+	if (Number == 0 || IsPlotDrawDoor(Number))
 		m_pDoor[Ny * m_Width + Nx].m_Usage++;
 }
 
@@ -1241,7 +1261,7 @@ void CCollision::UnsetDCollisionAt(float x, float y, int Fight)
 
 	m_pDoor[Ny * m_Width + Nx].m_Usage--;
 
-	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && m_pDoor[Ny * m_Width + Nx].m_Number == 0)
+	if (m_pDoor[Ny * m_Width + Nx].m_Usage == 0 && (m_pDoor[Ny * m_Width + Nx].m_Number == 0 || IsPlotDrawDoor(m_pDoor[Ny * m_Width + Nx].m_Number)))
 	{
 		m_pDoor[Ny * m_Width + Nx].m_Index = 0;
 		m_pDoor[Ny * m_Width + Nx].m_Flags = 0;
@@ -1315,18 +1335,18 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
-		bool IsPlotDoor = (Number != -1 && Number < m_NumSwitchers + 1 && m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && GetPlotBySwitch(m_pDoor[Ny * m_Width + Nx].m_Number) > 0);
+		bool PlotDoor = (Number != -1 && !IsPlotDoor(Number) && m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && IsPlotDoor(m_pDoor[Ny * m_Width + Nx].m_Number));
 		if (GetIndex(Nx, Ny) == TILE_SOLID
 			|| GetIndex(Nx, Ny) == TILE_NOHOOK
 			|| GetIndex(Nx, Ny) == TILE_NOLASER
 			|| GetFIndex(Nx, Ny) == TILE_NOLASER
-			|| IsPlotDoor)
+			|| PlotDoor)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			if (IsPlotDoor) return GetDCollisionAt(Pos.x, Pos.y);
+			if (PlotDoor) return GetDCollisionAt(Pos.x, Pos.y);
 			else if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 
@@ -1469,6 +1489,40 @@ int CCollision::GetDTile(int x, int y)
 	return m_pDoor[Ny * m_Width + Nx].m_Index;
 }
 
+void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed)
+{
+	if (!m_pSpeedup)
+		return;
+
+	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+
+	m_pSpeedup[Index].m_Angle = Angle;
+	m_pSpeedup[Index].m_Force = Force;
+	m_pSpeedup[Index].m_MaxSpeed = MaxSpeed;
+	m_pSpeedup[Index].m_Type = Force ? TILE_BOOST : 0;
+}
+
+void CCollision::SetButtonNumber(vec2 Pos, int Number)
+{
+	if (!m_pDoor)
+		return;
+
+	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+
+	m_pDoor[Index].m_Button = Number;
+}
+
+int CCollision::GetButtonNumber(int Index)
+{
+	if (!m_pDoor)
+		return 0;
+	return m_pDoor[Index].m_Button;
+}
+
 bool CCollision::IsPlotTile(int Index)
 {
 	return Index == TILE_SWITCH_PLOT || Index == TILE_SWITCH_PLOT_DOOR || Index == TILE_SWITCH_PLOT_TOTELE;
@@ -1489,6 +1543,33 @@ int CCollision::GetSwitchByPlot(int PlotID)
 int CCollision::GetPlotBySwitch(int SwitchID)
 {
 	return SwitchID - m_NumSwitchers;
+}
+
+int CCollision::GetSwitchByPlotLaserDoor(int PlotID, int Door)
+{
+	int Num = 0;
+	if (PlotID == 0)
+	{
+		Num = GetNumPlotLaserDoors();
+	}
+	else
+	{
+		for (int i = 1; i < PlotID; i++)
+			Num += GetNumMaxDoors(i);
+	}
+	return m_NumSwitchers + m_NumPlots + Num + Door + 1;
+}
+
+int CCollision::GetNumMaxDoors(int PlotID)
+{
+	if (PlotID == 0)
+		return GetNumFreeDrawDoors();
+	return m_apPlotSize[PlotID] == PLOT_SMALL ? PLOT_SMALL_MAX_DOORS : m_apPlotSize[PlotID] == PLOT_BIG ? PLOT_BIG_MAX_DOORS : 0;
+}
+
+CCollision::SSwitchers *CCollision::GetPlotLaserDoors(int PlotID)
+{
+	return &m_pSwitchers[m_NumSwitchers + m_NumPlots + GetSwitchByPlotLaserDoor(PlotID, 0) + 1];
 }
 
 int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
@@ -1543,8 +1624,8 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 		int Number = m_pDoor[Ny * m_Width + Nx].m_Number;
 		bool IsDoor = (m_pDoor[Ny * m_Width + Nx].m_Index == TILE_STOPA && (m_pSwitchers[Number].m_Status[Team] || !ClosedOnly));
 		bool PlotLaserWall = (Number == 0 && m_pSwitch[Ny * m_Width + Nx].m_Type == TILE_SWITCH_PLOT);
-		bool IsPlotDoor = (IsDoor && (PlotLaserWall || GetPlotBySwitch(Number) > 0));
-		if (IsPlotDoor || (!PlotDoorOnly && IsDoor))
+		bool PlotDoor = (IsDoor && (PlotLaserWall || IsPlotDoor(Number)));
+		if (PlotDoor || (!PlotDoorOnly && IsDoor))
 		{
 			if (pOutCollision)
 				*pOutCollision = Pos;
@@ -1566,8 +1647,7 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 bool CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	int Number = m_pDoor[GetPureMapIndex(Pos)].m_Number;
-	bool IsPlotDoor = GetPlotBySwitch(Number) > 0;
-	return GetDTile(Pos.x, Pos.y) == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor) && (m_pSwitchers[Number].m_Status[Team] || !ClosedOnly);
+	return GetDTile(Pos.x, Pos.y) == TILE_STOPA && (!PlotDoorOnly || IsPlotDoor(Number)) && (m_pSwitchers[Number].m_Status[Team] || !ClosedOnly);
 }
 
 bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, bool ClosedOnly)
