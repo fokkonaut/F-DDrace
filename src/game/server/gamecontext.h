@@ -413,6 +413,7 @@ public:
 	};
 
 	void SetPlotDoorStatus(int PlotID, bool Close);
+	void SetPlotDrawDoorStatus(int PlotID, int Door, bool Close);
 	void ClearPlot(int PlotID);
 	int GetPlotID(int AccID);
 	void ExpirePlots();

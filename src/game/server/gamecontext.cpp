@@ -4600,12 +4600,12 @@ void CGameContext::ReadPlotStats(int ID)
 								if (NewNumber == -1)
 								{
 									NewNumber = Collision()->GetSwitchByPlotLaserDoor(ID, vNumbers.size());
+									SetPlotDrawDoorStatus(PlotID, vNumbers.size(), Status);
+
 									std::pair<int, int> Pair;
 									Pair.first = Number;
 									Pair.second = NewNumber;
 									vNumbers.push_back(Pair);
-
-									Collision()->m_pSwitchers[NewNumber].m_Status[0] = Status;
 								}
 							}
 
@@ -4849,6 +4849,16 @@ void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
 		return;
 
 	int Switch = Collision()->GetSwitchByPlot(PlotID);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
+}
+
+void CGameContext::SetPlotDrawDoorStatus(int PlotID, int Door, bool Close)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || Door >= Collision()->GetNumMaxDoors(PlotID) || !Collision()->m_pSwitchers)
+		return;
+
+	int Switch = Collision()->GetSwitchByPlotLaserDoor(PlotID, Door);
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
 }

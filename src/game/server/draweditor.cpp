@@ -595,6 +595,9 @@ void CDrawEditor::OnWeaponSwitch()
 			GameServer()->SetPlotDoorStatus(PlotID, true);
 			GameServer()->RemovePortalsFromPlot(PlotID);
 
+			for (int i = 0; i < GetNumMaxDoors(); i++)
+				GameServer()->SetPlotDrawDoorStatus(PlotID, i, true);
+
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (GameServer()->GetPlayerChar(i) && i != GetCID())
 					GameServer()->GetPlayerChar(i)->TeleOutOfPlot(PlotID);
