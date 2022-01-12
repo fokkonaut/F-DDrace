@@ -5,7 +5,7 @@
 #include "speedup.h"
 
 CSpeedup::CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_SPEEDUP, Pos, 16)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_SPEEDUP, Pos, 14)
 {
 	m_Angle = 0;
 	m_Force = Force;

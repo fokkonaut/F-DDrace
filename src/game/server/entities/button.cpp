@@ -5,7 +5,7 @@
 #include "button.h"
 
 CButton::CButton(CGameWorld *pGameWorld, vec2 Pos, int Number, bool Collision)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_BUTTON, Pos, 16)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_BUTTON, Pos, 14)
 {
 	m_Number = Number;
 	m_Collision = Collision;
