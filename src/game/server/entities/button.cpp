@@ -81,7 +81,7 @@ void CButton::Snap(int SnappingClient)
 	pButton->m_StartTick = 0;
 
 	// show buttons also when far away but only the dot
-	if (!Status || NetworkClipped(SnappingClient, false, true))
+	if (!Status)
 		return;
 
 	for (int i = 0; i < NUM_SIDES; i++)
