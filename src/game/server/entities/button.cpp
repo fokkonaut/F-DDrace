@@ -46,7 +46,7 @@ void CButton::ResetCollision(bool Remove)
 
 void CButton::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient, false, true))
+	if (NetworkClipped(SnappingClient))
 		return;
 
 	if (m_BrushCID != -1)
@@ -80,7 +80,7 @@ void CButton::Snap(int SnappingClient)
 	pButton->m_FromY = round_to_int(m_Pos.y);
 	pButton->m_StartTick = 0;
 
-	if (!Status)
+	if (!Status || NetworkClipped(SnappingClient, false, true))
 		return;
 
 	for (int i = 0; i < NUM_SIDES; i++)
