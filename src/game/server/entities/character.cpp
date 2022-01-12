@@ -2228,13 +2228,13 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 	// prevent going through plot doors
 	vec2 Pos;
-	if (GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x + GetProximityRadius() / 3.f, Pos.y = m_Pos.y - GetProximityRadius() / 3.f) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x + GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y - GetProximityRadius() / 3.f) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt(Pos.x = m_Pos.x - GetProximityRadius() / 3.f, Pos.y = m_Pos.y + GetProximityRadius() / 3.f) == TILE_STOPA)
+	if (GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x + GetProximityRadius() / 3.f), (Pos.y = m_Pos.y - GetProximityRadius() / 3.f)) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x + GetProximityRadius() / 3.f), (Pos.y = m_Pos.y + GetProximityRadius() / 3.f)) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x - GetProximityRadius() / 3.f), (Pos.y = m_Pos.y - GetProximityRadius() / 3.f)) == TILE_STOPA ||
+		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x - GetProximityRadius() / 3.f), (Pos.y = m_Pos.y + GetProximityRadius() / 3.f)) == TILE_STOPA)
 	{
 		int Number = GameServer()->Collision()->GetDoorNumber(Pos);
-		if (!m_StoppedDoorSkip && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && Team() != TEAM_SUPER && GameServer()->Collision()->IsPlotDoor(Number))
+		if (!m_StoppedDoorSkip && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && GameServer()->Collision()->IsPlotDoor(Number))
 		{
 			m_StoppedDoorSkip = true;
 			m_Core.m_Vel = vec2(0, 0);
