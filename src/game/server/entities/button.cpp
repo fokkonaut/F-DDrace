@@ -64,7 +64,7 @@ void CButton::Snap(int SnappingClient)
 		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-		Status = GameServer()->Collision()->m_pSwitchers && pChr->Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()];
+		Status = GameServer()->Collision()->m_pSwitchers && pChr && pChr->Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()];
 	}
 
 	if (!Status && (Server()->Tick() % Server()->TickSpeed()) % 11 == 0)
