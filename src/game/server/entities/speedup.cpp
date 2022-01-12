@@ -87,7 +87,7 @@ void CSpeedup::Tick()
 
 void CSpeedup::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient, false, true))
+	if (NetworkClipped(SnappingClient))
 		return;
 
 	if (m_BrushCID != -1)
