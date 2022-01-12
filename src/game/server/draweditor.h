@@ -75,6 +75,7 @@ class CDrawEditor
 	bool CanRemove(CEntity *pEnt);
 	int GetPlotID();
 	int CurrentPlotID();
+	int CurrentPlotDoorID();
 	int GetNumMaxDoors();
 
 	vec2 m_Pos;

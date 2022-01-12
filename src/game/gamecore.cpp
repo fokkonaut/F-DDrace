@@ -108,7 +108,7 @@ void CCharacterCore::Tick(bool UseInput)
 	m_UpdateFlagVel = 0;
 	m_UpdateFlagAtStand = 0;
 
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? m_pfnSwitchActive : 0, m_pSwitchActiveUser, m_Pos, 18.0f, -1, m_MoveRestrictionExtra);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? m_pfnSwitchActive : 0, m_pSwitchActiveUser, m_Pos, 18.f, -1, m_MoveRestrictionExtra);
 
 	m_TriggeredEvents = 0;
 
@@ -549,7 +549,7 @@ void CCharacterCore::ResetDragVelocity()
 	m_HookDragVel = vec2(0,0);
 }
 
-void CCharacterCore::Move()
+void CCharacterCore::Move(bool BugStoppersPassthrough)
 {
 	if(!m_pWorld)
 		return;
@@ -561,7 +561,7 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE), 0);
+	m_pCollision->MoveBox(m_pfnSwitchActive, m_pSwitchActiveUser, &NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE), 0.f, !BugStoppersPassthrough);
 
 	m_Colliding = 0;
 	if (m_Vel.x < 0.001f && m_Vel.x > -0.001f)

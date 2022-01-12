@@ -213,7 +213,7 @@ public:
 	void Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore* pTeams, std::map<int, std::vector<vec2> >* pTeleOuts, CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pSwitchActiveUser);
 	void Reset();
 	void Tick(bool UseInput);
-	void Move();
+	void Move(bool BugStoppersPassthrough);
 
 	void AddDragVelocity();
 	void ResetDragVelocity();

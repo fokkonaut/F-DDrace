@@ -165,7 +165,7 @@ void CAdvancedEntity::HandleDropped()
 		HandleTiles(CurrentIndex);
 	}
 	IsGrounded(m_GroundVel, m_AirVel);
-	GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, m_Size, m_Elasticity);
+	GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Pos, &m_Vel, m_Size, m_Elasticity, true);
 }
 
 bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)

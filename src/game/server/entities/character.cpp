@@ -260,7 +260,7 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		GameServer()->Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
+		GameServer()->Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false);
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
@@ -897,7 +897,6 @@ void CCharacter::FireWeapon()
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameLayerClipped(PortalPos)
-					|| GameServer()->Collision()->TestBoxDoor(PortalPos, vec2(CCharacterCore::PHYS_SIZE*2, CCharacterCore::PHYS_SIZE*2), Team(), true) // disallow portal placing too close to plot doors to get through them (in combination with plot door skip preventing)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
@@ -1293,6 +1292,7 @@ void CCharacter::ResetInput()
 
 void CCharacter::Tick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if(m_Paused)
 		return;
 
@@ -1361,7 +1361,7 @@ void CCharacter::TickDefered()
 		m_ReckoningCore.Init(&TempWorld, GameServer()->Collision(), &Teams()->m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts, IsSwitchActiveCb, this);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
 		m_ReckoningCore.Tick(false);
-		m_ReckoningCore.Move();
+		m_ReckoningCore.Move(false);
 		m_ReckoningCore.Quantize();
 	}
 
@@ -1377,7 +1377,7 @@ void CCharacter::TickDefered()
 	bool StuckBefore = GameServer()->Collision()->TestBox(m_Core.m_Pos, ColBox);
 
 	m_Core.m_Id = m_pPlayer->GetCID();
-	m_Core.Move();
+	m_Core.Move(false);
 
 	bool StuckAfterMove = GameServer()->Collision()->TestBox(m_Core.m_Pos, ColBox);
 	m_Core.Quantize();
@@ -2224,26 +2224,6 @@ void CCharacter::HandleSkippableTiles(int Index)
 	{
 		Die(WEAPON_WORLD);
 		return;
-	}
-
-	// prevent going through plot doors
-	vec2 Pos;
-	if (GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x + GetProximityRadius() / 3.f), (Pos.y = m_Pos.y - GetProximityRadius() / 3.f)) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x + GetProximityRadius() / 3.f), (Pos.y = m_Pos.y + GetProximityRadius() / 3.f)) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x - GetProximityRadius() / 3.f), (Pos.y = m_Pos.y - GetProximityRadius() / 3.f)) == TILE_STOPA ||
-		GameServer()->Collision()->GetDCollisionAt((Pos.x = m_Pos.x - GetProximityRadius() / 3.f), (Pos.y = m_Pos.y + GetProximityRadius() / 3.f)) == TILE_STOPA)
-	{
-		int Number = GameServer()->Collision()->GetDoorNumber(Pos);
-		if (!m_StoppedDoorSkip && Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers[Number].m_Status[Team()] && GameServer()->Collision()->IsPlotDoor(Number))
-		{
-			m_StoppedDoorSkip = true;
-			m_Core.m_Vel = vec2(0, 0);
-			m_Core.m_Pos = m_PrevPos;
-		}
-	}
-	else
-	{
-		m_StoppedDoorSkip = false;
 	}
 
 	if (Index < 0)
@@ -3630,9 +3610,7 @@ void CCharacter::FDDraceInit()
 	m_pDummyHandle = 0;
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
 
-	m_StoppedDoorSkip = false;
 	m_LastTaserUse = Now;
-
 	m_FirstFreezeTick = 0;
 
 	if (GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))

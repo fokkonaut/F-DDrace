@@ -462,7 +462,6 @@ public:
 	int64 m_WeaponChangeTick;
 	int m_KillStreak;
 	int64 m_LastWantedLogout;
-	bool m_StoppedDoorSkip;
 
 	bool m_GotLasered;
 
