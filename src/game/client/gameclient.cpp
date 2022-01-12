@@ -577,7 +577,7 @@ void CGameClient::EvolveCharacter(CNetObj_Character *pCharacter, int Tick)
 	{
 		pCharacter->m_Tick++;
 		TempCore.Tick(false);
-		TempCore.Move();
+		TempCore.Move(false);
 		TempCore.Quantize();
 	}
 
@@ -1620,7 +1620,7 @@ void CGameClient::OnPredict()
 
 			World.m_apCharacters[c]->AddDragVelocity();
 			World.m_apCharacters[c]->ResetDragVelocity();
-			World.m_apCharacters[c]->Move();
+			World.m_apCharacters[c]->Move(false);
 			World.m_apCharacters[c]->Quantize();
 		}
 
