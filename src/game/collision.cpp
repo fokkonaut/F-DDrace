@@ -1567,11 +1567,6 @@ int CCollision::GetNumMaxDoors(int PlotID)
 	return m_apPlotSize[PlotID] == PLOT_SMALL ? PLOT_SMALL_MAX_DOORS : m_apPlotSize[PlotID] == PLOT_BIG ? PLOT_BIG_MAX_DOORS : 0;
 }
 
-CCollision::SSwitchers *CCollision::GetPlotLaserDoors(int PlotID)
-{
-	return &m_pSwitchers[m_NumSwitchers + m_NumPlots + GetSwitchByPlotLaserDoor(PlotID, 0) + 1];
-}
-
 int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
 	float d = distance(Pos0, Pos1);

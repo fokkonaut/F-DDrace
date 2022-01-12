@@ -193,7 +193,6 @@ public:
 
 	int GetSwitchByPlotLaserDoor(int Plot, int Door);
 	int GetNumPlotLaserDoors() { return m_aNumPlots[PLOT_SMALL] * PLOT_SMALL_MAX_DOORS + m_aNumPlots[PLOT_BIG] * PLOT_BIG_MAX_DOORS; }
-	SSwitchers *GetPlotLaserDoors(int PlotID);
 	int GetNumMaxDoors(int PlotID);
 
 	int GetNumAllSwitchers() { return m_NumSwitchers + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }

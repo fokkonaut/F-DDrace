@@ -516,8 +516,8 @@ void CCharacter::FireWeapon()
 					// number 0 can't be opened and also functions as plot walls that can't be opened
 					// plotid -1: map objects
 					// plotid > 0: plot doors
-					if (pDoor->m_Number == 0 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) ||
-						(!m_DoorHammer && (pDoor->m_PlotID == -1 || !GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) || pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID()))))
+					if (pDoor->m_Number == 0 ||
+						(!m_DoorHammer && (pDoor->m_PlotID == -1 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) || !GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) || pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID()))))
 						continue;
 
 					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
