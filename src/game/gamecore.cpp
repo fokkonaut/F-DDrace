@@ -561,7 +561,7 @@ void CCharacterCore::Move(bool BugStoppersPassthrough)
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(m_pfnSwitchActive, m_pSwitchActiveUser, &NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE), 0.f, !BugStoppersPassthrough);
+	m_pCollision->MoveBox(m_pfnSwitchActive, m_pSwitchActiveUser, &NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE), 0.f, !BugStoppersPassthrough, m_MoveRestrictionExtra);
 
 	m_Colliding = 0;
 	if (m_Vel.x < 0.001f && m_Vel.x > -0.001f)

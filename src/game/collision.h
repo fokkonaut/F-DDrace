@@ -95,10 +95,21 @@ public:
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
 	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
 	void MovePoint(vec2* pInoutPos, vec2* pInoutVel, float Elasticity, int* pBounces);
-	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper);
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper)
+
+	struct MoveRestrictionExtra
 	{
-		MoveBox(0, 0, pInoutPos, pInoutVel, Size, Elasticity, CheckStopper);
+		bool m_CanEnterRoom;
+
+		MoveRestrictionExtra()
+		{
+			m_CanEnterRoom = false;
+		}
+	};
+
+	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra());
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra())
+	{
+		MoveBox(0, 0, pInoutPos, pInoutVel, Size, Elasticity, CheckStopper, Extra);
 	}
 	bool TestBox(vec2 Pos, vec2 Size);
 
@@ -119,16 +130,6 @@ public:
 	int GetIndex(int x, int y);
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
-
-	struct MoveRestrictionExtra
-	{
-		bool m_CanEnterRoom;
-
-		MoveRestrictionExtra()
-		{
-			m_CanEnterRoom = false;
-		}
-	};
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, MoveRestrictionExtra Extra = MoveRestrictionExtra());
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f, MoveRestrictionExtra Extra = MoveRestrictionExtra())

@@ -664,7 +664,7 @@ static int DirSign(int Direction)
 	return 0;
 }
 
-void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStoppers)
+void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStoppers, MoveRestrictionExtra Extra)
 {
 	if (Size.x > ms_MinStaticPhysSize || Size.y > ms_MinStaticPhysSize)
 	{
@@ -759,7 +759,7 @@ void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec
 				//
 				// Backward-compatibility. \o/
 				static const float OFFSET = 18.0f;
-				int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET);
+				int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET, -1, Extra);
 				for(int d = 1; d < NUM_MR_DIRS; d++)
 				{
 					static const int TILESIZE = 32;
