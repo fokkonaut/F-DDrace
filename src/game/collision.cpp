@@ -1698,11 +1698,15 @@ int CCollision::GetPlotID(int Index)
 
 int CCollision::GetSwitchByPlot(int PlotID)
 {
+	if (PlotID <= 0 || PlotID > m_NumPlots)
+		return 0;
 	return PlotID + m_NumSwitchers;
 }
 
 int CCollision::GetPlotBySwitch(int SwitchID)
 {
+	if (!IsPlotDoor(SwitchID))
+		return 0;
 	return SwitchID - m_NumSwitchers;
 }
 
