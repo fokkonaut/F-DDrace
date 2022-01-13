@@ -95,6 +95,49 @@ int CDrawEditor::GetNumMaxDoors()
 	return GameServer()->Collision()->GetNumMaxDoors(CurrentPlotID());
 }
 
+int CDrawEditor::GetFirstFreeNumber()
+{
+	int PlotID = CurrentPlotID();
+	std::vector<int> vNumbers;
+
+	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	{
+		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		if (pEnt->GetObjType() != CGameWorld::ENTTYPE_BUTTON && (pEnt->GetObjType() != CGameWorld::ENTTYPE_DOOR || pEnt->m_Number == 0))
+			continue;
+
+		bool Found = false;
+		for (unsigned int i = 0; i < vNumbers.size(); i++)
+			if (vNumbers[i] == pEnt->m_Number)
+				Found = true;
+
+		if (!Found)
+			vNumbers.push_back(pEnt->m_Number);
+	}
+
+	int FirstFree = 0;
+	for (int i = 0; i < GetNumMaxDoors(); i++)
+	{
+		int Switch = GameServer()->Collision()->GetSwitchByPlotLaserDoor(PlotID, i);
+		bool Found = false;
+
+		for (unsigned int j = 0; j < vNumbers.size(); j++)
+		{
+			if (vNumbers[j] == Switch)
+			{
+				FirstFree++;
+				Found = true;
+				break;
+			}
+		}
+
+		if (!Found)
+			break;
+	}
+
+	return FirstFree;
+}
+
 void CDrawEditor::Tick()
 {
 	if (!Active())
@@ -415,6 +458,8 @@ void CDrawEditor::SendWindow()
 		"Move up/down: shoot left/right\n", sizeof(aMsg));
 	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
 		str_append(aMsg, "Change setting: A/D\n", sizeof(aMsg));
+	if (m_Category == CAT_LASERDOORS)
+		str_append(aMsg, "First free number: kill\n", sizeof(aMsg));
 
 	str_append(aMsg, "\n", sizeof(aMsg));
 	str_append(aMsg,
@@ -546,8 +591,19 @@ void CDrawEditor::OnPlayerKill()
 				AddAngle(45);
 		}
 	}
-	else if (m_Category != CAT_SPEEDUPS && m_Category != CAT_LASERDOORS)
+	else if (m_Category == CAT_LASERDOORS && m_Selecting)
+	{
+		int FreeNumber = GetFirstFreeNumber();
+		if (FreeNumber != GetNumMaxDoors())
+		{
+			m_Laser.m_Number = FreeNumber;
+			SendWindow();
+		}
+	}
+	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS)
+	{
 		m_RoundPos = !m_RoundPos;
+	}
 }
 
 void CDrawEditor::SetAngle(float Angle)

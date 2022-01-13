@@ -80,7 +80,6 @@ void CButton::Snap(int SnappingClient)
 	pButton->m_FromY = round_to_int(m_Pos.y);
 	pButton->m_StartTick = 0;
 
-	// show buttons also when far away but only the dot
 	if (!Status)
 		return;
 

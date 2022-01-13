@@ -77,6 +77,7 @@ class CDrawEditor
 	int CurrentPlotID();
 	int CurrentPlotDoorID();
 	int GetNumMaxDoors();
+	int GetFirstFreeNumber();
 
 	vec2 m_Pos;
 	int m_Entity;
