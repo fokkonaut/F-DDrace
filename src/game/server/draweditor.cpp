@@ -187,7 +187,7 @@ void CDrawEditor::OnPlayerFire()
 		return;
 	}
 
-	if (!CanPlace())
+	if (m_pCharacter->m_FreezeTime || !CanPlace())
 		return;
 
 	int PlotID = GameServer()->GetTilePlotID(m_Pos);

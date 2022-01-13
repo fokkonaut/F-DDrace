@@ -442,6 +442,13 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
+	if (m_DrawEditor.Active())
+	{
+		if(ClickedFire)
+			m_DrawEditor.OnPlayerFire();
+		return;
+	}
+
 	if (m_FreezeTime)
 	{
 		if (m_PainSoundTimer <= 0)
@@ -467,13 +474,6 @@ void CCharacter::FireWeapon()
 
 	// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
 	m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
-
-	if (m_DrawEditor.Active())
-	{
-		if(ClickedFire)
-			m_DrawEditor.OnPlayerFire();
-		return;
-	}
 
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
