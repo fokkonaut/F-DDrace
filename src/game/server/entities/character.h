@@ -440,7 +440,7 @@ public:
 	CHelicopter *m_pHelicopter;
 	bool TryMountHelicopter();
 
-	int GetCurrentTilePlotID();
+	int GetCurrentTilePlotID(bool CheckDoor = false);
 	void TeleOutOfPlot(int PlotID);
 	int m_CurrentButtonNumber;
 

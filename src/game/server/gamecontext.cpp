@@ -4739,9 +4739,10 @@ int CGameContext::GetPlotID(int AccID)
 	return 0;
 }
 
-int CGameContext::GetTilePlotID(vec2 Pos)
+int CGameContext::GetTilePlotID(vec2 Pos, bool CheckDoor)
 {
-	return Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
+	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->GetDoorNumber(Pos)) : 0;
+	return PlotDoor >= PLOT_START ? PlotDoor : Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
 }
 
 void CGameContext::SetPlotInfo(int PlotID, int AccID)
@@ -4897,6 +4898,14 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 			}
 		}
 	}
+}
+
+bool CGameContext::IsPlotEmpty(int PlotID)
+{
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		if (GetPlayerChar(i) && GetTilePlotID(GetPlayerChar(i)->GetPos(), true) == PlotID)
+			return false;
+	return true;
 }
 
 void CGameContext::SetExpireDateDays(time_t *pDate, float Days)

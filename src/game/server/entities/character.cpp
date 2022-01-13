@@ -516,8 +516,8 @@ void CCharacter::FireWeapon()
 					// number 0 can't be opened and also functions as plot walls that can't be opened
 					// plotid -1: map objects
 					// plotid > 0: plot doors
-					if (pDoor->m_Number == 0 ||
-						(!m_DoorHammer && (pDoor->m_PlotID == -1 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) || !GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) || pDoor->m_PlotID != GameServer()->GetPlotID(m_pPlayer->GetAccID()))))
+					bool CanHammerPlotDoor = pDoor->m_PlotID == GameServer()->GetPlotID(m_pPlayer->GetAccID()) && GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) && (!Config()->m_SvPlotDoorCloseEmpty || GameServer()->IsPlotEmpty(pDoor->m_PlotID));
+					if (pDoor->m_Number == 0 || (!m_DoorHammer && (pDoor->m_PlotID == -1 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) || !CanHammerPlotDoor)))
 						continue;
 
 					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
@@ -3879,9 +3879,9 @@ int CCharacter::GetPowerHooked()
 	return pHooker->m_HookPower;
 }
 
-int CCharacter::GetCurrentTilePlotID()
+int CCharacter::GetCurrentTilePlotID(bool CheckDoor)
 {
-	return GameServer()->GetTilePlotID(m_Pos);
+	return GameServer()->GetTilePlotID(m_Pos, CheckDoor);
 }
 
 void CCharacter::TeleOutOfPlot(int PlotID)
@@ -3892,16 +3892,13 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 	if (m_pPlayer->IsMinigame() && m_pPlayer->m_SavedMinigameTee)
 	{
 		vec2 SavedPos = m_pPlayer->m_MinigameTee.GetPos();
-		int SavedTilePlotID = GameServer()->GetTilePlotID(SavedPos);
-		int SavedPlotDoor = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(SavedPos));
+		int SavedTilePlotID = GameServer()->GetTilePlotID(SavedPos, true);
 
-		if (SavedTilePlotID == PlotID || SavedPlotDoor == PlotID)
+		if (SavedTilePlotID == PlotID)
 			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_aPlots[PlotID].m_ToTele);
 	}
 
-	int TilePlotID = GetCurrentTilePlotID();
-	int PlotDoor = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(m_Pos));
-	if (TilePlotID == PlotID || PlotDoor == PlotID)
+	if (GetCurrentTilePlotID() == PlotID)
 	{
 		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);

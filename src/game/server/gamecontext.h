@@ -417,7 +417,7 @@ public:
 	void ClearPlot(int PlotID);
 	int GetPlotID(int AccID);
 	void ExpirePlots();
-	int GetTilePlotID(vec2 Pos);
+	int GetTilePlotID(vec2 Pos, bool CheckDoor = false);
 
 	int m_FullHourOffsetTicks;
 	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
@@ -425,6 +425,7 @@ public:
 
 	int IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
 	void RemovePortalsFromPlot(int PlotID);
+	bool IsPlotEmpty(int PlotID);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);

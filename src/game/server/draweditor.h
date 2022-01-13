@@ -75,7 +75,6 @@ class CDrawEditor
 	bool CanRemove(CEntity *pEnt);
 	int GetPlotID();
 	int CurrentPlotID();
-	int CurrentPlotDoorID();
 	int GetNumMaxDoors();
 	int GetFirstFreeNumber();
 

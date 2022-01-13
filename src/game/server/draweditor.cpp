@@ -78,16 +78,7 @@ int CDrawEditor::GetPlotID()
 
 int CDrawEditor::CurrentPlotID()
 {
-	// Check for the own door because you can skip into it, but not through.
-	int PlotDoorID = CurrentPlotDoorID();
-	if (PlotDoorID == GetPlotID())
-		return PlotDoorID;
-	return m_pCharacter->GetCurrentTilePlotID();
-}
-
-int CDrawEditor::CurrentPlotDoorID()
-{
-	return GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->GetDoorNumber(m_pCharacter->GetPos()));
+	return m_pCharacter->GetCurrentTilePlotID(true);
 }
 
 int CDrawEditor::GetNumMaxDoors()
