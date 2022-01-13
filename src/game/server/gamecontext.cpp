@@ -463,9 +463,13 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	str_copy(aText, pText, sizeof(aText));
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 	{
+		// Can happen when translating a player message and that player left the server before translator finished...
+		if (!m_apPlayers[ChatterClientID])
+			return;
+
 		// join local or public chat
 		bool Local = Mode == CHAT_TEAM;
-		if ((Mode == CHAT_ALL || Mode == CHAT_TEAM) && m_apPlayers[ChatterClientID] && m_apPlayers[ChatterClientID]->JoinChat(Local))
+		if ((Mode == CHAT_ALL || Mode == CHAT_TEAM) && m_apPlayers[ChatterClientID]->JoinChat(Local))
 			Mode = Local ? CHAT_LOCAL : CHAT_ALL;
 
 		if (Mode == CHAT_WHISPER)
