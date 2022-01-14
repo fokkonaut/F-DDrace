@@ -2224,7 +2224,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Die(WEAPON_WORLD);
 		return;
 	}
-
+	Config()->m_SvTestingCommands = 1;
 	if (Index < 0)
 		return;
 
@@ -2235,11 +2235,6 @@ void CCharacter::HandleSkippableTiles(int Index)
 		int Force, MaxSpeed = 0;
 		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 		GameServer()->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
-
-		// So plot owner cant build speedups where you get stuck
-		if (MaxSpeed > 0 && MaxSpeed < 5 && GameServer()->Collision()->GetPlotID(Index) >= PLOT_START)
-			MaxSpeed = 5;
-
 		if (Force == 255 && MaxSpeed)
 		{
 			m_Core.m_Vel = Direction * (MaxSpeed / 5);

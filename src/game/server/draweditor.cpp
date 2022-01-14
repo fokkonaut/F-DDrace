@@ -318,8 +318,8 @@ void CDrawEditor::HandleInput()
 				{
 					m_Speedup.m_Force += m_Input.m_Direction;
 					if (m_Speedup.m_Force > 255)
-						m_Speedup.m_Force = 0;
-					else if (m_Speedup.m_Force < 0)
+						m_Speedup.m_Force = 1;
+					else if (m_Speedup.m_Force < 1)
 						m_Speedup.m_Force = 255;
 				}
 				else if (m_Setting == SPEEDUP_MAXSPEED)
