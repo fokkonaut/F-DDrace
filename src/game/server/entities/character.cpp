@@ -4271,7 +4271,7 @@ void CCharacter::CheckMoved()
 		return;
 
 	m_pPlayer->Pause(CPlayer::PAUSE_NONE, false);
-}true
+}
 
 void CCharacter::ForceSetPos(vec2 Pos)
 {
