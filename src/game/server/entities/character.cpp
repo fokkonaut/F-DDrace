@@ -1376,7 +1376,7 @@ void CCharacter::TickDefered()
 	bool StuckBefore = GameServer()->Collision()->TestBox(m_Core.m_Pos, ColBox);
 
 	m_Core.m_Id = m_pPlayer->GetCID();
-	m_Core.Move(false);
+	m_Core.Move(Config()->m_SvStoppersPassthrough);
 
 	bool StuckAfterMove = GameServer()->Collision()->TestBox(m_Core.m_Pos, ColBox);
 	m_Core.Quantize();
