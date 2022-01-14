@@ -315,5 +315,4 @@ MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER, "Whe
 MACRO_CONFIG_INT(SvCountTimeoutToMaxIP, sv_count_timeout_to_max_ip, 1, 0, 1, CFGFLAG_SERVER, "Whether timeouted tees count to the limit of max clients per ip", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDropOldClients, sv_drop_old_clients, 1, 0, 1, CFGFLAG_SERVER, "Whether old and not fully supported clients are getting dropped", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPlotDoorCloseEmpty, sv_plot_door_close_empty, 0, 0, 1, CFGFLAG_SERVER, "Whether the plot has to be clear from tees in order to close", AUTHED_ADMIN)
 #endif

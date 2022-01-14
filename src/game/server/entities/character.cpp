@@ -516,7 +516,7 @@ void CCharacter::FireWeapon()
 					// number 0 can't be opened and also functions as plot walls that can't be opened
 					// plotid -1: map objects
 					// plotid > 0: plot doors
-					bool CanHammerPlotDoor = pDoor->m_PlotID == GameServer()->GetPlotID(m_pPlayer->GetAccID()) && GameServer()->Collision()->IsPlotDoor(pDoor->m_Number) && (!Config()->m_SvPlotDoorCloseEmpty || GameServer()->IsPlotEmpty(pDoor->m_PlotID));
+					bool CanHammerPlotDoor = pDoor->m_PlotID == GameServer()->GetPlotID(m_pPlayer->GetAccID()) && GameServer()->Collision()->IsPlotDoor(pDoor->m_Number);
 					if (pDoor->m_Number == 0 || (!m_DoorHammer && (pDoor->m_PlotID == -1 || GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number) || !CanHammerPlotDoor)))
 						continue;
 

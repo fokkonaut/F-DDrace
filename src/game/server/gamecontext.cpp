@@ -4903,7 +4903,7 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 bool CGameContext::IsPlotEmpty(int PlotID)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
-		if (GetPlayerChar(i) && GetTilePlotID(GetPlayerChar(i)->GetPos(), true) == PlotID)
+		if (GetPlayerChar(i) && GetPlayerChar(i)->GetCurrentTilePlotID(true) == PlotID)
 			return false;
 	return true;
 }
