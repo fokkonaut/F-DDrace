@@ -2224,7 +2224,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Die(WEAPON_WORLD);
 		return;
 	}
-	Config()->m_SvTestingCommands = 1;
+
 	if (Index < 0)
 		return;
 
