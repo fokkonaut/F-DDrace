@@ -3898,7 +3898,7 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_aPlots[PlotID].m_ToTele);
 	}
 
-	if (GetCurrentTilePlotID() == PlotID)
+	if (GetCurrentTilePlotID(true) == PlotID)
 	{
 		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);
@@ -4275,7 +4275,7 @@ void CCharacter::CheckMoved()
 
 void CCharacter::ForceSetPos(vec2 Pos)
 {
-	int CurrentPlotID = GetCurrentTilePlotID();
+	int CurrentPlotID = GetCurrentTilePlotID(true);
 	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(Pos))
 		m_pPlayer->StopPlotEditing();
 	m_Core.m_Pos = m_Pos = m_PrevPos = Pos;
