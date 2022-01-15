@@ -141,11 +141,8 @@ int CDrawEditor::GetNumSpeedups(int PlotID)
 
 	int Num = 0;
 	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
-	{
-		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
-		if (pEnt->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
+		if (GameServer()->m_aPlots[PlotID].m_vObjects[i]->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
 			Num++;
-	}
 
 	return Num;
 }
@@ -465,7 +462,6 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 
 void CDrawEditor::SendWindow()
 {
-
 	char aMsg[900];
 	str_format(aMsg, sizeof(aMsg), "     > %s <\n\n", GetCategory(m_Category));
 
