@@ -49,17 +49,20 @@ bool CDrawEditor::CanPlace(bool Remove)
 			return false;
 	}
 
+	int CursorPlotID = GetCursorPlotID();
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(m_Pos);
 	if (m_Category == CAT_SPEEDUPS && !Remove)
 	{
+		if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
+			return false;
+
 		int Index = GameServer()->Collision()->GetMapIndex(m_Pos);
 		ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 	}
 
-	int TilePlotID = GetCursorPlotID();
 	int OwnPlotID = GetPlotID();
 	bool FreeDraw = OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID;
-	return (ValidTile && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
+	return (ValidTile && ((CursorPlotID >= PLOT_START && CursorPlotID == OwnPlotID) || FreeDraw));
 }
 
 bool CDrawEditor::CanRemove(CEntity *pEnt)
@@ -129,6 +132,22 @@ int CDrawEditor::GetFirstFreeNumber()
 	}
 
 	return FirstFree;
+}
+
+int CDrawEditor::GetNumSpeedups(int PlotID)
+{
+	if (PlotID < PLOT_START)
+		return 0; // doesnt matter on free draw, has unlimited anyways
+
+	int Num = 0;
+	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	{
+		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		if (pEnt->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
+			Num++;
+	}
+
+	return Num;
 }
 
 void CDrawEditor::Tick()
@@ -446,6 +465,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 
 void CDrawEditor::SendWindow()
 {
+
 	char aMsg[900];
 	str_format(aMsg, sizeof(aMsg), "     > %s <\n\n", GetCategory(m_Category));
 

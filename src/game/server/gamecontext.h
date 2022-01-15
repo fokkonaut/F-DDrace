@@ -384,6 +384,7 @@ public:
 	void SetPlotInfo(int PlotID, int AccID);
 	void SetPlotExpire(int PlotID);
 
+	int GetMaxPlotSpeedups(int PlotID);
 	unsigned int GetMaxPlotObjects(int PlotID);
 	const char *GetPlotSizeString(int PlotID);
 

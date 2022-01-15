@@ -4798,8 +4798,8 @@ unsigned int CGameContext::GetMaxPlotObjects(int PlotID)
 	{
 		switch (m_aPlots[PlotID].m_Size)
 		{
-		case 0: return Config()->m_SvMaxObjectsPlotSmall;
-		case 1: return Config()->m_SvMaxObjectsPlotBig;
+		case PLOT_SMALL: return Config()->m_SvMaxObjectsPlotSmall;
+		case PLOT_BIG: return Config()->m_SvMaxObjectsPlotBig;
 		}
 	}
 
@@ -4813,11 +4813,24 @@ const char *CGameContext::GetPlotSizeString(int PlotID)
 
 	switch (m_aPlots[PlotID].m_Size)
 	{
-	case 0: return "small";
-	case 1: return "big";
+	case PLOT_SMALL: return "small";
+	case PLOT_BIG: return "big";
 	}
 
 	return "Unkown";
+}
+
+int CGameContext::GetMaxPlotSpeedups(int PlotID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+		return 0; // free draw has unlimited, so doesnt matter
+
+	switch (m_aPlots[PlotID].m_Size)
+	{
+	case PLOT_SMALL: return 15;
+	case PLOT_BIG: return 40;
+	}
+	return 0;
 }
 
 void CGameContext::ExpirePlots()

@@ -78,6 +78,7 @@ class CDrawEditor
 	int GetCursorPlotID();
 	int GetNumMaxDoors();
 	int GetFirstFreeNumber();
+	int GetNumSpeedups(int PlotID);
 
 	vec2 m_Pos;
 	int m_Entity;
