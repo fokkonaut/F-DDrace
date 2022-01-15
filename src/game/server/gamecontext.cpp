@@ -4891,7 +4891,7 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 		CPortal *pPortal = (CPortal *)m_World.FindFirst(CGameWorld::ENTTYPE_PORTAL);
 		for (; pPortal; pPortal = (CPortal *)pPortal->TypeNext())
 		{
-			if (GetTilePlotID(pPortal->GetPos()) == PlotID)
+			if (GetTilePlotID(pPortal->GetPos(), true) == PlotID)
 			{
 				pPortal->DestroyLinkedPortal();
 				pPortal->Reset();

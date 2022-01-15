@@ -890,7 +890,7 @@ void CCharacter::FireWeapon()
 				if (GameServer()->Collision()->TestBox(PortalPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 					Found = GetNearestAirPos(PortalPos, m_Pos, &PortalPos);
 
-				bool PlotDoorOnly = GameServer()->GetTilePlotID(m_Pos) < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
+				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
 
 				if (!Found || !PortalPos
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance

@@ -56,10 +56,7 @@ bool CDrawEditor::CanPlace(bool Remove)
 		ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 	}
 
-	int TilePlotID = GameServer()->GetTilePlotID(m_Pos);
-	if (CurrentPlotID() != TilePlotID)
-		return false;
-
+	int TilePlotID = GetCursorPlotID();
 	int OwnPlotID = GetPlotID();
 	bool FreeDraw = OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID;
 	return (ValidTile && ((TilePlotID >= PLOT_START && TilePlotID == OwnPlotID) || FreeDraw));
@@ -79,6 +76,11 @@ int CDrawEditor::GetPlotID()
 int CDrawEditor::CurrentPlotID()
 {
 	return m_pCharacter->GetCurrentTilePlotID(true);
+}
+
+int CDrawEditor::GetCursorPlotID()
+{
+	return GameServer()->GetTilePlotID(m_Pos);
 }
 
 int CDrawEditor::GetNumMaxDoors()
@@ -154,6 +156,10 @@ void CDrawEditor::Tick()
 
 	if (Active() && Server()->Tick() % Server()->TickSpeed() == 0)
 	{
+		// if you have a plot and if you are in your own plot dont show object counts of free draw or nearby plots
+		if (PlotID < PLOT_START || PlotID != GetPlotID())
+			PlotID = GetCursorPlotID();
+
 		char aBuf[32];
 		str_format(aBuf, sizeof(aBuf), "Objects [%d/%d]", (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
 		GameServer()->SendBroadcast(aBuf, GetCID(), false);
@@ -190,7 +196,7 @@ void CDrawEditor::OnPlayerFire()
 	if (m_pCharacter->m_FreezeTime || !CanPlace())
 		return;
 
-	int PlotID = GameServer()->GetTilePlotID(m_Pos);
+	int PlotID = GetCursorPlotID();
 	if (GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
 		return;
 
