@@ -10,7 +10,7 @@
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 
-CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner)
+CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos, PickupPhysSize)
 {
 	m_Type = Type;
@@ -19,6 +19,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Layer = Layer;
 	m_Number = Number;
 
+	m_Collision = Collision;
 	m_Owner = Owner;
 	m_SnapPos = m_Pos;
 
@@ -50,7 +51,7 @@ void CPickup::Reset(bool Destroy)
 void CPickup::Tick()
 {
 	// no affect on players, just a preview for the brushing client
-	if (m_BrushCID != -1)
+	if (!m_Collision)
 		return;
 
 	if (m_Owner >= 0)
@@ -283,6 +284,11 @@ void CPickup::Snap(int SnappingClient)
 		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
 			return;
 	}
+
+	// plot id 0 = free draw, dont hide objects on normal plots. Always show objects when editing currently
+	if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->m_HideDrawings && m_PlotID == 0 && !m_Collision
+		&& (!GameServer()->GetPlayerChar(SnappingClient) || GameServer()->GetPlayerChar(SnappingClient)->GetActiveWeapon() != WEAPON_DRAW_EDITOR))
+		return;
 
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
 	CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
