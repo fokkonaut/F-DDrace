@@ -1965,6 +1965,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	pCharacter->m_AmmoCount = 0;
 	pCharacter->m_Health = 0;
 	pCharacter->m_Armor = 0;
+	pCharacter->m_Direction = m_Input.m_Direction;
 
 	int Events = m_TriggeredEvents;
 	// jump is used for flying up, annoying air jump effect otherwise
@@ -1984,13 +1985,18 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		// 0.6 clients detect air jumps manually, so we pretend to never do an airjump :D
 		if (Server()->IsSevendown(SnappingClient))
 			pCharacter->m_Jumped &= ~2;
+
+		// skidding, from game/client/components/players.cpp
+		if (IsGrounded() && ((pCharacter->m_Direction == -1 && (pCharacter->m_VelX/256.f) > 0.f) || (pCharacter->m_Direction == 1 && (pCharacter->m_VelX/256.f) < 0.f)))
+		{
+			pCharacter->m_Direction = 0;
+			pCharacter->m_VelX = 0;
+		}
 	}
 	pCharacter->m_TriggeredEvents = Events;
 
 	pCharacter->m_Weapon = GameServer()->GetWeaponType(m_ActiveWeapon);
 	pCharacter->m_AttackTick = m_AttackTick;
-
-	pCharacter->m_Direction = m_Input.m_Direction;
 
 	// change eyes and use ninja graphic if player is freeze
 	if (m_DeepFreeze)
