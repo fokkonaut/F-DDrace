@@ -10,7 +10,7 @@ const int PickupPhysSize = 14;
 class CPickup : public CEntity
 {
 public:
-	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1, bool Collision = true);
+	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1);
 
 	virtual ~CPickup();
 
@@ -33,7 +33,6 @@ private:
 
 	vec2 m_SnapPos;
 	int m_Owner;
-	bool m_Collision;
 
 	void Move();
 	vec2 m_Core;

@@ -21,7 +21,6 @@ class CDrawEditor
 		DRAW_PICKUP_SHOTGUN,
 		DRAW_PICKUP_GRENADE,
 		DRAW_PICKUP_LASER,
-		DRAW_PICKUP_COLLISION,
 		NUM_DRAW_PICKUPS,
 
 		// Wall
@@ -106,7 +105,6 @@ class CDrawEditor
 	{
 		int m_Type;
 		int m_SubType;
-		bool m_Collision;
 	} m_Pickup;
 
 	struct

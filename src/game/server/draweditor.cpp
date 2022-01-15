@@ -141,8 +141,11 @@ int CDrawEditor::GetNumSpeedups(int PlotID)
 
 	int Num = 0;
 	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
-		if (GameServer()->m_aPlots[PlotID].m_vObjects[i]->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
+	{
+		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		if (pEnt->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
 			Num++;
+	}
 
 	return Num;
 }
@@ -298,14 +301,7 @@ void CDrawEditor::HandleInput()
 
 		if (m_Selecting && (m_PrevInput.m_Direction == 0 || m_EditStartTick < Server()->Tick() - Server()->TickSpeed() / 2))
 		{
-			if (m_Category == CAT_PICKUPS)
-			{
-				if (m_Setting == DRAW_PICKUP_COLLISION)
-				{
-					m_Pickup.m_Collision = !m_Pickup.m_Collision;
-				}
-			}
-			else if (m_Category == CAT_LASERWALLS)
+			if (m_Category == CAT_LASERWALLS)
 			{
 				if (m_Setting == LASERWALL_COLLISION)
 				{
@@ -450,7 +446,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	switch (m_Entity)
 	{
 	case CGameWorld::ENTTYPE_PICKUP:
-		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Pickup.m_Type, m_Pickup.m_SubType, 0, 0, -1, !Preview && m_Pickup.m_Collision);
+		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Pickup.m_Type, m_Pickup.m_SubType);
 	case CGameWorld::ENTTYPE_DOOR:
 	{
 		int Number = m_Category == CAT_LASERDOORS && !Preview ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(CurrentPlotID(), m_Laser.m_Number) : 0;
@@ -469,6 +465,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 
 void CDrawEditor::SendWindow()
 {
+
 	char aMsg[900];
 	str_format(aMsg, sizeof(aMsg), "     > %s <\n\n", GetCategory(m_Category));
 
@@ -505,12 +502,7 @@ void CDrawEditor::SendWindow()
 	{
 		str_append(aMsg, "     Objects:\n\n", sizeof(aMsg));
 		for (int i = 0; i < NUM_DRAW_PICKUPS; i++)
-			if (i != DRAW_PICKUP_COLLISION)
-				str_append(aMsg, FormatSetting(GetPickup(i), i), sizeof(aMsg));
-
-		str_append(aMsg, "\n", sizeof(aMsg));
-		str_format(aBuf, sizeof(aBuf), "Collision: %s", m_Pickup.m_Collision ? "Yes" : "No");
-		str_append(aMsg, FormatSetting(aBuf, DRAW_PICKUP_COLLISION), sizeof(aMsg));
+			str_append(aMsg, FormatSetting(GetPickup(i), i), sizeof(aMsg));
 	}
 	else if (m_Category == CAT_LASERWALLS)
 	{
