@@ -442,7 +442,7 @@ public:
 
 	int GetCurrentTilePlotID(bool CheckDoor = false);
 	void TeleOutOfPlot(int PlotID);
-	std::vector<int> m_vCurrentButtonNumbers;
+	int m_CurrentButtonNumber;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

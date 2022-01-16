@@ -117,12 +117,12 @@ public:
 
 	void Dest();
 	void SetCollisionAt(float x, float y, int id);
-	//void SetDTile(float x, float y, bool State);
-	//void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
-	/*int GetDTileIndex(int Index);
+	void SetDTile(float x, float y, bool State);
+	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
+	int GetDTileIndex(int Index);
 	int GetDTileFlags(int Index);
 	int GetDTileNumber(int Index);
-	int GetDCollisionAt(float x, float y) { return GetDTile(round_to_int(x), round_to_int(y)); }*/
+	int GetDCollisionAt(float x, float y) { return GetDTile(round_to_int(x), round_to_int(y)); }
 	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Number = -1);
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
@@ -139,7 +139,7 @@ public:
 
 	int GetTile(int x, int y);
 	int GetFTile(int x, int y);
-	//int GetDTile(int x, int y);
+	int GetDTile(int x, int y);
 	int Entity(int x, int y, int Layer);
 	int GetPureMapIndex(float x, float y);
 	int GetPureMapIndex(vec2 Pos) { return GetPureMapIndex(Pos.x, Pos.y); }
@@ -203,13 +203,9 @@ public:
 	// IntersectLineDoor: returns -1 when intersected with a plot built laserwall, otherwise returns the number of the intersected laser wall
 	int IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
 	bool TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
-	int CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly);
-	//int GetDoorNumber(vec2 Pos);
-	//void UnsetDCollisionAt(float x, float y, int Number);
-
-	int GetDoorIndex(int Index, int Number);
-	bool AddDoorTile(int Index, int Type, int Number, int Flags = 0);
-	bool RemoveDoorTile(int Index, int Number);
+	bool CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly);
+	int GetDoorNumber(vec2 Pos);
+	void UnsetDCollisionAt(float x, float y, int Fight = 0);
 
 	// plots
 	bool IsPlotTile(int Index);
@@ -230,13 +226,11 @@ public:
 
 	bool IsPlotDoor(int Number) { return Number > m_NumSwitchers && !IsPlotDrawDoor(Number); }
 	bool IsPlotDrawDoor(int Number) { return Number > m_NumSwitchers + m_NumPlots; }
-	//void SetButtonNumber(vec2 Pos, int Number);
-	//int GetButtonNumber(int Index);
-	std::vector<int> GetButtonNumbers(int Index);
-	bool IsFightBorder(vec2 Pos, int Fight);
+	void SetButtonNumber(vec2 Pos, int Number);
+	int GetButtonNumber(int Index);
 
 	// fights
-	//int GetFightNumber(int Index, bool RealFight = true);
+	int GetFightNumber(int Index, bool RealFight = true);
 
 	// Boxbig
 	const float ms_MinStaticPhysSize = 30; // actually the smallest object right now is a map tile (32 x 32)

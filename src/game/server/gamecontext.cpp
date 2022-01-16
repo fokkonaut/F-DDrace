@@ -1059,7 +1059,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -4741,7 +4740,7 @@ int CGameContext::GetPlotID(int AccID)
 
 int CGameContext::GetTilePlotID(vec2 Pos, bool CheckDoor)
 {
-	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->CheckPointDoor(Pos, 0, true, false)) : 0;
+	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->GetDoorNumber(Pos)) : 0;
 	return PlotDoor >= PLOT_START ? PlotDoor : Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
 }
 

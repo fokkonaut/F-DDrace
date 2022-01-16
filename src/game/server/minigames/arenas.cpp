@@ -76,8 +76,8 @@ bool CArenas::IsGrounded(CCharacter *pChr)
 	if (!pChr)
 		return false;
 	int Fight = GetClientFight(pChr->GetPlayer()->GetCID());
-	return pChr->IsGrounded() || GameServer()->Collision()->IsFightBorder(vec2(pChr->GetPos().x, pChr->GetPos().y), Fight)
-		|| GameServer()->Collision()->IsFightBorder(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4), Fight);
+	return pChr->IsGrounded() || GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y))) == Fight
+		|| GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x, pChr->GetPos().y + pChr->GetProximityRadius() + 4))) == Fight;
 }
 
 int CArenas::GetClientFight(int ClientID, bool HasToBeJoined)
@@ -286,12 +286,12 @@ void CArenas::UpdateSnapPositions(int ClientID)
 
 			if (m_aFights[Fight].m_KillBorder)
 			{
-				if (GameServer()->Collision()->IsFightBorder(TempPos, Fight))
+				if (GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y))) == Fight)
 					return;
 			}
 			else
 			{
-				BorderBelow = GameServer()->Collision()->IsFightBorder(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4), Fight);
+				BorderBelow = GameServer()->Collision()->GetFightNumber(GameServer()->Collision()->GetPureMapIndex(vec2(TempPos.x, TempPos.y + CCharacterCore::PHYS_SIZE + 4))) == Fight;
 			}
 
 			TempPos.y += 32.f;
@@ -743,11 +743,10 @@ void CArenas::SetArenaCollision(int Fight, bool Remove)
 
 		for (int j = 0; j < 2; j++)
 		{
-			int Index = GameServer()->Collision()->GetPureMapIndex(CurrentPos[j]);
-			if (Remove)
-				GameServer()->Collision()->RemoveDoorTile(Index, -(Fight + 1));
+			if (!Remove)
+				GameServer()->Collision()->SetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, TILE_STOPA, 0/*Flags*/, -(Fight+1));
 			else
-				GameServer()->Collision()->AddDoorTile(Index, TILE_STOPA, -(Fight + 1));
+				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, -(Fight+1));
 		}
 	}
 
@@ -759,11 +758,10 @@ void CArenas::SetArenaCollision(int Fight, bool Remove)
 
 		for (int j = 0; j < 2; j++)
 		{
-			int Index = GameServer()->Collision()->GetPureMapIndex(CurrentPos[j]);
-			if (Remove)
-				GameServer()->Collision()->RemoveDoorTile(Index, -(Fight+1));
+			if (!Remove)
+				GameServer()->Collision()->SetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, TILE_STOPA, 0/*Flags*/, -(Fight+1));
 			else
-				GameServer()->Collision()->AddDoorTile(Index, TILE_STOPA, -(Fight+1));
+				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos[j].x, CurrentPos[j].y, -(Fight+1));
 		}
 	}
 }
