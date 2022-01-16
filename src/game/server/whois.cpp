@@ -2,7 +2,11 @@
 #include <game/server/gamecontext.h>
 #include <engine/shared/config.h>
 
+#include <base/detect.h>
+
+#if defined(CONF_FAMILY_WINDOWS)
 #include <io.h>
+#endif
 #include<stdio.h>
 #include<fcntl.h>
 
