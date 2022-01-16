@@ -1489,6 +1489,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
 
+	m_WhoIs.OnClientEnter(ClientID);
+
 	IServer::CClientInfo Info;
 	Server()->GetClientInfo(ClientID, &Info);
 	if(Info.m_GotDDNetVersion)
@@ -3900,6 +3902,8 @@ void CGameContext::FDDraceInit()
 	m_pMinigames[MINIGAME_1VS1] = new CArenas(this, MINIGAME_1VS1);
 	m_pMinigames[MINIGAME_INSTAGIB_BOOMFNG] = new CMinigame(this, MINIGAME_INSTAGIB_BOOMFNG);
 	m_pMinigames[MINIGAME_INSTAGIB_FNG] = new CMinigame(this, MINIGAME_INSTAGIB_FNG);
+
+	m_WhoIs.Init(this);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;

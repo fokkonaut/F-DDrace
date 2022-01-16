@@ -1768,6 +1768,32 @@ void CGameContext::ConViewCursor(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SetViewCursor(pResult, pUserData, false);
 }
 
+void CGameContext::ConWhoIsID(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Mode = pResult->GetInteger(0);
+	int Cutoff = pResult->GetInteger(1);
+	int ClientID = pResult->GetInteger(2);
+	if (Mode)
+	{
+		pSelf->m_WhoIs.Run(pSelf->Server()->ClientName(ClientID), Mode, Cutoff);
+	}
+	else
+	{
+		char aIP[16] = { 0 };
+		pSelf->Server()->GetClientAddr(ClientID, aIP, sizeof(aIP));
+		pSelf->m_WhoIs.Run(aIP, Mode, Cutoff);
+	}
+}
+
+void CGameContext::ConWhoIs(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Mode = pResult->GetInteger(0);
+	int Cutoff = pResult->GetInteger(1);
+	pSelf->m_WhoIs.Run(pResult->GetString(2), Mode, Cutoff);
+}
+
 void CGameContext::ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
