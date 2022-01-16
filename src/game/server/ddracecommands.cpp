@@ -1773,7 +1773,7 @@ void CGameContext::ConWhoIsID(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Mode = pResult->GetInteger(0);
 	int Cutoff = pResult->GetInteger(1);
-	int ClientID = pResult->GetInteger(2);
+	int ClientID = pResult->GetVictim();
 	if (Mode)
 	{
 		pSelf->m_WhoIs.Run(pSelf->Server()->ClientName(ClientID), Mode, Cutoff);

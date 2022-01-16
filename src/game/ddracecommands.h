@@ -105,7 +105,7 @@ CONSOLE_COMMAND("view_cursor_zoomed", "?i[id]", CFGFLAG_SERVER, ConViewCursorZoo
 
 // whois
 CONSOLE_COMMAND("whois", "i[mode] i[cutoff] r[name]", CFGFLAG_SERVER, ConWhoIs, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
-CONSOLE_COMMAND("whoisid", "i[mode] i[cutoff] i[id]", CFGFLAG_SERVER, ConWhoIsID, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
+CONSOLE_COMMAND("whoisid", "i[mode] i[cutoff] v[id]", CFGFLAG_SERVER, ConWhoIsID, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
 
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
 CONSOLE_COMMAND("whitelist_add", "s[ip] ?s[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
