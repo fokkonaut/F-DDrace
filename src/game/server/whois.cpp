@@ -6,7 +6,11 @@
 
 #if defined(CONF_FAMILY_WINDOWS)
 #include <io.h>
+#else
+#include <unistd.h>
 #endif
+#include <string.h>
+#include <iostream>
 #include<stdio.h>
 #include<fcntl.h>
 
@@ -17,18 +21,18 @@ CWhoIs::CWhoIs()
 	m_pGameServer = 0;
 }
 
-int CWhoIs::Init(CGameContext *pGameServer)
+void CWhoIs::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
 
 	num_nms = num_ips = 0;
 	if (!(ipplayers = (struct player *)calloc(sizeof(struct player), GameServer()->Config()->m_SvWhoIsIPEntries))) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt allocate list");
-		return NULL;
+		return;
 	}
 	if (!(nmplayers = (struct player *)calloc(sizeof(struct player), GameServer()->Config()->m_SvWhoIsIPEntries))) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt allocate list");
-		return NULL;
+		return;
 	}
 	int ind, src_fd, rr;
 	char addr_buf[32], name_buf[32];
@@ -36,17 +40,17 @@ int CWhoIs::Init(CGameContext *pGameServer)
 	str_format(aFile, sizeof(aFile), "%s/whois.txt", GameServer()->Config()->m_SvWhoIsFile);
 	if ((src_fd = open(aFile, O_RDONLY, 0777)) < 0) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt open");
-		return NULL;
+		return;
 	}
 	char *dst = (char *)calloc(20000000, 1), *ptr = dst;	
 	if (!dst) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt allocate buffer");
-		return NULL;
+		return;
 	}
 	if ((rr = (int)read(src_fd, dst, 20000000)) <= 0) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt read");
 		free(dst);
-		return NULL;
+		return;
 	}
 	close(src_fd);
 	char aBuf[64];
@@ -55,7 +59,7 @@ int CWhoIs::Init(CGameContext *pGameServer)
 	if (rr < 1) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "too small, waiting..");
 		free(dst);
-		return NULL;
+		return;
 	}
 
 	do {
@@ -90,7 +94,7 @@ int CWhoIs::Init(CGameContext *pGameServer)
 	char buf[256];
 	snprintf(buf, sizeof(buf), "read %d ips and %d names", num_ips, num_nms);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", buf);
-	return num_ips;
+	return;
 }
 
 void CWhoIs::Run(const char *name, int mode, int cutoff)

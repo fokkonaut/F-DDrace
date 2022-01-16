@@ -37,7 +37,7 @@ class CWhoIs
 
 public:
 	CWhoIs();
-	int Init(CGameContext *pGameServer);
+	void Init(CGameContext *pGameServer);
 	void Run(const char *pName, int Mode, int Cutoff);
 	void AddEntry(int ClientID);
 };
