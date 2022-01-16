@@ -1774,8 +1774,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   teehistorian.h
   teeinfo.cpp
   teeinfo.h
-  whois.cpp
-  whois.h
 )
 set(GAME_GENERATED_SERVER
   src/generated/server_data.cpp
