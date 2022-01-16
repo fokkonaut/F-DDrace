@@ -21,6 +21,7 @@
 
 #include "eventhandler.h"
 #include "gameworld.h"
+#include "whois.h"
 
 #include "teehistorian.h"
 
@@ -620,6 +621,7 @@ public:
 	class CHouse *m_pHouses[NUM_HOUSES];
 	class CMinigame *m_pMinigames[NUM_MINIGAMES];
 	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
+	CWhoIs m_WhoIs;
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);
@@ -966,6 +968,9 @@ private:
 	void SetViewCursor(IConsole::IResult* pResult, void* pUserData, bool Zoomed);
 	static void ConViewCursor(IConsole::IResult* pResult, void* pUserData);
 	static void ConViewCursorZoomed(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConWhoIs(IConsole::IResult* pResult, void* pUserData);
+	static void ConWhoIsID(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData);
 	static void ConWhitelistRemove(IConsole::IResult* pResult, void* pUserData);

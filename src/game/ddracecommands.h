@@ -94,10 +94,18 @@ CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says
 CONSOLE_COMMAND("teecontrol", "?v[id] ?i[forcedid]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 CONSOLE_COMMAND("set_minigame", "v[id] s[minigame]", CFGFLAG_SERVER, ConSetMinigame, this, "Sets player v to minigame s", AUTHED_ADMIN)
 CONSOLE_COMMAND("save_drop", "?v[id] ?i[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
+
+// jail
 CONSOLE_COMMAND("jail_arrest", "v[id] i[seconds]", CFGFLAG_SERVER, ConJailArrest, this, "Arrests player v for i minutes", AUTHED_ADMIN)
 CONSOLE_COMMAND("jail_release", "v[id]", CFGFLAG_SERVER, ConJailRelease, this, "Releases player v from jail", AUTHED_ADMIN)
+
+// view cursor
 CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
 CONSOLE_COMMAND("view_cursor_zoomed", "?i[id]", CFGFLAG_SERVER, ConViewCursorZoomed, this, "View zoomed cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)
+
+// whois
+CONSOLE_COMMAND("whois", "i[mode] i[cutoff] r[name]", CFGFLAG_SERVER, ConWhoIs, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
+CONSOLE_COMMAND("whoisid", "i[mode] i[cutoff] i[id]", CFGFLAG_SERVER, ConWhoIsID, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
 
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
 CONSOLE_COMMAND("whitelist_add", "s[ip] ?s[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
