@@ -2839,24 +2839,28 @@ void CCharacter::HandleTiles(int Index)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
 	// handle switch tiles
-	int ButtonNumber = GameServer()->Collision()->GetButtonNumber(MapIndex);
-	if (ButtonNumber > 0 && Team() != TEAM_SUPER)
+	std::vector<int> vButtonNumbers = GameServer()->Collision()->GetButtonNumbers(MapIndex);
+	std::vector<int> vCurrentNumbers = m_vCurrentButtonNumbers;
+	m_vCurrentButtonNumbers.clear();
+	for (unsigned int i = 0; i < vButtonNumbers.size(); i++)
 	{
-		if (ButtonNumber != m_CurrentButtonNumber)
+		if (vButtonNumbers[i] > 0 && Team() != TEAM_SUPER)
 		{
-			// little sound for the button
-			if (GameServer()->Collision()->IsPlotDrawDoor(ButtonNumber))
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+			if (std::find(vCurrentNumbers.begin(), vCurrentNumbers.end(), vButtonNumbers[i]) == vCurrentNumbers.end())
+			{
+				// little sound for the button
+				if (GameServer()->Collision()->IsPlotDrawDoor(vButtonNumbers[i]))
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 
-			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_Status[Team()] ^= 1;
-			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_EndTick[Team()] = 0;
-			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_ClientID[Team()] = m_pPlayer->GetCID();
-			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_StartTick[Team()] = Server()->Tick();
+				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_Status[Team()] ^= 1;
+				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_EndTick[Team()] = 0;
+				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_ClientID[Team()] = m_pPlayer->GetCID();
+				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_StartTick[Team()] = Server()->Tick();
+			}
+
+			m_vCurrentButtonNumbers.push_back(vButtonNumbers[i]);
 		}
-		m_CurrentButtonNumber = ButtonNumber;
 	}
-	else
-		m_CurrentButtonNumber = 0;
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
@@ -3625,7 +3629,7 @@ void CCharacter::FDDraceInit()
 	m_LastSetDummyHammer = 0;
 
 	m_LastWeaponIndTick = 0;
-	m_CurrentButtonNumber = 0;
+	m_vCurrentButtonNumbers.clear();
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

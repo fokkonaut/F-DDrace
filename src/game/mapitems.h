@@ -3,6 +3,8 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
+#include <vector>
+
 // layer types
 enum
 {
@@ -229,6 +231,7 @@ enum
 	TILE_SWITCH_PLOT = 192, // plot size; delay=0: small, delay=1: big
 	TILE_SWITCH_PLOT_DOOR, // door lenght in blocks: delay
 	TILE_SWITCH_PLOT_TOTELE, // totele plot position
+	TILE_SWITCHTOGGLE = 28, // this one is same as speedup tile, so it wouldnt show anything ingame. perfect. thats why we dont use 26 here
 
 	//Layers
 	LAYER_GAME=0,
@@ -480,14 +483,24 @@ public:
 class CDoorTile
 {
 public:
-	unsigned char m_Index;
-	unsigned char m_Flags;
-	int m_Number;
+	struct SInfo
+	{
+		SInfo(int Index, int Number, int Flags)
+		{
+			m_Index = Index;
+			m_Number = Number;
+			m_Flags = Flags;
+		}
+		unsigned char m_Index;
+		unsigned char m_Flags;
+		int m_Number;
+	};
 
-	// F-DDrace
-	int m_Usage; // draw editor putting multiple doors on top of each other so we know when to remove the collision on removal of last door
+	std::vector<SInfo> m_vTiles;
+
+	/*int m_Usage; // draw editor putting multiple doors on top of each other so we know when to remove the collision on removal of last door
 	int m_Fight; // fight number for arena border
-	int m_Button; // toggle button for switchers, only used for plot door buttons by draw editor
+	int m_Button; // toggle button for switchers, only used for plot door buttons by draw editor*/
 };
 
 class CTuneTile
