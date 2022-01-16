@@ -5667,6 +5667,9 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 	if (pChr->GetPlayer()->IsMinigame())
 		pChr->GetPlayer()->m_MinigameTee.Load(pChr, 0);
 
+	// if character got saved and during restart the plot expires, it would be not good if the tee keeps his editor
+	pChr->GetPlayer()->StopPlotEditing();
+
 	// save identity to cache
 	SSavedIdentity Info;
 	Server()->GetClientAddr(ClientID, &Info.m_Addr);
