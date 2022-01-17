@@ -1453,7 +1453,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
-		bool PlotDoor = Number != -1 && !IsPlotDoor(Number) && CheckPointDoor(Pos, 0, true, false); // can just use team 0 because ClosedOnly is false anyways
+		bool PlotDoor = Number != -1 && !IsPlotDoor(Number) && CheckPointDoor(Pos, 0, true, false) != -1; // can just use team 0 because ClosedOnly is false anyways
 		if (GetIndex(Nx, Ny) == TILE_SOLID
 			|| GetIndex(Nx, Ny) == TILE_NOHOOK
 			|| GetIndex(Nx, Ny) == TILE_NOLASER
@@ -1794,6 +1794,9 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 int CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	int Index = GetPureMapIndex(Pos);
+	if (Index < 0)
+		return -1;
+
 	for (unsigned int i = 0; i < m_pDoor[Index].m_vTiles.size(); i++)
 	{
 		int Number = m_pDoor[Index].m_vTiles[i].m_Number;
@@ -1806,13 +1809,13 @@ int CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool Close
 bool CCollision::TestBoxDoor(vec2 Pos, vec2 Size, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	Size *= 0.5f;
-	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly))
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly) != -1)
 		return true;
-	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly))
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y - Size.y), Team, PlotDoorOnly, ClosedOnly) != -1)
 		return true;
-	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
+	if (CheckPointDoor(vec2(Pos.x - Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly) != -1)
 		return true;
-	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly))
+	if (CheckPointDoor(vec2(Pos.x + Size.x, Pos.y + Size.y), Team, PlotDoorOnly, ClosedOnly) != -1)
 		return true;
 	return false;
 }

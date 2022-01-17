@@ -63,7 +63,7 @@ void CDoor::ResetCollision(bool Remove)
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
 
-		bool PlotDoor = GameServer()->IntersectedLineDoor(m_Pos, CurrentPos, 0, true, false) && !GameServer()->Collision()->IsPlotDoor(m_Number); // extra check so plot doors dont invalidate theirselves
+		bool PlotDoor = GameServer()->Collision()->CheckPointDoor(CurrentPos, 0, true, false) != -1 && !GameServer()->Collision()->IsPlotDoor(m_Number); // extra check so plot doors dont invalidate theirselves
 
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(CurrentPos.x, CurrentPos.y)
