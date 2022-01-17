@@ -1643,7 +1643,7 @@ bool CCollision::IsFightBorder(vec2 Pos, int Fight)
 
 	int Index = GetPureMapIndex(Pos);
 	for (unsigned int i = 0; i < m_pDoor[Index].m_vTiles.size(); i++)
-		if (m_pDoor[Index].m_vTiles[i].m_Number  * -1 == Fight + 1)
+		if (m_pDoor[Index].m_vTiles[i].m_Number - 1 - GetNumAllSwitchers() == Fight)
 			return true;
 	return false;
 }
