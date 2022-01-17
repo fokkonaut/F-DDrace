@@ -2838,8 +2838,6 @@ void CCharacter::HandleTiles(int Index)
 	}
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
-	Config()->m_SvTestingCommands = 1;
-
 	// handle switch tiles
 	std::vector<int> vCurrentNumbers;
 	std::vector<int> vButtonNumbers = GameServer()->Collision()->GetButtonNumbers(MapIndex);
