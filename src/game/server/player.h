@@ -149,12 +149,6 @@ public:
 	int m_LastActionTick;
 	int m_TeamChangeTick;
 
-	struct
-	{
-		int m_TargetX;
-		int m_TargetY;
-	} m_LatestActivity;
-
 	// network latency calculations
 	struct
 	{
@@ -233,6 +227,7 @@ public:
 	int m_LastTarget_x;
 	int m_LastTarget_y;
 	CNetObj_PlayerInput *m_pLastTarget;
+	bool m_LastTargetInit;
 	int m_Sent1stAfkWarning; // afk timer's 1st warning after 50% of sv_max_afk_time
 	int m_Sent2ndAfkWarning; // afk timer's 2nd warning after 90% of sv_max_afk_time
 	char m_pAfkMsg[160];

@@ -2000,8 +2000,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (Config()->m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
-			pPlayer->UpdatePlaytime();
-
 			// don't allow spectators to disturb players during a running game in tournament mode
 			int Mode = pMsg->m_Mode;
 			if((Config()->m_SvTournamentMode == 2) &&
@@ -2103,6 +2101,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			else if(Mode != CHAT_NONE)
 			{
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
+				pPlayer->UpdatePlaytime();
 
 				if (Mode != CHAT_WHISPER)
 				{

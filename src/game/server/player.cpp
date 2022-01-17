@@ -70,6 +70,7 @@ void CPlayer::Reset()
 
 	delete m_pLastTarget;
 	m_pLastTarget = nullptr;
+	m_LastTargetInit = false;
 	m_TuneZone = 0;
 	m_TuneZoneOld = m_TuneZone;
 	m_Halloween = false;
@@ -1021,13 +1022,14 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		m_ActiveSpecSwitch = false;
 
 	// check for activity
-	if(NewInput->m_Direction || m_LatestActivity.m_TargetX != NewInput->m_TargetX ||
-		m_LatestActivity.m_TargetY != NewInput->m_TargetY || NewInput->m_Jump ||
-		NewInput->m_Fire&1 || NewInput->m_Hook)
+	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
-		m_LatestActivity.m_TargetX = NewInput->m_TargetX;
-		m_LatestActivity.m_TargetY = NewInput->m_TargetY;
+		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
+		// Ignore the first direct input and keep the player afk as it is sent automatically
+		if(m_LastTargetInit)
+			UpdatePlaytime();
 		m_LastActionTick = Server()->Tick();
+		m_LastTargetInit = true;
 	}
 }
 
