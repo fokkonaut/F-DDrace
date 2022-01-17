@@ -54,29 +54,31 @@ void CDoor::Open(int Tick, bool ActivatedTeam[])
 
 void CDoor::ResetCollision(bool Remove)
 {
+	if (!m_Collision)
+		return;
+
 	int Length = max(m_Length - 1, 1); // make sure to always set at least the one tile
 	for (int i = 0; i < Length; i++)
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i));
 
-		bool IsPlotDoor = (GameServer()->Collision()->GetDCollisionAt(CurrentPos.x, CurrentPos.y) == TILE_STOPA
-			&& GameServer()->Collision()->IsPlotDoor(GameServer()->Collision()->GetDoorNumber(CurrentPos))
-			&& !GameServer()->Collision()->IsPlotDoor(m_Number)); // extra check so plot doors dont invalidate theirselves
+		bool PlotDoor = GameServer()->IntersectedLineDoor(m_Pos, CurrentPos, 0, true, false) && !GameServer()->Collision()->IsPlotDoor(m_Number); // extra check so plot doors dont invalidate theirselves
 
 		if (GameServer()->Collision()->CheckPoint(CurrentPos)
 				|| GameServer()->Collision()->GetTile(CurrentPos.x, CurrentPos.y)
 				|| GameServer()->Collision()->GetFTile(CurrentPos.x, CurrentPos.y)
-				|| IsPlotDoor)
+				|| PlotDoor)
 		{
 			break;
 		}
-		else if (m_Collision)
+		else
 		{
-			if (!Remove)
-				GameServer()->Collision()->SetDCollisionAt(CurrentPos.x, CurrentPos.y, TILE_STOPA, 0/*Flags*/, m_Number);
+			int Index = GameServer()->Collision()->GetPureMapIndex(CurrentPos);
+			if (Remove)
+				GameServer()->Collision()->RemoveDoorTile(Index, TILE_STOPA, m_Number);
 			else
-				GameServer()->Collision()->UnsetDCollisionAt(CurrentPos.x, CurrentPos.y);
+				GameServer()->Collision()->AddDoorTile(Index, TILE_STOPA, m_Number);
 		}
 	}
 }

@@ -4746,7 +4746,7 @@ int CGameContext::GetPlotID(int AccID)
 
 int CGameContext::GetTilePlotID(vec2 Pos, bool CheckDoor)
 {
-	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->GetDoorNumber(Pos)) : 0;
+	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->CheckPointDoor(Pos, 0, true, false)) : 0; // can use team 0 for checkpointdoor because closedonly = false
 	return PlotDoor >= PLOT_START ? PlotDoor : Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
 }
 
