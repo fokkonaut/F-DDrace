@@ -2298,12 +2298,12 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 	CCharacter *pThis = (CCharacter *)pUser;
 	CCollision *pCollision = pThis->GameServer()->Collision();
 	CArenas *pArenas = pThis->GameServer()->Arenas();
-	if (Number > pCollision->GetNumAllSwitchers())
+	if (Number < 0)
 	{
 		if (pArenas->FightStarted(pThis->m_pPlayer->GetCID()))
 		{
 			int Fight = pArenas->GetClientFight(pThis->m_pPlayer->GetCID());
-			if (Number - 1 - pCollision->GetNumAllSwitchers() == Fight)
+			if (-Number == Fight + 1)
 			{
 				if (pArenas->IsKillBorder(Fight))
 					pThis->Die(WEAPON_SELF);
@@ -2839,29 +2839,24 @@ void CCharacter::HandleTiles(int Index)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
 	// handle switch tiles
-	std::vector<int> vCurrentNumbers = m_vCurrentButtonNumbers;
-	m_vCurrentButtonNumbers.clear();
-
-	std::vector<int> vButtonNumbers = GameServer()->Collision()->GetButtonNumbers(MapIndex);
-	for (unsigned int i = 0; i < vButtonNumbers.size(); i++)
+	int ButtonNumber = GameServer()->Collision()->GetButtonNumber(MapIndex);
+	if (ButtonNumber > 0 && Team() != TEAM_SUPER)
 	{
-		if (vButtonNumbers[i] > 0 && Team() != TEAM_SUPER)
+		if (ButtonNumber != m_CurrentButtonNumber)
 		{
-			if (std::find(vCurrentNumbers.begin(), vCurrentNumbers.end(), vButtonNumbers[i]) == vCurrentNumbers.end())
-			{
-				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_Status[Team()] ^= 1;
-				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_EndTick[Team()] = 0;
-				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_ClientID[Team()] = m_pPlayer->GetCID();
-				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_StartTick[Team()] = Server()->Tick();
+			// little sound for the button
+			if (GameServer()->Collision()->IsPlotDrawDoor(ButtonNumber))
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 
-				// little sound for the button
-				if (GameServer()->Collision()->IsPlotDrawDoor(vButtonNumbers[i]))
-					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
-			}
-
-			m_vCurrentButtonNumbers.push_back(vButtonNumbers[i]);
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_Status[Team()] ^= 1;
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_EndTick[Team()] = 0;
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_ClientID[Team()] = m_pPlayer->GetCID();
+			GameServer()->Collision()->m_pSwitchers[ButtonNumber].m_StartTick[Team()] = Server()->Tick();
 		}
+		m_CurrentButtonNumber = ButtonNumber;
 	}
+	else
+		m_CurrentButtonNumber = 0;
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
@@ -3630,6 +3625,7 @@ void CCharacter::FDDraceInit()
 	m_LastSetDummyHammer = 0;
 
 	m_LastWeaponIndTick = 0;
+	m_CurrentButtonNumber = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
