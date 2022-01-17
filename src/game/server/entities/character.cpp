@@ -2838,16 +2838,16 @@ void CCharacter::HandleTiles(int Index)
 	}
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 
-	// handle switch tiles
-	std::vector<int> vCurrentNumbers = m_vCurrentButtonNumbers;
-	m_vCurrentButtonNumbers.clear();
+	Config()->m_SvTestingCommands = 1;
 
+	// handle switch tiles
+	std::vector<int> vCurrentNumbers;
 	std::vector<int> vButtonNumbers = GameServer()->Collision()->GetButtonNumbers(MapIndex);
 	for (unsigned int i = 0; i < vButtonNumbers.size(); i++)
 	{
 		if (vButtonNumbers[i] > 0 && Team() != TEAM_SUPER)
 		{
-			if (std::find(vCurrentNumbers.begin(), vCurrentNumbers.end(), vButtonNumbers[i]) == vCurrentNumbers.end())
+			if (std::find(m_vCurrentButtonNumbers.begin(), m_vCurrentButtonNumbers.end(), vButtonNumbers[i]) == m_vCurrentButtonNumbers.end())
 			{
 				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_Status[Team()] ^= 1;
 				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_EndTick[Team()] = 0;
@@ -2859,9 +2859,10 @@ void CCharacter::HandleTiles(int Index)
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 			}
 
-			m_vCurrentButtonNumbers.push_back(vButtonNumbers[i]);
+			vCurrentNumbers.push_back(vButtonNumbers[i]);
 		}
 	}
+	m_vCurrentButtonNumbers = vCurrentNumbers;
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
@@ -3345,6 +3346,7 @@ void CCharacter::DDracePostCoreTick()
 		HandleTiles(CurrentIndex);
 		m_LastIndexTile = 0;
 		m_LastIndexFrontTile = 0;
+		m_vCurrentButtonNumbers.clear();
 		if (!m_Alive)
 			return;
 	}
