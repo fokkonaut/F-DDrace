@@ -507,7 +507,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0)))
 	{
 		char aWebhookName[32];
-		char aAvatarURL[128];
+		char aAvatarURL[256];
 		str_copy(aWebhookName, "[Server]", sizeof(aWebhookName));
 		str_copy(aAvatarURL, Config()->m_SvWebhookChatAvatarURL, sizeof(aAvatarURL));
 
@@ -517,22 +517,31 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 			if (Config()->m_SvWebhookChatSkinAvatars)
 			{
-				if (m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_UseCustomColor)
+				char aParameters[256];
+				if (Config()->m_SvWebhookChatSkinRenderer == 0) // skins.tw
 				{
-#if defined(CONF_FAMILY_WINDOWS)
-					str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s^&body_color=%d^&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
-#else
-					str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s&body_color=%d&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
-#endif
+					str_format(aAvatarURL, sizeof(aAvatarURL), "https://skins.tw/api/render/%s", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName);
+
+					if (m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_UseCustomColor)
+					{
+						str_format(aParameters, sizeof(aParameters), "?bodyColor=%d&footColor=%d&colorFormat=code", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
+						str_append(aAvatarURL, aParameters, sizeof(aParameters));
+					}
 				}
-				else
+				else if (Config()->m_SvWebhookChatSkinRenderer == 1) // KoG
 				{
 					str_format(aAvatarURL, sizeof(aAvatarURL), "https://kog.tw/render_tee.php?skin=%s", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName);
+
+					if (m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_UseCustomColor)
+					{
+						str_format(aParameters, sizeof(aParameters), "&body_color=%d&feet_color=%d", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorBody, m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_ColorFeet);
+						str_append(aAvatarURL, aParameters, sizeof(aParameters));
+					}
 				}
 			}
 		}
 
-		Server()->SendWebhookMessage(Config()->m_SvWebhookChatURL, aText, aWebhookName, aAvatarURL);
+		Server()->SendWebhookMessage(Config()->m_SvWebhookChatURL, aText, aWebhookName, FormatURL(aAvatarURL));
 	}
 
 	if (Mode == CHAT_ALL || Mode == CHAT_TEAM || Mode == CHAT_LOCAL)
@@ -4746,7 +4755,7 @@ int CGameContext::GetPlotID(int AccID)
 
 int CGameContext::GetTilePlotID(vec2 Pos, bool CheckDoor)
 {
-	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->GetDoorNumber(Pos)) : 0;
+	int PlotDoor = CheckDoor ? Collision()->GetPlotBySwitch(Collision()->CheckPointDoor(Pos, 0, true, false)) : 0; // can use team 0 for checkpointdoor because closedonly = false
 	return PlotDoor >= PLOT_START ? PlotDoor : Collision()->GetPlotID(Collision()->GetMapIndex(Pos));
 }
 
@@ -6187,6 +6196,21 @@ const char *CGameContext::FormatMotd(const char *pMsg)
 	char aFooter[128];
 	str_format(aFooter, sizeof(aFooter), "F-DDrace is a mod by fokkonaut\nF-DDrace Mod. Ver.: %s", GAME_VERSION);
 	return AppendMotdFooter(pMsg, aFooter);
+}
+
+const char *CGameContext::FormatURL(const char *pURL)
+{
+	static char aURL[256];
+	for (int i = 0, s = 0; i < str_length(pURL) + 1; i++)
+	{
+#ifdef CONF_FAMILY_WINDOWS
+		if (pURL[i] == '&')
+			aURL[s++] = '^';
+#endif
+		aURL[s++] = pURL[i];
+	}
+
+	return aURL;
 }
 
 const char *CGameContext::FormatExperienceBroadcast(const char *pMsg, int ClientID)

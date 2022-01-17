@@ -646,6 +646,8 @@ public:
 	virtual void MapDesignChangeDone(int ClientID);
 	void SendStartMessages(int ClientID);
 
+	const char *FormatURL(const char *pURL);
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 

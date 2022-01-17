@@ -51,13 +51,22 @@ bool CDrawEditor::CanPlace(bool Remove)
 
 	int CursorPlotID = GetCursorPlotID();
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(m_Pos);
-	if (m_Category == CAT_SPEEDUPS && !Remove)
+	if (!Remove)
 	{
-		if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
-			return false;
-
 		int Index = GameServer()->Collision()->GetMapIndex(m_Pos);
-		ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+		if (m_Category == CAT_SPEEDUPS)
+		{
+			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
+				return false;
+
+			ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+		}
+		else if (m_Category == CAT_LASERDOORS && m_Laser.m_ButtonMode)
+		{
+			// disallow placing buttons on already existing buttons with the same number
+			int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
+			ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
+		}
 	}
 
 	int OwnPlotID = GetPlotID();

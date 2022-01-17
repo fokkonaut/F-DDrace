@@ -40,8 +40,11 @@ void CButton::ResetCollision(bool Remove)
 	if (!m_Collision)
 		return;
 
-	int Number = Remove ? 0 : m_Number;
-	GameServer()->Collision()->SetButtonNumber(m_Pos, Number);
+	int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
+	if (Remove)
+		GameServer()->Collision()->RemoveDoorTile(Index, TILE_SWITCHTOGGLE, m_Number);
+	else
+		GameServer()->Collision()->AddDoorTile(Index, TILE_SWITCHTOGGLE, m_Number);
 }
 
 void CButton::Snap(int SnappingClient)
