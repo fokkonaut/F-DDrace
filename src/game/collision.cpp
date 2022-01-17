@@ -1660,7 +1660,7 @@ bool CCollision::IsFightBorder(vec2 Pos, int Fight)
 std::vector<int> CCollision::GetButtonNumbers(int Index)
 {
 	std::vector<int> vNumbers;
-	if (!m_pSwitch || !m_pDoor)
+	if (!m_pSwitch || !m_pDoor || Index < 0)
 		return vNumbers;
 
 	// to support toggle tiles aswell
