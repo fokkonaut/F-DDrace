@@ -1599,6 +1599,9 @@ void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed)
 
 int CCollision::GetDoorIndex(int Index, int Type, int Number)
 {
+	if (Index < 0)
+		return -1;
+
 	for (unsigned int i = 0; i < m_pDoor[Index].m_vTiles.size(); i++)
 		if (m_pDoor[Index].m_vTiles[i].m_Index == Type && m_pDoor[Index].m_vTiles[i].m_Number == Number)
 			return i;
@@ -1607,6 +1610,9 @@ int CCollision::GetDoorIndex(int Index, int Type, int Number)
 
 bool CCollision::AddDoorTile(int Index, int Type, int Number, int Flags)
 {
+	if (Index < 0)
+		return false;
+
 	int DoorIndex = GetDoorIndex(Index, Type, Number);
 	if (DoorIndex == -1)
 	{
@@ -1625,6 +1631,9 @@ bool CCollision::AddDoorTile(int Index, int Type, int Number, int Flags)
 
 bool CCollision::RemoveDoorTile(int Index, int Type, int Number)
 {
+	if (Index < 0)
+		return false;
+
 	int DoorIndex = GetDoorIndex(Index, Type, Number);
 	if (DoorIndex != -1)
 	{
