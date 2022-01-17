@@ -161,10 +161,11 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 				}
 				else if (m_pSwitch[i].m_Type == TILE_SWITCH_PLOT_TOTELE)
 				{
-					if (m_pSwitch[i].m_Delay >= 0 && m_pSwitch[i].m_Delay < NUM_PLOT_SIZES)
+					int Size = m_pSwitch[i].m_Delay;
+					if (Size >= 0 && Size < NUM_PLOT_SIZES)
 					{
-						m_aNumPlots[m_pSwitch[i].m_Delay]++;
-						m_apPlotSize[PlotID] = m_pSwitch[i].m_Delay;
+						m_aNumPlots[Size]++;
+						m_apPlotSize[PlotID] = Size;
 					}
 				}
 			}
@@ -373,7 +374,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
-			for (int i = 0; i < m_pDoor[ModMapIndex].m_vTiles.size(); i++)
+			for (unsigned int i = 0; i < m_pDoor[ModMapIndex].m_vTiles.size(); i++)
 			{
 				if (pfnSwitchActive(m_pDoor[ModMapIndex].m_vTiles[i].m_Number, pUser))
 				{
@@ -1451,7 +1452,6 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		int Index = Ny * m_Width + Nx;
 
 		bool PlotDoor = Number != -1 && !IsPlotDoor(Number) && CheckPointDoor(Pos, 0, true, false); // can just use team 0 because ClosedOnly is false anyways
 		if (GetIndex(Nx, Ny) == TILE_SOLID
@@ -1464,7 +1464,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			if (PlotDoor) TILE_STOPA;
+			if (PlotDoor) return TILE_STOPA;
 			else if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 
