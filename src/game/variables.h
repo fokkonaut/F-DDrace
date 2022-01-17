@@ -273,9 +273,11 @@ MACRO_CONFIG_STR(SvDefaultMapDesign, sv_default_map_design, 128, "", CFGFLAG_SER
 // webhook
 MACRO_CONFIG_STR(SvWebhookAntibotURL, sv_webhook_antibot_url, 128, "", CFGFLAG_SERVER, "Webhook URL for antibot reports", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWebhookAntibotName, sv_webhook_antibot_name, 128, "", CFGFLAG_SERVER, "Webhook name for antibot reports", AUTHED_ADMIN)
+
 MACRO_CONFIG_STR(SvWebhookChatURL, sv_webhook_chat_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWebhookChatAvatarURL, sv_webhook_chat_avatar_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge avatar", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWebhookChatSkinAvatars, sv_webhook_chat_skin_avatars, 0, 0, 1, CFGFLAG_SERVER, "Whether chat bridge webhook shows skins as avatars", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvWebhookChatSkinRenderer, sv_webhook_chat_skin_renderer, 0, 0, 1, CFGFLAG_SERVER, "Webhook chat bridge skin renderer (0=skins.tw, 1=KoG)", AUTHED_ADMIN)
 
 // vpn/proxy detection
 MACRO_CONFIG_STR(SvIPHubXKey, sv_iphub_x_key, 128, "", CFGFLAG_SERVER, "IPHub.info X-Key", AUTHED_ADMIN)
