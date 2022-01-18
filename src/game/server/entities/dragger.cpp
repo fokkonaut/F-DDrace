@@ -205,7 +205,15 @@ void CDragger::Snap(int SnappingClient)
 	CNetObj_EntityEx* pEntData = 0;
 	CCharacter *pSnap = GameServer()->GetPlayerChar(SnappingClient);
 	if (pSnap && pSnap->SendExtendedEntity(this))
+	{
 		pEntData = static_cast<CNetObj_EntityEx*>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		if (pEntData)
+		{
+			pEntData->m_SwitchNumber = m_Number;
+			pEntData->m_Layer = m_Layer;
+			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
+		}
+	}
 
 	if (!pEntData)
 	{
@@ -233,10 +241,6 @@ void CDragger::Snap(int SnappingClient)
 
 	if (pEntData)
 	{
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK+round_to_int(m_Strength)-1, (int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
-
 		pObj->m_StartTick = 0;
 	}
 	else
