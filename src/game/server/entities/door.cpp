@@ -125,19 +125,19 @@ void CDoor::Snap(int SnappingClient)
 	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
 	bool ForceOn = Char && Char->GetActiveWeapon() == WEAPON_DRAW_EDITOR && GameServer()->Collision()->IsPlotDrawDoor(m_Number);
 
-	bool SendEntityEx = false;
+	CNetObj_EntityEx *pEntData = 0;
 	if (m_Collision && !ForceOn)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
-		if (pChr && (SendEntityEx = pChr->SendExtendedEntity(this)))
+		if (pChr && pChr->SendExtendedEntity(this))
 		{
-			CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-			if(!pEntData)
-				return;
-
-			pEntData->m_SwitchNumber = m_Number;
-			pEntData->m_Layer = m_Layer;
-			pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+			pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+			if (pEntData)
+			{
+				pEntData->m_SwitchNumber = m_Number;
+				pEntData->m_Layer = m_Layer;
+				pEntData->m_EntityClass = ENTITYCLASS_DOOR;
+			}
 		}
 	}
 
@@ -148,7 +148,7 @@ void CDoor::Snap(int SnappingClient)
 	pObj->m_X = (int)m_Pos.x;
 	pObj->m_Y = (int)m_Pos.y;
 
-	if (SnappingClient == -1 || SendEntityEx)
+	if (pEntData)
 	{
 		pObj->m_FromX = (int)m_To.x;
 		pObj->m_FromY = (int)m_To.y;
