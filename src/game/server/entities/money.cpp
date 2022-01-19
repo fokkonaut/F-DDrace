@@ -12,6 +12,10 @@ CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float 
 	m_Amount = Amount;
 	m_Vel = vec2(5*Direction, Direction == 0 ? 0 : -5);
 	m_StartTick = Server()->Tick();
+	
+	m_Snap.m_Pos = m_Pos;
+	m_Snap.m_Time = 0.f;
+	m_Snap.m_LastTime = Server()->Tick();
 
 	for (int i = 0; i < NUM_DOTS_BIG; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -121,9 +125,13 @@ void CMoney::Snap(int SnappingClient)
 	pBullet->m_Type = WEAPON_SHOTGUN;
 
 	float AngleStep = 2.0f * pi / GetNumDots();
+	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
+
 	for(int i = 0; i < GetNumDots(); i++)
 	{
-		vec2 Pos = m_Pos + vec2(GetRadius() * cos(AngleStep*i), GetRadius() * sin(AngleStep*i));
+		vec2 Pos = m_Pos;
+		Pos.x += GetRadius() * cosf(m_Snap.m_Time * 10.f + AngleStep * i);
+		Pos.y += GetRadius() * sinf(m_Snap.m_Time * 10.f + AngleStep * i);
 		
 		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
 		if(!pObj)
@@ -136,4 +144,6 @@ void CMoney::Snap(int SnappingClient)
 		pObj->m_StartTick = 0;
 		pObj->m_Type = WEAPON_HAMMER;
 	}
+
+	m_Snap.m_LastTime = Server()->Tick();
 }

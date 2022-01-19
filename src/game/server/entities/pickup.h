@@ -30,16 +30,18 @@ private:
 	int m_SpawnTick;
 
 	// F-DDrace
-
-	vec2 m_SnapPos;
 	int m_Owner;
-
 	void Move();
 	vec2 m_Core;
-
 	int m_ID2;
-
 	int64 m_aLastBatteryMsg[MAX_CLIENTS];
+
+	struct
+	{
+		vec2 m_Pos;
+		float m_Time;
+		float m_LastTime;
+	} m_Snap;
 };
 
 #endif

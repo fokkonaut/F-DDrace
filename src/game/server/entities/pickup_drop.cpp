@@ -20,8 +20,11 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_Bullets = Bullets;
 	m_Vel = vec2(5*Direction, -5);
 	m_PickupDelay = Server()->TickSpeed() * 2;
-	m_SnapPos = m_Pos;
 	m_DDraceMode = GameServer()->m_apPlayers[Owner]->m_Gamemode == GAMEMODE_DDRACE;
+
+	m_Snap.m_Pos = m_Pos;
+	m_Snap.m_Time = 0.f;
+	m_Snap.m_LastTime = Server()->Tick();
 
 	for (int i = 0; i < 4; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -220,18 +223,15 @@ void CPickupDrop::Snap(int SnappingClient)
 		if (!pProj)
 			return;
 
-		static float s_Time = 0.0f;
-		static float s_LastLocalTime = Server()->Tick();
+		m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
 
-		s_Time += (Server()->Tick() - s_LastLocalTime) / Server()->TickSpeed();
+		float Offset = m_Snap.m_Pos.y / 32.0f + m_Snap.m_Pos.x / 32.0f;
+		m_Snap.m_Pos.x = m_Pos.x + cosf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
+		m_Snap.m_Pos.y = m_Pos.y + sinf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
+		m_Snap.m_LastTime = Server()->Tick();
 
-		float Offset = m_SnapPos.y / 32.0f + m_SnapPos.x / 32.0f;
-		m_SnapPos.x = m_Pos.x + cosf(s_Time * 2.0f + Offset) * 2.5f;
-		m_SnapPos.y = m_Pos.y + sinf(s_Time * 2.0f + Offset) * 2.5f;
-		s_LastLocalTime = Server()->Tick();
-
-		pProj->m_X = m_SnapPos.x;
-		pProj->m_Y = m_SnapPos.y;
+		pProj->m_X = m_Snap.m_Pos.x;
+		pProj->m_Y = m_Snap.m_Pos.y;
 
 		pProj->m_VelX = 0;
 		pProj->m_VelY = 0;

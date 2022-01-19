@@ -20,7 +20,10 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Number = Number;
 
 	m_Owner = Owner;
-	m_SnapPos = m_Pos;
+	
+	m_Snap.m_Pos = m_Pos;
+	m_Snap.m_Time = 0.f;
+	m_Snap.m_LastTime = Server()->Tick();
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastBatteryMsg[i] = 0;
@@ -325,18 +328,18 @@ void CPickup::Snap(int SnappingClient)
 		if (!pProj)
 			return;
 
-		static float s_Time = 0.0f;
-		static float s_LastLocalTime = Server()->Tick();
+		m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
 
-		s_Time += (Server()->Tick() - s_LastLocalTime) / Server()->TickSpeed();
+		float Offset = m_Snap.m_Pos.y / 32.0f + m_Snap.m_Pos.x / 32.0f;
+		m_Snap.m_Pos.x = m_Pos.x + cosf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
+		m_Snap.m_Pos.y = m_Pos.y + sinf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
+		m_Snap.m_LastTime = Server()->Tick();
 
-		float Offset = m_SnapPos.y / 32.0f + m_SnapPos.x / 32.0f;
-		m_SnapPos.x = m_Pos.x + cosf(s_Time * 2.0f + Offset) * 2.5f;
-		m_SnapPos.y = m_Pos.y + sinf(s_Time * 2.0f + Offset) * 2.5f;
-		s_LastLocalTime = Server()->Tick();
+		pProj->m_X = m_Snap.m_Pos.x;
+		pProj->m_Y = m_Snap.m_Pos.y;
 
-		pProj->m_X = round_to_int(m_SnapPos.x);
-		pProj->m_Y = round_to_int(m_SnapPos.y);
+		pProj->m_X = round_to_int(m_Snap.m_Pos.x);
+		pProj->m_Y = round_to_int(m_Snap.m_Pos.y);
 
 		pProj->m_VelX = 0;
 		pProj->m_VelY = 0;

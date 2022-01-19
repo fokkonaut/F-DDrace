@@ -30,10 +30,16 @@ private:
 	int m_Bullets;
 	int m_PickupDelay;
 	int m_Special;
-	vec2 m_SnapPos;
 
 	// have to define a new ID variable for the bullet
 	int m_aID[4];
+
+	struct
+	{
+		vec2 m_Pos;
+		float m_Time;
+		float m_LastTime;
+	} m_Snap;
 };
 
 #endif

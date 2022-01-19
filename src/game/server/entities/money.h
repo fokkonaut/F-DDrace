@@ -7,8 +7,8 @@
 
 enum
 {
-	NUM_DOTS_SMALL = 6,
-	NUM_DOTS_BIG = 12,
+	NUM_DOTS_SMALL = 4,
+	NUM_DOTS_BIG = 6,
 
 	SMALL_MONEY_AMOUNT = 10000,
 	MONEY_RADIUS_BIG = 14,
@@ -21,6 +21,13 @@ enum
 class CMoney : public CAdvancedEntity
 {
 private:
+	struct
+	{
+		vec2 m_Pos;
+		float m_Time;
+		float m_LastTime;
+	} m_Snap;
+
 	int64 m_Amount;
 	int64 m_StartTick;
 	int m_aID[NUM_DOTS_BIG];
