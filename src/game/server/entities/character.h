@@ -436,13 +436,15 @@ public:
 	// editor
 	CDrawEditor m_DrawEditor;
 
+	std::vector<int> m_vLastButtonNumbers;
+	int m_LastInOutTeleporter;
+
 	// helicopter
 	CHelicopter *m_pHelicopter;
 	bool TryMountHelicopter();
 
 	int GetCurrentTilePlotID(bool CheckDoor = false);
 	void TeleOutOfPlot(int PlotID);
-	std::vector<int> m_vCurrentButtonNumbers;
 
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);

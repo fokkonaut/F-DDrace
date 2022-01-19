@@ -231,7 +231,9 @@ enum
 	TILE_SWITCH_PLOT = 192, // plot size; delay=0: small, delay=1: big
 	TILE_SWITCH_PLOT_DOOR, // door lenght in blocks: delay
 	TILE_SWITCH_PLOT_TOTELE, // totele plot position
-	TILE_SWITCHTOGGLE = 28, // for draw editor placed buttons for plot draw doors
+	TILE_SWITCHTOGGLE = 28, // for draw editor placed buttons for plot draw doors, also supported as mappable tiles
+	TILE_TELE_INOUT_EVIL = 94, // also supported as mappable tiles
+	TILE_TELE_INOUT = 95, // also supported as mappable tiles
 
 	//Layers
 	LAYER_GAME=0,

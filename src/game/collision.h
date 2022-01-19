@@ -17,6 +17,9 @@ enum
 
 	PLOT_SMALL_MAX_DOORS = 2,
 	PLOT_BIG_MAX_DOORS = 5,
+
+	PLOT_SMALL_MAX_TELE = 2,
+	PLOT_BIG_MAX_TELE = 5,
 };
 
 enum
@@ -235,6 +238,21 @@ public:
 
 	// speedups
 	void SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed);
+
+	// teleporters
+	int m_NumTeleporters;
+	//bool IsPlotDrawTele(int Number) { return Number > m_NumTeleporters; } // unused rn
+	void SetTeleporter(vec2 Pos, int Type, int Number);
+
+	int GetSwitchByPlotTeleporter(int Plot, int Tele);
+	int GetNumPlotTeleporters() { return m_aNumPlots[PLOT_SMALL] * PLOT_SMALL_MAX_TELE + m_aNumPlots[PLOT_BIG] * PLOT_BIG_MAX_TELE; }
+	int GetNumMaxTeleporters(int PlotID);
+
+	//int GetNumAllTeleporters() { return m_NumTeleporters + GetNumPlotTeleporters() + GetNumFreeDrawTeleporters(); } // unused rn
+	int GetNumFreeDrawTeleporters() { return 255 - m_NumTeleporters - GetNumPlotTeleporters(); }
+
+	int IsTeleportTile(int Index);
+	bool IsTeleportInOut(vec2 Pos);
 
 	// access to plots: PlotID + m_NumSwitchers && PlotID < m_NumPlots + 1
 	SSwitchers *m_pSwitchers;

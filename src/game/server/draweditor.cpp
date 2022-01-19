@@ -3,6 +3,7 @@
 #include <game/server/entities/door.h>
 #include <game/server/entities/button.h>
 #include <game/server/entities/speedup.h>
+#include <game/server/entities/teleporter.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
@@ -26,6 +27,8 @@ CDrawEditor::CDrawEditor(CCharacter *pChr)
 	m_Speedup.m_Angle = 0;
 	m_Speedup.m_Force = 2;
 	m_Speedup.m_MaxSpeed = 0;
+	m_Teleporter.m_Number = 0;
+	m_Teleporter.m_Evil = true;
 	m_Category = CAT_UNINITIALIZED;
 	SetCategory(CAT_PICKUPS);
 	m_RoundPos = true;
@@ -41,7 +44,7 @@ bool CDrawEditor::Active()
 
 bool CDrawEditor::CanPlace(bool Remove)
 {
-	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER)
 	{
 		int rx = round_to_int(m_Pos.x) / 32;
 		int ry = round_to_int(m_Pos.y) / 32;
@@ -66,6 +69,10 @@ bool CDrawEditor::CanPlace(bool Remove)
 			// disallow placing buttons on already existing buttons with the same number
 			int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
 			ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
+		}
+		else if (m_Category == CAT_TELEPORTER)
+		{
+			ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
 		}
 	}
 
@@ -100,15 +107,27 @@ int CDrawEditor::GetNumMaxDoors()
 	return GameServer()->Collision()->GetNumMaxDoors(CurrentPlotID());
 }
 
+int CDrawEditor::GetNumMaxTeleporters()
+{
+	return GameServer()->Collision()->GetNumMaxTeleporters(CurrentPlotID());
+}
+
 int CDrawEditor::GetFirstFreeNumber()
 {
+	bool IsDoor = m_Category == CAT_LASERDOORS;
+	bool IsTeleporter = m_Category == CAT_TELEPORTER;
+	if (!IsDoor && !IsTeleporter)
+		return -1;
+
 	int PlotID = CurrentPlotID();
 	std::vector<int> vNumbers;
 
 	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
 	{
 		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
-		if (pEnt->GetObjType() != CGameWorld::ENTTYPE_BUTTON && (pEnt->GetObjType() != CGameWorld::ENTTYPE_DOOR || pEnt->m_Number == 0))
+		if (IsDoor && pEnt->GetObjType() != CGameWorld::ENTTYPE_BUTTON && (pEnt->GetObjType() != CGameWorld::ENTTYPE_DOOR || pEnt->m_Number == 0))
+			continue;
+		if (IsTeleporter && pEnt->GetObjType() != CGameWorld::ENTTYPE_TELEPORTER)
 			continue;
 
 		bool Found = false;
@@ -121,14 +140,15 @@ int CDrawEditor::GetFirstFreeNumber()
 	}
 
 	int FirstFree = 0;
-	for (int i = 0; i < GetNumMaxDoors(); i++)
+	int Max = IsDoor ? GetNumMaxDoors() : IsTeleporter ? GetNumMaxTeleporters() : 0;
+	for (int i = 0; i < Max; i++)
 	{
-		int Switch = GameServer()->Collision()->GetSwitchByPlotLaserDoor(PlotID, i);
+		int Number = IsDoor ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(PlotID, i) : IsTeleporter ? GameServer()->Collision()->GetSwitchByPlotTeleporter(PlotID, i) : 0;
 		bool Found = false;
 
 		for (unsigned int j = 0; j < vNumbers.size(); j++)
 		{
-			if (vNumbers[j] == Switch)
+			if (vNumbers[j] == Number)
 			{
 				FirstFree++;
 				Found = true;
@@ -173,6 +193,8 @@ void CDrawEditor::Tick()
 	{
 		if (m_Category == CAT_LASERDOORS && m_Laser.m_Number >= GetNumMaxDoors())
 			m_Laser.m_Number = 0;
+		else if (m_Category == CAT_TELEPORTER && m_Teleporter.m_Number >= GetNumMaxTeleporters())
+			m_Teleporter.m_Number = 0;
 	}
 
 	HandleInput();
@@ -282,7 +304,7 @@ void CDrawEditor::HandleInput()
 		{
 			m_Erasing = true;
 
-			int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON);
+			int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
 			CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
 
 			if (CanRemove(pEntity))
@@ -362,6 +384,21 @@ void CDrawEditor::HandleInput()
 						m_Speedup.m_MaxSpeed = 255;
 				}
 			}
+			else if (m_Category == CAT_TELEPORTER)
+			{
+				if (m_Setting == TELEPORTER_NUMBER)
+				{
+					m_Teleporter.m_Number += m_Input.m_Direction;
+					if (m_Teleporter.m_Number >= GetNumMaxTeleporters())
+						m_Teleporter.m_Number = 0;
+					else if (m_Teleporter.m_Number < 0)
+						m_Teleporter.m_Number = GetNumMaxTeleporters()-1;
+				}
+				else if (m_Setting == TELEPORTER_EVIL)
+				{
+					m_Teleporter.m_Evil = !m_Teleporter.m_Evil;
+				}
+			}
 			SendWindow();
 		}
 		else if (!m_Selecting)
@@ -428,6 +465,11 @@ void CDrawEditor::SetCategory(int Category)
 		m_Entity = CGameWorld::ENTTYPE_SPEEDUP;
 		m_RoundPos = true;
 	}
+	else if (Category == CAT_TELEPORTER)
+	{
+		m_Entity = CGameWorld::ENTTYPE_TELEPORTER;
+		m_RoundPos = true;
+	}
 
 	// done in SetPickup()
 	if (Category != CAT_PICKUPS)
@@ -465,6 +507,12 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	}
 	case CGameWorld::ENTTYPE_SPEEDUP:
 		return new CSpeedup(m_pCharacter->GameWorld(), m_Pos, m_Speedup.m_Angle, m_Speedup.m_Force, m_Speedup.m_MaxSpeed, !Preview);
+	case CGameWorld::ENTTYPE_TELEPORTER:
+	{
+		int Type = m_Teleporter.m_Evil ? TILE_TELE_INOUT_EVIL : TILE_TELE_INOUT;
+		int Number = !Preview ? GameServer()->Collision()->GetSwitchByPlotTeleporter(CurrentPlotID(), m_Teleporter.m_Number) : 0;
+		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, Type, Number, !Preview);
+	}
 	}
 	return 0;
 }
@@ -478,9 +526,9 @@ void CDrawEditor::SendWindow()
 		"     Menu controls:\n\n"
 		"Change category: hook left/right\n"
 		"Move up/down: shoot left/right\n", sizeof(aMsg));
-	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER)
 		str_append(aMsg, "Change setting: A/D\n", sizeof(aMsg));
-	if (m_Category == CAT_LASERDOORS)
+	if (m_Category == CAT_LASERDOORS || m_Category == CAT_TELEPORTER)
 		str_append(aMsg, "First free number: kill\n", sizeof(aMsg));
 
 	str_append(aMsg, "\n", sizeof(aMsg));
@@ -489,7 +537,7 @@ void CDrawEditor::SendWindow()
 		"Stop editing: Switch weapon\n"
 		"Place object: Left mouse\n"
 		"Eraser: Right mouse\n", sizeof(aMsg));
-	if (m_Category != CAT_SPEEDUPS)
+	if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
 		str_append(aMsg, "Toggle position rounding: kill\n", sizeof(aMsg));
 
 	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
@@ -533,6 +581,14 @@ void CDrawEditor::SendWindow()
 		str_format(aBuf, sizeof(aBuf), "Max speed: %d", m_Speedup.m_MaxSpeed);
 		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_MAXSPEED), sizeof(aMsg));
 	}
+	else if (m_Category == CAT_TELEPORTER)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Number: %d/%d", m_Teleporter.m_Number+1, GetNumMaxTeleporters());
+		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_NUMBER), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Evil: %s", m_Teleporter.m_Evil ? "Yes" : "No");
+		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_EVIL), sizeof(aMsg));
+	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
 }
@@ -567,6 +623,7 @@ const char *CDrawEditor::GetCategory(int Category)
 	case CAT_LASERWALLS: return "Laser Walls";
 	case CAT_LASERDOORS: return "Laser Doors";
 	case CAT_SPEEDUPS: return "Speedups";
+	case CAT_TELEPORTER: return "Teleporters";
 	default: return "Unknown";
 	}
 }
@@ -579,6 +636,7 @@ int CDrawEditor::GetNumSettings()
 	case CAT_LASERWALLS: return NUM_LASERWALL_SETTINGS;
 	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
+	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
 	default: return 0;
 	}
 }
@@ -613,18 +671,23 @@ void CDrawEditor::OnPlayerKill()
 				AddAngle(45);
 		}
 	}
-	else if (m_Category == CAT_LASERDOORS && m_Selecting)
-	{
-		int FreeNumber = GetFirstFreeNumber();
-		if (FreeNumber != GetNumMaxDoors())
-		{
-			m_Laser.m_Number = FreeNumber;
-			SendWindow();
-		}
-	}
-	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS)
+	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
 	{
 		m_RoundPos = !m_RoundPos;
+	}
+	else if (m_Selecting)
+	{
+		bool IsDoor = m_Category == CAT_LASERDOORS;
+		bool IsTeleporter = m_Category == CAT_TELEPORTER;
+		int Max = IsDoor ? GetNumMaxDoors() : IsTeleporter ? GetNumMaxTeleporters() : -1;
+
+		int FreeNumber = GetFirstFreeNumber(); // returns -1, so when not a wanted category -1 == -1 = return :D
+		if (FreeNumber != Max)
+		{
+			if (IsDoor) m_Laser.m_Number = FreeNumber;
+			else if (IsTeleporter) m_Teleporter.m_Number = FreeNumber;
+			SendWindow();
+		}
 	}
 }
 
@@ -666,8 +729,11 @@ void CDrawEditor::AddAngle(float Add)
 
 void CDrawEditor::AddLength(float Add)
 {
-	m_Laser.m_Length = clamp(m_Laser.m_Length + Add/10.f, 0.0f, s_MaxLength);
-	((CDoor *)m_pPreview)->SetLength(round_to_int(m_Laser.m_Length * 32));
+	if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
+	{
+		m_Laser.m_Length = clamp(m_Laser.m_Length + Add/10.f, 0.0f, s_MaxLength);
+		((CDoor *)m_pPreview)->SetLength(round_to_int(m_Laser.m_Length * 32));
+	}
 }
 
 void CDrawEditor::OnWeaponSwitch()

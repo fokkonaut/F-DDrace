@@ -2845,7 +2845,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (vButtonNumbers[i] > 0 && Team() != TEAM_SUPER)
 		{
-			if (std::find(m_vCurrentButtonNumbers.begin(), m_vCurrentButtonNumbers.end(), vButtonNumbers[i]) == m_vCurrentButtonNumbers.end())
+			if (std::find(m_vLastButtonNumbers.begin(), m_vLastButtonNumbers.end(), vButtonNumbers[i]) == m_vLastButtonNumbers.end())
 			{
 				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_Status[Team()] ^= 1;
 				GameServer()->Collision()->m_pSwitchers[vButtonNumbers[i]].m_EndTick[Team()] = 0;
@@ -2860,7 +2860,7 @@ void CCharacter::HandleTiles(int Index)
 			vCurrentNumbers.push_back(vButtonNumbers[i]);
 		}
 	}
-	m_vCurrentButtonNumbers = vCurrentNumbers;
+	m_vLastButtonNumbers = vCurrentNumbers;
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCHOPEN && Team() != TEAM_SUPER && GameServer()->Collision()->GetSwitchNumber(MapIndex) > 0)
 	{
@@ -3048,7 +3048,18 @@ void CCharacter::HandleTiles(int Index)
 		}
 
 		int Num = Controller->m_TeleOuts[z - 1].size();
-		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		vec2 NewPos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		{
+			if (m_LastInOutTeleporter == z || Num <= 1) // dont teleport when only 1 is there
+				return;
+			m_LastInOutTeleporter = z;
+
+			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
+				NewPos = Controller->m_TeleOuts[z - 1][rand() % Num];
+		}
+
+		m_Pos = m_PrevPos = m_Core.m_Pos = NewPos;
 		if (!Config()->m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -3076,7 +3087,18 @@ void CCharacter::HandleTiles(int Index)
 		}
 
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
-		m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		vec2 NewPos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		{
+			if (m_LastInOutTeleporter == evilz || Num <= 1) // dont teleport when only 1 is there
+				return;
+			m_LastInOutTeleporter = evilz;
+
+			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
+				NewPos = Controller->m_TeleOuts[evilz - 1][rand() % Num];
+		}
+
+		m_Pos = m_PrevPos = m_Core.m_Pos = NewPos;
 		if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -3094,6 +3116,10 @@ void CCharacter::HandleTiles(int Index)
 		}
 		return;
 	}
+
+	// Reset here too
+	m_LastInOutTeleporter = 0;
+
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
 	{
 		if (m_Super)
@@ -3342,9 +3368,13 @@ void CCharacter::DDracePostCoreTick()
 	else
 	{
 		HandleTiles(CurrentIndex);
+
+		// Reset
 		m_LastIndexTile = 0;
 		m_LastIndexFrontTile = 0;
-		m_vCurrentButtonNumbers.clear();
+		m_vLastButtonNumbers.clear();
+		m_LastInOutTeleporter = 0;
+
 		if (!m_Alive)
 			return;
 	}
@@ -3630,6 +3660,7 @@ void CCharacter::FDDraceInit()
 	m_LastSetDummyHammer = 0;
 
 	m_LastWeaponIndTick = 0;
+	m_LastInOutTeleporter = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

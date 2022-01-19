@@ -1733,6 +1733,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/speedup.h
   entities/stable_projectile.cpp
   entities/stable_projectile.h
+  entities/teleporter.cpp
+  entities/teleporter.h
   entities/trail.cpp
   entities/trail.h
   entity.cpp

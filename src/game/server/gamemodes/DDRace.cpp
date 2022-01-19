@@ -42,7 +42,7 @@ void CGameControllerDDRace::InitTeleporter()
 		int Type = GameServer()->Collision()->TeleLayer()[i].m_Type;
 		if (Number > 0)
 		{
-			if (Type == TILE_TELEOUT)
+			if (Type == TILE_TELEOUT || Type == TILE_TELE_INOUT || Type == TILE_TELE_INOUT_EVIL)
 			{
 				m_TeleOuts[Number - 1].push_back(
 						vec2(i % Width * 32 + 16, i / Width * 32 + 16));
@@ -52,6 +52,9 @@ void CGameControllerDDRace::InitTeleporter()
 				m_TeleCheckOuts[Number - 1].push_back(
 						vec2(i % Width * 32 + 16, i / Width * 32 + 16));
 			}
+
+			if (Number > GameServer()->Collision()->m_NumTeleporters)
+				GameServer()->Collision()->m_NumTeleporters = Number;
 		}
 	}
 }

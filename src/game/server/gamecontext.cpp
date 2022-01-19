@@ -22,6 +22,7 @@
 #include "entities/helicopter.h"
 #include "entities/speedup.h"
 #include "entities/button.h"
+#include "entities/teleporter.h"
 #include "gamemodes/DDRace.h"
 #include "teeinfo.h"
 #include "gamecontext.h"
@@ -4676,6 +4677,36 @@ void CGameContext::ReadPlotStats(int ID)
 						}
 						break;
 					}
+					case CGameWorld::ENTTYPE_TELEPORTER:
+					{
+						int Type = 0;
+						int Number = -1;
+						sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Type, &Number);
+						if (Type > 0 && Number >= 0)
+						{
+							int NewNumber = -1;
+							for (unsigned int i = 0; i < vNumbers.size(); i++)
+								if (vNumbers[i].first == Number)
+									NewNumber = vNumbers[i].second;
+
+							if (NewNumber == -1)
+							{
+								if ((int)vNumbers.size() >= Collision()->GetNumMaxTeleporters(ID))
+									break;
+
+								NewNumber = Collision()->GetSwitchByPlotTeleporter(ID, vNumbers.size());
+								std::pair<int, int> Pair;
+								Pair.first = Number;
+								Pair.second = NewNumber;
+								vNumbers.push_back(Pair);
+							}
+
+							CTeleporter *pTeleporter = new CTeleporter(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, NewNumber);
+							pTeleporter->m_PlotID = ID;
+							m_aPlots[ID].m_vObjects.push_back(pTeleporter);
+						}
+						break;
+					}
 				}
 
 				// jump to next comma, if it exists skip it so we can start the next loop run with the next data
@@ -4732,6 +4763,13 @@ void CGameContext::WritePlotStats(int ID)
 				{
 					CSpeedup *pSpeedup = (CSpeedup *)m_aPlots[ID].m_vObjects[i];
 					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d,", CGameWorld::ENTTYPE_SPEEDUP, pSpeedup->GetPos().x/32.f, pSpeedup->GetPos().y/32.f, pSpeedup->GetAngle(), pSpeedup->GetForce(), pSpeedup->GetMaxSpeed());
+					PlotFile << aEntry;
+					break;
+				}
+				case CGameWorld::ENTTYPE_TELEPORTER:
+				{
+					CTeleporter *pTeleporter = (CTeleporter *)m_aPlots[ID].m_vObjects[i];
+					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_TELEPORTER, pTeleporter->GetPos().x/32.f, pTeleporter->GetPos().y/32.f, pTeleporter->GetType(), pTeleporter->m_Number);
 					PlotFile << aEntry;
 					break;
 				}

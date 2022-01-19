@@ -64,6 +64,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 	Dest();
 	m_NumSwitchers = 0;
 	m_NumPlots = 0;
+	m_NumTeleporters = 0;
 	for (int i = 0; i < NUM_PLOT_SIZES; i++)
 		m_aNumPlots[i] = 0;
 	m_pLayers = pLayers;
@@ -869,7 +870,7 @@ int CCollision::IsTeleport(int Index)
 	if (Index < 0 || !m_pTele)
 		return 0;
 
-	if (m_pTele[Index].m_Type == TILE_TELEIN)
+	if (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELE_INOUT)
 		return m_pTele[Index].m_Number;
 
 	return 0;
@@ -882,7 +883,7 @@ int CCollision::IsEvilTeleport(int Index)
 	if (!m_pTele)
 		return 0;
 
-	if (m_pTele[Index].m_Type == TILE_TELEINEVIL)
+	if (m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELE_INOUT_EVIL)
 		return m_pTele[Index].m_Number;
 
 	return 0;
@@ -1082,7 +1083,8 @@ bool CCollision::TileExists(int Index)
 		return true;
 	if (m_pFront && m_pFront[Index].m_Index >= TILE_FREEZE && m_pFront[Index].m_Index <= MaxIndexValue)
 		return true;
-	if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
+	if (m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN
+		|| m_pTele[Index].m_Type == TILE_TELE_INOUT || m_pTele[Index].m_Type == TILE_TELE_INOUT_EVIL))
 		return true;
 	if (m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
 		return true;
@@ -1597,6 +1599,38 @@ void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed)
 	m_pSpeedup[Index].m_Type = Force ? TILE_BOOST : 0;
 }
 
+void CCollision::SetTeleporter(vec2 Pos, int Type, int Number)
+{
+	if (!m_pTele)
+		return;
+
+	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+
+	m_pTele[Index].m_Number = Number;
+	m_pTele[Index].m_Type = Type;
+}
+
+int CCollision::IsTeleportTile(int Index)
+{
+	if (!m_pTele || Index < 0)
+		return 0;
+	return m_pTele[Index].m_Type;
+}
+
+bool CCollision::IsTeleportInOut(vec2 Pos)
+{
+	if (!m_pTele)
+		return false;
+
+	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+
+	return m_pTele[Index].m_Type == TILE_TELE_INOUT || m_pTele[Index].m_Type == TILE_TELE_INOUT_EVIL;
+}
+
 int CCollision::GetDoorIndex(int Index, int Type, int Number)
 {
 	if (Index < 0)
@@ -1719,6 +1753,28 @@ int CCollision::GetNumMaxDoors(int PlotID)
 	if (PlotID == 0)
 		return GetNumFreeDrawDoors();
 	return m_apPlotSize[PlotID] == PLOT_SMALL ? PLOT_SMALL_MAX_DOORS : m_apPlotSize[PlotID] == PLOT_BIG ? PLOT_BIG_MAX_DOORS : 0;
+}
+
+int CCollision::GetSwitchByPlotTeleporter(int PlotID, int Tele)
+{
+	int Num = 0;
+	if (PlotID == 0)
+	{
+		Num = GetNumPlotTeleporters();
+	}
+	else
+	{
+		for (int i = 1; i < PlotID; i++)
+			Num += GetNumMaxTeleporters(i);
+	}
+	return m_NumTeleporters + Num + Tele + 1;
+}
+
+int CCollision::GetNumMaxTeleporters(int PlotID)
+{
+	if (PlotID == 0)
+		return GetNumFreeDrawTeleporters();
+	return m_apPlotSize[PlotID] == PLOT_SMALL ? PLOT_SMALL_MAX_TELE : m_apPlotSize[PlotID] == PLOT_BIG ? PLOT_BIG_MAX_TELE : 0;
 }
 
 int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)

@@ -38,12 +38,18 @@ class CDrawEditor
 		SPEEDUP_MAXSPEED,
 		NUM_SPEEDUP_SETTINGS,
 
+		// Teleporters
+		TELEPORTER_NUMBER = 0,
+		TELEPORTER_EVIL,
+		NUM_TELEPORTERS_SETTINGS,
+
 		// Categories
 		CAT_UNINITIALIZED = -1,
 		CAT_PICKUPS,
 		CAT_LASERWALLS,
 		CAT_LASERDOORS,
 		CAT_SPEEDUPS,
+		CAT_TELEPORTER,
 		NUM_DRAW_CATEGORIES,
 	};
 
@@ -76,7 +82,9 @@ class CDrawEditor
 	int GetPlotID();
 	int CurrentPlotID();
 	int GetCursorPlotID();
+
 	int GetNumMaxDoors();
+	int GetNumMaxTeleporters();
 	int GetFirstFreeNumber();
 	int GetNumSpeedups(int PlotID);
 
@@ -125,6 +133,12 @@ class CDrawEditor
 		int m_MaxSpeed;
 		int m_Angle;
 	} m_Speedup;
+
+	struct
+	{
+		int m_Number;
+		bool m_Evil;
+	} m_Teleporter;
 
 	// preview
 	void SetPreview();
