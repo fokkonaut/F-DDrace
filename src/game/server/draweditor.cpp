@@ -18,7 +18,7 @@ IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 CDrawEditor::CDrawEditor(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
-	m_Setting = -1;
+
 	m_Laser.m_Angle = s_DefaultAngle;
 	m_Laser.m_Length = 3;
 	m_Laser.m_Thickness = s_MaxThickness;
@@ -29,12 +29,22 @@ CDrawEditor::CDrawEditor(CCharacter *pChr)
 	m_Speedup.m_MaxSpeed = 0;
 	m_Teleporter.m_Number = 0;
 	m_Teleporter.m_Evil = true;
-	m_Category = CAT_UNINITIALIZED;
-	SetCategory(CAT_PICKUPS);
+	
+	m_Setting = -1;
 	m_RoundPos = true;
 	m_Erasing = false;
 	m_Selecting = false;
 	m_EditStartTick = 0;
+
+	m_Category = CAT_UNINITIALIZED;
+	for (int i = 0; i < NUM_DRAW_CATEGORIES; i++)
+	{
+		if (IsCategoryAllowed(i))
+		{
+			SetCategory(i);
+			break;
+		}
+	}
 }
 
 bool CDrawEditor::Active()
@@ -176,6 +186,13 @@ int CDrawEditor::GetNumSpeedups(int PlotID)
 	return Num;
 }
 
+bool CDrawEditor::IsCategoryAllowed(int Category)
+{
+	if (CurrentPlotID() < PLOT_START || !GameServer()->Config()->m_SvPlotEditorCategories[0])
+		return true;
+	return str_in_list(GameServer()->Config()->m_SvPlotEditorCategories, ",", GetCategoryListName(Category));
+}
+
 void CDrawEditor::Tick()
 {
 	if (!Active())
@@ -285,18 +302,21 @@ void CDrawEditor::HandleInput()
 		{
 			int Dir = m_pCharacter->GetAimDir();
 			int Category = m_Category;
-			if (Dir == 1)
+			do
 			{
-				Category++;
-				if (Category >= NUM_DRAW_CATEGORIES)
-					Category = 0;
-			}
-			else if (Dir == -1)
-			{
-				Category--;
-				if (Category < 0)
-					Category = NUM_DRAW_CATEGORIES - 1;
-			}
+				if (Dir == 1)
+				{
+					Category++;
+					if (Category >= NUM_DRAW_CATEGORIES)
+						Category = 0;
+				}
+				else if (Dir == -1)
+				{
+					Category--;
+					if (Category < 0)
+						Category = NUM_DRAW_CATEGORIES - 1;
+				}
+			} while (!IsCategoryAllowed(Category));
 			SetCategory(Category);
 			SendWindow();
 		}
@@ -625,6 +645,19 @@ const char *CDrawEditor::GetCategory(int Category)
 	case CAT_SPEEDUPS: return "Speedups";
 	case CAT_TELEPORTER: return "Teleporters";
 	default: return "Unknown";
+	}
+}
+
+const char *CDrawEditor::GetCategoryListName(int Category)
+{
+	switch (Category)
+	{
+	case CAT_PICKUPS: return "pickups";
+	case CAT_LASERWALLS: return "walls";
+	case CAT_LASERDOORS: return "doors";
+	case CAT_SPEEDUPS: return "speedups";
+	case CAT_TELEPORTER: return "teleporters";
+	default: return "";
 	}
 }
 

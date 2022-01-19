@@ -88,6 +88,9 @@ class CDrawEditor
 	int GetFirstFreeNumber();
 	int GetNumSpeedups(int PlotID);
 
+	bool IsCategoryAllowed(int Category);
+	const char *GetCategoryListName(int Category);
+
 	vec2 m_Pos;
 	int m_Entity;
 	bool m_RoundPos;
