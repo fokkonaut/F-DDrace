@@ -19,6 +19,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_GroundVel = true;
 	m_AirVel = true;
 	m_Elasticity = 0.5f;
+	m_LastInOutTeleporter = 0;
 }
 
 void CAdvancedEntity::Reset()
@@ -161,6 +162,7 @@ void CAdvancedEntity::HandleDropped()
 	else
 	{
 		HandleTiles(CurrentIndex);
+		m_LastInOutTeleporter = 0;
 	}
 	IsGrounded(m_GroundVel, m_AirVel);
 	GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Pos, &m_Vel, m_Size, m_Elasticity, !Config()->m_SvStoppersPassthrough);
@@ -192,19 +194,43 @@ void CAdvancedEntity::HandleTiles(int Index)
 	if (z && Controller->m_TeleOuts[z - 1].size())
 	{
 		int Num = Controller->m_TeleOuts[z - 1].size();
-		m_PrevPos = m_Pos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		vec2 NewPos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		{
+			if (m_LastInOutTeleporter == z || Num <= 1) // dont teleport when only 1 is there
+				return;
+			m_LastInOutTeleporter = z;
+
+			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
+				NewPos = Controller->m_TeleOuts[z - 1][rand() % Num];
+		}
+		m_PrevPos = m_Pos = NewPos;
 		return;
 	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
-		m_PrevPos = m_Pos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		vec2 NewPos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
+		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		{
+			if (m_LastInOutTeleporter == evilz || Num <= 1) // dont teleport when only 1 is there
+				return;
+			m_LastInOutTeleporter = evilz;
+
+			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
+				NewPos = Controller->m_TeleOuts[evilz - 1][rand() % Num];
+		}
+		m_PrevPos = m_Pos = NewPos;
 		m_Vel = vec2(0, 0);
 		if (!Config()->m_SvTeleportHoldHook)
 			ReleaseHooked();
 		return;
 	}
+
+	// Reset here too
+	m_LastInOutTeleporter = 0;
+
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
 	{
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
