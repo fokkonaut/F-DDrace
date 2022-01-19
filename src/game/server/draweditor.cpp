@@ -316,7 +316,7 @@ void CDrawEditor::HandleInput()
 					if (Category < 0)
 						Category = NUM_DRAW_CATEGORIES - 1;
 				}
-			} while (!IsCategoryAllowed(Category));
+			} while (!IsCategoryAllowed(Category) && Category != m_Category); // when only wrong categories has been written to the list fall back to the category we had before
 			SetCategory(Category);
 			SendWindow();
 		}
