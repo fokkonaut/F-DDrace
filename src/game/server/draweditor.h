@@ -47,6 +47,8 @@ class CDrawEditor
 		TELE_MODE_TOGGLE = 0,
 		TELE_MODE_IN,
 		TELE_MODE_OUT,
+		TELE_MODE_WEAPON,
+		TELE_MODE_HOOK,
 		NUM_TELE_MODES,
 
 		// Categories

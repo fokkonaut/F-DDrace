@@ -690,6 +690,8 @@ const char *CDrawEditor::GetTeleporterMode()
 	case TELE_MODE_TOGGLE: return "Toggle";
 	case TELE_MODE_IN: return "From";
 	case TELE_MODE_OUT: return "To";
+	case TELE_MODE_WEAPON: return "Weapon From";
+	case TELE_MODE_HOOK: return "Hook From";
 	default: return "Unknown";
 	}
 }
@@ -701,6 +703,8 @@ int CDrawEditor::GetTeleporterType()
 	case TELE_MODE_TOGGLE: return m_Teleporter.m_Evil ? TILE_TELE_INOUT_EVIL : TILE_TELE_INOUT;
 	case TELE_MODE_IN: return m_Teleporter.m_Evil ? TILE_TELEINEVIL : TILE_TELEIN;
 	case TELE_MODE_OUT: return TILE_TELEOUT;
+	case TELE_MODE_WEAPON: return TILE_TELEINWEAPON;
+	case TELE_MODE_HOOK: return TILE_TELEINHOOK;
 	default: return 0;
 	}
 }

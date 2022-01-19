@@ -77,7 +77,7 @@ void CTeleporter::Snap(int SnappingClient)
 
 	float AngleStep = 2.0f * pi / NUM_CIRCLE;
 	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
-
+	Config()->m_SvTestingCommands = 1;
 	for (int i = 0; i < NUM_CIRCLE; i++)
 	{
 		vec2 Pos = m_Pos;
@@ -98,18 +98,44 @@ void CTeleporter::Snap(int SnappingClient)
 
 	m_Snap.m_LastTime = Server()->Tick();
 
-	if (m_Type == TILE_TELEOUT || !m_Collision)
-		return;
-
-	for(int i = 0; i < NUM_PARTICLES; i++)
+	if (m_Type == TILE_TELEINWEAPON)
 	{
-		float RandomRadius = frandom()*(TELE_RADIUS-4.0f);
-		float RandomAngle = 2.0f * pi * frandom();
-		vec2 ParticlePos = m_Pos + vec2(RandomRadius * cos(RandomAngle), RandomRadius * sin(RandomAngle));
-			
-		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE+i], sizeof(CNetObj_Projectile)));
-		if(pObj)
+		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE], sizeof(CNetObj_Projectile)));
+		if (!pObj)
+			return;
+
+		pObj->m_X = (int)m_Pos.x;
+		pObj->m_Y = (int)m_Pos.y;
+		pObj->m_VelX = 0;
+		pObj->m_VelY = 0;
+		pObj->m_StartTick = Server()->Tick()-2;
+		pObj->m_Type = WEAPON_GUN;
+	}
+	else if (m_Type == TILE_TELEINHOOK)
+	{
+		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE], sizeof(CNetObj_Projectile)));
+		if (!pObj)
+			return;
+
+		pObj->m_X = (int)m_Pos.x;
+		pObj->m_Y = (int)m_Pos.y;
+		pObj->m_VelX = 0;
+		pObj->m_VelY = 0;
+		pObj->m_StartTick = Server()->Tick()-2;
+		pObj->m_Type = WEAPON_SHOTGUN;
+	}
+	else if (m_Type != TILE_TELEOUT && m_Collision)
+	{
+		for (int i = 0; i < NUM_PARTICLES; i++)
 		{
+			float RandomRadius = frandom()*(TELE_RADIUS-4.0f);
+			float RandomAngle = 2.0f * pi * frandom();
+			vec2 ParticlePos = m_Pos + vec2(RandomRadius * cos(RandomAngle), RandomRadius * sin(RandomAngle));
+			
+			CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE+i], sizeof(CNetObj_Projectile)));
+			if (!pObj)
+				return;
+
 			pObj->m_X = (int)ParticlePos.x;
 			pObj->m_Y = (int)ParticlePos.y;
 			pObj->m_VelX = 0;
