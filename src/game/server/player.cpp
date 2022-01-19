@@ -609,7 +609,7 @@ void CPlayer::Snap(int SnappingClient)
 
 		if (Server()->IsSevendown(m_ClientID))
 		{
-			if (m_pSpecFlag)
+			if (m_pSpecFlag && (SpecMode == SPEC_FLAGRED || SpecMode == SPEC_FLAGBLUE))
 			{
 				((int*)pSpectatorInfo)[0] = SpectatorID != -1 ? SpectatorID : ID;
 				((int*)pSpectatorInfo)[1] = m_pSpecFlag->GetPos().x;
@@ -626,7 +626,7 @@ void CPlayer::Snap(int SnappingClient)
 		{
 			pSpectatorInfo->m_SpecMode = SpecMode;
 			pSpectatorInfo->m_SpectatorID = SpectatorID;
-			if (m_pSpecFlag)
+			if (m_pSpecFlag && (SpecMode == SPEC_FLAGRED || SpecMode == SPEC_FLAGBLUE))
 			{
 				pSpectatorInfo->m_X = m_pSpecFlag->GetPos().x;
 				pSpectatorInfo->m_Y = m_pSpecFlag->GetPos().y;
