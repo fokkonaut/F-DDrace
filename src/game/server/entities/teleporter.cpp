@@ -77,7 +77,7 @@ void CTeleporter::Snap(int SnappingClient)
 
 	float AngleStep = 2.0f * pi / NUM_CIRCLE;
 	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
-	Config()->m_SvTestingCommands = 1;
+
 	for (int i = 0; i < NUM_CIRCLE; i++)
 	{
 		vec2 Pos = m_Pos;
