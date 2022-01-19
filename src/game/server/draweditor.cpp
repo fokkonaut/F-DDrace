@@ -421,6 +421,7 @@ void CDrawEditor::HandleInput()
 						m_Teleporter.m_Mode = 0;
 					else if (m_Teleporter.m_Mode < 0)
 						m_Teleporter.m_Mode = NUM_TELE_MODES-1;
+					UpdatePreview();
 				}
 				else if (m_Setting == TELEPORTER_EVIL)
 				{
