@@ -12,6 +12,13 @@ CTeleporter::CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number,
 	m_Number = Number;
 	m_Collision = Collision;
 
+	m_Snap.m_Pos = m_Pos;
+	m_Snap.m_Time = 0.f;
+	m_Snap.m_LastTime = Server()->Tick();
+
+	for (int i = 0; i < NUM_TELEPORTER_IDS; i++)
+		m_aID[i] = Server()->SnapNewID();
+
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
 }
@@ -19,6 +26,8 @@ CTeleporter::CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number,
 CTeleporter::~CTeleporter()
 {
 	ResetCollision(true);
+	for (int i = 0; i < NUM_TELEPORTER_IDS; i++)
+		Server()->SnapFreeID(m_aID[i]);
 }
 
 void CTeleporter::ResetCollision(bool Remove)
@@ -65,13 +74,47 @@ void CTeleporter::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if (!pObj)
+	float AngleStep = 2.0f * pi / NUM_CIRCLE;
+	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
+
+	for (int i = 0; i < NUM_CIRCLE; i++)
+	{
+		vec2 Pos = m_Pos;
+		Pos.x += TELE_RADIUS * cosf(m_Snap.m_Time * 2.5f + AngleStep * i);
+		Pos.y += TELE_RADIUS * sinf(m_Snap.m_Time * 2.5f + AngleStep * i);
+
+		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = (int)Pos.x;
+		pObj->m_Y = (int)Pos.y;
+		pObj->m_VelX = 0;
+		pObj->m_VelY = 0;
+		pObj->m_StartTick = 0;
+		pObj->m_Type = WEAPON_HAMMER;
+	}
+
+	m_Snap.m_LastTime = Server()->Tick();
+
+	if (((CGameControllerDDRace *)GameServer()->m_pController)->m_TeleOuts[m_Number - 1].size() <= 1)
 		return;
 
-	pObj->m_X = round_to_int(m_Pos.x);
-	pObj->m_Y = round_to_int(m_Pos.y);
-	pObj->m_FromX = round_to_int(m_Pos.x);
-	pObj->m_FromY = round_to_int(m_Pos.y);
-	pObj->m_StartTick = 0;
+	for(int i = 0; i < NUM_PARTICLES; i++)
+	{
+		float RandomRadius = frandom()*(TELE_RADIUS-4.0f);
+		float RandomAngle = 2.0f * pi * frandom();
+		vec2 ParticlePos = m_Pos + vec2(RandomRadius * cos(RandomAngle), RandomRadius * sin(RandomAngle));
+			
+		CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE+i], sizeof(CNetObj_Projectile)));
+		if(pObj)
+		{
+			pObj->m_X = (int)ParticlePos.x;
+			pObj->m_Y = (int)ParticlePos.y;
+			pObj->m_VelX = 0;
+			pObj->m_VelY = 0;
+			pObj->m_StartTick = Server()->Tick();
+			pObj->m_Type = WEAPON_HAMMER;
+		}
+	}
 }

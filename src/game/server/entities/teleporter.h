@@ -7,6 +7,23 @@
 
 class CTeleporter : public CEntity
 {
+	enum
+	{
+		TELE_RADIUS = 16,
+
+		NUM_CIRCLE = 5,
+		NUM_PARTICLES = 1,
+		NUM_TELEPORTER_IDS = NUM_CIRCLE + NUM_PARTICLES,
+	};
+
+	struct
+	{
+		vec2 m_Pos;
+		float m_Time;
+		float m_LastTime;
+	} m_Snap;
+
+	int m_aID[NUM_TELEPORTER_IDS];
 	int m_Type;
 	bool m_Collision;
 	void ResetCollision(bool Remove = false);
