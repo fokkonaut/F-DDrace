@@ -1987,7 +1987,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			pCharacter->m_Jumped &= ~2;
 
 		// skidding, from game/client/components/players.cpp
-		if (IsGrounded() && ((pCharacter->m_Direction == -1 && (pCharacter->m_VelX/256.f) > 0.f) || (pCharacter->m_Direction == 1 && (pCharacter->m_VelX/256.f) < 0.f)))
+		if (SnappingClient != m_pPlayer->GetCID() && IsGrounded() && ((pCharacter->m_Direction == -1 && (pCharacter->m_VelX/256.f) > 0.f) || (pCharacter->m_Direction == 1 && (pCharacter->m_VelX/256.f) < 0.f)))
 		{
 			pCharacter->m_Direction = 0;
 			pCharacter->m_VelX = 0;
