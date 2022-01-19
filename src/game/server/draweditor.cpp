@@ -414,6 +414,14 @@ void CDrawEditor::HandleInput()
 					else if (m_Teleporter.m_Number < 0)
 						m_Teleporter.m_Number = GetNumMaxTeleporters()-1;
 				}
+				else if (m_Setting == TELEPORTER_MODE)
+				{
+					m_Teleporter.m_Mode += m_Input.m_Direction;
+					if (m_Teleporter.m_Mode >= NUM_TELE_MODES)
+						m_Teleporter.m_Mode = 0;
+					else if (m_Teleporter.m_Mode < 0)
+						m_Teleporter.m_Mode = NUM_TELE_MODES-1;
+				}
 				else if (m_Setting == TELEPORTER_EVIL)
 				{
 					m_Teleporter.m_Evil = !m_Teleporter.m_Evil;
@@ -529,9 +537,8 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 		return new CSpeedup(m_pCharacter->GameWorld(), m_Pos, m_Speedup.m_Angle, m_Speedup.m_Force, m_Speedup.m_MaxSpeed, !Preview);
 	case CGameWorld::ENTTYPE_TELEPORTER:
 	{
-		int Type = m_Teleporter.m_Evil ? TILE_TELE_INOUT_EVIL : TILE_TELE_INOUT;
 		int Number = !Preview ? GameServer()->Collision()->GetSwitchByPlotTeleporter(CurrentPlotID(), m_Teleporter.m_Number) : 0;
-		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, Type, Number, !Preview);
+		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, GetTeleporterType(), Number, !Preview);
 	}
 	}
 	return 0;
@@ -606,6 +613,8 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
 		str_format(aBuf, sizeof(aBuf), "Number: %d/%d", m_Teleporter.m_Number+1, GetNumMaxTeleporters());
 		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_NUMBER), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Mode: %s", GetTeleporterMode());
+		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_MODE), sizeof(aMsg));
 		str_format(aBuf, sizeof(aBuf), "Evil: %s", m_Teleporter.m_Evil ? "Yes" : "No");
 		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_EVIL), sizeof(aMsg));
 	}
@@ -670,6 +679,28 @@ int CDrawEditor::GetNumSettings()
 	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
 	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
+	default: return 0;
+	}
+}
+
+const char *CDrawEditor::GetTeleporterMode()
+{
+	switch (m_Teleporter.m_Mode)
+	{
+	case TELE_MODE_TOGGLE: return "Toggle";
+	case TELE_MODE_IN: return "From";
+	case TELE_MODE_OUT: return "To";
+	default: return "Unknown";
+	}
+}
+
+int CDrawEditor::GetTeleporterType()
+{
+	switch (m_Teleporter.m_Mode)
+	{
+	case TELE_MODE_TOGGLE: return m_Teleporter.m_Evil ? TILE_TELE_INOUT_EVIL : TILE_TELE_INOUT;
+	case TELE_MODE_IN: return m_Teleporter.m_Evil ? TILE_TELEINEVIL : TILE_TELEIN;
+	case TELE_MODE_OUT: return TILE_TELEOUT;
 	default: return 0;
 	}
 }

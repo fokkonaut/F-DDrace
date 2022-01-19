@@ -40,8 +40,14 @@ class CDrawEditor
 
 		// Teleporters
 		TELEPORTER_NUMBER = 0,
+		TELEPORTER_MODE,
 		TELEPORTER_EVIL,
 		NUM_TELEPORTERS_SETTINGS,
+
+		TELE_MODE_TOGGLE = 0,
+		TELE_MODE_IN,
+		TELE_MODE_OUT,
+		NUM_TELE_MODES,
 
 		// Categories
 		CAT_UNINITIALIZED = -1,
@@ -112,6 +118,9 @@ class CDrawEditor
 	const char *GetPickup(int Pickup);
 	void SetPickup(int Pickup);
 
+	const char *GetTeleporterMode();
+	int GetTeleporterType();
+
 	struct
 	{
 		int m_Type;
@@ -141,6 +150,7 @@ class CDrawEditor
 	{
 		int m_Number;
 		bool m_Evil;
+		int m_Mode;
 	} m_Teleporter;
 
 	// preview

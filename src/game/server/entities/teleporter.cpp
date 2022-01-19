@@ -40,23 +40,24 @@ void CTeleporter::ResetCollision(bool Remove)
 	if (!pController)
 		return; // when server reloads or shuts down
 
-	int Type = m_Type;
-
-	if (Remove)
+	int Type = Remove ? 0 : m_Type;
+	if (m_Type == TILE_TELEOUT || m_Type == TILE_TELE_INOUT || m_Type == TILE_TELE_INOUT_EVIL)
 	{
-		Type = 0;
-		for (unsigned int i = 0; i < pController->m_TeleOuts[m_Number - 1].size(); i++)
+		if (Remove)
 		{
-			if (pController->m_TeleOuts[m_Number - 1][i] == m_Pos)
+			for (unsigned int i = 0; i < pController->m_TeleOuts[m_Number - 1].size(); i++)
 			{
-				pController->m_TeleOuts[m_Number - 1].erase(pController->m_TeleOuts[m_Number - 1].begin() + i);
-				break;
+				if (pController->m_TeleOuts[m_Number - 1][i] == m_Pos)
+				{
+					pController->m_TeleOuts[m_Number - 1].erase(pController->m_TeleOuts[m_Number - 1].begin() + i);
+					break;
+				}
 			}
 		}
-	}
-	else
-	{
-		pController->m_TeleOuts[m_Number - 1].push_back(m_Pos);
+		else
+		{
+			pController->m_TeleOuts[m_Number - 1].push_back(m_Pos);
+		}
 	}
 
 	GameServer()->Collision()->SetTeleporter(m_Pos, Type, m_Number);
@@ -97,7 +98,7 @@ void CTeleporter::Snap(int SnappingClient)
 
 	m_Snap.m_LastTime = Server()->Tick();
 
-	if (((CGameControllerDDRace *)GameServer()->m_pController)->m_TeleOuts[m_Number - 1].size() <= 1)
+	if (m_Type == TILE_TELEOUT || !m_Collision)
 		return;
 
 	for(int i = 0; i < NUM_PARTICLES; i++)
