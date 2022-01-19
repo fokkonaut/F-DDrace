@@ -2043,7 +2043,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			else
 			{
 				int Seconds = (Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed();
-				Ammo = (Seconds*10/Config()->m_SvPortalRifleDelay);
+				Ammo = (Seconds*10/max(Config()->m_SvPortalRifleDelay, 1));
 			}
 		}
 		pCharacter->m_AmmoCount = clamp(Ammo, 0, 10);
@@ -2073,7 +2073,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 				if (!pFlag->IsAtStand())
 				{
 					int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
-					int Amount = 10 - (DroppedSinceSeconds*10/Config()->m_SvFlagRespawnDropped);
+					int Amount = 10 - (DroppedSinceSeconds*10/max(Config()->m_SvFlagRespawnDropped, 1));
 					pCharacter->m_Health = pCharacter->m_Armor = Amount;
 				}
 				else
