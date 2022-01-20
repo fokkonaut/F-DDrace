@@ -688,7 +688,7 @@ const char *CDrawEditor::GetTeleporterMode()
 {
 	switch (m_Teleporter.m_Mode)
 	{
-	case TELE_MODE_TOGGLE: return "Toggle";
+	case TELE_MODE_TOGGLE: return "In/Out";
 	case TELE_MODE_IN: return "From";
 	case TELE_MODE_OUT: return "To";
 	case TELE_MODE_WEAPON: return "Weapon From";
