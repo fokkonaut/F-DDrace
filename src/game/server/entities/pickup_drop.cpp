@@ -224,11 +224,11 @@ void CPickupDrop::Snap(int SnappingClient)
 			return;
 
 		m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
+		m_Snap.m_LastTime = Server()->Tick();
 
 		float Offset = m_Snap.m_Pos.y / 32.0f + m_Snap.m_Pos.x / 32.0f;
 		m_Snap.m_Pos.x = m_Pos.x + cosf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
 		m_Snap.m_Pos.y = m_Pos.y + sinf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
-		m_Snap.m_LastTime = Server()->Tick();
 
 		pProj->m_X = m_Snap.m_Pos.x;
 		pProj->m_Y = m_Snap.m_Pos.y;

@@ -126,6 +126,7 @@ void CMoney::Snap(int SnappingClient)
 
 	float AngleStep = 2.0f * pi / GetNumDots();
 	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
+	m_Snap.m_LastTime = Server()->Tick();
 
 	for(int i = 0; i < GetNumDots(); i++)
 	{
@@ -144,6 +145,4 @@ void CMoney::Snap(int SnappingClient)
 		pObj->m_StartTick = 0;
 		pObj->m_Type = WEAPON_HAMMER;
 	}
-
-	m_Snap.m_LastTime = Server()->Tick();
 }

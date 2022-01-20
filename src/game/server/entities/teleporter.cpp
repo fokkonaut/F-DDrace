@@ -83,6 +83,7 @@ void CTeleporter::Snap(int SnappingClient)
 
 	float AngleStep = 2.0f * pi / NUM_CIRCLE;
 	m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
+	m_Snap.m_LastTime = Server()->Tick();
 
 	for (int i = 0; i < NUM_CIRCLE; i++)
 	{
@@ -101,8 +102,6 @@ void CTeleporter::Snap(int SnappingClient)
 		pObj->m_StartTick = 0;
 		pObj->m_Type = WEAPON_HAMMER;
 	}
-
-	m_Snap.m_LastTime = Server()->Tick();
 
 	if (m_Type == TILE_TELEINWEAPON)
 	{
