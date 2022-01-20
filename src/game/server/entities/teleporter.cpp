@@ -40,7 +40,6 @@ void CTeleporter::ResetCollision(bool Remove)
 	if (!pController)
 		return; // when server reloads or shuts down
 
-	int Type = Remove ? 0 : m_Type;
 	if (m_Type == TILE_TELEOUT || m_Type == TILE_TELE_INOUT || m_Type == TILE_TELE_INOUT_EVIL)
 	{
 		if (Remove)
@@ -60,6 +59,13 @@ void CTeleporter::ResetCollision(bool Remove)
 		}
 	}
 
+	int Type = m_Type;
+	int Number = m_Number;
+	if (Remove)
+	{
+		Type = 0;
+		Number = 0;
+	}
 	GameServer()->Collision()->SetTeleporter(m_Pos, Type, m_Number);
 }
 

@@ -66,7 +66,7 @@ bool CDrawEditor::CanPlace(bool Remove)
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(m_Pos);
 	if (!Remove)
 	{
-		int Index = GameServer()->Collision()->GetMapIndex(m_Pos);
+		int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 		if (m_Category == CAT_SPEEDUPS)
 		{
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
