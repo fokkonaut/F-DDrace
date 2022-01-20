@@ -1619,15 +1619,10 @@ int CCollision::IsTeleportTile(int Index)
 	return m_pTele[Index].m_Type;
 }
 
-bool CCollision::IsTeleportInOut(vec2 Pos)
+bool CCollision::IsTeleportInOut(int Index)
 {
 	if (!m_pTele)
 		return false;
-
-	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
-	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-	int Index = Ny * m_Width + Nx;
-
 	return m_pTele[Index].m_Type == TILE_TELE_INOUT || m_pTele[Index].m_Type == TILE_TELE_INOUT_EVIL;
 }
 

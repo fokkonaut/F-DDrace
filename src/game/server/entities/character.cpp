@@ -3049,9 +3049,9 @@ void CCharacter::HandleTiles(int Index)
 
 		int Num = Controller->m_TeleOuts[z - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
-		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
 		{
-			if (m_LastInOutTeleporter == z || Num <= 1) // dont teleport when only 1 is there
+			if (m_LastInOutTeleporter == z || Num <= 1) // dont teleport when only 1 is there, bcs its our current tile then
 				return;
 			m_LastInOutTeleporter = z;
 
@@ -3073,7 +3073,7 @@ void CCharacter::HandleTiles(int Index)
 					m_aWeapons[i].m_Got = false;
 		}
 		return;
-	}
+	}Config()->m_SvTestingCommands = 1;
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
@@ -3088,9 +3088,9 @@ void CCharacter::HandleTiles(int Index)
 
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
-		if (GameServer()->Collision()->IsTeleportInOut(NewPos))
+		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
 		{
-			if (m_LastInOutTeleporter == evilz || Num <= 1) // dont teleport when only 1 is there
+			if (m_LastInOutTeleporter == evilz || Num <= 1) // dont teleport when only 1 is there, bcs its our current tile then
 				return;
 			m_LastInOutTeleporter = evilz;
 
@@ -3116,10 +3116,6 @@ void CCharacter::HandleTiles(int Index)
 		}
 		return;
 	}
-
-	// Reset here too
-	m_LastInOutTeleporter = 0;
-
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
 	{
 		if (m_Super)

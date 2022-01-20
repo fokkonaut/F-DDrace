@@ -252,7 +252,7 @@ public:
 	int GetNumFreeDrawTeleporters() { return 255 - m_NumTeleporters - GetNumPlotTeleporters(); }
 
 	int IsTeleportTile(int Index);
-	bool IsTeleportInOut(vec2 Pos);
+	bool IsTeleportInOut(int Index);
 
 	// access to plots: PlotID + m_NumSwitchers && PlotID < m_NumPlots + 1
 	SSwitchers *m_pSwitchers;
