@@ -27,8 +27,8 @@ class CWhoIs
 		int numn, count, first3;
 	};
 
-    int num_bad, num_ips, num_nms;
-    struct player *ipplayers, *nmplayers;
+	int num_bad, num_ips, num_nms;
+	struct player *ipplayers, *nmplayers;
 
 	struct player *FindEntry(struct player *src, int num, const char *name);
 	int AddName(struct player *src, const char *name);
@@ -36,7 +36,6 @@ class CWhoIs
 	int AddEntry(const char *name, const char *addr);
 
 public:
-	CWhoIs();
 	void Init(CGameContext *pGameServer);
 	void Run(const char *pName, int Mode, int Cutoff);
 	void AddEntry(int ClientID);

@@ -16,11 +16,6 @@
 
 IServer *CWhoIs::Server() const { return GameServer()->Server(); }
 
-CWhoIs::CWhoIs()
-{
-	m_pGameServer = 0;
-}
-
 void CWhoIs::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;
