@@ -3073,7 +3073,7 @@ void CCharacter::HandleTiles(int Index)
 					m_aWeapons[i].m_Got = false;
 		}
 		return;
-	}Config()->m_SvTestingCommands = 1;
+	}
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
