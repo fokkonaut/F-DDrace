@@ -2306,7 +2306,7 @@ bool CCharacter::IsSwitchActiveCb(int Number, void *pUser)
 			if (Number - 1 - pCollision->GetNumAllSwitchers() == Fight)
 			{
 				if (pArenas->IsKillBorder(Fight))
-					pThis->Die(WEAPON_SELF);
+					pThis->m_pPlayer->ThreadKillCharacter(WEAPON_SELF); // Dont call Die() here, because the door array in CCollision::GetMoveRestrictions is not updated while looping, means when we die and the arena is removed it stil loops
 				return true;
 			}
 		}
