@@ -375,6 +375,9 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
+			if (ModMapIndex < 0)
+				continue;
+
 			for (unsigned int i = 0; i < m_pDoor[ModMapIndex].m_vTiles.size(); i++)
 			{
 				if (pfnSwitchActive(m_pDoor[ModMapIndex].m_vTiles[i].m_Number, pUser))
