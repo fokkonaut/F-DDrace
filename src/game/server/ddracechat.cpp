@@ -2776,7 +2776,7 @@ void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int OtherID;
-	char aBuf[MAX_NAME_LENGTH];
+	char aBuf[128];
 	str_copy(aBuf, pResult->GetFullString(), sizeof(aBuf));
 	const char *pRest = pSelf->GetWhisper(aBuf, &OtherID);
 	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID))
