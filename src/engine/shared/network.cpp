@@ -124,11 +124,10 @@ CNetBase::~CNetBase()
 			Shutdown();
 }
 
-void CNetBase::Init(NETSOCKET Socket, NETSOCKET SocketTwo, NETSOCKET SocketSurvival, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine)
+void CNetBase::Init(NETSOCKET Socket, NETSOCKET SocketTwo, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine)
 {
 	m_aSocket[SOCKET_MAIN] = Socket;
 	m_aSocket[SOCKET_TWO] = SocketTwo;
-	m_aSocket[SOCKET_SURVIVAL] = SocketSurvival;
 	m_pConfig = pConfig;
 	m_pEngine = pEngine;
 	m_Huffman.Init();

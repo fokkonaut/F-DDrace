@@ -17,7 +17,7 @@ bool CNetClient::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 	mem_zero(this, sizeof(*this));
 
 	// init
-	Init(Socket, Socket, Socket, pConfig, pConsole, pEngine);
+	Init(Socket, Socket, pConfig, pConsole, pEngine);
 	m_Connection.Init(this, false);
 
 	m_TokenManager.Init(this);

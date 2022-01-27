@@ -663,9 +663,7 @@ public:
 	void SurvivalTick();
 	void SetPlayerSurvivalState(int State);
 	void SendSurvivalBroadcast(const char* pMsg, bool Sound = false, bool IsImportant = true);
-	virtual bool IsClientSurvival(int ClientID);
-	virtual int CountSurvivalPlayers(int State);
-	virtual int GetClientSurvivalKills(int ClientID);
+	int CountSurvivalPlayers(int State);
 	int GetRandomSurvivalPlayer(int State, int NotThis = -1);
 	int m_SurvivalBackgroundState;
 	int m_SurvivalGameState;

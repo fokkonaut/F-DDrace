@@ -294,8 +294,6 @@ public:
 	CRegister m_Register;
 	CRegister m_RegisterTwo;
 	CRegister m_RegisterSevendown;
-	CRegister m_RegSurvival;
-	CRegister m_RegSevendownSurvival;
 	CMapChecker m_MapChecker;
 	CAuthManager m_AuthManager;
 
@@ -477,9 +475,7 @@ public:
 	void DummyLeave(int DummyID);
 
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
-	virtual int GetSocket(int ClientID) { return m_aClients[ClientID].m_Socket; }
 	bool IsDoubleInfo();
-	bool IsClientServerInfoSurvival(int ClientID);
 
 	enum
 	{
