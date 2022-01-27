@@ -153,6 +153,7 @@ enum
 {
 	SOCKET_MAIN,
 	SOCKET_TWO,
+	SOCKET_SURVIVAL,
 	NUM_SOCKETS
 };
 
@@ -238,7 +239,7 @@ public:
 	class IEngine *Engine() { return m_pEngine; }
 	int NetType(int Socket) { return m_aSocket[Socket].type; }
 	
-	void Init(NETSOCKET Socket, NETSOCKET SocketTwo, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine);
+	void Init(NETSOCKET Socket, NETSOCKET SocketTwo, NETSOCKET SocketSurvival, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine);
 	void Shutdown();
 	void UpdateLogHandles();
 	void Wait(int Time);

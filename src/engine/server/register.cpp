@@ -35,6 +35,10 @@ CRegister::CRegister(bool Sevendown, int Socket)
 	{
 		m_pPrintFrom = "register2";
 	}
+	else if (m_Socket == SOCKET_SURVIVAL)
+	{
+		m_pPrintFrom = m_Sevendown ? "reg6surv" : "regsurv";
+	}
 }
 
 int CRegister::GetPort()
@@ -43,6 +47,8 @@ int CRegister::GetPort()
 		return m_pConfig->m_SvPort;
 	if (m_Socket == SOCKET_TWO)
 		return m_pConfig->m_SvPortTwo;
+	if (m_Socket == SOCKET_SURVIVAL)
+		return m_pConfig->m_SvPortSurvival;
 	return 0;
 }
 
