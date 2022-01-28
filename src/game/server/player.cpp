@@ -217,6 +217,7 @@ void CPlayer::Reset()
 
 	m_ZoomCursor = false;
 	m_StandardShowDistance = m_ShowDistance;
+	m_SentShowDistance = false;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_aStrongWeakID[i] = 0;

@@ -1106,6 +1106,11 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "ConnectionID: %s", aConnectionID);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
+	if (pPlayer->m_SentShowDistance)
+	{
+		str_format(aBuf, sizeof(aBuf), "Zoom level/dimensions: %.2f / (%d/%d)", pPlayer->GetZoomLevel(), (int)pPlayer->m_ShowDistance.x, (int)pPlayer->m_ShowDistance.y);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
 	str_format(aBuf, sizeof(aBuf), "Design: %s", pSelf->Server()->GetMapDesign(ID));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	if (pChr)

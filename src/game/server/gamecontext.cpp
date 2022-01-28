@@ -2793,6 +2793,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
 			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+			pPlayer->m_SentShowDistance = true;
 
 			float Aspect = pPlayer->m_ShowDistance.x / pPlayer->m_ShowDistance.y;
 			CalcScreenParams(Aspect, 1.f, &pPlayer->m_StandardShowDistance.x, &pPlayer->m_StandardShowDistance.y);
