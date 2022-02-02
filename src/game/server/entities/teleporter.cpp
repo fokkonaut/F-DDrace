@@ -66,7 +66,7 @@ void CTeleporter::ResetCollision(bool Remove)
 		Type = 0;
 		Number = 0;
 	}
-	GameServer()->Collision()->SetTeleporter(m_Pos, Type, m_Number);
+	GameServer()->Collision()->SetTeleporter(m_Pos, Type, Number);
 }
 
 void CTeleporter::Snap(int SnappingClient)
