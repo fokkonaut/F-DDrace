@@ -216,7 +216,7 @@ public:
 	int GetNumPlotLaserDoors() { return m_aNumPlots[PLOT_SMALL] * PLOT_SMALL_MAX_DOORS + m_aNumPlots[PLOT_BIG] * PLOT_BIG_MAX_DOORS; }
 	int GetNumMaxDoors(int PlotID);
 
-	int GetNumAllSwitchers() { return m_NumSwitchers + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }
+	int GetNumAllSwitchers() { return !m_pSwitch ? 0 : m_NumSwitchers + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }
 	int GetNumFreeDrawDoors() { return 255 - m_NumSwitchers - m_NumPlots - GetNumPlotLaserDoors(); }
 
 	bool IsPlotDoor(int Number) { return Number > m_NumSwitchers && !IsPlotDrawDoor(Number); }

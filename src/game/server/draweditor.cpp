@@ -15,7 +15,7 @@ static float s_DefaultAngle = 90 * pi / 180;
 CGameContext *CDrawEditor::GameServer() const { return m_pCharacter->GameServer(); }
 IServer *CDrawEditor::Server() const { return GameServer()->Server(); }
 
-CDrawEditor::CDrawEditor(CCharacter *pChr)
+void CDrawEditor::Init(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
 

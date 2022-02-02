@@ -51,6 +51,7 @@ CCollision::CCollision()
 	m_pDoor = 0;
 	m_pSwitchers = 0;
 	m_pTune = 0;
+
 	m_apPlotSize = 0;
 }
 
@@ -62,11 +63,6 @@ CCollision::~CCollision()
 void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 {
 	Dest();
-	m_NumSwitchers = 0;
-	m_NumPlots = 0;
-	m_NumTeleporters = 0;
-	for (int i = 0; i < NUM_PLOT_SIZES; i++)
-		m_aNumPlots[i] = 0;
 	m_pLayers = pLayers;
 	m_pConfig = pConfig;
 	m_Width = m_pLayers->GameLayer()->m_Width;
@@ -79,12 +75,24 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		if (Size >= m_Width * m_Height * sizeof(CTeleTile))
 			m_pTele = static_cast<CTeleTile*>(m_pLayers->Map()->GetData(m_pLayers->TeleLayer()->m_Tele));
 	}
+	else
+	{
+		// For draweditor
+		m_pTele = new CTeleTile[m_Width * m_Height];
+		mem_zero(m_pTele, sizeof(m_Width * m_Height * sizeof(CTeleTile)));
+	}
 
 	if (m_pLayers->SpeedupLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->SpeedupLayer()->m_Speedup);
 		if (Size >= m_Width * m_Height * sizeof(CSpeedupTile))
 			m_pSpeedup = static_cast<CSpeedupTile*>(m_pLayers->Map()->GetData(m_pLayers->SpeedupLayer()->m_Speedup));
+	}
+	else
+	{
+		// For draweditor
+		m_pSpeedup = new CSpeedupTile[m_Width * m_Height];
+		mem_zero(m_pSpeedup, sizeof(m_Width * m_Height * sizeof(CSpeedupTile)));
 	}
 
 	if (m_pLayers->SwitchLayer())
@@ -98,8 +106,13 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 	}
 	else
 	{
-		m_pDoor = 0;
+		// For draweditor
+		m_pSwitch = new CSwitchTile[m_Width * m_Height];
+		mem_zero(m_pSwitch, m_Width * m_Height * sizeof(CSwitchTile));
+
+		m_pDoor = new CDoorTile[m_Width * m_Height];
 		m_pSwitchers = 0;
+		//m_pDoor = 0;
 	}
 
 	if (m_pLayers->TuneLayer())
@@ -173,7 +186,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		}
 	}
 
-	if (m_NumSwitchers || m_NumPlots)
+	if (m_NumSwitchers || m_NumPlots || m_pSwitch) // added || m_pSwitch here bcs can now be executed always, because m_pswitch will always be set for draw editor also when the layer does not exist in the map
 	{
 		m_pSwitchers = new SSwitchers[GetNumAllSwitchers() + 1]; // always 256, GetNumFreeDrawDoors() fills up the rest from whats available up to 256
 
@@ -375,7 +388,7 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
-			if (ModMapIndex < 0)
+			if (ModMapIndex < 0 || !m_pDoor)
 				continue;
 
 			for (unsigned int i = 0; i < m_pDoor[ModMapIndex].m_vTiles.size(); i++)
@@ -805,6 +818,10 @@ void CCollision::Dest()
 	m_pDoor = 0;
 	m_pSwitchers = 0;
 	m_apPlotSize = 0;
+	m_NumPlots = 0;
+	m_NumTeleporters = 0;
+	for (int i = 0; i < NUM_PLOT_SIZES; i++)
+		m_aNumPlots[i] = 0;
 }
 
 int CCollision::IsSolid(int x, int y)
@@ -1631,7 +1648,7 @@ bool CCollision::IsTeleportInOut(int Index)
 
 int CCollision::GetDoorIndex(int Index, int Type, int Number)
 {
-	if (Index < 0)
+	if (Index < 0 || !m_pDoor)
 		return -1;
 
 	for (unsigned int i = 0; i < m_pDoor[Index].m_vTiles.size(); i++)
@@ -1642,7 +1659,7 @@ int CCollision::GetDoorIndex(int Index, int Type, int Number)
 
 bool CCollision::AddDoorTile(int Index, int Type, int Number, int Flags)
 {
-	if (Index < 0)
+	if (Index < 0 || !m_pDoor)
 		return false;
 
 	int DoorIndex = GetDoorIndex(Index, Type, Number);
@@ -1663,7 +1680,7 @@ bool CCollision::AddDoorTile(int Index, int Type, int Number, int Flags)
 
 bool CCollision::RemoveDoorTile(int Index, int Type, int Number)
 {
-	if (Index < 0)
+	if (Index < 0 || !m_pDoor)
 		return false;
 
 	int DoorIndex = GetDoorIndex(Index, Type, Number);
@@ -1848,7 +1865,7 @@ int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec
 int CCollision::CheckPointDoor(vec2 Pos, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	int Index = GetPureMapIndex(Pos);
-	if (Index < 0)
+	if (Index < 0 || !m_pDoor)
 		return -1;
 
 	for (unsigned int i = 0; i < m_pDoor[Index].m_vTiles.size(); i++)

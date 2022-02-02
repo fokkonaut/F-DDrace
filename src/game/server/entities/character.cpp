@@ -62,7 +62,7 @@ MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
 CCharacter::CCharacter(CGameWorld *pWorld)
-: CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), ms_PhysSize), m_DrawEditor(this)
+: CEntity(pWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), ms_PhysSize)
 {
 	m_Health = 0;
 	m_Armor = 0;
@@ -3657,6 +3657,8 @@ void CCharacter::FDDraceInit()
 
 	m_LastWeaponIndTick = 0;
 	m_LastInOutTeleporter = 0;
+
+	m_DrawEditor.Init(this);
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

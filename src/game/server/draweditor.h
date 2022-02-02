@@ -162,8 +162,7 @@ class CDrawEditor
 	CEntity *m_pPreview;
 
 public:
-	CDrawEditor(CCharacter *pChr);
-
+	void Init(CCharacter *pChr);
 	void Tick();
 
 	bool Active();
