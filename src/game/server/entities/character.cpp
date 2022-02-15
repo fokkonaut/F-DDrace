@@ -1860,6 +1860,9 @@ void CCharacter::Snap(int SnappingClient)
 
 	SnapCharacter(SnappingClient, ID);
 
+	if (SnappingClient == m_pPlayer->GetCID())
+		m_DrawEditor.Snap();
+
 	// Draw cursor
 	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	if (pSnap && (pSnap->m_ViewCursorID == -1 || pSnap->m_ViewCursorID == m_pPlayer->GetCID()))

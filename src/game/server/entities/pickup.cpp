@@ -10,7 +10,7 @@
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 
-CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner)
+CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos, PickupPhysSize)
 {
 	m_Type = Type;
@@ -20,6 +20,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Number = Number;
 
 	m_Owner = Owner;
+	m_Collision = Collision;
 	
 	m_Snap.m_Pos = m_Pos;
 	m_Snap.m_Time = 0.f;
@@ -53,7 +54,7 @@ void CPickup::Reset(bool Destroy)
 void CPickup::Tick()
 {
 	// no affect on players, just a preview for the brushing client
-	if (m_BrushCID != -1)
+	if (!m_Collision)
 		return;
 
 	if (m_Owner >= 0)
