@@ -10,7 +10,7 @@ const int PickupPhysSize = 14;
 class CPickup : public CEntity
 {
 public:
-	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1, bool Collision = true);
+	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1);
 
 	virtual ~CPickup();
 
@@ -23,7 +23,6 @@ public:
 	int GetType() { return m_Type; }
 	int GetSubtype() { return m_Subtype; }
 	int GetOwner() { return m_Owner; }
-	bool GetCollision() { return m_Collision; }
 
 private:
 	int m_Type;
@@ -36,7 +35,6 @@ private:
 	vec2 m_Core;
 	int m_ID2;
 	int64 m_aLastBatteryMsg[MAX_CLIENTS];
-	bool m_Collision;
 
 	struct
 	{

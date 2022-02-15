@@ -51,17 +51,6 @@ class CDrawEditor
 		TELE_MODE_HOOK,
 		NUM_TELE_MODES,
 
-		// Transform
-		TRANSFORM_CUT = 0,
-		TRANSFORM_COPY,
-		TRANSFORM_ERASE,
-		NUM_TRANSFORM_SETTINGS,
-
-		TRANSFORM_STATE_SETTING_FIRST = 0,
-		TRANSFORM_STATE_SETTING_SECOND,
-		TRANSFORM_STATE_CONFIRM,
-		TRANSFORM_STATE_RUNNING,
-
 		// Categories
 		CAT_UNINITIALIZED = -1,
 		CAT_PICKUPS,
@@ -69,7 +58,6 @@ class CDrawEditor
 		CAT_LASERDOORS,
 		CAT_SPEEDUPS,
 		CAT_TELEPORTER,
-		CAT_TRANSFORM,
 		NUM_DRAW_CATEGORIES,
 	};
 
@@ -80,7 +68,6 @@ class CDrawEditor
 	int GetCID();
 
 	CEntity *CreateEntity(bool Preview = false);
-	CEntity *CreateTransformEntity(CEntity *pTemplate, bool Preview);
 
 	bool IsCategoryLaser() { return m_Category == CAT_LASERWALLS || m_Category == CAT_LASERDOORS; }
 	void SetAngle(float Angle);
@@ -136,8 +123,6 @@ class CDrawEditor
 	const char *GetTeleporterMode();
 	int GetTeleporterType();
 
-	void RemoveTransformPreview();
-
 	struct
 	{
 		int m_Type;
@@ -170,22 +155,6 @@ class CDrawEditor
 		int m_Mode;
 	} m_Teleporter;
 
-	struct SelectedEnt
-	{
-		CEntity* m_pEnt;
-		vec2 m_Offset;
-	};
-	struct
-	{
-		int m_aID[4];
-		vec2 m_aPos[2];
-		vec2 TopLeft() { return vec2(min(m_aPos[0].x, m_aPos[1].x), min(m_aPos[0].y, m_aPos[1].y)); }
-		vec2 BottomRight() { return vec2(max(m_aPos[0].x, m_aPos[1].x), max(m_aPos[0].y, m_aPos[1].y)); }
-		bool IsInArea(vec2 Pos) { return (Pos.x >= TopLeft().x && Pos.x <= BottomRight().x && Pos.y >= TopLeft().y && Pos.y <= BottomRight().y); }
-		int m_State;
-		std::vector<SelectedEnt> m_vSelected;
-	} m_Transform;
-
 	// preview
 	void SetPreview();
 	void RemovePreview();
@@ -193,10 +162,8 @@ class CDrawEditor
 	CEntity *m_pPreview;
 
 public:
-	~CDrawEditor();
 	void Init(CCharacter *pChr);
 	void Tick();
-	void Snap();
 
 	bool Active();
 	bool Selecting() { return Active() && m_Selecting; }
