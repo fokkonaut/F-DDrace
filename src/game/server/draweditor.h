@@ -7,7 +7,6 @@
 #include "entity.h"
 
 class CCharacter;
-struct SSelectedArea;
 
 class CDrawEditor
 {
@@ -138,7 +137,7 @@ class CDrawEditor
 	int GetTeleporterType();
 
 	void StopTransform();
-	void RemoveEntity(CEntity *pEntity);
+	bool RemoveEntity(CEntity *pEntity);
 
 	struct
 	{
@@ -180,7 +179,7 @@ class CDrawEditor
 	struct
 	{
 		int m_State;
-		SSelectedArea m_Area;
+		CSelectedArea m_Area;
 		std::vector<SSelectedEnt> m_vPreview;
 		std::vector<CEntity *> m_vSelected;
 	} m_Transform;
@@ -192,7 +191,6 @@ class CDrawEditor
 	CEntity *m_pPreview;
 
 public:
-	~CDrawEditor();
 	void Init(CCharacter *pChr);
 	void Tick();
 	void Snap();

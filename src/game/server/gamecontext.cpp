@@ -6319,7 +6319,7 @@ void CGameContext::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
-void CGameContext::SnapSelectedArea(SSelectedArea *pSelectedArea)
+void CGameContext::SnapSelectedArea(CSelectedArea *pSelectedArea)
 {
 	vec2 TopLeft = pSelectedArea->TopLeft();
 	vec2 BottomRight = pSelectedArea->BottomRight();

@@ -30,8 +30,7 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Teleporter.m_Number = 0;
 	m_Teleporter.m_Evil = true;
 	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
-	for (int i = 0; i < 4; i++)
-		m_Transform.m_Area.m_aID[i] = Server()->SnapNewID();
+	m_Transform.m_Area.Init(GameServer());
 	
 	m_Setting = -1;
 	m_RoundPos = true;
@@ -48,12 +47,6 @@ void CDrawEditor::Init(CCharacter *pChr)
 			break;
 		}
 	}
-}
-
-CDrawEditor::~CDrawEditor()
-{
-	for (int i = 0; i < 4; i++)
-		Server()->SnapFreeID(m_Transform.m_Area.m_aID[i]);
 }
 
 bool CDrawEditor::Active()
@@ -123,12 +116,20 @@ bool CDrawEditor::CanRemove(CEntity *pEntity)
 	return CanPlace(true) && pEntity && !pEntity->IsPlotDoor() && pEntity->m_PlotID >= 0;
 }
 
-void CDrawEditor::RemoveEntity(CEntity *pEntity)
+bool CDrawEditor::RemoveEntity(CEntity *pEntity)
 {
+	if (pEntity->m_MoveCID != -1 && pEntity->m_MoveCID != GetCID())
+		return false;
+
 	for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
 		if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
+		{
 			GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+			break;
+		}
+
 	GameServer()->m_World.DestroyEntity(pEntity);
+	return true;
 }
 
 int CDrawEditor::GetPlotID()
@@ -322,13 +323,20 @@ void CDrawEditor::OnPlayerFire()
 		int PlotID = CurrentPlotID();
 		if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
 		{
-			for (unsigned i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+			for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
 			{
 				CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
 				if (m_Transform.m_Area.Includes(pEntity->GetPos()))
 				{
 					if (m_Setting == TRANSFORM_MOVE)
-						pEntity->m_MoveCID = GetCID();
+					{
+						if (pEntity->m_MoveCID == -1)
+						{
+							pEntity->m_MoveCID = GetCID();
+							m_Transform.m_vSelected.push_back(pEntity);
+						}
+						continue;
+					}
 					m_Transform.m_vSelected.push_back(pEntity);
 				}
 			}
@@ -343,6 +351,9 @@ void CDrawEditor::OnPlayerFire()
 					Entity.m_Offset = Entity.m_pEnt->GetPos() - m_Transform.m_Area.BottomRight();
 					m_Transform.m_vPreview.push_back(Entity);
 				}
+
+				if (m_Setting == TRANSFORM_COPY)
+					m_Transform.m_vSelected.clear();
 			}
 			else if (m_Setting == TRANSFORM_ERASE)
 			{
@@ -452,9 +463,8 @@ void CDrawEditor::HandleInput()
 				int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
 				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
 
-				if (CanRemove(pEntity))
+				if (CanRemove(pEntity) && RemoveEntity(pEntity))
 				{
-					RemoveEntity(pEntity);
 					m_pCharacter->SetAttackTick(Server()->Tick());
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
 				}
@@ -625,8 +635,7 @@ void CDrawEditor::SetCategory(int Category)
 	{
 		m_Entity = -1;
 		m_RoundPos = true;
-		m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
-		m_Transform.m_vSelected.clear();
+		// no need to reset m_Transform stuff, because we call StopTransform() anyways
 	}
 
 	// done in SetPickup()
@@ -1058,6 +1067,7 @@ void CDrawEditor::StopTransform()
 	m_Transform.m_vPreview.clear();
 
 	for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-		m_Transform.m_vSelected[i]->m_MoveCID = -1;
+		if (m_Transform.m_vSelected[i]->m_MoveCID == GetCID())
+			m_Transform.m_vSelected[i]->m_MoveCID = -1;
 	m_Transform.m_vSelected.clear();
 }

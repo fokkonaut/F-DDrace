@@ -10,10 +10,16 @@
 class CEntity;
 class CCharacter;
 class CPlayer;
+class CGameContext;
 
 // Needs to be here because we need it in gamecontext.h but also in draweditor.h
-struct SSelectedArea
+class CSelectedArea
 {
+	CGameContext *m_pGameServer;
+public:
+	void Init(CGameContext *pGameServer);
+	~CSelectedArea();
+
 	int m_aID[4];
 	vec2 m_aPos[2];
 	vec2 TopLeft() { return vec2(min(m_aPos[0].x, m_aPos[1].x), min(m_aPos[0].y, m_aPos[1].y)); }

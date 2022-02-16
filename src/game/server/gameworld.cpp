@@ -12,6 +12,19 @@
 #include <engine/shared/config.h>
 #include "gamemodes/DDRace.h"
 
+void CSelectedArea::Init(CGameContext *pGameServer)
+{
+	m_pGameServer = pGameServer;
+	for (int i = 0; i < 4; i++)
+		m_aID[i] = m_pGameServer->Server()->SnapNewID();
+}
+
+CSelectedArea::~CSelectedArea()
+{
+	for (int i = 0; i < 4; i++)
+		m_pGameServer->Server()->SnapFreeID(m_aID[i]);
+}
+
 
 //////////////////////////////////////////////////
 // game world
