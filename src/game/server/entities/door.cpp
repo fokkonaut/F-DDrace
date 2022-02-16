@@ -110,25 +110,20 @@ void CDoor::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	if (m_BrushCID != -1)
-	{
-		CCharacter *pBrushChr = GameServer()->GetPlayerChar(m_BrushCID);
-		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
-			return;
-	}
+	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+	if (pChr && pChr->m_DrawEditor.OnSnapPreview(this))
+		return;
 
 	// plot id 0 = free draw, dont hide objects on normal plots. Always show objects when editing currently
 	if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->m_HideDrawings && m_PlotID == 0 && !m_Collision
 		&& (!GameServer()->GetPlayerChar(SnappingClient) || GameServer()->GetPlayerChar(SnappingClient)->GetActiveWeapon() != WEAPON_DRAW_EDITOR))
 		return;
 
-	CCharacter *Char = GameServer()->GetPlayerChar(SnappingClient);
-	bool ForceOn = Char && Char->GetActiveWeapon() == WEAPON_DRAW_EDITOR && GameServer()->Collision()->IsPlotDrawDoor(m_Number);
+	bool ForceOn = pChr && pChr->GetActiveWeapon() == WEAPON_DRAW_EDITOR && GameServer()->Collision()->IsPlotDrawDoor(m_Number);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if (m_Collision && !ForceOn)
 	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 		if (pChr && pChr->SendExtendedEntity(this))
 		{
 			pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
@@ -157,9 +152,9 @@ void CDoor::Snap(int SnappingClient)
 	else
 	{
 		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
-			Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
+			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-		if (Char && Char->Team() != TEAM_SUPER && Char->IsAlive() && (ForceOn || (GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])))
+		if (pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && (ForceOn || (GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])))
 		{
 			pObj->m_FromX = (int)m_To.x;
 			pObj->m_FromY = (int)m_To.y;

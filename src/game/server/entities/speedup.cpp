@@ -90,12 +90,9 @@ void CSpeedup::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (m_BrushCID != -1)
-	{
-		CCharacter *pBrushChr = GameServer()->GetPlayerChar(m_BrushCID);
-		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
-			return;
-	}
+	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+	if (pChr && pChr->m_DrawEditor.OnSnapPreview(this))
+		return;
 
 	for (int i = 0; i < NUM_DOTS; i++)
 	{

@@ -7,6 +7,7 @@
 #include "entity.h"
 
 class CCharacter;
+struct SSelectedArea;
 
 class CDrawEditor
 {
@@ -51,6 +52,17 @@ class CDrawEditor
 		TELE_MODE_HOOK,
 		NUM_TELE_MODES,
 
+		// Transform
+		TRANSFORM_MOVE = 0,
+		TRANSFORM_COPY,
+		TRANSFORM_ERASE,
+		NUM_TRANSFORM_SETTINGS,
+
+		TRANSFORM_STATE_SETTING_FIRST = 0,
+		TRANSFORM_STATE_SETTING_SECOND,
+		TRANSFORM_STATE_CONFIRM,
+		TRANSFORM_STATE_RUNNING,
+
 		// Categories
 		CAT_UNINITIALIZED = -1,
 		CAT_PICKUPS,
@@ -58,6 +70,7 @@ class CDrawEditor
 		CAT_LASERDOORS,
 		CAT_SPEEDUPS,
 		CAT_TELEPORTER,
+		CAT_TRANSFORM,
 		NUM_DRAW_CATEGORIES,
 	};
 
@@ -68,6 +81,7 @@ class CDrawEditor
 	int GetCID();
 
 	CEntity *CreateEntity(bool Preview = false);
+	CEntity *CreateTransformEntity(CEntity *pTemplate, bool Preview);
 
 	bool IsCategoryLaser() { return m_Category == CAT_LASERWALLS || m_Category == CAT_LASERDOORS; }
 	void SetAngle(float Angle);
@@ -85,8 +99,8 @@ class CDrawEditor
 	DrawInput m_PrevInput;
 	int m_PrevPlotID;
 
-	bool CanPlace(bool Remove = false);
-	bool CanRemove(CEntity *pEnt);
+	bool CanPlace(bool Remove = false, CEntity *pEntity = 0);
+	bool CanRemove(CEntity *pEntity);
 	int GetPlotID();
 	int CurrentPlotID();
 	int GetCursorPlotID();
@@ -123,6 +137,9 @@ class CDrawEditor
 	const char *GetTeleporterMode();
 	int GetTeleporterType();
 
+	void StopTransform();
+	void RemoveEntity(CEntity *pEntity);
+
 	struct
 	{
 		int m_Type;
@@ -155,6 +172,19 @@ class CDrawEditor
 		int m_Mode;
 	} m_Teleporter;
 
+	struct SSelectedEnt
+	{
+		CEntity *m_pEnt;
+		vec2 m_Offset;
+	};
+	struct
+	{
+		int m_State;
+		SSelectedArea m_Area;
+		std::vector<SSelectedEnt> m_vPreview;
+		std::vector<CEntity *> m_vSelected;
+	} m_Transform;
+
 	// preview
 	void SetPreview();
 	void RemovePreview();
@@ -162,8 +192,10 @@ class CDrawEditor
 	CEntity *m_pPreview;
 
 public:
+	~CDrawEditor();
 	void Init(CCharacter *pChr);
 	void Tick();
+	void Snap();
 
 	bool Active();
 	bool Selecting() { return Active() && m_Selecting; }
@@ -175,6 +207,6 @@ public:
 	void OnInput(CNetObj_PlayerInput *pNewInput);
 
 	// used in snap functions of available entities to draw, returns true if the SnappingClient is not able to see the preview
-	bool OnSnapPreview(int SnappingClient);
+	bool OnSnapPreview(CEntity *pEntity);
 };
 #endif //GAME_SERVER_DRAWEDITOR_H

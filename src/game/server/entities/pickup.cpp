@@ -10,7 +10,7 @@
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 
-CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner)
+CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos, PickupPhysSize)
 {
 	m_Type = Type;
@@ -20,6 +20,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Number = Number;
 
 	m_Owner = Owner;
+	m_Collision = Collision;
 	
 	m_Snap.m_Pos = m_Pos;
 	m_Snap.m_Time = 0.f;
@@ -53,7 +54,7 @@ void CPickup::Reset(bool Destroy)
 void CPickup::Tick()
 {
 	// no affect on players, just a preview for the brushing client
-	if (m_BrushCID != -1)
+	if (!m_Collision)
 		return;
 
 	if (m_Owner >= 0)
@@ -280,22 +281,18 @@ void CPickup::Snap(int SnappingClient)
 	if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
 		return;
 
-	if (m_BrushCID != -1)
-	{
-		CCharacter *pBrushChr = GameServer()->GetPlayerChar(m_BrushCID);
-		if (pBrushChr && pBrushChr->m_DrawEditor.OnSnapPreview(SnappingClient))
-			return;
-	}
+	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
+	if (pChr && pChr->m_DrawEditor.OnSnapPreview(this))
+		return;
 
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
-	CCharacter* Char = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1
 				|| GameServer()->m_apPlayers[SnappingClient]->IsPaused())
 			&& GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
-		Char = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
+		pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-	if (pOwner && Char)
+	if (pOwner && pChr)
 	{
 		if (!CmaskIsSet(pOwner->TeamMask(), SnappingClient))
 			return;
@@ -318,7 +315,7 @@ void CPickup::Snap(int SnappingClient)
 	else
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if (Char && Char->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()]) && (!Tick))
+		if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) && (!Tick))
 			return;
 	}
 

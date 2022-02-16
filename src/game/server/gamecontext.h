@@ -648,6 +648,8 @@ public:
 
 	const char *FormatURL(const char *pURL);
 
+	void SnapSelectedArea(SSelectedArea *pSelectedArea);
+
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 

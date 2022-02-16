@@ -29,6 +29,9 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Speedup.m_MaxSpeed = 0;
 	m_Teleporter.m_Number = 0;
 	m_Teleporter.m_Evil = true;
+	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
+	for (int i = 0; i < 4; i++)
+		m_Transform.m_Area.m_aID[i] = Server()->SnapNewID();
 	
 	m_Setting = -1;
 	m_RoundPos = true;
@@ -47,40 +50,63 @@ void CDrawEditor::Init(CCharacter *pChr)
 	}
 }
 
+CDrawEditor::~CDrawEditor()
+{
+	for (int i = 0; i < 4; i++)
+		Server()->SnapFreeID(m_Transform.m_Area.m_aID[i]);
+}
+
 bool CDrawEditor::Active()
 {
 	return m_pCharacter->GetActiveWeapon() == WEAPON_DRAW_EDITOR;
 }
 
-bool CDrawEditor::CanPlace(bool Remove)
+bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 {
-	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER)
+	vec2 Pos = m_Pos;
+	int CursorPlotID = GetCursorPlotID();
+	int Type = m_Entity;
+	bool ButtonMode = m_Laser.m_ButtonMode;
+	int DoorNumber = m_Laser.m_Number;
+	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER;
+
+	if (pEntity)
 	{
-		int rx = round_to_int(m_Pos.x) / 32;
-		int ry = round_to_int(m_Pos.y) / 32;
+		Pos = pEntity->GetPos();
+		CursorPlotID = GameServer()->GetTilePlotID(Pos);
+		Type = pEntity->GetObjType();
+		ButtonMode = Type == CGameWorld::ENTTYPE_BUTTON;
+		DoorNumber = pEntity->m_Number;
+		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER;
+		Remove = false;
+	}
+
+	if (CheckBorders)
+	{
+		int rx = round_to_int(Pos.x) / 32;
+		int ry = round_to_int(Pos.y) / 32;
 		if (rx <= 0 || rx >= GameServer()->Collision()->GetWidth()-1 || ry <= 0 || ry >= GameServer()->Collision()->GetHeight()-1)
 			return false;
 	}
 
-	int CursorPlotID = GetCursorPlotID();
-	bool ValidTile = !GameServer()->Collision()->CheckPoint(m_Pos);
+	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
 	if (!Remove)
 	{
-		int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		if (m_Category == CAT_SPEEDUPS)
+		int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
+		if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 		{
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
 				return false;
 
 			ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 		}
-		else if (m_Category == CAT_LASERDOORS && m_Laser.m_ButtonMode)
+		else if (Type == CGameWorld::ENTTYPE_BUTTON)
 		{
 			// disallow placing buttons on already existing buttons with the same number
-			int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
+			int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, DoorNumber);
 			ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
 		}
-		else if (m_Category == CAT_TELEPORTER)
+		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
 			ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
 		}
@@ -91,10 +117,18 @@ bool CDrawEditor::CanPlace(bool Remove)
 	return (ValidTile && ((CursorPlotID >= PLOT_START && CursorPlotID == OwnPlotID) || FreeDraw));
 }
 
-bool CDrawEditor::CanRemove(CEntity *pEnt)
+bool CDrawEditor::CanRemove(CEntity *pEntity)
 {
 	// check whether pEnt->m_PlotID >= 0 because -1 would mean its a map object, so we dont wanna be able to remove it
-	return CanPlace(true) && pEnt && !pEnt->IsPlotDoor() && pEnt->m_PlotID >= 0;
+	return CanPlace(true) && pEntity && !pEntity->IsPlotDoor() && pEntity->m_PlotID >= 0;
+}
+
+void CDrawEditor::RemoveEntity(CEntity *pEntity)
+{
+	for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
+		if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
+			GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+	GameServer()->m_World.DestroyEntity(pEntity);
 }
 
 int CDrawEditor::GetPlotID()
@@ -205,6 +239,21 @@ void CDrawEditor::Tick()
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
 
+	if (m_Category == CAT_TRANSFORM)
+	{
+		if ((m_Transform.m_State == TRANSFORM_STATE_SETTING_FIRST || m_Transform.m_State == TRANSFORM_STATE_SETTING_SECOND))
+		{
+			if (m_Transform.m_State == TRANSFORM_STATE_SETTING_FIRST)
+				m_Transform.m_Area.m_aPos[0] = m_Pos;
+			m_Transform.m_Area.m_aPos[1] = m_Pos;
+		}
+		if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+		{
+			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+				m_Transform.m_vPreview[i].m_pEnt->SetPos(m_Pos + m_Transform.m_vPreview[i].m_Offset);
+		}
+	}
+
 	int PlotID = CurrentPlotID();
 	if (PlotID != m_PrevPlotID)
 	{
@@ -230,6 +279,14 @@ void CDrawEditor::Tick()
 	}
 }
 
+void CDrawEditor::Snap()
+{
+	if (!Active() || m_Category != CAT_TRANSFORM)
+		return;
+
+	GameServer()->SnapSelectedArea(&m_Transform.m_Area);
+}
+
 void CDrawEditor::OnPlayerFire()
 {
 	if (!Active())
@@ -237,23 +294,85 @@ void CDrawEditor::OnPlayerFire()
 
 	if (m_Selecting)
 	{
-		int Dir = m_pCharacter->GetAimDir();
-		int Setting = m_Setting;
-		int NumSettings = GetNumSettings();
-		if (Dir == 1)
+		if (m_Category != CAT_TRANSFORM || m_Transform.m_State != TRANSFORM_STATE_RUNNING)
 		{
-			Setting++;
-			if (Setting >= NumSettings)
-				Setting = 0;
+			int Dir = m_pCharacter->GetAimDir();
+			int Setting = m_Setting;
+			int NumSettings = GetNumSettings();
+			if (Dir == 1)
+			{
+				Setting++;
+				if (Setting >= NumSettings)
+					Setting = 0;
+			}
+			else if (Dir == -1)
+			{
+				Setting--;
+				if (Setting < 0)
+					Setting = NumSettings-1;
+			}
+			SetSetting(Setting);
+			SendWindow();
 		}
-		else if (Dir == -1)
+		return;
+	}
+
+	if (m_Category == CAT_TRANSFORM)
+	{
+		int PlotID = CurrentPlotID();
+		if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
 		{
-			Setting--;
-			if (Setting < 0)
-				Setting = NumSettings-1;
+			for (unsigned i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+			{
+				CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+				if (m_Transform.m_Area.Includes(pEntity->GetPos()))
+				{
+					if (m_Setting == TRANSFORM_MOVE)
+						pEntity->m_MoveCID = GetCID();
+					m_Transform.m_vSelected.push_back(pEntity);
+				}
+			}
+
+			if (m_Setting == TRANSFORM_MOVE || m_Setting == TRANSFORM_COPY)
+			{
+				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+				{
+					SSelectedEnt Entity;
+					Entity.m_pEnt = CreateTransformEntity(m_Transform.m_vSelected[i], true);
+					Entity.m_pEnt->m_BrushCID = GetCID();
+					Entity.m_Offset = Entity.m_pEnt->GetPos() - m_Transform.m_Area.BottomRight();
+					m_Transform.m_vPreview.push_back(Entity);
+				}
+			}
+			else if (m_Setting == TRANSFORM_ERASE)
+			{
+				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+					RemoveEntity(m_Transform.m_vSelected[i]);
+				StopTransform();
+				return;
+			}
 		}
-		SetSetting(Setting);
-		SendWindow();
+		else if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+		{
+			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+			{
+				if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
+				{
+					CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
+					pEntity->m_PlotID = PlotID;
+					GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+				}
+			}
+
+			if (m_Setting == TRANSFORM_MOVE)
+				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+					RemoveEntity(m_Transform.m_vSelected[i]);
+
+			StopTransform();
+			return;
+		}
+
+		m_Transform.m_State++;
 		return;
 	}
 
@@ -320,22 +439,25 @@ void CDrawEditor::HandleInput()
 			SetCategory(Category);
 			SendWindow();
 		}
-		else if (!m_Selecting && !m_pCharacter->m_FreezeTime)
+		else if (!m_Selecting)
 		{
-			m_Erasing = true;
-
-			int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
-			CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
-
-			if (CanRemove(pEntity))
+			if (m_Category == CAT_TRANSFORM)
 			{
-				for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
-					if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
-						GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
+				StopTransform();
+			}
+			else if (!m_pCharacter->m_FreezeTime)
+			{
+				m_Erasing = true;
 
-				GameServer()->m_World.DestroyEntity(pEntity);
-				m_pCharacter->SetAttackTick(Server()->Tick());
-				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
+				int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
+				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
+
+				if (CanRemove(pEntity))
+				{
+					RemoveEntity(pEntity);
+					m_pCharacter->SetAttackTick(Server()->Tick());
+					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, CmaskAll());
+				}
 			}
 		}
 	}
@@ -499,6 +621,13 @@ void CDrawEditor::SetCategory(int Category)
 		m_Entity = CGameWorld::ENTTYPE_TELEPORTER;
 		m_RoundPos = true;
 	}
+	else if (Category == CAT_TRANSFORM)
+	{
+		m_Entity = -1;
+		m_RoundPos = true;
+		m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
+		m_Transform.m_vSelected.clear();
+	}
 
 	// done in SetPickup()
 	if (Category != CAT_PICKUPS)
@@ -507,6 +636,7 @@ void CDrawEditor::SetCategory(int Category)
 		m_Setting = 0; // always first setting
 	}
 
+	StopTransform();
 	m_Category = Category;
 }
 
@@ -523,7 +653,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	switch (m_Entity)
 	{
 	case CGameWorld::ENTTYPE_PICKUP:
-		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Pickup.m_Type, m_Pickup.m_SubType);
+		return new CPickup(m_pCharacter->GameWorld(), m_Pos, m_Pickup.m_Type, m_Pickup.m_SubType, 0, 0, -1, !Preview);
 	case CGameWorld::ENTTYPE_DOOR:
 	{
 		int Number = m_Category == CAT_LASERDOORS && !Preview ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(CurrentPlotID(), m_Laser.m_Number) : 0;
@@ -545,6 +675,24 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	return 0;
 }
 
+CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
+{
+	switch (pTemplate->GetObjType())
+	{
+	case CGameWorld::ENTTYPE_PICKUP:
+		return new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview);
+	case CGameWorld::ENTTYPE_DOOR:
+		return new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview, ((CDoor *)pTemplate)->GetThickness());
+	case CGameWorld::ENTTYPE_BUTTON:
+		return new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview);
+	case CGameWorld::ENTTYPE_SPEEDUP:
+		return new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview);
+	case CGameWorld::ENTTYPE_TELEPORTER:
+		return new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview);
+	}
+	return 0;
+}
+
 void CDrawEditor::SendWindow()
 {
 	char aMsg[900];
@@ -562,13 +710,22 @@ void CDrawEditor::SendWindow()
 	str_append(aMsg, "\n", sizeof(aMsg));
 	str_append(aMsg,
 		"     Controls:\n\n"
-		"Stop editing: Switch weapon\n"
-		"Place object: Left mouse\n"
-		"Eraser: Right mouse\n", sizeof(aMsg));
-	if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
+		"Stop editing: Switch weapon\n", sizeof(aMsg));
+	if (m_Category == CAT_TRANSFORM)
+	{
+		str_append(aMsg, "Abort selection: Right mouse\n", sizeof(aMsg));
+		str_append(aMsg, "Confirm: Left mouse\n", sizeof(aMsg));
+	}
+	else
+	{
+		str_append(aMsg,
+			"Eraser: Right mouse\n"
+			"Place object: Left mouse\n", sizeof(aMsg));
+	}
+	if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TRANSFORM)
 		str_append(aMsg, "Toggle position rounding: kill\n", sizeof(aMsg));
 
-	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TRANSFORM)
 	{
 		if (IsCategoryLaser())
 			str_append(aMsg, "Change length: TAB + A/D\n", sizeof(aMsg));
@@ -619,6 +776,13 @@ void CDrawEditor::SendWindow()
 		str_format(aBuf, sizeof(aBuf), "Evil: %s", m_Teleporter.m_Evil ? "Yes" : "No");
 		str_append(aMsg, FormatSetting(aBuf, TELEPORTER_EVIL), sizeof(aMsg));
 	}
+	else if (m_Category == CAT_TRANSFORM)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_append(aMsg, FormatSetting("Move", TRANSFORM_MOVE), sizeof(aMsg));
+		str_append(aMsg, FormatSetting("Copy", TRANSFORM_COPY), sizeof(aMsg));
+		str_append(aMsg, FormatSetting("Erase", TRANSFORM_ERASE), sizeof(aMsg));
+	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
 }
@@ -654,6 +818,7 @@ const char *CDrawEditor::GetCategory(int Category)
 	case CAT_LASERDOORS: return "Laser Doors";
 	case CAT_SPEEDUPS: return "Speedups";
 	case CAT_TELEPORTER: return "Teleporters";
+	case CAT_TRANSFORM: return "Transformation";
 	default: return "Unknown";
 	}
 }
@@ -667,6 +832,7 @@ const char *CDrawEditor::GetCategoryListName(int Category)
 	case CAT_LASERDOORS: return "doors";
 	case CAT_SPEEDUPS: return "speedups";
 	case CAT_TELEPORTER: return "teleporters";
+	case CAT_TRANSFORM: return "transform";
 	default: return "";
 	}
 }
@@ -680,6 +846,7 @@ int CDrawEditor::GetNumSettings()
 	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
 	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
+	case CAT_TRANSFORM: return NUM_TRANSFORM_SETTINGS;
 	default: return 0;
 	}
 }
@@ -740,7 +907,7 @@ void CDrawEditor::OnPlayerKill()
 				AddAngle(45);
 		}
 	}
-	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
+	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TRANSFORM)
 	{
 		m_RoundPos = !m_RoundPos;
 	}
@@ -828,6 +995,7 @@ void CDrawEditor::OnWeaponSwitch()
 	else if (m_pCharacter->GetLastWeapon() == WEAPON_DRAW_EDITOR)
 	{
 		RemovePreview();
+		StopTransform();
 
 		int PlotID = GetPlotID();
 		if (CurrentPlotID() == PlotID)
@@ -846,11 +1014,12 @@ void CDrawEditor::OnWeaponSwitch()
 void CDrawEditor::OnPlayerDeath()
 {
 	RemovePreview();
+	StopTransform();
 }
 
 void CDrawEditor::SetPreview()
 {
-	if (m_pPreview)
+	if (m_pPreview || m_Entity == -1)
 		return;
 
 	m_pPreview = CreateEntity(true);
@@ -875,7 +1044,20 @@ void CDrawEditor::UpdatePreview()
 	SetPreview();
 }
 
-bool CDrawEditor::OnSnapPreview(int SnappingClient)
+bool CDrawEditor::OnSnapPreview(CEntity *pEntity)
 {
-	return SnappingClient != GetCID() || m_Erasing;
+	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || pEntity->m_MoveCID == GetCID();
+}
+
+void CDrawEditor::StopTransform()
+{
+	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
+
+	for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+		m_Transform.m_vPreview[i].m_pEnt->Destroy();
+	m_Transform.m_vPreview.clear();
+
+	for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+		m_Transform.m_vSelected[i]->m_MoveCID = -1;
+	m_Transform.m_vSelected.clear();
 }

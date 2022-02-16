@@ -11,6 +11,16 @@ class CEntity;
 class CCharacter;
 class CPlayer;
 
+// Needs to be here because we need it in gamecontext.h but also in draweditor.h
+struct SSelectedArea
+{
+	int m_aID[4];
+	vec2 m_aPos[2];
+	vec2 TopLeft() { return vec2(min(m_aPos[0].x, m_aPos[1].x), min(m_aPos[0].y, m_aPos[1].y)); }
+	vec2 BottomRight() { return vec2(max(m_aPos[0].x, m_aPos[1].x), max(m_aPos[0].y, m_aPos[1].y)); }
+	bool Includes(vec2 Pos) { return (Pos.x >= TopLeft().x && Pos.x <= BottomRight().x && Pos.y >= TopLeft().y && Pos.y <= BottomRight().y); }
+};
+
 /*
 	Class: Game World
 		Tracks all entities in the game. Propagates tick and

@@ -6319,6 +6319,27 @@ void CGameContext::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
+void CGameContext::SnapSelectedArea(SSelectedArea *pSelectedArea)
+{
+	vec2 TopLeft = pSelectedArea->TopLeft();
+	vec2 BottomRight = pSelectedArea->BottomRight();
+	vec2 aPoints[4] = { TopLeft, vec2(BottomRight.x, TopLeft.y), BottomRight, vec2(TopLeft.x, BottomRight.y) };
+
+	for (int i = 0; i < 4; i++)
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, pSelectedArea->m_aID[i], sizeof(CNetObj_Laser)));
+		if (!pObj)
+			return;
+
+		int To = i == 3 ? 0 : i+1;
+		pObj->m_X = round_to_int(aPoints[i].x);
+		pObj->m_Y = round_to_int(aPoints[i].y);
+		pObj->m_FromX = round_to_int(aPoints[To].x);
+		pObj->m_FromY = round_to_int(aPoints[To].y);
+		pObj->m_StartTick = Server()->Tick() - 2;
+	}
+}
+
 void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)
 {
 	int DummyID = GetNextClientID();
