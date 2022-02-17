@@ -31,7 +31,7 @@ jobs:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
-          cmake-args: -G "Visual Studio 16 2019" -A x64
+          cmake-args: -A x64
           package-file: teeworlds-*-win64.zip
           env:
             CFLAGS: /WX
@@ -67,6 +67,10 @@ jobs:
       run: |
         cd debug
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+	- name: Run debug server
+      env: ${{ matrix.env }}
+      run: |
+        cd debug
         ./teeworlds_srv shutdown
 
     - name: Build in release mode
@@ -80,6 +84,10 @@ jobs:
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+    - name: Run release server
+      env: ${{ matrix.env }}
+      run: |
+        cd release
         ./teeworlds_srv shutdown
 
     - name: Package
