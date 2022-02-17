@@ -46,6 +46,7 @@ public:
 	int GetAngle() { return m_Angle; }
 	int GetForce() { return m_Force; }
 	int GetMaxSpeed() { return m_MaxSpeed; }
+	bool GetCollision() { return m_Collision; }
 };
 
 #endif // GAME_SERVER_ENTITIES_SPEEDUP_H

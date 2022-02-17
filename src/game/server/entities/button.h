@@ -29,6 +29,7 @@ public:
 	CButton(CGameWorld *pGameWorld, vec2 Pos, int Number, bool Collision = true);
 	virtual ~CButton();
 	virtual void Snap(int SnappingClient);
+	bool GetCollision() { return m_Collision; }
 };
 
 #endif // GAME_SERVER_ENTITIES_BUTTON_H

@@ -710,15 +710,15 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 	switch (pTemplate->GetObjType())
 	{
 	case CGameWorld::ENTTYPE_PICKUP:
-		return new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview);
+		return new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview && ((CPickup *)pTemplate)->GetCollision());
 	case CGameWorld::ENTTYPE_DOOR:
-		return new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview, ((CDoor *)pTemplate)->GetThickness());
+		return new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview && ((CDoor *)pTemplate)->GetCollision(), ((CDoor *)pTemplate)->GetThickness());
 	case CGameWorld::ENTTYPE_BUTTON:
-		return new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview);
+		return new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview && ((CButton *)pTemplate)->GetCollision());
 	case CGameWorld::ENTTYPE_SPEEDUP:
-		return new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview);
+		return new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview && ((CSpeedup *)pTemplate)->GetCollision());
 	case CGameWorld::ENTTYPE_TELEPORTER:
-		return new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview);
+		return new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && ((CTeleporter *)pTemplate)->GetCollision());
 	}
 	return 0;
 }
