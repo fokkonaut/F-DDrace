@@ -306,7 +306,7 @@ int main(int argc, const char **argv) // ignore_convention
 
 	pConfigManager->Init(FlagMask);
 	m_pConsole->Init();
-	m_NetBan.Init(m_pConsole, pStorage);
+	m_NetBan.Init(m_pConsole, pStorage, pConfig);
 	if(argc > 1) // ignore_convention
 		m_pConsole->ParseArguments(argc-1, &argv[1]); // ignore_convention
 
