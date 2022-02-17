@@ -2010,6 +2010,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (Config()->m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
+			if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DrawEditor.TryEnterPresetName(pMsg->m_pMessage))
+				return;
+
 			// don't allow spectators to disturb players during a running game in tournament mode
 			int Mode = pMsg->m_Mode;
 			if((Config()->m_SvTournamentMode == 2) &&
@@ -4567,152 +4570,11 @@ void CGameContext::ReadPlotStats(int ID)
 		case PLOT_DOOR_STATUS:				SetPlotDoorStatus(ID, atoi(pData)); break;
 		case PLOT_OBJECTS:
 		{
-			std::vector< std::pair<int, int> > vNumbers;
-			while (1)
+			std::vector<CEntity *> vEntities = ReadPlotObjects(pData, ID);
+			for (unsigned int j = 0; j < vEntities.size(); j++)
 			{
-				if (!pData)
-					break;
-
-				vec2 Pos = vec2(-1, -1);
-				int EntityType = -1;
-
-				sscanf(pData, "%d", &EntityType);
-				switch (EntityType)
-				{
-					case CGameWorld::ENTTYPE_PICKUP:
-					{
-						int Type = -1;
-						int Subtype = -1;
-						sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Type, &Subtype);
-						if (Type >= 0 && Subtype >= 0)
-						{
-							CPickup *pPickup = new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype);
-							pPickup->m_PlotID = ID;
-							m_aPlots[ID].m_vObjects.push_back(pPickup);
-						}
-						break;
-					}
-					case CGameWorld::ENTTYPE_DOOR:
-					{
-						float Rotation = -1.f;
-						int Length = -1;
-						int CollisionActive = -1;
-						int Thickness = -1;
-						int Number = -1;
-						int Status = -1;
-						sscanf(pData, "%d:%f/%f:%f:%d:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Rotation, &Length, &CollisionActive, &Thickness, &Number, &Status);
-						if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0)
-						{
-							int NewNumber = -1;
-							if (Number == 0)
-							{
-								NewNumber = 0;
-							}
-							else
-							{
-								for (unsigned int i = 0; i < vNumbers.size(); i++)
-									if (vNumbers[i].first == Number)
-										NewNumber = vNumbers[i].second;
-
-								if (NewNumber == -1)
-								{
-									if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
-										break;
-
-									NewNumber = Collision()->GetSwitchByPlotLaserDoor(ID, vNumbers.size());
-									SetPlotDrawDoorStatus(ID, vNumbers.size(), Status);
-
-									std::pair<int, int> Pair;
-									Pair.first = Number;
-									Pair.second = NewNumber;
-									vNumbers.push_back(Pair);
-								}
-							}
-
-							CDoor *pDoor = new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, NewNumber, CollisionActive, Thickness);
-							pDoor->m_PlotID = ID;
-							m_aPlots[ID].m_vObjects.push_back(pDoor);
-						}
-						break;
-					}
-					case CGameWorld::ENTTYPE_BUTTON:
-					{
-						int Number = -1;
-						sscanf(pData, "%d:%f/%f:%d", &EntityType, &Pos.x, &Pos.y, &Number);
-						if (Number >= 0)
-						{
-							int NewNumber = -1;
-							for (unsigned int i = 0; i < vNumbers.size(); i++)
-								if (vNumbers[i].first == Number)
-									NewNumber = vNumbers[i].second;
-
-							if (NewNumber == -1)
-							{
-								if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(ID))
-									break;
-
-								NewNumber = Collision()->GetSwitchByPlotLaserDoor(ID, vNumbers.size());
-								std::pair<int, int> Pair;
-								Pair.first = Number;
-								Pair.second = NewNumber;
-								vNumbers.push_back(Pair);
-							}
-
-							CButton *pButton = new CButton(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), NewNumber);
-							pButton->m_PlotID = ID;
-							m_aPlots[ID].m_vObjects.push_back(pButton);
-						}
-						break;
-					}
-					case CGameWorld::ENTTYPE_SPEEDUP:
-					{
-						int Angle = -1;
-						int Force = -1;
-						int MaxSpeed = -1;
-						sscanf(pData, "%d:%f/%f:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Angle, &Force, &MaxSpeed);
-						if (Angle >= 0 && Force > 0 && MaxSpeed >= 0)
-						{
-							CSpeedup *pSpeedup = new CSpeedup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Angle, Force, MaxSpeed);
-							pSpeedup->m_PlotID = ID;
-							m_aPlots[ID].m_vObjects.push_back(pSpeedup);
-						}
-						break;
-					}
-					case CGameWorld::ENTTYPE_TELEPORTER:
-					{
-						int Type = 0;
-						int Number = -1;
-						sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Type, &Number);
-						if (Type > 0 && Number >= 0)
-						{
-							int NewNumber = -1;
-							for (unsigned int i = 0; i < vNumbers.size(); i++)
-								if (vNumbers[i].first == Number)
-									NewNumber = vNumbers[i].second;
-
-							if (NewNumber == -1)
-							{
-								if ((int)vNumbers.size() >= Collision()->GetNumMaxTeleporters(ID))
-									break;
-
-								NewNumber = Collision()->GetSwitchByPlotTeleporter(ID, vNumbers.size());
-								std::pair<int, int> Pair;
-								Pair.first = Number;
-								Pair.second = NewNumber;
-								vNumbers.push_back(Pair);
-							}
-
-							CTeleporter *pTeleporter = new CTeleporter(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, NewNumber);
-							pTeleporter->m_PlotID = ID;
-							m_aPlots[ID].m_vObjects.push_back(pTeleporter);
-						}
-						break;
-					}
-				}
-
-				// jump to next comma, if it exists skip it so we can start the next loop run with the next data
-				if ((pData = str_find(pData, ",")))
-					pData++;
+				vEntities[j]->m_PlotID = ID;
+				m_aPlots[ID].m_vObjects.push_back(vEntities[j]);
 			}
 		} break;
 		}
@@ -4721,7 +4583,6 @@ void CGameContext::ReadPlotStats(int ID)
 
 void CGameContext::WritePlotStats(int ID)
 {
-	std::string data;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s/%s/%d.plot", Config()->m_SvPlotFilePath, Server()->GetCurrentMapName(), ID);
 	std::ofstream PlotFile(aBuf);
@@ -4735,50 +4596,210 @@ void CGameContext::WritePlotStats(int ID)
 		PlotFile << PlotDoorStatus << "\n";
 		
 		for (unsigned int i = 0; i < m_aPlots[ID].m_vObjects.size(); i++)
-		{
-			char aEntry[128];
-			switch (m_aPlots[ID].m_vObjects[i]->GetObjType())
-			{
-				case CGameWorld::ENTTYPE_PICKUP:
-				{
-					CPickup *pPickup = (CPickup *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, pPickup->GetPos().x/32.f, pPickup->GetPos().y/32.f, pPickup->GetType(), pPickup->GetSubtype());
-					PlotFile << aEntry;
-					break;
-				}
-				case CGameWorld::ENTTYPE_DOOR:
-				{
-					CDoor *pDoor = (CDoor *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, pDoor->GetPos().x/32.f, pDoor->GetPos().y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->GetCollision(), pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
-					PlotFile << aEntry;
-					break;
-				}
-				case CGameWorld::ENTTYPE_BUTTON:
-				{
-					CButton *pButton = (CButton *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d,", CGameWorld::ENTTYPE_BUTTON, pButton->GetPos().x/32.f, pButton->GetPos().y/32.f, pButton->m_Number);
-					PlotFile << aEntry;
-					break;
-				}
-				case CGameWorld::ENTTYPE_SPEEDUP:
-				{
-					CSpeedup *pSpeedup = (CSpeedup *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d,", CGameWorld::ENTTYPE_SPEEDUP, pSpeedup->GetPos().x/32.f, pSpeedup->GetPos().y/32.f, pSpeedup->GetAngle(), pSpeedup->GetForce(), pSpeedup->GetMaxSpeed());
-					PlotFile << aEntry;
-					break;
-				}
-				case CGameWorld::ENTTYPE_TELEPORTER:
-				{
-					CTeleporter *pTeleporter = (CTeleporter *)m_aPlots[ID].m_vObjects[i];
-					str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_TELEPORTER, pTeleporter->GetPos().x/32.f, pTeleporter->GetPos().y/32.f, pTeleporter->GetType(), pTeleporter->m_Number);
-					PlotFile << aEntry;
-					break;
-				}
-			}
-		}
+			WritePlotObject(m_aPlots[ID].m_vObjects[i], &PlotFile);
 
 		PlotFile << "\n";
 	}
+}
+
+void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 *pPos)
+{
+	vec2 Pos = pPos ? *pPos : pEntity->GetPos();
+	char aEntry[128];
+	switch (pEntity->GetObjType())
+	{
+		case CGameWorld::ENTTYPE_PICKUP:
+		{
+			CPickup *pPickup = (CPickup *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_PICKUP, Pos.x/32.f, Pos.y/32.f, pPickup->GetType(), pPickup->GetSubtype());
+			*pFile << aEntry;
+			break;
+		}
+		case CGameWorld::ENTTYPE_DOOR:
+		{
+			CDoor *pDoor = (CDoor *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->GetCollision(), pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
+			*pFile << aEntry;
+			break;
+		}
+		case CGameWorld::ENTTYPE_BUTTON:
+		{
+			CButton *pButton = (CButton *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d,", CGameWorld::ENTTYPE_BUTTON, Pos.x/32.f, Pos.y/32.f, pButton->m_Number);
+			*pFile << aEntry;
+			break;
+		}
+		case CGameWorld::ENTTYPE_SPEEDUP:
+		{
+			CSpeedup *pSpeedup = (CSpeedup *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d,", CGameWorld::ENTTYPE_SPEEDUP, Pos.x/32.f, Pos.y/32.f, pSpeedup->GetAngle(), pSpeedup->GetForce(), pSpeedup->GetMaxSpeed());
+			*pFile << aEntry;
+			break;
+		}
+		case CGameWorld::ENTTYPE_TELEPORTER:
+		{
+			CTeleporter *pTeleporter = (CTeleporter *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_TELEPORTER, Pos.x/32.f, Pos.y/32.f, pTeleporter->GetType(), pTeleporter->m_Number);
+			*pFile << aEntry;
+			break;
+		}
+	}
+}
+
+std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int PlotID)
+{
+	const char *pData = pLine;
+	std::vector<CEntity *> vEntities;
+	std::vector< std::pair<int, int> > vNumbers;
+	while (1)
+	{
+		if (!pData)
+			break;
+
+		vec2 Pos = vec2(-1, -1);
+		int EntityType = -1;
+
+		sscanf(pData, "%d", &EntityType);
+		switch (EntityType)
+		{
+			case CGameWorld::ENTTYPE_PICKUP:
+			{
+				int Type = -1;
+				int Subtype = -1;
+				sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Type, &Subtype);
+				if (Type >= 0 && Subtype >= 0)
+				{
+					vEntities.push_back(new CPickup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, Subtype));
+				}
+				break;
+			}
+			case CGameWorld::ENTTYPE_DOOR:
+			{
+				float Rotation = -1.f;
+				int Length = -1;
+				int CollisionActive = -1;
+				int Thickness = -1;
+				int Number = -1;
+				int Status = -1;
+				sscanf(pData, "%d:%f/%f:%f:%d:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Rotation, &Length, &CollisionActive, &Thickness, &Number, &Status);
+				if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0)
+				{
+					int NewNumber = -1;
+					if (Number == 0)
+					{
+						NewNumber = 0;
+					}
+					else
+					{
+						for (unsigned int i = 0; i < vNumbers.size(); i++)
+							if (vNumbers[i].first == Number)
+								NewNumber = vNumbers[i].second;
+
+						if (NewNumber == -1)
+						{
+							if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(PlotID))
+								break;
+
+							NewNumber = Collision()->GetSwitchByPlotLaserDoor(PlotID, vNumbers.size());
+							SetPlotDrawDoorStatus(PlotID, vNumbers.size(), Status);
+
+							std::pair<int, int> Pair;
+							Pair.first = Number;
+							Pair.second = NewNumber;
+							vNumbers.push_back(Pair);
+						}
+					}
+
+					vEntities.push_back(new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, NewNumber, CollisionActive, Thickness));
+				}
+				break;
+			}
+			case CGameWorld::ENTTYPE_BUTTON:
+			{
+				int Number = -1;
+				sscanf(pData, "%d:%f/%f:%d", &EntityType, &Pos.x, &Pos.y, &Number);
+				if (Number >= 0)
+				{
+					int NewNumber = -1;
+					for (unsigned int i = 0; i < vNumbers.size(); i++)
+						if (vNumbers[i].first == Number)
+							NewNumber = vNumbers[i].second;
+
+					if (NewNumber == -1)
+					{
+						if ((int)vNumbers.size() >= Collision()->GetNumMaxDoors(PlotID))
+							break;
+
+						NewNumber = Collision()->GetSwitchByPlotLaserDoor(PlotID, vNumbers.size());
+						std::pair<int, int> Pair;
+						Pair.first = Number;
+						Pair.second = NewNumber;
+						vNumbers.push_back(Pair);
+					}
+
+					vEntities.push_back(new CButton(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), NewNumber));
+				}
+				break;
+			}
+			case CGameWorld::ENTTYPE_SPEEDUP:
+			{
+				int Angle = -1;
+				int Force = -1;
+				int MaxSpeed = -1;
+				sscanf(pData, "%d:%f/%f:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Angle, &Force, &MaxSpeed);
+				if (Angle >= 0 && Force > 0 && MaxSpeed >= 0)
+				{
+					vEntities.push_back(new CSpeedup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Angle, Force, MaxSpeed));
+				}
+				break;
+			}
+			case CGameWorld::ENTTYPE_TELEPORTER:
+			{
+				int Type = 0;
+				int Number = -1;
+				sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Type, &Number);
+				if (Type > 0 && Number >= 0)
+				{
+					int NewNumber = -1;
+					for (unsigned int i = 0; i < vNumbers.size(); i++)
+						if (vNumbers[i].first == Number)
+							NewNumber = vNumbers[i].second;
+
+					if (NewNumber == -1)
+					{
+						if ((int)vNumbers.size() >= Collision()->GetNumMaxTeleporters(PlotID))
+							break;
+
+						NewNumber = Collision()->GetSwitchByPlotTeleporter(PlotID, vNumbers.size());
+						std::pair<int, int> Pair;
+						Pair.first = Number;
+						Pair.second = NewNumber;
+						vNumbers.push_back(Pair);
+					}
+
+					vEntities.push_back(new CTeleporter(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, NewNumber));
+				}
+				break;
+			}
+		}
+
+		// jump to next comma, if it exists skip it so we can start the next loop run with the next data
+		if ((pData = str_find(pData, ",")))
+			pData++;
+	}
+
+	return vEntities;
+}
+
+int CGameContext::LoadPresetListCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CGameContext *pSelf = (CGameContext *)pUser;
+	if (!IsDir && str_endswith(pName, ".plot"))
+	{
+		std::string Name = pName;
+		pSelf->m_vPresetList.push_back(Name.erase(Name.size()-5)); // remove .plot
+	}
+	return 0;
 }
 
 int CGameContext::GetPlotID(int AccID)
@@ -5840,6 +5861,9 @@ void CGameContext::CreateFolders()
 	// plots
 	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Server()->GetMapName());
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+
+	str_format(aPath, sizeof(aPath), "%s/presets", Config()->m_SvPlotFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// money drops

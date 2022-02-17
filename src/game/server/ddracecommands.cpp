@@ -1974,3 +1974,41 @@ void CGameContext::ConPlotInfo(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Door status: %d", pSelf->Collision()->m_pSwitchers ? pSelf->Collision()->m_pSwitchers[pSelf->Collision()->GetSwitchByPlot(PlotID)].m_Status[0] : 0);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
 }
+
+void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "%s/presets", pSelf->Config()->m_SvPlotFilePath);
+	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadPresetListCallback, pSelf);
+
+	int Bufcnt = 0;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Listing all draw editor presets:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+
+	for (unsigned int i = 0; i < pSelf->m_vPresetList.size(); i++)
+	{
+		const char *pName = pSelf->m_vPresetList[i].c_str();
+		if (Bufcnt + str_length(pName) + 4 > 128)
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+			Bufcnt = 0;
+		}
+		if (Bufcnt != 0)
+		{
+			str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, ", %s", pName);
+			Bufcnt += 2 + str_length(pName);
+		}
+		else
+		{
+			str_format(&aBuf[Bufcnt], sizeof(aBuf) - Bufcnt, "%s", pName);
+			Bufcnt += str_length(pName);
+		}
+	}
+	if (Bufcnt != 0)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+
+	pSelf->m_vPresetList.clear();
+}

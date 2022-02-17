@@ -55,6 +55,9 @@ class CDrawEditor
 		TRANSFORM_MOVE = 0,
 		TRANSFORM_COPY,
 		TRANSFORM_ERASE,
+		NUM_TRANSFORM_NON_ADMIN,
+		TRANSFORM_SAVE_PRESET = NUM_TRANSFORM_NON_ADMIN,
+		TRANSFORM_LOAD_PRESET,
 		NUM_TRANSFORM_SETTINGS,
 
 		TRANSFORM_STATE_SETTING_FIRST = 0,
@@ -206,5 +209,6 @@ public:
 
 	// used in snap functions of available entities to draw, returns true if the SnappingClient is not able to see the preview
 	bool OnSnapPreview(CEntity *pEntity);
+	bool TryEnterPresetName(const char *pName);
 };
 #endif //GAME_SERVER_DRAWEDITOR_H

@@ -379,9 +379,16 @@ public:
 
 	void UpdateHidePlayers(int UpdateID = -1);
 
+	// draweditor preset list
+	static int LoadPresetListCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	std::vector<std::string> m_vPresetList;
+
 	// plots
 	void ReadPlotStats(int ID);
 	void WritePlotStats(int ID);
+	std::vector<CEntity *> ReadPlotObjects(const char *pLine, int PlotID);
+	void WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 *pPos = 0);
+
 	void SetPlotInfo(int PlotID, int AccID);
 	void SetPlotExpire(int PlotID);
 
@@ -989,6 +996,7 @@ private:
 	static void ConClearPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlotOwner(IConsole::IResult* pResult, void* pUserData);
 	static void ConPlotInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConPresetList(IConsole::IResult* pResult, void* pUserData);
 
 	enum
 	{

@@ -124,6 +124,7 @@ CONSOLE_COMMAND("toteleplot", "i[plotid] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, C
 CONSOLE_COMMAND("clearplot", "i[plotid]", CFGFLAG_SERVER, ConClearPlot, this, "Clears plot with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("plot_owner", "s[username] i[plotid]", CFGFLAG_SERVER, ConPlotOwner, this, "Sets owner of plot i to account with username s", AUTHED_ADMIN)
 CONSOLE_COMMAND("plot_info", "i[plotid]", CFGFLAG_SERVER, ConPlotInfo, this, "Shows information about plot i", AUTHED_ADMIN)
+CONSOLE_COMMAND("preset_list", "", CFGFLAG_SERVER, ConPresetList, this, "Shows a list with presets to load from the draw editor", AUTHED_ADMIN)
 
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)

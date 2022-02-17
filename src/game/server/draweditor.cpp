@@ -7,6 +7,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
+#include <fstream>
+#include <string>
 
 static float s_MaxLength = 10.f;
 static int s_MaxThickness = 4;
@@ -118,7 +120,7 @@ bool CDrawEditor::CanRemove(CEntity *pEntity)
 
 bool CDrawEditor::RemoveEntity(CEntity *pEntity)
 {
-	if (pEntity->m_MoveCID != -1 && pEntity->m_MoveCID != GetCID())
+	if (pEntity->m_TransformCID != -1 && pEntity->m_TransformCID != GetCID())
 		return false;
 
 	for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
@@ -282,7 +284,7 @@ void CDrawEditor::Tick()
 
 void CDrawEditor::Snap()
 {
-	if (!Active() || m_Category != CAT_TRANSFORM)
+	if (!Active() || m_Category != CAT_TRANSFORM || m_Transform.m_State == TRANSFORM_STATE_RUNNING || m_Setting == TRANSFORM_LOAD_PRESET)
 		return;
 
 	GameServer()->SnapSelectedArea(&m_Transform.m_Area);
@@ -330,9 +332,9 @@ void CDrawEditor::OnPlayerFire()
 				{
 					if (m_Setting == TRANSFORM_MOVE)
 					{
-						if (pEntity->m_MoveCID == -1)
+						if (pEntity->m_TransformCID == -1)
 						{
-							pEntity->m_MoveCID = GetCID();
+							pEntity->m_TransformCID = GetCID();
 							m_Transform.m_vSelected.push_back(pEntity);
 						}
 						continue;
@@ -362,24 +364,36 @@ void CDrawEditor::OnPlayerFire()
 				StopTransform();
 				return;
 			}
+			else if (m_Setting == TRANSFORM_SAVE_PRESET)
+			{
+				GameServer()->SendChatTarget(GetCID(), "Please enter the name for this preset into the chat");
+			}
+			else if (m_Setting == TRANSFORM_LOAD_PRESET)
+			{
+				GameServer()->SendChatTarget(GetCID(), "Please enter the name of the wanted preset into the chat");
+				m_Transform.m_vSelected.clear();
+			}
 		}
 		else if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
 		{
-			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+			if (m_Setting != TRANSFORM_SAVE_PRESET && m_Setting != TRANSFORM_LOAD_PRESET)
 			{
-				if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
+				for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 				{
-					CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
-					pEntity->m_PlotID = PlotID;
-					GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
+					{
+						CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
+						pEntity->m_PlotID = PlotID;
+						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+					}
 				}
+
+				if (m_Setting == TRANSFORM_MOVE)
+					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+						RemoveEntity(m_Transform.m_vSelected[i]);
+
+				StopTransform();
 			}
-
-			if (m_Setting == TRANSFORM_MOVE)
-				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-					RemoveEntity(m_Transform.m_vSelected[i]);
-
-			StopTransform();
 			return;
 		}
 
@@ -652,9 +666,15 @@ void CDrawEditor::SetCategory(int Category)
 void CDrawEditor::SetSetting(int Setting)
 {
 	if (m_Category == CAT_PICKUPS)
+	{
 		SetPickup(Setting);
+	}
 	else
+	{
 		m_Setting = Setting;
+		if (m_Category == CAT_TRANSFORM)
+			StopTransform();
+	}
 }
 
 CEntity *CDrawEditor::CreateEntity(bool Preview)
@@ -791,6 +811,11 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting("Move", TRANSFORM_MOVE), sizeof(aMsg));
 		str_append(aMsg, FormatSetting("Copy", TRANSFORM_COPY), sizeof(aMsg));
 		str_append(aMsg, FormatSetting("Erase", TRANSFORM_ERASE), sizeof(aMsg));
+		if (Server()->GetAuthedState(GetCID()) >= AUTHED_ADMIN)
+		{
+			str_append(aMsg, FormatSetting("Save Preset", TRANSFORM_SAVE_PRESET), sizeof(aMsg));
+			str_append(aMsg, FormatSetting("Load Preset", TRANSFORM_LOAD_PRESET), sizeof(aMsg));
+		}
 	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
@@ -855,7 +880,7 @@ int CDrawEditor::GetNumSettings()
 	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
 	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
-	case CAT_TRANSFORM: return NUM_TRANSFORM_SETTINGS;
+	case CAT_TRANSFORM: return Server()->GetAuthedState(GetCID()) < AUTHED_ADMIN ? NUM_TRANSFORM_NON_ADMIN : NUM_TRANSFORM_SETTINGS;
 	default: return 0;
 	}
 }
@@ -1055,19 +1080,78 @@ void CDrawEditor::UpdatePreview()
 
 bool CDrawEditor::OnSnapPreview(CEntity *pEntity)
 {
-	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || pEntity->m_MoveCID == GetCID();
+	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || (pEntity->m_TransformCID == GetCID() && m_Setting == TRANSFORM_MOVE);
+}
+
+bool CDrawEditor::TryEnterPresetName(const char *pName)
+{
+	if (m_Category == CAT_TRANSFORM && m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+	{
+		if (m_Setting == TRANSFORM_SAVE_PRESET)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s/presets/%s.plot", GameServer()->Config()->m_SvPlotFilePath, pName);
+			std::ofstream PresetFile(aBuf);
+
+			for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+			{
+				vec2 Pos = m_Transform.m_vSelected[i]->GetPos() - m_Transform.m_Area.BottomRight();
+				GameServer()->WritePlotObject(m_Transform.m_vSelected[i], &PresetFile, &Pos);
+			}
+
+			str_format(aBuf, sizeof(aBuf), "Successfully saved preset '%s'", pName);
+			GameServer()->SendChatTarget(GetCID(), aBuf);
+			StopTransform();
+			return true;
+		}
+		else if (m_Setting == TRANSFORM_LOAD_PRESET)
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s/presets/%s.plot", GameServer()->Config()->m_SvPlotFilePath, pName);
+			std::fstream PresetFile(aBuf);
+			if (!PresetFile.is_open())
+			{
+				str_format(aBuf, sizeof(aBuf), "Couldn't load preset '%s'", pName);
+				GameServer()->SendChatTarget(GetCID(), aBuf);
+				StopTransform();
+				return true;
+			}
+
+			std::string data;
+			getline(PresetFile, data);
+			const char *pData = data.c_str();
+
+			std::vector<CEntity *> vEntities = GameServer()->ReadPlotObjects(pData, CurrentPlotID());
+			while(vEntities.size())
+			{
+				SSelectedEnt Entity;
+				Entity.m_pEnt = CreateTransformEntity(vEntities[0], true);
+				Entity.m_pEnt->m_BrushCID = GetCID();
+				Entity.m_Offset = Entity.m_pEnt->GetPos();
+				m_Transform.m_vPreview.push_back(Entity);
+				vEntities[0]->Destroy();
+				vEntities.erase(vEntities.begin());
+			}
+
+			str_format(aBuf, sizeof(aBuf), "Successfully loaded preset '%s'", pName);
+			GameServer()->SendChatTarget(GetCID(), aBuf);
+			m_Setting = TRANSFORM_COPY;
+			return true;
+		}
+	}
+	return false;
 }
 
 void CDrawEditor::StopTransform()
 {
-	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
+	m_Transform.m_State = m_Setting == TRANSFORM_LOAD_PRESET ? TRANSFORM_STATE_CONFIRM : TRANSFORM_STATE_SETTING_FIRST;
 
 	for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 		m_Transform.m_vPreview[i].m_pEnt->Destroy();
 	m_Transform.m_vPreview.clear();
 
 	for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-		if (m_Transform.m_vSelected[i]->m_MoveCID == GetCID())
-			m_Transform.m_vSelected[i]->m_MoveCID = -1;
+		if (m_Transform.m_vSelected[i]->m_TransformCID == GetCID())
+			m_Transform.m_vSelected[i]->m_TransformCID = -1;
 	m_Transform.m_vSelected.clear();
 }

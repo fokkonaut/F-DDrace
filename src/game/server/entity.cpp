@@ -23,7 +23,7 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	// F-DDrace
 	m_PlotID = -1;
 	m_BrushCID = -1;
-	m_MoveCID = -1;
+	m_TransformCID = -1;
 }
 
 CEntity::~CEntity()

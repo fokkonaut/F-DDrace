@@ -159,8 +159,8 @@ public:
 
 	// character drawing right now, only he can see the preview
 	int m_BrushCID;
-	// character transforming this entity right now (it being cut out and moved somewhere else)
-	int m_MoveCID;
+	// character transforming this entity right now (it being cut out and moved somewhere else) or when trying to save object
+	int m_TransformCID;
 };
 
 #endif
