@@ -27,7 +27,7 @@ class CWhoIs
 		int numn, count, first3;
 	};
 
-	int num_bad, num_ips, num_nms;
+	int num_ips, num_nms;
 	struct player *ipplayers, *nmplayers;
 
 	struct player *FindEntry(struct player *src, int num, const char *name);
