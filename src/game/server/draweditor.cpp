@@ -764,7 +764,9 @@ void CDrawEditor::SendWindow()
 			"Eraser: Right mouse\n"
 			"Place object: Left mouse\n", sizeof(aMsg));
 	}
-	if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TRANSFORM)
+	if (m_Category == CAT_TRANSFORM)
+		str_append(aMsg, "Flip selection: kill\n", sizeof(aMsg));
+	else if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
 		str_append(aMsg, "Toggle position rounding: kill\n", sizeof(aMsg));
 
 	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TRANSFORM)
@@ -957,7 +959,29 @@ void CDrawEditor::OnPlayerKill()
 				AddAngle(45);
 		}
 	}
-	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TRANSFORM)
+	else if (m_Category == CAT_TRANSFORM)
+	{
+		if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+		{
+			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+			{
+				m_Transform.m_vPreview[i].m_Offset.x *= -1;
+
+				int Type = m_Transform.m_vPreview[i].m_pEnt->GetObjType();
+				if (Type == CGameWorld::ENTTYPE_DOOR)
+				{
+					float NewRotation = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() * -1.f;
+					((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetDirection(ClampRotation(NewRotation));
+				}
+				else if (Type == CGameWorld::ENTTYPE_SPEEDUP)
+				{
+					int NewAngle = (((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->GetAngle() + 180) * -1;
+					((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->SetAngle(ClampAngle(NewAngle));
+				}
+			}
+		}
+	}
+	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
 	{
 		m_RoundPos = !m_RoundPos;
 	}
@@ -1002,8 +1026,8 @@ void CDrawEditor::SetAngle(float Angle)
 			int Type = m_Transform.m_vPreview[i].m_pEnt->GetObjType();
 			if (Type == CGameWorld::ENTTYPE_DOOR)
 			{
-				float NewAngle = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() - Added * pi / 180;
-				((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetDirection(ClampRotation(NewAngle));
+				float NewRotation = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() - Added * pi / 180;
+				((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetDirection(ClampRotation(NewRotation));
 			}
 			else if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 			{
