@@ -828,8 +828,8 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting("Erase", TRANSFORM_ERASE), sizeof(aMsg));
 		if (Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvEditorPresetLevel)
 		{
-			str_append(aMsg, FormatSetting("Save Preset", TRANSFORM_SAVE_PRESET), sizeof(aMsg));
-			str_append(aMsg, FormatSetting("Load Preset", TRANSFORM_LOAD_PRESET), sizeof(aMsg));
+			str_append(aMsg, FormatSetting("Save preset", TRANSFORM_SAVE_PRESET), sizeof(aMsg));
+			str_append(aMsg, FormatSetting("Load preset", TRANSFORM_LOAD_PRESET), sizeof(aMsg));
 		}
 	}
 
