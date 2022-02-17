@@ -2010,7 +2010,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (Length == 0 || (pMsg->m_pMessage[0] != '/' && (Config()->m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 				return;
 
-			if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DrawEditor.TryEnterPresetName(pMsg->m_pMessage))
+			bool Command = pMsg->m_pMessage[0] == '/';
+			if (!Command && pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DrawEditor.TryEnterPresetName(pMsg->m_pMessage))
 				return;
 
 			// don't allow spectators to disturb players during a running game in tournament mode
@@ -2024,8 +2025,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(m_apPlayers[pMsg->m_Target] && m_apPlayers[pMsg->m_Target]->GetTeam() != TEAM_SPECTATORS)
 					Mode = CHAT_NONE;
 			}
-
-			bool Command = pMsg->m_pMessage[0] == '/';
 
 			if (Mode == CHAT_WHISPER)
 			{
