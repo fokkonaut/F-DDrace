@@ -362,10 +362,17 @@ void CDrawEditor::OnPlayerFire()
 				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
 					RemoveEntity(m_Transform.m_vSelected[i]);
 				StopTransform();
+				m_pCharacter->SetAttackTick(Server()->Tick());
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
 				return;
 			}
 			else if (m_Setting == TRANSFORM_SAVE_PRESET)
 			{
+				if (!m_Transform.m_vSelected.size())
+				{
+					StopTransform();
+					return;
+				}
 				GameServer()->SendChatTarget(GetCID(), "Please enter the name for this preset into the chat");
 			}
 			else if (m_Setting == TRANSFORM_LOAD_PRESET)
@@ -393,6 +400,8 @@ void CDrawEditor::OnPlayerFire()
 						RemoveEntity(m_Transform.m_vSelected[i]);
 
 				StopTransform();
+				m_pCharacter->SetAttackTick(Server()->Tick());
+				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
 			}
 			return;
 		}
