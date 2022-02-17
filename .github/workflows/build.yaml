@@ -67,7 +67,7 @@ jobs:
       run: |
         cd debug
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
-	- name: Run debug server
+    - name: Run debug server
       env: ${{ matrix.env }}
       run: |
         cd debug
