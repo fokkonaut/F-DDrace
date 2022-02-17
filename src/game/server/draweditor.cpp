@@ -826,7 +826,7 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting("Move", TRANSFORM_MOVE), sizeof(aMsg));
 		str_append(aMsg, FormatSetting("Copy", TRANSFORM_COPY), sizeof(aMsg));
 		str_append(aMsg, FormatSetting("Erase", TRANSFORM_ERASE), sizeof(aMsg));
-		if (Server()->GetAuthedState(GetCID()) >= AUTHED_ADMIN)
+		if (Server()->GetAuthedState(GetCID()) >= GameServer()->Config()->m_SvEditorPresetLevel)
 		{
 			str_append(aMsg, FormatSetting("Save Preset", TRANSFORM_SAVE_PRESET), sizeof(aMsg));
 			str_append(aMsg, FormatSetting("Load Preset", TRANSFORM_LOAD_PRESET), sizeof(aMsg));
@@ -895,7 +895,7 @@ int CDrawEditor::GetNumSettings()
 	case CAT_LASERDOORS: return NUM_LASERDOOR_SETTINGS;
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
 	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
-	case CAT_TRANSFORM: return Server()->GetAuthedState(GetCID()) < AUTHED_ADMIN ? NUM_TRANSFORM_NON_ADMIN : NUM_TRANSFORM_SETTINGS;
+	case CAT_TRANSFORM: return Server()->GetAuthedState(GetCID()) < GameServer()->Config()->m_SvEditorPresetLevel ? NUM_TRANSFORM_NON_ADMIN : NUM_TRANSFORM_SETTINGS;
 	default: return 0;
 	}
 }
