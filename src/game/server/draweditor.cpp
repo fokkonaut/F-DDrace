@@ -622,6 +622,7 @@ void CDrawEditor::SetCategory(int Category)
 	if (m_Category == Category)
 		return;
 
+	StopTransform();
 	m_Setting = -1; // so we dont fuck up setpickup
 	if (Category == CAT_PICKUPS)
 	{
@@ -659,7 +660,6 @@ void CDrawEditor::SetCategory(int Category)
 		m_Setting = 0; // always first setting
 	}
 
-	StopTransform();
 	m_Category = Category;
 }
 
@@ -671,8 +671,9 @@ void CDrawEditor::SetSetting(int Setting)
 	}
 	else
 	{
+		int LastSetting = m_Setting;
 		m_Setting = Setting;
-		if (m_Category == CAT_TRANSFORM)
+		if (m_Category == CAT_TRANSFORM && (m_Setting == TRANSFORM_LOAD_PRESET || LastSetting == TRANSFORM_LOAD_PRESET))
 			StopTransform();
 	}
 }
@@ -1080,7 +1081,7 @@ void CDrawEditor::UpdatePreview()
 
 bool CDrawEditor::OnSnapPreview(CEntity *pEntity)
 {
-	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || (pEntity->m_TransformCID == GetCID() && m_Setting == TRANSFORM_MOVE);
+	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || (pEntity->m_TransformCID == GetCID() && m_Category == CAT_TRANSFORM && m_Setting == TRANSFORM_MOVE);
 }
 
 bool CDrawEditor::TryEnterPresetName(const char *pName)
@@ -1144,6 +1145,14 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 
 void CDrawEditor::StopTransform()
 {
+	if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+	{
+		if (m_Setting == TRANSFORM_SAVE_PRESET)
+			GameServer()->SendChatTarget(GetCID(), "Preset saving aborted");
+		else if (m_Setting == TRANSFORM_LOAD_PRESET)
+			GameServer()->SendChatTarget(GetCID(), "Preset loading aborted");
+	}
+
 	m_Transform.m_State = m_Setting == TRANSFORM_LOAD_PRESET ? TRANSFORM_STATE_CONFIRM : TRANSFORM_STATE_SETTING_FIRST;
 
 	for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
