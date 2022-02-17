@@ -142,6 +142,9 @@ class CDrawEditor
 	void StopTransform(bool Silent = false);
 	bool RemoveEntity(CEntity *pEntity);
 
+	float ClampRotation(float Rotation);
+	int ClampAngle(int Angle);
+
 	struct
 	{
 		int m_Type;
@@ -181,6 +184,7 @@ class CDrawEditor
 	};
 	struct
 	{
+		int m_Angle;
 		int m_State;
 		CSelectedArea m_Area;
 		std::vector<SSelectedEnt> m_vPreview;

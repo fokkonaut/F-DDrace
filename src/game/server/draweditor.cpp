@@ -32,6 +32,7 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Teleporter.m_Number = 0;
 	m_Teleporter.m_Evil = true;
 	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
+	m_Transform.m_Angle = 0;
 	m_Transform.m_Area.Init(GameServer());
 	
 	m_Setting = -1;
@@ -592,7 +593,7 @@ void CDrawEditor::HandleInput()
 			if (IsCategoryLaser())
 				Add -= m_Input.m_Direction * 0.5f;
 
-			if ((IsCategoryLaser() && !m_Laser.m_ButtonMode) || m_Category == CAT_SPEEDUPS)
+			if ((IsCategoryLaser() && !m_Laser.m_ButtonMode) || m_Category == CAT_SPEEDUPS || m_Category == CAT_TRANSFORM)
 			{
 				if ((m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) && IsCategoryLaser())
 					AddLength(Add);
@@ -935,7 +936,7 @@ void CDrawEditor::OnPlayerKill()
 	if (m_pCharacter->GetPlayer()->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
 	{
 		int Angle = -1;
-		float DefaultAngle;
+		float DefaultAngle = 0;
 		if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
 		{
 			Angle = round_to_int(m_Laser.m_Angle * 180 / pi);
@@ -944,7 +945,10 @@ void CDrawEditor::OnPlayerKill()
 		else if (m_Category == CAT_SPEEDUPS)
 		{
 			Angle = m_Speedup.m_Angle;
-			DefaultAngle = 0;
+		}
+		else if (m_Category == CAT_TRANSFORM)
+		{
+			Angle = m_Transform.m_Angle;
 		}
 
 		if (Angle != -1)
@@ -987,28 +991,80 @@ void CDrawEditor::SetAngle(float Angle)
 		m_Speedup.m_Angle = Angle;
 		((CSpeedup *)m_pPreview)->SetAngle(m_Speedup.m_Angle);
 	}
+	else if (m_Category == CAT_TRANSFORM && m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+	{
+		int Added = Angle - m_Transform.m_Angle;
+
+		for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+		{
+			vec2 Offset = m_Transform.m_vPreview[i].m_Offset;
+			vec2 Origin = rotate(Offset, -m_Transform.m_Angle);
+			m_Transform.m_vPreview[i].m_Offset = rotate(Origin, Angle);
+
+			int Type = m_Transform.m_vPreview[i].m_pEnt->GetObjType();
+			if (Type == CGameWorld::ENTTYPE_DOOR)
+			{
+				float NewAngle = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() - Added * pi / 180;
+				((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetDirection(ClampRotation(NewAngle));
+			}
+			else if (Type == CGameWorld::ENTTYPE_SPEEDUP)
+			{
+				int NewAngle = ((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->GetAngle() + Added;
+				((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->SetAngle(ClampAngle(NewAngle));
+			}
+		}
+
+		m_Transform.m_Angle = Angle;
+	}
 }
 
 void CDrawEditor::AddAngle(float Add)
 {
 	if (IsCategoryLaser() && !m_Laser.m_ButtonMode)
 	{
-		float NewAngle = (m_Laser.m_Angle * 180 / pi) + Add;
-		if (NewAngle >= 360.f)
-			NewAngle -= 360.f;
-		else if (NewAngle < 0.f)
-			NewAngle += 360.f;
-		SetAngle(NewAngle * pi / 180);
+		float NewAngle = ((m_Laser.m_Angle * 180 / pi) + Add) * pi / 180;
+		SetAngle(ClampRotation(NewAngle));
 	}
-	else if (m_Category == CAT_SPEEDUPS)
+	else
 	{
-		int NewAngle = m_Speedup.m_Angle - Add; // negative to move counter clockwise, same as laserwalls always did
-		if (NewAngle >= 360)
-			NewAngle -= 360;
-		else if (NewAngle < 0)
-			NewAngle += 360;
-		SetAngle(NewAngle);
+		int Angle;
+		bool Set = false;
+		if (m_Category == CAT_SPEEDUPS)
+		{
+			Angle = m_Speedup.m_Angle;
+			Set = true;
+		}
+		else if (m_Category == CAT_TRANSFORM)
+		{
+			Angle = m_Transform.m_Angle;
+			Set = true;
+		}
+
+		if (Set)
+		{
+			int NewAngle = Angle - Add; // negative to move counter clockwise, same as laserwalls always did
+			SetAngle(ClampAngle(NewAngle));
+		}
 	}
+}
+
+float CDrawEditor::ClampRotation(float Rotation)
+{
+	float Angle = (Rotation * 180 / pi);
+	if (Angle >= 360.f)
+		Angle -= 360.f;
+	else if (Angle < 0.f)
+		Angle += 360.f;
+	return Angle * pi / 180;
+}
+
+int CDrawEditor::ClampAngle(int Angle)
+{
+	if (Angle >= 360)
+		Angle -= 360;
+	else if (Angle < 0)
+		Angle += 360;
+	return Angle;
 }
 
 void CDrawEditor::AddLength(float Add)
@@ -1178,6 +1234,7 @@ void CDrawEditor::StopTransform(bool Silent)
 	}
 
 	m_Transform.m_State = m_Setting == TRANSFORM_LOAD_PRESET ? TRANSFORM_STATE_CONFIRM : TRANSFORM_STATE_SETTING_FIRST;
+	m_Transform.m_Angle = 0;
 
 	for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 		m_Transform.m_vPreview[i].m_pEnt->Destroy();
