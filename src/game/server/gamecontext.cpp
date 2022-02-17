@@ -4797,7 +4797,12 @@ int CGameContext::LoadPresetListCallback(const char *pName, int IsDir, int Stora
 	if (!IsDir && str_endswith(pName, ".plot"))
 	{
 		std::string Name = pName;
-		pSelf->m_vPresetList.push_back(Name.erase(Name.size()-5)); // remove .plot
+		Name = Name.erase(Name.size() - 5); // remove .plot
+		for (unsigned int i = 0; i < pSelf->m_vPresetList.size(); i++)
+			if (pSelf->m_vPresetList[i] == Name)
+				return 0;
+
+		pSelf->m_vPresetList.push_back(Name);
 	}
 	return 0;
 }

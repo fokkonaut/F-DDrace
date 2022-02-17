@@ -1102,6 +1102,7 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 
 			str_format(aBuf, sizeof(aBuf), "Successfully saved preset '%s'", pName);
 			GameServer()->SendChatTarget(GetCID(), aBuf);
+			m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST; // reset state so we dont send message
 			StopTransform();
 			return true;
 		}
@@ -1114,6 +1115,7 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 			{
 				str_format(aBuf, sizeof(aBuf), "Couldn't load preset '%s'", pName);
 				GameServer()->SendChatTarget(GetCID(), aBuf);
+				m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST; // reset state so we dont send message
 				StopTransform();
 				return true;
 			}
