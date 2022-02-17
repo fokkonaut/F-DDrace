@@ -707,20 +707,24 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 
 CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 {
+	CEntity *pEntity = 0;
 	switch (pTemplate->GetObjType())
 	{
 	case CGameWorld::ENTTYPE_PICKUP:
-		return new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview && ((CPickup *)pTemplate)->GetCollision());
+		pEntity = new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_DOOR:
-		return new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview && ((CDoor *)pTemplate)->GetCollision(), ((CDoor *)pTemplate)->GetThickness());
+		pEntity = new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision, ((CDoor *)pTemplate)->GetThickness()); break;
 	case CGameWorld::ENTTYPE_BUTTON:
-		return new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview && ((CButton *)pTemplate)->GetCollision());
+		pEntity = new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_SPEEDUP:
-		return new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview && ((CSpeedup *)pTemplate)->GetCollision());
+		pEntity = new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_TELEPORTER:
-		return new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && ((CTeleporter *)pTemplate)->GetCollision());
+		pEntity = new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	}
-	return 0;
+
+	// update initialcollision in case we have a preview right now it it was set to false in the constructor
+	pEntity->m_InitialCollision = pTemplate->m_InitialCollision;
+	return pEntity;
 }
 
 void CDrawEditor::SendWindow()

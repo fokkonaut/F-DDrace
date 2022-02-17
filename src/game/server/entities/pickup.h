@@ -23,7 +23,6 @@ public:
 	int GetType() { return m_Type; }
 	int GetSubtype() { return m_Subtype; }
 	int GetOwner() { return m_Owner; }
-	bool GetCollision() { return m_Collision; }
 
 private:
 	int m_Type;
@@ -36,7 +35,6 @@ private:
 	vec2 m_Core;
 	int m_ID2;
 	int64 m_aLastBatteryMsg[MAX_CLIENTS];
-	bool m_Collision;
 
 	struct
 	{

@@ -5,10 +5,9 @@
 #include "button.h"
 
 CButton::CButton(CGameWorld *pGameWorld, vec2 Pos, int Number, bool Collision)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_BUTTON, Pos, 14)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_BUTTON, Pos, 14, Collision)
 {
 	m_Number = Number;
-	m_Collision = Collision;
 
 	vec2 aOffsets[NUM_SIDES] = {
 		vec2(0, -16),

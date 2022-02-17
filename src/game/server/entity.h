@@ -52,7 +52,7 @@ protected:
 
 public:
 	/* Constructor */
-	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProximityRadius=0);
+	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProximityRadius = 0, bool Collision = true);
 
 	/* Destructor */
 	virtual ~CEntity();
@@ -154,13 +154,17 @@ public:
 
 	// used for entities inside of plots, created by the draw editor. if not on a plot but still from the editor, its 0, if not an object from editor its -1
 	int m_PlotID;
-
 	bool IsPlotDoor();
 
 	// character drawing right now, only he can see the preview
 	int m_BrushCID;
 	// character transforming this entity right now (it being cut out and moved somewhere else) or when trying to save object
 	int m_TransformCID;
+
+	// initially wanted collision state
+	bool m_InitialCollision;
+	// whether other entities are affected by us, not guaranteed to work, only if implemented into the entity
+	bool m_Collision;
 };
 
 #endif

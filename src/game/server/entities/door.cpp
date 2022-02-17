@@ -9,12 +9,11 @@
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 		int Number, bool Collision, int Thickness) :
-		CEntity(pGameWorld, CGameWorld::ENTTYPE_DOOR, Pos)
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_DOOR, Pos, 0, Collision)
 {
 	m_Number = Number;
 	m_Pos = Pos;
 	m_PrevPos = m_Pos;
-	m_Collision = Collision;
 	m_Thickness = Thickness;
 	m_Length = Length;
 	

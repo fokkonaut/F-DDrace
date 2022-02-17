@@ -5,7 +5,7 @@
 #include "gamecontext.h"
 #include "player.h"
 
-CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRadius)
+CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRadius, bool Collision)
 {
 	m_pGameWorld = pGameWorld;
 
@@ -24,6 +24,7 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_PlotID = -1;
 	m_BrushCID = -1;
 	m_TransformCID = -1;
+	m_InitialCollision = m_Collision = Collision;
 }
 
 CEntity::~CEntity()

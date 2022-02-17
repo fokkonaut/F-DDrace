@@ -6,11 +6,10 @@
 #include "teleporter.h"
 
 CTeleporter::CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number, bool Collision)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_TELEPORTER, Pos, 14)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_TELEPORTER, Pos, 14, Collision)
 {
 	m_Type = Type;
 	m_Number = Number;
-	m_Collision = Collision;
 
 	m_Snap.m_Pos = m_Pos;
 	m_Snap.m_Time = 0.f;

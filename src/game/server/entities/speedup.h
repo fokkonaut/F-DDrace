@@ -28,7 +28,6 @@ class CSpeedup : public CEntity
 	int m_Angle;
 	int m_Force;
 	int m_MaxSpeed;
-	bool m_Collision;
 
 	float m_Distance;
 	float m_CurrentDist;
@@ -46,7 +45,6 @@ public:
 	int GetAngle() { return m_Angle; }
 	int GetForce() { return m_Force; }
 	int GetMaxSpeed() { return m_MaxSpeed; }
-	bool GetCollision() { return m_Collision; }
 };
 
 #endif // GAME_SERVER_ENTITIES_SPEEDUP_H

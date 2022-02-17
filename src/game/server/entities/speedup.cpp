@@ -5,12 +5,11 @@
 #include "speedup.h"
 
 CSpeedup::CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision)
-: CEntity(pGameWorld, CGameWorld::ENTTYPE_SPEEDUP, Pos, 14)
+: CEntity(pGameWorld, CGameWorld::ENTTYPE_SPEEDUP, Pos, 14, Collision)
 {
 	m_Angle = 0;
 	m_Force = Force;
 	m_MaxSpeed = MaxSpeed;
-	m_Collision = Collision;
 
 	vec2 aOffsets[NUM_DOTS] = {
 		vec2(5, 0),

@@ -17,7 +17,6 @@ class CDoor: public CEntity
 	// F-DDrace
 	float m_Rotation;
 	vec2 m_PrevPos;
-	bool m_Collision; // used for draw editor preview
 	int m_Thickness;
 	void Update();
 
@@ -33,7 +32,6 @@ public:
 	void SetThickness(int Thickness) { m_Thickness = Thickness; }
 	int GetLength() { return m_Length; }
 	float GetRotation() { return m_Rotation; }
-	bool GetCollision() { return m_Collision; }
 	int GetThickness() { return m_Thickness; }
 	virtual ~CDoor();
 

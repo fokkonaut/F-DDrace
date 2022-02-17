@@ -4618,7 +4618,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_DOOR:
 		{
 			CDoor *pDoor = (CDoor *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->GetCollision(), pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->m_Collision, pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
 			*pFile << aEntry;
 			break;
 		}

@@ -25,7 +25,6 @@ class CTeleporter : public CEntity
 
 	int m_aID[NUM_TELEPORTER_IDS];
 	int m_Type;
-	bool m_Collision;
 	void ResetCollision(bool Remove = false);
 
 public:
@@ -33,7 +32,6 @@ public:
 	virtual ~CTeleporter();
 	virtual void Snap(int SnappingClient);
 	int GetType() { return m_Type; }
-	bool GetCollision() { return m_Collision; }
 };
 
 #endif // GAME_SERVER_ENTITIES_TELEPORTER_H
