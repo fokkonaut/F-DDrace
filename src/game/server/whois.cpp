@@ -180,6 +180,8 @@ int CWhoIs::AddGeneric(struct player *names, struct player *addrs, int *ppl, int
 	    pl >= GameServer()->Config()->m_SvWhoIsIPEntries || pl1 >= GameServer()->Config()->m_SvWhoIsIPEntries)
 		return 0;
 	
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
 	if ((tp = FindEntry(addrs, pl, addr_buf)) == NULL) {
 		struct player *dst = &(addrs[pl]);
 		strncpy(dst->name, addr_buf, 16);
@@ -209,6 +211,7 @@ int CWhoIs::AddGeneric(struct player *names, struct player *addrs, int *ppl, int
 		AddName(tp, addr_buf);
 		tp->count++;
 	}
+#pragma GCC diagnostic pop
 
 	*ppl1 = pl1;
 	*ppl = pl;
