@@ -62,7 +62,6 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 	vec2 Pos = m_Pos;
 	int CursorPlotID = GetCursorPlotID();
 	int Type = m_Entity;
-	bool ButtonMode = m_Laser.m_ButtonMode;
 	int DoorNumber = m_Laser.m_Number;
 	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER;
 
@@ -71,7 +70,6 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 		Pos = pEntity->GetPos();
 		CursorPlotID = GameServer()->GetTilePlotID(Pos);
 		Type = pEntity->GetObjType();
-		ButtonMode = Type == CGameWorld::ENTTYPE_BUTTON;
 		DoorNumber = pEntity->m_Number;
 		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER;
 		Remove = false;
