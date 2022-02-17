@@ -139,7 +139,7 @@ class CDrawEditor
 	const char *GetTeleporterMode();
 	int GetTeleporterType();
 
-	void StopTransform();
+	void StopTransform(bool Silent = false);
 	bool RemoveEntity(CEntity *pEntity);
 
 	struct

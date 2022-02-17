@@ -1979,10 +1979,6 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "%s/presets", pSelf->Config()->m_SvPlotFilePath);
-	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadPresetListCallback, pSelf);
-
 	int Bufcnt = 0;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Listing all draw editor presets:");
@@ -2009,6 +2005,4 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 	}
 	if (Bufcnt != 0)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
-
-	pSelf->m_vPresetList.clear();
 }

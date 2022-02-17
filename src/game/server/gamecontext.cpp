@@ -3935,6 +3935,10 @@ void CGameContext::FDDraceInit()
 	SetMapSpecificOptions();
 	if (Config()->m_SvDefaultDummies)
 		ConnectDefaultDummies();
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "%s/presets", Config()->m_SvPlotFilePath);
+	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadPresetListCallback, this);
 }
 
 void CGameContext::DeleteTempfile()

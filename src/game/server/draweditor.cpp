@@ -1094,6 +1094,16 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 	{
 		if (m_Setting == TRANSFORM_SAVE_PRESET)
 		{
+			for (unsigned int i = 0; i < GameServer()->m_vPresetList.size(); i++)
+			{
+				if (str_comp_nocase(GameServer()->m_vPresetList[i].c_str(), pName) == 0)
+				{
+					GameServer()->SendChatTarget(GetCID(), "Couldn't save preset '%s', a preset with that name already exists");
+					StopTransform(true);
+					return true;
+				}
+			}
+
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s/presets/%s.plot", GameServer()->Config()->m_SvPlotFilePath, pName);
 			std::ofstream PresetFile(aBuf);
@@ -1104,10 +1114,10 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 				GameServer()->WritePlotObject(m_Transform.m_vSelected[i], &PresetFile, &Pos);
 			}
 
+			GameServer()->m_vPresetList.push_back(pName);
 			str_format(aBuf, sizeof(aBuf), "Successfully saved preset '%s'", pName);
 			GameServer()->SendChatTarget(GetCID(), aBuf);
-			m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST; // reset state so we dont send message
-			StopTransform();
+			StopTransform(true);
 			return true;
 		}
 		else if (m_Setting == TRANSFORM_LOAD_PRESET)
@@ -1119,8 +1129,7 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 			{
 				str_format(aBuf, sizeof(aBuf), "Couldn't load preset '%s'", pName);
 				GameServer()->SendChatTarget(GetCID(), aBuf);
-				m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST; // reset state so we dont send message
-				StopTransform();
+				StopTransform(true);
 				return true;
 			}
 
@@ -1149,9 +1158,9 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 	return false;
 }
 
-void CDrawEditor::StopTransform()
+void CDrawEditor::StopTransform(bool Silent)
 {
-	if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+	if (!Silent && m_Transform.m_State == TRANSFORM_STATE_RUNNING)
 	{
 		if (m_Setting == TRANSFORM_SAVE_PRESET)
 			GameServer()->SendChatTarget(GetCID(), "Preset saving aborted");
