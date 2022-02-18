@@ -6069,6 +6069,7 @@ bool CGameContext::IsSpawnArea(vec2 Pos)
 
 vec2 CGameContext::RoundPos(vec2 Pos)
 {
+	Pos = vec2((int)Pos.x, (int)Pos.y);
 	Pos.x -= (int)Pos.x % 32 - 16;
 	Pos.y -= (int)Pos.y % 32 - 16;
 	return Pos;

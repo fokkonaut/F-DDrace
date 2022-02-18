@@ -963,6 +963,8 @@ void CDrawEditor::OnPlayerKill()
 	{
 		if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
 		{
+			m_Transform.m_Angle = (m_Transform.m_Angle + 180) * -1;
+
 			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 			{
 				m_Transform.m_vPreview[i].m_Offset.x *= -1;
