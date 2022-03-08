@@ -16,7 +16,6 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_PrevPos = m_Pos;
 	m_Thickness = Thickness;
 	m_Length = Length;
-	m_Rotation = Rotation;
 
 	SetDirection(Rotation);
 	ResetCollision();
@@ -28,14 +27,9 @@ CDoor::~CDoor()
 	ResetCollision(true);
 }
 
-void CDoor::SetRotation(float Rotation)
-{
-	m_Rotation = Rotation;
-	SetDirection(Rotation);
-}
-
 void CDoor::SetDirection(float Rotation)
 {
+	m_Rotation = Rotation;
 	m_Direction = vec2(sin(Rotation), cos(Rotation));
 	Update();
 }

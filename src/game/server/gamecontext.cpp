@@ -1069,7 +1069,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -4622,7 +4621,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_DOOR:
 		{
 			CDoor *pDoor = (CDoor *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation() * 180 / pi, pDoor->GetLength(), (int)pDoor->m_Collision, pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->m_Collision, pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
 			*pFile << aEntry;
 			break;
 		}
@@ -4714,7 +4713,7 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 						}
 					}
 
-					vEntities.push_back(new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation * pi / 180, Length, NewNumber, CollisionActive, Thickness));
+					vEntities.push_back(new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, NewNumber, CollisionActive, Thickness));
 				}
 				break;
 			}
@@ -6070,12 +6069,9 @@ bool CGameContext::IsSpawnArea(vec2 Pos)
 
 vec2 CGameContext::RoundPos(vec2 Pos)
 {
-	Pos.x = (int)(Pos.x / 32) * 32.f + 16.f;
-	Pos.y = (int)(Pos.y / 32) * 32.f + 16.f;
-	//Pos.x -= ((int)(Pos.x * 100.f) % (32 * 100)) / 100.f - 16.f;
-	//Pos.y -= ((int)(Pos.y * 100.f) % (32 * 100)) / 100.f - 16.f;
-	//Pos.x -= (int)Pos.x % 32 - 16;
-	//Pos.y -= (int)Pos.y % 32 - 16;
+	Pos = vec2((int)Pos.x, (int)Pos.y);
+	Pos.x -= (int)Pos.x % 32 - 16;
+	Pos.y -= (int)Pos.y % 32 - 16;
 	return Pos;
 }
 

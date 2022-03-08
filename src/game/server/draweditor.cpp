@@ -388,13 +388,6 @@ void CDrawEditor::OnPlayerFire()
 				{
 					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
 					{
-						if (m_Transform.m_vPreview[i].m_pEnt->GetObjType() == CGameWorld::ENTTYPE_DOOR)
-						{
-							float InitialRotation = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation();
-							float NewRotation = InitialRotation + m_Transform.m_Angle * pi / 180;
-							((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetRotation(ClampRotation(NewRotation));
-						}
-
 						CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
 						pEntity->m_PlotID = PlotID;
 						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
@@ -1024,6 +1017,8 @@ void CDrawEditor::SetAngle(float Angle)
 	}
 	else if (m_Category == CAT_TRANSFORM && m_Transform.m_State == TRANSFORM_STATE_RUNNING)
 	{
+		int Added = Angle - m_Transform.m_Angle;
+
 		for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 		{
 			vec2 Offset = m_Transform.m_vPreview[i].m_Offset;
@@ -1033,12 +1028,11 @@ void CDrawEditor::SetAngle(float Angle)
 			int Type = m_Transform.m_vPreview[i].m_pEnt->GetObjType();
 			if (Type == CGameWorld::ENTTYPE_DOOR)
 			{
-				float NewRotation = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() - Angle * pi / 180;
+				float NewRotation = ((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->GetRotation() - Added * pi / 180;
 				((CDoor *)m_Transform.m_vPreview[i].m_pEnt)->SetDirection(ClampRotation(NewRotation));
 			}
 			else if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 			{
-				int Added = Angle - m_Transform.m_Angle;
 				int NewAngle = ((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->GetAngle() + Added;
 				((CSpeedup *)m_Transform.m_vPreview[i].m_pEnt)->SetAngle(ClampAngle(NewAngle));
 			}
