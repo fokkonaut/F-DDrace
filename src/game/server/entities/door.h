@@ -27,6 +27,7 @@ public:
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 			int Number, bool Collision = true, int Thickness = 4);
 
+	void SetRotation(float Rotation);
 	void SetDirection(float Rotation);
 	void SetLength(int Length);
 	void SetThickness(int Thickness) { m_Thickness = Thickness; }
