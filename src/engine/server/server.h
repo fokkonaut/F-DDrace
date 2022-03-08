@@ -233,7 +233,7 @@ public:
 	// map
 	enum
 	{
-		MAP_CHUNK_SIZE=NET_MAX_PAYLOAD-NET_MAX_CHUNKHEADERSIZE-4, // msg type
+		MAP_CHUNK_SIZE=NET_MAX_PAYLOAD-NET_MAX_CHUNKHEADERSIZE-4-10, // msg type
 	};
 	char m_aCurrentMap[128];
 	SHA256_DIGEST m_CurrentMapSha256;
