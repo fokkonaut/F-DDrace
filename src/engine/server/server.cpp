@@ -1062,7 +1062,6 @@ void CServer::SendMapData(int ClientID, int Chunk, bool FakeMap)
 	Msg.AddInt(ChunkSize);
 	Msg.AddRaw(&pMapData[Offset], ChunkSize);
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
-	dbg_msg("hi", "%d", Msg.Size());
 }
 
 void CServer::SendMap(int ClientID)
