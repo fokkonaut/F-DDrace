@@ -1062,6 +1062,7 @@ void CServer::SendMapData(int ClientID, int Chunk, bool FakeMap)
 	Msg.AddInt(ChunkSize);
 	Msg.AddRaw(&pMapData[Offset], ChunkSize);
 	SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+	dbg_msg("hi", "%d", Msg.Size());
 }
 
 void CServer::SendMap(int ClientID)
@@ -1394,20 +1395,24 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					int Chunk = m_aClients[ClientID].m_MapChunk;
 					unsigned int Offset = Chunk * ChunkSize;
 
-					// check for last part
-					if(Offset+ChunkSize >= m_CurrentMapSize)
+					unsigned char *pMapData = m_pCurrentMapData;
+					unsigned int Size = m_CurrentMapSize;
+
+					int Design = m_aClients[ClientID].m_CurrentMapDesign;
+					if (m_aClients[ClientID].m_DesignChange && Design != -1)
 					{
-						ChunkSize = m_CurrentMapSize-Offset;
+						pMapData = m_aMapDesign[Design].m_pData;
+						Size = m_aMapDesign[Design].m_Size;
+					}
+
+					// check for last part
+					if(Offset+ChunkSize >= Size)
+					{
+						ChunkSize = Size-Offset;
 						m_aClients[ClientID].m_MapChunk = -1;
 					}
 					else
 						m_aClients[ClientID].m_MapChunk++;
-
-					unsigned char *pMapData = m_pCurrentMapData;
-
-					int Design = m_aClients[ClientID].m_CurrentMapDesign;
-					if (m_aClients[ClientID].m_DesignChange && Design != -1)
-						pMapData = m_aMapDesign[Design].m_pData;
 
 					CMsgPacker Msg(NETMSG_MAP_DATA, true);
 					Msg.AddRaw(&pMapData[Offset], ChunkSize);
