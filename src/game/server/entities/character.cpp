@@ -4046,8 +4046,14 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 	int Count = 0;
 	for (int i = 0; i < NUM_WEAPONS; i++)
+	{
+		W = GetSpawnWeaponIndex(i);
+		if (W != -1 && m_aSpawnWeaponActive[W])
+			continue;
+
 		if (i != WEAPON_NINJA && i != WEAPON_TASER && (i != WEAPON_PORTAL_RIFLE || m_CollectedPortalRifle) && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
 			Count++;
+	}
 	if (Count < 2)
 		return;
 
