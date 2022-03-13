@@ -234,10 +234,7 @@ void CDrawEditor::Tick()
 	if (!Active())
 		return;
 
-	m_Pos = m_pCharacter->GetCursorPos();
-	if (m_RoundPos && !m_Erasing)
-		m_Pos = GameServer()->RoundPos(m_Pos);
-
+	HandleInput();
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
 
@@ -265,7 +262,6 @@ void CDrawEditor::Tick()
 			m_Teleporter.m_Number = 0;
 	}
 
-	HandleInput();
 	m_PrevInput = m_Input;
 	m_PrevPlotID = PlotID;
 
@@ -287,142 +283,6 @@ void CDrawEditor::Snap()
 		return;
 
 	GameServer()->SnapSelectedArea(&m_Transform.m_Area);
-}
-
-void CDrawEditor::OnPlayerFire()
-{
-	if (!Active())
-		return;
-
-	if (m_Selecting)
-	{
-		if (m_Category != CAT_TRANSFORM || m_Transform.m_State != TRANSFORM_STATE_RUNNING)
-		{
-			int Dir = m_pCharacter->GetAimDir();
-			int Setting = m_Setting;
-			int NumSettings = GetNumSettings();
-			if (Dir == 1)
-			{
-				Setting++;
-				if (Setting >= NumSettings)
-					Setting = 0;
-			}
-			else if (Dir == -1)
-			{
-				Setting--;
-				if (Setting < 0)
-					Setting = NumSettings-1;
-			}
-			SetSetting(Setting);
-			SendWindow();
-		}
-		return;
-	}
-
-	if (m_Category == CAT_TRANSFORM)
-	{
-		int PlotID = CurrentPlotID();
-		if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
-		{
-			for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
-			{
-				CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
-				if (m_Transform.m_Area.Includes(pEntity->GetPos()))
-				{
-					if (m_Setting == TRANSFORM_MOVE)
-					{
-						if (pEntity->m_TransformCID == -1)
-						{
-							pEntity->m_TransformCID = GetCID();
-							m_Transform.m_vSelected.push_back(pEntity);
-						}
-						continue;
-					}
-					m_Transform.m_vSelected.push_back(pEntity);
-				}
-			}
-
-			if (m_Setting == TRANSFORM_MOVE || m_Setting == TRANSFORM_COPY)
-			{
-				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-				{
-					SSelectedEnt Entity;
-					Entity.m_pEnt = CreateTransformEntity(m_Transform.m_vSelected[i], true);
-					Entity.m_pEnt->m_BrushCID = GetCID();
-					Entity.m_Offset = Entity.m_pEnt->GetPos() - m_Transform.m_Area.BottomRight();
-					m_Transform.m_vPreview.push_back(Entity);
-				}
-
-				if (m_Setting == TRANSFORM_COPY)
-					m_Transform.m_vSelected.clear();
-			}
-			else if (m_Setting == TRANSFORM_ERASE)
-			{
-				for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-					RemoveEntity(m_Transform.m_vSelected[i]);
-				StopTransform();
-				m_pCharacter->SetAttackTick(Server()->Tick());
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
-				return;
-			}
-			else if (m_Setting == TRANSFORM_SAVE_PRESET)
-			{
-				if (!m_Transform.m_vSelected.size())
-				{
-					StopTransform();
-					return;
-				}
-				GameServer()->SendChatTarget(GetCID(), "Please enter the name for this preset into the chat");
-			}
-			else if (m_Setting == TRANSFORM_LOAD_PRESET)
-			{
-				GameServer()->SendChatTarget(GetCID(), "Please enter the name of the wanted preset into the chat");
-				m_Transform.m_vSelected.clear();
-			}
-		}
-		else if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
-		{
-			if (m_Setting != TRANSFORM_SAVE_PRESET && m_Setting != TRANSFORM_LOAD_PRESET)
-			{
-				for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
-				{
-					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
-					{
-						CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
-						pEntity->m_PlotID = PlotID;
-						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
-					}
-				}
-
-				if (m_Setting == TRANSFORM_MOVE)
-					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-						RemoveEntity(m_Transform.m_vSelected[i]);
-
-				StopTransform();
-				m_pCharacter->SetAttackTick(Server()->Tick());
-				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
-			}
-			return;
-		}
-
-		m_Transform.m_State++;
-		return;
-	}
-
-	if (m_pCharacter->m_FreezeTime || !CanPlace())
-		return;
-
-	int PlotID = GetCursorPlotID();
-	if (GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
-		return;
-
-	CEntity *pEntity = CreateEntity();
-	pEntity->m_PlotID = PlotID;
-
-	GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
-
-	m_pCharacter->SetAttackTick(Server()->Tick());
-	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
 }
 
 void CDrawEditor::OnInput(CNetObj_PlayerInput *pNewInput)
@@ -602,6 +462,146 @@ void CDrawEditor::HandleInput()
 	}
 	else
 		m_EditStartTick = 0;
+
+	// set cursor position, do that after we set m_Erasing and before we start placing objects, was in Tick() before but then we would need to check !m_PrevInput.m_Hook when placing
+	m_Pos = m_pCharacter->GetCursorPos();
+	if (m_RoundPos && !m_Erasing)
+		m_Pos = GameServer()->RoundPos(m_Pos);
+
+	// shoot, dont process placement while we are erasing, to avoid placing things in the wall when position can only be rounded (bcs its not with erase)
+	// use character inputs here directly instead of an own m_Input.m_Fire, because that would be fucked up when switching weapons etc
+	if (CountInput(m_pCharacter->LatestPrevInput()->m_Fire, m_pCharacter->LatestInput()->m_Fire).m_Presses && !m_Erasing)
+	{
+		if (m_Selecting)
+		{
+			if (m_Category != CAT_TRANSFORM || m_Transform.m_State != TRANSFORM_STATE_RUNNING)
+			{
+				int Dir = m_pCharacter->GetAimDir();
+				int Setting = m_Setting;
+				int NumSettings = GetNumSettings();
+				if (Dir == 1)
+				{
+					Setting++;
+					if (Setting >= NumSettings)
+						Setting = 0;
+				}
+				else if (Dir == -1)
+				{
+					Setting--;
+					if (Setting < 0)
+						Setting = NumSettings-1;
+				}
+				SetSetting(Setting);
+				SendWindow();
+			}
+			return;
+		}
+
+		if (m_Category == CAT_TRANSFORM)
+		{
+			int PlotID = CurrentPlotID();
+			if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
+			{
+				for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+				{
+					CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+					if (m_Transform.m_Area.Includes(pEntity->GetPos()))
+					{
+						if (m_Setting == TRANSFORM_MOVE)
+						{
+							if (pEntity->m_TransformCID == -1)
+							{
+								pEntity->m_TransformCID = GetCID();
+								m_Transform.m_vSelected.push_back(pEntity);
+							}
+							continue;
+						}
+						m_Transform.m_vSelected.push_back(pEntity);
+					}
+				}
+
+				if (m_Setting == TRANSFORM_MOVE || m_Setting == TRANSFORM_COPY)
+				{
+					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+					{
+						SSelectedEnt Entity;
+						Entity.m_pEnt = CreateTransformEntity(m_Transform.m_vSelected[i], true);
+						Entity.m_pEnt->m_BrushCID = GetCID();
+						Entity.m_Offset = Entity.m_pEnt->GetPos() - m_Transform.m_Area.BottomRight();
+						m_Transform.m_vPreview.push_back(Entity);
+					}
+
+					if (m_Setting == TRANSFORM_COPY)
+						m_Transform.m_vSelected.clear();
+				}
+				else if (m_Setting == TRANSFORM_ERASE)
+				{
+					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+						RemoveEntity(m_Transform.m_vSelected[i]);
+					StopTransform();
+					m_pCharacter->SetAttackTick(Server()->Tick());
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
+					return;
+				}
+				else if (m_Setting == TRANSFORM_SAVE_PRESET)
+				{
+					if (!m_Transform.m_vSelected.size())
+					{
+						StopTransform();
+						return;
+					}
+					GameServer()->SendChatTarget(GetCID(), "Please enter the name for this preset into the chat");
+				}
+				else if (m_Setting == TRANSFORM_LOAD_PRESET)
+				{
+					GameServer()->SendChatTarget(GetCID(), "Please enter the name of the wanted preset into the chat");
+					m_Transform.m_vSelected.clear();
+				}
+			}
+			else if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
+			{
+				if (m_Setting != TRANSFORM_SAVE_PRESET && m_Setting != TRANSFORM_LOAD_PRESET)
+				{
+					for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
+					{
+						if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
+						{
+							CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
+							pEntity->m_PlotID = PlotID;
+							GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+						}
+					}
+
+					if (m_Setting == TRANSFORM_MOVE)
+						for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+							RemoveEntity(m_Transform.m_vSelected[i]);
+
+					StopTransform();
+					m_pCharacter->SetAttackTick(Server()->Tick());
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
+				}
+				return;
+			}
+
+			m_Transform.m_State++;
+			return;
+		}
+
+		if (m_pCharacter->m_FreezeTime || !CanPlace())
+			return;
+
+		int PlotID = GetCursorPlotID();
+		if (GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+			return;
+
+		CEntity *pEntity = CreateEntity();
+		pEntity->m_PlotID = PlotID;
+
+		GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+
+		m_pCharacter->SetAttackTick(Server()->Tick());
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
+	}
 }
 
 void CDrawEditor::SetPickup(int Pickup)
