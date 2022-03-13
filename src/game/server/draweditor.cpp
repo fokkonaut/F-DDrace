@@ -409,6 +409,10 @@ void CDrawEditor::OnPlayerFire()
 		return;
 	}
 
+	// dont process placement while we are erasing, to avoid placing things in the wall when position can only be rounded(bcs its not with erase)
+	if (m_Input.m_Hook || m_PrevInput.m_Hook)
+		return;
+
 	if (m_pCharacter->m_FreezeTime || !CanPlace())
 		return;
 
