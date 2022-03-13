@@ -234,6 +234,7 @@ void CDrawEditor::Tick()
 	if (!Active())
 		return;
 
+	HandleInput();
 	m_Pos = m_pCharacter->GetCursorPos();
 	if (m_RoundPos && !m_Erasing)
 		m_Pos = GameServer()->RoundPos(m_Pos);
@@ -265,7 +266,6 @@ void CDrawEditor::Tick()
 			m_Teleporter.m_Number = 0;
 	}
 
-	HandleInput();
 	m_PrevInput = m_Input;
 	m_PrevPlotID = PlotID;
 
@@ -410,10 +410,7 @@ void CDrawEditor::OnPlayerFire()
 	}
 
 	// dont process placement while we are erasing, to avoid placing things in the wall when position can only be rounded(bcs its not with erase)
-	if (m_Input.m_Hook || m_PrevInput.m_Hook)
-		return;
-
-	if (m_pCharacter->m_FreezeTime || !CanPlace())
+	if (m_Erasing || m_pCharacter->m_FreezeTime || !CanPlace())
 		return;
 
 	int PlotID = GetCursorPlotID();
