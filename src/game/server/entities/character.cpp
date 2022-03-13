@@ -3986,9 +3986,13 @@ void CCharacter::SetAvailableWeapon(int PreferedWeapon)
 		if (GetWeaponGot(i))
 		{
 			SetWeapon(i);
-			break;
+			return; // weapon found, return
 		}
 	}
+
+	// no weapon found --> force gun so we dont end up with weird behaviour
+	GiveWeapon(WEAPON_GUN);
+	SetWeapon(WEAPON_GUN);
 }
 
 void CCharacter::SetLastTouchedSwitcher(int Number)
