@@ -205,6 +205,7 @@ public:
 	bool Active();
 	bool Selecting() { return Active() && m_Selecting; }
 
+	void OnPlayerFire();
 	void OnWeaponSwitch();
 	void OnPlayerDeath();
 	void OnPlayerKill();

@@ -520,9 +520,8 @@ public:
 	int m_LastTouchedSwitcher;
 	int m_LastTouchedPortalBy;
 
-	CNetObj_PlayerInput *Input() { return &m_Input; }
-	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; }
-	CNetObj_PlayerInput *LatestPrevInput() { return &m_LatestPrevInput; }
+	CNetObj_PlayerInput *Input() { return &m_Input; };
+	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; };
 	int GetReloadTimer() { return m_ReloadTimer; }
 
 	// Handles dummymode stuff

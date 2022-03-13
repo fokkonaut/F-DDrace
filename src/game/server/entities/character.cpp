@@ -31,6 +31,32 @@
 #include <game/server/score.h>
 #include <generated/protocol.h>
 
+//input count
+struct CInputCount
+{
+	int m_Presses;
+	int m_Releases;
+};
+
+CInputCount CountInput(int Prev, int Cur)
+{
+	CInputCount c = {0, 0};
+	Prev &= INPUT_STATE_MASK;
+	Cur &= INPUT_STATE_MASK;
+	int i = Prev;
+
+	while(i != Cur)
+	{
+		i = (i+1)&INPUT_STATE_MASK;
+		if(i&1)
+			c.m_Presses++;
+		else
+			c.m_Releases++;
+	}
+
+	return c;
+}
+
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -417,7 +443,11 @@ void CCharacter::FireWeapon()
 		return;
 
 	if (m_DrawEditor.Active())
+	{
+		if(ClickedFire)
+			m_DrawEditor.OnPlayerFire();
 		return;
+	}
 
 	if (m_FreezeTime)
 	{
