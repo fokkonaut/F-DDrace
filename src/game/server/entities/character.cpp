@@ -620,7 +620,8 @@ void CCharacter::FireWeapon()
 							pTarget->Freeze();
 					}
 
-					Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
+					if (!Server()->IsIdleDummy(m_pPlayer->GetCID()))
+						Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
 
 					Hits++;
 				}
@@ -1240,32 +1241,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	// Should be enough to set keep it for one second after setting it
-	if (m_LastSetDummyHammer < Server()->Tick() - Server()->TickSpeed())
-	{
-		// Reset dummyhammer after 2 seconds if we didnt re-set it
-		if (m_LastSetDummyHammer < Server()->Tick() - Server()->TickSpeed() * 2)
-			m_DummyHammer = false;
-
-		if (m_LatestInput.m_Direction == 0 && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-		{
-			CCharacter *pDummy = GameServer()->GetPlayerChar(Server()->GetDummy(m_pPlayer->GetCID()));
-			if (pDummy)
-			{
-				vec2 WantedDir = normalize(pDummy->Core()->m_Pos - m_Core.m_Pos);
-				vec2 Dir = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
-
-				float Max = 0.3f;
-				if (abs(WantedDir.x - Dir.x) < Max && abs(WantedDir.y - Dir.y) < Max)
-				{
-					m_DummyHammer = true;
-					m_LastSetDummyHammer = Server()->Tick();
-				}
-			}
-		}
-	}
-
-	if (!m_pTelekinesisEntity)
+	if (!m_pTelekinesisEntity && !Server()->IsIdleDummy(m_pPlayer->GetCID()))
 		Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
 	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
@@ -3653,10 +3629,6 @@ void CCharacter::FDDraceInit()
 	m_ViewCursorSnapID = Server()->SnapNewID();
 	m_DynamicCamera = false;
 	m_CameraMaxLength = 0.f;
-
-	m_DummyHammer = false;
-	m_DummyFire = 0;
-	m_LastSetDummyHammer = 0;
 
 	m_LastWeaponIndTick = 0;
 	m_LastInOutTeleporter = 0;

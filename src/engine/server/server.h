@@ -187,6 +187,14 @@ public:
 		bool m_Sevendown;
 		int m_Socket;
 
+		// dummy
+		bool m_IdleDummy;
+		bool m_DummyHammer;
+
+		int m_InputCount;
+		int64 m_InputCountTick;
+
+		// design
 		bool m_DesignChange;
 		int m_CurrentMapDesign;
 
@@ -474,6 +482,8 @@ public:
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
 
+	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
+	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
 	bool IsDoubleInfo();
 

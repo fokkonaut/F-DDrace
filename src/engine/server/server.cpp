@@ -923,6 +923,8 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *p
 	pThis->m_aClients[ClientID].m_Socket = Socket;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
+	pThis->m_aClients[ClientID].m_IdleDummy = false;
+	pThis->m_aClients[ClientID].m_InputCountTick = 0;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
@@ -969,6 +971,8 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Socket = SOCKET_MAIN;
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
+	pThis->m_aClients[ClientID].m_IdleDummy = false;
+	pThis->m_aClients[ClientID].m_InputCountTick = 0;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
@@ -1531,7 +1535,31 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+			{
 				GameServer()->OnClientDirectInput(ClientID, m_aClients[ClientID].m_LatestInput.m_aData);
+
+				// We do the idle dummy checking after the input has been applied, tho the relevant input gets applied in OnPredictedInput and PredictedEarlyInput
+				if (m_aClients[ClientID].m_InputCountTick == 0)
+				{
+					m_aClients[ClientID].m_InputCountTick = Tick();
+					m_aClients[ClientID].m_InputCount = 1;
+				}
+				else if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
+				{
+					// https://github.com/ddnet/ddnet/blob/master/src/engine/client/client.cpp#L588
+					// dummys send their input half of the time only, just for not getting prediction time resets.
+					// while hammerfly is on, the dummy even sends no input at all except for the direction changes and hammer, so thats about 2 inputs per second
+					// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
+					m_aClients[ClientID].m_IdleDummy = m_aClients[ClientID].m_InputCount <= 15;
+					m_aClients[ClientID].m_DummyHammer = m_aClients[ClientID].m_InputCount < 5;
+					m_aClients[ClientID].m_InputCountTick = 0;
+					m_aClients[ClientID].m_InputCount = 0;
+				}
+				else
+				{
+					m_aClients[ClientID].m_InputCount++;
+				}
+			}
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{
@@ -4143,6 +4171,8 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_Socket = SOCKET_MAIN;
 	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	m_aClients[DummyID].m_PgscState = CClient::PGSC_STATE_NONE;
+	m_aClients[DummyID].m_IdleDummy = false;
+	m_aClients[DummyID].m_InputCountTick = 0;
 
 	m_NetServer.DummyDelete(DummyID);
 }

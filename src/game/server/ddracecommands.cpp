@@ -1147,6 +1147,18 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	else if (pPlayer->m_HasTeeControl)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Tee Control: True");
 
+	int Dummy = pSelf->Server()->GetDummy(ID);
+	if (Dummy != -1)
+	{
+		if (pSelf->Server()->IsIdleDummy(ID))
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: True");
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: False");
+
+		if (pSelf->Server()->IsDummyHammer(ID))
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");
+	}
+
 	// then character vars
 	if (!pChr)
 		return;
@@ -1211,8 +1223,6 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	}
 	if (pChr->m_DoorHammer)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
-	if (pChr->m_DummyHammer)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");
 	str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }

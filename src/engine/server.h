@@ -63,6 +63,8 @@ public:
 	virtual void DummyLeave(int DummyID) = 0;
 
 	virtual bool IsSevendown(int ClientID) = 0;
+	virtual bool IsIdleDummy(int ClientID) = 0;
+	virtual bool IsDummyHammer(int ClientID) = 0;
 	virtual const char *GetLanguage(int ClientID) = 0;
 	virtual void SetLanguage(int ClientID, const char *pLanguage) = 0;
 	virtual void ChangeMapDesign(int ClientID, const char *pName) = 0;
@@ -314,7 +316,6 @@ public:
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 	virtual void SetBotDetected(int ClientID) = 0;
-	virtual bool IsClientDummyHammer(int ClientID) = 0;
 };
 
 extern IGameServer *CreateGameServer();
