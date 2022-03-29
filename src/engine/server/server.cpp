@@ -1539,12 +1539,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				GameServer()->OnClientDirectInput(ClientID, m_aClients[ClientID].m_LatestInput.m_aData);
 
 				// We do the idle dummy checking after the input has been applied, tho the relevant input gets applied in OnPredictedInput and PredictedEarlyInput
-				if (m_aClients[ClientID].m_InputCountTick == 0)
-				{
-					m_aClients[ClientID].m_InputCountTick = Tick();
-					m_aClients[ClientID].m_InputCount = 1;
-				}
-				else if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
+				if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
 				{
 					// https://github.com/ddnet/ddnet/blob/master/src/engine/client/client.cpp#L588
 					// dummys send their input half of the time only, just for not getting prediction time resets.
@@ -1552,13 +1547,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
 					m_aClients[ClientID].m_IdleDummy = m_aClients[ClientID].m_InputCount <= 15;
 					m_aClients[ClientID].m_DummyHammer = m_aClients[ClientID].m_InputCount < 5;
-					m_aClients[ClientID].m_InputCountTick = 0;
+					m_aClients[ClientID].m_InputCountTick = Tick();
 					m_aClients[ClientID].m_InputCount = 0;
 				}
-				else
-				{
-					m_aClients[ClientID].m_InputCount++;
-				}
+				m_aClients[ClientID].m_InputCount++;
 			}
 		}
 		else if(Msg == NETMSG_RCON_CMD)
