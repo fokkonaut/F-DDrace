@@ -1541,7 +1541,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				// We do the idle dummy checking after the input has been applied, tho the relevant input gets applied in OnPredictedInput and PredictedEarlyInput
 				if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
 				{
-					// https://github.com/ddnet/ddnet/blob/master/src/engine/client/client.cpp#L588
+					// https://github.com/ddnet/ddnet/blob/68470cc6b069e65e39b45bcaa03753185b7fbd3a/src/engine/client/client.cpp#L588-L590
 					// dummys send their input half of the time only, just for not getting prediction time resets.
 					// while hammerfly is on, the dummy even sends no input at all except for the direction changes and hammer, so thats about 2 inputs per second
 					// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
