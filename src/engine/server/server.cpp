@@ -1541,27 +1541,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				// We do the idle dummy checking after the input has been applied, tho the relevant input gets applied in OnPredictedInput and PredictedEarlyInput
 				if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
 				{
-					int Dummy = GetDummy(ClientID);
-					if (Dummy != -1)
-					{
-						// https://github.com/ddnet/ddnet/blob/master/src/engine/client/client.cpp#L588
-						// dummys send their input half of the time only, just for not getting prediction time resets.
-						// while hammerfly is on, the dummy even sends no input at all except for the direction changes and hammer, so thats about 2 inputs per second
-						// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
-						m_aClients[ClientID].m_IdleDummy = m_aClients[ClientID].m_InputCount <= 15;
-						m_aClients[ClientID].m_DummyHammer = m_aClients[ClientID].m_InputCount < 5;
-						m_aClients[ClientID].m_InputCountTick = Tick();
-						m_aClients[ClientID].m_InputCount = 0;
-
-						// Never two idle tees at once, thats impossble! Someone is trying to trick the system by sending less inputs so he doesnt get detected (marked as idle)
-						if (m_aClients[ClientID].m_IdleDummy && m_aClients[Dummy].m_IdleDummy)
-						{
-							m_aClients[ClientID].m_IdleDummy = false;
-							m_aClients[Dummy].m_IdleDummy = false;
-						}
-					}
-					else
-						m_aClients[ClientID].m_IdleDummy = false;
+					// https://github.com/ddnet/ddnet/blob/master/src/engine/client/client.cpp#L588
+					// dummys send their input half of the time only, just for not getting prediction time resets.
+					// while hammerfly is on, the dummy even sends no input at all except for the direction changes and hammer, so thats about 2 inputs per second
+					// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
+					m_aClients[ClientID].m_IdleDummy = m_aClients[ClientID].m_InputCount <= 15;
+					m_aClients[ClientID].m_DummyHammer = m_aClients[ClientID].m_InputCount < 5;
+					m_aClients[ClientID].m_InputCountTick = Tick();
+					m_aClients[ClientID].m_InputCount = 0;
 				}
 				m_aClients[ClientID].m_InputCount++;
 			}
