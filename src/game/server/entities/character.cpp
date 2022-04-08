@@ -620,8 +620,7 @@ void CCharacter::FireWeapon()
 							pTarget->Freeze();
 					}
 
-					if (!Server()->IsIdleDummy(m_pPlayer->GetCID())) // avoid false positives with dummy hammer or deepfly
-						Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
+					Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
 
 					Hits++;
 				}
@@ -1241,7 +1240,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if (!m_pTelekinesisEntity && !Server()->IsIdleDummy(m_pPlayer->GetCID())) // avoid false positives with dummy hammer or deepfly
+	if (!m_pTelekinesisEntity)
 		Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
 	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
