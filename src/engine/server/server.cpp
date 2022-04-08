@@ -1496,6 +1496,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIntendedTick == IntendedTick);
 			// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
 			m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
+			// dummy copy moves could be detected aswell by checking whether its the idle dummy and then counting inputs a bit, bcs they get sent twice as often with it acitavted
 
 			m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
 			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;
