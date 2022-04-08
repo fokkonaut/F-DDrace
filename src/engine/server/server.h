@@ -190,9 +190,7 @@ public:
 		// dummy
 		bool m_IdleDummy;
 		bool m_DummyHammer;
-
-		int m_InputCount;
-		int64 m_InputCountTick;
+		int m_LastIntendedTick;
 
 		// design
 		bool m_DesignChange;

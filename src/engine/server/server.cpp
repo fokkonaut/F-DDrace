@@ -924,7 +924,6 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *p
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->m_aClients[ClientID].m_IdleDummy = false;
-	pThis->m_aClients[ClientID].m_InputCountTick = 0;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
@@ -972,7 +971,6 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
 	pThis->m_aClients[ClientID].m_IdleDummy = false;
-	pThis->m_aClients[ClientID].m_InputCountTick = 0;
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
@@ -1486,13 +1484,21 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			int64 TagTime;
 			int64 Now = time_get();
 
-			m_aClients[ClientID].m_LastAckedSnapshot = Unpacker.GetInt();
+			int LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
 
 			// check for errors
 			if(Unpacker.Error() || Size/4 > MAX_INPUT_SIZE)
 				return;
+
+			// This does also apply when dummy hammer or dummy copy moves is activated, the "idle" dummy will always send the intended tick of before the swap
+			m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIntendedTick == IntendedTick);
+			// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
+			m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
+
+			m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
+			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;
 
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
 				m_aClients[ClientID].m_SnapRate = CClient::SNAPRATE_FULL;
@@ -1535,23 +1541,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
-			{
 				GameServer()->OnClientDirectInput(ClientID, m_aClients[ClientID].m_LatestInput.m_aData);
-
-				// We do the idle dummy checking after the input has been applied, tho the relevant input gets applied in OnPredictedInput and PredictedEarlyInput
-				if (Tick() >= m_aClients[ClientID].m_InputCountTick + TickSpeed())
-				{
-					// https://github.com/ddnet/ddnet/blob/68470cc6b069e65e39b45bcaa03753185b7fbd3a/src/engine/client/client.cpp#L588-L590
-					// dummys send their input half of the time only, just for not getting prediction time resets.
-					// while hammerfly is on, the dummy even sends no input at all except for the direction changes and hammer, so thats about 2 inputs per second
-					// active player sends about 20 input packets per second and dummy about 10, so i think 15 is a good solution
-					m_aClients[ClientID].m_IdleDummy = m_aClients[ClientID].m_InputCount <= 15;
-					m_aClients[ClientID].m_DummyHammer = m_aClients[ClientID].m_InputCount < 5;
-					m_aClients[ClientID].m_InputCountTick = Tick();
-					m_aClients[ClientID].m_InputCount = 0;
-				}
-				m_aClients[ClientID].m_InputCount++;
-			}
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{
@@ -4164,7 +4154,6 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
 	m_aClients[DummyID].m_PgscState = CClient::PGSC_STATE_NONE;
 	m_aClients[DummyID].m_IdleDummy = false;
-	m_aClients[DummyID].m_InputCountTick = 0;
 
 	m_NetServer.DummyDelete(DummyID);
 }
