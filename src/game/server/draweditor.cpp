@@ -542,21 +542,24 @@ void CDrawEditor::HandleInput()
 			}
 			else if (m_Category == CAT_SPEEDUPS)
 			{
+				// in plots maximum force and maxspeed to 15
+				int Max = CurrentPlotID() >= PLOT_START ? 15 : 255;
+
 				if (m_Setting == SPEEDUP_FORCE)
 				{
 					m_Speedup.m_Force += m_Input.m_Direction;
-					if (m_Speedup.m_Force > 255)
+					if (m_Speedup.m_Force > Max)
 						m_Speedup.m_Force = 1;
 					else if (m_Speedup.m_Force < 1)
-						m_Speedup.m_Force = 255;
+						m_Speedup.m_Force = Max;
 				}
 				else if (m_Setting == SPEEDUP_MAXSPEED)
 				{
 					m_Speedup.m_MaxSpeed += m_Input.m_Direction;
-					if (m_Speedup.m_MaxSpeed > 255)
+					if (m_Speedup.m_MaxSpeed > Max)
 						m_Speedup.m_MaxSpeed = 0;
 					else if (m_Speedup.m_MaxSpeed < 0)
-						m_Speedup.m_MaxSpeed = 255;
+						m_Speedup.m_MaxSpeed = Max;
 				}
 			}
 			else if (m_Category == CAT_TELEPORTER)
