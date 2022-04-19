@@ -2408,18 +2408,19 @@ void CCharacter::HandleTiles(int Index)
 
 		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
 		bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
-		if (MoneyTile || PoliceMoneyTile)
+		if ((MoneyTile || PoliceMoneyTile) && !m_ProcessedMoneyTile)
 		{
 			m_MoneyTile = true;
+			m_ProcessedMoneyTile = true; // when multiple speedups on a moneytile face into each other the player skips multiple tiles in one tick leading to doubled xp and money
 
 			bool Plot = GetCurrentTilePlotID() >= PLOT_START;
-			int Seconds = Server()->TickSpeed();
+			int Ticks = Server()->TickSpeed();
 			if (m_pPlayer->m_JailTime) // every 3 seconds only while arrested
-				Seconds *= 3;
+				Ticks *= 3;
 			else if (Plot) // every 2 seconds only on plot money tile
-				Seconds *= 2;
+				Ticks *= 2;
 
-			if (Server()->Tick() % Seconds == 0)
+			if (Server()->Tick() % Ticks == 0)
 			{
 				if (m_pPlayer->GetAccID() < ACC_START)
 				{
@@ -3353,6 +3354,8 @@ void CCharacter::DDracePostCoreTick()
 			return;
 	}
 
+	m_ProcessedMoneyTile = false;
+
 	// teleport gun
 	if (m_TeleGunTeleport)
 	{
@@ -3599,6 +3602,7 @@ void CCharacter::FDDraceInit()
 	m_SpawnTick = Now;
 	m_WeaponChangeTick = Now;
 	m_MoneyTile = false;
+	m_ProcessedMoneyTile = false;
 	m_GotLasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;

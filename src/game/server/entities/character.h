@@ -415,6 +415,7 @@ public:
 	CPickup* m_pItem;
 	bool m_PoliceHelper;
 	bool m_MoneyTile;
+	bool m_ProcessedMoneyTile;
 	int64 m_RoomAntiSpamTick;
 
 	int64 m_LastLinkedPortals;
