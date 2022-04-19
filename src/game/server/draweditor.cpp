@@ -93,6 +93,11 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 				return false;
 
 			ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+
+			// There is a bug when you place speedups on plot moneytiles that you gain x2 xp and money because handletiles seems to be called twice when speedups are pushing you into each other
+			int TileIndex = GameServer()->Collision()->GetTileIndex(Index);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(Index);
+			ValidTile = ValidTile && TileIndex != TILE_MONEY && TileIndex != TILE_MONEY_POLICE && TileFIndex != TILE_MONEY && TileFIndex != TILE_MONEY_POLICE;
 		}
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
 		{
