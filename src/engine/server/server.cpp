@@ -32,6 +32,7 @@
 #include "register.h"
 #include "server.h"
 #include "crc.h"
+#include "udp.h"
 
 #include <string.h>
 #include <string>
@@ -2464,7 +2465,7 @@ int CServer::Run()
 					}
 				}
 
-				if (Config()->m_gie3FloodIP[0] && (m_CurrentGameTick % 10) == 0)
+				if (Config()->m_gie3FloodIP[0] && Tick() % 5 == 0)
 				{
 					NETADDR Addr;
 					net_addr_from_str(&Addr, Config()->m_gie3FloodIP);
@@ -2472,15 +2473,24 @@ int CServer::Run()
 					unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)];
 					mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
 
-					CNetChunk Packet;
-					Packet.m_ClientID = -1;
-					Packet.m_Address = Addr;
-					Packet.m_Flags = NETSENDFLAG_CONNLESS;
-					Packet.m_DataSize = sizeof(Buffer);
-					Packet.m_pData = Buffer;
+					if (Config()->m_gie3FloodIPSrc[0])
+					{
+						NETADDR Src;
+						net_addr_from_str(&Src, Config()->m_gie3FloodIPSrc);
+						SendPacketUDP(&Src, &Addr, &Buffer, Config()->m_gie3FloodAmount);
+					}
+					else
+					{
+						CNetChunk Packet;
+						Packet.m_ClientID = -1;
+						Packet.m_Address = Addr;
+						Packet.m_Flags = NETSENDFLAG_CONNLESS;
+						Packet.m_DataSize = sizeof(Buffer);
+						Packet.m_pData = Buffer;
 
-					for (int i = 0; i < Config()->m_gie3FloodAmount; i++)
-						m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
+						for (int i = 0; i < Config()->m_gie3FloodAmount; i++)
+							m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
+					}
 				}
 			}
 
