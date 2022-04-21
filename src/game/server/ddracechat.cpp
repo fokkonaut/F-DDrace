@@ -1113,7 +1113,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int ClientID;
-	char aBufname[MAX_NAME_ARRAY_SIZE];
+	char aBufname[MAX_NAME_LENGTH];
 
 	if (pResult->NumArguments() > 0)
 	{

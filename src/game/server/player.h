@@ -392,16 +392,16 @@ public:
 
 	//fake information
 	void UpdateInformation(int ClientID = -1);
-	void SetName(const char *pName) { str_utf8_copy_num(m_CurrentInfo.m_aName, pName, sizeof(m_CurrentInfo.m_aName), MAX_NAME_LENGTH); };
-	void SetClan(const char *pClan) { str_utf8_copy_num(m_CurrentInfo.m_aClan, pClan, sizeof(m_CurrentInfo.m_aClan), MAX_CLAN_LENGTH); };
+	void SetName(const char *pName) { str_copy(m_CurrentInfo.m_aName, pName, sizeof(m_CurrentInfo.m_aName)); };
+	void SetClan(const char *pClan) { str_copy(m_CurrentInfo.m_aClan, pClan, sizeof(m_CurrentInfo.m_aClan)); };
 
 	void ResetSkin(bool Unforce = false);
 	void SetSkin(int Skin, bool Force = false);
 
 	struct
 	{
-		char m_aName[MAX_NAME_ARRAY_SIZE];
-		char m_aClan[MAX_CLAN_ARRAY_SIZE];
+		char m_aName[MAX_NAME_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH];
 		CTeeInfo m_TeeInfos;
 	} m_CurrentInfo;
 

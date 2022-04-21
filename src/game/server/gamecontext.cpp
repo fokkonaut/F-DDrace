@@ -1446,8 +1446,8 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 void CGameContext::OnClientEnter(int ClientID)
 {
 	// F-DDrace
-	str_utf8_copy_num(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aName), MAX_NAME_LENGTH);
-	str_utf8_copy_num(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan), MAX_CLAN_LENGTH);
+	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aName));
+	str_copy(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan, Server()->ClientClan(ClientID), sizeof(m_apPlayers[ClientID]->m_CurrentInfo.m_aClan));
 	m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = m_apPlayers[ClientID]->m_TeeInfos;
 	m_apPlayers[ClientID]->Respawn();
 
@@ -1887,8 +1887,8 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// set infos
 			if (str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID)) == 0) // check that we dont have a name on right now set by an admin
 			{
-				char aOldName[MAX_NAME_ARRAY_SIZE];
-				str_utf8_copy_num(aOldName, Server()->ClientName(ClientID), sizeof(aOldName), MAX_NAME_LENGTH);
+				char aOldName[MAX_NAME_LENGTH];
+				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 				Server()->SetClientName(ClientID, pName);
 				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
 				{

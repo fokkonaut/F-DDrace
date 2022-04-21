@@ -338,7 +338,7 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_
 
 int CServer::TrySetClientName(int ClientID, const char* pName)
 {
-	char aTrimmedName[64];
+	char aTrimmedName[MAX_NAME_LENGTH];
 
 	// trim the name
 	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pName), sizeof(aTrimmedName));
@@ -366,7 +366,7 @@ int CServer::TrySetClientName(int ClientID, const char* pName)
 	pName = aTrimmedName;
 
 	// set the client name
-	str_utf8_copy_num(m_aClients[ClientID].m_aName, pName, sizeof(m_aClients[ClientID].m_aName), MAX_NAME_LENGTH);
+	str_copy(m_aClients[ClientID].m_aName, pName, sizeof(m_aClients[ClientID].m_aName));
 	return 0;
 }
 
@@ -375,8 +375,8 @@ void CServer::SetClientName(int ClientID, const char *pName)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pName)
 		return;
 
-	char aNameTry[MAX_NAME_ARRAY_SIZE];
-	str_utf8_copy_num(aNameTry, pName, sizeof(aNameTry), MAX_NAME_LENGTH);
+	char aNameTry[MAX_NAME_LENGTH];
+	str_copy(aNameTry, pName, sizeof(aNameTry));
 	if (TrySetClientName(ClientID, aNameTry))
 	{
 		// auto rename
@@ -394,7 +394,7 @@ void CServer::SetClientClan(int ClientID, const char *pClan)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pClan)
 		return;
 
-	str_utf8_copy_num(m_aClients[ClientID].m_aClan, pClan, sizeof(m_aClients[ClientID].m_aClan), MAX_CLAN_LENGTH);
+	str_copy(m_aClients[ClientID].m_aClan, pClan, sizeof(m_aClients[ClientID].m_aClan));
 }
 
 void CServer::SetClientCountry(int ClientID, int Country)
@@ -4138,8 +4138,8 @@ void CServer::DummyJoin(int DummyID)
 	m_aClients[DummyID].m_Sevendown = false;
 	m_aClients[DummyID].m_Socket = SOCKET_MAIN;
 
-	str_utf8_copy_num(m_aClients[DummyID].m_aName, pNames[DummyID], sizeof(m_aClients[DummyID].m_aName), MAX_NAME_LENGTH);
-	str_utf8_copy_num(m_aClients[DummyID].m_aClan, pClans[DummyID], sizeof(m_aClients[DummyID].m_aClan), MAX_CLAN_LENGTH);
+	str_copy(m_aClients[DummyID].m_aName, pNames[DummyID], sizeof(m_aClients[DummyID].m_aName));
+	str_copy(m_aClients[DummyID].m_aClan, pClans[DummyID], sizeof(m_aClients[DummyID].m_aClan));
 }
 
 void CServer::DummyLeave(int DummyID)
