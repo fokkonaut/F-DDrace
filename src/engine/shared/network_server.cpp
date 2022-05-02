@@ -19,7 +19,7 @@ static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 }
 
 bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CNetBan *pNetBan,
-	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, NETFUNC_CLIENTREJOIN pfnClientRejoin, void *pUser)
+	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
@@ -50,7 +50,6 @@ bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 
 	m_pfnNewClient = pfnNewClient;
 	m_pfnDelClient = pfnDelClient;
-	m_pfnClientRejoin = pfnClientRejoin;
 	m_UserPtr = pUser;
 
 	// F-DDrace
@@ -190,7 +189,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 				continue;
 			}
 
-			int Slot = -1;
+			bool Found = false;
 			// try to find matching slot
 			for(int i = 0; i < NET_MAX_CLIENTS; i++)
 			{
@@ -220,135 +219,126 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 							}
 						}
 					}
-					Slot = i;
+					Found = true;
 				}
 			}
 
-			//if(Slot != -1)
-			//	continue;
+			if(Found)
+				continue;
 
 			// not found, client that wants to connect
 			int ControlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
 			bool AcceptConnect = false;
 			SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
 
-			// For reconnecting clients after timeout
-			if (Slot == -1 || (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL))
+			if (!*pSevendown)
 			{
-				if (!*pSevendown)
-				{
-					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
-					if(Accept <= 0)
-						continue;
+				int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
+				if(Accept <= 0)
+					continue;
 
-					if(ControlMsg == NET_CTRLMSG_TOKEN)
-						m_TokenCache.AddToken(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, NET_TOKENFLAG_RESPONSEONLY, Socket);
-					else if(ControlMsg == NET_CTRLMSG_CONNECT)
+				if(ControlMsg == NET_CTRLMSG_TOKEN)
+					m_TokenCache.AddToken(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, NET_TOKENFLAG_RESPONSEONLY, Socket);
+				else if(ControlMsg == NET_CTRLMSG_CONNECT)
+				{
+					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_ACCEPT, 0, 0, false, Socket);
+					AcceptConnect = true;
+				}
+			}
+			else
+			{
+				if (!Config()->m_SvAllowSevendown)
+					continue;
+
+				if(ControlMsg == NET_CTRLMSG_CONNECT)
+				{
+					// response connection request with token
+					SecurityToken = GetSecurityToken(Addr);
+					SendControlMsg(&Addr, 0, 0, NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), true, Socket, SecurityToken);
+				}
+				else if(ControlMsg == 3) // NET_CTRLMSG_ACCEPT
+				{
+					SecurityToken = ToSecurityToken(&m_RecvUnpacker.m_Data.m_aChunkData[1]);
+					if(SecurityToken == GetSecurityToken(Addr))
 					{
-						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_ACCEPT, 0, 0, false, Socket);
+						// correct token
+						// try to accept client
+						if(Config()->m_Debug)
+							dbg_msg("security", "new client (ddnet token)");
 						AcceptConnect = true;
 					}
-				}
-				else
-				{
-					if (!Config()->m_SvAllowSevendown)
-						continue;
-
-					if(ControlMsg == NET_CTRLMSG_CONNECT)
+					else
 					{
-						// response connection request with token
-						SecurityToken = GetSecurityToken(Addr);
-						SendControlMsg(&Addr, 0, 0, NET_CTRLMSG_ACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC), true, Socket, SecurityToken);
-					}
-					else if(ControlMsg == 3) // NET_CTRLMSG_ACCEPT
-					{
-						SecurityToken = ToSecurityToken(&m_RecvUnpacker.m_Data.m_aChunkData[1]);
-						if(SecurityToken == GetSecurityToken(Addr))
-						{
-							// correct token
-							// try to accept client
-							if(Config()->m_Debug)
-								dbg_msg("security", "new client (ddnet token)");
-							AcceptConnect = true;
-						}
-						else
-						{
-							// invalid token
-							if(Config()->m_Debug)
-								dbg_msg("security", "invalid token");
-						}
+						// invalid token
+						if(Config()->m_Debug)
+							dbg_msg("security", "invalid token");
 					}
 				}
 			}
 
-			if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL && AcceptConnect)
+			if (m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONTROL)
 			{
-				if (Slot != -1)
+				if(AcceptConnect)
 				{
-					// reset netconn and process rejoin
-					m_aSlots[Slot].m_Connection.Reset(true, Socket);
-					m_pfnClientRejoin(Slot, m_UserPtr);
-					continue;
-				}
-
-				if (Connlimit(Addr))
-				{
-					const char LimitMsg[] = "Too many connections in a short time";
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
-					continue; // failed to add client
-				}
-
-				// check if there are free slots
-				if(m_NumClients >= m_MaxClients)
-				{
-					const char FullMsg[] = "This server is full";
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), *pSevendown, Socket, SecurityToken);
-					continue;
-				}
-
-				// only allow a specific number of players with the same ip
-				int FoundAddr = 0;
-				// dont count timeouted tees to the same address because then not every timeout can be get back
-				int FoundTimeouts = 0;
-
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
-				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-						continue;
-
-					if(!net_addr_comp(&Addr, m_aSlots[i].m_Connection.PeerAddress(), false))
+					if (Connlimit(Addr))
 					{
-						FoundAddr++;
-						if (m_aSlots[i].m_Connection.m_TimeoutSituation)
-							FoundTimeouts++;
+						const char LimitMsg[] = "Too many connections in a short time";
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
+						continue; // failed to add client
 					}
-				}
 
-				int MaxClientsPerIP = Config()->m_SvCountTimeoutToMaxIP ? m_MaxClientsPerIP : clamp(m_MaxClientsPerIP+FoundTimeouts, 0, m_MaxClientsPerIP*2);
-				if(FoundAddr >= MaxClientsPerIP)
-				{
-					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, Socket, SecurityToken);
-					continue;
-				}
-
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
-				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+					// check if there are free slots
+					if(m_NumClients >= m_MaxClients)
 					{
-						m_NumClients++;
-						m_aSlots[i].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown, Socket);
-						if(m_pfnNewClient)
-							m_pfnNewClient(i, *pSevendown, Socket, m_UserPtr);
+						const char FullMsg[] = "This server is full";
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, FullMsg, sizeof(FullMsg), *pSevendown, Socket, SecurityToken);
+						continue;
+					}
 
-						if (Config()->m_Debug)
+					// only allow a specific number of players with the same ip
+					int FoundAddr = 0;
+					// dont count timeouted tees to the same address because then not every timeout can be get back
+					int FoundTimeouts = 0;
+
+					for(int i = 0; i < NET_MAX_CLIENTS; i++)
+					{
+						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+							continue;
+
+						if(!net_addr_comp(&Addr, m_aSlots[i].m_Connection.PeerAddress(), false))
 						{
-							char aAddrStr[NETADDR_MAXSTRSIZE];
-							net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-							dbg_msg("security", "client accepted %s", aAddrStr);
+							FoundAddr++;
+							if (m_aSlots[i].m_Connection.m_TimeoutSituation)
+								FoundTimeouts++;
 						}
-						break;
+					}
+
+					int MaxClientsPerIP = Config()->m_SvCountTimeoutToMaxIP ? m_MaxClientsPerIP : clamp(m_MaxClientsPerIP+FoundTimeouts, 0, m_MaxClientsPerIP*2);
+					if(FoundAddr >= MaxClientsPerIP)
+					{
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", m_MaxClientsPerIP);
+						SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, Socket, SecurityToken);
+						continue;
+					}
+
+					for(int i = 0; i < NET_MAX_CLIENTS; i++)
+					{
+						if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+						{
+							m_NumClients++;
+							m_aSlots[i].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown, Socket);
+							if(m_pfnNewClient)
+								m_pfnNewClient(i, *pSevendown, Socket, m_UserPtr);
+
+							if (Config()->m_Debug)
+							{
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+								dbg_msg("security", "client accepted %s", aAddrStr);
+							}
+							break;
+						}
 					}
 				}
 			}

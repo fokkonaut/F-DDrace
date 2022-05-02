@@ -158,7 +158,6 @@ enum
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
 typedef int (*NETFUNC_NEWCLIENT)(int ClientID, bool Sevendown, int Socket, void *pUser);
-typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, void *pUser);
 
 typedef unsigned int TOKEN;
 
@@ -383,7 +382,7 @@ private:
 	static TOKEN GenerateToken(const NETADDR *pPeerAddr);
 
 public:
-	void Reset(bool Rejoin = false, int Socket = SOCKET_MAIN);
+	void Reset(bool Rejoin = false);
 	void Init(CNetBase *pNetBase, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);
@@ -499,7 +498,6 @@ class CNetServer : public CNetBase
 
 	NETFUNC_NEWCLIENT m_pfnNewClient;
 	NETFUNC_DELCLIENT m_pfnDelClient;
-	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
 	void *m_UserPtr;
 
 	// F-DDrace
@@ -521,7 +519,7 @@ class CNetServer : public CNetBase
 public:
 	//
 	bool Open(NETADDR BindAddr, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine, class CNetBan *pNetBan,
-		int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, NETFUNC_CLIENTREJOIN pfnClientRejoin, void *pUser);
+		int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 	void Close();
 
 	// the token parameter is only used for connless packets
