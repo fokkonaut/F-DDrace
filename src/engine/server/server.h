@@ -344,6 +344,7 @@ public:
 
 	static int NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
+	static int ClientRejoinCallback(int ClientID, void *pUser);
 
 	void SendCapabilities(int ClientID);
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);

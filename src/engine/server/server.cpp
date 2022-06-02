@@ -893,6 +893,24 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
+int CServer::ClientRejoinCallback(int ClientID, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+
+	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
+	pThis->m_aClients[ClientID].m_AuthKey = -1;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
+	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
+	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
+
+	pThis->m_aClients[ClientID].Reset();
+
+	pThis->SendMap(ClientID);
+
+	return 0;
+}
+
 int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
@@ -2270,7 +2288,7 @@ int CServer::Run()
 	}
 
 	if(!m_NetServer.Open(BindAddr, Config(), Console(), Kernel()->RequestInterface<IEngine>(), &m_ServerBan,
-		Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP, NewClientCallback, DelClientCallback, this))
+		Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP, NewClientCallback, DelClientCallback, ClientRejoinCallback, this))
 	{
 		dbg_msg("server", "couldn't open socket. port %d might already be in use", Config()->m_SvPort);
 		return -1;
