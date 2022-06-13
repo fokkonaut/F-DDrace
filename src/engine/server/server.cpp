@@ -1455,6 +1455,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
+					SendConnectionReady(ClientID);
 					GameServer()->MapDesignChangeDone(ClientID);
 					return;
 				}
@@ -1475,12 +1476,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
 				m_aClients[ClientID].m_State = CClient::STATE_READY;
 				GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
+				SendConnectionReady(ClientID);
 
 				if (Config()->m_SvDefaultMapDesign[0])
 					ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 			}
-
-			SendConnectionReady(ClientID);
 		}
 		else if(Msg == NETMSG_ENTERGAME)
 		{
