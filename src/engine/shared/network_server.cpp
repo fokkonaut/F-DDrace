@@ -286,7 +286,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 						if (Slot != -1)
 						{
 							// reset netconn and process rejoin
-							m_aSlots[Slot].m_Connection.Reset(true, Socket);
+							m_aSlots[Slot].m_Connection.Reset(true, Socket, *pSevendown);
 							m_pfnClientRejoin(Slot, m_UserPtr);
 							continue;
 						}

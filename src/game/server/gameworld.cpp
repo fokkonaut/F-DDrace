@@ -507,6 +507,8 @@ void CGameWorld::PlayerMap::OnMapDesignChange()
 	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
 		if (m_pMap[i] != -1)
 			GetPlayer()->SendConnect(i, m_pMap[i]);
+
+	m_UpdateTeamsState = true;
 }
 
 void CGameWorld::Tick()

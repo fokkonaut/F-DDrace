@@ -383,7 +383,7 @@ private:
 	static TOKEN GenerateToken(const NETADDR *pPeerAddr);
 
 public:
-	void Reset(bool Rejoin = false, int Socket = SOCKET_MAIN);
+	void Reset(bool Rejoin = false, int Socket = SOCKET_MAIN, bool Sevendown = false);
 	void Init(CNetBase *pNetBase, bool BlockCloseMsg);
 	int Connect(NETADDR *pAddr);
 	void Disconnect(const char *pReason);

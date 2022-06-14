@@ -1529,8 +1529,36 @@ void CGameContext::SendStartMessages(int ClientID)
 	}
 }
 
+void CGameContext::OnClientRejoin(int ClientID)
+{
+	if (!m_apPlayers[ClientID])
+		return;
+
+	// send clear vote options
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
+	// begin sending vote options
+	m_apPlayers[ClientID]->m_SendVoteIndex = 0;
+
+	SendStartMessages(ClientID);
+	m_World.InitPlayerMap(ClientID);
+	m_World.UpdateTeamsState(ClientID);
+
+	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
+	SendTuningParams(ClientID, Zone);
+}
+
 void CGameContext::MapDesignChangeDone(int ClientID)
 {
+	if (!m_apPlayers[ClientID])
+		return;
+
+	// send clear vote options
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
+	// begin sending vote options
+	m_apPlayers[ClientID]->m_SendVoteIndex = 0;
+
 	SendStartMessages(ClientID);
 	m_World.OnMapDesignChange(ClientID);
 

@@ -905,6 +905,7 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientID].Reset();
+	pThis->GameServer()->OnClientRejoin(ClientID);
 
 	pThis->SendMap(ClientID);
 
@@ -1455,7 +1456,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
-					GameServer()->MapDesignChangeDone(ClientID);
+					GameServer()->OnClientRejoin(ClientID);
 					return;
 				}
 				if (SendingFakeMap)
@@ -3465,6 +3466,7 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	{
 		return false;
 	}
+
 	m_aClients[ClientID].m_Sevendown = m_aClients[OrigID].m_Sevendown;
 	m_aClients[ClientID].m_Socket = m_aClients[OrigID].m_Socket;
 
@@ -3473,12 +3475,15 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 		LogoutClient(ClientID, "Timeout Protection");
 	}
 
+	m_aClients[ClientID].m_CurrentMapDesign = m_aClients[OrigID].m_CurrentMapDesign;
+	m_aClients[ClientID].m_Authed = AUTHED_NO;
+	m_aClients[ClientID].m_DDNetVersion = m_aClients[OrigID].m_DDNetVersion;
+	m_aClients[ClientID].m_GotDDNetVersionPacket = m_aClients[OrigID].m_GotDDNetVersionPacket;
+	m_aClients[ClientID].m_DDNetVersionSettled = m_aClients[OrigID].m_DDNetVersionSettled;
+
 	// important ot call OnSetTimedOut before we remove the original client but after we swapped already
 	GameServer()->OnSetTimedOut(ClientID, OrigID);
 
-	m_aClients[ClientID].m_CurrentMapDesign = m_aClients[OrigID].m_CurrentMapDesign;
-	m_aClients[ClientID].m_Authed = AUTHED_NO;
-	//m_aClients[ClientID].m_Flags = m_aClients[OrigID].m_Flags;
 	DelClientCallback(OrigID, "Timeout Protection used", this);
 	return true;
 }
