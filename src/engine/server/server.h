@@ -199,6 +199,8 @@ public:
 		bool m_DesignChange;
 		int m_CurrentMapDesign;
 
+		bool m_Rejoining;
+
 		char m_aLanguage[5]; // would be 2, but "none" is 4
 
 		int m_DnsblState;

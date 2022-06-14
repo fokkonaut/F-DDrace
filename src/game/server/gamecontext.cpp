@@ -1531,6 +1531,10 @@ void CGameContext::SendStartMessages(int ClientID)
 
 void CGameContext::OnClientRejoin(int ClientID)
 {
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' rejoined current session", Server()->ClientName(ClientID));
+	SendChat(-1, CHAT_ALL, -1, aBuf);
+
 	if (!m_apPlayers[ClientID])
 		return;
 

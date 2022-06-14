@@ -16,28 +16,25 @@ void CNetConnection::ResetStats()
 	mem_zero(&m_Stats, sizeof(m_Stats));
 }
 
-void CNetConnection::Reset(bool Rejoin, int Socket, bool Sevendown)
+void CNetConnection::Reset()
 {
 	m_Sequence = 0;
 	m_Ack = 0;
 	m_PeerAck = 0;
 	m_RemoteClosed = 0;
 
-	if(!Rejoin)
-	{
-		m_TimeoutProtected = false;
-		m_TimeoutSituation = false;
+	m_TimeoutProtected = false;
+	m_TimeoutSituation = false;
 
-		m_State = NET_CONNSTATE_OFFLINE;
-		m_Token = NET_TOKEN_NONE;
-		m_PeerToken = NET_TOKEN_NONE;
-		m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
+	m_State = NET_CONNSTATE_OFFLINE;
+	m_Token = NET_TOKEN_NONE;
+	m_PeerToken = NET_TOKEN_NONE;
+	m_SecurityToken = NET_SECURITY_TOKEN_UNKNOWN;
 
-		mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
-	}
+	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 
-	m_Sevendown = Sevendown;
-	m_Socket = Socket;
+	m_Sevendown = false;
+	m_Socket = SOCKET_MAIN;
 
 	m_LastSendTime = 0;
 	m_LastRecvTime = 0;

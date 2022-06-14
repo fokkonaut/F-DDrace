@@ -289,6 +289,8 @@ void CServer::CClient::Reset()
 	m_CurrentMapDesign = -1;
 	m_DesignChange = false;
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
+
+	m_Rejoining = false;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_MAIN), m_RegisterTwo(false, SOCKET_TWO), m_RegisterSevendown(true, SOCKET_MAIN)
@@ -904,7 +906,7 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientID].Reset();
-	pThis->GameServer()->OnClientRejoin(ClientID);
+	pThis->m_aClients[ClientID].m_Rejoining = true;
 
 	pThis->SendMap(ClientID);
 
@@ -1449,39 +1451,42 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_READY)
 		{
-			bool SendingFakeMap = m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP;
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_DesignChange || SendingFakeMap || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 			{
+				SendConnectionReady(ClientID);
+
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
-					SendConnectionReady(ClientID);
 					GameServer()->MapDesignChangeDone(ClientID);
-					return;
 				}
-				if (SendingFakeMap)
+				else if (m_aClients[ClientID].m_Rejoining)
+				{
+					m_aClients[ClientID].m_Rejoining = false;
+					GameServer()->OnClientRejoin(ClientID);
+				}
+				else if (m_aClients[ClientID].m_State == CClient::STATE_FAKE_MAP)
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 					SendMap(ClientID);
-					return;
 				}
+				else if (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC)
+				{
+					char aAddrStr[NETADDR_MAXSTRSIZE];
+					net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
-				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+					bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
+					m_aClients[ClientID].m_State = CClient::STATE_READY;
+					GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
 
-				bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
-				m_aClients[ClientID].m_State = CClient::STATE_READY;
-				GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
-
-				if (Config()->m_SvDefaultMapDesign[0])
-					ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
+					if (Config()->m_SvDefaultMapDesign[0])
+						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
+				}
 			}
-
-			SendConnectionReady(ClientID);
 		}
 		else if(Msg == NETMSG_ENTERGAME)
 		{
