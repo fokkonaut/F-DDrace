@@ -1573,7 +1573,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if (!m_aClients[ClientID].m_DummyHammer)
 						m_aClients[ClientID].m_HammerflyMarked = false;
 				}
-				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0)
+				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0 && pPlayerInput->m_Fire != m_aClients[ClientID].m_LastFire)
 				{
 					m_aClients[ClientID].m_HammerflyMarked = true;
 				}
