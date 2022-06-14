@@ -233,15 +233,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 				bool AcceptConnect = false;
 				SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
 
-				if (Slot != -1 && !Control)
-				{
-					if(m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown, Socket))
-					{
-						if (m_RecvUnpacker.m_Data.m_DataSize)
-							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
-					}
-				}
-				else
+				if (Slot == -1 || Control)
 				{
 					if (!*pSevendown)
 					{
@@ -351,6 +343,15 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 								break;
 							}
 						}
+					}
+				}
+
+				if (Slot != -1)
+				{
+					if (m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown, Socket))
+					{
+						if (m_RecvUnpacker.m_Data.m_DataSize)
+							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);
 					}
 				}
 			}
