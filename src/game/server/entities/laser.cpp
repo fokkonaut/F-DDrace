@@ -78,22 +78,31 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if (m_Type == WEAPON_SHOTGUN)
 	{
-		vec2 Vel = IsCharacter ? pChr->Core()->m_Vel : pEnt->GetVel();
-		vec2 Pos = IsCharacter ? pChr->Core()->m_Pos : pEnt->GetPos();
-
-		vec2 Temp;
 		float Strength;
 		if (!m_TuneZone)
 			Strength = GameServer()->Tuning()->m_ShotgunStrength;
 		else
 			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
 
+		static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
+		vec2 Vel = IsCharacter ? pChr->Core()->m_Vel : pEnt->GetVel();
+		vec2 Pos = IsCharacter ? pChr->Core()->m_Pos : pEnt->GetPos();
+		vec2 Temp = Vel;
+		bool ShotgunBug = false;
+
 		if (!Config()->m_SvOldLaser)
+		{
 			Temp = Vel + normalize(m_PrevPos - Pos) * Strength;
+			ShotgunBug = m_PrevPos == Pos;
+		}
 		else if (pOwnerChar)
+		{
 			Temp = Vel + normalize(pOwnerChar->Core()->m_Pos - Pos) * Strength;
-		else
-			Temp = Vel;
+			ShotgunBug = pOwnerChar->Core()->m_Pos == Pos;
+		}
+
+		if (ShotgunBug && Config()->m_SvShotgunBug)
+			Temp = StackedLaserShotgunBugSpeed;
 
 		if (IsCharacter)
 		{

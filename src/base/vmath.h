@@ -116,7 +116,10 @@ inline float angle(const vector2_base<float> &a)
 
 inline vector2_base<float> normalize(const vector2_base<float> &v)
 {
-	float l = (float)(1.0f/sqrtf(v.x*v.x + v.y*v.y));
+	float divisor = sqrtf(v.x * v.x + v.y * v.y);
+	if(divisor == 0.0f)
+		return vector2_base<float>(0.0f, 0.0f);
+	float l = (float)(1.0f / divisor);
 	return vector2_base<float>(v.x*l, v.y*l);
 }
 
@@ -197,7 +200,10 @@ inline float length(const vector3_base<float> &a)
 
 inline vector3_base<float> normalize(const vector3_base<float> &v)
 {
-	float l = (float)(1.0f/sqrtf(v.x*v.x + v.y*v.y + v.z*v.z));
+	float divisor = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if(divisor == 0.0f)
+		return vector3_base<float>(0.0f, 0.0f, 0.0f);
+	float l = (float)(1.0f / divisor);
 	return vector3_base<float>(v.x*l, v.y*l, v.z*l);
 }
 
