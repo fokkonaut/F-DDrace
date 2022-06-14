@@ -189,8 +189,11 @@ public:
 
 		// dummy
 		bool m_IdleDummy;
-		bool m_DummyHammer;
 		int m_LastIntendedTick;
+		bool m_DummyHammer;
+
+		bool m_HammerflyMarked;
+		int m_LastFire;
 
 		// design
 		bool m_DesignChange;
@@ -481,6 +484,7 @@ public:
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
 
+	virtual bool HammerflyMarked(int ClientID) { return m_aClients[ClientID].m_HammerflyMarked; }
 	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
 	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }

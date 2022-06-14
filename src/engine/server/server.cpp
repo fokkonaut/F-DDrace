@@ -1511,15 +1511,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(Unpacker.Error() || Size/4 > MAX_INPUT_SIZE)
 				return;
 
-			// This does also apply when dummy hammer or dummy copy moves is activated, the "idle" dummy will always send the intended tick of before the swap
-			m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIntendedTick == IntendedTick);
-			// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
-			m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
-			// dummy copy moves could be detected aswell by checking whether its the idle dummy and then counting inputs a bit, bcs they get sent twice as often with it acitavted
+			if (m_aClients[ClientID].m_DDNetVersion <= VERSION_DDNET_INTENDED_TICK)
+			{
+				// This does also apply when dummy hammer or dummy copy moves is activated, the "idle" dummy will always send the intended tick of before the swap
+				m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIntendedTick == IntendedTick);
+				// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
+				m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
+				// dummy copy moves could be detected aswell by checking whether its the idle dummy and then counting inputs a bit, bcs they get sent twice as often with it acitavted
 
-			m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
+				m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
+			}
+
 			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;
-
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
 				m_aClients[ClientID].m_SnapRate = CClient::SNAPRATE_FULL;
 
@@ -1558,6 +1561,24 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			m_aClients[ClientID].m_CurrentInput++;
 			m_aClients[ClientID].m_CurrentInput %= 200;
+
+			// new way of checking for hammerfly since dummy ntended tick got fixed
+			if (m_aClients[ClientID].m_DDNetVersion > VERSION_DDNET_INTENDED_TICK)
+			{
+				CNetObj_PlayerInput *pPlayerInput = (CNetObj_PlayerInput *)m_aClients[ClientID].m_LatestInput.m_aData;
+				if (m_aClients[ClientID].m_HammerflyMarked)
+				{
+					m_aClients[ClientID].m_DummyHammer = (pPlayerInput->m_Fire == m_aClients[ClientID].m_LastFire + 2);
+					if (!m_aClients[ClientID].m_DummyHammer)
+						m_aClients[ClientID].m_HammerflyMarked = false;
+				}
+				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0)
+				{
+					m_aClients[ClientID].m_HammerflyMarked = true;
+				}
+
+				m_aClients[ClientID].m_LastFire = pPlayerInput->m_Fire;
+			}
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
