@@ -989,21 +989,6 @@ void CCharacter::FireWeapon()
 	if (GetActiveWeapon() != WEAPON_LIGHTSABER) // we don't want the client to render the fire animation
 		m_AttackTick = Server()->Tick();
 
-	if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0) // -1 == unlimited
-	{
-		m_aWeapons[GetActiveWeapon()].m_Ammo--;
-
-		if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
-		{
-			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery--;
-			UpdateWeaponIndicator();
-		}
-
-		int W = GetSpawnWeaponIndex(GetActiveWeapon());
-		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
-			GiveWeapon(GetActiveWeapon(), true);
-	}
-
 	//spooky ghost
 	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN)
 	{
@@ -1031,6 +1016,21 @@ void CCharacter::FireWeapon()
 		else
 			GameServer()->TuningList()[m_TuneZone].Get(OLD_TUNES + GetActiveWeapon(), &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+
+	if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0) // -1 == unlimited
+	{
+		m_aWeapons[GetActiveWeapon()].m_Ammo--;
+
+		if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
+		{
+			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery--;
+			UpdateWeaponIndicator();
+		}
+
+		int W = GetSpawnWeaponIndex(GetActiveWeapon());
+		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
+			GiveWeapon(GetActiveWeapon(), true);
 	}
 }
 
