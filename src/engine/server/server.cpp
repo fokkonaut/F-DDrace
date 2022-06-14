@@ -1456,7 +1456,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
-					GameServer()->OnClientRejoin(ClientID);
+					GameServer()->MapDesignChangeDone(ClientID);
 					return;
 				}
 				if (SendingFakeMap)
