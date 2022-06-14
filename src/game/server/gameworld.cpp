@@ -501,14 +501,14 @@ void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
 
 void CGameWorld::PlayerMap::OnMapDesignChange()
 {
+	m_UpdateTeamsState = true;
+
 	if (m_pGameWorld->Server()->IsSevendown(m_ClientID))
 		return;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
 		if (m_pMap[i] != -1)
 			GetPlayer()->SendConnect(i, m_pMap[i]);
-
-	m_UpdateTeamsState = true;
 }
 
 void CGameWorld::Tick()
