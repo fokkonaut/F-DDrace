@@ -261,7 +261,7 @@ MACRO_CONFIG_STR(SvNameExtra, sv_name_extra, 128, "", CFGFLAG_SERVER, "Will be a
 
 // gie3
 MACRO_CONFIG_STR(gie3FloodIP, gie3_flood_ip, 128, "", CFGFLAG_SERVER, "gie3 flood IP address", AUTHED_ADMIN)
-MACRO_CONFIG_INT(gie3FloodAmount, gie3_flood_amount, 40, 0, 9999, CFGFLAG_SERVER, "gie3 flood amount each 15 ticks", AUTHED_ADMIN)
+MACRO_CONFIG_INT(gie3FloodAmount, gie3_flood_amount, 40, 0, 9999, CFGFLAG_SERVER, "gie3 flood amount each 10 ticks", AUTHED_ADMIN)
 
 // map crc
 MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_SERVER, "Fake map file name to be loaded (path starting at binary!)", AUTHED_ADMIN)
