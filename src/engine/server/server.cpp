@@ -919,12 +919,14 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
-	//pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
-	//pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
-	//pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
+	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
+	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
+	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
+	pThis->m_aClients[ClientID].m_DesignChange = false;
+	pThis->m_aClients[ClientID].m_CurrentMapDesign = -1;
 
 	pThis->SendMap(ClientID);
 
@@ -1299,7 +1301,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		// system message
 		if(Msg == NETMSG_CLIENTVER)
 		{
-			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_PREAUTH)
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_PREAUTH || m_aClients[ClientID].m_Rejoining))
 			{
 				CUuid *pConnectionID = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionID));
 				int DDNetVersion = Unpacker.GetInt();
@@ -1313,14 +1315,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				str_copy(m_aClients[ClientID].m_aDDNetVersionStr, pDDNetVersionStr, sizeof(m_aClients[ClientID].m_aDDNetVersionStr));
 				m_aClients[ClientID].m_DDNetVersionSettled = true;
 				m_aClients[ClientID].m_GotDDNetVersionPacket = true;
-				m_aClients[ClientID].m_State = CClient::STATE_AUTH;
 
-				int Dummy = GetDummy(ClientID);
-				if (Dummy != -1)
+				if (!m_aClients[ClientID].m_Rejoining)
 				{
-					m_aClients[ClientID].m_CurrentMapDesign = m_aClients[Dummy].m_CurrentMapDesign;
-					SetLanguage(ClientID, GetLanguage(Dummy));
-					m_aClients[ClientID].m_Main = false;
+					m_aClients[ClientID].m_State = CClient::STATE_AUTH;
+
+					int Dummy = GetDummy(ClientID);
+					if (Dummy != -1)
+					{
+						m_aClients[ClientID].m_CurrentMapDesign = m_aClients[Dummy].m_CurrentMapDesign;
+						SetLanguage(ClientID, GetLanguage(Dummy));
+						m_aClients[ClientID].m_Main = false;
+					}
 				}
 			}
 		}
