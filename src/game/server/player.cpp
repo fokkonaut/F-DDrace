@@ -1747,7 +1747,7 @@ bool CPlayer::GiveTaserBattery(int Amount)
 			return false;
 
 		if (pAccount->m_TaserBattery+Amount < 0)
-			Amount -= abs(Amount)-pAccount->m_TaserBattery;
+			Amount += abs(Amount)-pAccount->m_TaserBattery;
 		Symbol = '-';
 	}
 
