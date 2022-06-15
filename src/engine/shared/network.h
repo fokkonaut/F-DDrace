@@ -159,6 +159,7 @@ enum
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
 typedef int (*NETFUNC_NEWCLIENT)(int ClientID, bool Sevendown, int Socket, void *pUser);
 typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, void *pUser);
+typedef bool (*NETFUNC_CLIENTCANCLOSE)(int ClientID, void *pUser);
 
 typedef unsigned int TOKEN;
 
@@ -397,7 +398,7 @@ public:
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, int Socket);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, int Socket, bool ClientCanClose = true);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 	void SendPacketConnless(const char *pData, int DataSize);
 
@@ -503,6 +504,8 @@ class CNetServer : public CNetBase
 	void *m_UserPtr;
 
 	// F-DDrace
+	NETFUNC_CLIENTCANCLOSE m_pfnClientCanClose;
+
 	struct CSpamConn
 	{
 		NETADDR m_Addr;
@@ -521,7 +524,8 @@ class CNetServer : public CNetBase
 public:
 	//
 	bool Open(NETADDR BindAddr, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine, class CNetBan *pNetBan,
-		int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, NETFUNC_CLIENTREJOIN pfnClientRejoin, void *pUser);
+		int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient,
+		NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_CLIENTCANCLOSE pfnClientCanClose, void *pUser);
 	void Close();
 
 	// the token parameter is only used for connless packets

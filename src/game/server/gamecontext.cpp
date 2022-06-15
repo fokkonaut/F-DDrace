@@ -1568,6 +1568,9 @@ void CGameContext::MapDesignChangeDone(int ClientID)
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);
+
+	if (Server()->GetDummy(ClientID) != -1)
+		SendChatTarget(ClientID, "[WARNING] You need to reconnect your dummy after the design change is done, so it can get back it's old state.");
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)

@@ -2608,14 +2608,6 @@ void CGameContext::ConDesign(IConsole::IResult* pResult, void* pUserData)
 
 	if (pResult->NumArguments())
 	{
-		if (pSelf->Server()->GetDummy(pResult->m_ClientID) != -1 && pSelf->Server()->Tick() > pPlayer->m_LastDesignChangeTry + pSelf->Server()->TickSpeed() * 5)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "[WARNING] Design change will disconnect your dummy, if you really want to change it, please write it again within 5 seconds.");
-			pPlayer->m_LastDesignChangeTry = pSelf->Server()->Tick();
-			return;
-		}
-
-		pPlayer->m_LastDesignChangeTry = 0;
 		pSelf->Server()->ChangeMapDesign(pResult->m_ClientID, pResult->GetString(0));
 		return;
 	}

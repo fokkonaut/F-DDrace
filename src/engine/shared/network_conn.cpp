@@ -270,7 +270,7 @@ void CNetConnection::DirectInit(const NETADDR *pAddr, const CNetPacketConstruct 
 	m_Socket = Socket;
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, int Socket)
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Sevendown, int Socket, bool ClientCanClose)
 {
 	if (Sevendown && State() != NET_CONNSTATE_OFFLINE && m_SecurityToken != NET_SECURITY_TOKEN_UNKNOWN && m_SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
@@ -318,7 +318,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, bool Seve
 
 		if(CtrlMsg == NET_CTRLMSG_CLOSE)
 		{
-			if(net_addr_comp(&m_PeerAddr, pAddr, true) == 0)
+			if(net_addr_comp(&m_PeerAddr, pAddr, true) == 0 && ClientCanClose)
 			{
 				m_State = NET_CONNSTATE_ERROR;
 				m_RemoteClosed = 1;

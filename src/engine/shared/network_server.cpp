@@ -19,7 +19,8 @@ static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 }
 
 bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CNetBan *pNetBan,
-	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, NETFUNC_CLIENTREJOIN pfnClientRejoin, void *pUser)
+	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient,
+	NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_CLIENTCANCLOSE pfnClientCanClose, void *pUser)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
@@ -51,6 +52,7 @@ bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 	m_pfnNewClient = pfnNewClient;
 	m_pfnDelClient = pfnDelClient;
 	m_pfnClientRejoin = pfnClientRejoin;
+	m_pfnClientCanClose = pfnClientCanClose;
 	m_UserPtr = pUser;
 
 	// F-DDrace
@@ -349,7 +351,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 
 				if (Slot != -1)
 				{
-					if (m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown, Socket))
+					if (m_aSlots[Slot].m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, *pSevendown, Socket, m_pfnClientCanClose(Slot, m_UserPtr)))
 					{
 						if (m_RecvUnpacker.m_Data.m_DataSize)
 							m_RecvUnpacker.Start(&Addr, &m_aSlots[Slot].m_Connection, Slot);

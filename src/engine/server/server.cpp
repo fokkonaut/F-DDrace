@@ -285,10 +285,37 @@ void CServer::CClient::Reset()
 		m_aIdMap[i] = -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aReverseIdMap[i] = -1;
+}
+
+void CServer::CClient::ResetContent()
+{
+	m_State = CClient::STATE_EMPTY;
+	m_aName[0] = 0;
+	m_aClan[0] = 0;
+	m_Country = -1;
+	m_Authed = AUTHED_NO;
+	m_AuthKey = -1;
+	m_AuthTries = 0;
+	m_pRconCmdToSend = 0;
+	m_pMapListEntryToSend = 0;
+	m_NoRconNote = false;
+	m_Quitting = false;
+	m_ShowIps = false;
+	m_DDNetVersion = VERSION_NONE;
+	m_GotDDNetVersionPacket = false;
+	m_DDNetVersionSettled = false;
+	m_Traffic = 0;
+	m_TrafficSince = 0;
+	m_Sevendown = false;
+	m_Socket = SOCKET_MAIN;
+	m_DnsblState = CClient::DNSBL_STATE_NONE;
+	m_PgscState = CClient::PGSC_STATE_NONE;
+	m_IdleDummy = false;
 
 	m_CurrentMapDesign = -1;
 	m_DesignChange = false;
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
+	m_Main = true;
 
 	m_Rejoining = false;
 }
@@ -463,17 +490,8 @@ int CServer::Init()
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_aClients[i].m_State = CClient::STATE_EMPTY;
-		m_aClients[i].m_aName[0] = 0;
-		m_aClients[i].m_aClan[0] = 0;
-		m_aClients[i].m_Country = -1;
+		m_aClients[i].ResetContent();
 		m_aClients[i].m_Snapshots.Init();
-		m_aClients[i].m_ShowIps = false;
-		m_aClients[i].m_AuthKey = -1;
-		m_aClients[i].m_Traffic = 0;
-		m_aClients[i].m_TrafficSince = 0;
-		m_aClients[i].m_Sevendown = false;
-		m_aClients[i].m_Socket = SOCKET_MAIN;
 	}
 
 	m_AnnouncementLastLine = 0;
@@ -901,9 +919,9 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
-	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
-	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
-	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
+	//pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
+	//pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
+	//pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
@@ -923,28 +941,11 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *p
 		pThis->GameServer()->OnClientDrop(ClientID, "removing dummy");
 	}
 
+	pThis->m_aClients[ClientID].ResetContent();
 	pThis->m_aClients[ClientID].m_State = CClient::STATE_PREAUTH;
-	pThis->m_aClients[ClientID].m_aName[0] = 0;
-	pThis->m_aClients[ClientID].m_aClan[0] = 0;
-	pThis->m_aClients[ClientID].m_Country = -1;
-	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthKey = -1;
-	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
-	pThis->m_aClients[ClientID].m_pMapListEntryToSend = 0;
-	pThis->m_aClients[ClientID].m_NoRconNote = false;
-	pThis->m_aClients[ClientID].m_Quitting = false;
-	pThis->m_aClients[ClientID].m_ShowIps = false;
-	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
-	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
-	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
-	pThis->m_aClients[ClientID].m_Traffic = 0;
-	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
 	pThis->m_aClients[ClientID].m_Socket = Socket;
-	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
-	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
-	pThis->m_aClients[ClientID].m_IdleDummy = false;
+
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
@@ -969,33 +970,18 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 		pThis->GameServer()->OnClientDrop(ClientID, pReason);
 	}
 
-	pThis->m_aClients[ClientID].m_State = CClient::STATE_EMPTY;
-	pThis->m_aClients[ClientID].m_aName[0] = 0;
-	pThis->m_aClients[ClientID].m_aClan[0] = 0;
-	pThis->m_aClients[ClientID].m_Country = -1;
-	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
-	pThis->m_aClients[ClientID].m_AuthKey = -1;
-	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
-	pThis->m_aClients[ClientID].m_pMapListEntryToSend = 0;
-	pThis->m_aClients[ClientID].m_NoRconNote = false;
-	pThis->m_aClients[ClientID].m_Quitting = false;
-	pThis->m_aClients[ClientID].m_ShowIps = false;
-	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
-	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
-	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
-	pThis->m_aClients[ClientID].m_Traffic = 0;
-	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
-	pThis->m_aClients[ClientID].m_Sevendown = false;
-	pThis->m_aClients[ClientID].m_Socket = SOCKET_MAIN;
-	pThis->m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_NONE;
-	pThis->m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_NONE;
-	pThis->m_aClients[ClientID].m_IdleDummy = false;
+	pThis->m_aClients[ClientID].ResetContent();
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 
 	return 0;
+}
+
+bool CServer::ClientCanCloseCallback(int ClientID, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	return !pThis->m_aClients[ClientID].m_DesignChange;
 }
 
 void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc)
@@ -1334,6 +1320,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					m_aClients[ClientID].m_CurrentMapDesign = m_aClients[Dummy].m_CurrentMapDesign;
 					SetLanguage(ClientID, GetLanguage(Dummy));
+					m_aClients[ClientID].m_Main = false;
 				}
 			}
 		}
@@ -1459,6 +1446,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
 					GameServer()->MapDesignChangeDone(ClientID);
+
+					int Dummy = GetDummy(ClientID);
+					if (Dummy != -1)
+						m_aClients[Dummy].m_DesignChange = false;
 				}
 				else if (m_aClients[ClientID].m_Rejoining)
 				{
@@ -2315,7 +2306,7 @@ int CServer::Run()
 	}
 
 	if(!m_NetServer.Open(BindAddr, Config(), Console(), Kernel()->RequestInterface<IEngine>(), &m_ServerBan,
-		Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP, NewClientCallback, DelClientCallback, ClientRejoinCallback, this))
+		Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP, NewClientCallback, DelClientCallback, ClientRejoinCallback, ClientCanCloseCallback, this))
 	{
 		dbg_msg("server", "couldn't open socket. port %d might already be in use", Config()->m_SvPort);
 		return -1;
@@ -4008,8 +3999,26 @@ void CServer::ChangeMapDesign(int ClientID, const char *pName)
 
 void CServer::SendMapDesign(int ClientID, int Design)
 {
+	if (!m_aClients[ClientID].m_Main)
+	{
+		int Main = GetDummy(ClientID);
+		if (Main != -1)
+		{
+			SendMapDesign(Main, Design);
+			return;
+		}
+	}
+
 	m_aClients[ClientID].m_DesignChange = true;
 	m_aClients[ClientID].m_CurrentMapDesign = Design;
+
+	// we also set it for the dummy so that ClientCanCloseCallback also works for dummy while design change
+	int Dummy = GetDummy(ClientID);
+	if (Dummy != -1)
+	{
+		m_aClients[Dummy].m_DesignChange = true;
+		m_aClients[Dummy].m_CurrentMapDesign = Design;
+	}
 
 	if (Design == -1)
 	{
@@ -4185,27 +4194,8 @@ void CServer::DummyJoin(int DummyID)
 void CServer::DummyLeave(int DummyID)
 {
 	GameServer()->OnClientDrop(DummyID, "");
-
-	m_aClients[DummyID].m_State = CClient::STATE_EMPTY;
-	m_aClients[DummyID].m_aName[0] = 0;
-	m_aClients[DummyID].m_aClan[0] = 0;
-	m_aClients[DummyID].m_Country = -1;
-	m_aClients[DummyID].m_Authed = AUTHED_NO;
-	m_aClients[DummyID].m_AuthTries = 0;
-	m_aClients[DummyID].m_pRconCmdToSend = 0;
-	m_aClients[DummyID].m_pMapListEntryToSend = 0;
-	m_aClients[DummyID].m_NoRconNote = false;
-	m_aClients[DummyID].m_Quitting = false;
-	m_aClients[DummyID].m_ShowIps = false;
-	m_aClients[DummyID].m_Traffic = 0;
-	m_aClients[DummyID].m_TrafficSince = 0;
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
-	m_aClients[DummyID].m_Sevendown = false;
-	m_aClients[DummyID].m_Socket = SOCKET_MAIN;
-	m_aClients[DummyID].m_DnsblState = CClient::DNSBL_STATE_NONE;
-	m_aClients[DummyID].m_PgscState = CClient::PGSC_STATE_NONE;
-	m_aClients[DummyID].m_IdleDummy = false;
-
+	m_aClients[DummyID].ResetContent();
 	m_NetServer.DummyDelete(DummyID);
 }
 

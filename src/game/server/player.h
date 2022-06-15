@@ -363,9 +363,6 @@ public:
 	bool m_LocalChat;
 	int GetAuthedHighlighted();
 
-	// design changer
-	int64 m_LastDesignChangeTry;
-
 	// zoom cursor
 	bool m_ZoomCursor;
 	vec2 m_StandardShowDistance;

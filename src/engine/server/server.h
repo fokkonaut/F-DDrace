@@ -177,6 +177,7 @@ public:
 		const CMapListEntry *m_pMapListEntryToSend;
 
 		void Reset();
+		void ResetContent();
 
 		// DDrace
 		bool m_ShowIps;
@@ -191,6 +192,7 @@ public:
 		bool m_IdleDummy;
 		int m_LastIntendedTick;
 		bool m_DummyHammer;
+		bool m_Main;
 
 		bool m_HammerflyMarked;
 		int m_LastFire;
@@ -350,6 +352,9 @@ public:
 	static int NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 	static int ClientRejoinCallback(int ClientID, void *pUser);
+
+	// returns whether client can close the connection or not right now, e.g. when in design change or the dummy, so that the client doesnt close the connection so they can rejoin
+	static bool ClientCanCloseCallback(int ClientID, void *pUser);
 
 	void SendCapabilities(int ClientID);
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);
