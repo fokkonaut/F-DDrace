@@ -339,14 +339,7 @@ Objects = [
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
 		NetIntRange("m_NumSwitchers", 0, 256),
 		# 256 switches / 32 bits = 8 int32
-		NetIntAny("m_Status1"),
-		NetIntAny("m_Status2"),
-		NetIntAny("m_Status3"),
-		NetIntAny("m_Status4"),
-		NetIntAny("m_Status5"),
-		NetIntAny("m_Status6"),
-		NetIntAny("m_Status7"),
-		NetIntAny("m_Status8"),
+		NetArray(NetIntAny("m_Status"), 8),
 	]),
 
 	# Switch info for map items
