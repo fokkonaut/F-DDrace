@@ -36,7 +36,7 @@ GameInfoFlags = Flags("GAMEINFOFLAG", [
 	# Full, use GameInfoFlags2 for more flags
 ])
 GameInfoFlags2 = Flags("GAMEINFOFLAG2", [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO", "HUD_DDRACE",
 ])
 CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
                   "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
@@ -84,7 +84,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=6,
+	GAMEINFO_CURVERSION=7,
 };
 '''
 
@@ -273,9 +273,20 @@ Objects = [
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
 		NetTick("m_FreezeEnd"),
-		NetIntRange("m_Jumps", 0, 255),
+		NetIntRange("m_Jumps", -1, 255),
 		NetIntAny("m_TeleCheckpoint"),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
+	]),
+
+	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
+		NetIntRange("m_JumpedTotal", 0, 255),
+		NetTick("m_NinjaActivationTick"),
+		NetTick("m_FreezeTick"),
+		NetBool("m_IsInFreeze"),
+		NetBool("m_IsInPracticeMode"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+		NetIntAny("m_RampValue"),
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [

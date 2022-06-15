@@ -1865,6 +1865,8 @@ void CCharacter::Snap(int SnappingClient)
 	if(!pDDNetCharacter)
 		return;
 
+	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
+
 	pDDNetCharacter->m_Flags = 0;
 	if(m_Solo)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
@@ -1872,9 +1874,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !GameServer()->Tuning()->m_PlayerCollision || (m_Passive && !m_Super))
+	if(!m_Core.m_Collision || !Tuning.m_PlayerCollision || (m_Passive && !m_Super))
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !GameServer()->Tuning()->m_PlayerHooking || (m_Passive && !m_Super))
+	if(!m_Core.m_Hook || !Tuning.m_PlayerHooking || (m_Passive && !m_Super))
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1911,6 +1913,18 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = pSnap ? (Config()->m_SvWeakHook ? pSnap->m_aStrongWeakID[ID] : SnappingClient == m_pPlayer->GetCID() ? 1 : 0) : m_StrongWeakID;
+
+	CNetObj_DDNetCharacterDisplayInfo *pDDNetCharacterDisplayInfo = static_cast<CNetObj_DDNetCharacterDisplayInfo *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, ID, sizeof(CNetObj_DDNetCharacterDisplayInfo)));
+	if(!pDDNetCharacterDisplayInfo)
+		return;
+	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = m_Ninja.m_ActivationTick;
+	pDDNetCharacterDisplayInfo->m_FreezeTick = m_FreezeTick;
+	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_IsFrozen;
+	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
+	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
+	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
+	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, Tuning.m_VelrampStart, Tuning.m_VelrampRange, Tuning.m_VelrampCurvature) * 1000.0f);
 }
 
 void CCharacter::SnapCharacter(int SnappingClient, int ID)
@@ -2602,7 +2616,7 @@ void CCharacter::HandleTiles(int Index)
 		if (m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
 		{
 			m_Core.m_LeftWall = false;
-			m_Core.m_JumpedTotal = m_Core.m_Jumps - 1;
+			m_Core.m_JumpedTotal = m_Core.m_Jumps >= 2 ? m_Core.m_Jumps - 2 : 0;
 			m_Core.m_Jumped = 1;
 		}
 	}
@@ -2941,23 +2955,30 @@ void CCharacter::HandleTiles(int Index)
 	}
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_JUMP)
 	{
-		int newJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		int NewJumps = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		if(NewJumps == 255)
+		{
+			NewJumps = -1;
+		}
 
-		if (newJumps != m_Core.m_Jumps)
+		if(NewJumps != m_Core.m_Jumps)
 		{
 			char aBuf[256];
-			if (newJumps == 1)
-				str_format(aBuf, sizeof(aBuf), "You can jump %d time", newJumps);
+			if(NewJumps == -1)
+				str_format(aBuf, sizeof(aBuf), "You only have your ground jump now");
+			else if (NewJumps == 1)
+				str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
 			else
-				str_format(aBuf, sizeof(aBuf), "You can jump %d times", newJumps);
+				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 
-			if (newJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT && !FightStarted)
+			if (NewJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT && !FightStarted)
 			{
-				m_pPlayer->GiveXP(newJumps * 100, "upgrading jumps");
-				m_MaxJumps = newJumps;
+				m_pPlayer->GiveXP(NewJumps * 100, "upgrading jumps");
+				m_MaxJumps = NewJumps;
 			}
-			m_Core.m_Jumps = newJumps;
+
+			m_Core.m_Jumps = NewJumps;
 		}
 	}
 	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_PENALTY && !m_LastPenalty)
@@ -3321,15 +3342,33 @@ void CCharacter::DDracePostCoreTick()
 	if ((m_DeepFreeze || m_pPlayer->m_ClanProtectionPunished) && !m_Super)
 		Freeze();
 
-	if (m_Core.m_Jumps == 0 && !m_Super)
-		m_Core.m_Jumped = 3;
-	else if (m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
-		m_Core.m_Jumped = 3;
-	else if (m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
+	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
+	if(m_Core.m_Jumps == -1)
+	{
+		// The player has only one ground jump, so his feet are always dark
+		m_Core.m_Jumped |= 2;
+	}
+	else if(m_Core.m_Jumps == 0)
+	{
+		// The player has no jumps at all, so his feet are always dark
+		m_Core.m_Jumped |= 2;
+	}
+	else if(m_Core.m_Jumps == 1 && m_Core.m_Jumped > 0)
+	{
+		// If the player has only one jump, each jump is the last one
+		m_Core.m_Jumped |= 2;
+	}
+	else if(m_Core.m_JumpedTotal < m_Core.m_Jumps - 1 && m_Core.m_Jumped > 1)
+	{
+		// The player has not yet used up all his jumps, so his feet remain light
 		m_Core.m_Jumped = 1;
+	}
 
-	if ((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
+	if((m_Super || m_SuperJump) && m_Core.m_Jumped > 1)
+	{
+		// Super players and players with infinite jumps always have light feet
 		m_Core.m_Jumped = 1;
+	}
 
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
