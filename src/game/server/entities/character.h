@@ -450,6 +450,8 @@ public:
 	// returns bitwise specials on weapons
 	int GetWeaponSpecial(int Type);
 
+	float GetFireDelay(int Weapon);
+
 	//weapon indicator
 	void UpdateWeaponIndicator();
 	bool IsWeaponIndicator();

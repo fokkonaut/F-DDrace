@@ -1017,12 +1017,7 @@ void CCharacter::FireWeapon()
 
 	if (!m_ReloadTimer)
 	{
-		float FireDelay;
-		if (!m_TuneZone)
-			GameServer()->Tuning()->Get(OLD_TUNES + GetActiveWeapon(), &FireDelay);
-		else
-			GameServer()->TuningList()[m_TuneZone].Get(OLD_TUNES + GetActiveWeapon(), &FireDelay);
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		m_ReloadTimer = GetFireDelay(GetActiveWeapon()) * Server()->TickSpeed() / 1000;
 	}
 
 	if(m_aWeapons[GetActiveWeapon()].m_Ammo > 0) // -1 == unlimited
@@ -1039,6 +1034,21 @@ void CCharacter::FireWeapon()
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
 			GiveWeapon(GetActiveWeapon(), true);
 	}
+}
+
+float CCharacter::GetFireDelay(int Weapon)
+{
+	int Tune = OLD_TUNES + GetActiveWeapon();
+	if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
+		Tune++; // the hammer hit fire delay got inserted inbetween, so we have to go one entry further
+
+	float FireDelay;
+	if (!m_TuneZone)
+		GameServer()->Tuning()->Get(Tune, &FireDelay);
+	else
+		GameServer()->TuningList()[m_TuneZone].Get(Tune, &FireDelay);
+
+	return FireDelay;
 }
 
 void CCharacter::HandleWeapons()
