@@ -1113,7 +1113,9 @@ void CGameContext::OnTick()
 			// Do it safely here so we dont get any crashes
 			if (m_apPlayers[i]->m_BotDetected)
 			{
-				Server()->Ban(i, 60*Config()->m_SvAntibotBanMinutes, "Bot detected");
+				char aBuf[64];
+				str_format(aBuf, sizeof(aBuf), "Bot detected (%s)", Server()->ClientName(i));
+				Server()->Ban(i, 60*Config()->m_SvAntibotBanMinutes, aBuf);
 				continue;
 			}
 
