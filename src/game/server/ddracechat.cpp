@@ -2625,6 +2625,7 @@ void CGameContext::ConDesign(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Map Designs ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "If you have your dummy connected, you need to reconnect it after the design change so it can get back it's state.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "You can set one of the following designs by using '/design <name>':");
 	pSelf->SendChatTarget(pResult->m_ClientID, aDesigns);
 }
