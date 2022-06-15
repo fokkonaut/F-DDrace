@@ -1038,8 +1038,8 @@ void CCharacter::FireWeapon()
 
 float CCharacter::GetFireDelay(int Weapon)
 {
-	int Tune = OLD_TUNES + GetActiveWeapon();
-	if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
+	int Tune = OLD_TUNES + Weapon;
+	if (Weapon >= NUM_VANILLA_WEAPONS)
 		Tune++; // the hammer hit fire delay got inserted inbetween, so we have to go one entry further
 
 	float FireDelay;
