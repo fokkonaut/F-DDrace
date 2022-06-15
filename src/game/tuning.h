@@ -54,12 +54,13 @@ MACRO_TUNING_PARAM(HookDuration, hook_duration, 1.25f, "Hook duration")
 
 #define OLD_TUNES 37 // F-DDrace // above are tunes until the fire delay tunes
 
-MACRO_TUNING_PARAM(HammerFireDelay, hammer_fire_delay, 125, "Delay of hammering")
+MACRO_TUNING_PARAM(HammerFireDelay, hammer_fire_delay, 125, "Delay of hammering (when hitting nothing)")
 MACRO_TUNING_PARAM(GunFireDelay, gun_fire_delay, 125, "Delay of firing gun")
 MACRO_TUNING_PARAM(ShotgunFireDelay, shotgun_fire_delay, 500, "Delay of firing shotgun")
 MACRO_TUNING_PARAM(GrenadeFireDelay, grenade_fire_delay, 500, "Delay of firing grenade")
 MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser rifle")
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
+MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of hammering (when hitting another tee)")
 
 MACRO_TUNING_PARAM(TaserFireDelay, taser_fire_delay, 800, "Delay of firing taser")
 MACRO_TUNING_PARAM(PortalRifleFireDelay, portalrifle_fire_delay, 125, "Delay of using portal rifle")
