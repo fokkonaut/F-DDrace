@@ -998,8 +998,8 @@ set(EXPECTED_DATA
   maps/BlmapChill_versions/BlmapChill_v0109.map
   maps/BlmapChill_versions/BlmapChill_v0110.map
   maps/BlmapChill_versions/BlmapChill_v0111.map
-  maps/Blockdale.map
   maps/BlockField.map
+  maps/Blockdale.map
   maps/CBattleGores.map
   maps/ChillBlock5.map
   maps/ChillBlock_fork/ChillBlock5_v002_fork_a_01.map
