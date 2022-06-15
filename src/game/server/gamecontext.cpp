@@ -1056,7 +1056,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	for (unsigned i = 0; i < last; i++)
 	{
 		if(i == 30 && Server()->IsSevendown(ClientID)) // laser damage
-			Msg.AddInt(5); // 5 is default value
+			Msg.AddInt(500); // 5 is default value
 		Msg.AddInt(pParams[i]);
 	}
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
