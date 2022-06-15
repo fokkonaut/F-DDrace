@@ -636,6 +636,7 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG_ALLOW_EYE_WHEEL
 		| GAMEINFOFLAG_ALLOW_HOOK_COLL
 		| GAMEINFOFLAG_BUG_DDRACE_GHOST
+		//| GAMEINFOFLAG_BUG_DDRACE_INPUT // dont send this because otherwise client cant use controls in specmode for click spectate or arena building
 		| GAMEINFOFLAG_PREDICT_DDRACE
 		| GAMEINFOFLAG_PREDICT_DDRACE_TILES
 		| GAMEINFOFLAG_ENTITIES_DDNET
