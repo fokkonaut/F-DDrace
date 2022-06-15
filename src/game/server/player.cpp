@@ -969,7 +969,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	if (m_pCharacter && !ApplyDirectInput(TeeControlled))
 	{
-		m_pCharacter->ResetInput();
 		m_pCharacter->ResetNumInputs();
 
 		if (m_pControlledTee && m_pControlledTee->m_pCharacter)
