@@ -1547,8 +1547,7 @@ void CGameContext::OnClientRejoin(int ClientID)
 	m_apPlayers[ClientID]->m_SendVoteIndex = 0;
 
 	SendStartMessages(ClientID);
-	m_World.InitPlayerMap(ClientID);
-	m_World.UpdateTeamsState(ClientID);
+	m_World.InitPlayerMap(ClientID, true);
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);
@@ -1566,7 +1565,7 @@ void CGameContext::MapDesignChangeDone(int ClientID)
 	m_apPlayers[ClientID]->m_SendVoteIndex = 0;
 
 	SendStartMessages(ClientID);
-	m_World.OnMapDesignChange(ClientID);
+	m_World.InitPlayerMap(ClientID, true);
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);

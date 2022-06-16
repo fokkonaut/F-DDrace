@@ -212,16 +212,21 @@ void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
 	m_UpdateTeamsState = false;
 }
 
-void CGameWorld::PlayerMap::InitPlayer()
+void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 {
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aReserved[i] = false;
+
+	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
+	if (Rejoin)
+		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+			Remove(i);
+
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_pMap[i] = -1;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_pReverseMap[i] = -1;
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_aReserved[i] = false;
 
 	if (GetPlayer()->m_IsDummy)
 		return; // just need to initialize the arrays
@@ -240,7 +245,7 @@ void CGameWorld::PlayerMap::InitPlayer()
 			m_pGameWorld->Server()->GetClientAddr(i, &Addr);
 			if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
 			{
-				if (m_pGameWorld->Server()->GetReverseIdMap(i)[i] == NextFreeID)
+				if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] == NextFreeID)
 				{
 					NextFreeID++;
 					Break = false;
@@ -352,7 +357,7 @@ int CGameWorld::PlayerMap::Remove(int MapID)
 
 		if (m_aReserved[ClientID])
 			m_ResortReserved = true;
-		
+
 		GetPlayer()->SendDisconnect(MapID);
 		m_pReverseMap[ClientID] = -1;
 		m_pMap[MapID] = -1;
@@ -497,18 +502,6 @@ void CGameWorld::PlayerMap::OnSetTimedOut(int OrigID)
 			m_pGameWorld->m_aMap[i].Add(m_pGameWorld->m_aMap[i].m_pReverseMap[OrigID], m_ClientID);
 		}
 	}
-}
-
-void CGameWorld::PlayerMap::OnMapDesignChange()
-{
-	m_UpdateTeamsState = true;
-
-	if (m_pGameWorld->Server()->IsSevendown(m_ClientID))
-		return;
-
-	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
-		if (m_pMap[i] != -1)
-			GetPlayer()->SendConnect(i, m_pMap[i]);
 }
 
 void CGameWorld::Tick()
