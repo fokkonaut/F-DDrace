@@ -158,7 +158,7 @@ enum
 
 typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char* pReason, void *pUser);
 typedef int (*NETFUNC_NEWCLIENT)(int ClientID, bool Sevendown, int Socket, void *pUser);
-typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, void *pUser);
+typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, bool Sevendown, int Socket, void *pUser);
 typedef bool (*NETFUNC_CLIENTCANCLOSE)(int ClientID, void *pUser);
 
 typedef unsigned int TOKEN;

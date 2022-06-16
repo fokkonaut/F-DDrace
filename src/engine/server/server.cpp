@@ -912,7 +912,7 @@ void CServer::DoSnapshot()
 	GameServer()->OnPostSnap();
 }
 
-int CServer::ClientRejoinCallback(int ClientID, void *pUser)
+int CServer::ClientRejoinCallback(int ClientID, bool Sevendown, int Socket, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
@@ -926,6 +926,8 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
+	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
+	pThis->m_aClients[ClientID].m_Socket = Socket;
 
 	if (pThis->m_aClients[ClientID].m_Main)
 	{

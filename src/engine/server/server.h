@@ -351,7 +351,7 @@ public:
 
 	static int NewClientCallback(int ClientID, bool Sevendown, int Socket, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
-	static int ClientRejoinCallback(int ClientID, void *pUser);
+	static int ClientRejoinCallback(int ClientID, bool Sevendown, int Socket, void *pUser);
 
 	// returns whether client can close the connection or not right now, e.g. when in design change or the dummy, so that the client doesnt close the connection so they can rejoin
 	static bool ClientCanCloseCallback(int ClientID, void *pUser);

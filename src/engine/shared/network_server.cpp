@@ -192,17 +192,18 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 				continue;
 			}
 
-			if (!*pSevendown)
-			{
-				int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
-				if(Accept <= 0)
-					continue;
-			}
-			else if (!Config()->m_SvAllowSevendown)
+			if (*pSevendown && !Config()->m_SvAllowSevendown)
 				continue;
 
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{
+				if (!*pSevendown)
+				{
+					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
+					if (Accept <= 0)
+						continue;
+				}
+
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_ClientID = -1;
 				pChunk->m_Address = Addr;
@@ -234,6 +235,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 				bool Control = (m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL);
 				bool AcceptConnect = false;
 				SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+
+				if (!*pSevendown && (Slot == -1 || Control))
+				{
+					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
+					if(Accept <= 0)
+						continue;
+				}
 
 				if (Control)
 				{
@@ -281,7 +289,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 						{
 							// reset netconn and process rejoin
 							m_aSlots[Slot].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown, Socket);
-							m_pfnClientRejoin(Slot, m_UserPtr);
+							m_pfnClientRejoin(Slot, *pSevendown, Socket, m_UserPtr);
 						}
 						else
 						{
