@@ -922,11 +922,22 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
+	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
-	pThis->m_aClients[ClientID].m_DesignChange = false;
-	pThis->m_aClients[ClientID].m_CurrentMapDesign = -1;
+
+	if (pThis->m_aClients[ClientID].m_Main)
+	{
+		pThis->m_aClients[ClientID].m_DesignChange = false;
+		pThis->m_aClients[ClientID].m_CurrentMapDesign = -1;
+	}
+	else
+	{
+		int Dummy = pThis->GetDummy(ClientID);
+		if (Dummy != -1)
+			pThis->m_aClients[Dummy].m_CurrentMapDesign = pThis->m_aClients[ClientID].m_CurrentMapDesign;
+	}
 
 	pThis->SendMap(ClientID);
 
@@ -1446,8 +1457,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 			{
-				SendConnectionReady(ClientID);
-
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
@@ -1483,6 +1492,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if (Config()->m_SvDefaultMapDesign[0])
 						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 				}
+
+				SendConnectionReady(ClientID);
 			}
 		}
 		else if(Msg == NETMSG_ENTERGAME)
@@ -4005,7 +4016,7 @@ void CServer::ChangeMapDesign(int ClientID, const char *pName)
 
 void CServer::SendMapDesign(int ClientID, int Design)
 {
-	if (!m_aClients[ClientID].m_Main)
+	if (!m_aClients[ClientID].m_Main && m_aClients[ClientID].m_Sevendown)
 	{
 		int Main = GetDummy(ClientID);
 		if (Main != -1)
