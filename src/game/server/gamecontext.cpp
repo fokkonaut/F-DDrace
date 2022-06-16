@@ -1540,9 +1540,6 @@ void CGameContext::OnClientRejoin(int ClientID)
 	if (!m_apPlayers[ClientID])
 		return;
 
-	CNetMsg_Sv_ReadyToEnter m;
-	Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
-
 	// send clear vote options
 	CNetMsg_Sv_VoteClearOptions ClearMsg;
 	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);

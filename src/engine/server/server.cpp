@@ -922,7 +922,6 @@ int CServer::ClientRejoinCallback(int ClientID, bool Sevendown, int Socket, void
 	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
-	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
@@ -1459,6 +1458,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
 			{
+				SendConnectionReady(ClientID);
+
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
@@ -1494,8 +1495,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if (Config()->m_SvDefaultMapDesign[0])
 						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 				}
-
-				SendConnectionReady(ClientID);
 			}
 		}
 		else if(Msg == NETMSG_ENTERGAME)
