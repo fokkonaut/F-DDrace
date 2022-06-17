@@ -4355,7 +4355,7 @@ void CCharacter::UpdateWeaponIndicator()
 	if (GetActiveWeapon() == WEAPON_TASER)
 		str_format(aTaserBattery, sizeof(aTaserBattery), " [%d]", GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
-	char aBuf[256] = "";
+	char aBuf[256];
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
