@@ -625,8 +625,7 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG2_GAMETYPE_FDDRACE
 		| GAMEINFOFLAG2_ENTITIES_FDDRACE
 		| GAMEINFOFLAG2_ALLOW_X_SKINS
-		| GAMEINFOFLAG2_HUD_AMMO
-		| GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
+		| GAMEINFOFLAG2_HUD_AMMO;
 
 	if (!pSnap->RestrictZoom())
 	{
@@ -636,6 +635,15 @@ void IGameController::Snap(int SnappingClient)
 	if (!pSnap->IsMinigame() && pSnap->m_ScoreMode == SCORE_TIME)
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
+	}
+
+	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK || pSnap->m_Minigame == MINIGAME_1VS1)
+	{
+		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_DDRACE;
+	}
+	else // fng, survival
+	{
+		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
 	}
 
 	if (!pSnappingChar)

@@ -1175,7 +1175,10 @@ void CCharacter::GiveNinja()
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
 
 	if (m_ScrollNinja)
+	{
+		m_Ninja.m_ActivationTick = 0; // for ddrace hud
 		return;
+	}
 
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	if (GetActiveWeapon() != WEAPON_NINJA)
@@ -1876,6 +1879,10 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
+	bool aGotWeapon[NUM_VANILLA_WEAPONS] = { false };
+	for (int i = 0; i < NUM_WEAPONS; i++)
+		if (m_aWeapons[i].m_Got)
+			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
 
 	pDDNetCharacter->m_Flags = 0;
 	if(m_Solo)
@@ -1906,18 +1913,20 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_HasTeleLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(m_aWeapons[WEAPON_HAMMER].m_Got || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_HAMMER)
+	if(aGotWeapon[WEAPON_HAMMER])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	if(m_aWeapons[WEAPON_GUN].m_Got || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN)
+	if(aGotWeapon[WEAPON_GUN])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	if(m_aWeapons[WEAPON_SHOTGUN].m_Got || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_SHOTGUN)
+	if(aGotWeapon[WEAPON_SHOTGUN])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	if(m_aWeapons[WEAPON_GRENADE].m_Got || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GRENADE)
+	if(aGotWeapon[WEAPON_GRENADE])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	if(m_aWeapons[WEAPON_LASER].m_Got || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_LASER)
+	if(aGotWeapon[WEAPON_LASER])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(GetActiveWeapon() == WEAPON_NINJA || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA)
+	if(aGotWeapon[WEAPON_NINJA])
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
+	//if(m_Core.m_LiveFrozen)
+	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_MOVEMENTS;
 
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
@@ -1927,8 +1936,11 @@ void CCharacter::Snap(int SnappingClient)
 	CNetObj_DDNetCharacterDisplayInfo *pDDNetCharacterDisplayInfo = static_cast<CNetObj_DDNetCharacterDisplayInfo *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, ID, sizeof(CNetObj_DDNetCharacterDisplayInfo)));
 	if(!pDDNetCharacterDisplayInfo)
 		return;
+
+	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
+
 	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
-	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = m_Ninja.m_ActivationTick;
+	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
 	pDDNetCharacterDisplayInfo->m_FreezeTick = m_FreezeTick;
 	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_IsFrozen;
 	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
@@ -3298,8 +3310,6 @@ void CCharacter::DDraceTick()
 		}
 		if (m_FreezeTime > 0)
 			m_FreezeTime--;
-		else
-			m_Ninja.m_ActivationTick = Server()->Tick();
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
 		m_Input.m_Hook = 0;
