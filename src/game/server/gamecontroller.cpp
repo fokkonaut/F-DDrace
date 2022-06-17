@@ -632,7 +632,7 @@ void IGameController::Snap(int SnappingClient)
 	if (!pSnap->IsMinigame() && pSnap->m_ScoreMode == SCORE_TIME)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
 
-	if (!pSnap->IsMinigame() || pSnap->m_Minigame == MINIGAME_BLOCK || pSnap->m_Minigame == MINIGAME_1VS1)
+	if (pSnap->ShowDDraceHud())
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_DDRACE;
 	else // fng, survival
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;

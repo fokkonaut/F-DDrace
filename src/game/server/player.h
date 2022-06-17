@@ -380,6 +380,9 @@ public:
 
 	bool m_BotDetected;
 
+	// ddrace hud
+	bool ShowDDraceHud();
+
 	// automatic actions when player enters afk mode
 	void OnSetAfk();
 

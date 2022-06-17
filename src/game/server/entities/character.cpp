@@ -4299,7 +4299,7 @@ int CCharacter::NumDDraceHudRows()
 
 	int Flags = GetDDNetCharacterFlags();
 	int Rows = 0;
-	if (ShowAmmoHud())
+	if (ShowAmmoHud() && m_pPlayer->ShowDDraceHud()) // when we dont show ddrace hud we have either nothing or health/armor. then we dont need to add a row
 		Rows++;
 	if (Flags&(CHARACTERFLAG_ENDLESS_JUMP|CHARACTERFLAG_ENDLESS_HOOK|CHARACTERFLAG_JETPACK|CHARACTERFLAG_TELEGUN_GUN|CHARACTERFLAG_TELEGUN_GRENADE|CHARACTERFLAG_TELEGUN_LASER))
 		Rows++;
