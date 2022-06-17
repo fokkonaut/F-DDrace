@@ -4468,6 +4468,9 @@ void CGameContext::List(int ClientID, const char* pFilter)
 
 int CGameContext::GetClientDDNetVersion(int ClientID)
 {
+	if (ClientID < 0)
+		return 0;
+
 	IServer::CClientInfo Info = {0};
 	Server()->GetClientInfo(ClientID, &Info);
 	return Info.m_DDNetVersion;

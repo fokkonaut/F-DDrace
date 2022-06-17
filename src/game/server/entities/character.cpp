@@ -1878,56 +1878,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(!pDDNetCharacter)
 		return;
 
-	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
-	bool aGotWeapon[NUM_VANILLA_WEAPONS] = { false };
-	for (int i = 0; i < NUM_WEAPONS; i++)
-		if (m_aWeapons[i].m_Got)
-			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
-
-	pDDNetCharacter->m_Flags = 0;
-	if(m_Solo)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
-	if(m_Super)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
-	if(m_EndlessHook)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !Tuning.m_PlayerCollision || (m_Passive && !m_Super))
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !Tuning.m_PlayerHooking || (m_Passive && !m_Super))
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HOOK;
-	if(m_SuperJump)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
-	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
-	if(m_Hit & DISABLE_HIT_GRENADE)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
-	if(m_Hit & DISABLE_HIT_HAMMER)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
-	if(m_Hit & DISABLE_HIT_RIFLE)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_LASER_HIT;
-	if(m_Hit & DISABLE_HIT_SHOTGUN)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_SHOTGUN_HIT;
-	if(m_HasTeleGun)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GUN;
-	if(m_HasTeleGrenade)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
-	if(m_HasTeleLaser)
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(aGotWeapon[WEAPON_HAMMER])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	if(aGotWeapon[WEAPON_GUN])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	if(aGotWeapon[WEAPON_SHOTGUN])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	if(aGotWeapon[WEAPON_GRENADE])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	if(aGotWeapon[WEAPON_LASER])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(aGotWeapon[WEAPON_NINJA])
-		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
-	//if(m_Core.m_LiveFrozen)
-	//	pDDNetCharacter->m_Flags |= CHARACTERFLAG_NO_MOVEMENTS;
-
+	pDDNetCharacter->m_Flags = GetDDNetCharacterFlags();
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
@@ -1937,6 +1888,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(!pDDNetCharacterDisplayInfo)
 		return;
 
+	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
 	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
 
 	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
@@ -1947,6 +1899,62 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
 	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, Tuning.m_VelrampStart, Tuning.m_VelrampRange, Tuning.m_VelrampCurvature) * 1000.0f);
+}
+
+int CCharacter::GetDDNetCharacterFlags()
+{
+	int Flags = 0;
+
+	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
+	bool aGotWeapon[NUM_VANILLA_WEAPONS] = { false };
+	for (int i = 0; i < NUM_WEAPONS; i++)
+		if (m_aWeapons[i].m_Got)
+			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
+
+	if(m_Solo)
+		Flags |= CHARACTERFLAG_SOLO;
+	if(m_Super)
+		Flags |= CHARACTERFLAG_SUPER;
+	if(m_EndlessHook)
+		Flags |= CHARACTERFLAG_ENDLESS_HOOK;
+	if(!m_Core.m_Collision || !Tuning.m_PlayerCollision || (m_Passive && !m_Super))
+		Flags |= CHARACTERFLAG_NO_COLLISION;
+	if(!m_Core.m_Hook || !Tuning.m_PlayerHooking || (m_Passive && !m_Super))
+		Flags |= CHARACTERFLAG_NO_HOOK;
+	if(m_SuperJump)
+		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
+	if(m_Jetpack && (GameServer()->GetWeaponType(GetActiveWeapon()) != WEAPON_GUN || GetActiveWeapon() == WEAPON_GUN))
+		Flags |= CHARACTERFLAG_JETPACK;
+	if(m_Hit & DISABLE_HIT_GRENADE && m_aWeapons[WEAPON_GRENADE].m_Got)
+		Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
+	if(m_Hit & DISABLE_HIT_HAMMER && m_aWeapons[WEAPON_HAMMER].m_Got)
+		Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
+	if(m_Hit & DISABLE_HIT_RIFLE && m_aWeapons[WEAPON_LASER].m_Got)
+		Flags |= CHARACTERFLAG_NO_LASER_HIT;
+	if(m_Hit & DISABLE_HIT_SHOTGUN && m_aWeapons[WEAPON_SHOTGUN].m_Got)
+		Flags |= CHARACTERFLAG_NO_SHOTGUN_HIT;
+	if(m_HasTeleGun && m_aWeapons[WEAPON_GUN].m_Got)
+		Flags |= CHARACTERFLAG_TELEGUN_GUN;
+	if(m_HasTeleGrenade && m_aWeapons[WEAPON_GRENADE].m_Got)
+		Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
+	if(m_HasTeleLaser && m_aWeapons[WEAPON_LASER].m_Got)
+		Flags |= CHARACTERFLAG_TELEGUN_LASER;
+	if(aGotWeapon[WEAPON_HAMMER])
+		Flags |= CHARACTERFLAG_WEAPON_HAMMER;
+	if(aGotWeapon[WEAPON_GUN])
+		Flags |= CHARACTERFLAG_WEAPON_GUN;
+	if(aGotWeapon[WEAPON_SHOTGUN])
+		Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
+	if(aGotWeapon[WEAPON_GRENADE])
+		Flags |= CHARACTERFLAG_WEAPON_GRENADE;
+	if(aGotWeapon[WEAPON_LASER])
+		Flags |= CHARACTERFLAG_WEAPON_LASER;
+	if(aGotWeapon[WEAPON_NINJA])
+		Flags |= CHARACTERFLAG_WEAPON_NINJA;
+	//if(m_Core.m_LiveFrozen)
+	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
+
+	return Flags;
 }
 
 void CCharacter::SnapCharacter(int SnappingClient, int ID)
@@ -2020,17 +2028,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	pCharacter->m_AttackTick = m_AttackTick;
 
 	// change eyes and use ninja graphic if player is freeze
-	if (m_DeepFreeze)
+	if (m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
 	{
 		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_PAIN;
-		pCharacter->m_Weapon = WEAPON_NINJA;
-	}
-	else if (m_FreezeTime > 0 || m_FreezeTime == -1)
-	{
-		if (pCharacter->m_Emote == EMOTE_NORMAL)
-			pCharacter->m_Emote = EMOTE_BLINK;
-		pCharacter->m_Weapon = WEAPON_NINJA;
+			pCharacter->m_Emote = m_DeepFreeze ? EMOTE_PAIN : EMOTE_BLINK;
+
+		if (GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_NEW_HUD)
+			pCharacter->m_Weapon = WEAPON_NINJA;
 	}
 
 	// change eyes, use ninja graphic and set ammo count if player has ninjajetpack
@@ -2528,13 +2532,7 @@ void CCharacter::HandleTiles(int Index)
 							pAccount->m_Level
 						);
 
-					// message gets cut off otherwise
-					if (Server()->IsSevendown(m_pPlayer->GetCID()))
-					{
-						for (int i = 0; i < 128; i++)
-							str_append(aMsg, " ", sizeof(aMsg));
-					}
-					GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
 				}
 			}
 		}
@@ -3857,14 +3855,7 @@ void CCharacter::FDDraceTick()
 			char aMsg[128];
 			str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
 			str_format(aMsg, sizeof(aMsg), "XP [%lld/%lld] +1 flag%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
-
-			if (Server()->IsSevendown(m_pPlayer->GetCID()))
-			{
-				for (int i = 0; i < 128; i++)
-					str_append(aMsg, " ", sizeof(aMsg));
-			}
-
-			GameServer()->SendBroadcast(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()), m_pPlayer->GetCID(), false);
+			SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
 		}
 	}
 
@@ -4296,6 +4287,44 @@ float CCharacter::GetTaserFreezeTime()
 	return GetTaserStrength() / 10.f;
 }
 
+bool CCharacter::ShowAmmoHud()
+{
+	return GetWeaponAmmo(GetActiveWeapon()) != -1 || GetActiveWeapon() == WEAPON_TASER || GetActiveWeapon() == WEAPON_PORTAL_RIFLE;
+}
+
+int CCharacter::NumDDraceHudRows()
+{
+	if (!Server()->IsSevendown(m_pPlayer->GetCID()) || GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
+		return 0;
+
+	int Flags = GetDDNetCharacterFlags();
+	int Rows = 0;
+	if (ShowAmmoHud())
+		Rows++;
+	if (Flags&(CHARACTERFLAG_ENDLESS_JUMP|CHARACTERFLAG_ENDLESS_HOOK|CHARACTERFLAG_JETPACK|CHARACTERFLAG_TELEGUN_GUN|CHARACTERFLAG_TELEGUN_GRENADE|CHARACTERFLAG_TELEGUN_LASER))
+		Rows++;
+	if (Flags&(CHARACTERFLAG_SOLO|CHARACTERFLAG_NO_COLLISION|CHARACTERFLAG_NO_HOOK|CHARACTERFLAG_NO_HAMMER_HIT|CHARACTERFLAG_NO_SHOTGUN_HIT|CHARACTERFLAG_NO_GRENADE_HIT|CHARACTERFLAG_NO_LASER_HIT))
+		Rows++;
+	if (Teams()->IsPractice(Team()) || m_DeepFreeze/* || m_Core.m_LiveFreeze*/)
+		Rows++;
+	return Rows;
+}
+
+void CCharacter::SendBroadcastHud(const char *pMessage)
+{
+	char aBuf[900] = "";
+	for (int i = 0; i < NumDDraceHudRows(); i++)
+		str_append(aBuf, "\n", sizeof(aBuf));
+
+	str_append(aBuf, pMessage, sizeof(aBuf));
+
+	if (Server()->IsSevendown(m_pPlayer->GetCID()))
+		for (int i = 0; i < 128; i++)
+			str_append(aBuf, " ", sizeof(aBuf));
+
+	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
+}
+
 bool CCharacter::IsWeaponIndicator()
 {
 	// 2 seconds of showing weapon indicator instead of money broadcast
@@ -4326,18 +4355,19 @@ void CCharacter::UpdateWeaponIndicator()
 	if (GetActiveWeapon() == WEAPON_TASER)
 		str_format(aTaserBattery, sizeof(aTaserBattery), " [%d]", GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
-	char aBuf[256];
+	char aBuf[256] = "";
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
-		str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
-		for (int i = 0; i < 128; i++)
-			str_append(aBuf, " ", sizeof(aBuf));
+		if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
+			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		else
+			str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
-	GameServer()->SendBroadcast(aBuf, m_pPlayer->GetCID(), false);
+	SendBroadcastHud(aBuf);
 	m_LastWeaponIndTick = Server()->Tick();
 }
 

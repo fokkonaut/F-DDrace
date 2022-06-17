@@ -123,6 +123,7 @@ enum
 	VERSION_DDNET = 1,
 	VERSION_DDNET_SWITCH = 15060,
 	VERSION_DDNET_INTENDED_TICK = 16010, // last version with idle dummy intended tick broken
+	VERSION_DDNET_NEW_HUD = 16020,
 };
 
 #endif
