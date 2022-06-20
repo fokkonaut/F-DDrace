@@ -391,7 +391,7 @@ void CDummyBlmapChillPolice::OnTick()
 {
 	if (X > 452 && X < 467 && Y > 75 && Y < 100)
 	{
-		if (Y > 86)
+		if (Y > 87)
 		{
 			Left();
 			Hook();
