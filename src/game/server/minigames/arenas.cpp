@@ -12,6 +12,7 @@ CArenas::CArenas(CGameContext *pGameServer, int Type) : CMinigame(pGameServer, T
 		Reset(i);
 	for (int i = 0; i < MAX_FIGHTS; i++)
 		m_aFights[i].Reset();
+	m_GlobalArena.Reset();
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -129,7 +130,7 @@ void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, 
 		return;
 	}
 
-	if (Participant < 0)
+	if (Participant < 0 && Participant != PARTICIPANT_GLOBAL)
 	{
 		GameServer()->SendChatTarget(ClientID, "Invalid participant");
 		return;
@@ -209,19 +210,38 @@ void CArenas::FinishConfiguration(int Fight, int ClientID)
 	GameServer()->SendBroadcast("", ClientID, false);
 	GameServer()->SendTeamChange(ClientID, GameServer()->m_apPlayers[ClientID]->GetTeam(), true, Server()->Tick(), ClientID);
 
-	m_aFights[Fight].m_aParticipants[1].m_Status = PARTICIPANT_INVITED;
-
-	char aBuf[128];
 	int Invited = m_aFights[Fight].m_aParticipants[1].m_ClientID;
 
-	str_format(aBuf, sizeof(aBuf), "You invited '%s' to a fight", Server()->ClientName(Invited));
-	GameServer()->SendChatTarget(ClientID, aBuf);
+	if (Invited == PARTICIPANT_GLOBAL)
+	{
+		m_GlobalArena.m_Active = true;
+		mem_copy(m_GlobalArena.m_aCorners, m_aFights[Fight].m_aCorners, sizeof(m_GlobalArena.m_aCorners));
+		mem_copy(m_GlobalArena.m_aSpawns, m_aFights[Fight].m_aSpawns, sizeof(m_GlobalArena.m_aSpawns));
+		m_GlobalArena.m_MiddlePos = m_aFights[Fight].m_MiddlePos;
+		m_GlobalArena.m_ScoreLimit = m_aFights[Fight].m_ScoreLimit;
+		m_GlobalArena.m_KillBorder = m_aFights[Fight].m_KillBorder;
+		m_GlobalArena.m_Weapons.m_Hammer = m_aFights[Fight].m_Weapons.m_Hammer;
+		m_GlobalArena.m_Weapons.m_Shotgun = m_aFights[Fight].m_Weapons.m_Shotgun;
+		m_GlobalArena.m_Weapons.m_Grenade = m_aFights[Fight].m_Weapons.m_Grenade;
+		m_GlobalArena.m_Weapons.m_Laser = m_aFights[Fight].m_Weapons.m_Laser;
 
-	str_format(aBuf, sizeof(aBuf), "You have been invited to a fight by '%s', type '/1vs1 %s' to join", Server()->ClientName(ClientID), Server()->ClientName(ClientID));
-	GameServer()->SendChatTarget(Invited, aBuf);
+		EndFight(Fight);
+		GameServer()->SendChatTarget(ClientID, "You successfully created a new global arena");
+	}
+	else
+	{
+		m_aFights[Fight].m_aParticipants[1].m_Status = PARTICIPANT_INVITED;
 
-	if (GameServer()->m_apPlayers[Invited] && GameServer()->m_apPlayers[Invited]->m_Minigame != MINIGAME_1VS1)
-		GameServer()->SendChatTarget(Invited, "Join the 1vs1 lobby using '/1vs1' before you accept the fight");
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "You invited '%s' to a fight", Server()->ClientName(Invited));
+		GameServer()->SendChatTarget(ClientID, aBuf);
+
+		str_format(aBuf, sizeof(aBuf), "You have been invited to a fight by '%s', type '/1vs1 %s' to join", Server()->ClientName(ClientID), Server()->ClientName(ClientID));
+		GameServer()->SendChatTarget(Invited, aBuf);
+
+		if (GameServer()->m_apPlayers[Invited] && GameServer()->m_apPlayers[Invited]->m_Minigame != MINIGAME_1VS1)
+			GameServer()->SendChatTarget(Invited, "Join the 1vs1 lobby using '/1vs1' before you accept the fight");
+	}
 }
 
 void CArenas::OnInput(int ClientID, CNetObj_PlayerInput *pNewInput)
@@ -411,18 +431,7 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' has accepted your invite", Server()->ClientName(ClientID));
 	GameServer()->SendChatTarget(Creator, aBuf);
 
-	KillParticipants(Fight);
-	int aID[2] = { ClientID, Creator };
-	for (int i = 0; i < 2; i++)
-	{
-		m_aInFight[aID[i]] = true;
-		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(aID[i], Fight + 1);
-		GameServer()->m_pController->UpdateGameInfo(aID[i]);
-
-		if (GameServer()->m_apPlayers[aID[i]])
-			GameServer()->m_apPlayers[aID[i]]->SetPlaying();
-	}
-
+	StartFight(Fight);
 	return true;
 }
 
@@ -431,7 +440,8 @@ void CArenas::EndFight(int Fight)
 	if (Fight < 0)
 		return;
 
-	KillParticipants(Fight);
+	if (m_aFights[Fight].m_aParticipants[1].m_ClientID != PARTICIPANT_GLOBAL)
+		KillParticipants(Fight);
 	SetArenaCollision(Fight, true);
 	for (int i = 0; i < 2; i++)
 	{
@@ -452,6 +462,74 @@ void CArenas::EndFight(int Fight)
 	m_aFights[Fight].Reset();
 }
 
+void CArenas::StartFight(int Fight)
+{
+	if (Fight < 0)
+		return;
+
+	KillParticipants(Fight);
+	int aID[2] = { m_aFights[Fight].m_aParticipants[0].m_ClientID, m_aFights[Fight].m_aParticipants[1].m_ClientID };
+	for (int i = 0; i < 2; i++)
+	{
+		m_aInFight[aID[i]] = true;
+		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(aID[i], Fight + 1);
+		GameServer()->m_pController->UpdateGameInfo(aID[i]);
+
+		if (GameServer()->m_apPlayers[aID[i]])
+			GameServer()->m_apPlayers[aID[i]]->SetPlaying();
+	}
+}
+
+const char *CArenas::StartGlobalArenaFight(int ClientID1, int ClientID2)
+{
+	if (!GlobalArenaExists())
+		return "There is no global arena, create one first";
+	if (ClientID1 == ClientID2)
+		return "Players cant fight against theirselves";
+	if (ClientID1 < 0 || ClientID2 < 0 || !GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
+		return "Both players have to be online";
+	if (GameServer()->m_apPlayers[ClientID1]->m_Minigame != MINIGAME_1VS1 || GameServer()->m_apPlayers[ClientID2]->m_Minigame != MINIGAME_1VS1)
+		return "Both players have to be in the 1vs1 minigame already";
+
+	int FreeArena = GetFreeArena();
+	if (FreeArena == -1)
+		return "Too many 1vs1 arenas, try again later";
+
+	// end current fights
+	for (int i = 0; i < 2; i++)
+		EndFight(GetClientFight(i == 0 ? ClientID1 : ClientID2));
+
+	m_aFights[FreeArena].m_Active = true;
+	mem_copy(m_aFights[FreeArena].m_aCorners, m_GlobalArena.m_aCorners, sizeof(m_aFights[FreeArena].m_aCorners));
+	mem_copy(m_aFights[FreeArena].m_aSpawns, m_GlobalArena.m_aSpawns, sizeof(m_aFights[FreeArena].m_aSpawns));
+	m_aFights[FreeArena].m_MiddlePos = m_GlobalArena.m_MiddlePos;
+	m_aFights[FreeArena].m_ScoreLimit = m_GlobalArena.m_ScoreLimit;
+	m_aFights[FreeArena].m_KillBorder = m_GlobalArena.m_KillBorder;
+	m_aFights[FreeArena].m_Weapons.m_Hammer = m_GlobalArena.m_Weapons.m_Hammer;
+	m_aFights[FreeArena].m_Weapons.m_Shotgun = m_GlobalArena.m_Weapons.m_Shotgun;
+	m_aFights[FreeArena].m_Weapons.m_Grenade = m_GlobalArena.m_Weapons.m_Grenade;
+	m_aFights[FreeArena].m_Weapons.m_Laser = m_GlobalArena.m_Weapons.m_Laser;
+
+	for (int i = 0; i < 2; i++)
+	{
+		m_aFights[FreeArena].m_aParticipants[i].m_ClientID = i == 0 ? ClientID1 : ClientID2;
+		m_aFights[FreeArena].m_aParticipants[i].m_Status = PARTICIPANT_ACCEPTED;
+		m_aFights[FreeArena].m_aParticipants[i].m_Score = 0;
+	}
+
+	m_aFights[FreeArena].m_LongFreezeStart = true;
+	StartFight(FreeArena);
+	return "";
+}
+
+bool CArenas::LongFreezeStart(int ClientID)
+{
+	int Fight = GetClientFight(ClientID);
+	if (Fight < 0)
+		return false;
+	return m_aFights[Fight].m_LongFreezeStart;
+}
+
 void CArenas::KillParticipants(int Fight, int Killer)
 {
 	for (int i = 0; i < 2; i++)
@@ -463,7 +541,10 @@ void CArenas::KillParticipants(int Fight, int Killer)
 		m_aFirstGroundedFreezeTick[ClientID] = 0;
 		CCharacter *pChr = ClientID >= 0 ? GameServer()->GetPlayerChar(ClientID) : 0;
 		if (pChr)
+		{
 			pChr->Die(i == Killer ? WEAPON_GAME : WEAPON_SELF, true, false); // WEAPON_SELF for the kill msg, so it will show the killer
+			pChr->GetPlayer()->Respawn();
+		}
 	}
 }
 
@@ -483,6 +564,8 @@ void CArenas::IncreaseScore(int Fight, int Index)
 
 	if (GameServer()->GetPlayerChar(ClientID))
 		GameServer()->CreateLaserText(m_aFights[Fight].m_aSpawns[Index], ClientID, "+1", 3);
+
+	m_aFights[Fight].m_LongFreezeStart = false; // we only want the long freeze start on the initial round
 
 	m_aFights[Fight].m_aParticipants[Index].m_Score++;
 	if (m_aFights[Fight].m_aParticipants[Index].m_Score >= m_aFights[Fight].m_ScoreLimit)
@@ -512,7 +595,7 @@ bool CArenas::OnCharacterSpawn(int ClientID)
 	pChr->GiveWeapon(WEAPON_GRENADE, !m_aFights[Fight].m_Weapons.m_Grenade);
 	pChr->GiveWeapon(WEAPON_LASER, !m_aFights[Fight].m_Weapons.m_Laser);
 
-	pChr->Freeze(3);
+	pChr->Freeze(m_aFights[Fight].m_LongFreezeStart ? 10 : 3);
 	return true;
 }
 
@@ -547,7 +630,10 @@ void CArenas::OnPlayerDie(int ClientID)
 
 	CCharacter *pChr = GameServer()->GetPlayerChar(m_aFights[Fight].m_aParticipants[Other].m_ClientID);
 	if (pChr)
+	{
 		pChr->Die(WEAPON_GAME, true, false);
+		pChr->GetPlayer()->Respawn();
+	}
 }
 
 void CArenas::Tick()

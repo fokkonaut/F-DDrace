@@ -976,6 +976,9 @@ private:
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
 
+	static void Con1VS1GlobalCreate(IConsole::IResult* pResult, void* pUserData);
+	static void Con1VS1GlobalStart(IConsole::IResult* pResult, void* pUserData);
+
 	void SetViewCursor(IConsole::IResult* pResult, void* pUserData, bool Zoomed);
 	static void ConViewCursor(IConsole::IResult* pResult, void* pUserData);
 	static void ConViewCursorZoomed(IConsole::IResult* pResult, void* pUserData);

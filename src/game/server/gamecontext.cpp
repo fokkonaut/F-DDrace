@@ -2712,17 +2712,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 			}
 
+			int Fight = Arenas()->GetClientFight(ClientID);
 			if (!Arenas()->FightStarted(ClientID))
-			{
-				int Fight = Arenas()->GetClientFight(ClientID);
+			{	
 				if (Fight >= 0)
 				{
 					Arenas()->EndFight(Fight);
 					return;
 				}
 			}
-			else if (pChr->m_SpawnTick + Server()->TickSpeed() * 3 > Server()->Tick()) // 3 sec freeze on arena join, dont kill there
-				return;
+			else
+			{
+				int Seconds = Arenas()->LongFreezeStart(ClientID) ? 15 : 3;
+				if (pChr->m_SpawnTick + Server()->TickSpeed() * Seconds > Server()->Tick()) // 3 sec freeze on arena join, dont kill there
+					return;
+			}
 
 			if (!m_apPlayers[ClientID]->IsMinigame() && m_apPlayers[ClientID]->m_EscapeTime)
 			{

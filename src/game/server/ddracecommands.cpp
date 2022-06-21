@@ -1723,6 +1723,35 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SaveDrop(Victim, Hours, pReason);
 }
 
+void CGameContext::Con1VS1GlobalCreate(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext*)pUserData;
+	if (!pSelf->m_apPlayers[pResult->m_ClientID])
+		return;
+
+	int ScoreLimit = 10;
+	bool KillBorder = false;
+	if (pResult->NumArguments() >= 1)
+	{
+		ScoreLimit = pResult->GetInteger(0);
+		if (pResult->NumArguments() >= 2)
+			KillBorder = pResult->GetInteger(1);
+	}
+
+	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, CArenas::PARTICIPANT_GLOBAL, ScoreLimit, KillBorder);
+}
+
+void CGameContext::Con1VS1GlobalStart(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext*)pUserData;
+	const char *pError = pSelf->Arenas()->StartGlobalArenaFight(pResult->GetInteger(0), pResult->GetInteger(1));
+	if (pError)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pError);
+		return;
+	}
+}
+
 void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

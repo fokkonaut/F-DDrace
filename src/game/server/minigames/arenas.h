@@ -20,6 +20,7 @@ public:
 		m_Active = false;
 		m_ScoreLimit = 10;
 		m_KillBorder = false;
+		m_LongFreezeStart = false;
 
 		m_Weapons.m_Hammer = true;
 		m_Weapons.m_Shotgun = false;
@@ -39,6 +40,7 @@ public:
 	vec2 m_MiddlePos;
 	int m_ScoreLimit;
 	bool m_KillBorder;
+	bool m_LongFreezeStart;
 
 	struct
 	{
@@ -81,6 +83,7 @@ class CArenas : public CMinigame
 		PARTICIPANT_ACCEPTED,
 	};
 
+	CFight m_GlobalArena;
 	CFight m_aFights[MAX_FIGHTS];
 	void SetArenaCollision(int Fight, bool Remove);
 	void PlaceArena(int ClientID);
@@ -93,6 +96,7 @@ class CArenas : public CMinigame
 	vec2 GetShowDistance(int ClientID);
 	bool IsGrounded(CCharacter *pChr);
 	bool ValidSpawnPos(vec2 Pos);
+	void StartFight(int Fight);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];
@@ -112,6 +116,11 @@ class CArenas : public CMinigame
 	} m_IDs;
 
 public:
+	enum
+	{
+		PARTICIPANT_GLOBAL = -2,
+	};
+
 	CArenas(CGameContext *pGameServer, int Type);
 	virtual ~CArenas();
 
@@ -139,6 +148,10 @@ public:
 	void StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder);
 	bool AcceptFight(int Creator, int ClientID);
 	void EndFight(int Fight);
+
+	bool GlobalArenaExists() { return m_GlobalArena.m_Active; }
+	bool LongFreezeStart(int ClientID);
+	const char *StartGlobalArenaFight(int ClientID1, int ClientID2);
 };
 
 #endif // GAME_SERVER_MINIGAMES_ARENAS_H
