@@ -356,6 +356,7 @@ public:
 	// returns whether client can close the connection or not right now, e.g. when in design change or the dummy, so that the client doesnt close the connection so they can rejoin
 	static bool ClientCanCloseCallback(int ClientID, void *pUser);
 
+	void SendRconType(int ClientID, bool UsernameReq);
 	void SendCapabilities(int ClientID);
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);
 	void SendMap(int ClientID);

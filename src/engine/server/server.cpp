@@ -1006,6 +1006,13 @@ void CServer::GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_
 	*pMapCrc = m_CurrentMapCrc;
 }
 
+void CServer::SendRconType(int ClientID, bool UsernameReq)
+{
+	CMsgPacker Msg(NETMSG_RCONTYPE, true);
+	Msg.AddInt(UsernameReq);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
 void CServer::SendCapabilities(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
@@ -1377,6 +1384,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_aClients[ClientID].m_Version = Unpacker.GetInt();
 				}
 
+				SendRconType(ClientID, m_AuthManager.NumNonDefaultKeys() > 0);
 				SendCapabilities(ClientID);
 				if (m_aClients[ClientID].m_Sevendown && m_FakeMapSize && Config()->m_FakeMapName[0] && Config()->m_FakeMapCrc[0] && GetDummy(ClientID) == -1)
 				{
@@ -1622,11 +1630,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
-			// we dont use the username thing yet, so unpack the empty username first
+			const char *pName = "";
 			if (m_aClients[ClientID].m_Sevendown)
-				Unpacker.GetString(CUnpacker::SANITIZE_CC);
+				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 			const char *pAuth = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-			if(!str_utf8_check(pAuth))
+			if(!str_utf8_check(pName) || !str_utf8_check(pAuth))
 				return;
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
@@ -1636,15 +1644,20 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				// oy removed the usernames...
 				// use "name:password" format until we establish new extended netmsg
-				char aName[64] = {};
-				const char *pDelim = str_find(pAuth, ":");
-				const char *pPw = nullptr;
-				if(!pDelim)
-					pPw = pAuth;
-				else
+				char aName[64];
+				str_copy(aName, pName, sizeof(aName));
+				const char *pPw = pAuth;
+
+				if (!m_aClients[ClientID].m_Sevendown)
 				{
-					str_copy(aName, pAuth, min((unsigned long)sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
-					pPw = pDelim + 1;
+					const char *pDelim = str_find(pAuth, ":");
+					if(!pDelim)
+						pPw = pAuth;
+					else
+					{
+						str_copy(aName, pAuth, min((unsigned long)sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
+						pPw = pDelim + 1;
+					}
 				}
 
 				if(!aName[0])
@@ -2841,10 +2854,15 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
+	bool NeedUpdate = !pManager->NumNonDefaultKeys();
 	if(pManager->AddKey(pIdent, pPw, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
+	{
+		if(NeedUpdate)
+			pThis->SendRconType(-1, true);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
+	}
 }
 
 void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
@@ -2878,10 +2896,14 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
+	bool NeedUpdate = !pManager->NumNonDefaultKeys();
+
 	if(pManager->AddKeyHash(pIdent, Hash, aSalt, Level) < 0)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident already exists");
 	else
 	{
+		if(NeedUpdate)
+			pThis->SendRconType(-1, true);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key added");
 	}
 }
@@ -2974,6 +2996,10 @@ void CServer::ConAuthRemove(IConsole::IResult *pResult, void *pUser)
 	}
 
 	pThis->AuthRemoveKey(KeySlot);
+
+	if(!pManager->NumNonDefaultKeys())
+		pThis->SendRconType(-1, false);
+
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "key removed, all users logged out");
 }
 

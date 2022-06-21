@@ -1745,7 +1745,7 @@ void CGameContext::Con1VS1GlobalStart(IConsole::IResult *pResult, void *pUserDat
 {
 	CGameContext *pSelf = (CGameContext*)pUserData;
 	const char *pError = pSelf->Arenas()->StartGlobalArenaFight(pResult->GetInteger(0), pResult->GetInteger(1));
-	if (pError)
+	if (pError[0])
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pError);
 		return;
