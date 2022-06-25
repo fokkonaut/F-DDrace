@@ -726,9 +726,10 @@ void CPlayer::Snap(int SnappingClient)
 		ShowSpec = true;
 		SpecPos = m_MinigameTee.GetPos();
 	}
+
 	if(SnappingClient >= 0)
 	{
-		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
+		ShowSpec = ((GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) && !GameServer()->Arenas()->FightStarted(SnappingClient)) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
 	}
 
 	if(ShowSpec)
