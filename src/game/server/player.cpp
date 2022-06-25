@@ -729,7 +729,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(SnappingClient >= 0)
 	{
-		ShowSpec = ((GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) && !GameServer()->Arenas()->FightStarted(SnappingClient)) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
+		ShowSpec = ShowSpec && ((GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) && !GameServer()->Arenas()->FightStarted(SnappingClient)) || pSnapping->m_ShowOthers == 1 || (pSnapping->GetTeam() == TEAM_SPECTATORS || pSnapping->IsPaused()));
 	}
 
 	if(ShowSpec)
