@@ -2723,6 +2723,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				if (!Config()->m_SvSelfkillFight)
+					return;
+
 				int Seconds = Arenas()->LongFreezeStart(ClientID) ? 15 : 3;
 				if (pChr->m_SpawnTick + Server()->TickSpeed() * Seconds > Server()->Tick()) // 3 sec freeze on arena join, dont kill there
 					return;
