@@ -221,7 +221,7 @@ MACRO_CONFIG_INT(SvSurvivalDeathmatchTime, sv_survival_deathmatch_time, 2, 1, 5,
 
 // portal rifle
 MACRO_CONFIG_INT(SvPortalRifleDelay, sv_portal_rifle_delay, 10, 0, 60, CFGFLAG_SERVER, "The minimum time in seconds between linking two portals with portal rifle", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPortalRadius, sv_portal_radius, 46, 0, 1024, CFGFLAG_SERVER, "The radius of a portal for portal rifles", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortalRadius, sv_portal_radius, 54, 0, 1024, CFGFLAG_SERVER, "The radius of a portal for portal rifles", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalDetonationLinked, sv_portal_detonation_linked, 5, 0, 60, CFGFLAG_SERVER, "Time in seconds linked portals detonate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalDetonation, sv_portal_detonation, 10, 0, 60, CFGFLAG_SERVER, "Time in seconds unlinked portals detonate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalMaxDistance, sv_portal_max_distance, 750, 50, 1000, CFGFLAG_SERVER, "Maximum distance to place a portal", AUTHED_ADMIN)

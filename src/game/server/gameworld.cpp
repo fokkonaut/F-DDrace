@@ -637,7 +637,7 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall, bool CheckMinigameTee)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall, bool CheckMinigameTee, bool CheckSize)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
@@ -660,7 +660,11 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 				Len = LenMinigame;
 		}
 
-		if (Len < p->m_ProximityRadius + Radius)
+		int r = Radius;
+		if (CheckSize)
+			r += p->m_ProximityRadius;
+
+		if (Len < r)
 		{
 			if (Len < ClosestRange)
 			{
@@ -847,7 +851,7 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEnti
 	return 0;
 }
 
-int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types)
+int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types, bool CheckSize)
 {
 	int Num = 0;
 
@@ -858,7 +862,11 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 		{
-			if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
+			int r = Radius;
+			if (CheckSize)
+				r += pEnt->m_ProximityRadius;
+
+			if(distance(pEnt->m_Pos, Pos) < r)
 			{
 				if(ppEnts)
 					ppEnts[Num] = pEnt;
