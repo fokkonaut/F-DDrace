@@ -611,10 +611,10 @@ void CCharacter::FireWeapon()
 						Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
 						Temp -= pTarget->m_Core.m_Vel;
 
+						pTarget->UnFreeze();
+
 						pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 							m_pPlayer->GetCID(), GetActiveWeapon());
-
-						pTarget->UnFreeze();
 
 						if (m_FreezeHammer)
 							pTarget->Freeze();
@@ -1524,7 +1524,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 	// dont set a weapon if we dont have a tee for it
 	int Killer = m_Core.m_Killer.m_ClientID;
-	if (Killer != m_pPlayer->GetCID() && (Weapon >= 0 || Weapon == WEAPON_PLAYER))
+	if (Killer != m_pPlayer->GetCID() && (Weapon == WEAPON_SELF || Weapon == WEAPON_PLAYER))
 		Weapon = m_Core.m_Killer.m_Weapon;
 	else if (Weapon < WEAPON_GAME)
 		Weapon = WEAPON_GAME; // don't send weird stuff to the clients
