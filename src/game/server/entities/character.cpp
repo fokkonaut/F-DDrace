@@ -611,6 +611,7 @@ void CCharacter::FireWeapon()
 						Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
 						Temp -= pTarget->m_Core.m_Vel;
 
+						// do unfreeze before takedamage, so that we update the weapon and killer to hammer when we are still in freeze, so we dont reset it
 						pTarget->UnFreeze();
 
 						pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
