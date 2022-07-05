@@ -97,7 +97,6 @@ private:
 		void Add(int MapID, int ClientID);
 		int Remove(int MapID);
 		void InsertNextEmpty(int ClientID);
-		void OnSetTimedOut(int OrigID);
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);
 
@@ -111,7 +110,6 @@ public:
 	CWorldCore m_Core;
 
 	// F-DDrace
-	void OnSetTimedOut(int ClientID, int OrigID) { m_aMap[ClientID].OnSetTimedOut(OrigID); }
 	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
