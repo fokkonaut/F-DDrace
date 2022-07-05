@@ -356,6 +356,7 @@ public:
 	virtual void FillAntibot(CAntibotRoundData *pData);
 	bool OnClientDDNetVersionKnown(int ClientID);
 	int GetClientDDNetVersion(int ClientID);
+	Mask128 ClientsMaskExcludeClientVersionAndHigher(int Version);
 	int ProcessSpamProtection(int ClientID);
 	int GetDDRaceTeam(int ClientID);
 	int64 m_NonEmptySince;
@@ -1088,5 +1089,5 @@ inline Mask128 CmaskNone() { return Mask128(-1); }
 inline Mask128 CmaskOne(int ClientID) { return Mask128(ClientID); }
 inline Mask128 CmaskUnset(Mask128 Mask, int ClientID) { return Mask^CmaskOne(ClientID); }
 inline Mask128 CmaskAllExceptOne(int ClientID) { return CmaskUnset(CmaskAll(), ClientID); }
-inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != 0; }
+inline bool CmaskIsSet(Mask128 Mask, int ClientID) { return (Mask&CmaskOne(ClientID)) != CmaskNone(); }
 #endif

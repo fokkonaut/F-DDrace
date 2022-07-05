@@ -240,7 +240,7 @@ void CCharacter::HandleNinja()
 
 		if (NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 		{
-			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), NinjaTime / Server()->TickSpeed(), 0, true, TeamMask());
+			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), NinjaTime / Server()->TickSpeed(), 0, true, TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
 		}
 
 		// force ninja Weapon
@@ -1885,21 +1885,22 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_StrongWeakID = pSnap ? (Config()->m_SvWeakHook ? pSnap->m_aStrongWeakID[ID] : SnappingClient == m_pPlayer->GetCID() ? 1 : 0) : m_StrongWeakID;
 
-	CNetObj_DDNetCharacterDisplayInfo *pDDNetCharacterDisplayInfo = static_cast<CNetObj_DDNetCharacterDisplayInfo *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTERDISPLAYINFO, ID, sizeof(CNetObj_DDNetCharacterDisplayInfo)));
-	if(!pDDNetCharacterDisplayInfo)
-		return;
-
-	CTuningParams &Tuning = m_TuneZone ? GameServer()->TuningList()[m_TuneZone] : *GameServer()->Tuning();
+	// Display Informations
 	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
 
-	pDDNetCharacterDisplayInfo->m_JumpedTotal = m_Core.m_JumpedTotal;
-	pDDNetCharacterDisplayInfo->m_NinjaActivationTick = NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
-	pDDNetCharacterDisplayInfo->m_FreezeTick = m_FreezeTick;
-	pDDNetCharacterDisplayInfo->m_IsInFreeze = m_IsFrozen;
-	pDDNetCharacterDisplayInfo->m_IsInPracticeMode = Teams()->IsPractice(Team());
-	pDDNetCharacterDisplayInfo->m_TargetX = m_Core.m_Input.m_TargetX;
-	pDDNetCharacterDisplayInfo->m_TargetY = m_Core.m_Input.m_TargetY;
-	pDDNetCharacterDisplayInfo->m_RampValue = round_to_int(VelocityRamp(length(m_Core.m_Vel) * 50, Tuning.m_VelrampStart, Tuning.m_VelrampRange, Tuning.m_VelrampCurvature) * 1000.0f);
+	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
+	pDDNetCharacter->m_NinjaActivationTick = NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
+	pDDNetCharacter->m_FreezeStart = m_FreezeTick;
+	if(m_IsFrozen)
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_IN_FREEZE;
+	}
+	if(Teams()->IsPractice(Team()))
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_PRACTICE_MODE;
+	}
+	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
+	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 }
 
 int CCharacter::GetDDNetCharacterFlags()
@@ -3305,7 +3306,7 @@ void CCharacter::DDraceTick()
 	{
 		if (m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1 || m_FreezeTime == -1)
 		{
-			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), (m_FreezeTime + 1) / Server()->TickSpeed(), 0, true, TeamMask());
+			GameServer()->CreateDamage(m_Pos, m_pPlayer->GetCID(), vec2(0, 0), (m_FreezeTime + 1) / Server()->TickSpeed(), 0, true, TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
 		}
 		if (m_FreezeTime > 0)
 			m_FreezeTime--;

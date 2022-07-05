@@ -4483,6 +4483,18 @@ int CGameContext::GetClientDDNetVersion(int ClientID)
 	return Info.m_DDNetVersion;
 }
 
+Mask128 CGameContext::ClientsMaskExcludeClientVersionAndHigher(int Version)
+{
+	Mask128 Mask = CmaskNone();
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(GetClientDDNetVersion(i) >= Version)
+			continue;
+		Mask |= CmaskOne(i);
+	}
+	return Mask;
+}
+
 bool CGameContext::RateLimitPlayerVote(int ClientID)
 {
 	int64 Now = Server()->Tick();

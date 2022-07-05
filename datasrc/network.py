@@ -41,7 +41,8 @@ GameInfoFlags2 = Flags("GAMEINFOFLAG2", [
 CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
                   "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
-                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA", "NO_MOVEMENTS"])
+                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA",
+				  "NO_MOVEMENTS", "IN_FREEZE", "PRACTICE_MODE"])
 
 EntityClasses = Flags("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
 
@@ -276,18 +277,15 @@ Objects = [
 		NetIntRange("m_Jumps", -1, 255),
 		NetIntAny("m_TeleCheckpoint"),
 		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
-	]),
-
-	NetObjectEx("DDNetCharacterDisplayInfo", "character-display-info@netobj.ddnet.tw", [
-		NetIntRange("m_JumpedTotal", 0, 255),
+		# New data fields for jump display, freeze bar and ninja bar
+		# Default values indicate that these values should not be used
+		NetIntRange("m_JumpedTotal", -1, 255),
 		NetTick("m_NinjaActivationTick"),
-		NetTick("m_FreezeTick"),
-		NetBool("m_IsInFreeze"),
-		NetBool("m_IsInPracticeMode"),
+		NetTick("m_FreezeStart"),
+		# New data fields for improved target accuracy
 		NetIntAny("m_TargetX"),
 		NetIntAny("m_TargetY"),
-		NetIntAny("m_RampValue"),
-	]),
+	], fixup=False),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
@@ -351,7 +349,7 @@ Objects = [
 		NetIntRange("m_NumSwitchers", 0, 256),
 		# 256 switches / 32 bits = 8 int32
 		NetArray(NetIntAny("m_Status"), 8),
-	]),
+	], fixup=False),
 
 	# Switch info for map items
 	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [

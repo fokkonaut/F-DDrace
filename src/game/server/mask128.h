@@ -64,9 +64,9 @@ struct Mask128
 		m_aMask[1] |= Mask[1];
 	}
 
-	bool operator&(Mask128 Mask)
+	Mask128 operator&(Mask128 Mask)
 	{
-		return (m_aMask[0]&Mask[0]) | (m_aMask[1]&Mask[1]);
+		return Mask128(m_aMask[0]&Mask[0], m_aMask[1]&Mask[1]);
 	}
 
 	void operator&=(Mask128 Mask)
@@ -78,6 +78,11 @@ struct Mask128
 	bool operator==(Mask128 Mask)
 	{
 		return m_aMask[0] == Mask[0] && m_aMask[1] == Mask[1];
+	}
+
+	bool operator!=(Mask128 Mask)
+	{
+		return m_aMask[0] != Mask[0] || m_aMask[1] != Mask[1];
 	}
 };
 #endif

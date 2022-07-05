@@ -21,7 +21,7 @@ void CGameTeams::Reset()
 		m_LastChat[i] = 0;
 		m_TeamLocked[i] = false;
 		m_IsSaving[i] = false;
-		m_Invited[i] = 0;
+		m_Invited[i] = CmaskNone();
 		m_Practice[i] = false;
 	}
 }
@@ -727,7 +727,7 @@ void CGameTeams::SetTeamLock(int Team, bool Lock)
 
 void CGameTeams::ResetInvited(int Team)
 {
-	m_Invited[Team] = 0;
+	m_Invited[Team] = CmaskNone();
 }
 
 void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)

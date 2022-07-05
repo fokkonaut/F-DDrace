@@ -108,7 +108,7 @@ public:
 
 	bool IsInvited(int Team, int ClientID)
 	{
-		return m_Invited[Team] & Mask128(ClientID);
+		return CmaskIsSet(m_Invited[Team], ClientID);
 	}
 
 	void SetFinished(int ClientID, bool finished)
