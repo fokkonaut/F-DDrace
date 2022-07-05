@@ -99,13 +99,13 @@ void CPortal::EntitiesEnter()
 				Pos = ((CCharacter *)pEnt)->Core()->m_Pos;
 		}
 
-		if (!pEnt || (distance(Pos, m_Pos) > Config()->m_SvPortalRadius))
+		if (!pEnt || (distance(Pos, m_Pos) > Config()->m_SvPortalRadius + pEnt->GetProximityRadius()))
 			m_vTeleported.erase(m_vTeleported.begin() + i);
 	}
 
 	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
 	CEntity *apEnts[128];
-	int Num = GameWorld()->FindEntitiesTypes(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, 128, Types, false);
+	int Num = GameWorld()->FindEntitiesTypes(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, 128, Types);
 
 	for (int i = 0; i < Num; i++)
 	{
@@ -240,10 +240,8 @@ void CPortal::Snap(int SnappingClient)
 				return;
 		}
 	}
-	
-	// subtract 8 because the general radius got increased frm 46 to 54. that is to make the hitbox of a portal a bit smaller, because we dont check for the proximity radius
-	// of entities for portals anymore. now tees need to be inside of the portal a little more, in order to get teleported, while keeping the old visual portal size
-	int Radius = Config()->m_SvPortalRadius - 8;
+
+	int Radius = Config()->m_SvPortalRadius;
 	float AngleStep = 2.0f * pi / NUM_SIDE;
 
 	for(int i = 0; i < NUM_SIDE; i++)

@@ -181,7 +181,7 @@ public:
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckWall = false, bool CheckMinigameTee = false, bool CheckSize = true);
+	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckWall = false, bool CheckMinigameTee = false);
 
 	/*
 		Function: insert_entity
@@ -257,7 +257,7 @@ public:
 
 	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
 	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true);
-	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types, bool CheckSize = true);
+	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types);
 	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int Types, class CCharacter *pThisOnly = 0);
 };
 
