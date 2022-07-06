@@ -4024,6 +4024,9 @@ int CServer::InitMapDesign(const char *pName, int IsDir, int StorageType, void *
 
 void CServer::ChangeMapDesign(int ClientID, const char *pName)
 {
+	if (!pName[0])
+		return;
+
 	int Design = m_aClients[ClientID].m_CurrentMapDesign;
 	if (str_comp_nocase(pName, "default") == 0)
 		Design = -1;
