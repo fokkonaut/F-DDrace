@@ -4321,7 +4321,7 @@ int CCharacter::NumDDraceHudRows()
 
 void CCharacter::SendBroadcastHud(const char *pMessage)
 {
-	char aBuf[900] = "";
+	char aBuf[256] = "";
 	for (int i = 0; i < NumDDraceHudRows(); i++)
 		str_append(aBuf, "\n", sizeof(aBuf));
 
