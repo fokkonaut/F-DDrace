@@ -677,7 +677,11 @@ void CPlayer::Snap(int SnappingClient)
 
 		((int*)pPlayerInfo)[0] = (int)((m_ClientID == SnappingClient && (!m_pControlledTee || m_Paused)) || (m_TeeControllerID == SnappingClient && !pSnapping->m_Paused));
 		((int*)pPlayerInfo)[1] = ID;
-		((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[2] = (!m_TeeControlMode || m_pControlledTee) ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		if (GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
+		{
+			((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		}
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
 	}
@@ -711,7 +715,7 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
 	if(m_Paused == PAUSE_SPEC)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
-	if(m_Paused == PAUSE_PAUSED)
+	if(m_Paused == PAUSE_PAUSED || GameServer()->Arenas()->IsConfiguring(m_ClientID))
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
 	bool ShowSpec = false;
