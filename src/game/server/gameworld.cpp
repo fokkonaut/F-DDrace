@@ -219,8 +219,12 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 
 	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
 	if (Rejoin)
+	{
+		m_UpdateTeamsState = true; // to get flag spectators back and all teams aswell
+
 		for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 			Remove(i);
+	}
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		m_pMap[i] = -1;
