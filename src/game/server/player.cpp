@@ -711,7 +711,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	pDDNetPlayer->m_AuthLevel = GetAuthedHighlighted();
 	pDDNetPlayer->m_Flags = 0;
-	if(m_Afk || GameServer()->Arenas()->IsConfiguring(m_ClientID))
+	if(m_Afk || GameServer()->Arenas()->IsConfiguring(m_ClientID) || Server()->DesignChanging(m_ClientID))
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
 	if(m_Paused == PAUSE_SPEC)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;

@@ -492,6 +492,7 @@ public:
 	void DummyJoin(int DummyID);
 	void DummyLeave(int DummyID);
 
+	virtual bool DesignChanging(int ClientID) { return m_aClients[ClientID].m_DesignChange; }
 	virtual bool HammerflyMarked(int ClientID) { return m_aClients[ClientID].m_HammerflyMarked; }
 	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
 	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
