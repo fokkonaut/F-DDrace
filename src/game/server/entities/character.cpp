@@ -4357,20 +4357,26 @@ void CCharacter::UpdateWeaponIndicator()
 	if (GetActiveWeapon() == WEAPON_TASER)
 		str_format(aTaserBattery, sizeof(aTaserBattery), " [%d]", GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
 
-	char aBuf[256];
+	char aBuf[256] = "";
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
+		{
 			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		}
 		else
-			str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		{
+			if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
+				str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		}
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
 	SendBroadcastHud(aBuf);
-	m_LastWeaponIndTick = Server()->Tick();
+	if (aBuf[0]) // dont update when vanilla weapon got triggered and we have new hud
+		m_LastWeaponIndTick = Server()->Tick();
 }
 
 int CCharacter::HasFlag()
