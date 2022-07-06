@@ -1804,6 +1804,8 @@ void CPlayer::OnLogin()
 		m_SilentFarm = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
 		m_HideDrawings = true;
+
+	Server()->ChangeMapDesign(m_ClientID, pAccount->m_aDesign);
 }
 
 void CPlayer::OnLogout()
@@ -1837,6 +1839,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_SILENTFARM;
 	if (m_HideDrawings)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEDRAWINGS;
+
+	str_copy(pAccount->m_aDesign, Server()->GetMapDesign(m_ClientID), sizeof(pAccount->m_aDesign));
 }
 
 void CPlayer::StopPlotEditing()

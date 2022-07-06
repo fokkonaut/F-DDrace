@@ -97,7 +97,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 8,
+	ACC_CURRENT_VERSION = 9,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -524,6 +524,7 @@ public:
 		time_t m_LastLoginDate;
 		int m_Flags;
 		char m_aEmail[128];
+		char m_aDesign[128];
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -579,6 +580,7 @@ public:
 		ACC_LAST_LOGIN_DATE,
 		ACC_FLAGS,
 		ACC_EMAIL,
+		ACC_DESIGN,
 		NUM_ACCOUNT_VARIABLES
 	};
 

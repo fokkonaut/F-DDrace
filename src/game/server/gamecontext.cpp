@@ -5237,6 +5237,7 @@ int CGameContext::AddAccount()
 	Account.m_LastLoginDate = 0;
 	Account.m_Flags = 0;
 	Account.m_aEmail[0] = '\0';
+	Account.m_aDesign[0] = '\0';
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -5327,6 +5328,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoll(pData); break;
 	case ACC_FLAGS:						m_Accounts[ID].m_Flags = atoi(pData); break;
 	case ACC_EMAIL:						str_copy(m_Accounts[ID].m_aEmail, pData, sizeof(m_Accounts[ID].m_aEmail)); break;
+	case ACC_DESIGN:					str_copy(m_Accounts[ID].m_aDesign, pData, sizeof(m_Accounts[ID].m_aDesign)); break;
 	}
 }
 
@@ -5382,6 +5384,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_LAST_LOGIN_DATE:			return "last_login_date";
 	case ACC_FLAGS:						return "flags";
 	case ACC_EMAIL:						return "email";
+	case ACC_DESIGN:					return "design";
 	}
 	return "Unknown";
 }
@@ -5441,6 +5444,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastLoginDate); break;
 	case ACC_FLAGS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Flags); break;
 	case ACC_EMAIL:						str_copy(aBuf, m_Accounts[ID].m_aEmail, sizeof(aBuf)); break;
+	case ACC_DESIGN:					str_copy(aBuf, m_Accounts[ID].m_aDesign, sizeof(aBuf)); break;
 	}
 	return aBuf;
 }
