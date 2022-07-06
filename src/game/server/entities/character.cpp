@@ -4291,7 +4291,10 @@ float CCharacter::GetTaserFreezeTime()
 
 bool CCharacter::ShowAmmoHud()
 {
-	return GetWeaponAmmo(GetActiveWeapon()) != -1 || GetActiveWeapon() == WEAPON_TASER || GetActiveWeapon() == WEAPON_PORTAL_RIFLE;
+	CCharacter *pChr = this;
+	if ((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->GetSpectatorID() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID()))
+		pChr = GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID());
+	return pChr->GetWeaponAmmo(pChr->GetActiveWeapon()) != -1 || pChr->GetActiveWeapon() == WEAPON_TASER || pChr->GetActiveWeapon() == WEAPON_PORTAL_RIFLE;
 }
 
 int CCharacter::NumDDraceHudRows()
@@ -4299,15 +4302,19 @@ int CCharacter::NumDDraceHudRows()
 	if (!Server()->IsSevendown(m_pPlayer->GetCID()) || GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
 		return 0;
 
-	int Flags = GetDDNetCharacterFlags();
+	CCharacter *pChr = this;
+	if ((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->GetSpectatorID() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID()))
+		pChr = GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID());
+
+	int Flags = pChr->GetDDNetCharacterFlags();
 	int Rows = 0;
-	if (ShowAmmoHud() && m_pPlayer->ShowDDraceHud()) // when we dont show ddrace hud we have either nothing or health/armor. then we dont need to add a row
+	if (ShowAmmoHud() && pChr->GetPlayer()->ShowDDraceHud()) // when we dont show ddrace hud we have either nothing or health/armor. then we dont need to add a row
 		Rows++;
 	if (Flags&(CHARACTERFLAG_ENDLESS_JUMP|CHARACTERFLAG_ENDLESS_HOOK|CHARACTERFLAG_JETPACK|CHARACTERFLAG_TELEGUN_GUN|CHARACTERFLAG_TELEGUN_GRENADE|CHARACTERFLAG_TELEGUN_LASER))
 		Rows++;
 	if (Flags&(CHARACTERFLAG_SOLO|CHARACTERFLAG_NO_COLLISION|CHARACTERFLAG_NO_HOOK|CHARACTERFLAG_NO_HAMMER_HIT|CHARACTERFLAG_NO_SHOTGUN_HIT|CHARACTERFLAG_NO_GRENADE_HIT|CHARACTERFLAG_NO_LASER_HIT))
 		Rows++;
-	if (Teams()->IsPractice(Team()) || m_DeepFreeze/* || m_Core.m_LiveFreeze*/)
+	if (Teams()->IsPractice(pChr->Team()) || pChr->m_DeepFreeze/* || pChr->Core()->m_LiveFreeze*/)
 		Rows++;
 	return Rows;
 }
