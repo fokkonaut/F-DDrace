@@ -193,6 +193,7 @@ void CPlayer::Reset()
 	m_PlotAuctionPrice = 0;
 	m_aPlotSwapUsername[0] = '\0';
 	m_PlotSpawn = false;
+	m_ToggleSpawn = false;
 	m_CheckedSavePlayer = false;
 	m_LoadedSavedPlayer = false;
 	m_WalletMoney = 0;
@@ -1262,7 +1263,7 @@ void CPlayer::TryRespawn()
 	{
 		Index = TILE_JAIL;
 	}
-	else if (m_PlotSpawn)
+	else if ((m_PlotSpawn && !m_ToggleSpawn) || (!m_PlotSpawn && m_ToggleSpawn))
 	{
 		int PlotID = GameServer()->GetPlotID(GetAccID());
 		if (PlotID > 0)
@@ -1284,6 +1285,7 @@ void CPlayer::TryRespawn()
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 
+	m_ToggleSpawn = false;
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
 	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);

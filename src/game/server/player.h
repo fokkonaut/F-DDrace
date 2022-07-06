@@ -330,6 +330,7 @@ public:
 	int m_PlotAuctionPrice;
 	char m_aPlotSwapUsername[32];
 	bool m_PlotSpawn;
+	bool m_ToggleSpawn;
 
 	bool m_HideDrawings;
 

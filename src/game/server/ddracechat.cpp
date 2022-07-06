@@ -2349,9 +2349,9 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	{
 		pPlayer->m_PlotSpawn = !pPlayer->m_PlotSpawn;
 		if (pPlayer->m_PlotSpawn)
-			pSelf->SendChatTarget(pResult->m_ClientID, "You will now respawn at your plot");
+			pSelf->SendChatTarget(pResult->m_ClientID, "You will now respawn at your plot (TAB+kill to join at normal spawn)");
 		else
-			pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer respawn at your plot");
+			pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer respawn at your plot (TAB+kill to join at plot spawn)");
 	}
 	else if (!str_comp_nocase(pCommand, "swap"))
 	{
