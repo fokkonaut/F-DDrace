@@ -500,7 +500,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	}
 
 	if (!(Flags&CHAT_NO_WEBHOOK) && (Mode == CHAT_ALL || Mode == CHAT_ATEVERYONE ||
-		((Mode == CHAT_TEAM || Mode == CHAT_LOCAL) && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0)))
+		(Mode == CHAT_TEAM && ChatterClientID >= 0 && GetDDRaceTeam(ChatterClientID) == 0)))
 	{
 		char aWebhookName[32];
 		char aAvatarURL[256];
