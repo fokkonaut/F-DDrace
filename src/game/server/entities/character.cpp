@@ -2112,7 +2112,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		}
 	}
 
-	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused() || GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()))
+	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused() || GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()) || Server()->DesignChanging(m_pPlayer->GetCID()))
 	{
 		if (m_FreezeTime > 0 || m_FreezeTime == -1 || m_DeepFreeze)
 			pCharacter->m_Emote = EMOTE_NORMAL;

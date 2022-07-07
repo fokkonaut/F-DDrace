@@ -1809,7 +1809,8 @@ void CPlayer::OnLogin()
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
 		m_HideDrawings = true;
 
-	Server()->ChangeMapDesign(m_ClientID, pAccount->m_aDesign);
+	if (Server()->IsMain(m_ClientID))
+		Server()->ChangeMapDesign(m_ClientID, pAccount->m_aDesign);
 }
 
 void CPlayer::OnLogout()
