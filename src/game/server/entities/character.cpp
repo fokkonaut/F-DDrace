@@ -4381,8 +4381,13 @@ void CCharacter::UpdateWeaponIndicator()
 	{
 		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
 	}
-	SendBroadcastHud(aBuf);
-	if (aBuf[0]) // dont update when vanilla weapon got triggered and we have new hud
+
+	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
+	if (aBuf[0] || IsWeaponIndicator())
+		SendBroadcastHud(aBuf);
+
+	// dont update when vanilla weapon got triggered and we have new hud
+	if (aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
 }
 
