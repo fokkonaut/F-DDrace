@@ -402,6 +402,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() ==	WEAPON_TASER
 		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
 		|| GetActiveWeapon() == WEAPON_BALL_GRENADE
+		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
 	)
 		FullAuto = true;
 	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -988,6 +989,28 @@ void CCharacter::FireWeapon()
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+			} break;
+
+			case WEAPON_TELE_RIFLE:
+			{
+				vec2 NewPos = GetCursorPos();
+				if (!Config()->m_SvTeleRifleAllowBlocks)
+				{
+					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
+					if (!Found || !NewPos)
+					{
+						if (ClickedFire)
+							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+						return;
+					}
+				}
+
+				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
+				GameServer()->CreatePlayerSpawn(NewPos, TeamMask());
+				m_Core.m_Pos = m_Pos = m_PrevPos = NewPos;
+
+				if (Sound)
+					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
 		}
 
@@ -4667,7 +4690,7 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
 	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER
-		|| Type == WEAPON_PORTAL_RIFLE || Type == WEAPON_DRAW_EDITOR)
+		|| Type == WEAPON_PORTAL_RIFLE || Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);

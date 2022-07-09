@@ -820,6 +820,18 @@ void CGameContext::ConUnBallGrenade(IConsole::IResult* pResult, void* pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_BALL_GRENADE, true);
 }
 
+void CGameContext::ConTeleRifle(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, false);
+}
+
+void CGameContext::ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, true);
+}
+
 void CGameContext::ConScrollNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

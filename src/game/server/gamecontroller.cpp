@@ -361,6 +361,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_BALL_GRENADE;
 	}
+	else if (Index == ENTITY_TELE_RIFLE)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_TELE_RIFLE;
+	}
 	else if (Index == ENTITY_PICKUP_BATTERY)
 	{
 		Type = POWERUP_BATTERY;
@@ -643,7 +648,7 @@ void IGameController::Snap(int SnappingClient)
 	if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
 
-	if (!pSnap->m_ZoomCursor && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active()))
+	if (!pSnap->m_ZoomCursor && (pSnappingChar->GetActiveWeapon() == WEAPON_TELEKINESIS || pSnappingChar->GetActiveWeapon() == WEAPON_PORTAL_RIFLE || pSnappingChar->m_DrawEditor.Active() || pSnappingChar->GetActiveWeapon() == WEAPON_TELE_RIFLE))
 		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 
 	if (pSnappingChar->ShowAmmoHud())

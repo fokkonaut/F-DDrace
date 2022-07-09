@@ -899,6 +899,8 @@ private:
 	static void ConUnProjectileRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConBallGrenade(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnBallGrenade(IConsole::IResult* pResult, void* pUserData);
+	static void ConTeleRifle(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnHammer(IConsole::IResult* pResult, void* pUserData);

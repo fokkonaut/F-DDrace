@@ -6692,6 +6692,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Ball Greande";
 	case WEAPON_DRAW_EDITOR:
 		return "Draw Editor";
+	case WEAPON_TELE_RIFLE:
+		return "Tele Rifle";
 	}
 	return "Unknown";
 }
@@ -6720,6 +6722,8 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_GRENADE;
 	case WEAPON_DRAW_EDITOR:
 		return WEAPON_NINJA;
+	case WEAPON_TELE_RIFLE:
+		return WEAPON_LASER;
 	}
 	return Weapon;
 }
