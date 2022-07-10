@@ -285,6 +285,9 @@ void CServer::CClient::Reset()
 		m_aIdMap[i] = -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aReverseIdMap[i] = -1;
+
+	m_CurrentMapDesign = -1;
+	m_DesignChange = false;
 }
 
 void CServer::CClient::ResetContent()
@@ -312,8 +315,6 @@ void CServer::CClient::ResetContent()
 	m_PgscState = CClient::PGSC_STATE_NONE;
 	m_IdleDummy = false;
 
-	m_CurrentMapDesign = -1;
-	m_DesignChange = false;
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 	m_Main = true;
 
