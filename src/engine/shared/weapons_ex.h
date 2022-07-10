@@ -2,6 +2,7 @@
 // These are weapons, created by fokkonaut.
 // NUM_VANILLA_WEAPONS is the old NUM_WEAPONS
 // Add another tune for the fire delay when adding a new weapon!
+// And also update game/server/save.cpp to save and load the new weapon correctly.
 
 #ifndef ENGINE_SHARED_WEAPONS_EX_H
 #define ENGINE_SHARED_WEAPONS_EX_H
