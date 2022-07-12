@@ -623,12 +623,15 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 	int Fight;
 	while ((Fight = GetClientFight(ClientID, !Disconnect)) >= 0)
 	{
-		int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
-		if (HasJoined(Fight, Other))
+		if (FightStarted(ClientID))
 		{
+			int Index = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 0 : 1;
+			int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
+			int OtherID = m_aFights[Fight].m_aParticipants[Other].m_ClientID;
+
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "Fight has been cancelled because '%s' left", Server()->ClientName(ClientID));
-			GameServer()->SendChatTarget(m_aFights[Fight].m_aParticipants[Other].m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "'%s' left a 1vs1 round against '%s'! Current scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
+			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 		}
 
 		EndFight(Fight);
