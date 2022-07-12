@@ -2723,7 +2723,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
-				if (!Config()->m_SvSelfkillFight)
+				if (!Arenas()->CanSelfkill(ClientID))
 					return;
 
 				int Seconds = Arenas()->LongFreezeStart(ClientID) ? 15 : 3;

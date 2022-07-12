@@ -530,6 +530,25 @@ bool CArenas::LongFreezeStart(int ClientID)
 	return m_aFights[Fight].m_LongFreezeStart;
 }
 
+bool CArenas::CanSelfkill(int ClientID)
+{
+	int Fight = GetClientFight(ClientID);
+	if (Fight < 0)
+		return true;
+	
+	int Other = m_aFights[Fight].m_aParticipants[0].m_ClientID == ClientID ? 1 : 0;
+	if (!HasJoined(Fight, Other))
+		return true;
+
+	int OtherID = m_aFights[Fight].m_aParticipants[Other].m_ClientID;
+	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+	CCharacter *pOther = GameServer()->GetPlayerChar(OtherID);
+	if (pChr && pOther)
+		if ((!pChr->m_FreezeTime && pChr->Core()->m_Killer.m_ClientID == OtherID) || (!pOther->m_FreezeTime && pOther->Core()->m_Killer.m_ClientID == ClientID) || (pChr->m_FreezeTime && pOther->m_FreezeTime))
+			return false;
+	return true;
+}
+
 void CArenas::KillParticipants(int Fight, int Killer)
 {
 	for (int i = 0; i < 2; i++)

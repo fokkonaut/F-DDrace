@@ -328,6 +328,5 @@ MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER, "Whe
 MACRO_CONFIG_INT(SvCountTimeoutToMaxIP, sv_count_timeout_to_max_ip, 1, 0, 1, CFGFLAG_SERVER, "Whether timeouted tees count to the limit of max clients per ip", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDropOldClients, sv_drop_old_clients, 1, 0, 1, CFGFLAG_SERVER, "Whether old and not fully supported clients are getting dropped", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSelfkillFight, sv_selfkill_fight, 0, 0, 1, CFGFLAG_SERVER, "Whether players in a 1vs1 fight can selfkill or not", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
 #endif
