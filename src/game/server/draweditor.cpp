@@ -1191,7 +1191,9 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 			{
 				if (str_comp_nocase(GameServer()->m_vPresetList[i].c_str(), pName) == 0)
 				{
-					GameServer()->SendChatTarget(GetCID(), "Couldn't save preset '%s', a preset with that name already exists");
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Couldn't save preset '%s', a preset with that name already exists", pName);
+					GameServer()->SendChatTarget(GetCID(), aBuf);
 					StopTransform(true);
 					return true;
 				}
