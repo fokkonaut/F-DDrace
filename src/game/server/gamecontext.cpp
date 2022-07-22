@@ -2816,6 +2816,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (pPlayer->m_SpookyGhost || pPlayer->m_ForcedSkin != SKIN_NONE)
 				return;
 
+			// update currently visable teeinfos
+			// it also gets set in SendSkinChange(), but that wont get executed if no up-to-date 0.7 client is connected, so definitely do it here aswell
+			m_apPlayers[ClientID]->m_CurrentInfo.m_TeeInfos = pPlayer->m_TeeInfos;
+
 			// update all clients
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
