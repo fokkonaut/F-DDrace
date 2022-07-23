@@ -1008,6 +1008,7 @@ void CCharacter::FireWeapon()
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 				GameServer()->CreatePlayerSpawn(NewPos, TeamMask());
 				m_Core.m_Pos = m_Pos = m_PrevPos = NewPos;
+				m_DDRaceState = DDRACE_CHEAT;
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
