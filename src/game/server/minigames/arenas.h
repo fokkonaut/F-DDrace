@@ -150,7 +150,6 @@ public:
 	void EndFight(int Fight);
 
 	bool GlobalArenaExists() { return m_GlobalArena.m_Active; }
-	bool LongFreezeStart(int ClientID);
 	bool CanSelfkill(int ClientID);
 	const char *StartGlobalArenaFight(int ClientID1, int ClientID2);
 };

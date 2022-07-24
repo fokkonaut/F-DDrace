@@ -522,14 +522,6 @@ const char *CArenas::StartGlobalArenaFight(int ClientID1, int ClientID2)
 	return "";
 }
 
-bool CArenas::LongFreezeStart(int ClientID)
-{
-	int Fight = GetClientFight(ClientID);
-	if (Fight < 0)
-		return false;
-	return m_aFights[Fight].m_LongFreezeStart;
-}
-
 bool CArenas::CanSelfkill(int ClientID)
 {
 	int Fight = GetClientFight(ClientID);
@@ -540,13 +532,21 @@ bool CArenas::CanSelfkill(int ClientID)
 	if (!HasJoined(Fight, Other))
 		return true;
 
-	int OtherID = m_aFights[Fight].m_aParticipants[Other].m_ClientID;
 	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+	int Seconds = m_aFights[Fight].m_LongFreezeStart ? 10 : 3;
+	if (pChr->m_SpawnTick + Server()->TickSpeed() * Seconds > Server()->Tick()) // 3 sec freeze on arena join, dont kill there
+		return false;
+
+	int OtherID = m_aFights[Fight].m_aParticipants[Other].m_ClientID;
 	CCharacter *pOther = GameServer()->GetPlayerChar(OtherID);
 	if (pChr && pOther)
-		if ((!pChr->m_FreezeTime && pChr->Core()->m_Killer.m_ClientID == OtherID) || (!pOther->m_FreezeTime && pOther->Core()->m_Killer.m_ClientID == ClientID) || (pChr->m_FreezeTime && pOther->m_FreezeTime))
-			return false;
-	return true;
+	{
+		// only allow selfkill if no one touched the other one yet OR if the one who tries to kill is frozen and the other one is not, to speed up the killing process
+		if ((pChr->Core()->m_Killer.m_ClientID != OtherID && pOther->Core()->m_Killer.m_ClientID != ClientID)
+			|| (pChr->m_FreezeTime && !pOther->m_FreezeTime))
+			return true;
+	}
+	return false;
 }
 
 void CArenas::KillParticipants(int Fight, int Killer)
