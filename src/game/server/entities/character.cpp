@@ -2481,7 +2481,8 @@ void CCharacter::HandleTiles(int Index)
 
 		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
 		bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
-		if ((MoneyTile || PoliceMoneyTile) && !m_ProcessedMoneyTile)
+		bool ExtraMoneyTile = m_TileIndex == TILE_MONEY_EXTRA || m_TileFIndex == TILE_MONEY_EXTRA;
+		if ((MoneyTile || PoliceMoneyTile || ExtraMoneyTile) && !m_ProcessedMoneyTile)
 		{
 			m_MoneyTile = true;
 			m_ProcessedMoneyTile = true; // when multiple speedups on a moneytile face into each other the player skips multiple tiles in one tick leading to doubled xp and money
@@ -2504,13 +2505,29 @@ void CCharacter::HandleTiles(int Index)
 
 				CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-				int XP = 0;
-				int Money = 0;
 				int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
+				int XP = AliveState;
+				int Money = 0;
 
-				// default
-				Money += 1;
-				XP += AliveState + 1;
+				int TileXP = 1;
+				int TileMoney = 1;
+
+				if (PoliceMoneyTile)
+				{
+					TileXP = 2;
+				}
+				else if (ExtraMoneyTile)
+				{
+					TileXP = 3;
+					TileMoney = 2;
+				}
+
+				XP += TileXP;
+				Money += TileMoney;
+
+				// police bonus
+				if (PoliceMoneyTile)
+					Money += pAccount->m_PoliceLevel;
 
 				// vip bonus
 				if (pAccount->m_VIP)
@@ -2519,16 +2536,9 @@ void CCharacter::HandleTiles(int Index)
 					Money += 2;
 				}
 
-				// police bonus
-				if (PoliceMoneyTile)
-				{
-					XP += 1;
-					Money += pAccount->m_PoliceLevel;
-				}
-
 				//flag bonus
 				bool FlagBonus = false;
-				if (!PoliceMoneyTile && !Plot && HasFlag() != -1)
+				if (!PoliceMoneyTile && !ExtraMoneyTile && !Plot && HasFlag() != -1)
 				{
 					XP += 1;
 					FlagBonus = true;
@@ -2548,12 +2558,12 @@ void CCharacter::HandleTiles(int Index)
 
 					str_format(aSurvival, sizeof(aSurvival), " +%d survival", AliveState);
 					str_format(aPolice, sizeof(aPolice), " +%d police", pAccount->m_PoliceLevel);
-					str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", PoliceMoneyTile ? 2 : 1, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
+					str_format(aPlusXP, sizeof(aPlusXP), " +%d%s%s%s", TileXP, FlagBonus ? " +1 flag" : "", pAccount->m_VIP ? " +2 vip" : "", AliveState ? aSurvival : "");
 					str_format(aMsg, sizeof(aMsg),
-							"Money [%lld] +1%s%s\n"
+							"Money [%lld] +%d%s%s\n"
 							"XP [%lld/%lld]%s\n"
 							"Level [%d]",
-							m_pPlayer->GetWalletMoney(), (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
+							m_pPlayer->GetWalletMoney(), TileMoney, (PoliceMoneyTile && pAccount->m_PoliceLevel) ? aPolice : "", pAccount->m_VIP ? " +2 vip" : "",
 							pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP,
 							pAccount->m_Level
 						);
@@ -3944,7 +3954,8 @@ void CCharacter::HandleLastIndexTiles()
 
 	if (m_MoneyTile)
 	{
-		if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE)
+		if (m_TileIndex != TILE_MONEY && m_TileFIndex != TILE_MONEY && m_TileIndex != TILE_MONEY_POLICE && m_TileFIndex != TILE_MONEY_POLICE
+			&& m_TileIndex != TILE_MONEY_EXTRA && m_TileFIndex != TILE_MONEY_EXTRA)
 		{
 			GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
 			m_MoneyTile = false;
