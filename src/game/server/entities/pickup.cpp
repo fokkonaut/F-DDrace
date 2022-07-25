@@ -71,7 +71,7 @@ void CPickup::SetRespawnTime(bool Init)
 		{
 			RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
 		}
-		else if (m_Subtype == WEAPON_PORTAL_RIFLE)// && Config()->m_SvPortalRifleAmmo)
+		else if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo)
 		{
 			// between 1 and 5 hours to respawn, and reduce time the more players are connected (1 player = 1 min)
 			int Minutes = ((rand() % (300 - 60) + 60) - GameServer()->CountConnectedPlayers(false, true));
