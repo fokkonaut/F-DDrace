@@ -50,10 +50,11 @@ protected:
 	} m_aClients[MAX_CLIENTS];
 
 	void SetPage(int ClientID, int Page);
-	void SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg = "");
+	virtual void SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg = "", int Page = -1);
 
 	virtual int FirstPage() { return PAGE_MAIN; }
 	virtual int NumPages() { return 0; }
+	virtual bool PageValid(int Page) { return true; }
 
 public:
 

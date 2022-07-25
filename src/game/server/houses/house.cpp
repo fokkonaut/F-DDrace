@@ -32,14 +32,18 @@ void CHouse::Reset(int ClientID)
 	m_aClients[ClientID].m_State = STATE_NONE;
 }
 
-void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg)
+void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg, int Page)
 {
 	char aMsg[900];
 	const char *pCut = "**************************************\n";
 
 	char aPage[8] = "";
 	if (m_aClients[ClientID].m_Page > PAGE_MAIN && m_Type != HOUSE_BANK)
-		str_format(aPage, sizeof(aPage), "~ %d ~", m_aClients[ClientID].m_Page);
+	{
+		if (Page == -1)
+			Page = m_aClients[ClientID].m_Page;
+		str_format(aPage, sizeof(aPage), "~ %d ~", Page);
+	}
 
 	char aFooter[128];
 	str_format(aFooter, sizeof(aFooter), "%s%s\n                       %s", pCut, pFooterMsg, aPage);
@@ -188,22 +192,25 @@ void CHouse::DoPageChange(int ClientID, int Dir)
 
 	if (m_Type != HOUSE_BANK || m_aClients[ClientID].m_Page > PAGE_MAIN)
 	{
-		if (Dir == PAGE_MAIN)
+		do
 		{
-			m_aClients[ClientID].m_Page = PAGE_MAIN;
-		}
-		else if (Dir == 1)
-		{
-			m_aClients[ClientID].m_Page++;
-			if (m_aClients[ClientID].m_Page >= NumPages())
-				m_aClients[ClientID].m_Page = FirstPage();
-		}
-		else if (Dir == -1)
-		{
-			m_aClients[ClientID].m_Page--;
-			if (m_aClients[ClientID].m_Page < FirstPage())
-				m_aClients[ClientID].m_Page = NumPages() - 1;
-		}
+			if (Dir == PAGE_MAIN)
+			{
+				m_aClients[ClientID].m_Page = PAGE_MAIN;
+			}
+			else if (Dir == 1)
+			{
+				m_aClients[ClientID].m_Page++;
+				if (m_aClients[ClientID].m_Page >= NumPages())
+					m_aClients[ClientID].m_Page = FirstPage();
+			}
+			else if (Dir == -1)
+			{
+				m_aClients[ClientID].m_Page--;
+				if (m_aClients[ClientID].m_Page < FirstPage())
+					m_aClients[ClientID].m_Page = NumPages() - 1;
+			}
+		} while (!PageValid(m_aClients[ClientID].m_Page));
 	}
 
 	OnPageChange(ClientID);

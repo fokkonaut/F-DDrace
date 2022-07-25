@@ -220,6 +220,7 @@ void CPickup::Tick()
 			}
 
 			case POWERUP_BATTERY:
+			{
 				if (GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID()))
 					break;
 
@@ -243,12 +244,13 @@ void CPickup::Tick()
 					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
 				}
 				break;
+			}
 
 			default:
 				break;
 		};
 
-		if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || m_Type == POWERUP_BATTERY)
+		if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA || m_Type == POWERUP_BATTERY || (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo))
 		{
 			if (Picked)
 			{
@@ -261,6 +263,8 @@ void CPickup::Tick()
 
 				if (m_Type == POWERUP_BATTERY)
 					RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
+				else if (m_Subtype == WEAPON_PORTAL_RIFLE)
+					RespawnTime = Config()->m_SvPortalRifleRespawnTime * 60;
 
 				if (RespawnTime >= 0)
 					m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;

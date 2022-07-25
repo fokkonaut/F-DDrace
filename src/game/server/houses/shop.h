@@ -84,6 +84,7 @@ private:
 	const char *GetTimeMessage(int Time);
 
 	virtual int NumPages() { return m_NumItemsList; }
+	virtual bool PageValid(int Page);
 	int m_aBackgroundItem[MAX_CLIENTS];
 
 	// Because it differs for shop/plot shop

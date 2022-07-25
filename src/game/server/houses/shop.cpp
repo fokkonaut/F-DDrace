@@ -85,6 +85,11 @@ void CShop::AddItem(const char *pName, int Level, int Price, int Time, const cha
 	}
 }
 
+bool CShop::PageValid(int Page)
+{
+	return Page != ITEM_PORTAL_RIFLE || GameServer()->Config()->m_SvPortalRifleShop;
+}
+
 const char *CShop::GetWelcomeMessage(int ClientID)
 {
 	static char aBuf[128];
@@ -104,7 +109,7 @@ const char *CShop::GetEndMessage(int ClientID)
 
 const char *CShop::GetHeadline(int Item)
 {
-	if (Item < ITEM_RAINBOW || Item >= NUM_ITEMS_SHOP)
+	if (Item <= 0 || Item >= m_NumItems)
 		return "Unknown";
 
 	static char aRet[64];
@@ -218,7 +223,10 @@ void CShop::OnPageChange(int ClientID)
 		);
 	}
 
-	SendWindow(ClientID, aMsg, "If you want to buy an item, press F3");
+	int Page = m_aClients[ClientID].m_Page;
+	if (Page > ITEM_PORTAL_RIFLE && !GameServer()->Config()->m_SvPortalRifleShop)
+		Page--;
+	SendWindow(ClientID, aMsg, "If you want to buy an item, press F3", Page);
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
 }
 
@@ -253,9 +261,9 @@ void CShop::BuyItem(int ClientID, int Item)
 			|| (Item == ITEM_SPOOKY_GHOST		&& pAccount->m_SpookyGhost)
 			|| (Item == ITEM_ROOM_KEY			&& (pPlayer->m_HasRoomKey))
 			//|| (Item == ITEM_VIP				&& pAccount->m_VIP) // vip can be bought unlimited times
-			|| (Item == ITEM_SPAWN_SHOTGUN		&& pAccount->m_SpawnWeapon[0] == 5)
-			|| (Item == ITEM_SPAWN_GRENADE		&& pAccount->m_SpawnWeapon[1] == 5)
-			|| (Item == ITEM_SPAWN_RIFLE		&& pAccount->m_SpawnWeapon[2] == 5)
+			|| (Item == ITEM_SPAWN_SHOTGUN		&& pAccount->m_SpawnWeapon[0] >= 5)
+			|| (Item == ITEM_SPAWN_GRENADE		&& pAccount->m_SpawnWeapon[1] >= 5)
+			|| (Item == ITEM_SPAWN_RIFLE		&& pAccount->m_SpawnWeapon[2] >= 5)
 			|| (Item == ITEM_NINJAJETPACK		&& pAccount->m_Ninjajetpack)
 			|| (Item == ITEM_TASER				&& pAccount->m_TaserLevel >= NUM_TASER_LEVELS)
 			|| (Item == ITEM_TASER_BATTERY && pAccount->m_TaserBattery >= MAX_TASER_BATTERY)
