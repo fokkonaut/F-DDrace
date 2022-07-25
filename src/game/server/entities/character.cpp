@@ -2505,13 +2505,8 @@ void CCharacter::HandleTiles(int Index)
 
 				CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-				int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
-				int XP = AliveState;
-				int Money = 0;
-
 				int TileXP = 1;
 				int TileMoney = 1;
-
 				if (PoliceMoneyTile)
 				{
 					TileXP = 2;
@@ -2522,8 +2517,9 @@ void CCharacter::HandleTiles(int Index)
 					TileMoney = 2;
 				}
 
-				XP += TileXP;
-				Money += TileMoney;
+				int AliveState = Plot ? 0 : GetAliveState(); // disallow survival bonus on plot money tile
+				int XP = AliveState + TileXP;
+				int Money = TileMoney;
 
 				// police bonus
 				if (PoliceMoneyTile)
