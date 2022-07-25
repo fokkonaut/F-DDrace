@@ -51,10 +51,19 @@ void CPickup::Reset(bool Destroy)
 
 void CPickup::SetRespawnTime(bool Init)
 {
-	int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+	if (!m_Collision)
+		return;
 
-	if (Init && g_pData->m_aPickups[m_Type].m_Spawndelay > 0 && Config()->m_SvVanillaModeStart)
-		RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Spawndelay;
+	int RespawnTime = -1;
+	if (Init)
+	{
+		if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0 && Config()->m_SvVanillaModeStart)
+			RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Spawndelay;
+	}
+	else
+	{
+		RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+	}
 
 	if (m_Type == POWERUP_BATTERY)
 	{
