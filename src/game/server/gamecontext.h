@@ -97,7 +97,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 9,
+	ACC_CURRENT_VERSION = 10,
 
 	// motd
 	MOTD_MAX_LINES = 24,
@@ -525,6 +525,7 @@ public:
 		int m_Flags;
 		char m_aEmail[128];
 		char m_aDesign[128];
+		int m_PortalBattery;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -581,6 +582,7 @@ public:
 		ACC_FLAGS,
 		ACC_EMAIL,
 		ACC_DESIGN,
+		ACC_PORTAL_BATTERY,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -831,6 +833,7 @@ private:
 
 	static void ConPayMoney(IConsole::IResult* pResult, void* pUserData);
 	static void ConMoney(IConsole::IResult* pResult, void* pUserData);
+	static void ConPortal(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConRoom(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpawn(IConsole::IResult* pResult, void* pUserData);

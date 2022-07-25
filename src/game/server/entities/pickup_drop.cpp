@@ -177,7 +177,9 @@ int CPickupDrop::IsCharacterNear()
 				)
 				continue;
 		}
-		else if (m_Type == POWERUP_BATTERY && !pChr->GetPlayer()->GiveTaserBattery(m_Bullets))
+		else if (m_Type == POWERUP_BATTERY && m_Weapon == WEAPON_TASER && !pChr->GetPlayer()->GiveTaserBattery(m_Bullets))
+			continue;
+		else if (m_Type == POWERUP_BATTERY && m_Weapon == WEAPON_PORTAL_RIFLE && !pChr->GetPlayer()->GivePortalBattery(m_Bullets))
 			continue;
 		else if (m_Type == POWERUP_HEALTH && !pChr->IncreaseHealth(1))
 			continue;

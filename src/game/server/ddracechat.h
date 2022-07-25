@@ -70,6 +70,7 @@ CHAT_COMMAND("pin", "?s[pin]", CFGFLAG_CHAT, ConPin, this, "Sets a new security 
 
 CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays i money to player r", AUTHED_NO)
 CHAT_COMMAND("money", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions, or drops i amount", AUTHED_NO)
+CHAT_COMMAND("portal", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConPortal, this, "Shows your current portal battery amount, or drops i amount", AUTHED_NO)
 
 CHAT_COMMAND("room", "s['invite'|'kick'] r[name]", CFGFLAG_CHAT, ConRoom, this, "Invite or kick player r from the room", AUTHED_NO)
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)

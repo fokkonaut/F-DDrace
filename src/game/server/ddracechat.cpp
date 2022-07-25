@@ -1387,6 +1387,8 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "Portal Battery [%d]", pAccount->m_PortalBattery);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} //fallthrough
 
 		case MINIGAME_BLOCK:
@@ -1977,6 +1979,62 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Drop money: '/money drop <amount>'");
+}
+
+void CGameContext::ConPortal(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
+
+	if (pResult->NumArguments() > 0)
+	{
+		if (str_comp_nocase(pResult->GetString(0), "drop") != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Invalid argument");
+			return;
+		}
+
+		if (pPlayer->GetCharacter())
+		{
+			int Amount = pResult->GetInteger(1);
+			if (Amount <= 0)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop nothing");
+				return;
+			}
+			if (Amount > 100)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop more than 100 portal batteries at the same time");
+				return;
+			}
+			if (Amount > pAccount->m_PortalBattery)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough portal batteries");
+				return;
+			}
+
+			if (pPlayer->GetCharacter()->m_LastPortalBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
+			{
+				pPlayer->GetCharacter()->DropWeapon(WEAPON_PORTAL_RIFLE, false, -3, POWERUP_BATTERY, Amount);
+				pPlayer->GetCharacter()->m_LastPortalBatteryDrop = pSelf->Server()->Tick();
+			}
+		}
+		return;
+	}
+
+	char aBuf[256];
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Portal Rifle ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can collect portal batteries in the map, which lets you use the portal rifle.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "The portal rifle can shoot two portals at cursor position, which tees, flags and weapons can use to travel between them.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your portal stats ~~~");
+	str_format(aBuf, sizeof(aBuf), "Portal battery: %d", pAccount->m_PortalBattery);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Drop portal battery: '/portal drop <amount>'");
 }
 
 void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)

@@ -309,6 +309,7 @@ public:
 	void GiveXP(int64 Amount, const char *pMessage = "");
 	void GiveBlockPoints(int Amount, int Victim);
 	bool GiveTaserBattery(int Amount);
+	bool GivePortalBattery(int Amount);
 	void OnLogin();
 	void OnLogout();
 	void SetExpireDate(int Item);

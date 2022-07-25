@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
+#include <base/math.h>
 #include "character.h"
 #include "pickup.h"
 
@@ -41,13 +42,38 @@ CPickup::~CPickup()
 
 void CPickup::Reset(bool Destroy)
 {
-	if (g_pData->m_aPickups[m_Type].m_Spawndelay > 0 && Config()->m_SvVanillaModeStart)
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * g_pData->m_aPickups[m_Type].m_Spawndelay;
-	else
-		m_SpawnTick = -1;
+	m_SpawnTick = -1;
+	SetRespawnTime(true);
 
 	if (Destroy)
 		GameWorld()->DestroyEntity(this);
+}
+
+void CPickup::SetRespawnTime(bool Init)
+{
+	int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
+
+	if (Init && g_pData->m_aPickups[m_Type].m_Spawndelay > 0 && Config()->m_SvVanillaModeStart)
+		RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Spawndelay;
+
+	if (m_Type == POWERUP_BATTERY)
+	{
+		if (m_Subtype == WEAPON_TASER)
+		{
+			RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
+		}
+		else if (m_Subtype == WEAPON_PORTAL_RIFLE) // ammo
+		{
+			// between 1 and 5 hours to respawn, and reduce time the more players are connected (1 player = 1 min)
+			int Minutes = ((rand() % (300 - 60) + 60) - GameServer()->CountConnectedPlayers(false, true));
+			RespawnTime = max(Minutes * 60, 30 * 60);
+		}
+	}
+	else if (m_Subtype == WEAPON_PORTAL_RIFLE) // weapon
+		RespawnTime = Config()->m_SvPortalRifleRespawnTime * 60;
+
+	if (RespawnTime >= 0)
+		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 }
 
 void CPickup::Tick()
@@ -232,16 +258,23 @@ void CPickup::Tick()
 
 					m_aLastBatteryMsg[ClientID] = Server()->Tick();
 
-					char aBuf[64];
+					char aBuf[64] = "";
 					int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
-					str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d seconds", Seconds);
+					if (Seconds <= 60)
+						str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d seconds", Seconds);
+					else
+						str_format(aBuf, sizeof(aBuf), "This battery will respawn in %d minutes", Seconds / 60);
 					GameServer()->SendChatTarget(ClientID, aBuf);
 					return;
 				}
-				else if (pChr->GetPlayer()->GiveTaserBattery(10))
+				else
 				{
-					Picked = true;
-					GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
+					if ((m_Subtype == WEAPON_TASER && pChr->GetPlayer()->GiveTaserBattery(10))
+						|| (m_Subtype == WEAPON_PORTAL_RIFLE && pChr->GetPlayer()->GivePortalBattery(1)))
+					{
+						Picked = true;
+						GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
+					}
 				}
 				break;
 			}
@@ -259,15 +292,7 @@ void CPickup::Tick()
 					pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
 				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-				int RespawnTime = g_pData->m_aPickups[GameServer()->GetPickupType(m_Type, m_Subtype)].m_Respawntime;
-
-				if (m_Type == POWERUP_BATTERY)
-					RespawnTime = Config()->m_SvBatteryRespawnTime * 60;
-				else if (m_Subtype == WEAPON_PORTAL_RIFLE)
-					RespawnTime = Config()->m_SvPortalRifleRespawnTime * 60;
-
-				if (RespawnTime >= 0)
-					m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+				SetRespawnTime();
 			}
 		}
 	}

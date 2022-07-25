@@ -42,6 +42,8 @@ private:
 		float m_Time;
 		float m_LastTime;
 	} m_Snap;
+
+	void SetRespawnTime(bool Init = false);
 };
 
 #endif

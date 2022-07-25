@@ -226,7 +226,7 @@ MACRO_CONFIG_INT(SvPortalDetonationLinked, sv_portal_detonation_linked, 5, 0, 60
 MACRO_CONFIG_INT(SvPortalDetonation, sv_portal_detonation, 10, 0, 60, CFGFLAG_SERVER, "Time in seconds unlinked portals detonate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalMaxDistance, sv_portal_max_distance, 750, 50, 1000, CFGFLAG_SERVER, "Maximum distance to place a portal", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalRifleShop, sv_portal_rifle_shop, 1, 0, 1, CFGFLAG_SERVER, "Whether portal rifle is in shop", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPortalRifleAmmo, sv_portal_rifle_ammo, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether portal rifle entity respawns after 15 minutes and portal requires ammo", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortalRifleAmmo, sv_portal_rifle_ammo, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether portal rifle entity respawns after x minutes and portal requires ammo", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalRifleRespawnTime, sv_portal_rifle_respawn_time, 15, 1, 999, CFGFLAG_SERVER, "Time in minutes a portal rifle respawns after pickup", AUTHED_ADMIN)
 
 // draw editor

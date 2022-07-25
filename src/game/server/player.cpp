@@ -1774,6 +1774,34 @@ bool CPlayer::GiveTaserBattery(int Amount)
 	return true;
 }
 
+bool CPlayer::GivePortalBattery(int Amount)
+{
+	if (GetAccID() < ACC_START || Amount == 0)
+		return false;
+
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	if (pAccount->m_PortalRifle) // disallow people who have bought portal rifle to pickup or drop any portal battery
+		return false;
+
+	char Symbol = '+';
+	if (Amount < 0)
+	{
+		if (pAccount->m_PortalBattery <= 0)
+			return false;
+
+		if (pAccount->m_PortalBattery+Amount < 0)
+			Amount += abs(Amount)-pAccount->m_PortalBattery;
+		Symbol = '-';
+	}
+
+	char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
+	GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+
+	pAccount->m_PortalBattery += Amount;
+	return true;
+}
+
 void CPlayer::OnLogin()
 {
 	GameServer()->SendChatTarget(m_ClientID, "Successfully logged in");

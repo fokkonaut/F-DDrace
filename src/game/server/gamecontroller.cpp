@@ -366,9 +366,15 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_TELE_RIFLE;
 	}
-	else if (Index == ENTITY_PICKUP_BATTERY)
+	else if (Index == ENTITY_PICKUP_TASER_BATTERY)
 	{
 		Type = POWERUP_BATTERY;
+		SubType = WEAPON_TASER;
+	}
+	else if (Index == ENTITY_PICKUP_PORTAL_BATTERY)
+	{
+		Type = POWERUP_BATTERY;
+		SubType = WEAPON_PORTAL_RIFLE;
 	}
 	else if (Index == ENTITY_CLOCK)
 	{
@@ -468,7 +474,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
 	}
-
+	Config()->m_SvTestingCommands = 1;
 	if(Type != -1)
 	{
 		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number);

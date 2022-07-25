@@ -133,7 +133,7 @@ public:
 	//drops
 	void DropMoney(int64 Amount, int Dir = -3);
 	void DropFlag();
-	void DropWeapon(int WeaponID, bool OnDeath, float Dir = -3);
+	void DropWeapon(int WeaponID, bool OnDeath, float Dir = -3, int Type = POWERUP_WEAPON, int Amount = 1);
 	void DropPickup(int Type, int Amount = 1);
 	void DropLoot(int Weapon);
 
@@ -420,6 +420,7 @@ public:
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
+	int64 m_LastPortalBatteryDrop;
 
 	bool SendDroppedFlagCooldown(int SnappingClient);
 

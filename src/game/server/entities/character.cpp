@@ -497,6 +497,8 @@ void CCharacter::FireWeapon()
 		NumShots = 1;
 	bool Sound = true;
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
 	for (int i = 0; i < NumShots; i++)
 	{
 		float Angle = GetAngle(TempDirection);
@@ -569,7 +571,7 @@ void CCharacter::FireWeapon()
 
 					// police catch gangster
 					if (pTarget->GetPlayer()->m_EscapeTime && !pTarget->GetPlayer()->IsMinigame() && pTarget->m_FreezeTime
-						&& GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PoliceLevel)
+						&& pAccount->m_PoliceLevel)
 					{
 						char aBuf[256];
 						int Minutes = clamp((int)(pTarget->GetPlayer()->m_EscapeTime / Server()->TickSpeed()) / 100, 10, 20);
@@ -900,8 +902,10 @@ void CCharacter::FireWeapon()
 					Found = GetNearestAirPos(PortalPos, m_Pos, &PortalPos);
 
 				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
+				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
 				if (!Found || !PortalPos
+					|| (BatteryRequired && !pAccount->m_PortalBattery)
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
@@ -926,6 +930,12 @@ void CCharacter::FireWeapon()
 							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);
 							m_pPlayer->m_pPortal[PORTAL_SECOND]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_FIRST]);
 							m_LastLinkedPortals = Server()->Tick();
+
+							if (BatteryRequired && m_pPlayer->GetAccID() >= ACC_START)
+							{
+								pAccount->m_PortalBattery--;
+								UpdateWeaponIndicator();
+							}
 						}
 						break;
 					}
@@ -1027,7 +1037,7 @@ void CCharacter::FireWeapon()
 		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		{
 			m_NumGhostShots++;
-			if ((m_pPlayer->m_HasSpookyGhost || GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_SpookyGhost) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
+			if ((m_pPlayer->m_HasSpookyGhost || pAccount->m_SpookyGhost) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
 			{
 				SetSpookyGhost();
 				m_NumGhostShots = 0;
@@ -1051,9 +1061,10 @@ void CCharacter::FireWeapon()
 
 		if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
 		{
-			GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery--;
+			pAccount->m_TaserBattery--;
 			UpdateWeaponIndicator();
 		}
+
 
 		int W = GetSpawnWeaponIndex(GetActiveWeapon());
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
@@ -1132,16 +1143,18 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 			m_aSpawnWeaponActive[W] = false;
 	}
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
 	if (Weapon == WEAPON_TASER && !Remove)
 	{
 		if (!m_aWeapons[WEAPON_LASER].m_Got
 			|| m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
-			|| GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel < 1
+			|| pAccount->m_TaserLevel < 1
 			|| m_pPlayer->IsMinigame())
 			return;
 	}
 
-	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
+	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && pAccount->m_PortalRifle)
 		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
@@ -1153,12 +1166,8 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	if (Weapon == WEAPON_PORTAL_RIFLE)
-	{
-		if (!PortalRifleByAcc)
-			m_CollectedPortalRifle = !Remove;
-		m_LastLinkedPortals = Server()->Tick();
-	}
+	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
+		m_CollectedPortalRifle = !Remove;
 
 	if (Weapon == WEAPON_NINJA)
 	{
@@ -1182,7 +1191,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	}
 
 	if (Weapon == WEAPON_LASER)
-		GiveWeapon(WEAPON_TASER, Remove, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
+		GiveWeapon(WEAPON_TASER, Remove, pAccount->m_TaserBattery);
 }
 
 void CCharacter::GiveAllWeapons()
@@ -3677,6 +3686,7 @@ void CCharacter::FDDraceInit()
 	m_RoomAntiSpamTick = Now;
 
 	m_CollectedPortalRifle = false;
+	m_LastPortalBatteryDrop = 0;
 
 	m_InitializedSpawnWeapons = false;
 	for (int i = 0; i < 3; i++)
@@ -4106,15 +4116,15 @@ void CCharacter::DropFlag()
 	}
 }
 
-void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
+void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int Amount)
 {
 	// Do not drop spawnweapons
 	int W = GetSpawnWeaponIndex(WeaponID);
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || !m_aWeapons[WeaponID].m_Got || m_pPlayer->m_Minigame == MINIGAME_1VS1
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
+	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || (!m_aWeapons[WeaponID].m_Got && Type == POWERUP_WEAPON) || m_pPlayer->m_Minigame == MINIGAME_1VS1
+		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_WEAPON && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
 		return;
 
 	int Count = 0;
@@ -4132,13 +4142,12 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
 	{
-		if (WeaponID == WEAPON_TASER)
-			return; // make sure we dont destroy valuable taser battery drops
+		if (WeaponID == WEAPON_TASER || WeaponID == WEAPON_PORTAL_RIFLE)
+			return; // make sure we dont destroy valuable taser battery drops or portal battery drops
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
 	}
 
 	int Special = GetWeaponSpecial(WeaponID);
-	int Type = POWERUP_WEAPON;
 	int Ammo = GetWeaponAmmo(WeaponID);
 
 	if (WeaponID == WEAPON_TASER)
@@ -4151,6 +4160,14 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 		UpdateWeaponIndicator();
 	}
+	else if (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_BATTERY)
+	{
+		Ammo = Amount;
+		if (!m_pPlayer->GivePortalBattery(-Ammo))
+			return;
+
+		UpdateWeaponIndicator();
+	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, Ammo, Special);
@@ -4158,7 +4175,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 
 	if (Special == 0)
 	{
-		if (WeaponID != WEAPON_TASER)
+		if (Type != POWERUP_BATTERY)
 		{
 			GiveWeapon(WeaponID, true);
 			SetWeapon(WEAPON_GUN);
@@ -4395,26 +4412,30 @@ void CCharacter::UpdateWeaponIndicator()
 		if (GameServer()->m_pHouses[i]->IsInside(m_pPlayer->GetCID()))
 			return;
 
-	char aTaserBattery[16] = "";
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+	char aAmmo[16] = "";
 	if (GetActiveWeapon() == WEAPON_TASER)
-		str_format(aTaserBattery, sizeof(aTaserBattery), " [%d]", GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery);
+		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_TaserBattery);
+	else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE && !pAccount->m_PortalRifle && Config()->m_SvPortalRifleAmmo)
+		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBattery);
 
 	char aBuf[256] = "";
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
 		{
-			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
 		}
 		else
 		{
 			if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
-				str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+				str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
 		}
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aTaserBattery);
+		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
 	}
 
 	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
