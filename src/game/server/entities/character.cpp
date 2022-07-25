@@ -1144,17 +1144,21 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_PortalRifle)
 		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
+	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
+		return;
+
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
 		m_aWeaponsBackupGot[Weapon][i] = !Remove;
 		m_aWeaponsBackup[Weapon][i] = Ammo;
 	}
 
-	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
-		return;
-
-	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
-		m_CollectedPortalRifle = !Remove;
+	if (Weapon == WEAPON_PORTAL_RIFLE)
+	{
+		if (!PortalRifleByAcc)
+			m_CollectedPortalRifle = !Remove;
+		m_LastLinkedPortals = Server()->Tick();
+	}
 
 	if (Weapon == WEAPON_NINJA)
 	{
