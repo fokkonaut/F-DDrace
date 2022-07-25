@@ -5235,6 +5235,7 @@ int CGameContext::AddAccount()
 	Account.m_Flags = 0;
 	Account.m_aEmail[0] = '\0';
 	Account.m_aDesign[0] = '\0';
+	Account.m_PortalBattery = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
