@@ -1329,17 +1329,14 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	else
 		pSelf->SendChatTarget(pResult->m_ClientID, "VIP: not bought");
 
-	if (pSelf->Config()->m_SvPortalRifleShop)
+	if (pAccount->m_PortalRifle)
 	{
-		if (pAccount->m_PortalRifle)
-		{
-			tmp = pAccount->m_ExpireDatePortalRifle;
-			str_format(aBuf, sizeof(aBuf), "Portal Rifle: until %s", pSelf->GetDate(tmp));
-			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-		}
-		else
-			pSelf->SendChatTarget(pResult->m_ClientID, "Portal Rifle: not bought");
+		tmp = pAccount->m_ExpireDatePortalRifle;
+		str_format(aBuf, sizeof(aBuf), "Portal Rifle: until %s", pSelf->GetDate(tmp));
+		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
+	else if (pSelf->Config()->m_SvPortalRifleShop)
+		pSelf->SendChatTarget(pResult->m_ClientID, "Portal Rifle: not bought");
 
 	str_format(aBuf, sizeof(aBuf), "Contact: %s", pAccount->m_aContact);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
