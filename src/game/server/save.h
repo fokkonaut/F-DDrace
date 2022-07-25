@@ -151,6 +151,7 @@ private:
 	int m_KillStreak;
 	int m_MaxJumps;
 	int m_CarriedFlag;
+	int m_CollectedPortalRifle;
 
 	// core
 	int m_SpinBot;
