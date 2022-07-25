@@ -34,7 +34,7 @@ private:
 	void Move();
 	vec2 m_Core;
 	int m_ID2;
-	int64 m_aLastBatteryMsg[MAX_CLIENTS];
+	int64 m_aLastRespawnMsg[MAX_CLIENTS];
 
 	struct
 	{
