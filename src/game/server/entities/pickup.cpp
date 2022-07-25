@@ -208,6 +208,8 @@ void CPickup::Tick()
 					{
 						if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
 							break;
+						if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo && GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID()))
+							break;
 
 						pChr->WeaponMoneyReward(m_Subtype);
 						if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (pChr->GetWeaponAmmo(m_Subtype) < 10 || !pChr->GetWeaponGot(m_Subtype)))
