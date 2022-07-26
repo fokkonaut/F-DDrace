@@ -295,7 +295,7 @@ void CPickup::Tick()
 			{
 				int ClientID = pChr->GetPlayer()->GetCID();
 				if (m_aLastRespawnMsg[ClientID] + Server()->TickSpeed() * 5 > Server()->Tick())
-					return;
+					continue;
 
 				m_aLastRespawnMsg[ClientID] = Server()->Tick();
 
@@ -306,7 +306,7 @@ void CPickup::Tick()
 					pType = "portal rifle";
 
 				if (!pType[0])
-					return;
+					continue;
 
 				char aBuf[64] = "";
 				int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
@@ -315,7 +315,7 @@ void CPickup::Tick()
 				else
 					str_format(aBuf, sizeof(aBuf), "This %s will respawn in %d minutes", pType, Seconds / 60);
 				GameServer()->SendChatTarget(ClientID, aBuf);
-				return;
+				continue;
 			}
 		}
 	}
