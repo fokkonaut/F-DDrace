@@ -901,7 +901,7 @@ void CCharacter::FireWeapon()
 				if (GameServer()->Collision()->TestBox(PortalPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 					Found = GetNearestAirPos(PortalPos, m_Pos, &PortalPos);
 
-				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START;
+				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START && Config()->m_SvPortalThroughDoor;
 				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
 				if (!Found || !PortalPos

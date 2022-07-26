@@ -228,6 +228,7 @@ MACRO_CONFIG_INT(SvPortalMaxDistance, sv_portal_max_distance, 750, 50, 1000, CFG
 MACRO_CONFIG_INT(SvPortalRifleShop, sv_portal_rifle_shop, 1, 0, 1, CFGFLAG_SERVER, "Whether portal rifle is in shop", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalRifleAmmo, sv_portal_rifle_ammo, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether portal rifle entity respawns after x minutes and portal requires ammo", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalRifleRespawnTime, sv_portal_rifle_respawn_time, 15, 1, 999, CFGFLAG_SERVER, "Time in minutes a portal rifle respawns after pickup", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortalThroughDoor, sv_portal_through_door, 1, 0, 1, CFGFLAG_SERVER, "Whether portal rilfe can be used through a closed door (outside of plot only)", AUTHED_ADMIN)
 
 // draw editor
 MACRO_CONFIG_INT(SvMaxObjectsPlotSmall, sv_max_objects_plot_small, 50, 0, 150, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed within a small plot", AUTHED_ADMIN)
