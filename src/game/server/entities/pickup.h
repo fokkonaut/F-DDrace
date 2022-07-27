@@ -28,6 +28,7 @@ private:
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;
+	int m_PickupTick;
 
 	// F-DDrace
 	int m_Owner;

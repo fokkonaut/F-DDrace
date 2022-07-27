@@ -29,6 +29,8 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastRespawnMsg[i] = 0;
 
+	m_PickupTick = -1;
+
 	Reset();
 
 	m_ID2 = Server()->SnapNewID();
@@ -285,6 +287,7 @@ void CPickup::Tick()
 						pChr->GetPlayer()->GetCID(), Server()->ClientName(pChr->GetPlayer()->GetCID()), m_Type, m_Subtype);
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+					m_PickupTick = Server()->Tick();
 					SetRespawnTime();
 				}
 			}
@@ -299,21 +302,42 @@ void CPickup::Tick()
 
 				m_aLastRespawnMsg[ClientID] = Server()->Tick();
 
+				bool RespawnTimer = true;
 				const char *pType = "";
 				if (m_Type == POWERUP_BATTERY)
+				{
 					pType = "battery";
+					RespawnTimer = m_Subtype != WEAPON_PORTAL_RIFLE;
+				}
 				else if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo)
+				{
 					pType = "portal rifle";
+				}
 
 				if (!pType[0])
 					continue;
 
 				char aBuf[64] = "";
-				int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
-				if (Seconds <= 60)
-					str_format(aBuf, sizeof(aBuf), "This %s will respawn in %d seconds", pType, Seconds);
+				if (RespawnTimer)
+				{
+					int Seconds = (m_SpawnTick - Server()->Tick()) / Server()->TickSpeed();
+					if (Seconds <= 60)
+						str_format(aBuf, sizeof(aBuf), "This %s will respawn in %d seconds", pType, Seconds);
+					else
+						str_format(aBuf, sizeof(aBuf), "This %s will respawn in %d minutes", pType, Seconds / 60);
+				}
 				else
-					str_format(aBuf, sizeof(aBuf), "This %s will respawn in %d minutes", pType, Seconds / 60);
+				{
+					if (m_PickupTick != -1)
+					{
+						int Seconds = (Server()->Tick() - m_PickupTick) / Server()->TickSpeed();
+						str_format(aBuf, sizeof(aBuf), "This %s got picked up %d minutes ago", pType, Seconds / 60);
+					}
+					else
+					{
+						str_format(aBuf, sizeof(aBuf), "This %s did not spawn yet", pType);
+					}
+				}
 				GameServer()->SendChatTarget(ClientID, aBuf);
 				continue;
 			}
