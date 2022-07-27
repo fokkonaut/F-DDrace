@@ -331,7 +331,10 @@ void CPickup::Tick()
 					if (m_PickupTick != -1)
 					{
 						int Seconds = (Server()->Tick() - m_PickupTick) / Server()->TickSpeed();
-						str_format(aBuf, sizeof(aBuf), "This %s got picked up %d minutes ago", pType, Seconds / 60);
+						if (Seconds <= 60)
+							str_format(aBuf, sizeof(aBuf), "This %s got picked up %d seconds ago", pType, Seconds);
+						else
+							str_format(aBuf, sizeof(aBuf), "This %s got picked up %d minutes ago", pType, Seconds / 60);
 					}
 					else
 					{
