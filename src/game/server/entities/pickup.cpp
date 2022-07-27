@@ -29,7 +29,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastRespawnMsg[i] = 0;
 
-	m_PickupTick = -1;
+	m_PickupTick = 0;
 
 	Reset();
 
@@ -328,18 +328,11 @@ void CPickup::Tick()
 				}
 				else
 				{
-					if (m_PickupTick != -1)
-					{
-						int Seconds = (Server()->Tick() - m_PickupTick) / Server()->TickSpeed();
-						if (Seconds <= 60)
-							str_format(aBuf, sizeof(aBuf), "This %s got picked up %d seconds ago", pType, Seconds);
-						else
-							str_format(aBuf, sizeof(aBuf), "This %s got picked up %d minutes ago", pType, Seconds / 60);
-					}
+					int Seconds = (Server()->Tick() - m_PickupTick) / Server()->TickSpeed();
+					if (Seconds <= 60)
+						str_format(aBuf, sizeof(aBuf), "This %s got picked up %d seconds ago", pType, Seconds);
 					else
-					{
-						str_format(aBuf, sizeof(aBuf), "This %s did not spawn yet", pType);
-					}
+						str_format(aBuf, sizeof(aBuf), "This %s got picked up %d minutes ago", pType, Seconds / 60);
 				}
 				GameServer()->SendChatTarget(ClientID, aBuf);
 				continue;
