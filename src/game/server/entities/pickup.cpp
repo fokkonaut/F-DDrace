@@ -116,7 +116,7 @@ void CPickup::Tick()
 			// respawn
 			m_SpawnTick = -1;
 
-			if(m_Type == POWERUP_WEAPON)
+			if(m_Type == POWERUP_WEAPON || m_Type == POWERUP_BATTERY)
 				GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
 		}
 		else if (m_Type != POWERUP_BATTERY && (m_Subtype != WEAPON_PORTAL_RIFLE || !Config()->m_SvPortalRifleAmmo))
