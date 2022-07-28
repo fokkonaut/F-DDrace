@@ -62,6 +62,8 @@ MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
 MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of hammering (when hitting another tee)")
 
+#define NUM_DDNET_TUNES 44
+
 // when adding a new tune here, make sure to update CCharacter::GetFireDelay(int)
 
 MACRO_TUNING_PARAM(TaserFireDelay, taser_fire_delay, 800, "Delay of firing taser")

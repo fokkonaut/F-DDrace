@@ -1059,6 +1059,9 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	unsigned int last = sizeof(m_Tuning) / sizeof(int);
 	for (unsigned i = 0; i < last; i++)
 	{
+		if (i >= NUM_DDNET_TUNES)
+			break;
+
 		if(i == 30 && Server()->IsSevendown(ClientID)) // laser damage
 			Msg.AddInt(500); // 5 is default value
 		Msg.AddInt(pParams[i]);
