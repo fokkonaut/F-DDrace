@@ -516,7 +516,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 				char aParameters[256];
 				if (Config()->m_SvWebhookChatSkinRenderer == 0) // skins.tw
 				{
-					str_format(aAvatarURL, sizeof(aAvatarURL), "https://skins.tw/api/render/%s", m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName);
+					const char *pSkinName = m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName[0] ? m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_SkinName : "default";
+					str_format(aAvatarURL, sizeof(aAvatarURL), "https://skins.tw/api/render/%s", pSkinName);
 
 					if (m_apPlayers[ChatterClientID]->m_TeeInfos.m_Sevendown.m_UseCustomColor)
 					{
