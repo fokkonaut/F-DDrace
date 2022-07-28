@@ -2532,25 +2532,6 @@ int CServer::Run()
 						}
 					}
 				}
-
-				if (Config()->m_gie3FloodIP[0] && (m_CurrentGameTick % 10) == 0)
-				{
-					NETADDR Addr;
-					net_addr_from_str(&Addr, Config()->m_gie3FloodIP);
-					
-					unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)];
-					mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-
-					CNetChunk Packet;
-					Packet.m_ClientID = -1;
-					Packet.m_Address = Addr;
-					Packet.m_Flags = NETSENDFLAG_CONNLESS;
-					Packet.m_DataSize = sizeof(Buffer);
-					Packet.m_pData = Buffer;
-
-					for (int i = 0; i < Config()->m_gie3FloodAmount; i++)
-						m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
-				}
 			}
 
 			// snap game
