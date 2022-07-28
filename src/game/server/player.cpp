@@ -2176,6 +2176,12 @@ bool CPlayer::RequestMinigameChange(int RequestedMinigame)
 	if (RequestedMinigame == m_RequestedMinigame)
 		return false; // only return false here, to actually join the minigame
 
+	if (m_EscapeTime)
+	{
+		GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being searched by the police");
+		return true;
+	}
+
 	if (m_JailTime)
 	{
 		GameServer()->SendChatTarget(m_ClientID, "You can't join a minigame while being arrested");
