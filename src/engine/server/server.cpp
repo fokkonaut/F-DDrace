@@ -3468,7 +3468,11 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 		if (str_length(pLine))
 			if (pLine[0] != '#')
 				v.push_back(pLine);
-	if (v.size() == 1)
+	if (Lines.empty())
+	{
+		return 0;
+	}
+	else if (Lines.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
@@ -3481,8 +3485,9 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 	{
 		unsigned Rand;
 		do
+		{
 			Rand = rand() % v.size();
-		while (Rand == m_AnnouncementLastLine);
+		} while (Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
 	}
