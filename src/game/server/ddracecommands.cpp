@@ -249,18 +249,14 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		}
 		if (Weapon == -2 || Weapon == -3)
 		{
-			pChr->GiveWeapon(WEAPON_HEART_GUN, Remove, Amount);
-			pChr->GiveWeapon(WEAPON_PLASMA_RIFLE, Remove, Amount);
-			pChr->GiveWeapon(WEAPON_STRAIGHT_GRENADE, Remove, Amount);
-			pChr->GiveWeapon(WEAPON_TELEKINESIS, Remove);
-			pChr->GiveWeapon(WEAPON_LIGHTSABER, Remove);
-			pChr->GiveWeapon(WEAPON_PORTAL_RIFLE, Remove, Amount);
-			pChr->GiveWeapon(WEAPON_PROJECTILE_RIFLE, Remove, Amount);
-			pChr->GiveWeapon(WEAPON_BALL_GRENADE, Remove, Amount);
-
 			for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
+			{
+				if (i != WEAPON_TASER && i != WEAPON_DRAW_EDITOR)
+					pChr->GiveWeapon(i, Remove, Amount);
+
 				if (pChr->m_aSpreadWeapon[i] != Spread)
 					pChr->SpreadWeapon(i, Spread, pResult->m_ClientID);
+			}
 		}
 	}
 	else
