@@ -78,7 +78,7 @@ protected:
 		enum
 		{
 			EXPIRES_NEVER=-1,
-			REASON_LENGTH=64,
+			REASON_LENGTH=128,
 		};
 		int m_Expires;
 		int m_LastInfoQuery;
