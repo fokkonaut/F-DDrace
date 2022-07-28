@@ -126,18 +126,15 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// F-DDrace
-		// this is the ddnet/0.6 way of setting up the angle
-		float a = 0;
-		if(m_Input.m_TargetX == 0)
-			a = atanf((float)m_Input.m_TargetY);
+		float tmp_angle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		if(tmp_angle < -(pi / 2.0f))
+		{
+			m_Angle = (int)((tmp_angle + (2.0f * pi)) * 256.0f);
+		}
 		else
-			a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
-
-		if(m_Input.m_TargetX < 0)
-			a = a + pi;
-
-		m_AngleSevendown = (int)(a * 256.0f); // sevendown way for setting up angle causes jumpyness for 0.7 clients, but when looking upward. thats why we send angles individually
-		m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
+		{
+			m_Angle = (int)(tmp_angle * 256.0f);
+		}
 
 		// Special jump cases:
 		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set

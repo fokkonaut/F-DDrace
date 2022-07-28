@@ -2164,8 +2164,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if(Server()->IsSevendown(SnappingClient))
 	{
-		pCharacter->m_Angle = Core()->m_AngleSevendown;
-
 		int PlayerFlags = 0;
 		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_CHATTING) PlayerFlags |= 4;
 		if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) PlayerFlags |= 8;
@@ -2186,6 +2184,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		((int*)pCharacter)[Offset+4] = Weapon;
 		((int*)pCharacter)[Offset+5] = Emote;
 		((int*)pCharacter)[Offset+6] = AttackTick;
+	}
+	else
+	{
+		if(pCharacter->m_Angle > (int)(pi * 256.0f))
+		{
+			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
+		}
 	}
 }
 
