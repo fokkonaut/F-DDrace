@@ -190,6 +190,10 @@ void CAdvancedEntity::HandleTiles(int Index)
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
 
 	// teleporters
+	int tcp = GameServer()->Collision()->IsTCheckpoint(MapIndex);
+	if (tcp)
+		m_TeleCheckpoint = tcp;
+
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	if (z && Controller->m_TeleOuts[z - 1].size())
 	{
