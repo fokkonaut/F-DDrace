@@ -1693,6 +1693,9 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 	int Victim = !pResult->NumArguments() ? pResult->m_ClientID : pResult->GetVictim();
 	int Hours = pResult->NumArguments() >= 2 ? pResult->GetInteger(1) : 6;
 	const char *pReason = pResult->NumArguments() == 3 ? pResult->GetString(2) : "automatic kick due to save drop";
+	int Dummy = pSelf->Server()->GetDummy(Victim);
+	if (Dummy != -1)
+		pSelf->SaveDrop(Dummy, Hours, pReason);
 	pSelf->SaveDrop(Victim, Hours, pReason);
 }
 
