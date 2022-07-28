@@ -370,7 +370,11 @@ Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker, bool SevendownOn
 	Mask128 Mask = CmaskNone();
 
 	if(Team == TEAM_SUPER)
-		return CmaskAll();
+	{
+		if (ExceptID == -1)
+			return CmaskAll();
+		return CmaskAllExceptOne(ExceptID);
+	}
 
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
