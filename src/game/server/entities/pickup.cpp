@@ -134,7 +134,7 @@ void CPickup::Tick()
 
 		// avoid affecting players through a wall when pickups on plots are placed at the edge of the wall without position rounding
 		// also means pickups placed right next to the plot door are not pickable by someone that might be close enough to the pickup because they are not on the same plotid
-		if (m_PlotID >= PLOT_START && pChr->GetCurrentTilePlotID() != m_PlotID)
+		if (m_PlotID >= PLOT_START && pChr->GetCurrentTilePlotID(true) != m_PlotID)
 			continue;
 
 		if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
