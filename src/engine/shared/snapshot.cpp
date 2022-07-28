@@ -25,8 +25,8 @@ static int ObjTypeToSevendown(int Seven)
 		Type = Seven - 3;
 	else if(Seven == NETEVENTTYPE_SOUNDWORLD)
 		Type = Seven - 2;
-	else if(Seven >= NUM_NETMSGTYPES)
-		Type = Seven - NUM_NETMSGTYPES;
+	else if(Seven >= NUM_NETOBJTYPES)
+		Type = Seven - NUM_NETOBJTYPES;
 	else // NETEVENTTYPE_DAMAGE is missing, because we manually send damage indicators to 0.6 clients, so we just drop the packet for 0.7 clients
 		return -1;
 	return Type;

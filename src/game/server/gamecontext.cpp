@@ -224,7 +224,7 @@ void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount,
 	for(int i = 0; i < SevendownAmount; i++)
 	{
 		float f = mix(s, e, float(i+1)/float(SevendownAmount+2));
-		int *pEvent = (int*)m_Events.Create(20 + NUM_NETMSGTYPES, 3*4, Mask);
+		int *pEvent = (int*)m_Events.Create(20 + NUM_NETOBJTYPES, 3*4, Mask);
 		if(pEvent)
 		{
 			((int*)pEvent)[0] = (int)Pos.x;
@@ -6006,7 +6006,16 @@ void CGameContext::CreateSoundGlobal(int Sound)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (m_apPlayers[i])
-			CreateSoundPlayer(Sound, i);
+		{
+			if (Server()->IsSevendown(i))
+			{
+				CMsgPacker Msg(5 + NUM_NETMSGTYPES); // NETMSGTYPE_SV_SOUNDGLOBAL
+				Msg.AddInt(Sound);
+				Server()->SendMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+			}
+			else
+				CreateSoundPlayer(Sound, i);
+		}
 }
 
 void CGameContext::CreateSoundPlayer(int Sound, int ClientID)
