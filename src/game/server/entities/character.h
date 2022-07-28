@@ -107,6 +107,7 @@ public:
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void ResetInput();
+	bool IsIdle();
 	void FireWeapon();
 
 	void Die(int Weapon = WEAPON_SELF, bool UpdateTeeControl = true, bool OnArenaDie = true);

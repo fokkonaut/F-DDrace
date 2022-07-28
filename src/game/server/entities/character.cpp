@@ -1323,6 +1323,11 @@ void CCharacter::ResetInput()
 	m_LatestPrevInput = m_LatestInput = m_Input;
 }
 
+bool CCharacter::IsIdle()
+{
+	return !m_SavedInput.m_Direction && !m_SavedInput.m_Hook && !m_SavedInput.m_Jump && !(m_SavedInput.m_Fire&1);
+}
+
 void CCharacter::Tick()
 {
 	if(m_Paused)

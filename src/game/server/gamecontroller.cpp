@@ -624,7 +624,7 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG_ALLOW_EYE_WHEEL
 		| GAMEINFOFLAG_ALLOW_HOOK_COLL
 		| GAMEINFOFLAG_BUG_DDRACE_GHOST
-		//| GAMEINFOFLAG_BUG_DDRACE_INPUT // dont send this because otherwise client cant use controls in specmode for click spectate or arena building
+		| GAMEINFOFLAG_BUG_DDRACE_INPUT
 		| GAMEINFOFLAG_PREDICT_DDRACE
 		| GAMEINFOFLAG_PREDICT_DDRACE_TILES
 		| GAMEINFOFLAG_ENTITIES_DDNET
@@ -648,8 +648,16 @@ void IGameController::Snap(int SnappingClient)
 	else // fng, survival
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
 
+	// allow inputs for arena placing while in spec, or for click to spectate in spectators
+	if (GameServer()->Arenas()->IsConfiguring(SnappingClient) || pSnap->GetTeam() == TEAM_SPECTATORS)
+		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_BUG_DDRACE_INPUT;
+
 	if (!pSnappingChar)
 		return;
+
+	// only allow click to spectate if the tee has no input applied while pausing, because otherwise it would have unexpected hook releases after resuming because this flag resets inputs
+	if (pSnap->IsPaused() && pSnappingChar->IsIdle())
+		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_BUG_DDRACE_INPUT;
 
 	if (pSnappingChar->GetWeaponAmmo(pSnappingChar->GetActiveWeapon()) == -1)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
