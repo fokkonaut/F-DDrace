@@ -269,7 +269,7 @@ void CDrawEditor::Tick()
 	m_PrevInput = m_Input;
 	m_PrevPlotID = PlotID;
 
-	if (Active() && Server()->Tick() % Server()->TickSpeed() == 0)
+	if (Server()->Tick() % Server()->TickSpeed() == 0)
 	{
 		// if you have a plot and if you are in your own plot dont show object counts of free draw or nearby plots
 		if (PlotID < PLOT_START || PlotID != GetPlotID())
