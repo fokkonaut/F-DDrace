@@ -86,7 +86,6 @@ CHAT_COMMAND("zoomcursor", "?i['0'|'1']", CFGFLAG_CHAT, ConZoomCursor, this, "Wh
 
 //other
 CHAT_COMMAND("resumemoved", "?i['0'|'1']", CFGFLAG_CHAT, ConResumeMoved, this, "Whether to resume from pause when someone moved your tee (off by default), optional i = 0 for off else for on", AUTHED_NO)
-CHAT_COMMAND("weapon", "i[weapon]", CFGFLAG_CHAT, ConWeapon, this, "Sets active weapon", AUTHED_NO)
 CHAT_COMMAND("mute", "r[playername]", CFGFLAG_CHAT, ConMutePlayer, this, "Mutes player r until disconnect", AUTHED_NO)
 CHAT_COMMAND("design", "?s[name]", CFGFLAG_CHAT, ConDesign, this, "Changes map design or shows a list of available designs", AUTHED_NO)
 CHAT_COMMAND("language", "?s[language]", CFGFLAG_CHAT, ConLanguage, this, "Changes language or shows a list of availables languages", AUTHED_NO)
