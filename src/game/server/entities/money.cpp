@@ -112,7 +112,7 @@ void CMoney::Snap(int SnappingClient)
 
 	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
-
+	Config()->m_SvTestingCommands = 1;
 	CNetObj_Projectile *pBullet = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(!pBullet)
 		return;

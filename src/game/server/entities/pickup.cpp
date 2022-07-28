@@ -446,7 +446,7 @@ void CPickup::Snap(int SnappingClient)
 		pShotgunBullet->m_X = round_to_int(m_Pos.x);
 		pShotgunBullet->m_Y = round_to_int(m_Pos.y - 30);
 		pShotgunBullet->m_Type = WEAPON_SHOTGUN;
-		pShotgunBullet->m_StartTick = Server()->Tick();
+		pShotgunBullet->m_StartTick = 0;
 	}
 	else if (Plasma)
 	{
@@ -479,7 +479,7 @@ void CPickup::Snap(int SnappingClient)
 
 		pProj->m_X = round_to_int(m_Pos.x);
 		pProj->m_Y = round_to_int(m_Pos.y - 30);
-		pProj->m_StartTick = Server()->Tick();
+		pProj->m_StartTick = Server()->Tick() - 2;
 		pProj->m_Type = WEAPON_GRENADE;
 	}
 }

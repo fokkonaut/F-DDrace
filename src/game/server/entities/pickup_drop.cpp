@@ -279,7 +279,7 @@ void CPickupDrop::Snap(int SnappingClient)
 			pSpreadIndicator->m_X = (int)m_Pos.x + SpreadOffset;
 			pSpreadIndicator->m_Y = (int)m_Pos.y - 30;
 			pSpreadIndicator->m_Type = WEAPON_SHOTGUN;
-			pSpreadIndicator->m_StartTick = Server()->Tick();
+			pSpreadIndicator->m_StartTick = 0;
 
 			SpreadOffset += 20;
 		}
@@ -294,7 +294,7 @@ void CPickupDrop::Snap(int SnappingClient)
 		pShotgunBullet->m_X = (int)m_Pos.x;
 		pShotgunBullet->m_Y = (int)m_Pos.y - ExtraBulletOffset;
 		pShotgunBullet->m_Type = WEAPON_SHOTGUN;
-		pShotgunBullet->m_StartTick = Server()->Tick();
+		pShotgunBullet->m_StartTick = 0;
 	}
 	else if (Plasma)
 	{
@@ -327,7 +327,7 @@ void CPickupDrop::Snap(int SnappingClient)
 
 		pProj->m_X = (int)m_Pos.x;
 		pProj->m_Y = (int)m_Pos.y - ExtraBulletOffset;
-		pProj->m_StartTick = Server()->Tick();
+		pProj->m_StartTick = Server()->Tick() - 2;
 		pProj->m_Type = WEAPON_GRENADE;
 	}
 }
