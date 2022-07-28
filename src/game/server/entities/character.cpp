@@ -909,7 +909,7 @@ void CCharacter::FireWeapon()
 					|| GameLayerClipped(PortalPos)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
-					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false) // dont allow to place portals too close to other tees
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false, true) // dont allow to place portals too close to other tees
 					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
