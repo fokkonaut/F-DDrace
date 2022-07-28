@@ -3468,11 +3468,11 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 		if (str_length(pLine))
 			if (pLine[0] != '#')
 				v.push_back(pLine);
-	if (Lines.empty())
+	if (v.empty())
 	{
 		return 0;
 	}
-	else if (Lines.size() == 1)
+	else if (v.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
