@@ -2751,7 +2751,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				aDummy[0] = '\0';
 				int Dummy = pThis->GetDummy(i);
 				if (Dummy != -1)
-					str_format(aDummy, sizeof(aDummy), " dummy=%d:'%s'", Dummy, pThis->ClientName(Dummy));
+					str_format(aDummy, sizeof(aDummy), " %s=%d:'%s'", pThis->m_aClients[i].m_Main ? "dummy" : "main", Dummy, pThis->ClientName(Dummy));
 
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> client=%s sevendown=%d socket=%d name='%s' score=%d%s%s", i, aAddrStr,
 						pThis->GetClientVersionStr(i), (int)pThis->m_aClients[i].m_Sevendown, pThis->m_aClients[i].m_Socket, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score, aDummy, aAuthStr);
