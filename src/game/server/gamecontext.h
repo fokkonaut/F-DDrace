@@ -651,6 +651,7 @@ public:
 	bool IsLocal(int CientID1, int ClientID2);
 	bool CanReceiveMessage(int Sender, int Receiver);
 	bool IsMuted(int Sender, int Receiver);
+	bool LineShouldHighlight(const char *pLine, const char *pName);
 
 	vec2 RoundPos(vec2 Pos);
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);

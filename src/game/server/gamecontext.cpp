@@ -2083,10 +2083,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
-						if (!m_apPlayers[i] || !Server()->GetAuthedState(i))
+						const char *pName = Server()->ClientName(i);
+						if (!m_apPlayers[i] || !Server()->GetAuthedState(i) || !LineShouldHighlight(pMsg->m_pMessage, pName))
 							continue;
 
-						const char *pName = Server()->ClientName(i);
 						while(1)
 						{
 							const char *pHaystack = str_find_nocase(pMsg->m_pMessage, pName);
@@ -2151,7 +2151,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					char aLocalNames[256] = "";
 					for (int i = 0; i < MAX_CLIENTS; i++)
 					{
-						if (m_apPlayers[i] && str_find_nocase(pMsg->m_pMessage, Server()->ClientName(i)) && (!CanReceiveMessage(ClientID, i) || !CanReceiveMessage(i, ClientID)))
+						if (m_apPlayers[i] && LineShouldHighlight(pMsg->m_pMessage, Server()->ClientName(i)) && (!CanReceiveMessage(ClientID, i) || !CanReceiveMessage(i, ClientID)))
 						{
 							char aBuf[128];
 							str_format(aBuf, sizeof(aBuf), "%s%s", aLocalNames[0] ? ", " : "", Server()->ClientName(i));
@@ -6046,6 +6046,18 @@ bool CGameContext::CanReceiveMessage(int Sender, int Receiver)
 bool CGameContext::IsMuted(int Sender, int Receiver)
 {
 	return m_apPlayers[Receiver] && Sender >= 0 && m_apPlayers[Receiver]->m_aMuted[Sender];
+}
+
+bool CGameContext::LineShouldHighlight(const char *pLine, const char *pName)
+{
+	const char *pHL = str_utf8_find_nocase(pLine, pName);
+	if (pHL)
+	{
+		int Length = str_length(pName);
+		if(Length > 0 && (pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+			return true;
+	}
+	return false;
 }
 
 void CGameContext::SendChatPolice(const char *pMessage)
