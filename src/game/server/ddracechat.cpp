@@ -1458,7 +1458,7 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to some extras. They can use following commands:");
-	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail, spreadgun, spinbot, aimclosest");
+	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail, spreadgun");
 	pSelf->SendChatTarget(pResult->m_ClientID, "You can use '/room' to invite other players to the room.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money more per second.");
 }
@@ -3130,38 +3130,4 @@ void CGameContext::ConSpreadGunVIP(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->SpreadWeapon(WEAPON_GUN, !pChr->m_aSpreadWeapon[WEAPON_GUN], pResult->m_ClientID);
-}
-
-void CGameContext::ConAimClosestVIP(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext* pSelf = (CGameContext*)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (!pChr)
-		return;
-
-	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
-		return;
-	}
-
-	pChr->AimClosest(!pChr->Core()->m_AimClosest, pResult->m_ClientID);
-}
-
-void CGameContext::ConSpinBotVIP(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext* pSelf = (CGameContext*)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (!pChr)
-		return;
-
-	if (!pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
-		return;
-	}
-
-	pChr->SpinBot(!pChr->Core()->m_SpinBot, pResult->m_ClientID);
 }

@@ -181,10 +181,6 @@ CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleLaser
 
 CONSOLE_COMMAND("doorhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConDoorHammer, this, "Gives a door hammer to player v", AUTHED_ADMIN)
 
-CONSOLE_COMMAND("spinbot", "?v[id]", CFGFLAG_SERVER, ConSpinBot, this, "Gives spinbot to player v", AUTHED_ADMIN)
-CONSOLE_COMMAND("spinbotspeed", "?v[id] ?i[speed]", CFGFLAG_SERVER, ConSpinBotSpeed, this, "Sets the spinbot speed i for player v", AUTHED_ADMIN)
-CONSOLE_COMMAND("aimclosest", "?v[id]", CFGFLAG_SERVER, ConAimClosest, this, "Makes player v aim to the closest tee", AUTHED_ADMIN)
-
 //account
 CONSOLE_COMMAND("acc_logout_port", "i[port]", CFGFLAG_SERVER, ConAccLogoutPort, this, "Logs out all accounts with last port i", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_logout", "s[username]", CFGFLAG_SERVER, ConAccLogout, this, "Logs out account s", AUTHED_ADMIN)

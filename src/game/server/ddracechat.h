@@ -117,6 +117,4 @@ CHAT_COMMAND("bloody", "", CFGFLAG_CHAT, ConBloodyVIP, this, "Toggles bloody for
 CHAT_COMMAND("atom", "", CFGFLAG_CHAT, ConAtomVIP, this, "Toggles atom for yourself", AUTHED_NO)
 CHAT_COMMAND("trail", "", CFGFLAG_CHAT, ConTrailVIP, this, "Toggles trail for yourself", AUTHED_NO)
 CHAT_COMMAND("spreadgun", "", CFGFLAG_CHAT, ConSpreadGunVIP, this, "Toggles spread gun for yourself", AUTHED_NO)
-CHAT_COMMAND("spinbot", "", CFGFLAG_CHAT, ConSpinBotVIP, this, "Toggles spinbot for yourself", AUTHED_NO)
-CHAT_COMMAND("aimclosest", "", CFGFLAG_CHAT, ConAimClosestVIP, this, "Toggles aimclosest for yourself", AUTHED_NO)
 #undef CHAT_COMMAND

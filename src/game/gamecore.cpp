@@ -92,13 +92,6 @@ void CCharacterCore::Reset()
 	m_Killer.m_Weapon = -1;
 	m_MoveRestrictionExtra.m_CanEnterRoom = false;
 	m_FakeTuneCID = -1;
-
-	m_SpinBot = false;
-	m_SpinBotSpeed = 50;
-	m_SpinBotAngle = 0;
-	m_AimClosest = false;
-	m_AimClosestPos = vec2(0, 0);
-	m_UpdateAngle = 0;
 	m_FightStarted = false;
 }
 
@@ -133,35 +126,18 @@ void CCharacterCore::Tick(bool UseInput)
 		m_Direction = m_Input.m_Direction;
 
 		// F-DDrace
-		if (!m_UpdateAngle && (m_SpinBot || m_AimClosest))
-		{
-			if (m_SpinBot)
-			{
-				m_Angle = m_SpinBotAngle;
-				m_SpinBotAngle += m_SpinBotSpeed;
-			}
-			else if (m_AimClosest)
-				m_Angle = (int)(angle(vec2(m_AimClosestPos.x - m_Pos.x, m_AimClosestPos.y - m_Pos.y)) * 256.0f);
-			m_AngleSevendown = m_Angle;
-		}
+		// this is the ddnet/0.6 way of setting up the angle
+		float a = 0;
+		if(m_Input.m_TargetX == 0)
+			a = atanf((float)m_Input.m_TargetY);
 		else
-		{
-			// this is the ddnet/0.6 way of setting up the angle
-			float a = 0;
-			if(m_Input.m_TargetX == 0)
-				a = atanf((float)m_Input.m_TargetY);
-			else
-				a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
+			a = atanf((float)m_Input.m_TargetY / (float)m_Input.m_TargetX);
 
-			if(m_Input.m_TargetX < 0)
-				a = a + pi;
+		if(m_Input.m_TargetX < 0)
+			a = a + pi;
 
-			m_AngleSevendown = (int)(a * 256.0f); // sevendown way for setting up angle causes jumpyness for 0.7 clients, but when looking upward. thats why we send angles individually
-			m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
-		}
-
-		if (m_UpdateAngle)
-			m_UpdateAngle--;
+		m_AngleSevendown = (int)(a * 256.0f); // sevendown way for setting up angle causes jumpyness for 0.7 clients, but when looking upward. thats why we send angles individually
+		m_Angle = (int)(angle(vec2(m_Input.m_TargetX, m_Input.m_TargetY))*256.0f); // causes jumpyness when aiming perfectly left for other ddnet clients (angle -803 to +804)
 
 		// Special jump cases:
 		// m_Jumps == -1: A tee may only make one ground jump. Second jumped bit is always set
@@ -213,10 +189,6 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookedPlayer = -1;
 				m_HookTick = 0;
 				//m_TriggeredEvents |= COREEVENTFLAG_HOOK_LAUNCH;
-
-				// F-DDrace
-				// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
-				m_UpdateAngle = UPDATE_ANGLE_TIME;
 			}
 		}
 		else

@@ -6896,10 +6896,6 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Always Tele Weapon";
 	case DOOR_HAMMER:
 		return "Door Hammer";
-	case AIM_CLOSEST:
-		return "Aim Closest";
-	case SPIN_BOT:
-		return "Spin Bot";
 	case TEE_CONTROL:
 		return "Tee Control";
 	}

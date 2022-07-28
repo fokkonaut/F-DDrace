@@ -871,8 +871,6 @@ private:
 	static void ConAtomVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConTrailVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpreadGunVIP(IConsole::IResult* pResult, void* pUserData);
-	static void ConSpinBotVIP(IConsole::IResult* pResult, void* pUserData);
-	static void ConAimClosestVIP(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);
@@ -965,10 +963,6 @@ private:
 	static void ConTeleLaser(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
-
-	static void ConSpinBot(IConsole::IResult* pResult, void* pUserData);
-	static void ConSpinBotSpeed(IConsole::IResult* pResult, void* pUserData);
-	static void ConAimClosest(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);

@@ -24,8 +24,6 @@ enum
 	HOOK_FLAG_BLUE
 };
 
-#define UPDATE_ANGLE_TIME 20
-
 
 class CTuneParam
 {
@@ -245,13 +243,6 @@ public:
 	int m_FakeTuneCID;
 
 	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
-
-	bool m_SpinBot;
-	int m_SpinBotSpeed;
-	float m_SpinBotAngle;
-	bool m_AimClosest;
-	vec2 m_AimClosestPos;
-	int m_UpdateAngle;
 
 	bool m_FightStarted;
 

@@ -333,10 +333,6 @@ void CPlayer::Tick()
 		}
 		else
 			m_pCharacter->m_NumGhostShots = 0;
-
-		// stop the spinning animation when chat is opened
-		if (m_PlayerFlags&PLAYERFLAG_CHATTING)
-			m_pCharacter->Core()->m_UpdateAngle = UPDATE_ANGLE_TIME;
 	}
 
 	// name

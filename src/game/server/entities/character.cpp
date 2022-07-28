@@ -473,9 +473,6 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
-	// if we have aimbot or spinbot on and shoot or hook, we want to put the mouse angle in the correct position for some time, so that we dont end up shooting in a weird direction graphically
-	m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
-
 	// F-DDrace
 	vec2 ProjStartPos = m_Pos+TempDirection*GetProximityRadius()*0.75f;
 
@@ -3910,17 +3907,6 @@ void CCharacter::FDDraceTick()
 		}
 	}
 
-	// stop spinning when we are paused
-	if (m_pPlayer->IsPaused())
-		m_Core.m_UpdateAngle = UPDATE_ANGLE_TIME;
-
-	// set aim bot pos
-	if (m_Core.m_AimClosest)
-	{
-		CCharacter *pClosest = GameWorld()->ClosestCharacter(m_Pos, this, m_pPlayer->GetCID());
-		m_Core.m_AimClosestPos = pClosest ? pClosest->m_Pos : vec2(0, 0);
-	}
-
 	// set cursor pos when controlling another tee
 	if (m_pTeeControlCursor && m_pPlayer->m_pControlledTee)
 	{
@@ -4780,20 +4766,6 @@ void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
 {
 	m_DoorHammer = Set;
 	GameServer()->SendExtraMessage(DOOR_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
-}
-
-void CCharacter::AimClosest(bool Set, int FromID, bool Silent)
-{
-	m_Core.m_SpinBot = false;
-	m_Core.m_AimClosest = Set;
-	GameServer()->SendExtraMessage(AIM_CLOSEST, m_pPlayer->GetCID(), Set, FromID, Silent);
-}
-
-void CCharacter::SpinBot(bool Set, int FromID, bool Silent)
-{
-	m_Core.m_AimClosest = false;
-	m_Core.m_SpinBot = Set;
-	GameServer()->SendExtraMessage(SPIN_BOT, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
 void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)

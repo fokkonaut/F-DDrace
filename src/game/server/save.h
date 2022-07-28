@@ -154,9 +154,6 @@ private:
 	int m_CollectedPortalRifle;
 
 	// core
-	int m_SpinBot;
-	int m_SpinBotSpeed;
-	int m_AimClosest;
 	int m_MoveRestrictionExtraCanEnterRoom;
 
 	// player
