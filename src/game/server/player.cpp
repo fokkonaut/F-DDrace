@@ -1035,7 +1035,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 	}
 }
 
-void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
+void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeControlled, bool HammerflyMarked)
 {
 	if (m_pControlledTee && !m_Paused && !TeeControlled)
 	{
@@ -1053,7 +1053,7 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeContr
 		return;
 
 	if(m_pCharacter && ApplyDirectInput(TeeControlled))
-		m_pCharacter->OnDirectInput(NewInput);
+		m_pCharacter->OnDirectInput(NewInput, HammerflyMarked);
 }
 
 bool CPlayer::ApplyDirectInput(bool TeeControlled)

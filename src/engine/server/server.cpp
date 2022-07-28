@@ -270,7 +270,10 @@ void CServer::CClient::Reset()
 {
 	// reset input
 	for(int i = 0; i < 200; i++)
+	{
 		m_aInputs[i].m_GameTick = -1;
+		m_aInputs[i].m_HammerflyMarked = false;
+	}
 	m_CurrentInput = 0;
 	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
@@ -314,6 +317,8 @@ void CServer::CClient::ResetContent()
 	m_DnsblState = CClient::DNSBL_STATE_NONE;
 	m_PgscState = CClient::PGSC_STATE_NONE;
 	m_IdleDummy = false;
+	m_DummyHammer = false;
+	m_HammerflyMarked = false;
 
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 	m_Main = true;
@@ -1586,7 +1591,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			m_aClients[ClientID].m_CurrentInput++;
 			m_aClients[ClientID].m_CurrentInput %= 200;
 
-			// new way of checking for hammerfly since dummy ntended tick got fixed
+			// new way of checking for hammerfly since dummy intended tick got fixed
 			if (m_aClients[ClientID].m_DDNetVersion > VERSION_DDNET_INTENDED_TICK)
 			{
 				CNetObj_PlayerInput *pPlayerInput = (CNetObj_PlayerInput *)m_aClients[ClientID].m_LatestInput.m_aData;
@@ -1603,6 +1608,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				m_aClients[ClientID].m_LastFire = pPlayerInput->m_Fire;
 			}
+			pInput->m_HammerflyMarked = m_aClients[ClientID].m_HammerflyMarked;
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
@@ -2426,7 +2432,7 @@ int CServer::Run()
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
 						for(int i = 0; i < 200; i++)
 							if(m_aClients[c].m_aInputs[i].m_GameTick == Tick() + 1)
-								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData);
+								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData, m_aClients[c].m_aInputs[i].m_HammerflyMarked);
 
 				m_CurrentGameTick++;
 				NewTicks = true;
