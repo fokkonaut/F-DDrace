@@ -290,8 +290,8 @@ void CGameTeams::SetForceCharacterNewTeam(int ClientID, int Team)
 		if (!m_TeamLocked[Team])
 			ChangeTeamState(Team, TEAMSTATE_OPEN);
 
-		if (GameServer()->Collision()->m_NumSwitchers > 0) {
-			for (int i = 0; i < GameServer()->Collision()->m_NumSwitchers+1; ++i)
+		if (GameServer()->Collision()->m_HighestSwitchNumber > 0) {
+			for (int i = 0; i < GameServer()->Collision()->m_HighestSwitchNumber+1; ++i)
 			{
 				GameServer()->Collision()->m_pSwitchers[i].m_Status[Team] = GameServer()->Collision()->m_pSwitchers[i].m_Initial;
 				GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team] = 0;

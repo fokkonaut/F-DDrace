@@ -140,8 +140,8 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 			if (IsPlot && m_pSwitch[i].m_Number > m_NumPlots)
 				m_NumPlots = m_pSwitch[i].m_Number;
 
-			if (!IsPlot && m_pSwitch[i].m_Number > m_NumSwitchers)
-				m_NumSwitchers = m_pSwitch[i].m_Number;
+			if (!IsPlot && m_pSwitch[i].m_Number > m_HighestSwitchNumber)
+				m_HighestSwitchNumber = m_pSwitch[i].m_Number;
 
 			if (Index <= TILE_NPH_START)
 			{
@@ -186,7 +186,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		}
 	}
 
-	if (m_NumSwitchers || m_NumPlots || m_pSwitch) // added || m_pSwitch here bcs can now be executed always, because m_pswitch will always be set for draw editor also when the layer does not exist in the map
+	if (m_HighestSwitchNumber || m_NumPlots || m_pSwitch) // added || m_pSwitch here bcs can now be executed always, because m_pswitch will always be set for draw editor also when the layer does not exist in the map
 	{
 		m_pSwitchers = new SSwitchers[GetNumAllSwitchers() + 1]; // always 256, GetNumFreeDrawDoors() fills up the rest from whats available up to 256
 
@@ -1738,14 +1738,14 @@ int CCollision::GetSwitchByPlot(int PlotID)
 {
 	if (PlotID <= 0 || PlotID > m_NumPlots)
 		return 0;
-	return PlotID + m_NumSwitchers;
+	return PlotID + m_HighestSwitchNumber;
 }
 
 int CCollision::GetPlotBySwitch(int SwitchID)
 {
 	if (!IsPlotDoor(SwitchID))
 		return 0;
-	return SwitchID - m_NumSwitchers;
+	return SwitchID - m_HighestSwitchNumber;
 }
 
 int CCollision::GetSwitchByPlotLaserDoor(int PlotID, int Door)
@@ -1760,7 +1760,7 @@ int CCollision::GetSwitchByPlotLaserDoor(int PlotID, int Door)
 		for (int i = 1; i < PlotID; i++)
 			Num += GetNumMaxDoors(i);
 	}
-	return m_NumSwitchers + m_NumPlots + Num + Door + 1;
+	return m_HighestSwitchNumber + m_NumPlots + Num + Door + 1;
 }
 
 int CCollision::GetNumMaxDoors(int PlotID)

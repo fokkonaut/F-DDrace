@@ -600,13 +600,35 @@ void IGameController::Snap(int SnappingClient)
 			if(!pSwitchState)
 				return;
 
-			pSwitchState->m_NumSwitchers = clamp(GameServer()->Collision()->GetNumAllSwitchers(), 0, 255);
+			pSwitchState->m_HighestSwitchNumber = clamp(GameServer()->Collision()->GetNumAllSwitchers(), 0, 255);
 			mem_zero(pSwitchState->m_Status, sizeof(pSwitchState->m_Status));
 
-			for(int i = 0; i < pSwitchState->m_NumSwitchers + 1; i++)
+			std::vector<std::pair<int, int>> vEndTicks; // <EndTick, SwitchNumber>
+
+			for(int i = 0; i < pSwitchState->m_HighestSwitchNumber + 1; i++)
 			{
 				int Status = (int)GameServer()->Collision()->m_pSwitchers[i].m_Status[Team];
 				pSwitchState->m_Status[i / 32] |= (Status << (i % 32));
+
+				int EndTick = GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team];
+				if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Collision()->m_pSwitchers[i].m_LastUpdateTick[Team] < Server()->Tick())
+				{
+					// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
+					vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Collision()->m_pSwitchers[i].m_EndTick[Team], i));
+				}
+			}
+
+			// send the endtick of switchers that are about to toggle back (up to four, prioritizing those with the earliest endticks)
+			mem_zero(pSwitchState->m_aSwitchNumbers, sizeof(pSwitchState->m_aSwitchNumbers));
+			mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
+
+			std::sort(vEndTicks.begin(), vEndTicks.end());
+			const int NumTimedSwitchers = min((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+
+			for(int i = 0; i < NumTimedSwitchers; i++)
+			{
+				pSwitchState->m_aSwitchNumbers[i] = vEndTicks[i].second;
+				pSwitchState->m_aEndTicks[i] = vEndTicks[i].first;
 			}
 		}
 	}

@@ -73,17 +73,6 @@ class CCollision
 	class CTuneTile* m_pTune;
 	class CDoorTile* m_pDoor;
 
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-		// F-DDrace
-		int m_ClientID[MAX_CLIENTS];
-		int m_StartTick[MAX_CLIENTS];
-	};
-
 public:
 	CCollision();
 	~CCollision();
@@ -180,7 +169,19 @@ public:
 	class CSwitchTile* SwitchLayer() { return m_pSwitch; }
 	class CTuneTile* TuneLayer() { return m_pTune; }
 	class CLayers* Layers() { return m_pLayers; }
-	int m_NumSwitchers;
+	int m_HighestSwitchNumber;
+
+	struct SSwitchers
+	{
+		bool m_Status[MAX_CLIENTS];
+		bool m_Initial;
+		int m_EndTick[MAX_CLIENTS];
+		int m_Type[MAX_CLIENTS];
+		int m_LastUpdateTick[MAX_CLIENTS];
+		// F-DDrace
+		int m_ClientID[MAX_CLIENTS];
+		int m_StartTick[MAX_CLIENTS];
+	};
 
 	// F-DDrace
 	class CConfig *m_pConfig;
@@ -216,11 +217,11 @@ public:
 	int GetNumPlotLaserDoors() { return m_aNumPlots[PLOT_SMALL] * PLOT_SMALL_MAX_DOORS + m_aNumPlots[PLOT_BIG] * PLOT_BIG_MAX_DOORS; }
 	int GetNumMaxDoors(int PlotID);
 
-	int GetNumAllSwitchers() { return !m_pSwitch ? 0 : m_NumSwitchers + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }
-	int GetNumFreeDrawDoors() { return 255 - m_NumSwitchers - m_NumPlots - GetNumPlotLaserDoors(); }
+	int GetNumAllSwitchers() { return !m_pSwitch ? 0 : m_HighestSwitchNumber + m_NumPlots + GetNumPlotLaserDoors() + GetNumFreeDrawDoors(); }
+	int GetNumFreeDrawDoors() { return 255 - m_HighestSwitchNumber - m_NumPlots - GetNumPlotLaserDoors(); }
 
-	bool IsPlotDoor(int Number) { return Number > m_NumSwitchers && !IsPlotDrawDoor(Number); }
-	bool IsPlotDrawDoor(int Number) { return Number > m_NumSwitchers + m_NumPlots; }
+	bool IsPlotDoor(int Number) { return Number > m_HighestSwitchNumber && !IsPlotDrawDoor(Number); }
+	bool IsPlotDrawDoor(int Number) { return Number > m_HighestSwitchNumber + m_NumPlots; }
 
 	// doors
 	bool AddDoorTile(int Index, int Type, int Number, int Flags = 0);

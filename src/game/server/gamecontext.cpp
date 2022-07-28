@@ -3056,7 +3056,7 @@ void CGameContext::ConSwitchOpen(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Switch = pResult->GetInteger(0);
 
-	if (pSelf->Collision()->m_NumSwitchers > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_NumSwitchers + 1)
+	if (pSelf->Collision()->m_HighestSwitchNumber > 0 && Switch >= 0 && Switch < pSelf->Collision()->m_HighestSwitchNumber + 1)
 	{
 		pSelf->Collision()->m_pSwitchers[Switch].m_Initial = false;
 		char aBuf[256];
@@ -3661,8 +3661,8 @@ void CGameContext::OnInit()
 		//Config()->m_SvTeam = 1;
 		Config()->m_SvShowOthersDefault = 0;
 
-		if (Collision()->m_NumSwitchers > 0)
-			for (int i = 0; i < Collision()->m_NumSwitchers + 1; ++i)
+		if (Collision()->m_HighestSwitchNumber > 0)
+			for (int i = 0; i < Collision()->m_HighestSwitchNumber + 1; ++i)
 				Collision()->m_pSwitchers[i].m_Initial = true;
 	}
 

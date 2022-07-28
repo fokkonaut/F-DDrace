@@ -346,9 +346,12 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntRange("m_NumSwitchers", 0, 256),
+		NetIntAny("m_HighestSwitchNumber"),
 		# 256 switches / 32 bits = 8 int32
 		NetArray(NetIntAny("m_Status"), 8),
+		# send the endtick of up to 4 timed switchers
+		NetArray(NetIntAny("m_aSwitchNumbers", 0), 4),
+		NetArray(NetIntAny("m_aEndTicks", 0), 4),
 	], fixup=False),
 
 	# Switch info for map items
