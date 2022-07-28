@@ -2231,7 +2231,9 @@ bool CPlayer::MinigameRequestTick()
 bool CPlayer::ShowDDraceHud()
 {
 	if (!Server()->IsSevendown(m_ClientID) || GameServer()->GetClientDDNetVersion(m_ClientID) < VERSION_DDNET_NEW_HUD)
-		return 0;
+		return false;
+	if (m_pCharacter && m_pCharacter->SendDroppedFlagCooldown(m_ClientID) != -1)
+		return false;
 	CPlayer *pPlayer = this;
 	if ((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID >= 0 && GameServer()->m_apPlayers[m_SpectatorID])
 		pPlayer = GameServer()->m_apPlayers[m_SpectatorID];

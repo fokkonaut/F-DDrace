@@ -419,7 +419,7 @@ public:
 	bool m_CollectedPortalRifle;
 	int64 m_LastPortalBatteryDrop;
 
-	bool SendDroppedFlagCooldown(int SnappingClient);
+	int SendDroppedFlagCooldown(int SnappingClient);
 
 	int m_HookPower;
 	bool m_IsRainbowHooked;

@@ -1882,7 +1882,7 @@ void CCharacter::Snap(int SnappingClient)
 	// explicitly check for /showall, in case a client that doesnt support showdistance wants to see characters while zooming out
 	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
 	// when showdistance is supported, then all entities within that showdistance range are being sent
-	if(NetworkClipped(SnappingClient, true) && !SendDroppedFlagCooldown(SnappingClient))
+	if(NetworkClipped(SnappingClient, true) && SendDroppedFlagCooldown(SnappingClient) == -1)
 		return;
 
 	if (!CanSnapCharacter(SnappingClient))
@@ -2123,32 +2123,21 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		}
 	}
 	
-	if (SendDroppedFlagCooldown(SnappingClient))
+	int Flag = SendDroppedFlagCooldown(SnappingClient);
+	if (Flag != -1)
 	{
-		int Team = -1;
-		if (m_pPlayer->GetSpecMode() == SPEC_FLAGRED)
-			Team = TEAM_RED;
-		else if (m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
-			Team = TEAM_BLUE;
-
-		if (Team != -1)
+		CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag];
+		if (pFlag && !pFlag->IsAtStand())
 		{
-			CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Team];
-			if (pFlag && !pFlag->GetCarrier())
-			{
-				if (!pFlag->IsAtStand())
-				{
-					int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
-					int Amount = 10 - (DroppedSinceSeconds*10/max(Config()->m_SvFlagRespawnDropped, 1));
-					pCharacter->m_Health = pCharacter->m_Armor = Amount;
-				}
-				else
-				{
-					pCharacter->m_Health = pCharacter->m_Armor = 0;
-				}
-				pCharacter->m_AmmoCount = 0;
-			}
+			int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
+			int Amount = 10 - (DroppedSinceSeconds*10/max(Config()->m_SvFlagRespawnDropped, 1));
+			pCharacter->m_Health = pCharacter->m_Armor = Amount;
 		}
+		else
+		{
+			pCharacter->m_Health = pCharacter->m_Armor = 10;
+		}
+		pCharacter->m_AmmoCount = 0;
 	}
 
 	if (GetPlayer()->m_Afk || GetPlayer()->IsPaused() || GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()) || Server()->DesignChanging(m_pPlayer->GetCID()))
@@ -3964,11 +3953,24 @@ void CCharacter::HandleLastIndexTiles()
 	}
 }
 
-bool CCharacter::SendDroppedFlagCooldown(int SnappingClient)
+int CCharacter::SendDroppedFlagCooldown(int SnappingClient)
 {
-	return SnappingClient == m_pPlayer->GetCID()
-		&& (m_pPlayer->GetSpecMode() == SPEC_FLAGRED || m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
-		&& (m_pPlayer->IsPaused() || m_pPlayer->GetTeam() == TEAM_SPECTATORS);
+	if (SnappingClient != m_pPlayer->GetCID() || (!m_pPlayer->IsPaused() && m_pPlayer->GetTeam() != TEAM_SPECTATORS))
+		return -1;
+
+	int Team = -1;
+	if (m_pPlayer->GetSpecMode() == SPEC_FLAGRED)
+		Team = TEAM_RED;
+	else if (m_pPlayer->GetSpecMode() == SPEC_FLAGBLUE)
+		Team = TEAM_BLUE;
+
+	if (Team == -1)
+		return -1;
+
+	CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Team];
+	if (pFlag && !pFlag->GetCarrier())
+		return Team;
+	return -1;
 }
 
 int CCharacter::GetPowerHooked()
