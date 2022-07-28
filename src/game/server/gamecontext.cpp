@@ -5604,6 +5604,8 @@ bool CGameContext::CheckPassword(int ID, const char *pPassword)
 
 int64 CGameContext::GetNeededXP(int Level)
 {
+	if (Level < 0)
+		return 0;
 	if (Level < DIFFERENCE_XP_END)
 		return m_aNeededXP[Level];
 	return m_aNeededXP[DIFFERENCE_XP_END-1] + (OVER_LVL_100_XP * (Level+1 - DIFFERENCE_XP_END));
