@@ -153,7 +153,7 @@ void CDoor::Snap(int SnappingClient)
 		if (SnappingClient > -1 && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == -1 || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID() != -1)
 			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->GetSpectatorID());
 
-		if (pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && (ForceOn || (GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()])))
+		if (!m_Collision || (pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && (ForceOn || (GameServer()->Collision()->GetNumAllSwitchers() > 0 && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]))))
 		{
 			pObj->m_FromX = (int)m_To.x;
 			pObj->m_FromY = (int)m_To.y;
