@@ -54,11 +54,10 @@ CHAT_COMMAND("account", "", CFGFLAG_CHAT, ConAccount, this, "Shows information a
 
 //info
 CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost", AUTHED_NO)
-CHAT_COMMAND("policeinfo", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
-CHAT_COMMAND("vipinfo", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP", AUTHED_NO)
+CHAT_COMMAND("police", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
+CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP", AUTHED_NO)
 CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons", AUTHED_NO)
-CHAT_COMMAND("accountinfo", "", CFGFLAG_CHAT, ConAccountInfo, this, "Shows information about accounts", AUTHED_NO)
-CHAT_COMMAND("taserinfo", "", CFGFLAG_CHAT, ConTaserInfo, this, "Shows information about the taser", AUTHED_NO)
+CHAT_COMMAND("taser", "", CFGFLAG_CHAT, ConTaserInfo, this, "Shows information about the taser", AUTHED_NO)
 
 //account
 CHAT_COMMAND("register", "s[name] s[password] s[password]", CFGFLAG_CHAT, ConRegister, this, "Register an account", AUTHED_NO)

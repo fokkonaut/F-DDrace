@@ -822,7 +822,6 @@ private:
 	static void ConVIPInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData);
-	static void ConAccountInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConTaserInfo(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConLogin(IConsole::IResult* pResult, void* pUserData);

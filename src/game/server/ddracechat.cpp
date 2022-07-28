@@ -1293,7 +1293,12 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 
 	if (pPlayer->GetAccID() < ACC_START)
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "You are not logged in");
+		pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Accounts ~~~");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are used to save your stats.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can farm money and buy things in the shop, kill tees and get points.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "These stats will be saved inside of your account.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "You can create an account using '/register'.");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Once you are logged in, you can use this command again to see information about your account.");
 		return;
 	}
 
@@ -1483,20 +1488,6 @@ void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserDa
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Spawn rifle bullets: %d", pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()].m_SpawnWeapon[2]);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
-}
-
-void CGameContext::ConAccountInfo(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext* pSelf = (CGameContext*)pUserData;
-	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Accounts ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Accounts are used to save your stats.");
-	pSelf->SendChatTarget(pResult->m_ClientID, "You can farm money and buy things in the shop, kill tees and get points.");
-	pSelf->SendChatTarget(pResult->m_ClientID, "These stats will be saved inside of your account.");
-	pSelf->SendChatTarget(pResult->m_ClientID, "You can create an account using '/register'.");
 }
 
 void CGameContext::ConWeaponIndicator(IConsole::IResult * pResult, void * pUserData)
@@ -2551,7 +2542,7 @@ void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 
 	char aInfo[128];
 	char aPage[128];
-	str_format(aInfo, sizeof(aInfo), "Use '/policeinfo <page>' to check out what other police ranks can do.");
+	str_format(aInfo, sizeof(aInfo), "Use '/police <page>' to check out what other police ranks can do.");
 	str_format(aPage, sizeof(aPage), "-- Page %d/%d --", Page, MaxPages);
 
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Police Info ~~~");
@@ -2580,7 +2571,7 @@ void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 		else if (Policelevel == 2)
 			pSelf->SendChatTarget(pResult->m_ClientID, "- '/policehelper'");
 		else if (Policelevel == 3)
-			pSelf->SendChatTarget(pResult->m_ClientID, "- taser license ('/taserinfo')");
+			pSelf->SendChatTarget(pResult->m_ClientID, "- taser license ('/taser')");
 	}
 	else
 	{
@@ -2591,7 +2582,7 @@ void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Every police rank will give you more benefits.");
 	}
 	pSelf->SendChatTarget(pResult->m_ClientID, "------------------------");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Use '/policeinfo <page>' for information about other ranks");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Use '/police <page>' for information about other ranks");
 	pSelf->SendChatTarget(pResult->m_ClientID, aPage);
 }
 
