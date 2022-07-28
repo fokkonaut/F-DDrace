@@ -5812,6 +5812,7 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
 
 	// if character got saved and during restart the plot expires, it would be not good if the tee keeps his editor
 	pChr->GetPlayer()->StopPlotEditing();
+	pChr->UnsetSpookyGhost();
 
 	// save identity to cache
 	SSavedIdentity Info;
