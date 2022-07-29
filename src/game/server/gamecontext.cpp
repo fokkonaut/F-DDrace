@@ -1029,18 +1029,23 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (pChr)
 	{
-		if (pChr->m_FakeTuneCollision)
+		bool IsSnake = pChr->m_Snake.Active();
+		bool IsInAnySnake = IsSnake || pChr->m_Snake.IsInAnySnake(pChr);
+
+		if (pChr->m_FakeTuneCollision || IsInAnySnake)
 			Tuning.m_PlayerCollision = 0.f;
-		if (pChr->m_Passive && !pChr->m_Super)
+		if ((pChr->m_Passive && !pChr->m_Super) || IsSnake)
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter)
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || IsSnake)
 			Tuning.m_HookFireSpeed = 0.f;
-
-		if (pChr->m_pHelicopter)
+		if (pChr->m_pHelicopter || IsSnake)
 			Tuning.m_HookDragAccel = 0.f;
+		if (pChr->m_pHelicopter || IsInAnySnake)
+			Tuning.m_HookDragSpeed = 0.f;
 
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1))
+			|| IsInAnySnake)
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;
@@ -1050,7 +1055,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_AirControlAccel = 0.f;
 		}
 
-		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter)
+		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || IsInAnySnake)
 			Tuning.m_Gravity = 0.f;
 	}
 
@@ -1072,6 +1077,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -6843,7 +6849,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
 		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
-		else if (Extra == PASSIVE)
+		else if (Extra == PASSIVE || Extra == SNAKE)
 			str_format(aMsg, sizeof(aMsg), "You are %s in %s", Set ? "now" : "no longer", aItem);
 		else if (Extra == ENDLESS_HOOK)
 			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
@@ -6854,7 +6860,6 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 		else
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have" : "lost", aItem);
 	}
-
 	// message with a sender
 	else if (FromID >= 0)
 		str_format(aMsg, sizeof(aMsg), "%s was %s '%s' by '%s'", aItem, Set ? "given to" : "removed from", Server()->ClientName(ToID), Server()->ClientName(FromID));
@@ -6934,6 +6939,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Door Hammer";
 	case TEE_CONTROL:
 		return "Tee Control";
+	case SNAKE:
+		return "Snake Mode";
 	}
 	return "Unknown";
 }

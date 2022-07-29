@@ -1253,6 +1253,11 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		m_DrawEditor.OnInput(pNewInput);
 		ResetInput |= 1;
 	}
+	else if (m_Snake.Active())
+	{
+		m_Snake.OnInput(pNewInput);
+		ResetInput |= 1;
+	}
 	else if (m_pHelicopter)
 	{
 		m_pHelicopter->OnInput(pNewInput);
@@ -1369,7 +1374,6 @@ void CCharacter::Tick()
 
 	// handle Weapons
 	HandleWeapons();
-
 	DDracePostCoreTick();
 
 	if(m_Core.m_TriggeredEvents & COREEVENTFLAG_HOOK_ATTACH_PLAYER)
@@ -1536,6 +1540,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		GameServer()->Arenas()->OnPlayerDie(m_pPlayer->GetCID());
 
 	m_DrawEditor.OnPlayerDeath();
+	m_Snake.SetActive(false);
 
 	// drop armor, hearts and weapons
 	DropLoot(Weapon);
@@ -2039,7 +2044,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	int Events = m_TriggeredEvents;
 	// jump is used for flying up, annoying air jump effect otherwise
-	if (m_pHelicopter && SnappingClient == m_pPlayer->GetCID())
+	if (SnappingClient == m_pPlayer->GetCID() && (m_pHelicopter || m_Snake.Active()))
 	{
 		pCharacter->m_Jumped |= 2;
 		Events |= COREEVENTFLAG_AIR_JUMP;
@@ -3484,6 +3489,8 @@ void CCharacter::DDracePostCoreTick()
 
 	if (!m_IsFrozen)
 		m_FirstFreezeTick = 0;
+
+	m_Snake.Tick();
 }
 
 bool CCharacter::Freeze(float Seconds)
@@ -3749,6 +3756,7 @@ void CCharacter::FDDraceInit()
 	m_LastInOutTeleporter = 0;
 
 	m_DrawEditor.Init(this);
+	m_Snake.Init(this);
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4788,4 +4796,10 @@ void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)
 	if (!Set)
 		m_pPlayer->ResumeFromTeeControl();
 	GameServer()->SendExtraMessage(TEE_CONTROL, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::Snake(bool Set, int FromID, bool Silent)
+{
+	if (m_Snake.SetActive(Set))
+		GameServer()->SendExtraMessage(SNAKE, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

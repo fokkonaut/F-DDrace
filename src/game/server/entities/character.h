@@ -10,6 +10,7 @@
 #include <game/server/entity.h>
 #include <game/server/player.h>
 #include <game/server/draweditor.h>
+#include <game/server/snake.h>
 
 #include "pickup.h"
 #include "lightsaber.h"
@@ -46,6 +47,7 @@ enum Extra
 	ALWAYS_TELE_WEAPON,
 	DOOR_HAMMER,
 	TEE_CONTROL,
+	SNAKE,
 	NUM_EXTRAS
 };
 
@@ -163,6 +165,7 @@ public:
 	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void TeeControl(bool Set = true, int ForcedID = -1, int FromID = -1, bool Silent = false);
+	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -414,6 +417,7 @@ public:
 	bool m_MoneyTile;
 	bool m_ProcessedMoneyTile;
 	int64 m_RoomAntiSpamTick;
+	CSnake m_Snake;
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

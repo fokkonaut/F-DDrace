@@ -917,6 +917,7 @@ private:
 	static void ConSendMotd(IConsole::IResult* pResult, void* pUserData);
 	static void ConHelicopter(IConsole::IResult* pResult, void* pUserData);
 	static void ConRemoveHelicopters(IConsole::IResult* pResult, void* pUserData);
+	static void ConSnake(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);
