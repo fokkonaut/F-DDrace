@@ -418,6 +418,7 @@ public:
 	bool m_ProcessedMoneyTile;
 	int64 m_RoomAntiSpamTick;
 	CSnake m_Snake;
+	bool m_InSnake;
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

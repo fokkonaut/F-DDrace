@@ -3755,6 +3755,7 @@ void CCharacter::FDDraceInit()
 
 	m_DrawEditor.Init(this);
 	m_Snake.Init(this);
+	m_InSnake = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4305,7 +4306,7 @@ void CCharacter::UnsetSpookyGhost()
 		return;
 
 	LoadWeaponBackup(BACKUP_SPOOKY_GHOST);
-	m_pPlayer->m_ShowName = !m_Snake.IsInAnySnake(this);
+	m_pPlayer->m_ShowName = !m_InSnake;
 	m_pPlayer->m_SpookyGhost = false; // set m_SpookyGhost before we reset the skin
 	m_pPlayer->ResetSkin();
 }

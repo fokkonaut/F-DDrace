@@ -1029,23 +1029,20 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (pChr)
 	{
-		bool IsSnake = pChr->m_Snake.Active();
-		bool IsInAnySnake = IsSnake || pChr->m_Snake.IsInAnySnake(pChr);
-
-		if (pChr->m_FakeTuneCollision || IsInAnySnake)
+		if (pChr->m_FakeTuneCollision || pChr->m_InSnake)
 			Tuning.m_PlayerCollision = 0.f;
-		if ((pChr->m_Passive && !pChr->m_Super) || IsSnake)
+		if ((pChr->m_Passive && !pChr->m_Super) || pChr->m_Snake.Active())
 			Tuning.m_PlayerHooking = 0.f;
 
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || IsSnake)
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || pChr->m_Snake.Active())
 			Tuning.m_HookFireSpeed = 0.f;
-		if (pChr->m_pHelicopter || IsSnake)
+		if (pChr->m_pHelicopter || pChr->m_Snake.Active())
 			Tuning.m_HookDragAccel = 0.f;
-		if (pChr->m_pHelicopter || IsInAnySnake)
+		if (pChr->m_pHelicopter || pChr->m_InSnake)
 			Tuning.m_HookDragSpeed = 0.f;
 
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1))
-			|| IsInAnySnake)
+		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter|| pChr->m_InSnake
+			|| (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{
 			Tuning.m_GroundControlSpeed = 0.f;
 			Tuning.m_GroundJumpImpulse = 0.f;
@@ -1055,7 +1052,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tuning.m_AirControlAccel = 0.f;
 		}
 
-		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || IsInAnySnake)
+		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
 			Tuning.m_Gravity = 0.f;
 	}
 

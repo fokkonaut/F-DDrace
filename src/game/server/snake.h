@@ -33,10 +33,8 @@ class CSnake
 	};
 	std::vector<SSnakeData> m_vSnake;
 
-	bool HandleInput();
-	bool IsInSnake(CCharacter *pChr);
-
 	void InvalidateTees();
+	bool HandleInput();
 	void AddNewTees();
 	void UpdateTees();
 
@@ -46,7 +44,6 @@ public:
 
 	bool Active();
 	bool SetActive(bool Active);
-	bool IsInAnySnake(CCharacter *pCheck);
 
 	void OnPlayerDeath();
 	void OnInput(CNetObj_PlayerInput *pNewInput);

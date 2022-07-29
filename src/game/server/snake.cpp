@@ -22,13 +22,12 @@ bool CSnake::Active()
 
 bool CSnake::SetActive(bool Active)
 {
-	if (m_Active == Active || (Active && IsInAnySnake(m_pCharacter)))
+	if (m_Active == Active || (Active && m_pCharacter->m_InSnake))
 		return false;
 
 	m_Active = Active;
 	m_MoveLifespan = 0;
 	m_Dir = vec2(0, 0);
-	m_pCharacter->GetPlayer()->m_ShowName = !m_Active;
 
 	if (m_Active)
 	{
@@ -37,6 +36,8 @@ bool CSnake::SetActive(bool Active)
 		Data.m_Pos = GameServer()->RoundPos(m_pCharacter->Core()->m_Pos);
 		m_vSnake.push_back(Data);
 		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
+		m_pCharacter->GetPlayer()->m_ShowName = false;
+		m_pCharacter->m_InSnake = true;
 	}
 	else
 	{
@@ -44,6 +45,7 @@ bool CSnake::SetActive(bool Active)
 		{
 			GameServer()->SendTuningParams(m_vSnake[i].m_pChr->GetPlayer()->GetCID(), m_vSnake[i].m_pChr->m_TuneZone);
 			m_vSnake[i].m_pChr->GetPlayer()->m_ShowName = true;
+			m_vSnake[i].m_pChr->m_InSnake = false;
 		}
 		m_vSnake.clear();
 	}
@@ -125,7 +127,7 @@ void CSnake::AddNewTees()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(i);
-		if (!pChr || IsInAnySnake(pChr))
+		if (!pChr || pChr->m_InSnake)
 			continue;
 
 		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 40.f)
@@ -137,6 +139,7 @@ void CSnake::AddNewTees()
 			m_vSnake.push_back(Data);
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
 			pChr->GetPlayer()->m_ShowName = false;
+			pChr->m_InSnake = true;
 		}
 	}
 }
@@ -150,28 +153,9 @@ void CSnake::UpdateTees()
 	}
 }
 
-bool CSnake::IsInSnake(CCharacter *pChr)
-{
-	for (unsigned int i = 0; i < m_vSnake.size(); i++)
-		if (m_vSnake[i].m_pChr == pChr)
-			return true;
-	return false;
-}
-
-bool CSnake::IsInAnySnake(CCharacter *pCheck)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CCharacter *pChr = GameServer()->GetPlayerChar(i);
-		if (pChr && pChr->m_Snake.Active() && pChr->m_Snake.IsInSnake(pCheck))
-			return true;
-	}
-	return false;
-}
-
 void CSnake::OnPlayerDeath()
 {
 	SetActive(false);
-	if (IsInAnySnake(m_pCharacter))
+	if (m_pCharacter->m_InSnake)
 		m_pCharacter->GetPlayer()->m_ShowName = true;
 }
