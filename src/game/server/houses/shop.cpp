@@ -224,7 +224,7 @@ void CShop::OnPageChange(int ClientID)
 	}
 
 	int Page = m_aClients[ClientID].m_Page;
-	if (Page > ITEM_PORTAL_RIFLE && !GameServer()->Config()->m_SvPortalRifleShop)
+	if (IsType(HOUSE_SHOP) && Page > ITEM_PORTAL_RIFLE && !GameServer()->Config()->m_SvPortalRifleShop)
 		Page--;
 	SendWindow(ClientID, aMsg, "If you want to buy an item, press F3", Page);
 	m_aClients[ClientID].m_LastMotd = Server()->Tick();
