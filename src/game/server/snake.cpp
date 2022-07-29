@@ -35,17 +35,18 @@ bool CSnake::SetActive(bool Active)
 		Data.m_pChr = m_pCharacter;
 		Data.m_Pos = GameServer()->RoundPos(m_pCharacter->Core()->m_Pos);
 		m_vSnake.push_back(Data);
-		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
+
 		m_pCharacter->GetPlayer()->m_ShowName = false;
 		m_pCharacter->m_InSnake = true;
+		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
 	}
 	else
 	{
 		for (unsigned int i = 0; i < m_vSnake.size(); i++)
 		{
-			GameServer()->SendTuningParams(m_vSnake[i].m_pChr->GetPlayer()->GetCID(), m_vSnake[i].m_pChr->m_TuneZone);
 			m_vSnake[i].m_pChr->GetPlayer()->m_ShowName = true;
 			m_vSnake[i].m_pChr->m_InSnake = false;
+			GameServer()->SendTuningParams(m_vSnake[i].m_pChr->GetPlayer()->GetCID(), m_vSnake[i].m_pChr->m_TuneZone);
 		}
 		m_vSnake.clear();
 	}
@@ -137,9 +138,10 @@ void CSnake::AddNewTees()
 			Data.m_pChr = pChr;
 			Data.m_Pos = pChr->Core()->m_Pos;
 			m_vSnake.push_back(Data);
-			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
+
 			pChr->GetPlayer()->m_ShowName = false;
 			pChr->m_InSnake = true;
+			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
 		}
 	}
 }
