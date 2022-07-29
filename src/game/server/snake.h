@@ -12,14 +12,11 @@ class CSnake
 {
 	CGameContext *GameServer() const;
 	IServer *Server() const;
-	void Reset();
 
 	CCharacter *m_pCharacter;
 	bool m_Active;
 	int m_MoveLifespan;
-	vec2 m_WantedDir;
 	vec2 m_Dir;
-	float m_Accel;
 
 	struct SSnakeInput
 	{
