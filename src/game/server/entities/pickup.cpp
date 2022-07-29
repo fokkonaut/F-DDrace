@@ -266,7 +266,7 @@ void CPickup::Tick()
 						break;
 
 					if ((m_Subtype == WEAPON_TASER && pChr->GetPlayer()->GiveTaserBattery(10))
-						|| (m_Subtype == WEAPON_PORTAL_RIFLE && pChr->GetPlayer()->GivePortalBattery(1)))
+						|| (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo && pChr->GetPlayer()->GivePortalBattery(1)))
 					{
 						Picked = true;
 						GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pChr->TeamMask());
