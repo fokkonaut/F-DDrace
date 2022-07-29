@@ -1540,7 +1540,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		GameServer()->Arenas()->OnPlayerDie(m_pPlayer->GetCID());
 
 	m_DrawEditor.OnPlayerDeath();
-	m_Snake.SetActive(false);
+	m_Snake.OnPlayerDeath();
 
 	// drop armor, hearts and weapons
 	DropLoot(Weapon);

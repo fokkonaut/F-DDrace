@@ -22,12 +22,13 @@ bool CSnake::Active()
 
 bool CSnake::SetActive(bool Active)
 {
-	if (Active && IsInAnySnake(m_pCharacter))
+	if (m_Active == Active || (Active && IsInAnySnake(m_pCharacter)))
 		return false;
 
 	m_Active = Active;
 	m_MoveLifespan = 0;
 	m_Dir = vec2(0, 0);
+	m_pCharacter->GetPlayer()->m_ShowName = !m_Active;
 
 	if (m_Active)
 	{
@@ -40,7 +41,10 @@ bool CSnake::SetActive(bool Active)
 	else
 	{
 		for (unsigned int i = 0; i < m_vSnake.size(); i++)
+		{
 			GameServer()->SendTuningParams(m_vSnake[i].m_pChr->GetPlayer()->GetCID(), m_vSnake[i].m_pChr->m_TuneZone);
+			m_vSnake[i].m_pChr->GetPlayer()->m_ShowName = true;
+		}
 		m_vSnake.clear();
 	}
 	return true;
@@ -73,7 +77,7 @@ void CSnake::InvalidateTees()
 {
 	for (unsigned int i = 0; i < m_vSnake.size(); i++)
 	{
-		if (!m_vSnake[i].m_pChr)
+		if (!m_vSnake[i].m_pChr || !m_vSnake[i].m_pChr->IsAlive())
 		{
 			m_vSnake.erase(m_vSnake.begin() + i);
 			i--;
@@ -106,7 +110,7 @@ bool CSnake::HandleInput()
 		for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
 			m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
 
-	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
+	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 40.f);
 	if (GameServer()->Collision()->TestBox(m_vSnake[0].m_Pos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 	{
 		GameServer()->CreateExplosion(m_vSnake[0].m_Pos, m_pCharacter->GetPlayer()->GetCID(), WEAPON_GRENADE, true, m_pCharacter->Team(), m_pCharacter->TeamMask());
@@ -132,6 +136,7 @@ void CSnake::AddNewTees()
 			Data.m_Pos = pChr->Core()->m_Pos;
 			m_vSnake.push_back(Data);
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
+			pChr->GetPlayer()->m_ShowName = false;
 		}
 	}
 }
@@ -162,4 +167,11 @@ bool CSnake::IsInAnySnake(CCharacter *pCheck)
 			return true;
 	}
 	return false;
+}
+
+void CSnake::OnPlayerDeath()
+{
+	SetActive(false);
+	if (IsInAnySnake(m_pCharacter))
+		m_pCharacter->GetPlayer()->m_ShowName = true;
 }

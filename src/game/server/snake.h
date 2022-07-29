@@ -48,6 +48,7 @@ public:
 	bool SetActive(bool Active);
 	bool IsInAnySnake(CCharacter *pCheck);
 
+	void OnPlayerDeath();
 	void OnInput(CNetObj_PlayerInput *pNewInput);
 };
 #endif //GAME_SERVER_SNAKE_H
