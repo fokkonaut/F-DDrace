@@ -85,4 +85,8 @@ void CRotatingBall::Snap(int SnappingClient)
 
 	pProj->m_X = round_to_int(m_ProjPos.x);
 	pProj->m_Y = round_to_int(m_ProjPos.y);
+	pProj->m_VelX = 0;
+	pProj->m_VelY = 0;
+	pProj->m_StartTick = 0;
+	pProj->m_Type = WEAPON_HAMMER;
 }
