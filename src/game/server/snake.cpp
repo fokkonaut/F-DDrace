@@ -125,7 +125,7 @@ void CSnake::AddNewTees()
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(i);
-		if (!pChr || IsInSnake(pChr))
+		if (!pChr || IsInAnySnake(pChr))
 			continue;
 
 		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 40.f)
