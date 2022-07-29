@@ -43,6 +43,7 @@ bool CSnake::SetActive(bool Active)
 	}
 	else
 	{
+		InvalidateTees();
 		for (unsigned int i = 0; i < m_vSnake.size(); i++)
 		{
 			m_vSnake[i].m_pChr->GetPlayer()->m_ShowName = true;
