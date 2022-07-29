@@ -152,6 +152,9 @@ private:
 	int m_MaxJumps;
 	int m_CarriedFlag;
 	int m_CollectedPortalRifle;
+	int m_Lovely;
+	int m_RotatingBall;
+	int m_EpicCircle;
 
 	// core
 	int m_MoveRestrictionExtraCanEnterRoom;
