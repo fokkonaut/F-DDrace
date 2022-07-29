@@ -243,7 +243,7 @@ MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFL
 
 // snake
 MACRO_CONFIG_INT(SvSnakeAutoMove, sv_snake_auto_move, 1, 0, 1, CFGFLAG_SERVER, "Whether snake keeps last input or can stand still if no inputs applied", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvSnakeSpeed, sv_snake_speed, 4, 1, 100, CFGFLAG_SERVER, "Snake blocks per second speed", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSnakeSpeed, sv_snake_speed, 4, 1, 50, CFGFLAG_SERVER, "Snake blocks per second speed", AUTHED_ADMIN)
 
 // chat
 MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use @everyone in chat", AUTHED_ADMIN)

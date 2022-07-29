@@ -110,7 +110,7 @@ bool CSnake::HandleInput()
 		for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
 			m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
 
-	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 40.f);
+	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
 	if (GameServer()->Collision()->TestBox(m_vSnake[0].m_Pos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 	{
 		GameServer()->CreateExplosion(m_vSnake[0].m_Pos, m_pCharacter->GetPlayer()->GetCID(), WEAPON_GRENADE, true, m_pCharacter->Team(), m_pCharacter->TeamMask());
@@ -128,7 +128,7 @@ void CSnake::AddNewTees()
 		if (!pChr || IsInSnake(pChr))
 			continue;
 
-		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 32.f)
+		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 40.f)
 		{
 			pChr->Core()->m_Pos = m_vSnake[m_vSnake.size()-1].m_pChr->Core()->m_Pos;
 			SSnakeData Data;

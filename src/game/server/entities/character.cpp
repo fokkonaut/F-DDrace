@@ -3489,8 +3489,6 @@ void CCharacter::DDracePostCoreTick()
 
 	if (!m_IsFrozen)
 		m_FirstFreezeTick = 0;
-
-	m_Snake.Tick();
 }
 
 bool CCharacter::Freeze(float Seconds)
