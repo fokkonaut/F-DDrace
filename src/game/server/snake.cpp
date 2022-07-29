@@ -124,7 +124,7 @@ void CSnake::AddNewTees()
 		if (!pChr || IsInSnake(pChr))
 			continue;
 
-		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 40.f)
+		if (distance(m_vSnake[0].m_pChr->Core()->m_Pos, pChr->Core()->m_Pos) <= 32.f)
 		{
 			pChr->Core()->m_Pos = m_vSnake[m_vSnake.size()-1].m_pChr->Core()->m_Pos;
 			SSnakeData Data;
