@@ -18,7 +18,6 @@
 #include "entities/door.h"
 #include "entities/clock.h"
 #include <game/layers.h>
-#include <algorithm>
 
 
 IGameController::IGameController(CGameContext *pGameServer)
