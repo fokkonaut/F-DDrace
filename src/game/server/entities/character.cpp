@@ -22,6 +22,7 @@
 #include "portal.h"
 #include "money.h"
 #include "lovely.h"
+#include "rotating_ball.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -3758,6 +3759,7 @@ void CCharacter::FDDraceInit()
 	m_Snake.Init(this);
 	m_InSnake = false;
 	m_Lovely = false;
+	m_RotatingBall = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4811,4 +4813,12 @@ void CCharacter::Lovely(bool Set, int FromID, bool Silent)
 	if (m_Lovely)
 		new CLovely(GameWorld(), m_Pos, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(LOVELY, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::RotatingBall(bool Set, int FromID, bool Silent)
+{
+	m_RotatingBall = Set;
+	if (m_RotatingBall)
+		new CRotatingBall(GameWorld(), m_Pos, m_pPlayer->GetCID());
+	GameServer()->SendExtraMessage(ROTATING_BALL, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

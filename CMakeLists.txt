@@ -1732,6 +1732,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/portal.h
   entities/projectile.cpp
   entities/projectile.h
+  entities/rotating_ball.cpp
+  entities/rotating_ball.h
   entities/speedup.cpp
   entities/speedup.h
   entities/stable_projectile.cpp

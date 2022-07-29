@@ -49,6 +49,7 @@ enum Extra
 	TEE_CONTROL,
 	SNAKE,
 	LOVELY,
+	ROTATING_BALL,
 	NUM_EXTRAS
 };
 
@@ -168,6 +169,7 @@ public:
 	void TeeControl(bool Set = true, int ForcedID = -1, int FromID = -1, bool Silent = false);
 	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
 	void Lovely(bool Set = true, int FromID = -1, bool Silent = false);
+	void RotatingBall(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -422,6 +424,7 @@ public:
 	CSnake m_Snake;
 	bool m_InSnake;
 	bool m_Lovely;
+	bool m_RotatingBall;
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

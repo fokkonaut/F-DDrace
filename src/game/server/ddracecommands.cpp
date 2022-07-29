@@ -1300,6 +1300,14 @@ void CGameContext::ConLovely(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->Lovely(!pChr->m_Lovely, pResult->m_ClientID);
 }
 
+void CGameContext::ConRotatingBall(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->RotatingBall(!pChr->m_RotatingBall, pResult->m_ClientID);
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

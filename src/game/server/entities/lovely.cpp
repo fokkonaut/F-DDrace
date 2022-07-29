@@ -68,6 +68,10 @@ void CLovely::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwner && (!CmaskIsSet(pOwner->TeamMask(), SnappingClient) || pOwner->IsPaused()))
+		return;
+
 	for (unsigned int i = 0; i < m_vLovelyData.size(); i++)
 	{
 		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
