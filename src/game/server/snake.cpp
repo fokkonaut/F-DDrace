@@ -94,7 +94,7 @@ bool CSnake::HandleInput()
 	if (m_Input.m_Jump != m_Input.m_Hook)
 		Dir.y = m_Input.m_Jump ? -1 : 1;
 
-	if (Dir != vec2(0, 0) && !(Dir.x && Dir.y))
+	if (Dir != vec2(0, 0) && (!(Dir.x && Dir.y)) || GameServer()->Config()->m_SvSnakeDiagonal)
 	{
 		m_Dir = Dir;
 	}
