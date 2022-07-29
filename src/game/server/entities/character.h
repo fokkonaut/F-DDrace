@@ -48,6 +48,7 @@ enum Extra
 	DOOR_HAMMER,
 	TEE_CONTROL,
 	SNAKE,
+	LOVELY,
 	NUM_EXTRAS
 };
 
@@ -166,6 +167,7 @@ public:
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void TeeControl(bool Set = true, int ForcedID = -1, int FromID = -1, bool Silent = false);
 	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
+	void Lovely(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -419,6 +421,7 @@ public:
 	int64 m_RoomAntiSpamTick;
 	CSnake m_Snake;
 	bool m_InSnake;
+	bool m_Lovely;
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

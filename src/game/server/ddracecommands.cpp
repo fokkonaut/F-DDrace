@@ -1292,6 +1292,14 @@ void CGameContext::ConSnake(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->Snake(!pChr->m_Snake.Active(), pResult->m_ClientID);
 }
 
+void CGameContext::ConLovely(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->Lovely(!pChr->m_Lovely, pResult->m_ClientID);
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

@@ -6938,6 +6938,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Tee Control";
 	case SNAKE:
 		return "Snake Mode";
+	case LOVELY:
+		return "Lovely";
 	}
 	return "Unknown";
 }

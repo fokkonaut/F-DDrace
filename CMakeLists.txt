@@ -1716,6 +1716,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/light.h
   entities/lightsaber.cpp
   entities/lightsaber.h
+  entities/lovely.cpp
+  entities/lovely.h
   entities/meteor.cpp
   entities/meteor.h
   entities/money.cpp
