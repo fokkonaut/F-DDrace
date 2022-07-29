@@ -844,7 +844,7 @@ void CCharacter::FireWeapon()
 						}
 					}
 
-					if ((pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_pTelekinesisEntity != this) || (pEntity && pEntity != pChr))
+					if ((pChr && pChr->GetPlayer()->GetCID() != m_pPlayer->GetCID() && pChr->m_pTelekinesisEntity != this && !pChr->m_InSnake) || (pEntity && pEntity != pChr))
 					{
 						bool IsTelekinesed = false;
 						for (int i = 0; i < MAX_CLIENTS; i++)

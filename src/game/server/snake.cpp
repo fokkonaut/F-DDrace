@@ -11,8 +11,15 @@ void CSnake::Init(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
 	m_Active = false;
+	Reset();
+}
+
+void CSnake::Reset()
+{
 	m_MoveLifespan = 0;
 	m_Dir = vec2(0, 0);
+	m_WantedDir = vec2(0, 0);
+	m_Accel = 0.f;
 }
 
 bool CSnake::Active()
@@ -26,8 +33,7 @@ bool CSnake::SetActive(bool Active)
 		return false;
 
 	m_Active = Active;
-	m_MoveLifespan = 0;
-	m_Dir = vec2(0, 0);
+	Reset();
 
 	if (m_Active)
 	{
@@ -39,6 +45,7 @@ bool CSnake::SetActive(bool Active)
 		m_pCharacter->GetPlayer()->m_ShowName = false;
 		m_pCharacter->m_InSnake = true;
 		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
+		GameServer()->UnsetTelekinesis(m_pCharacter);
 	}
 	else
 	{
@@ -65,7 +72,7 @@ void CSnake::Tick()
 	if (!Active())
 		return;
 
-	if (m_MoveLifespan)
+	if (m_MoveLifespan > 0)
 		m_MoveLifespan--;
 
 	InvalidateTees();
@@ -96,27 +103,48 @@ bool CSnake::HandleInput()
 
 	if (Dir != vec2(0, 0) && (!(Dir.x && Dir.y)) || GameServer()->Config()->m_SvSnakeDiagonal)
 	{
-		m_Dir = Dir;
+		m_WantedDir = Dir;
 	}
 	else if (!GameServer()->Config()->m_SvSnakeAutoMove)
+	{
+		m_WantedDir = vec2(0, 0);
+	}
+
+	if (m_MoveLifespan >= 0)
+	{
+		if (m_MoveLifespan == 0)
+		{
+			m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos);
+			m_MoveLifespan = -1;
+		}
+		else
+		{
+			m_vSnake[0].m_Pos += m_Dir * m_Accel;
+		}
+
+		if (m_vSnake.size() > 1)
+			for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
+				m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
+
+		if (m_MoveLifespan > 0)
+			return false;
+	}
+
+	if (m_WantedDir == vec2(0, 0))
 	{
 		m_Dir = vec2(0, 0);
 		return false;
 	}
 
-	if (m_MoveLifespan > 0)
-		return false;
+	m_Dir = m_WantedDir;
 
+	vec2 NewPos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
 	m_MoveLifespan = Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed;
+	m_Accel = distance(NewPos, m_vSnake[0].m_Pos) / m_MoveLifespan;
 
-	if (m_vSnake.size() > 1)
-		for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
-			m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
-
-	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
-	if (GameServer()->Collision()->TestBox(m_vSnake[0].m_Pos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
+	if (GameServer()->Collision()->TestBox(NewPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 	{
-		GameServer()->CreateExplosion(m_vSnake[0].m_Pos, m_pCharacter->GetPlayer()->GetCID(), WEAPON_GRENADE, true, m_pCharacter->Team(), m_pCharacter->TeamMask());
+		GameServer()->CreateExplosion(NewPos, m_pCharacter->GetPlayer()->GetCID(), WEAPON_GRENADE, true, m_pCharacter->Team(), m_pCharacter->TeamMask());
 		SetActive(false);
 		return true;
 	}
@@ -142,6 +170,7 @@ void CSnake::AddNewTees()
 			pChr->GetPlayer()->m_ShowName = false;
 			pChr->m_InSnake = true;
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
+			GameServer()->UnsetTelekinesis(pChr);
 		}
 	}
 }
