@@ -183,6 +183,7 @@ CONSOLE_COMMAND("doorhammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConDoorHamm
 
 CONSOLE_COMMAND("lovely", "?v[id]", CFGFLAG_SERVER, ConLovely, this, "Toggles lovely for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("rotating_ball", "?v[id]", CFGFLAG_SERVER, ConRotatingBall, this, "Toggles rotating ball for player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("epic_circle", "?v[id]", CFGFLAG_SERVER, ConEpicCircle, this, "Toggles epic circle for player v", AUTHED_ADMIN)
 
 //account
 CONSOLE_COMMAND("acc_logout_port", "i[port]", CFGFLAG_SERVER, ConAccLogoutPort, this, "Logs out all accounts with last port i", AUTHED_ADMIN)

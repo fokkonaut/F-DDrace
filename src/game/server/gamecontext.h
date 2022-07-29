@@ -965,6 +965,7 @@ private:
 	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConLovely(IConsole::IResult* pResult, void* pUserData);
 	static void ConRotatingBall(IConsole::IResult* pResult, void* pUserData);
+	static void ConEpicCircle(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);

@@ -1700,6 +1700,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/dummy/macros.h
   entities/dummy/v3_blocker.cpp
   entities/dummy/v3_blocker.h
+  entities/epic_circle.cpp
+  entities/epic_circle.h
   entities/flag.cpp
   entities/flag.h
   entities/flyingpoint.cpp

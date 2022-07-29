@@ -23,6 +23,7 @@
 #include "money.h"
 #include "lovely.h"
 #include "rotating_ball.h"
+#include "epic_circle.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -3760,6 +3761,7 @@ void CCharacter::FDDraceInit()
 	m_InSnake = false;
 	m_Lovely = false;
 	m_RotatingBall = false;
+	m_EpicCircle = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4821,4 +4823,12 @@ void CCharacter::RotatingBall(bool Set, int FromID, bool Silent)
 	if (m_RotatingBall)
 		new CRotatingBall(GameWorld(), m_Pos, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(ROTATING_BALL, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::EpicCircle(bool Set, int FromID, bool Silent)
+{
+	m_EpicCircle = Set;
+	if (m_EpicCircle)
+		new CEpicCircle(GameWorld(), m_Pos, m_pPlayer->GetCID());
+	GameServer()->SendExtraMessage(EPIC_CIRCLE, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

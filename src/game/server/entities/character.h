@@ -50,6 +50,7 @@ enum Extra
 	SNAKE,
 	LOVELY,
 	ROTATING_BALL,
+	EPIC_CIRCLE,
 	NUM_EXTRAS
 };
 
@@ -170,6 +171,7 @@ public:
 	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
 	void Lovely(bool Set = true, int FromID = -1, bool Silent = false);
 	void RotatingBall(bool Set = true, int FromID = -1, bool Silent = false);
+	void EpicCircle(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -425,6 +427,7 @@ public:
 	bool m_InSnake;
 	bool m_Lovely;
 	bool m_RotatingBall;
+	bool m_EpicCircle;
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
