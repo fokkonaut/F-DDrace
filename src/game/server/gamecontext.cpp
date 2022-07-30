@@ -7365,6 +7365,7 @@ void CGameContext::SendSurvivalBroadcast(const char *pMsg, bool Sound, bool IsIm
 void CGameContext::InstagibTick(int Type)
 {
 	Type = Type == 0 ? MINIGAME_INSTAGIB_BOOMFNG : MINIGAME_INSTAGIB_FNG;
+	m_aMinigameDisabled[Type] = true;
 
 	// if there are no spawn tiles, we cant play the game
 	if (!m_aMinigameDisabled[Type] && !Collision()->TileUsed(Type == MINIGAME_INSTAGIB_BOOMFNG ? ENTITY_SPAWN_RED : ENTITY_SPAWN_BLUE))
