@@ -1751,14 +1751,17 @@ bool CPlayer::GiveTaserBattery(int Amount)
 		Symbol = '-';
 	}
 
+	pAccount->m_TaserBattery += Amount;
 	if (m_pCharacter)
 	{
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+
+		if (m_pCharacter->GetActiveWeapon() == WEAPON_TASER)
+			m_pCharacter->UpdateWeaponIndicator();
 	}
 
-	pAccount->m_TaserBattery += Amount;
 	return true;
 }
 
@@ -1779,14 +1782,17 @@ bool CPlayer::GivePortalBattery(int Amount)
 		Symbol = '-';
 	}
 
+	pAccount->m_PortalBattery += Amount;
 	if (m_pCharacter)
 	{
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+
+		if (m_pCharacter->GetActiveWeapon() == WEAPON_PORTAL_RIFLE)
+			m_pCharacter->UpdateWeaponIndicator();
 	}
 
-	pAccount->m_PortalBattery += Amount;
 	return true;
 }
 
