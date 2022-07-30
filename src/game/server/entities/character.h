@@ -431,7 +431,7 @@ public:
 
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
-	int64 m_LastPortalBatteryDrop;
+	int64 m_LastBatteryDrop;
 
 	int SendDroppedFlagCooldown(int SnappingClient);
 

@@ -57,7 +57,6 @@ CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows i
 CHAT_COMMAND("police", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
 CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP", AUTHED_NO)
 CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons", AUTHED_NO)
-CHAT_COMMAND("taser", "", CFGFLAG_CHAT, ConTaserInfo, this, "Shows information about the taser", AUTHED_NO)
 
 //account
 CHAT_COMMAND("register", "s[name] s[password] s[password]", CFGFLAG_CHAT, ConRegister, this, "Register an account", AUTHED_NO)
@@ -70,6 +69,7 @@ CHAT_COMMAND("pin", "?s[pin]", CFGFLAG_CHAT, ConPin, this, "Sets a new security 
 CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays i money to player r", AUTHED_NO)
 CHAT_COMMAND("money", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions, or drops i amount", AUTHED_NO)
 CHAT_COMMAND("portal", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConPortal, this, "Shows your current portal battery amount, or drops i amount", AUTHED_NO)
+CHAT_COMMAND("taser", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConTaserInfo, this, "Shows your current taser stats, or drops i amount", AUTHED_NO)
 
 CHAT_COMMAND("room", "s['invite'|'kick'] r[name]", CFGFLAG_CHAT, ConRoom, this, "Invite or kick player r from the room", AUTHED_NO)
 CHAT_COMMAND("spawn", "", CFGFLAG_CHAT, ConSpawn, this, "Teleport to spawn (-50.000 money)", AUTHED_NO)

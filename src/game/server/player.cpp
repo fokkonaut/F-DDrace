@@ -1756,12 +1756,6 @@ bool CPlayer::GiveTaserBattery(int Amount)
 
 	if (m_pCharacter)
 	{
-		if (m_pCharacter->GetWeaponGot(WEAPON_TASER))
-		{
-			int Ammo = m_pCharacter->GetWeaponAmmo(WEAPON_TASER) + Amount;
-			m_pCharacter->SetWeaponAmmo(WEAPON_TASER, Ammo);
-		}
-
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
@@ -1791,9 +1785,12 @@ bool CPlayer::GivePortalBattery(int Amount)
 		Symbol = '-';
 	}
 
-	char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
-	GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+	if (m_pCharacter)
+	{
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
+		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+	}
 
 	pAccount->m_PortalBattery += Amount;
 	return true;
@@ -1808,8 +1805,6 @@ void CPlayer::OnLogin()
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	if (!IsMinigame() && !m_JailTime && m_pCharacter)
 	{
-		m_pCharacter->GiveWeapon(WEAPON_TASER, false, pAccount->m_TaserBattery);
-
 		if (pAccount->m_PortalRifle)
 			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 	}
@@ -1845,7 +1840,6 @@ void CPlayer::OnLogout()
 	if (m_pCharacter)
 	{
 		m_pCharacter->UnsetSpookyGhost();
-		m_pCharacter->GiveWeapon(WEAPON_TASER, true);
 		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, true);
 	}
 

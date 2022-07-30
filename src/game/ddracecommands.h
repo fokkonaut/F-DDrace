@@ -73,6 +73,8 @@ CONSOLE_COMMAND("ballgrenade", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST,
 CONSOLE_COMMAND("unballgrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnBallGrenade, this, "Takes the ball grenade from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("telerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleRifle, this, "Gives a tele rifle to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("untelerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnTeleRifle, this, "Takes the tele rifle from player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("taser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTaser, this, "Gives a taser to player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("untaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnTaser, this, "Takes the taser from player v", AUTHED_ADMIN)
 
 CONSOLE_COMMAND("hammer", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConHammer, this, "Gives a hammer to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("gun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConGun, this, "Gives a gun to player v, or spread gun", AUTHED_ADMIN)

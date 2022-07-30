@@ -251,7 +251,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		{
 			for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
 			{
-				if (i != WEAPON_TASER && i != WEAPON_DRAW_EDITOR)
+				if (i != WEAPON_DRAW_EDITOR)
 					pChr->GiveWeapon(i, Remove, Amount);
 
 				if (pChr->m_aSpreadWeapon[i] != Spread)
@@ -826,6 +826,18 @@ void CGameContext::ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TELE_RIFLE, true);
+}
+
+void CGameContext::ConTaser(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TASER, false);
+}
+
+void CGameContext::ConUnTaser(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TASER, true);
 }
 
 void CGameContext::ConScrollNinja(IConsole::IResult *pResult, void *pUserData)

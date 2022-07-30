@@ -2008,10 +2008,10 @@ void CGameContext::ConPortal(IConsole::IResult* pResult, void* pUserData)
 				return;
 			}
 
-			if (pPlayer->GetCharacter()->m_LastPortalBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
+			if (pPlayer->GetCharacter()->m_LastBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
 			{
 				pPlayer->GetCharacter()->DropWeapon(WEAPON_PORTAL_RIFLE, false, -3, POWERUP_BATTERY, Amount);
-				pPlayer->GetCharacter()->m_LastPortalBatteryDrop = pSelf->Server()->Tick();
+				pPlayer->GetCharacter()->m_LastBatteryDrop = pSelf->Server()->Tick();
 			}
 		}
 		return;
@@ -3010,9 +3010,40 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 		return;
 
-	char aBuf[128];
 	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID()];
 
+	if (pResult->NumArguments() > 0)
+	{
+		if (str_comp_nocase(pResult->GetString(0), "drop") != 0)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "Invalid argument");
+			return;
+		}
+
+		if (pPlayer->GetCharacter())
+		{
+			int Amount = pResult->GetInteger(1);
+			if (Amount <= 0)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You can't drop nothing");
+				return;
+			}
+			if (Amount > pAccount->m_TaserBattery)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You don't have enough taser batteries");
+				return;
+			}
+
+			if (pPlayer->GetCharacter()->m_LastBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
+			{
+				pPlayer->GetCharacter()->DropWeapon(WEAPON_TASER, false, -3, POWERUP_BATTERY, Amount);
+				pPlayer->GetCharacter()->m_LastBatteryDrop = pSelf->Server()->Tick();
+			}
+		}
+		return;
+	}
+
+	char aBuf[128];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Taser ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Police officers with level 3 or higher get a taser license.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser is a rifle that freezes players for a short time.");
@@ -3029,6 +3060,8 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Taser battery: %d/%d", pAccount->m_TaserBattery, MAX_TASER_BATTERY);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Drop taser battery: '/taser drop <amount>'");
 }
 
 void CGameContext::ConRainbowVIP(IConsole::IResult *pResult, void *pUserData)

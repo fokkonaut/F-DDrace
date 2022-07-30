@@ -172,6 +172,7 @@ int CPickupDrop::IsCharacterNear()
 
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Weapon) != WEAPON_GUN)
+				|| (m_Weapon == WEAPON_TASER && GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_TaserLevel < 1)
 				|| (pChr->GetWeaponGot(m_Weapon) && m_Special == 0 && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
 				|| (m_Special != 0 && !AcceptSpecial)
 				)
@@ -259,7 +260,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 
 	bool Gun = (m_Weapon == WEAPON_GUN && (m_Special&SPECIAL_JETPACK || m_Special&SPECIAL_TELEWEAPON)) || m_Weapon == WEAPON_PROJECTILE_RIFLE || (m_Weapon == WEAPON_HAMMER && m_Special&SPECIAL_DOORHAMMER);
-	bool Plasma = m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_PORTAL_RIFLE || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_Special&SPECIAL_TELEWEAPON);
+	bool Plasma = m_Weapon == WEAPON_PLASMA_RIFLE || m_Weapon == WEAPON_LIGHTSABER || m_Weapon == WEAPON_PORTAL_RIFLE || m_Weapon == WEAPON_TELE_RIFLE || (m_Weapon == WEAPON_LASER && m_Special&SPECIAL_TELEWEAPON) || (m_Weapon == WEAPON_TASER && m_Type == POWERUP_WEAPON);
 	bool Heart = m_Weapon == WEAPON_HEART_GUN;
 	bool Grenade = m_Weapon == WEAPON_STRAIGHT_GRENADE || m_Weapon == WEAPON_BALL_GRENADE || (m_Weapon == WEAPON_GRENADE && m_Special&SPECIAL_TELEWEAPON);
 

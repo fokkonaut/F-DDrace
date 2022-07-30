@@ -1059,16 +1059,15 @@ void CCharacter::FireWeapon()
 	{
 		m_aWeapons[GetActiveWeapon()].m_Ammo--;
 
-		if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
-		{
-			pAccount->m_TaserBattery--;
-			UpdateWeaponIndicator();
-		}
-
-
 		int W = GetSpawnWeaponIndex(GetActiveWeapon());
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
 			GiveWeapon(GetActiveWeapon(), true);
+	}
+
+	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
+	{
+		pAccount->m_TaserBattery--;
+		UpdateWeaponIndicator();
 	}
 }
 
@@ -1145,15 +1144,6 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-	if (Weapon == WEAPON_TASER && !Remove)
-	{
-		if (!m_aWeapons[WEAPON_LASER].m_Got
-			|| m_aSpawnWeaponActive[GetSpawnWeaponIndex(WEAPON_LASER)]
-			|| pAccount->m_TaserLevel < 1
-			|| m_pPlayer->IsMinigame())
-			return;
-	}
-
 	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && pAccount->m_PortalRifle)
 		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
@@ -1189,9 +1179,6 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	{
 		m_aWeapons[Weapon].m_Ammo = Ammo;
 	}
-
-	if (Weapon == WEAPON_LASER)
-		GiveWeapon(WEAPON_TASER, Remove, pAccount->m_TaserBattery);
 }
 
 void CCharacter::GiveAllWeapons()
@@ -3696,7 +3683,7 @@ void CCharacter::FDDraceInit()
 	m_RoomAntiSpamTick = Now;
 
 	m_CollectedPortalRifle = false;
-	m_LastPortalBatteryDrop = 0;
+	m_LastBatteryDrop = 0;
 
 	m_InitializedSpawnWeapons = false;
 	for (int i = 0; i < 3; i++)
@@ -4141,7 +4128,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int
 		return;
 
 	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || (!m_aWeapons[WeaponID].m_Got && Type == POWERUP_WEAPON) || m_pPlayer->m_Minigame == MINIGAME_1VS1
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_WEAPON && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && GetWeaponAmmo(WeaponID) == 0))
+		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_WEAPON && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && m_pPlayer->GetAccID() < ACC_START))
 		return;
 
 	int Count = 0;
@@ -4151,7 +4138,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int
 		if (W != -1 && m_aSpawnWeaponActive[W])
 			continue;
 
-		if (i != WEAPON_NINJA && i != WEAPON_TASER && (i != WEAPON_PORTAL_RIFLE || m_CollectedPortalRifle) && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
+		if (i != WEAPON_NINJA && (i != WEAPON_PORTAL_RIFLE || m_CollectedPortalRifle) && i != WEAPON_DRAW_EDITOR && m_aWeapons[i].m_Got)
 			Count++;
 	}
 	if (Count < 2)
@@ -4167,23 +4154,26 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int
 	int Special = GetWeaponSpecial(WeaponID);
 	int Ammo = GetWeaponAmmo(WeaponID);
 
-	if (WeaponID == WEAPON_TASER)
+	if (Type == POWERUP_BATTERY)
 	{
-		Type = POWERUP_BATTERY;
-		Ammo = OnDeath ? GetAliveState() : min(GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserBattery, 10);
+		if (WeaponID == WEAPON_TASER)
+		{
+			Type = POWERUP_BATTERY;
+			Ammo = OnDeath ? GetAliveState() : Amount;
 
-		if (!m_pPlayer->GiveTaserBattery(-Ammo))
-			return;
+			if (!m_pPlayer->GiveTaserBattery(-Ammo))
+				return;
 
-		UpdateWeaponIndicator();
-	}
-	else if (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_BATTERY)
-	{
-		Ammo = Amount;
-		if (!m_pPlayer->GivePortalBattery(-Ammo))
-			return;
+			UpdateWeaponIndicator();
+		}
+		else if (WeaponID == WEAPON_PORTAL_RIFLE)
+		{
+			Ammo = Amount;
+			if (!m_pPlayer->GivePortalBattery(-Ammo))
+				return;
 
-		UpdateWeaponIndicator();
+			UpdateWeaponIndicator();
+		}
 	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
@@ -4350,7 +4340,10 @@ void CCharacter::SetWeaponGot(int Type, bool Value)
 
 int CCharacter::GetTaserStrength()
 {
-	return clamp((int)((Server()->Tick() - m_LastTaserUse) * 2 / Server()->TickSpeed()), 0, GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_TaserLevel);
+	// If player isnt logged in set his taserlevel to 10, so that he can use taser when given via rcon. he is not able to pick a taser pickup up, so he doesnt have level 10 to abuse
+	int AccID = m_pPlayer->GetAccID();
+	int TaserLevel = AccID >= ACC_START ? GameServer()->m_Accounts[AccID].m_TaserLevel : 10;
+	return clamp((int)((Server()->Tick() - m_LastTaserUse) * 2 / Server()->TickSpeed()), 0, TaserLevel);
 }
 
 float CCharacter::GetTaserFreezeTime()
@@ -4432,7 +4425,7 @@ void CCharacter::UpdateWeaponIndicator()
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 	char aAmmo[16] = "";
-	if (GetActiveWeapon() == WEAPON_TASER)
+	if (GetActiveWeapon() == WEAPON_TASER && pAccount->m_TaserLevel)
 		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_TaserBattery);
 	else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE && !pAccount->m_PortalRifle && Config()->m_SvPortalRifleAmmo)
 		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBattery);
