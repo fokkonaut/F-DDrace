@@ -4190,7 +4190,7 @@ void CCharacter::DropPickup(int Type, int Amount)
 
 void CCharacter::DropBattery(int WeaponID, int Amount, bool OnDeath, float Dir)
 {
-	if (m_LastBatteryDrop > Server()->Tick() - Server()->TickSpeed() || Amount <= 0)
+	if (m_LastBatteryDrop > Server()->Tick() - Server()->TickSpeed() || Amount <= 0 || m_pPlayer->m_Minigame == MINIGAME_1VS1)
 		return;
 
 	if (WeaponID == WEAPON_TASER)
@@ -4258,8 +4258,11 @@ void CCharacter::DropLoot(int Weapon)
 			}
 
 			// up to one extra weapon
+			int Weapon = (rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS;
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon((rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS, true, Dir);
+			DropWeapon(Weapon, true, Dir);
+			if (Weapon == WEAPON_TASER)
+				DropBattery(WEAPON_TASER, 0, true, Dir);
 		}
 	}
 }
