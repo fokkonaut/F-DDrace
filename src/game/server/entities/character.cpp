@@ -4120,15 +4120,16 @@ void CCharacter::DropFlag()
 	}
 }
 
-void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int Amount)
+void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 {
 	// Do not drop spawnweapons
 	int W = GetSpawnWeaponIndex(WeaponID);
 	if (W != -1 && m_aSpawnWeaponActive[W])
 		return;
 
-	if ((!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || Config()->m_SvMaxWeaponDrops == 0 || (!m_aWeapons[WeaponID].m_Got && Type == POWERUP_WEAPON) || m_pPlayer->m_Minigame == MINIGAME_1VS1
-		|| (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && Type == POWERUP_WEAPON && !m_CollectedPortalRifle) || WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_TASER && m_pPlayer->GetAccID() < ACC_START))
+	if (Config()->m_SvMaxWeaponDrops == 0 || (!OnDeath && (m_FreezeTime || !Config()->m_SvDropWeapons)) || !m_aWeapons[WeaponID].m_Got || m_pPlayer->m_Minigame == MINIGAME_1VS1)
+		return;
+	if (WeaponID == WEAPON_DRAW_EDITOR || (WeaponID == WEAPON_NINJA && !m_ScrollNinja) || (WeaponID == WEAPON_PORTAL_RIFLE && !m_CollectedPortalRifle) || (WeaponID == WEAPON_TASER && m_pPlayer->GetAccID() < ACC_START))
 		return;
 
 	int Count = 0;
@@ -4145,48 +4146,18 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir, int Type, int
 		return;
 
 	if (m_pPlayer->m_vWeaponLimit[WeaponID].size() == (unsigned)Config()->m_SvMaxWeaponDrops)
-	{
-		if (WeaponID == WEAPON_TASER || WeaponID == WEAPON_PORTAL_RIFLE)
-			return; // make sure we dont destroy valuable taser battery drops or portal battery drops
 		m_pPlayer->m_vWeaponLimit[WeaponID][0]->Reset(false);
-	}
 
 	int Special = GetWeaponSpecial(WeaponID);
-	int Ammo = GetWeaponAmmo(WeaponID);
-
-	if (Type == POWERUP_BATTERY)
-	{
-		if (WeaponID == WEAPON_TASER)
-		{
-			Type = POWERUP_BATTERY;
-			Ammo = OnDeath ? GetAliveState() : Amount;
-
-			if (!m_pPlayer->GiveTaserBattery(-Ammo))
-				return;
-
-			UpdateWeaponIndicator();
-		}
-		else if (WeaponID == WEAPON_PORTAL_RIFLE)
-		{
-			Ammo = Amount;
-			if (!m_pPlayer->GivePortalBattery(-Ammo))
-				return;
-
-			UpdateWeaponIndicator();
-		}
-	}
 
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
-	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, Type, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, Ammo, Special);
+	CPickupDrop *pWeapon = new CPickupDrop(GameWorld(), m_Pos, POWERUP_WEAPON, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, GetWeaponAmmo(WeaponID), Special);
 	m_pPlayer->m_vWeaponLimit[WeaponID].push_back(pWeapon);
 
 	if (Special == 0)
 	{
-		if (Type != POWERUP_BATTERY)
-		{
-			GiveWeapon(WeaponID, true);
-			SetWeapon(WEAPON_GUN);
-		}
+		GiveWeapon(WeaponID, true);
+		SetWeapon(WEAPON_GUN);
 	}
 	if (Special&SPECIAL_SPREADWEAPON)
 		SpreadWeapon(WeaponID, false, -1, OnDeath);
@@ -4215,6 +4186,33 @@ void CCharacter::DropPickup(int Type, int Amount)
 		GameServer()->m_vPickupDropLimit.push_back(pPickupDrop);
 	}
 	GameServer()->CreateSound(m_Pos, Type == POWERUP_HEALTH ? SOUND_PICKUP_HEALTH : SOUND_PICKUP_ARMOR, TeamMask());
+}
+
+void CCharacter::DropBattery(int WeaponID, int Amount, bool OnDeath, float Dir)
+{
+	if (m_LastBatteryDrop > Server()->Tick() - Server()->TickSpeed() || Amount <= 0)
+		return;
+
+	if (WeaponID == WEAPON_TASER)
+	{
+		if (OnDeath)
+			Amount = GetAliveState();
+		if (!m_pPlayer->GiveTaserBattery(-Amount))
+			return;
+	}
+	else if (WeaponID == WEAPON_PORTAL_RIFLE)
+	{
+		if (!m_pPlayer->GivePortalBattery(-Amount))
+			return;
+	}
+	else
+		return;
+
+	UpdateWeaponIndicator();
+
+	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+	new CPickupDrop(GameWorld(), m_Pos, POWERUP_BATTERY, m_pPlayer->GetCID(), Dir == -3 ? GetAimDir() : Dir, 300, WeaponID, Amount);
+	m_LastBatteryDrop = Server()->Tick();
 }
 
 void CCharacter::DropLoot(int Weapon)

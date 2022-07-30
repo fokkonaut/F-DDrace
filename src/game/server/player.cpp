@@ -1746,11 +1746,8 @@ bool CPlayer::GiveTaserBattery(int Amount)
 	}
 	else
 	{
-		if (pAccount->m_TaserBattery <= 0)
+		if (pAccount->m_TaserBattery <= 0 || pAccount->m_TaserBattery+Amount < 0)
 			return false;
-
-		if (pAccount->m_TaserBattery+Amount < 0)
-			Amount += abs(Amount)-pAccount->m_TaserBattery;
 		Symbol = '-';
 	}
 
@@ -1777,11 +1774,8 @@ bool CPlayer::GivePortalBattery(int Amount)
 	char Symbol = '+';
 	if (Amount < 0)
 	{
-		if (pAccount->m_PortalBattery <= 0)
+		if (pAccount->m_PortalBattery <= 0 || pAccount->m_PortalBattery+Amount < 0)
 			return false;
-
-		if (pAccount->m_PortalBattery+Amount < 0)
-			Amount += abs(Amount)-pAccount->m_PortalBattery;
 		Symbol = '-';
 	}
 

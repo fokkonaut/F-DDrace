@@ -1392,6 +1392,10 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 
 			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
+			pSelf->SendChatTarget(pResult->m_ClientID, "--- Collectables ---");
+			str_format(aBuf, sizeof(aBuf), "Taser Battery [%d]", pAccount->m_TaserBattery);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 			str_format(aBuf, sizeof(aBuf), "Portal Battery [%d]", pAccount->m_PortalBattery);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 		} //fallthrough
@@ -1400,7 +1404,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 		{
 			if (Minigame == MINIGAME_NONE)
 			{
-				pSelf->SendChatTarget(pResult->m_ClientID, "---- BLOCK ----");
+				pSelf->SendChatTarget(pResult->m_ClientID, "--- Block ---");
 			}
 			else
 			{
@@ -2008,11 +2012,7 @@ void CGameContext::ConPortal(IConsole::IResult* pResult, void* pUserData)
 				return;
 			}
 
-			if (pPlayer->GetCharacter()->m_LastBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
-			{
-				pPlayer->GetCharacter()->DropWeapon(WEAPON_PORTAL_RIFLE, false, -3, POWERUP_BATTERY, Amount);
-				pPlayer->GetCharacter()->m_LastBatteryDrop = pSelf->Server()->Tick();
-			}
+			pPlayer->GetCharacter()->DropBattery(WEAPON_PORTAL_RIFLE, Amount);
 		}
 		return;
 	}
@@ -3034,11 +3034,7 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 				return;
 			}
 
-			if (pPlayer->GetCharacter()->m_LastBatteryDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
-			{
-				pPlayer->GetCharacter()->DropWeapon(WEAPON_TASER, false, -3, POWERUP_BATTERY, Amount);
-				pPlayer->GetCharacter()->m_LastBatteryDrop = pSelf->Server()->Tick();
-			}
+			pPlayer->GetCharacter()->DropBattery(WEAPON_TASER, Amount);
 		}
 		return;
 	}
