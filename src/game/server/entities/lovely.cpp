@@ -8,14 +8,15 @@ CLovely::CLovely(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 {
 	m_Owner = Owner;
 	m_SpawnDelay = 0;
+	for (int i = 0; i < MAX_HEARTS; i++)
+		m_aLovelyData[i].m_ID = Server()->SnapNewID();
 	GameWorld()->InsertEntity(this);
 }
 
 void CLovely::Reset()
 {
-	for (unsigned int i = 0; i < m_vLovelyData.size(); i++)
-		Server()->SnapFreeID(m_vLovelyData[i].m_ID);
-	m_vLovelyData.clear();
+	for (int i = 0; i < MAX_HEARTS; i++)
+		Server()->SnapFreeID(m_aLovelyData[i].m_ID);
 	GameWorld()->DestroyEntity(this);
 }
 
@@ -31,36 +32,39 @@ void CLovely::Tick()
 	m_Pos = pOwner->GetPos();
 
 	m_SpawnDelay--;
-	if (!m_vLovelyData.size() || m_SpawnDelay <= 0)
+	if (m_SpawnDelay <= 0)
 	{
 		SpawnNewHeart();
 		int SpawnTime = 45;
 		m_SpawnDelay = Server()->TickSpeed() - (rand() % (SpawnTime - (SpawnTime - 10) + 1) + (SpawnTime - 10));
 	}
 
-	for (unsigned int i = 0; i < m_vLovelyData.size(); i++)
+	for (int i = 0; i < MAX_HEARTS; i++)
 	{
-		m_vLovelyData[i].m_Lifespan--;
-		m_vLovelyData[i].m_Pos.y -= 5.f;
+		if (m_aLovelyData[i].m_Lifespan == -1)
+			continue;
 
-		if (m_vLovelyData[i].m_Lifespan <= 0 || GameServer()->Collision()->TestBox(m_vLovelyData[i].m_Pos, vec2(14.f, 14.f)))
-		{
-			Server()->SnapFreeID(m_vLovelyData[i].m_ID);
-			m_vLovelyData.erase(m_vLovelyData.begin() + i);
-			i--;
-		}
+		m_aLovelyData[i].m_Lifespan--;
+		m_aLovelyData[i].m_Pos.y -= 5.f;
+
+		if (m_aLovelyData[i].m_Lifespan == 0 || GameServer()->Collision()->TestBox(m_aLovelyData[i].m_Pos, vec2(14.f, 14.f)))
+			m_aLovelyData[i].m_Lifespan = -1;
 	}
 }
 
 void CLovely::SpawnNewHeart()
 {
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	SLovelyData Data;
-	Data.m_ID = Server()->SnapNewID();
-	Data.m_Lifespan = Server()->TickSpeed() / 2;
-	Data.m_Pos = vec2(pOwner->GetPos().x + (rand() % 50 - 25), pOwner->GetPos().y - 30);
-	m_vLovelyData.push_back(Data);
-	pOwner->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed() * 2);
+	for (int i = 0; i < MAX_HEARTS; i++)
+	{
+		if (m_aLovelyData[i].m_Lifespan > 0)
+			continue;
+
+		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+		m_aLovelyData[i].m_Lifespan = Server()->TickSpeed() / 2;
+		m_aLovelyData[i].m_Pos = vec2(pOwner->GetPos().x + (rand() % 50 - 25), pOwner->GetPos().y - 30);
+		pOwner->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed() * 2);
+		break;
+	}
 }
 
 void CLovely::Snap(int SnappingClient)
@@ -72,15 +76,18 @@ void CLovely::Snap(int SnappingClient)
 	if (pOwner && (!CmaskIsSet(pOwner->TeamMask(), SnappingClient) || pOwner->IsPaused()))
 		return;
 
-	for (unsigned int i = 0; i < m_vLovelyData.size(); i++)
+	for (int i = 0; i < MAX_HEARTS; i++)
 	{
+		if (m_aLovelyData[i].m_Lifespan == -1)
+			continue;
+
 		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_vLovelyData[i].m_ID, Size));
+		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aLovelyData[i].m_ID, Size));
 		if (!pP)
 			return;
 
-		pP->m_X = round_to_int(m_vLovelyData[i].m_Pos.x);
-		pP->m_Y = round_to_int(m_vLovelyData[i].m_Pos.y);
+		pP->m_X = round_to_int(m_aLovelyData[i].m_Pos.x);
+		pP->m_Y = round_to_int(m_aLovelyData[i].m_Pos.y);
 		if (Server()->IsSevendown(SnappingClient))
 		{
 			pP->m_Type = POWERUP_HEALTH;

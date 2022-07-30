@@ -5,6 +5,11 @@
 
 class CLovely : public CEntity
 {
+	enum
+	{
+		MAX_HEARTS = 4
+	};
+
 	int m_Owner;
 	float m_SpawnDelay;
 
@@ -14,7 +19,7 @@ class CLovely : public CEntity
 		vec2 m_Pos;
 		float m_Lifespan;
 	};
-	std::vector <SLovelyData> m_vLovelyData;
+	SLovelyData m_aLovelyData[MAX_HEARTS];
 	void SpawnNewHeart();
 
 public:
