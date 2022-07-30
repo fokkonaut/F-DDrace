@@ -3043,7 +3043,7 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Taser ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Police officers with level 3 or higher get a taser license.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "The taser is a rifle that freezes players for a short time.");
-	pSelf->SendChatTarget(pResult->m_ClientID, "The taser relies on the normal rifle, if you loose it, you loose the taser.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "You can pick up the taser and taser batteries throughout the map.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your taser stats ~~~");
 	str_format(aBuf, sizeof(aBuf), "Taser level: %d/%d", pAccount->m_TaserLevel, NUM_TASER_LEVELS);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
