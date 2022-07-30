@@ -1390,7 +1390,7 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 				}
 			}
 
-			str_format(aBuf, sizeof(aBuf), "Police [%d]%s", pAccount->m_PoliceLevel, pAccount->m_PoliceLevel >= NUM_POLICE_LEVELS ? " (max)" : "");
+			str_format(aBuf, sizeof(aBuf), "Police [%d]", pAccount->m_PoliceLevel);
 			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 			pSelf->SendChatTarget(pResult->m_ClientID, "--- Collectables ---");
