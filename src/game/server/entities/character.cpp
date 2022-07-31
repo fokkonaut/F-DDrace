@@ -263,7 +263,7 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		GameServer()->Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false);
+		GameServer()->Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false, m_Core.m_MoveRestrictionExtra);
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);

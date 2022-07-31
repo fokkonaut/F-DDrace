@@ -725,7 +725,10 @@ void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec
 				}
 			}
 
-			if(CheckStoppers)
+			// always disallow ninja through vip+ door
+			int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width-1);
+			int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height-1);
+			if(CheckStoppers || (!Extra.m_VipPlus && (GetIndex(Nx, Ny) == TILE_VIP_PLUS_ONLY || GetFIndex(Nx, Ny) == TILE_VIP_PLUS_ONLY)))
 			{
 				// Yay. Backward-compatibility. Isn't that fun?
 				//
@@ -1820,9 +1823,9 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
 			if (FrontLayerBlocked)
-				return GetFIndex(Nx, Ny);
+				return FIndex;
 			if (GameLayerBlocked)
-				return GetIndex(Nx, Ny);
+				return Index;
 			return 0;
 		}
 		Last = Pos;
