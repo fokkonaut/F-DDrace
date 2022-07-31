@@ -24,6 +24,7 @@
 #include "lovely.h"
 #include "rotating_ball.h"
 #include "epic_circle.h"
+#include "staff_ind.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -3767,6 +3768,7 @@ void CCharacter::FDDraceInit()
 	m_Lovely = false;
 	m_RotatingBall = false;
 	m_EpicCircle = false;
+	m_StaffInd = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4849,4 +4851,12 @@ void CCharacter::EpicCircle(bool Set, int FromID, bool Silent)
 	if (m_EpicCircle)
 		new CEpicCircle(GameWorld(), m_Pos, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(EPIC_CIRCLE, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::StaffInd(bool Set, int FromID, bool Silent)
+{
+	m_StaffInd = Set;
+	if (m_StaffInd)
+		new CStaffInd(GameWorld(), m_Pos, m_pPlayer->GetCID());
+	GameServer()->SendExtraMessage(STAFF_IND, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

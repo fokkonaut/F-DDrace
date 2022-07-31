@@ -6842,7 +6842,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 	if (FromID == -1 || FromID == ToID)
 	{
 		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER|| Extra == SPREAD_WEAPON
-			|| Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON || Extra == DOOR_HAMMER || Extra == ROTATING_BALL || Extra == EPIC_CIRCLE)
+			|| Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON || Extra == DOOR_HAMMER || Extra == ROTATING_BALL || Extra == EPIC_CIRCLE || Extra == STAFF_IND)
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
 		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
@@ -6944,6 +6944,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Rotating Ball";
 	case EPIC_CIRCLE:
 		return "Epic Circle";
+	case STAFF_IND:
+		return "Staff Indicator";
 	}
 	return "Unknown";
 }

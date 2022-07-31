@@ -51,6 +51,7 @@ enum Extra
 	LOVELY,
 	ROTATING_BALL,
 	EPIC_CIRCLE,
+	STAFF_IND,
 	NUM_EXTRAS
 };
 
@@ -173,6 +174,7 @@ public:
 	void Lovely(bool Set = true, int FromID = -1, bool Silent = false);
 	void RotatingBall(bool Set = true, int FromID = -1, bool Silent = false);
 	void EpicCircle(bool Set = true, int FromID = -1, bool Silent = false);
+	void StaffInd(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -429,6 +431,7 @@ public:
 	bool m_Lovely;
 	bool m_RotatingBall;
 	bool m_EpicCircle;
+	bool m_StaffInd;
 
 	void ResetOnlyFirstPortal();
 	int64 m_LastLinkedPortals;
