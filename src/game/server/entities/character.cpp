@@ -463,8 +463,11 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
 	// check for ammo
-	if(!m_aWeapons[GetActiveWeapon()].m_Ammo)
+	bool NoTaserAmmo = (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery <= 0);
+	if(!m_aWeapons[GetActiveWeapon()].m_Ammo || NoTaserAmmo)
 	{
 		// 125ms is a magical limit of how fast a human can click
 		m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
@@ -496,8 +499,6 @@ void CCharacter::FireWeapon()
 	if (m_pPlayer->IsMinigame() || (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
 		NumShots = 1;
 	bool Sound = true;
-
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
 	for (int i = 0; i < NumShots; i++)
 	{
@@ -1064,7 +1065,7 @@ void CCharacter::FireWeapon()
 			GiveWeapon(GetActiveWeapon(), true);
 	}
 
-	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START)
+	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
 	{
 		pAccount->m_TaserBattery--;
 		UpdateWeaponIndicator();
@@ -2812,8 +2813,7 @@ void CCharacter::HandleTiles(int Index)
 	if ((m_TileIndex == TILE_VIP_PLUS_ONLY) || (m_TileFIndex == TILE_VIP_PLUS_ONLY))
 	{
 		// only reset portal if we have only shot the first one. if both are there already it means they are either both inside, or both outside.
-		if (m_pPlayer->m_pPortal[PORTAL_FIRST] && !m_pPlayer->m_pPortal[PORTAL_SECOND])
-			m_pPlayer->m_pPortal[PORTAL_FIRST]->Reset();
+		ResetOnlyFirstPortal();
 	}
 
 	// update this AFTER you are done using this var above
@@ -4474,6 +4474,12 @@ void CCharacter::UpdateWeaponIndicator()
 	// dont update when vanilla weapon got triggered and we have new hud
 	if (aBuf[0])
 		m_LastWeaponIndTick = Server()->Tick();
+}
+
+void CCharacter::ResetOnlyFirstPortal()
+{
+	if (m_pPlayer->m_pPortal[PORTAL_FIRST] && !m_pPlayer->m_pPortal[PORTAL_SECOND])
+		m_pPlayer->m_pPortal[PORTAL_FIRST]->Reset();
 }
 
 int CCharacter::HasFlag()

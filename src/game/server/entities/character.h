@@ -430,6 +430,7 @@ public:
 	bool m_RotatingBall;
 	bool m_EpicCircle;
 
+	void ResetOnlyFirstPortal();
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
 	int64 m_LastBatteryDrop;

@@ -2159,6 +2159,7 @@ void CGameContext::ConSpawn(IConsole::IResult* pResult, void* pUserData)
 
 	pChr->ReleaseHook();
 	pChr->ForceSetPos(Pos);
+	pChr->ResetOnlyFirstPortal();
 
 	// create death effect and do a nice sound when teleporting to spawn
 	Mask128 TeamMask = pChr->TeamMask();
