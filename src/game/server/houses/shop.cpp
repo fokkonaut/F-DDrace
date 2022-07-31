@@ -24,8 +24,8 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.");
 		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghost'.");
 		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
-		AddItem("VIP", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP gives you some benefits, check '/vip'.", EuroMode);
-		AddItem("VIP+", 1, EuroMode ? 10 : 1000000, TIME_30_DAYS, "VIP+ gives you even more benefits than VIP, check '/vip'.", EuroMode);
+		AddItem("VIP Classic", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP Classic gives you some benefits, check '/vip'.", EuroMode);
+		AddItem("VIP+", 1, EuroMode ? 10 : 1000000, TIME_30_DAYS, "VIP+ gives you even more benefits than VIP Classic, check '/vip'.", EuroMode);
 		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
