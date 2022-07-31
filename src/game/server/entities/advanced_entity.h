@@ -46,7 +46,7 @@ protected:
 	bool m_GroundVel;
 	bool m_AirVel;
 	float m_Elasticity;
-	bool m_VipPlus;
+	bool m_AllowVipPlus;
 
 	static bool IsSwitchActiveCb(int Number, void* pUser);
 	void HandleTiles(int Index);
@@ -54,6 +54,7 @@ protected:
 	int m_TileFIndex;
 	int m_MoveRestrictions;
 	int m_LastInOutTeleporter;
+	CCollision::MoveRestrictionExtra GetMoveRestrictionExtra();
 };
 
 #endif

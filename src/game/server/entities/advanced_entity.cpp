@@ -18,7 +18,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_Gravity = true;
 	m_GroundVel = true;
 	m_AirVel = true;
-	m_VipPlus = true;
+	m_AllowVipPlus = true;
 	m_Elasticity = 0.5f;
 	m_LastInOutTeleporter = 0;
 }
@@ -166,7 +166,7 @@ void CAdvancedEntity::HandleDropped()
 		m_LastInOutTeleporter = 0;
 	}
 	IsGrounded(m_GroundVel, m_AirVel);
-	GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Pos, &m_Vel, m_Size, m_Elasticity, !Config()->m_SvStoppersPassthrough);
+	GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Pos, &m_Vel, m_Size, m_Elasticity, !Config()->m_SvStoppersPassthrough, GetMoveRestrictionExtra());
 }
 
 bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
@@ -179,6 +179,14 @@ bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
 	return pCollision->m_pSwitchers && pCollision->m_pSwitchers[Number].m_Status[Team] && Team != TEAM_SUPER;
 }
 
+CCollision::MoveRestrictionExtra CAdvancedEntity::GetMoveRestrictionExtra()
+{
+	CCollision::MoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra();
+	if (!m_AllowVipPlus)
+		Extra.m_VipPlus = false; // explicitly disallow passing the vip room if the entity wants to force it
+	return Extra;
+}
+
 void CAdvancedEntity::HandleTiles(int Index)
 {
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
@@ -186,9 +194,7 @@ void CAdvancedEntity::HandleTiles(int Index)
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 
-	CCollision::MoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra();
-	if (!m_VipPlus) Extra.m_VipPlus = false; // only explicitly disallow it when this entitiy really shall not pass.
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, Extra);
+	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, GetMoveRestrictionExtra());
 
 	// stopper
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);
