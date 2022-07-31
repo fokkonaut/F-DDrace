@@ -301,6 +301,12 @@ void CShop::BuyItem(int ClientID, int Item)
 			return;
 		}
 
+		if (Item == ITEM_BLOODY && pChr->m_Atom)
+		{
+			GameServer()->SendChatTarget(ClientID, "You can not buy bloody while atom is activated");
+			return;
+		}
+
 		if (Item == ITEM_TASER_BATTERY)
 		{
 			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
