@@ -114,7 +114,7 @@ void CPortal::EntitiesEnter()
 			continue;
 
 		// dont allow travelling when touching the portal through a wall
-		if (GameServer()->Collision()->IntersectLine(m_Pos, apEnts[i]->GetPos(), 0, 0))
+		if (GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, apEnts[i]->GetPos(), 0, 0))
 			continue;
 
 		CCharacter *pAffectedChr = 0;

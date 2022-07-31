@@ -18,6 +18,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_Gravity = true;
 	m_GroundVel = true;
 	m_AirVel = true;
+	m_VipPlus = true;
 	m_Elasticity = 0.5f;
 	m_LastInOutTeleporter = 0;
 }
@@ -184,7 +185,10 @@ void CAdvancedEntity::HandleTiles(int Index)
 	int MapIndex = Index;
 	m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra());
+
+	CCollision::MoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra();
+	if (!m_VipPlus) Extra.m_VipPlus = false; // only explicitly disallow it when this entitiy really shall not pass.
+	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, -1, Extra);
 
 	// stopper
 	m_Vel = ClampVel(m_MoveRestrictions, m_Vel);

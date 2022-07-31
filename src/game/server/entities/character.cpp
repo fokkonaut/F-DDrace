@@ -2808,6 +2808,14 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
+	// vip plus only
+	if ((m_TileIndex == TILE_VIP_PLUS_ONLY) || (m_TileFIndex == TILE_VIP_PLUS_ONLY))
+	{
+		// only reset portal if we have only shot the first one. if both are there already it means they are either both inside, or both outside.
+		if (m_pPlayer->m_pPortal[PORTAL_FIRST] && !m_pPlayer->m_pPortal[PORTAL_SECOND])
+			m_pPlayer->m_pPortal[PORTAL_FIRST]->Reset();
+	}
+
 	// update this AFTER you are done using this var above
 	m_LastIndexTile = m_TileIndex;
 	m_LastIndexFrontTile = m_TileFIndex;
@@ -2884,6 +2892,12 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You need a key to enter this room, buy one in the shop");
 		m_RoomAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
+	}
+
+	if ((m_MoveRestrictions&CANTMOVE_VIP_PLUS_ONLY) && m_VipPlusAntiSpamTick < Server()->Tick())
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "This area is for VIP+ only, buy it in the shop");
+		m_VipPlusAntiSpamTick = Server()->Tick() + Server()->TickSpeed() * 5;
 	}
 
 	// stopper
@@ -3676,12 +3690,6 @@ void CCharacter::FDDraceInit()
 
 	m_NumGhostShots = 0;
 
-	int64 Now = Server()->Tick();
-
-	if (m_pPlayer->m_HasRoomKey)
-		m_Core.m_MoveRestrictionExtra.m_CanEnterRoom = true;
-	m_RoomAntiSpamTick = Now;
-
 	m_CollectedPortalRifle = false;
 	m_LastBatteryDrop = 0;
 
@@ -3703,6 +3711,16 @@ void CCharacter::FDDraceInit()
 		if (pAccount->m_PortalRifle)
 			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 	}
+
+	int64 Now = Server()->Tick();
+
+	if (pAccount->m_VIP == VIP_PLUS)
+		m_Core.m_MoveRestrictionExtra.m_VipPlus = true;
+	m_VipPlusAntiSpamTick = Now;
+
+	if (m_pPlayer->m_HasRoomKey)
+		m_Core.m_MoveRestrictionExtra.m_RoomKey = true;
+	m_RoomAntiSpamTick = Now;
 
 	m_HasFinishedSpecialRace = false;
 	m_GotMoneyXPBomb = false;

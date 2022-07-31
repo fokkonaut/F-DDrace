@@ -5220,7 +5220,7 @@ int CGameContext::AddAccount()
 	Account.m_aLastMoneyTransaction[3][0] = '\0';
 	Account.m_aLastMoneyTransaction[4][0] = '\0';
 	Account.m_SpookyGhost = false;
-	Account.m_VIP = false;
+	Account.m_VIP = 0;
 	Account.m_BlockPoints = 0;
 	Account.m_InstagibKills = 0;
 	Account.m_InstagibWins = 0;
@@ -5235,7 +5235,7 @@ int CGameContext::AddAccount()
 	Account.m_KillingSpreeRecord = 0;
 	Account.m_Euros = 0;
 	Account.m_ExpireDateVIP = 0;
-	Account.m_PortalRifle = false;
+	Account.m_PortalRifle = 0;
 	Account.m_ExpireDatePortalRifle = 0;
 	Account.m_Version = ACC_CURRENT_VERSION;
 	Account.m_Addr.type = -1;

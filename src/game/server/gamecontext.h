@@ -99,6 +99,10 @@ enum
 	// update this one with every acc change you do
 	ACC_CURRENT_VERSION = 10,
 
+	// vip
+	VIP_CLASSIC = 1,
+	VIP_PLUS,
+
 	// motd
 	MOTD_MAX_LINES = 24,
 };
@@ -498,7 +502,7 @@ public:
 		int m_SurvivalWins;
 		bool m_SpookyGhost;
 		char m_aLastMoneyTransaction[5][128];
-		bool m_VIP;
+		int m_VIP;
 		int m_BlockPoints;
 		int m_InstagibKills;
 		int m_InstagibWins;
@@ -511,7 +515,7 @@ public:
 		int m_KillingSpreeRecord;
 		int m_Euros;
 		time_t m_ExpireDateVIP;
-		bool m_PortalRifle;
+		int m_PortalRifle;
 		time_t m_ExpireDatePortalRifle;
 		int m_Version;
 		NETADDR m_Addr;
@@ -870,6 +874,9 @@ private:
 	static void ConAtomVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConTrailVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpreadGunVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConRotatingBallVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConEpicCircleVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConLovelyVIP(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);

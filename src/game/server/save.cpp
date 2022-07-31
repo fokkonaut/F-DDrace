@@ -191,7 +191,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_EpicCircle = pChr->m_EpicCircle;
 
 	// core
-	m_MoveRestrictionExtraCanEnterRoom = pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom;
+	m_MoveRestrictionExtraRoomKey = pChr->Core()->m_MoveRestrictionExtra.m_RoomKey;
 
 	// player
 	m_Gamemode = pChr->GetPlayer()->m_Gamemode;
@@ -363,7 +363,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->EpicCircle(m_EpicCircle, -1, true);
 
 		// core
-		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = m_MoveRestrictionExtraCanEnterRoom;
+		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = m_MoveRestrictionExtraRoomKey;
 
 		// player
 		pChr->GetPlayer()->m_Gamemode = m_Gamemode;
@@ -486,7 +486,7 @@ char* CSaveTee::GetString()
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
-		m_MoveRestrictionExtraCanEnterRoom, m_Lovely, m_RotatingBall, m_EpicCircle,
+		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle,
 		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_JailTime, m_EscapeTime, m_CollectedPortalRifle,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, (int64)m_Identity.m_ExpireDate,
@@ -594,7 +594,7 @@ int CSaveTee::LoadString(char* String)
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
-		&m_MoveRestrictionExtraCanEnterRoom, &m_Lovely, &m_RotatingBall, &m_EpicCircle,
+		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle,
 		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		&m_JailTime, &m_EscapeTime, &m_CollectedPortalRifle,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, &ExpireDate,

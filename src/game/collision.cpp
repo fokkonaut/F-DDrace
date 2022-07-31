@@ -318,8 +318,12 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags, CCollision
 		return Twoway(CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN);
 		// F-DDrace
 	case TILE_ROOM:
-		if (!Extra.m_CanEnterRoom)
+		if (!Extra.m_RoomKey)
 			return Twoway(CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN)|CANTMOVE_ROOM;
+		break;
+	case TILE_VIP_PLUS_ONLY:
+		if (!Extra.m_VipPlus)
+			return Twoway(CANTMOVE_LEFT|CANTMOVE_RIGHT|CANTMOVE_UP|CANTMOVE_DOWN)|CANTMOVE_VIP_PLUS_ONLY;
 		break;
 	}
 	return 0;
@@ -352,8 +356,10 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::M
 
 	// F-DDrace
 	int Extras = 0;
-	if (Tile == TILE_ROOM && !Extra.m_CanEnterRoom)
+	if (Tile == TILE_ROOM && !Extra.m_RoomKey)
 		Extras |= CANTMOVE_ROOM;
+	if (Tile == TILE_VIP_PLUS_ONLY && !Extra.m_VipPlus)
+		Extras |= CANTMOVE_VIP_PLUS_ONLY;
 
 	return (Result&GetMoveRestrictionsMask(Direction))|Extras;
 }
@@ -1803,8 +1809,10 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 		vec2 Pos = mix(Pos0, Pos1, a);
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
-		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetIndex(Nx, Ny) == TILE_DFREEZE;
-		bool FrontLayerBlocked = GetFIndex(Nx, Ny) == TILE_PORTAL_RIFLE_STOP || GetFIndex(Nx, Ny) == TILE_DFREEZE;
+		int Index = GetIndex(Nx, Ny);
+		int FIndex = GetFIndex(Nx, Ny);
+		bool GameLayerBlocked = Index == TILE_SOLID || Index == TILE_NOHOOK || Index == TILE_PORTAL_RIFLE_STOP || Index == TILE_DFREEZE || Index == TILE_VIP_PLUS_ONLY;
+		bool FrontLayerBlocked = FIndex == TILE_PORTAL_RIFLE_STOP || FIndex == TILE_DFREEZE || FIndex == TILE_VIP_PLUS_ONLY;
 		if (GameLayerBlocked || FrontLayerBlocked)
 		{
 			if (pOutCollision)

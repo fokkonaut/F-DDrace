@@ -55,7 +55,7 @@ CHAT_COMMAND("account", "", CFGFLAG_CHAT, ConAccount, this, "Shows information a
 //info
 CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost", AUTHED_NO)
 CHAT_COMMAND("police", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
-CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP", AUTHED_NO)
+CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP and VIP+", AUTHED_NO)
 CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons", AUTHED_NO)
 
 //account
@@ -115,4 +115,7 @@ CHAT_COMMAND("bloody", "", CFGFLAG_CHAT, ConBloodyVIP, this, "Toggles bloody for
 CHAT_COMMAND("atom", "", CFGFLAG_CHAT, ConAtomVIP, this, "Toggles atom for yourself", AUTHED_NO)
 CHAT_COMMAND("trail", "", CFGFLAG_CHAT, ConTrailVIP, this, "Toggles trail for yourself", AUTHED_NO)
 CHAT_COMMAND("spreadgun", "", CFGFLAG_CHAT, ConSpreadGunVIP, this, "Toggles spread gun for yourself", AUTHED_NO)
+CHAT_COMMAND("rotatingball", "", CFGFLAG_CHAT, ConRotatingBallVIP, this, "Toggles rotating ball for yourself", AUTHED_NO)
+CHAT_COMMAND("epiccircle", "", CFGFLAG_CHAT, ConEpicCircleVIP, this, "Toggles epic circle for yourself", AUTHED_NO)
+CHAT_COMMAND("lovely", "", CFGFLAG_CHAT, ConLovelyVIP, this, "Toggles lovely for yourself", AUTHED_NO)
 #undef CHAT_COMMAND

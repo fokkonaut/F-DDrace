@@ -157,7 +157,7 @@ private:
 	int m_EpicCircle;
 
 	// core
-	int m_MoveRestrictionExtraCanEnterRoom;
+	int m_MoveRestrictionExtraRoomKey;
 
 	// player
 	int m_Gamemode;

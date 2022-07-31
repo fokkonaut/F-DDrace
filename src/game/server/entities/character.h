@@ -434,6 +434,8 @@ public:
 	bool m_CollectedPortalRifle;
 	int64 m_LastBatteryDrop;
 
+	int64 m_VipPlusAntiSpamTick;
+
 	int SendDroppedFlagCooldown(int SnappingClient);
 
 	int m_HookPower;

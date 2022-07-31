@@ -1465,11 +1465,13 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	if (!pPlayer)
 		return;
 
-	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "VIP's have access to some extras. They can use following commands:");
-	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail, spreadgun");
-	pSelf->SendChatTarget(pResult->m_ClientID, "You can use '/room' to invite other players to the room.");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Also, you get 2 xp and 2 money more per second.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP Classic ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "With VIP Classic you get an XP and money boost of '+2' per second, aswell as access to the following commands:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "rainbow, bloody, atom, trail, spreadgun, room");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP+ ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "VIP+ includes every feature of VIP Classic.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Additionally to that you can enter the VIP+ room to farm safely there, aswell as you gain access to the following commands:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "rotatingball, epiccircle, lovely");
 }
 
 void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData)
@@ -2065,13 +2067,13 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player has a key already");
 			return;
 		}
-		else if (pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom)
+		else if (pChr->Core()->m_MoveRestrictionExtra.m_RoomKey)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player got invited already");
 			return;
 		}
 
-		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true;
+		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = true;
 		str_format(aBuf, sizeof(aBuf), "'%s' invited you to the room", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
 
@@ -2095,13 +2097,13 @@ void CGameContext::ConRoom(IConsole::IResult* pResult, void* pUserData)
 			pSelf->SendChatTarget(pResult->m_ClientID, "You can't kick a player with a key");
 			return;
 		}
-		else if (!pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom)
+		else if (!pChr->Core()->m_MoveRestrictionExtra.m_RoomKey)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "This player is not invited");
 			return;
 		}
 
-		pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = false;
+		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = false;
 		str_format(aBuf, sizeof(aBuf), "'%s' kicked you out of room", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
 
@@ -3063,8 +3065,7 @@ void CGameContext::ConTaserInfo(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConRainbowVIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 
@@ -3080,8 +3081,7 @@ void CGameContext::ConRainbowVIP(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConBloodyVIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 
@@ -3097,8 +3097,7 @@ void CGameContext::ConBloodyVIP(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConAtomVIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 
@@ -3114,8 +3113,7 @@ void CGameContext::ConAtomVIP(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConTrailVIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 
@@ -3131,8 +3129,7 @@ void CGameContext::ConTrailVIP(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSpreadGunVIP(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 
@@ -3143,4 +3140,52 @@ void CGameContext::ConSpreadGunVIP(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->SpreadWeapon(WEAPON_GUN, !pChr->m_aSpreadWeapon[WEAPON_GUN], pResult->m_ClientID);
+}
+
+void CGameContext::ConRotatingBallVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr)
+		return;
+
+	if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+		return;
+	}
+
+	pChr->RotatingBall(!pChr->m_RotatingBall, pResult->m_ClientID);
+}
+
+void CGameContext::ConEpicCircleVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr)
+		return;
+
+	if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+		return;
+	}
+
+	pChr->EpicCircle(!pChr->m_EpicCircle, pResult->m_ClientID);
+}
+
+void CGameContext::ConLovelyVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr)
+		return;
+
+	if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+		return;
+	}
+
+	pChr->Lovely(!pChr->m_Lovely, pResult->m_ClientID);
 }

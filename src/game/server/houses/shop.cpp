@@ -25,6 +25,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghost'.");
 		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
 		AddItem("VIP", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP gives you some benefits, check '/vip'.", EuroMode);
+		AddItem("VIP+", 1, EuroMode ? 10 : 1000000, TIME_30_DAYS, "VIP+ gives you even more benefits than VIP, check '/vip'.", EuroMode);
 		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
@@ -294,6 +295,12 @@ void CShop::BuyItem(int ClientID, int Item)
 			return;
 		}
 
+		if (pAccount->m_VIP && ((Item == ITEM_VIP && pAccount->m_VIP != VIP_CLASSIC) || (Item == ITEM_VIP_PLUS && pAccount->m_VIP != VIP_PLUS)))
+		{
+			GameServer()->SendChatTarget(ClientID, "You can not buy this VIP level while owning another one");
+			return;
+		}
+
 		if (Item == ITEM_TASER_BATTERY)
 		{
 			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
@@ -355,7 +362,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	// send a message that we bought the item
 	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aDescription, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	GameServer()->SendChatTarget(ClientID, aMsg);
-	if (Item == ITEM_VIP || Item == ITEM_PORTAL_RIFLE)
+	if (Item == ITEM_VIP || Item == ITEM_VIP_PLUS || Item == ITEM_PORTAL_RIFLE)
 		GameServer()->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
@@ -377,8 +384,10 @@ void CShop::BuyItem(int ClientID, int Item)
 		case ITEM_BLOODY:			pChr->Bloody(true, -1, true); break;
 		case ITEM_POLICE:			pAccount->m_PoliceLevel++; break;
 		case ITEM_SPOOKY_GHOST:		pAccount->m_SpookyGhost = true; break;
-		case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_CanEnterRoom = true; break;
-		case ITEM_VIP:				pAccount->m_VIP = true; pPlayer->SetExpireDate(Item); break;
+		case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = true; break;
+		case ITEM_VIP_PLUS:			pChr->Core()->m_MoveRestrictionExtra.m_VipPlus = true;
+			// fallthrough
+		case ITEM_VIP:				pAccount->m_VIP = Item == ITEM_VIP ? VIP_CLASSIC : VIP_PLUS; pPlayer->SetExpireDate(Item); break;
 		case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
 			// fallthrough
 		case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;

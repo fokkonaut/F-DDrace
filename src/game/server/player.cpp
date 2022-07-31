@@ -1803,10 +1803,16 @@ void CPlayer::OnLogin()
 	ExpireItems();
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	if (!IsMinigame() && !m_JailTime && m_pCharacter)
+	if (m_pCharacter)
 	{
-		if (pAccount->m_PortalRifle)
-			m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
+		if (pAccount->m_VIP == VIP_PLUS)
+			m_pCharacter->Core()->m_MoveRestrictionExtra.m_VipPlus = true;
+
+		if (!IsMinigame() && !m_JailTime)
+		{
+			if (pAccount->m_PortalRifle)
+				m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
+		}
 	}
 
 	if (pAccount->m_aContact[0] == '\0')
@@ -1837,8 +1843,12 @@ void CPlayer::OnLogout()
 {
 	GameServer()->SendChatTarget(m_ClientID, "Successfully logged out");
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 	if (m_pCharacter)
 	{
+		if (pAccount->m_VIP == VIP_PLUS)
+			m_pCharacter->Core()->m_MoveRestrictionExtra.m_VipPlus = false;
+
 		m_pCharacter->UnsetSpookyGhost();
 		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, true);
 	}
@@ -1846,8 +1856,6 @@ void CPlayer::OnLogout()
 	StopPlotEditing();
 	CancelPlotAuction();
 	CancelPlotSwap();
-
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
 
 	if (m_TimeoutCode[0] != '\0')
 		str_copy(pAccount->m_aTimeoutCode, m_TimeoutCode, sizeof(pAccount->m_aTimeoutCode));
@@ -1933,7 +1941,7 @@ bool CPlayer::IsExpiredItem(int Item)
 		return false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
-	bool *pVariable;
+	int *pVariable;
 	time_t *pDate;
 
 	switch (Item)
@@ -1948,7 +1956,7 @@ bool CPlayer::IsExpiredItem(int Item)
 
 	if (GameServer()->IsExpired(*pDate))
 	{
-		*pVariable = false;
+		*pVariable = 0;
 		*pDate = 0;
 		return true;
 	}

@@ -15,6 +15,7 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
 	m_StandPos = Pos;
 	m_Team = Team;
 	Reset(true);
+	m_VipPlus = false;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -175,6 +176,10 @@ void CFlag::Tick()
 			if (GetCarrier() == apCloseCCharacters[i] || (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
 				continue;
 
+			// disallow so it wont instantly drop again
+			if (apCloseCCharacters[i]->m_TileIndex == TILE_VIP_PLUS_ONLY || apCloseCCharacters[i]->m_TileFIndex == TILE_VIP_PLUS_ONLY)
+				continue;
+
 			// take the flag
 			if (apCloseCCharacters[i]->HasFlag() == -1 && !GameServer()->Arenas()->FightStarted(apCloseCCharacters[i]->GetPlayer()->GetCID()))
 			{
@@ -207,6 +212,18 @@ void CFlag::Tick()
 		int Number = GameServer()->IntersectedLineDoor(m_Pos, m_PrevPos, Team, true, false);
 		if (Number > 0)
 			TeleToPlot(GameServer()->Collision()->GetPlotBySwitch(Number));
+	}
+
+	int MapIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
+	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+	int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+	if (TileIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_VIP_PLUS_ONLY)
+	{
+		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
+		if (GetCarrier())
+			Drop();
+		m_Vel = vec2(0, 0);
+		m_Pos = m_PrevPos;
 	}
 
 	if (m_SoundTick && Server()->Tick() % Server()->TickSpeed() == 0)

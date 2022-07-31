@@ -90,7 +90,8 @@ void CCharacterCore::Reset()
 	// F-DDrace
 	m_Killer.m_ClientID = -1;
 	m_Killer.m_Weapon = -1;
-	m_MoveRestrictionExtra.m_CanEnterRoom = false;
+	m_MoveRestrictionExtra.m_RoomKey = false;
+	m_MoveRestrictionExtra.m_VipPlus = false;
 	m_FakeTuneCID = -1;
 	m_FightStarted = false;
 }

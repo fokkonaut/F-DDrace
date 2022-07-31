@@ -51,7 +51,8 @@ enum
 
 	// F-DDrace
 	CANTMOVE_ROOM=1<<12,
-	CANTMOVE_DOWN_LASERDOOR=1<<13, // used by prediction
+	CANTMOVE_VIP_PLUS_ONLY=1<<13,
+	CANTMOVE_DOWN_LASERDOOR=1<<14, // used by prediction
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
@@ -90,11 +91,13 @@ public:
 
 	struct MoveRestrictionExtra
 	{
-		bool m_CanEnterRoom;
+		bool m_RoomKey;
+		bool m_VipPlus;
 
 		MoveRestrictionExtra()
 		{
-			m_CanEnterRoom = false;
+			m_RoomKey = false;
+			m_VipPlus = false;
 		}
 	};
 
