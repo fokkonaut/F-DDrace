@@ -3097,7 +3097,6 @@ void CGameContext::ConBloodyVIP(IConsole::IResult *pResult, void *pUserData)
 	pChr->Trail(false, -1, true);
 	pChr->RotatingBall(false, -1, true);
 	pChr->EpicCircle(false, -1, true);
-	pChr->Lovely(false, -1, true);
 }
 
 void CGameContext::ConAtomVIP(IConsole::IResult *pResult, void *pUserData)
@@ -3118,7 +3117,6 @@ void CGameContext::ConAtomVIP(IConsole::IResult *pResult, void *pUserData)
 	pChr->Trail(false, -1, true);
 	pChr->RotatingBall(false, -1, true);
 	pChr->EpicCircle(false, -1, true);
-	pChr->Lovely(false, -1, true);
 }
 
 void CGameContext::ConTrailVIP(IConsole::IResult *pResult, void *pUserData)
@@ -3137,6 +3135,7 @@ void CGameContext::ConTrailVIP(IConsole::IResult *pResult, void *pUserData)
 	pChr->Trail(!pChr->m_Trail, pResult->m_ClientID);
 	pChr->Atom(false, -1, true);
 	pChr->Bloody(false, -1, true);
+	pChr->EpicCircle(false, -1, true);
 }
 
 void CGameContext::ConSpreadGunVIP(IConsole::IResult *pResult, void *pUserData)
@@ -3189,6 +3188,7 @@ void CGameContext::ConEpicCircleVIP(IConsole::IResult *pResult, void *pUserData)
 	pChr->EpicCircle(!pChr->m_EpicCircle, pResult->m_ClientID);
 	pChr->Atom(false, -1, true);
 	pChr->Bloody(false, -1, true);
+	pChr->Trail(false, -1, true);
 }
 
 void CGameContext::ConLovelyVIP(IConsole::IResult *pResult, void *pUserData)
@@ -3205,8 +3205,6 @@ void CGameContext::ConLovelyVIP(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pChr->Lovely(!pChr->m_Lovely, pResult->m_ClientID);
-	pChr->Atom(false, -1, true);
-	pChr->Bloody(false, -1, true);
 }
 
 void CGameContext::ConRainbowHookVIP(IConsole::IResult *pResult, void *pUserData)
