@@ -1929,6 +1929,9 @@ void CPlayer::SetExpireDate(int Item)
 	case ITEM_VIP:
 			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDateVIP, ITEM_EXPIRE_VIP);
 			break;
+	case ITEM_VIP_PLUS:
+			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDateVIP, ITEM_EXPIRE_VIP_PLUS);
+			break;
 	case ITEM_PORTAL_RIFLE:
 			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDatePortalRifle, ITEM_EXPIRE_PORTAL_RIFLE);
 			break;

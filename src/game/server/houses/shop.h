@@ -59,6 +59,7 @@ enum ShopExpire
 {
 	// days until item expired
 	ITEM_EXPIRE_VIP = 30,
+	ITEM_EXPIRE_VIP_PLUS = 20,
 	ITEM_EXPIRE_PORTAL_RIFLE = 20,
 	ITEM_EXPIRE_PLOT_SMALL = 7,
 	ITEM_EXPIRE_PLOT_BIG = 5,
