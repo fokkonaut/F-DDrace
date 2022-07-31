@@ -1137,6 +1137,8 @@ bool CCollision::TileExistsNext(int Index)
 
 	if (m_pTiles[TileOnTheRight].m_Index == TILE_ROOM || m_pTiles[TileOnTheLeft].m_Index == TILE_ROOM || m_pTiles[TileBelow].m_Index == TILE_ROOM || m_pTiles[TileAbove].m_Index == TILE_ROOM)
 		return true;
+	if (m_pTiles[TileOnTheRight].m_Index == TILE_VIP_PLUS_ONLY || m_pTiles[TileOnTheLeft].m_Index == TILE_VIP_PLUS_ONLY || m_pTiles[TileBelow].m_Index == TILE_VIP_PLUS_ONLY || m_pTiles[TileAbove].m_Index == TILE_VIP_PLUS_ONLY)
+		return true;
 	if ((m_pTiles[TileOnTheRight].m_Index == TILE_STOP && m_pTiles[TileOnTheRight].m_Flags == ROTATION_270) || (m_pTiles[TileOnTheLeft].m_Index == TILE_STOP && m_pTiles[TileOnTheLeft].m_Flags == ROTATION_90))
 		return true;
 	if ((m_pTiles[TileBelow].m_Index == TILE_STOP && m_pTiles[TileBelow].m_Flags == ROTATION_0) || (m_pTiles[TileAbove].m_Index == TILE_STOP && m_pTiles[TileAbove].m_Flags == ROTATION_180))
@@ -1148,6 +1150,8 @@ bool CCollision::TileExistsNext(int Index)
 	if (m_pFront)
 	{
 		if (m_pFront[TileOnTheRight].m_Index == TILE_ROOM || m_pFront[TileOnTheLeft].m_Index == TILE_ROOM || m_pFront[TileBelow].m_Index == TILE_ROOM || m_pFront[TileAbove].m_Index == TILE_ROOM)
+			return true;
+		if (m_pFront[TileOnTheRight].m_Index == TILE_VIP_PLUS_ONLY || m_pFront[TileOnTheLeft].m_Index == TILE_VIP_PLUS_ONLY || m_pFront[TileBelow].m_Index == TILE_VIP_PLUS_ONLY || m_pFront[TileAbove].m_Index == TILE_VIP_PLUS_ONLY)
 			return true;
 		if (m_pFront[TileOnTheRight].m_Index == TILE_STOPA || m_pFront[TileOnTheLeft].m_Index == TILE_STOPA || ((m_pFront[TileOnTheRight].m_Index == TILE_STOPS || m_pFront[TileOnTheLeft].m_Index == TILE_STOPS)))
 			return true;
