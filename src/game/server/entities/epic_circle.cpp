@@ -43,6 +43,10 @@ void CEpicCircle::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwner && (!CmaskIsSet(pOwner->TeamMask(), SnappingClient) || pOwner->IsPaused()))
+		return;
+
 	CNetObj_Projectile *pParticle[MAX_PARTICLES];
 	for (int i = 0; i < MAX_PARTICLES; i++)
 	{
