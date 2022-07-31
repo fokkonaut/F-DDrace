@@ -155,6 +155,7 @@ private:
 	int m_Lovely;
 	int m_RotatingBall;
 	int m_EpicCircle;
+	int m_StaffInd;
 
 	// core
 	int m_MoveRestrictionExtraRoomKey;
