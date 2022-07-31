@@ -3204,5 +3204,5 @@ void CGameContext::ConRainbowHookVIP(IConsole::IResult *pResult, void *pUserData
 		return;
 	}
 
-	pChr->HookPower(RAINBOW, pResult->m_ClientID);
+	pChr->HookPower(pChr->m_HookPower == RAINBOW ? HOOK_NORMAL : RAINBOW, pResult->m_ClientID);
 }
