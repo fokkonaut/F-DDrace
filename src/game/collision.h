@@ -84,7 +84,7 @@ public:
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int CheckIndex = -1);
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
 	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
 	void MovePoint(vec2* pInoutPos, vec2* pInoutVel, float Elasticity, int* pBounces);

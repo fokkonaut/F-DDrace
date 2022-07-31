@@ -432,7 +432,7 @@ int CCollision::GetTile(int x, int y)
 }
 
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int CheckIndex)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -444,12 +444,15 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
-		if (CheckPoint(ix, iy))
+		bool IsIndex = CheckIndex != -1 ? (GetIndex(ix, iy) == CheckIndex || GetFIndex(ix, iy) == CheckIndex) : false;
+		if (CheckPoint(ix, iy) || IsIndex)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
+			if (IsIndex)
+				return CheckIndex;
 			return GetCollisionAt(ix, iy);
 		}
 

@@ -170,14 +170,10 @@ void CFlag::Tick()
 		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius(), (CEntity**)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for (int i = 0; i < Num; i++)
 		{
-			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL))
+			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL, TILE_VIP_PLUS_ONLY))
 				continue;
 
 			if (GetCarrier() == apCloseCCharacters[i] || (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
-				continue;
-
-			// disallow so it wont instantly drop again
-			if (apCloseCCharacters[i]->m_TileIndex == TILE_VIP_PLUS_ONLY || apCloseCCharacters[i]->m_TileFIndex == TILE_VIP_PLUS_ONLY)
 				continue;
 
 			// take the flag
