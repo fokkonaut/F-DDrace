@@ -118,4 +118,5 @@ CHAT_COMMAND("spreadgun", "", CFGFLAG_CHAT, ConSpreadGunVIP, this, "Toggles spre
 CHAT_COMMAND("rotatingball", "", CFGFLAG_CHAT, ConRotatingBallVIP, this, "Toggles rotating ball for yourself", AUTHED_NO)
 CHAT_COMMAND("epiccircle", "", CFGFLAG_CHAT, ConEpicCircleVIP, this, "Toggles epic circle for yourself", AUTHED_NO)
 CHAT_COMMAND("lovely", "", CFGFLAG_CHAT, ConLovelyVIP, this, "Toggles lovely for yourself", AUTHED_NO)
+CHAT_COMMAND("rainbowhook", "", CFGFLAG_CHAT, ConRainbowHookVIP, this, "Toggles rainbow hook for yourself", AUTHED_NO)
 #undef CHAT_COMMAND
