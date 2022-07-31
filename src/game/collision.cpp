@@ -444,7 +444,9 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 		ix = round_to_int(Pos.x);
 		iy = round_to_int(Pos.y);
 
-		bool IsIndex = CheckIndex != -1 ? (GetIndex(ix, iy) == CheckIndex || GetFIndex(ix, iy) == CheckIndex) : false;
+		int Nx = clamp(ix / 32, 0, m_Width-1);
+		int Ny = clamp(iy / 32, 0, m_Height-1);
+		bool IsIndex = CheckIndex != -1 ? (GetIndex(Nx, Ny) == CheckIndex || GetFIndex(Nx, Ny) == CheckIndex) : false;
 		if (CheckPoint(ix, iy) || IsIndex)
 		{
 			if (pOutCollision)
