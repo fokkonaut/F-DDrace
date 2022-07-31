@@ -1926,11 +1926,9 @@ void CPlayer::SetExpireDate(int Item)
 
 	switch (Item)
 	{
-	case ITEM_VIP:
-			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDateVIP, ITEM_EXPIRE_VIP);
-			break;
 	case ITEM_VIP_PLUS:
-			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDateVIP, ITEM_EXPIRE_VIP_PLUS);
+	case ITEM_VIP:
+			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDateVIP, Item == ITEM_VIP_PLUS ? ITEM_EXPIRE_VIP_PLUS : ITEM_EXPIRE_VIP);
 			break;
 	case ITEM_PORTAL_RIFLE:
 			GameServer()->SetExpireDateDays(&pAccount->m_ExpireDatePortalRifle, ITEM_EXPIRE_PORTAL_RIFLE);
@@ -1949,6 +1947,7 @@ bool CPlayer::IsExpiredItem(int Item)
 
 	switch (Item)
 	{
+	case ITEM_VIP_PLUS:
 	case ITEM_VIP: pVariable = &pAccount->m_VIP; pDate = &pAccount->m_ExpireDateVIP; break;
 	case ITEM_PORTAL_RIFLE: pVariable = &pAccount->m_PortalRifle; pDate = &pAccount->m_ExpireDatePortalRifle; break;
 	default: return false;
