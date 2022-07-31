@@ -88,7 +88,7 @@ public:
 	void TranslatePlayerFlags(CNetObj_PlayerInput *NewInput);
 	void OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
 	void OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled = false);
-	void OnPredictedEarlyInput(CNetObj_PlayerInput* NewInput, bool TeeControlled = false, bool HammerflyMarked = false);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput* NewInput, bool TeeControlled = false);
 	bool ApplyDirectInput(bool TeeControlled);
 
 	void OnDisconnect();

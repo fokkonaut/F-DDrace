@@ -338,7 +338,7 @@ public:
 	virtual void OnClientAuth(int ClientID, int Level);
 	virtual void OnClientDirectInput(int ClientID, void *pInput);
 	virtual void OnClientPredictedInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput, bool HammerflyMarked);
+	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
 	virtual void OnClientRejoin(int ClientID);
 
 	virtual void OnClientEngineJoin(int ClientID);

@@ -272,7 +272,6 @@ void CServer::CClient::Reset()
 	for(int i = 0; i < 200; i++)
 	{
 		m_aInputs[i].m_GameTick = -1;
-		m_aInputs[i].m_HammerflyMarked = false;
 	}
 	m_CurrentInput = 0;
 	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
@@ -1608,7 +1607,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				m_aClients[ClientID].m_LastFire = pPlayerInput->m_Fire;
 			}
-			pInput->m_HammerflyMarked = m_aClients[ClientID].m_HammerflyMarked;
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
@@ -2432,7 +2430,7 @@ int CServer::Run()
 					if(m_aClients[c].m_State == CClient::STATE_INGAME)
 						for(int i = 0; i < 200; i++)
 							if(m_aClients[c].m_aInputs[i].m_GameTick == Tick() + 1)
-								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData, m_aClients[c].m_aInputs[i].m_HammerflyMarked);
+								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData);
 
 				m_CurrentGameTick++;
 				NewTicks = true;

@@ -298,7 +298,7 @@ public:
 	virtual void OnClientAuth(int ClientID, int Level) = 0;
 	virtual void OnClientDirectInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientPredictedInput(int ClientID, void *pInput) = 0;
-	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput, bool HammerflyMarked) = 0;
+	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput) = 0;
 	virtual void OnClientRejoin(int ClientID) = 0;
 
 	virtual bool IsClientBot(int ClientID) const = 0;

@@ -1282,7 +1282,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 }
 
-void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput, bool HammerflyMarked)
+void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
@@ -1291,7 +1291,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput, bool HammerflyMar
 	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
 		m_LatestInput.m_TargetY = -1;
 
-	if (!m_pTelekinesisEntity && !HammerflyMarked)
+	if (!m_pTelekinesisEntity)
 		Antibot()->OnDirectInput(m_pPlayer->GetCID());
 
 	if(m_NumInputs > 2 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
@@ -2239,12 +2239,15 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_HookedPlayer = m_Core.m_HookedPlayer;
 	pData->m_SpawnTick = m_SpawnTick;
 	pData->m_WeaponChangeTick = m_WeaponChangeTick;
-	pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
-	pData->m_aLatestInputs[0].m_TargetY = m_LatestInput.m_TargetY;
-	pData->m_aLatestInputs[1].m_TargetX = m_LatestPrevInput.m_TargetX;
-	pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
-	pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
-	pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
+	if (!Server()->HammerflyMarked(m_pPlayer->GetCID()))
+	{
+		pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
+		pData->m_aLatestInputs[0].m_TargetY = m_LatestInput.m_TargetY;
+		pData->m_aLatestInputs[1].m_TargetX = m_LatestPrevInput.m_TargetX;
+		pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
+		pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
+		pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
+	}
 }
 
 void CCharacter::HandleBroadcast()

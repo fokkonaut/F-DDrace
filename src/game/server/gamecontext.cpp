@@ -1388,10 +1388,10 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 	}
 }
 
-void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput, bool HammerflyMarked)
+void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput)
 {
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientID]->OnPredictedEarlyInput((CNetObj_PlayerInput *)pInput, false, HammerflyMarked);
+		m_apPlayers[ClientID]->OnPredictedEarlyInput((CNetObj_PlayerInput *)pInput);
 }
 
 struct CVoteOptionServer *CGameContext::GetVoteOption(int Index)
