@@ -1328,7 +1328,7 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 	if (pAccount->m_VIP)
 	{
 		tmp = pAccount->m_ExpireDateVIP;
-		str_format(aBuf, sizeof(aBuf), "VIP: until %s", pSelf->GetDate(tmp));
+		str_format(aBuf, sizeof(aBuf), "VIP%s: until %s", pAccount->m_VIP == VIP_PLUS ? "+" : "", pSelf->GetDate(tmp));
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 	else
