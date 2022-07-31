@@ -62,7 +62,7 @@ void CLovely::SpawnNewHeart()
 		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 		m_aLovelyData[i].m_Lifespan = Server()->TickSpeed() / 2;
 		m_aLovelyData[i].m_Pos = vec2(pOwner->GetPos().x + (rand() % 50 - 25), pOwner->GetPos().y - 30);
-		pOwner->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed() * 2);
+		pOwner->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
 		break;
 	}
 }
