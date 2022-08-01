@@ -52,7 +52,8 @@ enum
 	// F-DDrace
 	CANTMOVE_ROOM=1<<12,
 	CANTMOVE_VIP_PLUS_ONLY=1<<13,
-	CANTMOVE_DOWN_LASERDOOR=1<<14, // used by prediction
+	CANTMOVE_PLOT_DOOR=1<<14,
+	CANTMOVE_DOWN_LASERDOOR=1<<15, // used by prediction
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);

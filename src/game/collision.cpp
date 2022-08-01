@@ -408,6 +408,8 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 					int DoorRestrictions = ::GetMoveRestrictions(d, Tile, Flags, Extra);
 					Restrictions |= DoorRestrictions;
 
+					if (DoorRestrictions && IsPlotDoor(m_pDoor[ModMapIndex].m_vTiles[i].m_Number))
+						Restrictions |= CANTMOVE_PLOT_DOOR;
 					if (DoorRestrictions & CANTMOVE_DOWN)
 						Restrictions |= CANTMOVE_DOWN_LASERDOOR;
 				}
@@ -730,10 +732,9 @@ void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec
 				}
 			}
 
-			// always disallow ninja through vip+ door
-			int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width-1);
-			int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height-1);
-			if(CheckStoppers || (!Extra.m_VipPlus && (GetIndex(Nx, Ny) == TILE_VIP_PLUS_ONLY || GetFIndex(Nx, Ny) == TILE_VIP_PLUS_ONLY)))
+			static const float OFFSET = 18.0f;
+			int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET, -1, Extra);
+			if(CheckStoppers || MoveRestrictions&(CANTMOVE_VIP_PLUS_ONLY|CANTMOVE_PLOT_DOOR)) // always forbid moving through a plot door or a vip+ door, e.g. with ninja or jetpack
 			{
 				// Yay. Backward-compatibility. Isn't that fun?
 				//
@@ -768,8 +769,8 @@ void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec
 				// direction.
 				//
 				// Backward-compatibility. \o/
-				static const float OFFSET = 18.0f;
-				int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET, -1, Extra);
+				//static const float OFFSET = 18.0f;
+				//int MoveRestrictions = GetMoveRestrictions(pfnSwitchActive, pUser, Pos, OFFSET, -1, Extra);
 				for(int d = 1; d < NUM_MR_DIRS; d++)
 				{
 					static const int TILESIZE = 32;
