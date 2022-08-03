@@ -126,8 +126,7 @@ void CFlag::Drop(int Dir)
 
 	PlaySound(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
-	if (m_Carrier != -1)
-		GameServer()->SendBroadcast("", m_Carrier, false);
+	GameServer()->SendBroadcast("", m_Carrier, false);
 	m_LastCarrier = m_Carrier;
 	m_Carrier = -1;
 	m_Vel = vec2(5 * Dir, Dir == 0 ? 0 : -5);
