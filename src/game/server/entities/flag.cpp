@@ -197,18 +197,9 @@ void CFlag::Tick()
 	}
 
 	// plots
-	int PlotID = GameServer()->GetTilePlotID(m_Pos);
+	int PlotID = GameServer()->GetTilePlotID(m_Pos, true);
 	if (PlotID >= PLOT_START)
-	{
 		TeleToPlot(PlotID);
-	}
-	else
-	{
-		int Team = GetCarrier() ? GetCarrier()->Team() : GetLastCarrier() ? GetLastCarrier()->Team() : 0;
-		int Number = GameServer()->IntersectedLineDoor(m_Pos, m_PrevPos, Team, true, false);
-		if (Number > 0)
-			TeleToPlot(GameServer()->Collision()->GetPlotBySwitch(Number));
-	}
 
 	int MapIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
