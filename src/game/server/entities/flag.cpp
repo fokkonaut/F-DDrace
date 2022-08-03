@@ -121,9 +121,12 @@ void CFlag::TickDefered()
 
 void CFlag::Drop(int Dir)
 {
+	if (m_Carrier == -1)
+		return;
+
 	PlaySound(SOUND_CTF_DROP);
 	m_DropTick = Server()->Tick();
-	if (GetCarrier())
+	if (m_Carrier != -1)
 		GameServer()->SendBroadcast("", m_Carrier, false);
 	m_LastCarrier = m_Carrier;
 	m_Carrier = -1;
@@ -146,8 +149,7 @@ void CFlag::Grab(int NewCarrier)
 void CFlag::TeleToPlot(int PlotID)
 {
 	GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
-	if (GetCarrier())
-		Drop();
+	Drop();
 	m_Vel = vec2(0, 0);
 	m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
 }
@@ -173,7 +175,7 @@ void CFlag::Tick()
 			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL, TILE_VIP_PLUS_ONLY))
 				continue;
 
-			if (GetCarrier() == apCloseCCharacters[i] || (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick()))
+			if (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick())
 				continue;
 
 			// take the flag
@@ -207,8 +209,7 @@ void CFlag::Tick()
 	if (TileIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_VIP_PLUS_ONLY)
 	{
 		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
-		if (GetCarrier())
-			Drop();
+		Drop();
 		m_Vel = vec2(0, 0);
 		m_Pos = m_PrevPos;
 	}
