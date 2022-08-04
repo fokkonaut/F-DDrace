@@ -88,7 +88,7 @@ void CShop::AddItem(const char *pName, int Level, int Price, int Time, const cha
 
 bool CShop::PageValid(int Page)
 {
-	return Page != ITEM_PORTAL_RIFLE || GameServer()->Config()->m_SvPortalRifleShop;
+	return !IsType(HOUSE_SHOP) || (Page != ITEM_PORTAL_RIFLE || GameServer()->Config()->m_SvPortalRifleShop);
 }
 
 const char *CShop::GetWelcomeMessage(int ClientID)
