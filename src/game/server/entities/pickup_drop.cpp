@@ -252,8 +252,9 @@ void CPickupDrop::Snap(int SnappingClient)
 		pP->m_Y = (int)m_Pos.y;
 		if (Server()->IsSevendown(SnappingClient))
 		{
-			pP->m_Type = m_Type;
-			((int*)pP)[3] = GameServer()->GetWeaponType(m_Weapon);
+			int Subtype = GameServer()->GetWeaponType(m_Weapon);
+			pP->m_Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : m_Type;
+			((int*)pP)[3] = Subtype;
 		}
 		else
 			pP->m_Type = GameServer()->GetPickupType(m_Type, m_Weapon);
