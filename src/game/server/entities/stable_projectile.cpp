@@ -95,7 +95,7 @@ void CStableProjectile::Snap(int SnappingClient)
 	pProj->m_X = round_to_int(m_LastResetPos.x);
 	pProj->m_Y = round_to_int(m_LastResetPos.y);
 	pProj->m_VelX = m_VelX;
-	pProj->m_VelY = m_VelY;
+	pProj->m_VelY = (m_VelY >= 0 && (m_VelY&512) != 0) ? 0 : m_VelY; // dont send PROJECTILEFLAG_IS_DDNET
 	pProj->m_StartTick = m_LastResetTick;
 	pProj->m_Type = m_Type;
 }
