@@ -1013,7 +1013,7 @@ void CCharacter::FireWeapon()
 			case WEAPON_TELE_RIFLE:
 			{
 				vec2 NewPos = GetCursorPos();
-				if (!Config()->m_SvTeleRifleAllowBlocks)
+				if (!Config()->m_SvTeleRifleAllowBlocks && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
 					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 					if (!Found || !NewPos)
