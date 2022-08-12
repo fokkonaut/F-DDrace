@@ -301,9 +301,9 @@ void CShop::BuyItem(int ClientID, int Item)
 			return;
 		}
 
-		if (Item == ITEM_BLOODY && pChr->m_Atom)
+		if (Item == ITEM_BLOODY && (pChr->m_Atom || pChr->m_Trail || pChr->m_RotatingBall || pChr->m_EpicCircle))
 		{
-			GameServer()->SendChatTarget(ClientID, "You can not buy bloody while atom is activated");
+			GameServer()->SendChatTarget(ClientID, "You can not buy bloody while specific cosmetics are activated");
 			return;
 		}
 
