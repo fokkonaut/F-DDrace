@@ -171,7 +171,7 @@ void CFlag::Tick()
 		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius(), (CEntity**)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for (int i = 0; i < Num; i++)
 		{
-			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL, TILE_VIP_PLUS_ONLY))
+			if (!apCloseCCharacters[i] || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLineFlagPickup(m_Pos, apCloseCCharacters[i]->GetPos(), NULL, NULL))
 				continue;
 
 			if (GetLastCarrier() == apCloseCCharacters[i] && (m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick())

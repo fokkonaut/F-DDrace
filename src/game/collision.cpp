@@ -434,7 +434,7 @@ int CCollision::GetTile(int x, int y)
 }
 
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int CheckIndex)
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -448,15 +448,13 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 
 		int Nx = clamp(ix / 32, 0, m_Width-1);
 		int Ny = clamp(iy / 32, 0, m_Height-1);
-		bool IsIndex = CheckIndex != -1 ? (GetIndex(Nx, Ny) == CheckIndex || GetFIndex(Nx, Ny) == CheckIndex) : false;
-		if (CheckPoint(ix, iy) || IsIndex)
+
+		if (CheckPoint(ix, iy))
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			if (IsIndex)
-				return CheckIndex;
 			return GetCollisionAt(ix, iy);
 		}
 
@@ -1809,6 +1807,51 @@ int CCollision::GetNumMaxTeleporters(int PlotID)
 	if (PlotID == 0)
 		return GetNumFreeDrawTeleporters();
 	return m_apPlotSize[PlotID] == PLOT_SMALL ? PLOT_SMALL_MAX_TELE : m_apPlotSize[PlotID] == PLOT_BIG ? PLOT_BIG_MAX_TELE : 0;
+}
+
+int CCollision::IntersectLineFlagPickup(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
+{
+	const int End = distance(Pos0, Pos1)+1;
+	const float InverseEnd = 1.0f/End;
+	vec2 Last = Pos0;
+	int ix = 0, iy = 0; // Temporary position for checking collision
+	for (int i = 0; i <= End; i++)
+	{
+		vec2 Pos = mix(Pos0, Pos1, i*InverseEnd);
+		ix = round_to_int(Pos.x);
+		iy = round_to_int(Pos.y);
+
+		int Nx = clamp(ix / 32, 0, m_Width-1);
+		int Ny = clamp(iy / 32, 0, m_Height-1);
+		int Index = GetIndex(Nx, Ny);
+		int FIndex = GetFIndex(Nx, Ny);
+
+		bool GameLayerBlocked = Index == TILE_VIP_PLUS_ONLY;
+		bool FrontLayerBlocked = FIndex == TILE_VIP_PLUS_ONLY;
+		int PlotDoor = GetPlotBySwitch(CheckPointDoor(Pos, 0, true, false));
+
+		if (CheckPoint(ix, iy) || GameLayerBlocked || FrontLayerBlocked || PlotDoor)
+		{
+			if (pOutCollision)
+				* pOutCollision = Pos;
+			if (pOutBeforeCollision)
+				* pOutBeforeCollision = Last;
+			if (GameLayerBlocked)
+				return Index;
+			if (FrontLayerBlocked)
+				return FIndex;
+			if (PlotDoor)
+				return TILE_STOPA;
+			return GetCollisionAt(ix, iy);
+		}
+
+		Last = Pos;
+	}
+	if (pOutCollision)
+		* pOutCollision = Pos1;
+	if (pOutBeforeCollision)
+		* pOutBeforeCollision = Pos1;
+	return 0;
 }
 
 int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
