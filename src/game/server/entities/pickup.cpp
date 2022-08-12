@@ -210,9 +210,11 @@ void CPickup::Tick()
 					{
 						if (pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN)
 							break;
-						if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo && GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID()))
+
+						bool FightStarted = GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID());
+						if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo && FightStarted)
 							break;
-						if (m_Subtype == WEAPON_TASER && GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_TaserLevel < 1)
+						if (m_Subtype == WEAPON_TASER && (GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_TaserLevel < 1 || FightStarted))
 							break;
 
 						pChr->WeaponMoneyReward(m_Subtype);
