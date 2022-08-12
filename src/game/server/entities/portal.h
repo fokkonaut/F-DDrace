@@ -34,6 +34,9 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
+	void SetThroughPlotDoor(int PlotID) { m_ThroughPlotDoor = PlotID; }
+	int GetThroughPlotDoor() { return m_ThroughPlotDoor; }
+
 	void SetLinkedPortal(CPortal *pPortal);
 	void DestroyLinkedPortal();
 };

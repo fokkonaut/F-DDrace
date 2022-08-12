@@ -921,12 +921,19 @@ void CCharacter::FireWeapon()
 					return;
 				}
 
-				int PlotDoorNumber = GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false);
 				for (int i = 0; i < NUM_PORTALS; i++)
 				{
 					if (!m_pPlayer->m_pPortal[i])
 					{
-						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), GameServer()->Collision()->GetPlotBySwitch(PlotDoorNumber));
+						int PlotDoorNumber = GameServer()->Collision()->GetPlotBySwitch(GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false));
+						if (i == PORTAL_SECOND && PlotDoorNumber < PLOT_START)
+						{
+							int OtherThroughPlotDoor = m_pPlayer->m_pPortal[PORTAL_FIRST]->GetThroughPlotDoor();
+							if (OtherThroughPlotDoor >= PLOT_START)
+								PlotDoorNumber = OtherThroughPlotDoor;
+						}
+
+						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), PlotDoorNumber);
 						if (i == PORTAL_SECOND)
 						{
 							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);
@@ -2815,6 +2822,12 @@ void CCharacter::HandleTiles(int Index)
 	{
 		// only reset portal if we have only shot the first one. if both are there already it means they are either both inside, or both outside.
 		ResetOnlyFirstPortal();
+	}
+
+	int PlotDoor = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->CheckPointDoor(m_Pos, Team(), true, false));
+	if (PlotDoor >= PLOT_START && m_pPlayer->m_pPortal[PORTAL_FIRST] && !m_pPlayer->m_pPortal[PORTAL_SECOND])
+	{
+		m_pPlayer->m_pPortal[PORTAL_FIRST]->SetThroughPlotDoor(PlotDoor);
 	}
 
 	// update this AFTER you are done using this var above
