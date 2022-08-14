@@ -7,6 +7,7 @@
 CHelicopter::CHelicopter(CGameWorld *pGameWorld, vec2 Pos)
 : CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, vec2(80, 128))
 {
+	m_AllowVipPlus = false;
 	m_Elasticity = 0.f;
 
 	m_Flipped = false;
