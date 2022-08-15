@@ -1182,7 +1182,13 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	if (Remove)
 	{
 		if (GetActiveWeapon() == Weapon)
-			SetWeapon(WEAPON_GUN);
+		{
+			// dont instantly switch weapon when we shot last shot of spawnweapons
+			if (m_ReloadTimer != 0)
+				m_QueuedWeapon = WEAPON_GUN;
+			else
+				SetWeapon(WEAPON_GUN);
+		}
 	}
 	else
 	{
