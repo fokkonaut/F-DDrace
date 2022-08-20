@@ -12,6 +12,10 @@
 #include <time.h>
 #include <stdio.h>
 
+#ifdef CONF_FAMILY_UNIX
+#include <sys/un.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
