@@ -1942,6 +1942,9 @@ bool CPlayer::IsExpiredItem(int Item)
 		return false;
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	if ((Item == ITEM_VIP && pAccount->m_VIP == VIP_PLUS) || (Item == ITEM_VIP_PLUS && pAccount->m_VIP == VIP_CLASSIC))
+		return false;
+
 	int *pVariable;
 	time_t *pDate;
 
