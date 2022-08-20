@@ -88,6 +88,12 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
 
+#if defined(CONF_FAMILY_UNIX)
+	UNIXSOCKETADDR m_ConnLoggingDestAddr;
+	bool m_ConnLoggingSocketCreated;
+	UNIXSOCKET m_ConnLoggingSocket;
+#endif
+
 #if defined(CONF_SQL)
 	lock m_GlobalSqlLock;
 
@@ -516,6 +522,16 @@ public:
 	virtual bool IsUniqueAddress(int ClientID);
 	virtual int GetDummy(int ClientID);
 	virtual bool IsDummy(int ClientID1, int ClientID2);
+
+#ifdef CONF_FAMILY_UNIX
+	enum CONN_LOGGING_CMD
+	{
+		OPEN_SESSION = 1,
+		CLOSE_SESSION = 2,
+	};
+
+	void SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr);
+#endif
 
 #if defined (CONF_SQL)
 	// console commands for sqlmasters

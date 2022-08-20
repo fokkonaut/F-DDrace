@@ -355,6 +355,10 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_
 
 	m_RconPasswordSet = 0;
 
+#ifdef CONF_FAMILY_UNIX
+	m_ConnLoggingSocketCreated = false;
+#endif
+
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
@@ -968,7 +972,9 @@ int CServer::NewClientCallback(int ClientID, bool Sevendown, int Socket, void *p
 	pThis->m_aClients[ClientID].Reset();
 	pThis->GameServer()->OnClientEngineJoin(ClientID);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sevendown);
-
+#if defined(CONF_FAMILY_UNIX)
+	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
+#endif
 	return 0;
 }
 
@@ -993,7 +999,9 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].ResetContent();
 	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
-
+#if defined(CONF_FAMILY_UNIX)
+	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
+#endif
 	return 0;
 }
 
@@ -3235,6 +3243,34 @@ void CServer::ConchainFakeMapCrc(IConsole::IResult *pResult, void *pUserData, IC
 	pThis->LoadUpdateFakeMap();
 }
 
+#if defined(CONF_FAMILY_UNIX)
+void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() == 1)
+	{
+		CServer *pServer = (CServer *)pUserData;
+
+		// open socket to send new connections
+		if(!pServer->m_ConnLoggingSocketCreated)
+		{
+			pServer->m_ConnLoggingSocket = net_unix_create_unnamed();
+			if(pServer->m_ConnLoggingSocket == -1)
+			{
+				pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Failed to created socket for communication with the connection logging server.");
+			}
+			else
+			{
+				pServer->m_ConnLoggingSocketCreated = true;
+			}
+		}
+
+		// set the destination address for the connection logging
+		net_unix_set_addr(&pServer->m_ConnLoggingDestAddr, pResult->GetString(0));
+	}
+}
+#endif
+
 void CServer::RegisterCommands()
 {
 	// register console commands
@@ -4234,6 +4270,23 @@ void CServer::DummyLeave(int DummyID)
 	m_aClients[DummyID].ResetContent();
 	m_NetServer.DummyDelete(DummyID);
 }
+
+#ifdef CONF_FAMILY_UNIX
+void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr)
+{
+	if(!Config()->m_SvConnLoggingServer[0] || !m_ConnLoggingSocketCreated)
+		return;
+
+	// pack the data and send it
+	unsigned char aData[23] = {0};
+	aData[0] = Cmd;
+	mem_copy(&aData[1], &pAddr->type, 4);
+	mem_copy(&aData[5], pAddr->ip, 16);
+	mem_copy(&aData[21], &pAddr->port, 2);
+
+	net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
+}
+#endif
 
 #if defined (CONF_SQL)
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)

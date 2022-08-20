@@ -629,6 +629,17 @@ typedef struct
 	unsigned short reserved;
 } NETADDR;
 
+#ifdef CONF_FAMILY_UNIX
+/**
+ * @ingroup Network-General
+ */
+typedef int UNIXSOCKET;
+/**
+ * @ingroup Network-General
+ */
+typedef struct sockaddr_un UNIXSOCKETADDR;
+#endif
+
 /*
 	Function: net_invalidate_socket
 		Invalidates a socket.
@@ -874,6 +885,56 @@ int net_tcp_recv(NETSOCKET sock, void *data, int maxsize);
 		Returns 0 on success. Negative value on failure.
 */
 int net_tcp_close(NETSOCKET sock);
+
+#if defined(CONF_FAMILY_UNIX)
+/**
+ * @defgroup Network-Unix-Sockets
+ * @ingroup Network-General
+ */
+
+/**
+ * Creates an unnamed unix datagram socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @return On success it returns a handle to the socket. On failure it returns -1.
+ */
+UNIXSOCKET net_unix_create_unnamed();
+
+/**
+ * Sends data to a Unix socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param sock Socket to use.
+ * @param addr Where to send the packet.
+ * @param data Pointer to the packet data to send.
+ * @param size Size of the packet.
+ *
+ * @return Number of bytes sent. Negative value on failure.
+ */
+int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size);
+
+/**
+ * Sets the unixsocketaddress for a path to a socket file.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param addr Pointer to the addressstruct to fill.
+ * @param path Path to the (named) unix socket.
+ */
+void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path);
+
+/**
+ * Closes a Unix socket.
+ *
+ * @ingroup Network-Unix-Sockets
+ *
+ * @param sock Socket to close.
+ */
+void net_unix_close(UNIXSOCKET sock);
+
+#endif
 
 /* Group: Strings */
 

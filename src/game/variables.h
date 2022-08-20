@@ -300,6 +300,10 @@ MACRO_CONFIG_STR(SvLibreTranslateKey, sv_libretranslate_key, 128, "", CFGFLAG_SE
 // sockets
 MACRO_CONFIG_INT(SvPortTwo, sv_port_two, 8304, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the second serverinfo", AUTHED_ADMIN)
 
+#if defined(CONF_FAMILY_UNIX)
+MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_SERVER, "Unix socket server for IP address logging (Unix only)")
+#endif
+
 // discord
 MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord server URL", AUTHED_ADMIN)
 

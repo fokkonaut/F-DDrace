@@ -1492,6 +1492,30 @@ int net_would_block()
 #endif
 }
 
+#if defined(CONF_FAMILY_UNIX)
+UNIXSOCKET net_unix_create_unnamed()
+{
+	return socket(AF_UNIX, SOCK_DGRAM, 0);
+}
+
+int net_unix_send(UNIXSOCKET sock, UNIXSOCKETADDR *addr, void *data, int size)
+{
+	return sendto(sock, data, size, 0, (struct sockaddr *)addr, sizeof(struct sockaddr_un));
+}
+
+void net_unix_set_addr(UNIXSOCKETADDR *addr, const char *path)
+{
+	mem_zero(addr, sizeof(*addr));
+	addr->sun_family = AF_UNIX;
+	str_copy(addr->sun_path, path);
+}
+
+void net_unix_close(UNIXSOCKET sock)
+{
+	close(sock);
+}
+#endif
+
 void net_invalidate_socket(NETSOCKET *socket)
 {
 	*socket = invalid_socket;
