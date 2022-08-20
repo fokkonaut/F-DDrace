@@ -439,23 +439,17 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
+
 	for (int i = 0; i <= End; i++)
 	{
 		vec2 Pos = mix(Pos0, Pos1, i*InverseEnd);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
-
-		int Nx = clamp(ix / 32, 0, m_Width-1);
-		int Ny = clamp(iy / 32, 0, m_Height-1);
-
-		if (CheckPoint(ix, iy))
+		if (CheckPoint(Pos.x, Pos.y))
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
+			return GetCollisionAt(Pos.x, Pos.y);
 		}
 
 		Last = Pos;
