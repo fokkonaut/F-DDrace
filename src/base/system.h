@@ -16,9 +16,7 @@
 #include <sys/un.h>
 #endif
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #ifdef __GNUC__
 #define GNUC_ATTRIBUTE(x) __attribute__(x)
@@ -2083,8 +2081,23 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
 */
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
-#ifdef __cplusplus
+/**
+ * Copies a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
 }
-#endif
+
+template<int N>
+void str_copy(char (&dst)[N], const char *src)
+{
+	str_copy(dst, src, N);
+}
 
 #endif

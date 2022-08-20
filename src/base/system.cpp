@@ -56,9 +56,7 @@
 	#include <sys/filio.h>
 #endif
 
-#if defined(__cplusplus)
 extern "C" {
-#endif
 
 IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
@@ -375,7 +373,7 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 
 void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 {
-	unsigned char *buffer = malloc(1024);
+	unsigned char *buffer = (unsigned char *)malloc(1024);
 	unsigned len = 0;
 	unsigned cap = 1024;
 	unsigned read;
@@ -389,12 +387,12 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 		if(len == cap)
 		{
 			cap *= 2;
-			buffer = realloc(buffer, cap);
+			buffer = (unsigned char *)realloc(buffer, cap);
 		}
 	}
 	if(len == cap)
 	{
-		buffer = realloc(buffer, cap + 1);
+		buffer = (unsigned char *)realloc(buffer, cap + 1);
 	}
 	// ensure null termination
 	buffer[len] = 0;
@@ -413,7 +411,7 @@ char *io_read_all_str(IOHANDLE io)
 		free(buffer);
 		return 0;
 	}
-	return buffer;
+	return (char *)buffer;
 }
 
 unsigned io_unread_byte(IOHANDLE io, unsigned char byte)
@@ -503,7 +501,7 @@ static unsigned long __stdcall thread_run(void *user)
 #error not implemented
 #endif
 {
-	struct THREAD_RUN *data = user;
+	struct THREAD_RUN *data = (THREAD_RUN *)user;
 	void (*threadfunc)(void *) = data->threadfunc;
 	void *u = data->u;
 	free(data);
@@ -513,7 +511,7 @@ static unsigned long __stdcall thread_run(void *user)
 
 void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 {
-	struct THREAD_RUN *data = malloc(sizeof(*data));
+	struct THREAD_RUN *data = (THREAD_RUN *)malloc(sizeof(*data));
 	data->threadfunc = threadfunc;
 	data->u = u;
 #if defined(CONF_FAMILY_UNIX)
@@ -2552,7 +2550,7 @@ static int byteval(const char *byte, unsigned char *dst)
 
 int str_hex_decode(void *dst, int dst_size, const char *src)
 {
-	unsigned char *cdst = dst;
+	unsigned char *cdst = (unsigned char *)dst;
 	int slen = str_length(src);
 	int len = slen / 2;
 	int i;
@@ -2616,7 +2614,7 @@ int mem_comp(const void *a, const void *b, int size)
 
 int mem_has_null(const void *block, unsigned size)
 {
-	const unsigned char *bytes = block;
+	const unsigned char *bytes = (const unsigned char *)block;
 	unsigned i;        
 	for(i = 0; i < size; i++)
 	{
@@ -3068,7 +3066,7 @@ void secure_random_fill(void *bytes, unsigned length)
 		dbg_break();
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(!CryptGenRandom(secure_random_data.provider, length, bytes))
+	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
 		dbg_msg("secure", "CryptGenRandom failed, last_error=%lu", GetLastError());
 		dbg_break();
@@ -3140,6 +3138,4 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value)
 	bytes[3] = value&0xff;
 }
 
-#if defined(__cplusplus)
 }
-#endif
