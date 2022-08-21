@@ -4284,6 +4284,9 @@ void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr)
 	mem_copy(&aData[5], pAddr->ip, 16);
 	mem_copy(&aData[21], &pAddr->port, 2);
 
+	char apath[128];
+	str_format(apath, sizeof(apath), "sending: %s", m_ConnLoggingDestAddr.sun_path);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", apath);
 	net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
 }
 #endif
