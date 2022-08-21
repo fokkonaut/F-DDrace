@@ -4278,8 +4278,11 @@ void CServer::DummyLeave(int DummyID)
 #ifdef CONF_FAMILY_UNIX
 void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr)
 {
-	if(!Config()->m_SvConnLoggingServer[0] || !m_ConnLoggingSocketCreated)
+	if (!Config()->m_SvConnLoggingServer[0] || !m_ConnLoggingSocketCreated)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "failed");
 		return;
+	}
 
 	// pack the data and send it
 	unsigned char aData[23] = {0};
@@ -4287,6 +4290,10 @@ void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr)
 	mem_copy(&aData[1], &pAddr->type, 4);
 	mem_copy(&aData[5], pAddr->ip, 16);
 	mem_copy(&aData[21], &pAddr->port, 2);
+
+	char apath[128];
+	str_format(apath, sizeof(apath), "sending: %s", m_ConnLoggingDestAddr.sun_path);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", apath);
 
 	net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
 }
