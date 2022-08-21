@@ -28,7 +28,6 @@
 #include <engine/shared/fifo.h>
 
 #include <mastersrv/mastersrv.h>
-#include <errno.h>
 
 #include "register.h"
 #include "server.h"
@@ -4289,12 +4288,7 @@ void CServer::SendConnLoggingCommand(CONN_LOGGING_CMD Cmd, const NETADDR *pAddr)
 	mem_copy(&aData[5], pAddr->ip, 16);
 	mem_copy(&aData[21], &pAddr->port, 2);
 
-	int res = net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
-	if (res != 0) {
-		char aBuf[222];
-		str_format(aBuf, sizeof(aBuf), "ERROOOOOOOOOOOOOOR: %s", strerror(errno));
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-	}
+	net_unix_send(m_ConnLoggingSocket, &m_ConnLoggingDestAddr, aData, sizeof(aData));
 }
 #endif
 
