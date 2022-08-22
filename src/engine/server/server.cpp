@@ -1961,7 +1961,27 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
  
 	ADD_INT(p, m_CurrentMapCrc);
 	ADD_INT(p, m_CurrentMapSize);
-	p.AddString(GameServer()->GameType(), 16);
+	str_copy(aBuf, GameServer()->GameType(), sizeof(aBuf));
+	if (IsBrowserScoreFix())
+	{
+		// if we want to display normal score we have to get rid of the string "race", thats why we replace it here with a fake letter 'c'
+		const char *pGameType = GameServer()->GameType();
+		const char *pStart = str_find_nocase(pGameType, "race");
+		if (pStart)
+		{
+			unsigned char aSymbol[] = { 0xD1, 0x81, 0x00, 0x00 }; // https://de.wiktionary.org/wiki/%D1%81
+			char aFakeRace[16];
+			str_format(aFakeRace, sizeof(aFakeRace), "ra%se", aSymbol);
+			str_append(aBuf, pGameType, pStart - pGameType + 1);
+			str_append(aBuf, aFakeRace, sizeof(aBuf));
+			str_append(aBuf, pStart + 4, sizeof(aBuf));
+
+			// this will make the client think gametype is idm leading to the client displaying the gametype in read color, otherwise gametype would be white
+			if (str_length(aBuf) + 4 < 16) // only if we have enough space to actually "set" the color. if it gets cut off we can leave it out entirely
+				str_append(aBuf, " idm", sizeof(aBuf));
+		}
+	}
+	p.AddString(aBuf, 16);
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
 
@@ -2019,6 +2039,8 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			int Score = -9999;
 			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
 				Score = abs(m_aClients[i].m_Score) * -1;
+			else if (IsBrowserScoreFix())
+				Score = m_aClients[i].m_Score;
 			ADD_INT(pp, Score);
 			ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
 			pp.AddString("", 0);
@@ -3552,6 +3574,11 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 bool CServer::IsDoubleInfo()
 {
 	return m_NetServer.NumClients() >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS;
+}
+
+bool CServer::IsBrowserScoreFix()
+{
+	return Config()->m_SvBrowserScoreFix && Config()->m_SvDefaultScoreMode != 0;
 }
 
 bool CServer::IsUniqueAddress(int ClientID)

@@ -464,6 +464,8 @@ public:
 	const char* GetAnnouncementLine(char const* FileName);
 	unsigned m_AnnouncementLastLine;
 
+	bool IsBrowserScoreFix();
+
 	enum
 	{
 		BOTLOOKUP_STATE_DONE = 0,
