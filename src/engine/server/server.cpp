@@ -1969,9 +1969,9 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 		const char *pStart = str_find_nocase(pGameType, "race");
 		if (pStart)
 		{
-			unsigned char aSymbol[] = { 0xD1, 0x81, 0x00, 0x00 }; // https://de.wiktionary.org/wiki/%D1%81
+			unsigned char aSymbol[] = { 0xD0, 0xB5, 0x00, 0x00 }; // https://de.wiktionary.org/wiki/%D0%B5 // fake 'e'
 			char aFakeRace[16];
-			str_format(aFakeRace, sizeof(aFakeRace), "ra%se", aSymbol);
+			str_format(aFakeRace, sizeof(aFakeRace), "rac%s", aSymbol);
 			str_append(aBuf, pGameType, pStart - pGameType + 1);
 			str_append(aBuf, aFakeRace, sizeof(aBuf));
 			str_append(aBuf, pStart + 4, sizeof(aBuf));
