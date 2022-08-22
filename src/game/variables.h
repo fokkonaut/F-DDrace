@@ -266,7 +266,7 @@ MACRO_CONFIG_INT(SvSpawnAreaHighY, sv_spawnarea_high_y, 0, 0, 9999, CFGFLAG_SERV
 // sevendown ddnet clients
 MACRO_CONFIG_INT(SvAllowSevendown, sv_allow_sevendown, 1, 0, 1, CFGFLAG_SERVER, "Allows sevendown connections", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMapWindow, sv_map_window, 15, 0, 100, CFGFLAG_SERVER, "Map downloading send-ahead window", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvNameExtra, sv_name_extra, 128, "", CFGFLAG_SERVER, "Will be appended to the server name for sevendown clients", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDropOldClients, sv_drop_old_clients, 1, 0, 1, CFGFLAG_SERVER, "Whether old and not fully supported clients are getting dropped", AUTHED_ADMIN)
 
 // map crc
 MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_SERVER, "Fake map file name to be loaded (path starting at binary!)", AUTHED_ADMIN)
@@ -336,6 +336,5 @@ MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 10
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvCountTimeoutToMaxIP, sv_count_timeout_to_max_ip, 1, 0, 1, CFGFLAG_SERVER, "Whether timeouted tees count to the limit of max clients per ip", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDropOldClients, sv_drop_old_clients, 1, 0, 1, CFGFLAG_SERVER, "Whether old and not fully supported clients are getting dropped", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
 #endif

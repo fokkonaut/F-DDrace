@@ -1956,8 +1956,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	ADD_INT(p, Token);
  
 	p.AddString(GameServer()->VersionSevendown(), 32);
-	str_format(aBuf, sizeof(aBuf), "%s%s", Config()->m_SvName, Config()->m_SvNameExtra);
-	p.AddString(aBuf, 64);
+	p.AddString(Config()->m_SvName, 64);
 	p.AddString(GetMapName(), 32);
  
 	ADD_INT(p, m_CurrentMapCrc);
