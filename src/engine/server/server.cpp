@@ -1976,7 +1976,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			str_append(aBuf, aFakeRace, sizeof(aBuf));
 			str_append(aBuf, pStart + 4, sizeof(aBuf));
 
-			// this will make the client think gametype is idm leading to the client displaying the gametype in read color, otherwise gametype would be white
+			// this will make the client think gametype is idm leading to the client displaying the gametype in red color, otherwise gametype would be white
 			if (str_length(aBuf) + 4 < 16) // only if we have enough space to actually "set" the color. if it gets cut off we can leave it out entirely
 				str_append(aBuf, " idm", sizeof(aBuf));
 		}
