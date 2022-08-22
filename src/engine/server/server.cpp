@@ -1975,7 +1975,10 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			str_append(aBuf, pGameType, pStart - pGameType + 1);
 			str_append(aBuf, aFakeRace, sizeof(aBuf));
 			str_append(aBuf, pStart + 4, sizeof(aBuf));
+		}
 
+		if (Config()->m_SvBrowserScoreFix == 2)
+		{
 			// this will make the client think gametype is idm leading to the client displaying the gametype in red color, otherwise gametype would be white
 			if (str_length(aBuf) + 4 < 16) // only if we have enough space to actually "set" the color. if it gets cut off we can leave it out entirely
 				str_append(aBuf, " idm", sizeof(aBuf));
@@ -3578,7 +3581,7 @@ bool CServer::IsDoubleInfo()
 
 bool CServer::IsBrowserScoreFix()
 {
-	return Config()->m_SvBrowserScoreFix && Config()->m_SvDefaultScoreMode != 0;
+	return (Config()->m_SvBrowserScoreFix || !str_find_nocase(GameServer()->GameType(), "race")) && Config()->m_SvDefaultScoreMode != 0;
 }
 
 bool CServer::IsUniqueAddress(int ClientID)
