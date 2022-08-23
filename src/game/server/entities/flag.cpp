@@ -197,26 +197,36 @@ void CFlag::Tick()
 			HandleDropped();
 	}
 
-	// plots
-	int PlotID = GameServer()->GetTilePlotID(m_Pos, true);
-	if (PlotID >= PLOT_START)
-		TeleToPlot(PlotID);
-
-	int MapIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-	int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	if (TileIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_VIP_PLUS_ONLY)
+	// check tiles inbetween pos and prevpos in case a flag is being carried and the guy has vip+ or a plot door is opened and he tries to skip it with ninja or speed.
+	// in such a case the tee wouldnt be stopped by MoveBox() means he would simply skip the tile without the flag noticing
+	const int End = distance(m_Pos, m_PrevPos)+1;
+	const float InverseEnd = 1.0f/End;
+	for (int i = 0; i <= End; i++)
 	{
-		GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
-		Drop();
-		m_Vel = vec2(0, 0);
-		m_Pos = m_PrevPos;
+		vec2 Pos = mix(m_Pos, m_PrevPos, i*InverseEnd);
+
+		// plots
+		int PlotID = GameServer()->GetTilePlotID(Pos, true);
+		if (PlotID >= PLOT_START)
+			TeleToPlot(PlotID);
+
+		// vip plus
+		int MapIndex = GameServer()->Collision()->GetMapIndex(Pos);
+		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+		if (TileIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_VIP_PLUS_ONLY)
+		{
+			GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
+			Drop();
+			m_Vel = vec2(0, 0);
+			m_Pos = m_PrevPos;
+		}
 	}
+
+	m_PrevPos = m_Pos;
 
 	if (m_SoundTick && Server()->Tick() % Server()->TickSpeed() == 0)
 		m_SoundTick--;
-
-	m_PrevPos = m_Pos;
 }
 
 void CFlag::Snap(int SnappingClient)
