@@ -87,8 +87,9 @@ public:
 
 	virtual void Reset();
 	virtual void Destroy();
+	virtual void PreTick();
 	virtual void Tick();
-	virtual void TickDefered();
+	virtual void TickDeferred();
 	virtual void TickPaused();
 	virtual void Snap(int SnappingClient);
 	void SnapCharacter(int SnappingClient, int ID);

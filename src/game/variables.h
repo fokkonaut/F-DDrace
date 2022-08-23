@@ -318,7 +318,7 @@ MACRO_CONFIG_INT(SvWhoIs, sv_whois, 0, 0, 1, CFGFLAG_SERVER, "Whether WhoIs is e
 MACRO_CONFIG_STR(SvWhoIsFile, sv_whois_file, 128, "data", CFGFLAG_SERVER, "WhoIs file", AUTHED_ADMIN)
 
 // bugs
-MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 1, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength or weak hook is also there", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 1, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength and bounce or weak is also there", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvStoppersPassthrough, sv_stoppers_passthrough, 0, 0, 1, CFGFLAG_SERVER, "Whether tees can pass through stoppers with enough speed", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 1, 0, 1, CFGFLAG_SERVER, "Whether firing shotgun while standing in another tee gives an insane boost", AUTHED_ADMIN)
 

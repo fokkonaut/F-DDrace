@@ -96,7 +96,7 @@ void CCharacterCore::Reset()
 	m_FightStarted = false;
 }
 
-void CCharacterCore::Tick(bool UseInput)
+void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	// F-DDrace
 	m_UpdateFlagVel = 0;
@@ -413,6 +413,12 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
+	if(DoDeferredTick)
+		TickDeferred();
+}
+
+void CCharacterCore::TickDeferred()
+{
 	if(m_pWorld)
 	{
 		float ClosestLen = -1;
@@ -466,20 +472,17 @@ void CCharacterCore::Tick(bool UseInput)
 				if(Distance > PHYS_SIZE*1.50f) // TODO: fix tweakable variable
 				{
 					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
+					float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
 
+					vec2 Temp;
 					// add force to the hooked player
-					pCharCore->m_HookDragVel += Dir*Accel*1.5f;
-
+					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.x, Accel * Dir.x * 1.5f);
+					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, pCharCore->m_Vel.y, Accel * Dir.y * 1.5f);
+					pCharCore->m_Vel = ClampVel(pCharCore->m_MoveRestrictions, Temp);
 					// add a little bit force to the guy who has the grip
-					m_HookDragVel -= Dir*Accel*0.25f;
-
-					if (m_pCollision->m_pConfig->m_SvWeakHook && !m_FightStarted)
-					{
-						pCharCore->AddDragVelocity();
-						pCharCore->ResetDragVelocity();
-						AddDragVelocity();
-						ResetDragVelocity();
-					}
+					Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, -Accel * Dir.x * 0.25f);
+					Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, -Accel * Dir.y * 0.25f);
+					m_Vel = ClampVel(m_MoveRestrictions, Temp);
 				}
 			}
 		}
@@ -516,22 +519,6 @@ void CCharacterCore::Tick(bool UseInput)
 	// clamp the velocity to something sane
 	if(length(m_Vel) > 6000)
 		m_Vel = normalize(m_Vel) * 6000;
-}
-
-void CCharacterCore::AddDragVelocity()
-{
-	// Apply hook interaction velocity
-	float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
-
-	vec2 Temp;
-	Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, m_HookDragVel.x);
-	Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, m_HookDragVel.y);
-	m_Vel = ClampVel(m_MoveRestrictions, Temp);
-}
-
-void CCharacterCore::ResetDragVelocity()
-{
-	m_HookDragVel = vec2(0,0);
 }
 
 void CCharacterCore::Move(bool BugStoppersPassthrough)

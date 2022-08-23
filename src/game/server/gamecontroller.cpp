@@ -664,6 +664,9 @@ void IGameController::Snap(int SnappingClient)
 		| GAMEINFOFLAG2_ENTITIES_FDDRACE
 		| GAMEINFOFLAG2_ALLOW_X_SKINS;
 
+	if (!Config()->m_SvWeakHook)
+		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK_AND_BOUNCE;
+
 	if (!pSnap->RestrictZoom())
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_ALLOW_ZOOM;
 
