@@ -85,6 +85,8 @@ CCharacter::~CCharacter()
 	if (m_pDummyHandle)
 		delete m_pDummyHandle;
 	Server()->SnapFreeID(m_ViewCursorSnapID);
+	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
+		Server()->SnapFreeID(m_aUntranslatedID[i]);
 }
 
 void CCharacter::Reset()
@@ -1884,11 +1886,6 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 void CCharacter::Snap(int SnappingClient)
 {
-	int ID = m_pPlayer->GetCID();
-
-	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
-		return;
-
 	// explicitly check for /showall, in case a client that doesnt support showdistance wants to see characters while zooming out
 	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
 	// when showdistance is supported, then all entities within that showdistance range are being sent
@@ -1899,14 +1896,13 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 
 	// F-DDrace
+	if (SnappingClient == m_pPlayer->GetCID())
+		m_DrawEditor.Snap();
+
+	// invisibility
 	if (m_Invisible && SnappingClient != m_pPlayer->GetCID() && SnappingClient != -1)
 		if (!Server()->GetAuthedState(SnappingClient) || Server()->Tick() % 200 == 0)
 			return;
-
-	SnapCharacter(SnappingClient, ID);
-
-	if (SnappingClient == m_pPlayer->GetCID())
-		m_DrawEditor.Snap();
 
 	// Draw cursor
 	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
@@ -1923,6 +1919,46 @@ void CCharacter::Snap(int SnappingClient)
 		pCursor->m_FromY = round_to_int(m_Pos.y);
 		pCursor->m_StartTick = Server()->Tick() - 5;
 	}
+
+	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
+	int ID = m_pPlayer->GetCID();
+	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
+	{
+		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
+		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aUntranslatedID[EUntranslatedMap::ID_WEAPON], Size));
+		if (!pPickup)
+			return;
+
+		int Subtype = GameServer()->GetWeaponType(GetActiveWeapon());
+		int Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : POWERUP_WEAPON;
+
+		pPickup->m_X = round_to_int(m_Pos.x);
+		pPickup->m_Y = round_to_int(m_Pos.y);
+		if (Server()->IsSevendown(SnappingClient))
+		{
+			pPickup->m_Type = Type;
+			((int*)pPickup)[3] = Subtype;
+		}
+		else
+			pPickup->m_Type = GameServer()->GetPickupType(Type, Subtype);
+
+		if (m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
+		{
+			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedID[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
+			if (!pLaser)
+				return;
+
+			pLaser->m_X = round_to_int(m_Core.m_HookPos.x);
+			pLaser->m_Y = round_to_int(m_Core.m_HookPos.y);
+			pLaser->m_FromX = round_to_int(m_Pos.x);
+			pLaser->m_FromY = round_to_int(m_Pos.y);
+			pLaser->m_StartTick = Server()->Tick() - 3;
+		}
+		return;
+	}
+
+	// otherwise show our normal tee and send ddnet character stuff
+	SnapCharacter(SnappingClient, ID);
 
 	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
 	if(!pDDNetCharacter)
@@ -3788,6 +3824,9 @@ void CCharacter::FDDraceInit()
 	m_RotatingBall = false;
 	m_EpicCircle = false;
 	m_StaffInd = false;
+
+	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
+		m_aUntranslatedID[i] = Server()->SnapNewID();
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

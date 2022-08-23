@@ -476,6 +476,15 @@ public:
 	bool IsWeaponIndicator();
 	int64 m_LastWeaponIndTick;
 
+	// 128p
+	enum EUntranslatedMap
+	{
+		ID_HOOK,
+		ID_WEAPON,
+		NUM_IDS
+	};
+	int m_aUntranslatedID[EUntranslatedMap::NUM_IDS];
+
 	//others
 	int HasFlag();
 	void CheckMoved();
