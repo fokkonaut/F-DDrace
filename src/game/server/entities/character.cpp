@@ -1337,7 +1337,7 @@ bool CCharacter::IsIdle()
 	return !m_SavedInput.m_Direction && !m_SavedInput.m_Hook && !m_SavedInput.m_Jump && !(m_SavedInput.m_Fire&1);
 }
 
-void CCharacter::PreTick()
+void CCharacter::Tick()
 {
 	if(m_Paused)
 		return;
@@ -1359,22 +1359,7 @@ void CCharacter::PreTick()
 	}
 
 	m_Core.m_Input = m_Input;
-	m_Core.Tick(true, Config()->m_SvWeakHook);
-}
-
-void CCharacter::Tick()
-{
-	if(!Config()->m_SvWeakHook)
-	{
-		if(m_Paused)
-			return;
-
-		m_Core.TickDeferred();
-	}
-	else
-	{
-		PreTick();
-	}
+	m_Core.Tick(true);
 
 	// F-DDrace
 	if (m_Core.m_UpdateFlagVel == HOOK_FLAG_RED || m_Core.m_UpdateFlagVel == HOOK_FLAG_BLUE)
@@ -1424,6 +1409,12 @@ void CCharacter::TickDeferred()
 		m_ReckoningCore.Move(false);
 		m_ReckoningCore.Quantize();
 	}
+
+	// apply drag velocity when the player is not firing ninja
+	// and set it back to 0 for the next tick
+	if(m_ActiveWeapon != WEAPON_NINJA || m_Ninja.m_CurrentMoveTime < 0)
+		m_Core.AddDragVelocity();
+	m_Core.ResetDragVelocity();
 
 	//lastsentcore
 	vec2 StartPos = m_Core.m_Pos;

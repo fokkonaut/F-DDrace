@@ -489,17 +489,6 @@ void CGameWorld::Tick()
 	else
 	{
 		// update all objects
-		if(!Config()->m_SvWeakHook)
-		{
-			for(int i = 0; i < NUM_ENTTYPES; i++)
-				for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
-				{
-					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-					pEnt->PreTick();
-					pEnt = m_pNextTraverseEntity;
-				}
-		}
-
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 			{
