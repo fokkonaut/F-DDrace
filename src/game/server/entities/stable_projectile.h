@@ -22,7 +22,7 @@ public:
 	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec = false, bool OnlyShowOwner = false);
 
 	virtual void Reset();
-	virtual void TickDefered();
+	virtual void TickDeferred();
 	virtual void Snap(int SnappingClient);
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };

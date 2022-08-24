@@ -352,7 +352,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-void CProjectile::TickDefered()
+void CProjectile::TickDeferred()
 {
 	if (Server()->Tick() % 4 == 1)
 	{

@@ -113,7 +113,7 @@ void CFlag::TickPaused()
 		m_GrabTick++;
 }
 
-void CFlag::TickDefered()
+void CFlag::TickDeferred()
 {
 	if (GetCarrier())
 		m_Pos = GetCarrier()->GetPos();

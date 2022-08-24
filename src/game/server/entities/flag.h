@@ -52,7 +52,7 @@ public:
 	void Reset(bool Init);
 	virtual void Reset() { Reset(false); };
 	virtual void TickPaused();
-	virtual void TickDefered();
+	virtual void TickDeferred();
 	virtual void Snap(int SnappingClient);
 	virtual void Tick();
 };

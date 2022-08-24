@@ -24,7 +24,7 @@ void CStableProjectile::Reset()
 	GameWorld()->DestroyEntity(this);
 }
 
-void CStableProjectile::TickDefered()
+void CStableProjectile::TickDeferred()
 {
 	if(Server()->Tick()%4 == 1)
 	{

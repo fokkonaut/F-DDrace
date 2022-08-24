@@ -57,7 +57,7 @@ private:
 	bool m_CalculatedVel;
 	vec2 m_Vel;
 
-	virtual void TickDefered();
+	virtual void TickDeferred();
 	void CalculateVel();
 	void GetOriginalTunings(float *pCurvature, float *pSpeed, bool TuneZone = false);
 	void GetTunings(float *pCurvature, float *pSpeed);
