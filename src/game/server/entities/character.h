@@ -87,7 +87,6 @@ public:
 
 	virtual void Reset();
 	virtual void Destroy();
-	void PreTick();
 	virtual void Tick();
 	virtual void TickDeferred();
 	virtual void TickPaused();
