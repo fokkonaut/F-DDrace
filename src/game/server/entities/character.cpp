@@ -1367,7 +1367,7 @@ void CCharacter::Tick()
 		int Flag = m_Core.m_UpdateFlagVel == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
 		((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag]->SetVel(m_Core.m_UFlagVel);
 	}
-
+	Config()->m_SvTestingCommands = 1;
 	if (m_Core.m_UpdateFlagAtStand == HOOK_FLAG_RED || m_Core.m_UpdateFlagAtStand == HOOK_FLAG_BLUE)
 	{
 		int Flag = m_Core.m_UpdateFlagAtStand == HOOK_FLAG_RED ? TEAM_RED : TEAM_BLUE;
