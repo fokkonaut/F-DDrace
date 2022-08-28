@@ -6,7 +6,6 @@
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
 
-class CCharacter;
 class CGameContext;
 class IServer;
 
