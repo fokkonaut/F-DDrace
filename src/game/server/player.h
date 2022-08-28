@@ -287,7 +287,6 @@ public:
 	int m_RainbowSpeed;
 	int m_RainbowColor;
 	void RainbowTick();
-	bool m_RainbowName;
 
 	bool m_InfRainbow;
 	int m_InfMeteors;
@@ -295,8 +294,10 @@ public:
 
 	CPortal *m_pPortal[NUM_PORTALS];
 
+	// rainbow name
+	bool m_RainbowName;
 	bool m_ProcessingRainbowName;
-	bool m_aResetTeam[MAX_CLIENTS];
+	int m_aForceTeam[MAX_CLIENTS];
 
 	//teecontrol
 	void SetTeeControl(CPlayer *pVictim);

@@ -4929,7 +4929,7 @@ void CCharacter::RainbowName(bool Set, int FromID, bool Silent)
 			if (GameServer()->m_apPlayers[i] && !NetworkClipped(i, false, true))
 			{
 				// remove TEAM_SUPER from urself
-				GameServer()->m_apPlayers[i]->m_aResetTeam[i] = true;
+				GameServer()->m_apPlayers[i]->m_aForceTeam[i] = Team();
 				Teams()->SendTeamsState(i);
 			}
 		}

@@ -465,19 +465,16 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{
 			Team = m_Core.Team(ID);
-			if (!m_pGameContext->m_apPlayers[ClientID]->m_aResetTeam[ID])
+			int ForceTeam = m_pGameContext->m_apPlayers[ClientID]->m_aForceTeam[ID];
+			if (ForceTeam == -1)
 			{
 				if (m_pGameContext->m_apPlayers[ID] && m_pGameContext->m_apPlayers[ID]->m_RainbowName)
-				{
-					Team = m_pGameContext->m_RainbowNameTeam;
-					if (ID == ClientID || ID == m_pGameContext->m_apPlayers[ClientID]->GetSpectatorID())
-						Team = 0; // dont show rainbow name on ourselves and not on spectator. spec is bcs otherwise client will make other tees around transparent
-				}
+					Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
 				else if (ID == ClientID && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName)
-				{
 					Team = TEAM_SUPER;
-				}
 			}
+			else
+				Team = ForceTeam;
 
 			if (Team == TEAM_SUPER)
 				Team = VANILLA_MAX_CLIENTS;

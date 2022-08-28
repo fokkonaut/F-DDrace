@@ -1140,7 +1140,8 @@ void CGameContext::OnTick()
 				m_pHouses[j]->Tick(i);
 
 			// also used for rainbow name
-			mem_zero(m_apPlayers[i]->m_aResetTeam, sizeof(m_apPlayers[i]->m_aResetTeam));
+			for (int j = 0; j < MAX_CLIENTS; j++)
+				m_apPlayers[i]->m_aForceTeam[j] = -1;
 		}
 	}
 
@@ -1156,18 +1157,26 @@ void CGameContext::OnTick()
 			{
 				for (int j = 0; j < MAX_CLIENTS; j++)
 				{
-					if (!m_apPlayers[j] || aUpdateTeams[j])
+					if (!m_apPlayers[j] || aUpdateTeams[j] || i == j)
 						continue;
 
-					if (!(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) && !GetPlayerChar(i)->NetworkClipped(j, false, true))
+					bool InRange = !GetPlayerChar(i)->NetworkClipped(j, false, true);
+					// if another person also has rainbow name, we have to put ourselves in TEAM_SUPER so that he isnt transparent
+					if (InRange && m_apPlayers[j]->m_RainbowName)
+						m_apPlayers[i]->m_aForceTeam[i] = TEAM_SUPER;
+
+					if (InRange && !(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD))
 					{
 						m_apPlayers[j]->m_ProcessingRainbowName = aUpdateTeams[j] = true;
+						// make others super if we watch a person with rainbow name, so that other tees wont be displayed transparent
+						if ((m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[j]->IsPaused()) && m_apPlayers[j]->GetSpectatorID() == i)
+							m_apPlayers[j]->m_aForceTeam[i] = TEAM_SUPER;
 					}
 					else if (m_apPlayers[j]->m_ProcessingRainbowName)
 					{
 						m_apPlayers[j]->m_ProcessingRainbowName = false;
-						m_apPlayers[j]->m_aResetTeam[i] = true;
-						m_apPlayers[j]->m_aResetTeam[j] = true;
+						m_apPlayers[j]->m_aForceTeam[i] = GetDDRaceTeam(i);
+						m_apPlayers[j]->m_aForceTeam[j] = GetDDRaceTeam(j);
 						aUpdateTeams[j] = true;
 					}
 				}
