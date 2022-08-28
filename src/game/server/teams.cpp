@@ -468,9 +468,15 @@ void CGameTeams::SendTeamsState(int ClientID)
 			if (!m_pGameContext->m_apPlayers[ClientID]->m_aResetTeam[ID])
 			{
 				if (m_pGameContext->m_apPlayers[ID] && m_pGameContext->m_apPlayers[ID]->m_RainbowName)
-					Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
+				{
+					Team = m_pGameContext->m_RainbowNameTeam;
+					if (ID == ClientID || ID == m_pGameContext->m_apPlayers[ClientID]->GetSpectatorID())
+						Team = 0;
+				}
 				else if (ID == ClientID && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName)
+				{
 					Team = TEAM_SUPER;
+				}
 			}
 
 			if (Team == TEAM_SUPER)
