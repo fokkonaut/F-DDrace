@@ -226,6 +226,7 @@ void CPlayer::Reset()
 
 	m_HideDrawings = false;
 	m_ProcessingRainbowName = false;
+	m_ResetChatNameColor = false;
 }
 
 void CPlayer::Tick()

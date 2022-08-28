@@ -297,6 +297,7 @@ public:
 	// rainbow name
 	bool m_RainbowName;
 	bool m_ProcessingRainbowName;
+	bool m_ResetChatNameColor;
 	int m_aForceTeam[MAX_CLIENTS];
 
 	//teecontrol

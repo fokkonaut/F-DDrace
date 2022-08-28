@@ -1171,6 +1171,13 @@ void CGameContext::OnTick()
 					if (InRange && !(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD))
 					{
 						m_apPlayers[j]->m_ProcessingRainbowName = aUpdateTeams[j] = true;
+						if (m_apPlayers[j]->m_ResetChatNameColor)
+						{
+							// when u send a chat msg nearby a rainbowname tee u r in team super and ur chat name is red, cuz of the team color.
+							// setting team to 0 resets the color of the chat msg, but setting back to team super doesnt make it red again
+							m_apPlayers[j]->m_aForceTeam[j] = 0;
+							m_apPlayers[j]->m_ResetChatNameColor = false;
+						}
 					}
 					else if (m_apPlayers[j]->m_ProcessingRainbowName)
 					{
@@ -2201,6 +2208,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 				pPlayer->UpdatePlaytime();
+				pPlayer->m_ResetChatNameColor = true;
 
 				if (Mode != CHAT_WHISPER)
 				{
