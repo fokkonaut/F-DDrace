@@ -1155,6 +1155,9 @@ void CGameContext::OnTick()
 			// Rainbow name
 			if (m_apPlayers[i]->m_RainbowName && Server()->Tick() % 2 == 0)
 			{
+				// always update ourselves too, so dummy stuff is resetted when switching.
+				aUpdateTeams[i] = Server()->GetDummy(i) != -1;
+
 				for (int j = 0; j < MAX_CLIENTS; j++)
 				{
 					if (!m_apPlayers[j] || aUpdateTeams[j] || i == j)
