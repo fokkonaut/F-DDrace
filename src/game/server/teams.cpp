@@ -471,18 +471,21 @@ void CGameTeams::SendTeamsState(int ClientID)
 		{
 			Team = m_Core.Team(ID);
 			int ForceTeam = pPlayer->m_aForceTeam[ID];
-			if (ForceTeam == -1 && pPlayer->m_ProcessingRainbowName && m_pGameContext->m_apPlayers[ID])
+			if (ForceTeam == -1)
 			{
-				if (m_pGameContext->m_apPlayers[ID]->m_RainbowName)
+				if (pPlayer->m_ProcessingRainbowName && m_pGameContext->m_apPlayers[ID])
 				{
-					Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
-				}
-				else
-				{
-					// if we process rainbow name but dont have it ourselves then someone close to us has it. put us in super so that guy isnt transparent
-					// make others super if we watch a person with rainbow name, so that other tees wont be displayed transparent
-					if (ID == ClientID || (SpeccingRainbowName && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName))
-						Team = TEAM_SUPER;
+					if (m_pGameContext->m_apPlayers[ID]->m_RainbowName)
+					{
+						Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
+					}
+					else
+					{
+						// if we process rainbow name but dont have it ourselves then someone close to us has it. put us in super so that guy isnt transparent
+						// make others super if we watch a person with rainbow name, so that other tees wont be displayed transparent
+						if (ID == ClientID || (SpeccingRainbowName && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName))
+							Team = TEAM_SUPER;
+					}
 				}
 			}
 			else
