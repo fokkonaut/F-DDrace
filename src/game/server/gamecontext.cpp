@@ -713,14 +713,14 @@ void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 {
 	// dont send so the client doesnt auto switch the weapon and stops editing
-	if (GetPlayerChar(ClientID) && GetPlayerChar(ClientID)->m_DrawEditor.Active())
+	CCharacter *pChr = GetPlayerChar(ClientID);
+	if (!pChr || pChr->m_DrawEditor.Active() || (pChr->GetActiveWeapon() == WEAPON_NINJA && !pChr->m_ScrollNinja))
 		return;
 
 	// include ninja, client doesnt auto switch to ninja on pickup
 	if (Weapon >= NUM_VANILLA_WEAPONS-1)
 	{
-		if (GetPlayerChar(ClientID))
-			GetPlayerChar(ClientID)->SetWeapon(Weapon);
+		pChr->SetWeapon(Weapon);
 	}
 	else
 	{
