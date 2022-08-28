@@ -439,13 +439,8 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if (GameServer()->Config()->m_SvTeam == 3)
 		return;
 
-	CPlayer *pPlayer = m_pGameContext->m_apPlayers[ClientID];
-	if (!pPlayer || m_pGameContext->GetClientDDNetVersion(ClientID) < VERSION_DDNET)
+	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->GetClientDDNetVersion(ClientID) < VERSION_DDNET)
 		return;
-
-	int SpectatorID = pPlayer->GetSpectatorID();
-	bool SpeccingRainbowName = (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) &&
-		SpectatorID != -1 && m_pGameContext->m_apPlayers[SpectatorID] && m_pGameContext->m_apPlayers[SpectatorID]->m_RainbowName;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
@@ -470,26 +465,9 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{
 			Team = m_Core.Team(ID);
-			int ForceTeam = pPlayer->m_aForceTeam[ID];
-			if (ForceTeam == -1)
-			{
-				if (pPlayer->m_ProcessingRainbowName && m_pGameContext->m_apPlayers[ID])
-				{
-					if (m_pGameContext->m_apPlayers[ID]->m_RainbowName)
-					{
-						Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
-					}
-					else
-					{
-						// if we process rainbow name but dont have it ourselves then someone close to us has it. put us in super so that guy isnt transparent
-						// make others super if we watch a person with rainbow name, so that other tees wont be displayed transparent
-						if (ID == ClientID || (SpeccingRainbowName && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName))
-							Team = TEAM_SUPER;
-					}
-				}
-			}
-			else
-				Team = ForceTeam;
+			int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, ID);
+			if (Color != -1)
+				Team = Color;
 
 			if (Team == TEAM_SUPER)
 				Team = VANILLA_MAX_CLIENTS;

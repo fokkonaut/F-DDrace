@@ -1096,6 +1096,8 @@ void CGameContext::OnTick()
 	for (int i = 0; i < NUM_MINIGAMES; i++)
 		m_pMinigames[i]->Tick();
 
+	m_RainbowName.Tick();
+
 	if(m_TeeHistorianActive)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1138,66 +1140,13 @@ void CGameContext::OnTick()
 			// F-DDrace
 			for (int j = 0; j < NUM_HOUSES; j++)
 				m_pHouses[j]->Tick(i);
-
-			// also used for rainbow name
-			for (int j = 0; j < MAX_CLIENTS; j++)
-				m_apPlayers[i]->m_aForceTeam[j] = -1;
 		}
 	}
 
-	bool aUpdateTeams[MAX_CLIENTS] = { false };
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (m_apPlayers[i])
-		{
 			m_apPlayers[i]->PostPostTick();
-
-			// Rainbow name
-			if (m_apPlayers[i]->m_RainbowName && Server()->Tick() % 2 == 0)
-			{
-				// always update ourselves too, so dummy stuff is resetted when switching.
-				aUpdateTeams[i] = Server()->GetDummy(i) != -1;
-
-				for (int j = 0; j < MAX_CLIENTS; j++)
-				{
-					if (!m_apPlayers[j] || aUpdateTeams[j] || i == j)
-						continue;
-
-					bool InRange = !GetPlayerChar(i)->NetworkClipped(j, false, true);
-					// if another person also has rainbow name, we have to put ourselves in TEAM_SUPER so that he isnt transparent
-					if (InRange && m_apPlayers[j]->m_RainbowName)
-						m_apPlayers[i]->m_aForceTeam[i] = TEAM_SUPER;
-
-					if (InRange && !(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD))
-					{
-						m_apPlayers[j]->m_ProcessingRainbowName = aUpdateTeams[j] = true;
-						if (m_apPlayers[j]->m_ResetChatNameColor)
-						{
-							// when u send a chat msg nearby a rainbowname tee u r in team super and ur chat name is red, cuz of the team color.
-							// setting team to 0 resets the color of the chat msg, but setting back to team super doesnt make it red again
-							m_apPlayers[j]->m_aForceTeam[j] = 0;
-							m_apPlayers[j]->m_ResetChatNameColor = false;
-						}
-					}
-					else if (m_apPlayers[j]->m_ProcessingRainbowName)
-					{
-						m_apPlayers[j]->m_ProcessingRainbowName = false;
-						m_apPlayers[j]->m_aForceTeam[i] = GetDDRaceTeam(i);
-						m_apPlayers[j]->m_aForceTeam[j] = GetDDRaceTeam(j);
-						aUpdateTeams[j] = true;
-					}
-				}
-			}
-		}
-	}
-
-	// rainbow name
-	if (Server()->Tick() % 2 == 0)
-	{
-		m_RainbowNameTeam = m_RainbowNameTeam % (VANILLA_MAX_CLIENTS-1) + 1;
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (m_apPlayers[i] && aUpdateTeams[i])
-				((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(i);
 	}
 
 	// update voting
@@ -2208,7 +2157,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 				pPlayer->UpdatePlaytime();
-				pPlayer->m_ResetChatNameColor = true;
+				m_RainbowName.OnChatMessage(ClientID);
 
 				if (Mode != CHAT_WHISPER)
 				{
@@ -4023,6 +3972,7 @@ void CGameContext::FDDraceInit()
 	m_pMinigames[MINIGAME_INSTAGIB_FNG] = new CMinigame(this, MINIGAME_INSTAGIB_FNG);
 
 	m_WhoIs.Init(this);
+	m_RainbowName.Init(this);
 
 	m_SurvivalGameState = SURVIVAL_OFFLINE;
 	m_SurvivalBackgroundState = SURVIVAL_OFFLINE;

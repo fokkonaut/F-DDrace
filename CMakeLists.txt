@@ -1772,6 +1772,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   minigames/minigame.h
   player.cpp
   player.h
+  rainbowname.cpp
+  rainbowname.h
   save.cpp
   save.h
   score.h

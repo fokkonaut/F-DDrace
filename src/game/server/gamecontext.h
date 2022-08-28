@@ -22,6 +22,7 @@
 #include "eventhandler.h"
 #include "gameworld.h"
 #include "whois.h"
+#include "rainbowname.h"
 
 #include "teehistorian.h"
 
@@ -638,6 +639,7 @@ public:
 	class CMinigame *m_pMinigames[NUM_MINIGAMES];
 	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
 	CWhoIs m_WhoIs;
+	CRainbowName m_RainbowName;
 
 	void CreateSoundGlobal(int Sound);
 	void CreateSoundPlayer(int Sound, int ClientID);
@@ -688,9 +690,6 @@ public:
 	int m_SurvivalGameState;
 	int64 m_SurvivalTick;
 	int m_SurvivalWinner;
-
-	// rainbow name
-	int m_RainbowNameTeam;
 
 	//instagib
 	void InstagibTick(int Type);
