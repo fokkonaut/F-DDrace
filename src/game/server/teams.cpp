@@ -471,7 +471,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 				{
 					Team = m_pGameContext->m_RainbowNameTeam;
 					if (ID == ClientID || ID == m_pGameContext->m_apPlayers[ClientID]->GetSpectatorID())
-						Team = 0;
+						Team = 0; // dont show rainbow name on ourselves and not on spectator. spec is bcs otherwise client will make other tees around transparent
 				}
 				else if (ID == ClientID && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName)
 				{
