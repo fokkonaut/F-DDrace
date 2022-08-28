@@ -1168,9 +1168,6 @@ void CGameContext::OnTick()
 					if (InRange && !(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD))
 					{
 						m_apPlayers[j]->m_ProcessingRainbowName = aUpdateTeams[j] = true;
-						// make others super if we watch a person with rainbow name, so that other tees wont be displayed transparent
-						if ((m_apPlayers[j]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[j]->IsPaused()) && m_apPlayers[j]->GetSpectatorID() == i)
-							m_apPlayers[j]->m_aForceTeam[i] = TEAM_SUPER;
 					}
 					else if (m_apPlayers[j]->m_ProcessingRainbowName)
 					{
