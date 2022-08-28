@@ -4924,7 +4924,6 @@ void CCharacter::RainbowName(bool Set, int FromID, bool Silent)
 	m_pPlayer->m_RainbowName = Set;
 	if (!m_pPlayer->m_RainbowName)
 	{
-		Config()->m_SvTestingCommands = 1;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if (GameServer()->m_apPlayers[i] && !NetworkClipped(i, false, true))
