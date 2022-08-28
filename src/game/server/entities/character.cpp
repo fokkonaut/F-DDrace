@@ -318,8 +318,14 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if (m_ReloadTimer != 0 || m_QueuedWeapon == -1 || (m_aWeapons[WEAPON_NINJA].m_Got && !m_ScrollNinja) || !m_aWeapons[m_QueuedWeapon].m_Got || m_DrawEditor.Selecting())
+	if (m_ReloadTimer != 0 || m_QueuedWeapon == -1 || (m_aWeapons[WEAPON_NINJA].m_Got && !m_ScrollNinja) || (m_QueuedWeapon != -2 && !m_aWeapons[m_QueuedWeapon].m_Got) || m_DrawEditor.Selecting())
 		return;
+
+	if (m_QueuedWeapon == -2)
+	{
+		SetAvailableWeapon();
+		return;
+	}
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
@@ -1187,7 +1193,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 		{
 			// dont instantly switch weapon when we shot last shot of spawnweapons
 			if (m_ReloadTimer != 0)
-				m_QueuedWeapon = WEAPON_GUN;
+				m_QueuedWeapon = -2;
 			else
 				SetWeapon(WEAPON_GUN);
 		}

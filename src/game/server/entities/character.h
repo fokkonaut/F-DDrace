@@ -201,7 +201,7 @@ private:
 
 	int m_ActiveWeapon;
 	int m_LastWeapon;
-	int m_QueuedWeapon;
+	int m_QueuedWeapon; // -2 = any available, preferred gun
 
 	int m_ReloadTimer;
 	int m_AttackTick;
