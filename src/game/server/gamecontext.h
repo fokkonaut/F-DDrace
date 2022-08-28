@@ -689,6 +689,9 @@ public:
 	int64 m_SurvivalTick;
 	int m_SurvivalWinner;
 
+	// rainbow name
+	int m_RainbowNameTeam;
+
 	//instagib
 	void InstagibTick(int Type);
 
@@ -977,6 +980,7 @@ private:
 	static void ConRotatingBall(IConsole::IResult* pResult, void* pUserData);
 	static void ConEpicCircle(IConsole::IResult* pResult, void* pUserData);
 	static void ConStaffInd(IConsole::IResult* pResult, void* pUserData);
+	static void ConRainbowName(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);

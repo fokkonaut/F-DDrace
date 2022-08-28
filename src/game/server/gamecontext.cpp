@@ -1138,13 +1138,50 @@ void CGameContext::OnTick()
 			// F-DDrace
 			for (int j = 0; j < NUM_HOUSES; j++)
 				m_pHouses[j]->Tick(i);
+
+			// also used for rainbow name
+			mem_zero(m_apPlayers[i]->m_aResetTeam, sizeof(m_apPlayers[i]->m_aResetTeam));
 		}
 	}
 
+	bool aUpdateTeams[MAX_CLIENTS] = { false };
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (m_apPlayers[i])
+		{
 			m_apPlayers[i]->PostPostTick();
+
+			// Rainbow name
+			if (m_apPlayers[i]->m_RainbowName && Server()->Tick() % 2 == 0)
+			{
+				for (int j = 0; j < MAX_CLIENTS; j++)
+				{
+					if (!m_apPlayers[j] || aUpdateTeams[j])
+						continue;
+
+					if (!(m_apPlayers[j]->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) && !GetPlayerChar(i)->NetworkClipped(j, false, true))
+					{
+						m_apPlayers[j]->m_ProcessingRainbowName = aUpdateTeams[j] = true;
+					}
+					else if (m_apPlayers[j]->m_ProcessingRainbowName)
+					{
+						m_apPlayers[j]->m_ProcessingRainbowName = false;
+						m_apPlayers[j]->m_aResetTeam[i] = true;
+						m_apPlayers[j]->m_aResetTeam[j] = true;
+						aUpdateTeams[j] = true;
+					}
+				}
+			}
+		}
+	}
+
+	// rainbow name
+	if (Server()->Tick() % 2 == 0)
+	{
+		m_RainbowNameTeam = m_RainbowNameTeam % (VANILLA_MAX_CLIENTS-1) + 1;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			if (m_apPlayers[i] && aUpdateTeams[i])
+				((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(i);
 	}
 
 	// update voting
@@ -6946,6 +6983,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Epic Circle";
 	case STAFF_IND:
 		return "Staff Indicator";
+	case RAINBOW_NAME:
+		return "Rainbow Name";
 	}
 	return "Unknown";
 }

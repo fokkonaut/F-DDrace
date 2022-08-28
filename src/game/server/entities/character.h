@@ -52,6 +52,7 @@ enum Extra
 	ROTATING_BALL,
 	EPIC_CIRCLE,
 	STAFF_IND,
+	RAINBOW_NAME,
 	NUM_EXTRAS
 };
 
@@ -175,6 +176,7 @@ public:
 	void RotatingBall(bool Set = true, int FromID = -1, bool Silent = false);
 	void EpicCircle(bool Set = true, int FromID = -1, bool Silent = false);
 	void StaffInd(bool Set = true, int FromID = -1, bool Silent = false);
+	void RainbowName(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character

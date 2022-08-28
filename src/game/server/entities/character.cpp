@@ -4918,3 +4918,21 @@ void CCharacter::StaffInd(bool Set, int FromID, bool Silent)
 		new CStaffInd(GameWorld(), m_Pos, m_pPlayer->GetCID());
 	GameServer()->SendExtraMessage(STAFF_IND, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
+
+void CCharacter::RainbowName(bool Set, int FromID, bool Silent)
+{
+	m_pPlayer->m_RainbowName = Set;
+	if (!m_pPlayer->m_RainbowName)
+	{
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (GameServer()->m_apPlayers[i] && !NetworkClipped(i, false, true))
+			{
+				// remove TEAM_SUPER from urself
+				GameServer()->m_apPlayers[i]->m_aResetTeam[i] = true;
+				Teams()->SendTeamsState(i);
+			}
+		}
+	}
+	GameServer()->SendExtraMessage(RAINBOW_NAME, m_pPlayer->GetCID(), Set, FromID, Silent);
+}

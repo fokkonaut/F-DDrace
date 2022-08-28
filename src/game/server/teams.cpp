@@ -465,6 +465,14 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{
 			Team = m_Core.Team(ID);
+			if (!m_pGameContext->m_apPlayers[ClientID]->m_aResetTeam[ID])
+			{
+				if (m_pGameContext->m_apPlayers[ID] && m_pGameContext->m_apPlayers[ID]->m_RainbowName)
+					Team = ID == ClientID ? 0 : m_pGameContext->m_RainbowNameTeam;
+				else if (ID == ClientID && m_pGameContext->m_apPlayers[ID]->m_ProcessingRainbowName)
+					Team = TEAM_SUPER;
+			}
+
 			if (Team == TEAM_SUPER)
 				Team = VANILLA_MAX_CLIENTS;
 			else if (Team > VANILLA_MAX_CLIENTS)

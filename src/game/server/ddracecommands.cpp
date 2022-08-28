@@ -1336,6 +1336,14 @@ void CGameContext::ConStaffInd(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->StaffInd(!pChr->m_StaffInd, pResult->m_ClientID);
 }
 
+void CGameContext::ConRainbowName(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->RainbowName(!pChr->GetPlayer()->m_RainbowName, pResult->m_ClientID);
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

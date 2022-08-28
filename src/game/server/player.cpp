@@ -174,6 +174,7 @@ void CPlayer::Reset()
 	{
 		m_HidePlayerTeam[i] = TEAM_RED;
 		m_aMuted[i] = false;
+		m_aResetTeam[i] = false;
 	}
 
 	for (int i = 0; i < NUM_HOUSES; i++)
@@ -224,6 +225,7 @@ void CPlayer::Reset()
 		m_aStrongWeakID[i] = 0;
 
 	m_HideDrawings = false;
+	m_ProcessingRainbowName = false;
 }
 
 void CPlayer::Tick()
