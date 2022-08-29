@@ -17,7 +17,7 @@ class CRainbowName
 
 	int m_Color;
 
-	struct
+	struct SInfo
 	{
 		bool m_UpdateTeams;
 		bool m_ResetChatColor;
