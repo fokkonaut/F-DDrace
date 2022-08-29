@@ -109,4 +109,8 @@ void CRainbowName::Update(int ClientID)
 			}
 		}
 	}
+
+	// always also update the dummy. if the dummy gets out of view while we are standing next to a rainbow name person, and then swithc to dummy, the teams wont update and we have garbage
+	if (pInfo->m_UpdateTeams)
+		m_aInfo[DummyID].m_UpdateTeams = true;
 }
