@@ -27,6 +27,11 @@ void CRainbowName::OnChatMessage(int ClientID)
 		m_aInfo[ClientID].m_ResetChatColor = true;
 }
 
+bool CRainbowName::IsAffected(int ClientID)
+{
+	return m_aInfo[ClientID].m_UpdateTeams;
+}
+
 void CRainbowName::Tick()
 {
 	if (Server()->Tick() % 2 != 0)
@@ -73,14 +78,6 @@ void CRainbowName::Update(int ClientID)
 	bool NoScoreboard = !(pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD);
 	int DummyID = Server()->GetDummy(ClientID);
 
-	int AffectedID = ClientID;
-	int SpectatorID = pPlayer->GetSpectatorID();
-	if ((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && SpectatorID != -1 && GameServer()->m_apPlayers[SpectatorID])
-	{
-		pPlayer = GameServer()->m_apPlayers[SpectatorID];
-		AffectedID = SpectatorID;
-	}
-
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
 		int ID = i;
@@ -91,19 +88,19 @@ void CRainbowName::Update(int ClientID)
 		if (!pOther || (!pPlayer->m_RainbowName && !pOther->m_RainbowName))
 			continue;
 
-		bool InRange = ID == ClientID || !pPlayer->GetCharacter() || !pPlayer->GetCharacter()->NetworkClipped(ID);
+		bool InRange = ID == ClientID || !pOther->GetCharacter() || !pOther->GetCharacter()->NetworkClipped(ClientID);
 		if (InRange || ID == DummyID)
 		{
 			if (pOther->m_RainbowName)
 			{
-				if (GameServer()->Config()->m_SvRainbowNameScoreboard || NoScoreboard)
+				if (NoScoreboard)
 				{
 					pInfo->m_aTeam[ID] = m_Color;
 					pInfo->m_UpdateTeams = true;
 				}
 
 				if (!pPlayer->m_RainbowName && NoScoreboard && InRange)
-					pInfo->m_aTeam[AffectedID] = TEAM_SUPER;
+					pInfo->m_aTeam[ClientID] = TEAM_SUPER;
 			}
 			else if (pPlayer->m_RainbowName && NoScoreboard && InRange)
 			{

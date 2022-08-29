@@ -30,7 +30,9 @@ public:
 	void Init(CGameContext *pGameServer);
 	void Tick();
 
-	int GetColor(int ClientID, int OtherID) { return m_aInfo[ClientID].m_aTeam[OtherID]; }
 	void OnChatMessage(int ClientID);
+
+	bool IsAffected(int ClientID);
+	int GetColor(int ClientID, int OtherID) { return m_aInfo[ClientID].m_aTeam[OtherID]; }
 };
 #endif //GAME_SERVER_RAINBOW_NAME_H

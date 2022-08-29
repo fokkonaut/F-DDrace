@@ -594,12 +594,20 @@ void CPlayer::Snap(int SnappingClient)
 				}
 			}
 		}
+		else
+		{
+			// when we are spectating while being affected by rainbowname people we dont wanna focus on one player, so that no tee gets transparent due to IsOtherTeam
+			if (SpecMode == SPEC_PLAYER && GameServer()->m_RainbowName.IsAffected(m_ClientID))
+			{
+				SpectatorID = m_ClientID;
+			}
+		}
 
 		if (SpecMode != SPEC_FREEVIEW && SpectatorID >= 0)
 		{
 			if (!Server()->Translate(SpectatorID, m_ClientID))
 			{
-				SpectatorID = m_ClientID;
+				SpectatorID = ID;
 				SpecMode = SPEC_PLAYER;
 			}
 		}
