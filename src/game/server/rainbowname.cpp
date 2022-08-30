@@ -48,19 +48,8 @@ void CRainbowName::Tick()
 		bool UpdatedLastRun = m_aInfo[i].m_UpdateTeams;
 		m_aInfo[i].m_UpdateTeams = false;
 
-		// reset teams
-		for (int j = 0; j < MAX_CLIENTS; j++)
-			m_aInfo[i].m_aTeam[j] = -1;
-
 		// process rainbow name
 		Update(i);
-
-		// if a player close to a rainbow name player sent a chat message, we send himself to t0 for one run, cuz that resets the chat color from TEAM_SUPER to grey
-		if (m_aInfo[i].m_ResetChatColor)
-		{
-			m_aInfo[i].m_aTeam[i] = 0;
-			m_aInfo[i].m_ResetChatColor = false;
-		}
 
 		// send and enjoy
 		if (m_aInfo[i].m_UpdateTeams || UpdatedLastRun)
@@ -74,12 +63,19 @@ void CRainbowName::Update(int ClientID)
 	if (!pPlayer)
 		return;
 
+	int OwnMapID = ClientID;
+	if (!Server()->Translate(OwnMapID, ClientID))
+		OwnMapID = -1;
+
 	SInfo *pInfo = &m_aInfo[ClientID];
 	bool NoScoreboard = !(pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD);
 	int DummyID = Server()->GetDummy(ClientID);
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
+		// reset team color
+		pInfo->m_aTeam[i] = -1;
+
 		int ID = i;
 		if (!Server()->ReverseTranslate(ID, ClientID))
 			continue;
@@ -95,22 +91,30 @@ void CRainbowName::Update(int ClientID)
 			{
 				if (NoScoreboard)
 				{
-					pInfo->m_aTeam[ID] = m_Color;
+					pInfo->m_aTeam[i] = m_Color;
 					pInfo->m_UpdateTeams = true;
 				}
 
-				if (!pPlayer->m_RainbowName && NoScoreboard && InRange)
-					pInfo->m_aTeam[ClientID] = TEAM_SUPER;
+				if (!pPlayer->m_RainbowName && NoScoreboard && InRange && OwnMapID != -1)
+					pInfo->m_aTeam[OwnMapID] = TEAM_SUPER;
 			}
 			else if (pPlayer->m_RainbowName && NoScoreboard && InRange)
 			{
-				pInfo->m_aTeam[ID] = TEAM_SUPER;
+				pInfo->m_aTeam[i] = TEAM_SUPER;
 				pInfo->m_UpdateTeams = true;
 			}
 		}
 	}
 
+	// if a player close to a rainbow name player sent a chat message, we send himself to t0 for one run, cuz that resets the chat color from TEAM_SUPER to grey
+	if (pInfo->m_ResetChatColor && OwnMapID != -1)
+	{
+		pInfo->m_aTeam[OwnMapID] = 0;
+		pInfo->m_ResetChatColor = false;
+		pInfo->m_UpdateTeams = true;
+	}
+
 	// always also update the dummy. if the dummy gets out of view while we are standing next to a rainbow name person, and then swithc to dummy, the teams wont update and we have garbage
-	if (pInfo->m_UpdateTeams)
+	if (pInfo->m_UpdateTeams && DummyID != -1)
 		m_aInfo[DummyID].m_UpdateTeams = true;
 }

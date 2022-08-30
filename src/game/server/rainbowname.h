@@ -21,7 +21,7 @@ class CRainbowName
 	{
 		bool m_UpdateTeams;
 		bool m_ResetChatColor;
-		int m_aTeam[MAX_CLIENTS];
+		int m_aTeam[VANILLA_MAX_CLIENTS];
 	} m_aInfo[MAX_CLIENTS];
 
 	void Update(int ClientID);

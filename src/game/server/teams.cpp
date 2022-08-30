@@ -465,7 +465,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{
 			Team = m_Core.Team(ID);
-			int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, ID);
+			int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, i);
 			if (Color != -1)
 				Team = Color;
 
