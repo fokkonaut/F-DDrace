@@ -104,7 +104,7 @@ void CRainbowName::Update(int ClientID)
 		pInfo->m_aTeam[i] = m_Color;
 		pInfo->m_UpdateTeams = true;
 
-		if (OwnMapID == -1 || pPlayer->m_RainbowName || pCore->Team(ClientID) != pCore->Team(ID))
+		if (OwnMapID == -1 || pCore->Team(ClientID) != pCore->Team(ID))
 			continue;
 
 		int SpectatorID = pPlayer->GetSpectatorID();
