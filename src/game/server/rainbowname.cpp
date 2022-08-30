@@ -84,9 +84,12 @@ void CRainbowName::Update(int ClientID)
 		if (!pOther || (!pPlayer->m_RainbowName && !pOther->m_RainbowName))
 			continue;
 
-		bool InRange = ID == ClientID || !pOther->GetCharacter() || !pOther->GetCharacter()->NetworkClipped(ClientID);
+		bool InRange = ID == ClientID || (pOther->GetCharacter() && pOther->GetCharacter()->CanSnapCharacter(ClientID) && !pOther->GetCharacter()->NetworkClipped(ClientID));
 		if (InRange || ID == DummyID)
 		{
+			CTeamsCore *pCore = &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.m_Core;
+			bool SetSuper = NoScoreboard && InRange && pCore->Team(ClientID) == pCore->Team(ID);
+
 			if (pOther->m_RainbowName)
 			{
 				if (NoScoreboard)
@@ -95,10 +98,10 @@ void CRainbowName::Update(int ClientID)
 					pInfo->m_UpdateTeams = true;
 				}
 
-				if (!pPlayer->m_RainbowName && NoScoreboard && InRange && OwnMapID != -1)
+				if (!pPlayer->m_RainbowName && SetSuper && OwnMapID != -1)
 					pInfo->m_aTeam[OwnMapID] = TEAM_SUPER;
 			}
-			else if (pPlayer->m_RainbowName && NoScoreboard && InRange)
+			else if (pPlayer->m_RainbowName && SetSuper)
 			{
 				pInfo->m_aTeam[i] = TEAM_SUPER;
 				pInfo->m_UpdateTeams = true;
