@@ -23,19 +23,19 @@ void CRainbowName::Init(CGameContext *pGameServer)
 void CRainbowName::OnChatMessage(int ClientID)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	if (pPlayer && !pPlayer->m_RainbowName)
+	if (pPlayer && (pPlayer->m_RainbowName || m_aInfo[ClientID].m_UpdateTeams))
 		m_aInfo[ClientID].m_ResetChatColor = true;
 }
 
 bool CRainbowName::IsAffected(int ClientID)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	if (!pPlayer)
+	if (!pPlayer || !m_aInfo[ClientID].m_UpdateTeams)
 		return false;
 
 	int SpectatorID = pPlayer->GetSpectatorID();
 	bool IsSpecPlayer = (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && SpectatorID != -1 && GameServer()->m_apPlayers[SpectatorID];
-	return m_aInfo[ClientID].m_UpdateTeams && IsSpecPlayer && GameServer()->m_apPlayers[SpectatorID]->m_RainbowName;
+	return IsSpecPlayer;
 }
 
 void CRainbowName::Tick()
@@ -74,75 +74,50 @@ void CRainbowName::Update(int ClientID)
 		OwnMapID = -1;
 
 	SInfo *pInfo = &m_aInfo[ClientID];
-	bool NoScoreboard = !(pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD);
+	if (OwnMapID != -1)
+		pInfo->m_aTeam[OwnMapID] = -1; // reset ourselves here so we dont override reset us when our id is greater than another and we got processed already
+
 	int DummyID = Server()->GetDummy(ClientID);
-
-	int SpectatorID = pPlayer->GetSpectatorID();
-	bool IsSpectating = (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused());
-
-	// reset team color, do it here to not override anything in the loop
-	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-		pInfo->m_aTeam[i] = -1;
+	CTeamsCore *pCore = &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.m_Core;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
+		if (i == OwnMapID)
+			continue;
+
+		pInfo->m_aTeam[i] = -1;
+
+		if (pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD)
+			continue;
+
 		int ID = i;
 		if (!Server()->ReverseTranslate(ID, ClientID))
 			continue;
 
 		CPlayer *pOther = GameServer()->m_apPlayers[ID];
-		if (!pOther)
+		if (!pOther || !pOther->m_RainbowName)
 			continue;
 
-		CPlayer *pAffected = GameServer()->m_apPlayers[ClientID];
-		int AffectedID = ClientID;
-		int AffectedMapID = OwnMapID;
-
-		// when speccing someone cylce the list as him. only the player we are watching gets highlighted as TEAM_SUPER
-		if (IsSpectating && SpectatorID != -1 && GameServer()->m_apPlayers[SpectatorID] && !GameServer()->m_apPlayers[SpectatorID]->m_RainbowName)
-		{
-			pAffected = GameServer()->m_apPlayers[SpectatorID];
-			AffectedID = SpectatorID;
-			AffectedMapID = SpectatorID;
-			if (!Server()->Translate(AffectedMapID, ClientID))
-				AffectedMapID = -1;
-		}
-
-		if (!pAffected->m_RainbowName && !pOther->m_RainbowName)
+		if (!pOther->GetCharacter() || !pOther->GetCharacter()->CanSnapCharacter(ClientID) || pOther->GetCharacter()->NetworkClipped(ClientID))
 			continue;
 
-		bool InRange = ID == ClientID || (pOther->GetCharacter() && pOther->GetCharacter()->CanSnapCharacter(ClientID) && !pOther->GetCharacter()->NetworkClipped(ClientID));
-		if (InRange || ID == DummyID)
-		{
-			CTeamsCore *pCore = &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.m_Core;
-			bool SetSuper = NoScoreboard && InRange && pCore->Team(AffectedID) == pCore->Team(ID);
-			bool NoSpecOrHim = !IsSpectating || ID == SpectatorID;
-			bool SpecSelf = IsSpectating && AffectedID == SpectatorID;
+		pInfo->m_aTeam[i] = m_Color;
+		pInfo->m_UpdateTeams = true;
 
-			if (pOther->m_RainbowName)
-			{
-				if (NoScoreboard)
-				{
-					pInfo->m_aTeam[i] = m_Color;
-					pInfo->m_UpdateTeams = true;
-				}
+		if (OwnMapID == -1 || pPlayer->m_RainbowName || pCore->Team(ClientID) != pCore->Team(ID))
+			continue;
 
-				if (((!pAffected->m_RainbowName && NoSpecOrHim) || SpecSelf) && SetSuper && AffectedMapID != -1)
-					pInfo->m_aTeam[AffectedMapID] = TEAM_SUPER;
-			}
-			else if (pAffected->m_RainbowName && SetSuper && NoSpecOrHim)
-			{
-				pInfo->m_aTeam[i] = m_aInfo[ID].m_ResetChatColor ? pCore->Team(ID) : TEAM_SUPER;
-				pInfo->m_UpdateTeams = true;
-			}
-		}
+		int SpectatorID = pPlayer->GetSpectatorID();
+		bool NoSpecOrFollow = (pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused()) || (SpectatorID != -1 && GameServer()->m_apPlayers[SpectatorID]);
+		if (NoSpecOrFollow)
+			pInfo->m_aTeam[OwnMapID] = TEAM_SUPER;
 	}
 
 	// if a player close to a rainbow name player sent a chat message, we send himself to t0 for one run, cuz that resets the chat color from TEAM_SUPER to grey
 	if (pInfo->m_ResetChatColor)
 	{
 		if (OwnMapID != -1)
-			pInfo->m_aTeam[OwnMapID] = 0;
+			pInfo->m_aTeam[OwnMapID] = pPlayer->m_RainbowName ? m_Color : pCore->Team(ClientID);
 		pInfo->m_ResetChatColor = false;
 		pInfo->m_UpdateTeams = true;
 	}
