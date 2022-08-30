@@ -71,11 +71,12 @@ void CRainbowName::Update(int ClientID)
 	bool NoScoreboard = !(pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD);
 	int DummyID = Server()->GetDummy(ClientID);
 
+	// reset team color, do it here to not override anything in the loop
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
-	{
-		// reset team color
 		pInfo->m_aTeam[i] = -1;
 
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+	{
 		int ID = i;
 		if (!Server()->ReverseTranslate(ID, ClientID))
 			continue;
