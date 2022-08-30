@@ -597,6 +597,7 @@ void CPlayer::Snap(int SnappingClient)
 		else
 		{
 			// when we are spectating while being affected by rainbowname people we dont wanna focus on one player, so that no tee gets transparent due to IsOtherTeam
+			// its now actually only activated when we spec someone who has rainbowname, rest is handled in the update function
 			if (SpecMode == SPEC_PLAYER && GameServer()->m_RainbowName.IsAffected(m_ClientID))
 			{
 				SpectatorID = m_ClientID;
