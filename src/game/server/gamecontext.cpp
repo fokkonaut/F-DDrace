@@ -463,6 +463,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		if (!m_apPlayers[ChatterClientID])
 			return;
 
+		m_RainbowName.OnChatMessage(ChatterClientID);
+
 		// join local or public chat
 		bool Local = Mode == CHAT_TEAM;
 		if ((Mode == CHAT_ALL || Mode == CHAT_TEAM) && m_apPlayers[ChatterClientID]->JoinChat(Local))
@@ -2157,7 +2159,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 				pPlayer->UpdatePlaytime();
-				m_RainbowName.OnChatMessage(ClientID);
 
 				if (Mode != CHAT_WHISPER)
 				{

@@ -104,7 +104,7 @@ void CRainbowName::Update(int ClientID)
 			}
 			else if (pPlayer->m_RainbowName && SetSuper)
 			{
-				pInfo->m_aTeam[i] = TEAM_SUPER;
+				pInfo->m_aTeam[i] = m_aInfo[ID].m_ResetChatColor ? pCore->Team(ID) : TEAM_SUPER;
 				pInfo->m_UpdateTeams = true;
 			}
 		}
