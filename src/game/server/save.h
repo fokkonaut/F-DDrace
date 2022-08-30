@@ -173,6 +173,7 @@ private:
 	int m_HasRoomKey;
 	int64 m_JailTime;
 	int64 m_EscapeTime;
+	int m_RainbowName;
 
 	SSavedIdentity m_Identity;
 };
