@@ -98,13 +98,14 @@ void CRainbowName::Update(int ClientID)
 		if (!pOther || !pOther->m_RainbowName)
 			continue;
 
-		if (!pOther->GetCharacter() || !pOther->GetCharacter()->CanSnapCharacter(ClientID) || pOther->GetCharacter()->NetworkClipped(ClientID))
-			continue;
+		bool InRange = pOther->GetCharacter() && pOther->GetCharacter()->CanSnapCharacter(ClientID) && !pOther->GetCharacter()->NetworkClipped(ClientID);
+		if (InRange || m_aInfo[ID].m_ResetChatColor)
+		{
+			pInfo->m_aTeam[i] = m_Color;
+			pInfo->m_UpdateTeams = true;
+		}
 
-		pInfo->m_aTeam[i] = m_Color;
-		pInfo->m_UpdateTeams = true;
-
-		if (OwnMapID == -1 || pCore->Team(ClientID) != pCore->Team(ID))
+		if (!InRange || pCore->Team(ClientID) != pCore->Team(ID) || OwnMapID == -1)
 			continue;
 
 		int SpectatorID = pPlayer->GetSpectatorID();
