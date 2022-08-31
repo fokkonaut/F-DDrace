@@ -61,6 +61,10 @@ void CRainbowName::Tick()
 		if (m_aInfo[i].m_UpdateTeams || UpdatedLastRun)
 			((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SendTeamsState(i);
 	}
+
+	// need to reset it after everyone has used the values of other people too
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aInfo[i].m_ResetChatColor = false;
 }
 
 void CRainbowName::Update(int ClientID)
@@ -115,11 +119,9 @@ void CRainbowName::Update(int ClientID)
 	}
 
 	// if a player close to a rainbow name player sent a chat message, we send himself to t0 for one run, cuz that resets the chat color from TEAM_SUPER to grey
-	if (pInfo->m_ResetChatColor)
+	if (pInfo->m_ResetChatColor && OwnMapID != -1)
 	{
-		if (OwnMapID != -1)
-			pInfo->m_aTeam[OwnMapID] = pPlayer->m_RainbowName ? m_Color : pCore->Team(ClientID);
-		pInfo->m_ResetChatColor = false;
+		pInfo->m_aTeam[OwnMapID] = pPlayer->m_RainbowName ? m_Color : pCore->Team(ClientID);
 		pInfo->m_UpdateTeams = true;
 	}
 
