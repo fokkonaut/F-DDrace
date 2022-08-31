@@ -464,7 +464,8 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			return;
 
 		// dont trigger updating of teams twice. this means people who translate chat will probably receive the color update before their chat msg appeared
-		if (Mode != CHAT_SINGLE && Mode != CHAT_SINGLE_TEAM)
+		// CHAT_SINGLE and CHAT_SINGLE_TEAM are used for translating aswell, so they would cause that
+		if (Mode == CHAT_ALL || Mode == CHAT_ATEVERYONE)
 			m_RainbowName.OnChatMessage(ChatterClientID);
 
 		// join local or public chat
