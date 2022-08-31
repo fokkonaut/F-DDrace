@@ -133,9 +133,13 @@ void CRegister::RegisterUpdate(int Nettype)
 	{
 		m_RegisterCount = 0;
 		m_RegisterFirst = 1;
-		RegisterNewState(REGISTERSTATE_UPDATE_ADDRS);
-		m_pMasterServer->RefreshAddresses(Nettype);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, "refreshing ip addresses");
+		// only proceed to next state if we are actually ready for that, if we are still updating during attack the hostlookups may take a longer time than usual
+		// if we would move to next state before refreshing addresses we would get stuck in next state, IsRefreshing() would return true then cuz state is STATE_UPDATE
+		if (m_pMasterServer->RefreshAddresses(Nettype) == 0)
+		{
+			RegisterNewState(REGISTERSTATE_UPDATE_ADDRS);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pPrintFrom, "refreshing ip addresses");
+		}
 	}
 	else if(m_RegisterState == REGISTERSTATE_UPDATE_ADDRS)
 	{
