@@ -11,6 +11,7 @@ CStaffInd::CStaffInd(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 
 	for (int i = 0; i < NUM_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
+	std::sort(std::begin(m_aID), std::end(m_aID));
 	GameWorld()->InsertEntity(this);
 }
 
