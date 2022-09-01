@@ -1471,7 +1471,7 @@ void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ VIP+ ~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "VIP+ includes every feature of VIP Classic.");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Additionally to that you can enter the VIP+ room to farm safely there, aswell as you gain access to the following commands:");
-	pSelf->SendChatTarget(pResult->m_ClientID, "rainbowhook, rotatingball, epiccircle, lovely");
+	pSelf->SendChatTarget(pResult->m_ClientID, "rainbowhook, rotatingball, epiccircle, lovely, rainbowname");
 }
 
 void CGameContext::ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData)
@@ -3221,4 +3221,20 @@ void CGameContext::ConRainbowHookVIP(IConsole::IResult *pResult, void *pUserData
 	}
 
 	pChr->HookPower(pChr->m_HookPower == RAINBOW ? HOOK_NORMAL : RAINBOW, pResult->m_ClientID);
+}
+
+void CGameContext::ConRainbowNameVIP(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr)
+		return;
+
+	if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+		return;
+	}
+
+	pChr->RainbowName(!pChr->GetPlayer()->m_RainbowName, pResult->m_ClientID);
 }

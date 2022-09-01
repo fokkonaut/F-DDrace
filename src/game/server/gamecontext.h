@@ -880,6 +880,7 @@ private:
 	static void ConEpicCircleVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConLovelyVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowHookVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConRainbowNameVIP(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);
