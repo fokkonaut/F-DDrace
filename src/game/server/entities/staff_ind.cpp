@@ -75,7 +75,7 @@ void CStaffInd::Snap(int SnappingClient)
 		pArmor->m_Type = POWERUP_ARMOR;
 
 	// m_ID is created before m_aID is created, means that id is lower and we can simply use it to make the ball behind
-	CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_BallFirst ? m_aID[BALL] : GetID(), sizeof(CNetObj_Laser)));
+	CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_BallFirst ? m_aID[BALL_FRONT] : m_aID[BALL], sizeof(CNetObj_Laser)));
 	if(!pLaser)
 		return;
 

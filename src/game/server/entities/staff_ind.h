@@ -7,8 +7,9 @@ class CStaffInd : public CEntity
 {
 	enum
 	{
-		ARMOR,
 		BALL,
+		ARMOR,
+		BALL_FRONT,
 		NUM_IDS
 	};
 
