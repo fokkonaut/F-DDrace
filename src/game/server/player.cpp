@@ -1862,6 +1862,9 @@ void CPlayer::OnLogout()
 		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, true);
 	}
 
+	if (pAccount->m_VIP == VIP_PLUS)
+		m_RainbowName = false;
+
 	StopPlotEditing();
 	CancelPlotAuction();
 	CancelPlotSwap();
