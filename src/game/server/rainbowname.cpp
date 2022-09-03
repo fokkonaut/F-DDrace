@@ -49,6 +49,8 @@ void CRainbowName::Tick()
 	{
 		if (!GameServer()->m_apPlayers[i])
 			continue;
+		if (Server()->IsSevendown(i) && GameServer()->GetClientDDNetVersion(i) < VERSION_DDNET_SUPER_PREDICTION)
+			continue;
 
 		// reset everything, keep track whether we had an update last run, so after that we update one more time
 		bool UpdatedLastRun = m_aInfo[i].m_UpdateTeams;
