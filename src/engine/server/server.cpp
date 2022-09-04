@@ -1030,7 +1030,10 @@ void CServer::SendCapabilities(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CAPABILITIES, true);
 	Msg.AddInt(SERVERCAP_CURVERSION); // version
-	Msg.AddInt(SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX | SERVERCAPFLAG_ALLOWDUMMY | SERVERCAPFLAG_SYNCWEAPONINPUT); // flags
+	int Flags = SERVERCAPFLAG_DDNET | SERVERCAPFLAG_CHATTIMEOUTCODE | SERVERCAPFLAG_ANYPLAYERFLAG | SERVERCAPFLAG_PINGEX | SERVERCAPFLAG_SYNCWEAPONINPUT;
+	if (Config()->m_SvAllowDummy)
+		Flags |= SERVERCAPFLAG_ALLOWDUMMY;
+	Msg.AddInt(Flags); // flags
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
@@ -1355,6 +1358,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					int Dummy = GetDummy(ClientID);
 					if (Dummy != -1)
 					{
+						if (!Config()->m_SvAllowDummy)
+						{
+							m_NetServer.Drop(ClientID, "Dummy is not allowed");
+							return;
+						}
+
 						m_aClients[ClientID].m_CurrentMapDesign = m_aClients[Dummy].m_CurrentMapDesign;
 						SetLanguage(ClientID, GetLanguage(Dummy));
 						m_aClients[ClientID].m_Main = false;
