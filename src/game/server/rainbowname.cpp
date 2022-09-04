@@ -23,7 +23,7 @@ void CRainbowName::Init(CGameContext *pGameServer)
 void CRainbowName::OnChatMessage(int ClientID)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	if (pPlayer && (pPlayer->m_RainbowName || m_aInfo[ClientID].m_UpdateTeams))
+	if (pPlayer && pPlayer->m_ShowName && (pPlayer->m_RainbowName || m_aInfo[ClientID].m_UpdateTeams))
 		m_aInfo[ClientID].m_ResetChatColor = true;
 }
 
