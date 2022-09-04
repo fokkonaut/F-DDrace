@@ -84,7 +84,7 @@ void CTrail::Tick()
 
 	int HistoryPos = 0;
 	float HistoryPosLength = 0.0f;
-	//float AdditionalLength = 0.0f;
+	float AdditionalLength = 0.0f;
 	for (int i = 0; i<NUM_TRAILS; i++)
 	{
 		float Length = (i + 1)*TRAIL_DIST;
@@ -100,25 +100,25 @@ void CTrail::Tick()
 				{
 					m_TrailHistoryLength += it->m_Dist;
 				}
-				return;
+				break;
 			}
 			NextDist = m_TrailHistory[HistoryPos].m_Dist;
 
 			if (Length <= HistoryPosLength + NextDist)
 			{
-				//AdditionalLength = Length - HistoryPosLength;
+				AdditionalLength = Length - HistoryPosLength;
 				break;
 			}
 			else
 			{
 				HistoryPos += 1;
 				HistoryPosLength += NextDist;
-				//AdditionalLength = 0;
+				AdditionalLength = 0.f;
 			}
 		}
 		vec2 Pos = m_TrailHistory[HistoryPos].m_Pos;
-		//the line under this comment crashed the server, dont know why but it works without that line too since the position gets set above this line too
-		//Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - m_TrailProjs[i]->GetPos())*(AdditionalLength / NextDist);
+		if (HistoryPos + 1 < m_TrailHistory.size()) // this seems to crash on windows otherwise, not sure why. avoiding this means the last trail bullet is kinda bugged
+			Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - Pos)*(AdditionalLength / NextDist);
 		m_TrailProjs[i]->SetPos(Pos);
 	}
 }
