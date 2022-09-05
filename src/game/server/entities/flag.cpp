@@ -11,7 +11,7 @@
 CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
 : CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG, Pos, vec2(ms_PhysSize, ms_PhysSize))
 {
-	m_Pos = Pos;
+	m_Pos = m_PrevPos = Pos;
 	m_StandPos = Pos;
 	m_Team = Team;
 	Reset(true);
@@ -34,7 +34,7 @@ void CFlag::Reset(bool Init)
 	m_Carrier = -1;
 	m_LastCarrier = -1;
 	m_AtStand = true;
-	m_Pos = m_StandPos;
+	m_Pos = m_PrevPos = m_StandPos;
 	m_Vel = vec2(0,0);
 	m_DropTick = 0;
 	m_GrabTick = 0;
