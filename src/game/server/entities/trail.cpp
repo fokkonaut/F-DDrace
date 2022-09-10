@@ -100,7 +100,7 @@ void CTrail::Tick()
 				{
 					m_TrailHistoryLength += it->m_Dist;
 				}
-				break;
+				return;
 			}
 			NextDist = m_TrailHistory[HistoryPos].m_Dist;
 
