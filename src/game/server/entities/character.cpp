@@ -1034,7 +1034,7 @@ void CCharacter::FireWeapon()
 
 				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 				GameServer()->CreatePlayerSpawn(NewPos, TeamMask());
-				m_Core.m_Pos = m_Pos = m_PrevPos = NewPos;
+				ForceSetPos(NewPos);
 				m_DDRaceState = DDRACE_CHEAT;
 
 				if (Sound)
@@ -3204,7 +3204,7 @@ void CCharacter::HandleTiles(int Index)
 				NewPos = Controller->m_TeleOuts[z - 1][rand() % Num];
 		}
 
-		m_Pos = m_PrevPos = m_Core.m_Pos = NewPos;
+		ForceSetPos(NewPos);
 		if (!Config()->m_SvTeleportHoldHook)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -3243,7 +3243,7 @@ void CCharacter::HandleTiles(int Index)
 				NewPos = Controller->m_TeleOuts[evilz - 1][rand() % Num];
 		}
 
-		m_Pos = m_PrevPos = m_Core.m_Pos = NewPos;
+		ForceSetPos(NewPos);
 		if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -3277,7 +3277,7 @@ void CCharacter::HandleTiles(int Index)
 				}
 
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 				m_Core.m_Vel = vec2(0, 0);
 
 				if (!Config()->m_SvTeleportHoldHook)
@@ -3297,7 +3297,7 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			}
 
-			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
+			ForceSetPos(SpawnPos);
 			m_Core.m_Vel = vec2(0, 0);
 
 			if (!Config()->m_SvTeleportHoldHook)
@@ -3323,7 +3323,7 @@ void CCharacter::HandleTiles(int Index)
 				}
 
 				int Num = Controller->m_TeleCheckOuts[k].size();
-				m_Pos = m_PrevPos = m_Core.m_Pos = Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num];
+				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 
 				if (!Config()->m_SvTeleportHoldHook)
 				{
@@ -3344,7 +3344,7 @@ void CCharacter::HandleTiles(int Index)
 				return;
 			}
 
-			m_Pos = m_PrevPos = m_Core.m_Pos = SpawnPos;
+			ForceSetPos(SpawnPos);
 
 			if (!Config()->m_SvTeleportHoldHook)
 			{
@@ -4104,7 +4104,7 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 
 	if (GetCurrentTilePlotID(true) == PlotID)
 	{
-		m_Core.m_Pos = m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+		ForceSetPos(GameServer()->m_aPlots[PlotID].m_ToTele);
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);
 	}
 }
@@ -4573,7 +4573,16 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	int CurrentPlotID = GetCurrentTilePlotID(true);
 	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(Pos))
 		m_pPlayer->StopPlotEditing();
+
 	m_Core.m_Pos = m_Pos = m_PrevPos = Pos;
+
+	int Flag = HasFlag();
+	if (Flag != -1)
+	{
+		// this is so that when we get teleported we also force update the prevpos so the flag doesnt find weird things between its new pos and the last prevpos before the tp
+		((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Flag]->SetPos(Pos);
+		((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Flag]->SetPrevPos(Pos);
+	}
 }
 
 bool CCharacter::TryMountHelicopter()
