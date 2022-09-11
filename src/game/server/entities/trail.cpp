@@ -117,7 +117,7 @@ void CTrail::Tick()
 			}
 		}
 		vec2 Pos = m_TrailHistory[HistoryPos].m_Pos;
-		if (HistoryPos + 1 < m_TrailHistory.size()) // this seems to crash on windows otherwise, not sure why. avoiding this means the last trail bullet is kinda bugged
+		if ((unsigned int)HistoryPos + 1 < m_TrailHistory.size()) // this seems to crash on windows otherwise, not sure why. avoiding this means the last trail bullet is kinda bugged
 			Pos += (m_TrailHistory[HistoryPos + 1].m_Pos - Pos)*(AdditionalLength / NextDist);
 		m_TrailProjs[i]->SetPos(Pos);
 	}
