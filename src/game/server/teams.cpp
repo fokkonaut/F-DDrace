@@ -453,13 +453,11 @@ void CGameTeams::SendTeamsState(int ClientID)
 				Team = 63; // red colored team, used 1 before but that is the most common team for 1vs1
 			else if (i == SPEC_SELECT_FLAG_BLUE)
 				Team = 36; // blue colored team
+			// try to make hook visible in most cases, i dont want to use TEAM_SUPER cause that would make names red when NONAME e.g. spookyghost
+			// but this right now means, that if u r in a team and ur dummy isnt, and u swap, and both try to hook the flag, one will have invisible hook
 			else if (i == VANILLA_MAX_CLIENTS-1 && Server()->IsSevendown(ClientID))
-			{
-				if (m_pGameContext->GetClientDDNetVersion(ClientID) >= VERSION_DDNET_SUPER_PREDICTION)
-					Team = VANILLA_MAX_CLIENTS; // always send flag hook player to team super, so the hook will always be visible
-				else
-					Team = m_Core.Team(ClientID); // fallback, try to make it work in most cases for older clients
-			}
+				Team = m_Core.Team(ClientID);
+			
 
 			if (Team != -1)
 			{
