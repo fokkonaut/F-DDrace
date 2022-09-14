@@ -756,7 +756,6 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
-	GameServer()->Config()->m_SvTestingCommands = 1;
 	if (!Server()->IsSevendown(m_ClientID))
 		return;
 
