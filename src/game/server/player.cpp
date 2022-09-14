@@ -224,6 +224,7 @@ void CPlayer::Reset()
 		m_aStrongWeakID[i] = 0;
 
 	m_HideDrawings = false;
+	m_SentFlagHookInfo = false;
 }
 
 void CPlayer::Tick()
@@ -755,6 +756,7 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
+	GameServer()->Config()->m_SvTestingCommands = 1;
 	if (!Server()->IsSevendown(m_ClientID))
 		return;
 
@@ -793,6 +795,59 @@ void CPlayer::FakeSnap()
 		((int*)pPlayerInfo)[2] = TEAM_BLUE;
 		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : -1;
 		((int*)pPlayerInfo)[4] = 0;
+	}
+
+	// Smooth flag hooking
+	int Team = -1;
+	if (GetCharacter())
+	{
+		if (GetCharacter()->Core()->m_HookedPlayer == HOOK_FLAG_BLUE)
+			Team = TEAM_BLUE;
+		else if (GetCharacter()->Core()->m_HookedPlayer == HOOK_FLAG_RED)
+			Team = TEAM_RED;
+	}
+
+	if (Team == -1)
+		return;
+
+	CFlag *pFlag = ((CGameControllerDDRace *)GameServer()->m_pController)->m_apFlags[Team];
+	if (!pFlag)
+		return;
+
+	// Empty name, name would flicker otherwise because we send NETOBJTYPE_PLAYERINFO every 2nd snapshot, in order not to have a SNAP_PREV of it in the client -> no tee render
+	FakeID = VANILLA_MAX_CLIENTS - 1;
+
+	// Send character at the position of the flag we are currently hooking
+	CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, FakeID, sizeof(CNetObj_Character)));
+	if(!pCharacter)
+		return;
+
+	pCharacter->m_X = pFlag->GetPos().x;
+	pCharacter->m_Y = pFlag->GetPos().y;
+
+	// If the flag is getting hooked while close to us, the client predicts the invisible fake tee as if it would be colliding with us
+	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, FakeID, sizeof(CNetObj_DDNetCharacter)));
+	if(!pDDNetCharacter)
+		return;
+	pDDNetCharacter->m_Flags = CHARACTERFLAG_NO_COLLISION;
+
+	if (!m_SentFlagHookInfo)
+	{
+		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, 5*4));
+		if (!pPlayerInfo)
+			return;
+
+		((int*)pPlayerInfo)[0] = 0;
+		((int*)pPlayerInfo)[1] = VANILLA_MAX_CLIENTS - 1;
+		((int*)pPlayerInfo)[2] = TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : -1;
+		((int*)pPlayerInfo)[4] = 0;
+
+		m_SentFlagHookInfo = true;
+	}
+	else
+	{
+		m_SentFlagHookInfo = false;
 	}
 }
 

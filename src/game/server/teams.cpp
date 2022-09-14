@@ -446,21 +446,29 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
-		int Team = 0;
+		int Team = -1;
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
 			if (i == SPEC_SELECT_FLAG_RED)
 				Team = 63; // red colored team, used 1 before but that is the most common team for 1vs1
 			else if (i == SPEC_SELECT_FLAG_BLUE)
 				Team = 36; // blue colored team
+			else if (i == VANILLA_MAX_CLIENTS-1)
+			{
+				if (m_pGameContext->GetClientDDNetVersion(ClientID) >= VERSION_DDNET_SUPER_PREDICTION)
+					Team = VANILLA_MAX_CLIENTS; // always send flag hook player to team super, so the hook will always be visible
+				else
+					Team = m_Core.Team(ClientID); // fallback, try to make it work in most cases for older clients
+			}
 
-			if (Team != 0)
+			if (Team != -1)
 			{
 				Msg.AddInt(Team);
 				continue;
 			}
 		}
 
+		Team = 0;
 		int ID = i;
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{

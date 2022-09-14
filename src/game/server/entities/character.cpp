@@ -2078,7 +2078,12 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if (pCharacter->m_HookedPlayer != -1)
 	{
-		if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
+		if (SnappingClient == m_pPlayer->GetCID() && Server()->IsSevendown(SnappingClient) &&
+			(pCharacter->m_HookedPlayer == HOOK_FLAG_BLUE || pCharacter->m_HookedPlayer == HOOK_FLAG_RED))
+		{
+			pCharacter->m_HookedPlayer = VANILLA_MAX_CLIENTS - 1;
+		}
+		else if (!Server()->Translate(pCharacter->m_HookedPlayer, SnappingClient))
 			pCharacter->m_HookedPlayer = -1;
 	}
 
