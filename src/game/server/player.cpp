@@ -224,7 +224,6 @@ void CPlayer::Reset()
 		m_aStrongWeakID[i] = 0;
 
 	m_HideDrawings = false;
-	m_SentFlagHookInfo = false;
 }
 
 void CPlayer::Tick()
@@ -813,7 +812,8 @@ void CPlayer::FakeSnap()
 	if (!pFlag)
 		return;
 
-	// Empty name, name would flicker otherwise because we send NETOBJTYPE_PLAYERINFO every 2nd snapshot, in order not to have a SNAP_PREV of it in the client -> no tee render
+	// We dont send the NETOBJTYPE_PLAYERINFO object, because that would make the client render the tee. We could send it every 2nd snapshot, so the client doesnt
+	// have the SNAP_PREV of it and wont render it aswell, but it seems to me that not having the object at all is also fine
 	FakeID = VANILLA_MAX_CLIENTS - 1;
 
 	// Send character at the position of the flag we are currently hooking
@@ -829,25 +829,6 @@ void CPlayer::FakeSnap()
 	if(!pDDNetCharacter)
 		return;
 	pDDNetCharacter->m_Flags = CHARACTERFLAG_NO_COLLISION;
-
-	if (!m_SentFlagHookInfo)
-	{
-		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, 5*4));
-		if (!pPlayerInfo)
-			return;
-
-		((int*)pPlayerInfo)[0] = 0;
-		((int*)pPlayerInfo)[1] = VANILLA_MAX_CLIENTS - 1;
-		((int*)pPlayerInfo)[2] = TEAM_SPECTATORS;
-		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : -1;
-		((int*)pPlayerInfo)[4] = 0;
-
-		m_SentFlagHookInfo = true;
-	}
-	else
-	{
-		m_SentFlagHookInfo = false;
-	}
 }
 
 int CPlayer::GetHidePlayerTeam(int Asker)
