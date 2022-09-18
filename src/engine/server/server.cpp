@@ -26,8 +26,7 @@
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifo.h>
-
-#include <mastersrv/mastersrv.h>
+#include <engine/shared/json.h>
 
 #include "register.h"
 #include "server.h"
@@ -325,7 +324,7 @@ void CServer::CClient::ResetContent()
 	m_Rejoining = false;
 }
 
-CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_MAIN), m_RegisterTwo(false, SOCKET_TWO), m_RegisterSevendown(true, SOCKET_MAIN)
+CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 {
 	m_TickSpeed = SERVER_TICK_SPEED;
 
@@ -359,6 +358,9 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_
 	m_ConnLoggingSocketCreated = false;
 #endif
 
+	m_pRegister = nullptr;
+	m_pRegisterTwo = nullptr;
+
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
@@ -371,6 +373,12 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta), m_Register(false, SOCKET_
 #endif
 
 	Init();
+}
+
+CServer::~CServer()
+{
+	delete m_pRegister;
+	delete m_pRegisterTwo;
 }
 
 int CServer::TrySetClientName(int ClientID, const char* pName)
@@ -446,6 +454,10 @@ void CServer::SetClientScore(int ClientID, int Score)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
+
+	if (m_aClients[ClientID].m_Score != Score)
+		UpdateServerInfo();
+
 	m_aClients[ClientID].m_Score = Score;
 }
 
@@ -1971,30 +1983,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
  
 	ADD_INT(p, m_CurrentMapCrc);
 	ADD_INT(p, m_CurrentMapSize);
-	str_copy(aBuf, GameServer()->GameType(), sizeof(aBuf));
-	if (IsBrowserScoreFix())
-	{
-		// if we want to display normal score we have to get rid of the string "race", thats why we replace it here with a fake letter 'c'
-		const char *pGameType = GameServer()->GameType();
-		const char *pStart = str_find_nocase(pGameType, "race");
-		if (pStart)
-		{
-			unsigned char aSymbol[] = { 0xD0, 0xB5, 0x00, 0x00 }; // https://de.wiktionary.org/wiki/%D0%B5 // fake 'e'
-			char aFakeRace[16];
-			str_format(aFakeRace, sizeof(aFakeRace), "rac%s", aSymbol);
-			str_append(aBuf, pGameType, pStart - pGameType + 1);
-			str_append(aBuf, aFakeRace, sizeof(aBuf));
-			str_append(aBuf, pStart + 4, sizeof(aBuf));
-		}
-
-		if (Config()->m_SvBrowserScoreFix == 2)
-		{
-			// this will make the client think gametype is idm leading to the client displaying the gametype in red color, otherwise gametype would be white
-			if (str_length(aBuf) + 4 < 16) // only if we have enough space to actually "set" the color. if it gets cut off we can leave it out entirely
-				str_append(aBuf, " idm", sizeof(aBuf));
-		}
-	}
-	p.AddString(aBuf, 16);
+	p.AddString(GetGameTypeServerInfo(), 16);
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
 
@@ -2080,6 +2069,136 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	#undef ADD_INT
 }
 
+const char *CServer::GetGameTypeServerInfo()
+{
+	static char aBuf[128];
+	str_copy(aBuf, GameServer()->GameType(), sizeof(aBuf));
+	if (IsBrowserScoreFix())
+	{
+		// if we want to display normal score we have to get rid of the string "race", thats why we replace it here with a fake letter 'c'
+		const char *pGameType = GameServer()->GameType();
+		const char *pStart = str_find_nocase(pGameType, "race");
+		if (pStart)
+		{
+			unsigned char aSymbol[] = { 0xD0, 0xB5, 0x00, 0x00 }; // https://de.wiktionary.org/wiki/%D0%B5 // fake 'e'
+			char aFakeRace[16];
+			str_format(aFakeRace, sizeof(aFakeRace), "rac%s", aSymbol);
+			str_append(aBuf, pGameType, pStart - pGameType + 1);
+			str_append(aBuf, aFakeRace, sizeof(aBuf));
+			str_append(aBuf, pStart + 4, sizeof(aBuf));
+		}
+
+		if (Config()->m_SvBrowserScoreFix == 2)
+		{
+			// this will make the client think gametype is idm leading to the client displaying the gametype in red color, otherwise gametype would be white
+			if (str_length(aBuf) + 4 < 16) // only if we have enough space to actually "set" the color. if it gets cut off we can leave it out entirely
+				str_append(aBuf, " idm", sizeof(aBuf));
+		}
+	}
+	return aBuf;
+}
+
+void CServer::UpdateRegisterServerInfo()
+{
+	// count the players
+	int PlayerCount = 0, ClientCount = 0, DummyCount = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State == CClient::STATE_DUMMY)
+			DummyCount++;
+		else if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			if(GameServer()->IsClientPlayer(i))
+				PlayerCount++;
+
+			ClientCount++;
+		}
+	}
+
+	int MaxPlayers = max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount);
+	int MaxClients = max(ClientCount, Config()->m_SvMaxClients-DummyCount);
+	char aName[256];
+	char aGameType[32];
+	char aMapName[64];
+	char aVersion[64];
+	char aMapSha256[SHA256_MAXSTRSIZE];
+
+	sha256_str(m_CurrentMapSha256, aMapSha256, sizeof(aMapSha256));
+
+	char aInfo[16384];
+	str_format(aInfo, sizeof(aInfo),
+		"{"
+		"\"max_clients\":%d,"
+		"\"max_players\":%d,"
+		"\"passworded\":%s,"
+		"\"game_type\":\"%s\","
+		"\"name\":\"%s\","
+		"\"map\":{"
+		"\"name\":\"%s\","
+		"\"sha256\":\"%s\","
+		"\"size\":%d"
+		"},"
+		"\"version\":\"%s\","
+		"\"clients\":[",
+		MaxClients,
+		MaxPlayers,
+		JsonBool(Config()->m_Password[0]),
+		EscapeJson(aGameType, sizeof(aGameType), GetGameTypeServerInfo()),
+		EscapeJson(aName, sizeof(aName), Config()->m_SvName),
+		EscapeJson(aMapName, sizeof(aMapName), GetMapName()),
+		aMapSha256,
+		m_CurrentMapSize,
+		EscapeJson(aVersion, sizeof(aVersion), GameServer()->VersionSevendown()));
+
+	bool FirstPlayer = true;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		{
+			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
+			// thats why we just send -9999, because it will be displayed as nothing
+			int Score = -9999;
+			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
+				Score = abs(m_aClients[i].m_Score) * -1;
+			else if (IsBrowserScoreFix())
+				Score = m_aClients[i].m_Score;
+
+			char aCName[32];
+			char aCClan[32];
+
+			char aClientInfo[256];
+			str_format(aClientInfo, sizeof(aClientInfo),
+				"%s{"
+				"\"name\":\"%s\","
+				"\"clan\":\"%s\","
+				"\"country\":%d,"
+				"\"score\":%d,"
+				"\"is_player\":%s"
+				"}",
+				!FirstPlayer ? "," : "",
+				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
+				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
+				m_aClients[i].m_Country,
+				Score,
+				JsonBool(GameServer()->IsClientPlayer(i)));
+			str_append(aInfo, aClientInfo, sizeof(aInfo));
+			FirstPlayer = false;
+		}
+	}
+
+	str_append(aInfo, "]}", sizeof(aInfo));
+
+	m_pRegister->OnNewInfo(aInfo);
+	m_pRegisterTwo->OnNewInfo("{\"type\":\"0.7-placeholder\"}");
+}
+
+void CServer::UpdateServerInfo(bool Resend)
+{
+	UpdateRegisterServerInfo();
+	if (Resend)
+		SendServerInfo(-1);
+}
+
 void CServer::SendServerInfo(int ClientID)
 {
 	CMsgPacker MsgMain(NETMSG_SERVERINFO, true);
@@ -2119,7 +2238,6 @@ void CServer::SendServerInfo(int ClientID)
 	}
 }
 
-
 void CServer::PumpNetwork()
 {
 	CNetChunk Packet;
@@ -2135,28 +2253,16 @@ void CServer::PumpNetwork()
 		{
 			if(Packet.m_Flags&NETSENDFLAG_CONNLESS)
 			{
-				if (Sevendown)
+				IRegister *pRegister = m_pRegister;
+				if (Socket == SOCKET_TWO)
 				{
-					if (Socket == SOCKET_TWO)
+					if (Sevendown || !IsDoubleInfo())
 						continue;
-
-					if(m_RegisterSevendown.RegisterProcessPacket(&Packet, ResponseToken))
-						continue;
+					pRegister = m_pRegisterTwo;
 				}
-				else
-				{
-					CRegister *pRegister = &m_Register;
-					if (Socket == SOCKET_TWO)
-					{
-						if (!IsDoubleInfo())
-							continue;
 
-						pRegister = &m_RegisterTwo;
-					}
-
-					if(pRegister->RegisterProcessPacket(&Packet, ResponseToken))
-						continue;
-				}
+				if (ResponseToken == NET_SECURITY_TOKEN_UNKNOWN && pRegister->OnPacket(&Packet))
+					continue;
 
 				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) &&
 					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
@@ -2324,13 +2430,6 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
-void CServer::InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole)
-{
-	m_Register.Init(pNetServer, pMasterServer, pConfig, pConsole);
-	m_RegisterTwo.Init(pNetServer, pMasterServer, pConfig, pConsole);
-	m_RegisterSevendown.Init(pNetServer, pMasterServer, pConfig, pConsole);
-}
-
 void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot)
 {
 	m_pConfig = pConfig;
@@ -2390,6 +2489,10 @@ int CServer::Run()
 		return -1;
 	}
 
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	m_pRegister = CreateRegister(m_pConfig, m_pConsole, pEngine, Config()->m_SvPort, m_NetServer.GetGlobalToken());
+	m_pRegisterTwo = CreateRegister(m_pConfig, m_pConsole, pEngine, Config()->m_SvPortTwo, m_NetServer.GetGlobalToken());
+
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
 #if defined(CONF_FAMILY_UNIX)
@@ -2411,6 +2514,8 @@ int CServer::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
+	m_pRegister->OnConfigChange();
+	m_pRegisterTwo->OnConfigChange();
 
 	if(m_AuthManager.IsGenerated())
 	{
@@ -2423,6 +2528,7 @@ int CServer::Run()
 	{
 		m_GameStartTime = time_get();
 
+		UpdateServerInfo();
 		while(m_RunServer)
 		{
 			// load new map
@@ -2454,6 +2560,7 @@ int CServer::Run()
 					m_CurrentGameTick = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit();
+					UpdateServerInfo(true);
 				}
 				else
 				{
@@ -2496,12 +2603,6 @@ int CServer::Run()
 
 				GameServer()->OnTick();
 
-				if (m_Jobs.size())
-				{
-					if (m_Jobs.front()->Status() == CJob::STATE_DONE)
-						m_Jobs.pop_front();
-				}
-
 				// remove after 24 hours because iphub.info has 1000 free requests within 24 hours
 				// actually lets use 48 hours just to be safe
 				if (Tick() % (TickSpeed() * 60 * 60 * 48))
@@ -2523,9 +2624,9 @@ int CServer::Run()
 							// initiate dnsbl lookup
 							InitDnsbl(i);
 						}
-						else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_DnsblLookup.Status() == CJob::STATE_DONE)
+						else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 						{
-							if(m_aClients[i].m_DnsblLookup.Result() == 1) // only return on 1, not on 2 as that might be a false positive
+							if(m_aClients[i].m_pDnsblLookup->m_Result == 1) // only return on 1, not on 2 as that might be a false positive
 							{
 								// bad ip -> blacklisted
 								m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
@@ -2559,11 +2660,11 @@ int CServer::Run()
 							// initiate proxy game server check lookup
 							InitProxyGameServerCheck(i);
 						}
-						else if(m_aClients[i].m_PgscState == CClient::PGSC_STATE_PENDING && m_aClients[i].m_PgscLookup.Status() == CJob::STATE_DONE)
+						else if(m_aClients[i].m_PgscState == CClient::PGSC_STATE_PENDING && m_aClients[i].m_pPgscLookup->Status() == IJob::STATE_DONE)
 						{
 							m_aClients[i].m_PgscState = CClient::PGSC_STATE_DONE;
 
-							if(m_aClients[i].m_PgscLookup.Result() == 1)
+							if(m_aClients[i].m_pPgscLookup->m_Result == 1)
 							{
 								// console output
 								char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -2595,12 +2696,9 @@ int CServer::Run()
 			}
 
 			// master server stuff
-			m_Register.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
-			m_RegisterSevendown.RegisterUpdate(m_NetServer.NetType(SOCKET_MAIN));
-
-			// dont spam console with warnings if we dont even want the second register right now
+			m_pRegister->Update();
 			if (IsDoubleInfo())
-				m_RegisterTwo.RegisterUpdate(m_NetServer.NetType(SOCKET_TWO));
+				m_pRegisterTwo->Update();
 
 			Antibot()->OnEngineTick();
 
@@ -2629,6 +2727,8 @@ int CServer::Run()
 	// disconnect all clients on shutdown
 	m_NetServer.Close();
 	m_Econ.Shutdown();
+	m_pRegister->OnShutdown();
+	m_pRegisterTwo->OnShutdown();
 
 #if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
@@ -3136,7 +3236,7 @@ void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserD
 	if(pResult->NumArguments())
 	{
 		str_clean_whitespaces(pSelf->Config()->m_SvName);
-		pSelf->SendServerInfo(-1);
+		pSelf->UpdateServerInfo(true);
 	}
 }
 
@@ -3428,12 +3528,9 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
-	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
-
-	pServer->InitRegister(&pServer->m_NetServer, pEngineMasterServer, pConfigManager->Values(), pConsole);
 
 	{
 		bool RegisterFail = false;
@@ -3446,8 +3543,6 @@ int main(int argc, const char **argv) // ignore_convention
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IEngineMasterServer*>(pEngineMasterServer)); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMasterServer*>(pEngineMasterServer));
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot*>(pEngineAntibot));
 
@@ -3458,8 +3553,6 @@ int main(int argc, const char **argv) // ignore_convention
 	pEngine->Init();
 	pConfigManager->Init(FlagMask);
 	pConsole->Init();
-	pEngineMasterServer->Init();
-	pEngineMasterServer->Load();
 
 	pServer->InitInterfaces(pConfigManager->Values(), pConsole, pGameServer, pEngineMap, pStorage, pEngineAntibot);
 	if(!UseDefaultConfig)
@@ -3496,7 +3589,6 @@ int main(int argc, const char **argv) // ignore_convention
 	delete pEngineMap;
 	delete pGameServer;
 	delete pConsole;
-	delete pEngineMasterServer;
 	delete pStorage;
 	delete pConfigManager;
 
@@ -3623,26 +3715,14 @@ bool CServer::IsDummy(int ClientID1, int ClientID2)
 		&& m_aClients[ClientID1].m_ConnectionID == m_aClients[ClientID2].m_ConnectionID;
 }
 
-void CServer::AddJob(JOBFUNC pfnFunc, void *pData)
+void CServer::CWebhook::Run()
 {
-	if (!m_RunServer)
-		return;
-
-	CJob *pJob = new CJob();
-	Kernel()->RequestInterface<IEngine>()->AddJob(pJob, pfnFunc, pData);
-	m_Jobs.push_back(pJob);
-}
-
-int WebhookThread(void *pArg)
-{
-	int ret = system((char *)pArg);
+	int ret = system(m_aCommand);
 	if (ret)
 	{
 		dbg_msg("webhook", "Sending webhook message failed, returned %d", ret);
-		dbg_msg("webhook", "%s", (char *)pArg);
+		dbg_msg("webhook", "%s", m_aCommand);
 	}
-	free(pArg);
-	return 0;
 }
 
 void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername, const char *pAvatarURL)
@@ -3678,24 +3758,24 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 		pQuote, pQuote, pQuote, pAvatarURL, pQuote,
 		pSingleQuote);
 
-	char *pBuf = (char *)calloc(1, 1024);
-	str_format(pBuf, 1024, "%s %s %s >%s 2>&1", pBase, aData, pURL, pRedirect);
+	char aBuf[1024];
+	str_format(aBuf, sizeof(aBuf), "%s %s %s >%s 2>&1", pBase, aData, pURL, pRedirect);
 	free(pMsg);
 	free(pName);
 
-	AddJob(WebhookThread, (void *)pBuf);
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	pEngine->AddJob(std::make_shared<CWebhook>(aBuf));
 }
 
-int BotLookupThread(void *pArg)
+void CServer::CBotLookup::Run()
 {
-	CServer *pSelf = (CServer *)pArg;
-	if (!pSelf->Config()->m_SvBotLookupURL[0])
+	if (!m_pServer->Config()->m_SvBotLookupURL[0])
 	{
-		pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
-		return 0;
+		m_pServer->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+		return;
 	}
 
-	char *pURL = strdup(pSelf->Config()->m_SvBotLookupURL);
+	char *pURL = strdup(m_pServer->Config()->m_SvBotLookupURL);
 	char *ptr = pURL;
 	for (; *ptr; ptr++)
 		if (*ptr == '\'')
@@ -3708,8 +3788,8 @@ int BotLookupThread(void *pArg)
 	FILE *pStream = pipe_open(aCmd, "r");
 	if (!pStream)
 	{
-		pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
-		return 0;
+		m_pServer->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+		return;
 	}
 
 	char *pResult = (char *)calloc(1, 1);
@@ -3729,35 +3809,34 @@ int BotLookupThread(void *pArg)
 	bool aDummy[MAX_CLIENTS] = { 0 };
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || aDummy[i])
+		if (m_pServer->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || aDummy[i])
 			continue;
 
 		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(pSelf->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), false);
+		net_addr_str(m_pServer->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), false);
 		if (str_find(pResult, aAddrStr))
 		{
 			char aBuf[256];
-			int Dummy = pSelf->GetDummy(i);
+			int Dummy = m_pServer->GetDummy(i);
 			if (Dummy != -1)
 			{
-				str_format(aBuf, sizeof(aBuf), "%d: %s, %d: %s", i, pSelf->ClientName(i), Dummy, pSelf->ClientName(Dummy));
+				str_format(aBuf, sizeof(aBuf), "%d: %s, %d: %s", i, m_pServer->ClientName(i), Dummy, m_pServer->ClientName(Dummy));
 				aDummy[Dummy] = true;
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%d: %s", i, pSelf->ClientName(i));
+				str_format(aBuf, sizeof(aBuf), "%d: %s", i, m_pServer->ClientName(i));
 			}
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", aBuf);
+			m_pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", aBuf);
 			Found = true;
 		}
 	}
 
 	if (!Found)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", "No results found");
+		m_pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "botlookup", "No results found");
 
-	pSelf->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
+	m_pServer->m_BotLookupState = CServer::BOTLOOKUP_STATE_DONE;
 	free(pResult);
-	return 0;
 }
 
 void CServer::PrintBotLookup()
@@ -3765,29 +3844,19 @@ void CServer::PrintBotLookup()
 	if (m_BotLookupState == BOTLOOKUP_STATE_PENDING)
 		return;
 
-	AddJob(BotLookupThread, this);
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	pEngine->AddJob(std::make_shared<CBotLookup>(this));
 	m_BotLookupState = BOTLOOKUP_STATE_PENDING;
 }
 
-struct PgscData
+void CServer::CClient::CPgscLookup::Run()
 {
-	char m_aAddress[NETADDR_MAXSTRSIZE];
-	char m_aFindString[128];
-};
-
-int PgscLookupThread(void *pArg)
-{
-	PgscData *pPgscData = (PgscData *)pArg;
-
 	char aCmd[256];
 	str_copy(aCmd, "curl -s https://master1.ddnet.tw/ddnet/15/servers.json", sizeof(aCmd));
 
 	FILE *pStream = pipe_open(aCmd, "r");
 	if (!pStream)
-	{
-		free(pPgscData);
-		return 0;
-	}
+		return;
 
 	char *pResult = (char *)calloc(1, 1);
 	char aPiece[1024];
@@ -3803,7 +3872,7 @@ int PgscLookupThread(void *pArg)
 	pipe_close(pStream);
 
 	const char *ptr = pResult;
-	while ((ptr = str_find(ptr, pPgscData->m_aAddress)))
+	while ((ptr = str_find(ptr, m_aAddress)))
 	{
 		const char *pFind = "\"name\":";
 		if ((ptr = str_find_nocase(ptr, pFind)))
@@ -3815,18 +3884,16 @@ int PgscLookupThread(void *pArg)
 				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
 				char aServerName[128];
 				str_copy(aServerName, ptr, min(NameLength, (int)sizeof(aServerName)));
-				if (str_utf8_find_confusable(aServerName, pPgscData->m_aFindString)) // can be empty, then just ban ip if there is a game server broadcasted with this ip
+				if (str_utf8_find_confusable(aServerName, m_aFindString)) // can be empty, then just ban ip if there is a game server broadcasted with this ip
 				{
-					free(pPgscData);
 					free(pResult);
-					return 1;
+					m_Result = 1;
+					return;
 				}
 			}
 		}
 	}
-	free(pPgscData);
 	free(pResult);
-	return 0;
 }
 
 void CServer::InitProxyGameServerCheck(int ClientID)
@@ -3840,20 +3907,16 @@ void CServer::InitProxyGameServerCheck(int ClientID)
 		}
 	}
 
-	PgscData *pPgscData = new PgscData();
-	net_addr_str(m_NetServer.ClientAddr(ClientID), pPgscData->m_aAddress, sizeof(pPgscData->m_aAddress), false);
-	str_copy(pPgscData->m_aFindString, Config()->m_SvPgscString, sizeof(pPgscData->m_aAddress));
-
-	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_PgscLookup, PgscLookupThread, (void *)pPgscData);
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	pEngine->AddJob(m_aClients[ClientID].m_pPgscLookup = std::make_shared<CClient::CPgscLookup>(m_NetServer.ClientAddr(ClientID), Config()->m_SvPgscString));
 	m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_PENDING;
 }
 
-int DnsblLookupThread(void *pArg)
+void CServer::CClient::CDnsblLookup::Run()
 {
-	FILE *pStream = pipe_open((char *)pArg, "r");
-	free(pArg);
+	FILE *pStream = pipe_open(m_aCommand, "r");
 	if (!pStream)
-		return 0;
+		return;
 
 	char aResult[512] = "";
 	if (fgets(aResult, sizeof(aResult), pStream))
@@ -3868,13 +3931,12 @@ int DnsblLookupThread(void *pArg)
 	if (pJsonData == 0)
 	{
 		dbg_msg("dnsbl", "Failed to parse json: %s", aError);
-		return 0;
+		return;
 	}
 
 	const json_value &rBlocked = (*pJsonData)["block"];
 	if (rBlocked.type == json_integer)
-		return (int)rBlocked.u.integer;
-	return 0;
+		m_Result = (int)rBlocked.u.integer;
 }
 
 void CServer::InitDnsbl(int ClientID)
@@ -3908,27 +3970,17 @@ void CServer::InitDnsbl(int ClientID)
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
 
-	char *pBuf = (char *)calloc(1, 512);
-	str_format(pBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
-	Kernel()->RequestInterface<IEngine>()->AddJob(&m_aClients[ClientID].m_DnsblLookup, DnsblLookupThread, (void *)pBuf);
+	char aBuf[512];
+	str_format(aBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
+
+	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+	pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CClient::CDnsblLookup>(aBuf));
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
 }
 
-struct TranslateData
+void CServer::CTranslateChat::Run()
 {
-	void *m_pUser;
-	int m_ClientID;
-	int m_Mode;
-	char m_aMessage[256];
-	char m_aLanguage[5];
-};
-
-int TranslateThread(void *pArg)
-{
-	TranslateData *pTranslateData = (TranslateData *)pArg;
-	CServer *pSelf = (CServer *)pTranslateData->m_pUser;
-
-	char *ptr = pTranslateData->m_aMessage;
+	char *ptr = m_aMessage;
 	for (; *ptr; ptr++)
 		if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`')
 			*ptr = ' ';
@@ -3936,13 +3988,13 @@ int TranslateThread(void *pArg)
 	char aCmd[512];
 	char aKey[128];
 #ifdef CONF_FAMILY_WINDOWS
-	if (pSelf->Config()->m_SvLibreTranslateKey[0])
-		str_format(aKey, sizeof(aKey), ",\\\"api_key\\\":\\\"%s\\\"", pSelf->Config()->m_SvLibreTranslateKey);
-	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data \"{\\\"q\\\":\\\"%s\\\",\\\"source\\\":\\\"auto\\\",\\\"target\\\":\\\"%s\\\"%s}\" %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, aKey, pSelf->Config()->m_SvLibreTranslateURL);
+	if (m_pServer->Config()->m_SvLibreTranslateKey[0])
+		str_format(aKey, sizeof(aKey), ",\\\"api_key\\\":\\\"%s\\\"", m_pServer->Config()->m_SvLibreTranslateKey);
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data \"{\\\"q\\\":\\\"%s\\\",\\\"source\\\":\\\"auto\\\",\\\"target\\\":\\\"%s\\\"%s}\" %s", m_aMessage, m_aLanguage, aKey, m_pServer->Config()->m_SvLibreTranslateURL);
 #else
-	if (pSelf->Config()->m_SvLibreTranslateKey[0])
-		str_format(aKey, sizeof(aKey), ",\"api_key\":\"%s\"", pSelf->Config()->m_SvLibreTranslateKey);
-	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"%s}' %s", pTranslateData->m_aMessage, pTranslateData->m_aLanguage, aKey, pSelf->Config()->m_SvLibreTranslateURL);
+	if (m_pServer->Config()->m_SvLibreTranslateKey[0])
+		str_format(aKey, sizeof(aKey), ",\"api_key\":\"%s\"", m_pServer->Config()->m_SvLibreTranslateKey);
+	str_format(aCmd, sizeof(aCmd), "curl -s -H \"Content-Type:application/json\" -X POST --data '{\"q\":\"%s\",\"source\":\"auto\",\"target\":\"%s\"%s}' %s", m_aMessage, m_aLanguage, aKey, m_pServer->Config()->m_SvLibreTranslateURL);
 #endif
 
 	char aResult[512] = "";
@@ -3974,21 +4026,18 @@ int TranslateThread(void *pArg)
 	}
 
 	if (!aResult[0])
-		str_copy(aResult, pTranslateData->m_aMessage, sizeof(aResult));
+		str_copy(aResult, m_aMessage, sizeof(aResult));
 
 	if (aResult[0])
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (pSelf->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(pSelf->GetLanguage(i), pTranslateData->m_aLanguage) != 0)
+			if (m_pServer->m_aClients[i].m_State != CServer::CClient::STATE_INGAME || str_comp_nocase(m_pServer->GetLanguage(i), m_aLanguage) != 0)
 				continue;
-			int Mode = (pTranslateData->m_Mode == CHAT_TEAM || pTranslateData->m_Mode == CHAT_LOCAL) ? CHAT_SINGLE_TEAM : CHAT_SINGLE;
-			pSelf->GameServer()->SendChatMessage(pTranslateData->m_ClientID, Mode, i, aResult);
+			int Mode = (m_Mode == CHAT_TEAM || m_Mode == CHAT_LOCAL) ? CHAT_SINGLE_TEAM : CHAT_SINGLE;
+			m_pServer->GameServer()->SendChatMessage(m_ClientID, Mode, i, aResult);
 		}
 	}
-
-	free(pTranslateData);
-	return 0;
 }
 
 void CServer::TranslateChat(int ClientID, const char *pMsg, int Mode)
@@ -4015,13 +4064,8 @@ void CServer::TranslateChat(int ClientID, const char *pMsg, int Mode)
 
 	for (unsigned int i = 0; i < vLanguages.size(); i++)
 	{
-		TranslateData *pTranslateData = new TranslateData();
-		pTranslateData->m_pUser = this;
-		pTranslateData->m_ClientID = ClientID;
-		pTranslateData->m_Mode = Mode;
-		str_copy(pTranslateData->m_aMessage, pMsg, sizeof(pTranslateData->m_aMessage));
-		str_copy(pTranslateData->m_aLanguage, vLanguages[i], sizeof(pTranslateData->m_aLanguage));
-		AddJob(TranslateThread, (void *)pTranslateData);
+		IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+		pEngine->AddJob(std::make_shared<CTranslateChat>(this, ClientID, Mode, pMsg, vLanguages[i]));
 	}
 }
 

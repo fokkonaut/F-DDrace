@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "system.h"
+#include "lock_scope.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -615,14 +616,26 @@ typedef CRITICAL_SECTION LOCKINTERNAL;
 
 LOCK lock_create()
 {
-	LOCKINTERNAL *lock = (LOCKINTERNAL*)mem_alloc(sizeof(LOCKINTERNAL), 4);
+	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
+#if defined(CONF_FAMILY_UNIX)
+	int result;
+#endif
+
+	if(!lock)
+		return 0;
 
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_init(lock, 0x0);
+	result = pthread_mutex_init(lock, 0x0);
+	if(result != 0)
+	{
+		dbg_msg("lock", "init failed: %d", result);
+		free(lock);
+		return 0;
+	}
 #elif defined(CONF_FAMILY_WINDOWS)
 	InitializeCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 	return (LOCK)lock;
 }
@@ -630,13 +643,15 @@ LOCK lock_create()
 void lock_destroy(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_destroy((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_destroy((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "destroy failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	DeleteCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
-	mem_free(lock);
+	free(lock);
 }
 
 int lock_trylock(LOCK lock)
@@ -646,46 +661,92 @@ int lock_trylock(LOCK lock)
 #elif defined(CONF_FAMILY_WINDOWS)
 	return !TryEnterCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wthread-safety-analysis"
+#endif
 void lock_wait(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_lock((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_lock((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "lock failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	EnterCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
 
 void lock_unlock(LOCK lock)
 {
 #if defined(CONF_FAMILY_UNIX)
-	pthread_mutex_unlock((LOCKINTERNAL *)lock);
+	int result = pthread_mutex_unlock((LOCKINTERNAL *)lock);
+	if(result != 0)
+		dbg_msg("lock", "unlock failed: %d", result);
 #elif defined(CONF_FAMILY_WINDOWS)
 	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
 #else
-	#error not implemented on this platform
+#error not implemented on this platform
 #endif
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
-#if !defined(CONF_PLATFORM_MACOSX)
-	#if defined(CONF_FAMILY_UNIX)
-	void semaphore_init(SEMAPHORE *sem) { sem_init(sem, 0, 0); }
-	void semaphore_wait(SEMAPHORE *sem) { sem_wait(sem); }
-	void semaphore_signal(SEMAPHORE *sem) { sem_post(sem); }
-	void semaphore_destroy(SEMAPHORE *sem) { sem_destroy(sem); }
-	#elif defined(CONF_FAMILY_WINDOWS)
-	void semaphore_init(SEMAPHORE *sem) { *sem = CreateSemaphore(0, 0, 10000, 0); }
-	void semaphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
-	void semaphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
-	void semaphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
-	#else
-		#error not implemented on this platform
-	#endif
+#if defined(CONF_FAMILY_WINDOWS)
+void sphore_init(SEMAPHORE *sem)
+{
+	*sem = CreateSemaphore(0, 0, 10000, 0);
+}
+void sphore_wait(SEMAPHORE *sem) { WaitForSingleObject((HANDLE)*sem, INFINITE); }
+void sphore_signal(SEMAPHORE *sem) { ReleaseSemaphore((HANDLE)*sem, 1, NULL); }
+void sphore_destroy(SEMAPHORE *sem) { CloseHandle((HANDLE)*sem); }
+#elif defined(CONF_PLATFORM_MACOS)
+void sphore_init(SEMAPHORE *sem)
+{
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
+	if(*sem == SEM_FAILED)
+		dbg_msg("sphore", "init failed: %d", errno);
+}
+void sphore_wait(SEMAPHORE *sem) { sem_wait(*sem); }
+void sphore_signal(SEMAPHORE *sem) { sem_post(*sem); }
+void sphore_destroy(SEMAPHORE *sem)
+{
+	char aBuf[64];
+	sem_close(*sem);
+	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	sem_unlink(aBuf);
+}
+#elif defined(CONF_FAMILY_UNIX)
+void sphore_init(SEMAPHORE *sem)
+{
+	if(sem_init(sem, 0, 0) != 0)
+		dbg_msg("sphore", "init failed: %d", errno);
+}
+
+void sphore_wait(SEMAPHORE *sem)
+{
+	if(sem_wait(sem) != 0)
+		dbg_msg("sphore", "wait failed: %d", errno);
+}
+
+void sphore_signal(SEMAPHORE *sem)
+{
+	if(sem_post(sem) != 0)
+		dbg_msg("sphore", "post failed: %d", errno);
+}
+void sphore_destroy(SEMAPHORE *sem)
+{
+	if(sem_destroy(sem) != 0)
+		dbg_msg("sphore", "destroy failed: %d", errno);
+}
 #endif
 
 
@@ -1721,6 +1782,24 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 	return 0;
 #endif
+}
+
+int fs_makedir_rec_for(const char *path)
+{
+	char buffer[1024 * 2];
+	char *p;
+	str_copy(buffer, path);
+	for(p = buffer + 1; *p != '\0'; p++)
+	{
+		if(*p == '/' && *(p + 1) != '\0')
+		{
+			*p = '\0';
+			if(fs_makedir(buffer) < 0)
+				return -1;
+			*p = '/';
+		}
+	}
+	return 0;
 }
 
 int fs_makedir(const char *path)

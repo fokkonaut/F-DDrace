@@ -554,6 +554,7 @@ public:
 	char m_ShutdownMessage[128];
 
 	int NumClients() { return m_NumClients; }
+	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
 	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
 

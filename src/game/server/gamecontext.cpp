@@ -1496,6 +1496,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	// F-DDrace
+	Server()->UpdateServerInfo();
+
 	UpdateHidePlayers();
 
 	if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
@@ -1613,6 +1615,8 @@ void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, Dummy, AsSpec);
 
+	Server()->UpdateServerInfo();
+
 	if (Dummy)
 		return;
 
@@ -1668,6 +1672,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	m_apPlayers[ClientID] = 0;
 
 	m_VoteUpdate = true;
+
+	Server()->UpdateServerInfo();
 }
 
 void CGameContext::OnClientEngineJoin(int ClientID)
@@ -2823,6 +2829,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->CheckClanProtection();
 			CheckLoadPlayer(ClientID);
 
+			Server()->UpdateServerInfo();
+
 			if (pPlayer->m_SpookyGhost || pPlayer->m_ForcedSkin != SKIN_NONE)
 				return;
 
@@ -2892,6 +2900,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_IsReadyToEnter = true;
 			CNetMsg_Sv_ReadyToEnter m;
 			Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
+
+			Server()->UpdateServerInfo();
 		}
 	}
 }

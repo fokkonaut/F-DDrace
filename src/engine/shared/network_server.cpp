@@ -11,7 +11,6 @@
 #include "config.h"
 
 #include <engine/shared/protocol.h>
-#include <mastersrv/mastersrv.h>
 
 static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
 {
@@ -110,6 +109,12 @@ int CNetServer::Update()
 	return 0;
 }
 
+SECURITY_TOKEN CNetServer::GetGlobalToken()
+{
+	static NETADDR NullAddr = {0};
+	return GetSecurityToken(NullAddr);
+}
+
 SECURITY_TOKEN CNetServer::GetSecurityToken(const NETADDR &Addr)
 {
 	SHA256_CTX Sha256;
@@ -197,7 +202,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 
 			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
 			{
-				if (!*pSevendown)
+				if (!*pSevendown && (SECURITY_TOKEN)m_RecvUnpacker.m_Data.m_Token != GetGlobalToken())
 				{
 					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
 					if (Accept <= 0)

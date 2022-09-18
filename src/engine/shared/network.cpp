@@ -10,8 +10,6 @@
 #include "network.h"
 #include "huffman.h"
 
-#include <mastersrv/mastersrv.h>
-
 
 static void ConchainDbgLognetwork(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -151,6 +149,7 @@ void CNetBase::Wait(int Time)
 		net_socket_read_wait(m_aSocket[i], Time);
 }
 
+static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
 // packs the data tight and sends it
 void CNetBase::SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown, int Socket)
 {

@@ -67,7 +67,7 @@ if(TARGET_OS STREQUAL "windows")
 endif()
 
 option(MYSQL "Enable mysql support" OFF)
-option(CLIENT "Compile client" ON)
+option(CLIENT "Compile client" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library" OFF)
 option(DOWNLOAD_DEPENDENCIES "Download dependencies (only available on Windows)" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DOWNLOAD_GTEST "Download and compile GTest if not found" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -92,7 +92,6 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
 )
 
 set(SERVER_EXECUTABLE teeworlds_srv CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE teeworlds CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # Compiler flags
@@ -305,6 +304,7 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 find_package(ZLIB)
 find_package(Crypto)
+find_package(Curl)
 find_package(Freetype)
 find_package(Git)
 find_package(GTest)
@@ -357,6 +357,7 @@ function(show_dependency_status OUTPUT_NAME NAME)
   endif()
 endfunction()
 
+show_dependency_status("Curl" CURL)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Dmg tools" DMGTOOLS)
 endif()
@@ -374,20 +375,16 @@ show_dependency_status("SDL2" SDL2)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
 
+if(NOT(CURL_FOUND))
+  message(SEND_ERROR "You must install Curl to compile ${CMAKE_PROJECT_NAME}")
+endif()
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile Teeworlds")
 endif()
-
 if(MYSQL AND NOT(MYSQL_FOUND))
   message(SEND_ERROR "You must install MySQL to compile the Teeworlds server with MySQL support")
 endif()
 
-if(CLIENT AND NOT(FREETYPE_FOUND))
-  message(SEND_ERROR "You must install Freetype to compile the Teeworlds client")
-endif()
-if(CLIENT AND NOT(SDL2_FOUND))
-  message(SEND_ERROR "You must install SDL2 to compile the Teeworlds client")
-endif()
 if(NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
     if(GIT_FOUND)
@@ -1229,6 +1226,7 @@ foreach(datafile ${DATA})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
 set(COPY_FILES
+  ${CURL_COPY_FILES}
   ${FREETYPE_COPY_FILES}
   ${SDL2_COPY_FILES}
 )
@@ -1275,8 +1273,6 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
     ${GIT_REVISION_EXTRA_DEPS}
     scripts/git_revision.py
 )
-generate_source("src/generated/client_data.cpp" "client_content_source")
-generate_source("src/generated/client_data.h" "client_content_header")
 generate_source("src/generated/protocol.cpp" "network_source")
 generate_source("src/generated/protocol.h" "network_header")
 generate_source("src/generated/server_data.cpp" "server_content_source")
@@ -1298,6 +1294,7 @@ set_src(BASE GLOB_RECURSE src/base
   hash_ctxt.h
   hash_libtomcrypt.cpp
   hash_openssl.cpp
+  lock_scope.h
   math.h
   system.cpp
   system.h
@@ -1329,7 +1326,6 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   kernel.h
   keys.h
   map.h
-  masterserver.h
   message.h
   server.h
   serverbrowser.h
@@ -1358,10 +1354,14 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
+  http.cpp
+  http.h
   huffman.cpp
   huffman.h
   jobs.cpp
   jobs.h
+  json.cpp
+  json.h
   jsonwriter.cpp
   jsonwriter.h
   kernel.cpp
@@ -1371,6 +1371,7 @@ set_src(ENGINE_SHARED GLOB src/engine/shared
   mapchecker.cpp
   mapchecker.h
   masterserver.cpp
+  masterserver.h
   memheap.cpp
   memheap.h
   message.h
@@ -1430,6 +1431,7 @@ set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 # Libraries
 set(LIBS
   ${CRYPTO_LIBRARIES}
+  ${CURL_LIBRARIES}
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
@@ -1442,199 +1444,6 @@ set(LIBS
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-shared game-shared)
-
-
-########################################################################
-# CLIENT
-########################################################################
-
-if(CLIENT)
-  # Sources
-  set_src(ENGINE_CLIENT GLOB src/engine/client
-    backend_sdl.cpp
-    backend_sdl.h
-    client.cpp
-    client.h
-    contacts.cpp
-    contacts.h
-    graphics_threaded.cpp
-    graphics_threaded.h
-    input.cpp
-    input.h
-    keynames.h
-    serverbrowser.cpp
-    serverbrowser.h
-    serverbrowser_entry.h
-    serverbrowser_fav.cpp
-    serverbrowser_fav.h
-    serverbrowser_filter.cpp
-    serverbrowser_filter.h
-    sound.cpp
-    sound.h
-    text.cpp
-  )
-  set_src(GAME_CLIENT GLOB_RECURSE src/game/client
-    animstate.cpp
-    animstate.h
-    component.h
-    components/binds.cpp
-    components/binds.h
-    components/broadcast.cpp
-    components/broadcast.h
-    components/camera.cpp
-    components/camera.h
-    components/chat.cpp
-    components/chat.h
-    components/console.cpp
-    components/console.h
-    components/controls.cpp
-    components/controls.h
-    components/countryflags.cpp
-    components/countryflags.h
-    components/damageind.cpp
-    components/damageind.h
-    components/debughud.cpp
-    components/debughud.h
-    components/effects.cpp
-    components/effects.h
-    components/emoticon.cpp
-    components/emoticon.h
-    components/flow.cpp
-    components/flow.h
-    components/hud.cpp
-    components/hud.h
-    components/infomessages.cpp
-    components/infomessages.h
-    components/items.cpp
-    components/items.h
-    components/mapimages.cpp
-    components/mapimages.h
-    components/maplayers.cpp
-    components/maplayers.h
-    components/menus.cpp
-    components/menus.h
-    components/menus_browser.cpp
-    components/menus_callback.cpp
-    components/menus_demo.cpp
-    components/menus_ingame.cpp
-    components/menus_listbox.cpp
-    components/menus_popups.cpp
-    components/menus_scrollregion.cpp
-    components/menus_settings.cpp
-    components/menus_start.cpp
-    components/motd.cpp
-    components/motd.h
-    components/nameplates.cpp
-    components/nameplates.h
-    components/notifications.cpp
-    components/notifications.h
-    components/particles.cpp
-    components/particles.h
-    components/players.cpp
-    components/players.h
-    components/scoreboard.cpp
-    components/scoreboard.h
-    components/skins.cpp
-    components/skins.h
-    components/sounds.cpp
-    components/sounds.h
-    components/spectator.cpp
-    components/spectator.h
-    components/stats.cpp
-    components/stats.h
-    components/voting.cpp
-    components/voting.h
-    gameclient.cpp
-    gameclient.h
-    lineinput.cpp
-    lineinput.h
-    localization.cpp
-    localization.h
-    render.cpp
-    render.h
-    render_map.cpp
-    ui.cpp
-    ui.h
-  )
-  set_src(GAME_EDITOR GLOB src/game/editor
-    auto_map.cpp
-    auto_map.h
-    editor.cpp
-    editor.h
-    io.cpp
-    layer_game.cpp
-    layer_quads.cpp
-    layer_tiles.cpp
-    popups.cpp
-  )
-  set(GAME_GENERATED_CLIENT
-    src/generated/client_data.cpp
-    src/generated/client_data.h
-  )
-  set(CLIENT_SRC ${PLATFORM_CLIENT} ${ENGINE_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
-
-  set(DEPS_CLIENT ${DEPS} ${PNGLITE_DEP} ${WAVPACK_DEP})
-
-  # Libraries
-  set(LIBS_CLIENT
-    ${LIBS}
-    ${FREETYPE_LIBRARIES}
-    ${PNGLITE_LIBRARIES}
-    ${SDL2_LIBRARIES}
-    ${WAVPACK_LIBRARIES}
-    ${PLATFORM_CLIENT_LIBS}
-  )
-
-  if(TARGET_OS STREQUAL "windows")
-    set(CLIENT_ICON "other/icons/${CLIENT_EXECUTABLE}.rc")
-    if(NOT MINGW)
-      set(CLIENT_MANIFEST "other/manifest/teeworlds.manifest")
-    else()
-      set(CLIENT_MANIFEST "other/manifest/teeworlds.rc")
-    endif()
-  else()
-    set(CLIENT_ICON)
-  endif()
-
-  # Target
-  set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
-  add_executable(${TARGET_CLIENT}
-    ${CLIENT_SRC}
-    ${CLIENT_ICON}
-    ${CLIENT_MANIFEST}
-    ${DEPS_CLIENT}
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-  )
-  target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
-
-  target_include_directories(${TARGET_CLIENT} PRIVATE
-    ${FREETYPE_INCLUDE_DIRS}
-    ${PNGLITE_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
-    ${WAVPACK_INCLUDE_DIRS}
-  )
-
-  set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
-  if(NOT(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS STREQUAL PARAMS))
-    unset(WAVPACK_OPEN_FILE_INPUT_EX CACHE)
-  endif()
-  set(WAVPACK_OPEN_FILE_INPUT_EX_PARAMS "${PARAMS}" CACHE INTERNAL "")
-
-  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES} ${WAVPACK_INCLUDE_DIRS})
-  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES} ${WAVPACK_LIBRARIES})
-  check_symbol_exists(WavpackOpenFileInputEx wavpack.h WAVPACK_OPEN_FILE_INPUT_EX)
-  set(CMAKE_REQUIRED_INCLUDES ${ORIGINAL_CMAKE_REQUIRED_INCLUDES})
-  set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES})
-
-  if(WAVPACK_OPEN_FILE_INPUT_EX)
-    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
-  endif()
-
-  list(APPEND TARGETS_OWN ${TARGET_CLIENT})
-  list(APPEND TARGETS_LINK ${TARGET_CLIENT})
-endif()
-
 
 ########################################################################
 # SERVER
@@ -1848,25 +1657,19 @@ endif()
 # VARIOUS TARGETS
 ########################################################################
 
-set_src(MASTERSRV_SRC GLOB src/mastersrv mastersrv.cpp mastersrv.h)
 set_src(VERSIONSRV_SRC GLOB src/versionsrv mapversions.h versionsrv.cpp versionsrv.h)
 
-set(TARGET_MASTERSRV mastersrv)
 set(TARGET_VERSIONSRV versionsrv)
 
-add_executable(${TARGET_MASTERSRV} EXCLUDE_FROM_ALL ${MASTERSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 add_executable(${TARGET_VERSIONSRV} EXCLUDE_FROM_ALL ${VERSIONSRV_SRC} $<TARGET_OBJECTS:engine-shared> ${DEPS})
 
-target_link_libraries(${TARGET_MASTERSRV} ${LIBS})
 target_link_libraries(${TARGET_VERSIONSRV} ${LIBS})
 
-list(APPEND TARGETS_OWN ${TARGET_MASTERSRV} ${TARGET_VERSIONSRV})
-list(APPEND TARGETS_LINK ${TARGET_MASTERSRV} ${TARGET_VERSIONSRV})
+list(APPEND TARGETS_LINK ${TARGET_VERSIONSRV})
 
 set(TARGETS_TOOLS)
 set_src(TOOLS GLOB src/tools
   crapnet.cpp
-  fake_server.cpp
   map_resave.cpp
   map_version.cpp
   packetgen.cpp
@@ -2064,7 +1867,6 @@ endforeach()
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 
 set(CPACK_TARGETS
-  ${TARGET_CLIENT}
   ${TARGET_SERVER}
 )
 set(CPACK_DIRS ${PROJECT_BINARY_DIR}/data)
@@ -2079,7 +1881,6 @@ endif()
 
 if(NOT DEV)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/data DESTINATION share/${PROJECT_NAME} COMPONENT data)
-  install(TARGETS ${TARGET_CLIENT} DESTINATION bin COMPONENT client)
   install(TARGETS ${TARGET_SERVER} DESTINATION bin COMPONENT server)
   if(ANTIBOT)
     install(TARGETS ${TARGET_ANTIBOT} DESTINATION lib/teeworlds COMPONENT server)
@@ -2098,75 +1899,6 @@ else()
 endif()
 
 set(PACKAGE_TARGETS)
-
-if(CLIENT AND (DMGTOOLS_FOUND OR HDIUTIL))
-  file(MAKE_DIRECTORY bundle/client/)
-  file(MAKE_DIRECTORY bundle/server/)
-  configure_file(other/bundle/client/Info.plist.in bundle/client/Info.plist)
-  configure_file(other/bundle/server/Info.plist.in bundle/server/Info.plist)
-
-  if(HDIUTIL)
-    set(DMG_PARAMS --hdiutil ${HDIUTIL})
-  elseif(DMGTOOLS_FOUND)
-    set(DMG_PARAMS --dmgtools ${DMG} ${HFSPLUS} ${NEWFS_HFS})
-  endif()
-  set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
-  set(DMG_MKDIRS
-    ${TARGET_CLIENT}.app
-    ${TARGET_CLIENT}.app/Contents
-    ${TARGET_CLIENT}.app/Contents/Frameworks
-    ${TARGET_CLIENT}.app/Contents/MacOS
-    ${TARGET_CLIENT}.app/Contents/Resources
-    ${TARGET_SERVER}.app
-    ${TARGET_SERVER}.app/Contents
-    ${TARGET_SERVER}.app/Contents/MacOS
-    ${TARGET_SERVER}.app/Contents/Resources
-    ${TARGET_SERVER}.app/Contents/Resources/data
-    # Needed so the server recognizes the data directory.
-    ${TARGET_SERVER}.app/Contents/Resources/data/mapres
-  )
-  set(DMG_MKDIR_COMMANDS)
-  foreach(dir ${DMG_MKDIRS})
-    list(APPEND DMG_MKDIR_COMMANDS COMMAND ${CMAKE_COMMAND} -E make_directory ${DMG_TMPDIR}/${dir})
-  endforeach()
-  add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
-    ${DMG_MKDIR_COMMANDS}
-
-    # CLIENT
-    COMMAND ${CMAKE_COMMAND} -E copy_directory data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
-    COMMAND ${CMAKE_COMMAND} -E copy ${SDL2_LIBRARY} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libSDL2-2.0.0.dylib
-    COMMAND ${CMAKE_COMMAND} -E copy ${FREETYPE_LIBRARY} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/libfreetype.6.dylib
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_change_dylib.py change --tools ${CMAKE_INSTALL_NAME_TOOL} ${CMAKE_OTOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT} SDL2 @executable_path/../Frameworks/libSDL2-2.0.0.dylib
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_change_dylib.py change --tools ${CMAKE_INSTALL_NAME_TOOL} ${CMAKE_OTOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT} libfreetype @executable_path/../Frameworks/libfreetype.6.dylib
-
-    # SERVER
-    COMMAND ${CMAKE_COMMAND} -E copy_directory data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
-
-    # DMG
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/dmg.py create ${DMG_PARAMS} ${CPACK_PACKAGE_FILE_NAME}.dmg ${CPACK_PACKAGE_FILE_NAME} ${DMG_TMPDIR}
-
-    DEPENDS
-      ${TARGET_CLIENT}
-      ${TARGET_SERVER_LAUNCHER}
-      ${TARGET_SERVER}
-      ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
-      ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
-      other/bundle/client/PkgInfo
-      other/bundle/server/PkgInfo
-      other/icons/${TARGET_CLIENT}.icns
-      other/icons/${TARGET_SERVER}.icns
-      scripts/dmg.py
-  )
-  add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
-  list(APPEND PACKAGE_TARGETS package_dmg)
-endif()
 
 foreach(ext zip tar.gz tar.xz)
   set(TAR_MODE c)
@@ -2284,6 +2016,7 @@ foreach(target ${TARGETS_LINK})
   if(TARGET_OS STREQUAL "mac")
     target_link_libraries(${target} -stdlib=libc++)
     target_link_libraries(${target} -mmacosx-version-min=10.7)
+	target_link_libraries(${target} "-framework SystemConfiguration") # Required by curl 7.79.0
   endif()
   if((MINGW OR TARGET_OS STREQUAL "linux") AND PREFER_BUNDLED_LIBS)
     # Statically link the standard libraries with on MinGW/Linux so we don't

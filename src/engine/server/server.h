@@ -87,6 +87,8 @@ class CServer : public IServer
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
+	class IRegister *m_pRegister;
+	class IRegister *m_pRegisterTwo;
 
 #if defined(CONF_FAMILY_UNIX)
 	UNIXSOCKETADDR m_ConnLoggingDestAddr;
@@ -212,10 +214,41 @@ public:
 
 		char m_aLanguage[5]; // would be 2, but "none" is 4
 
+		class CDnsblLookup : public IJob
+		{
+			void Run() override;
+		public:
+			CDnsblLookup() {};
+			CDnsblLookup(const char *pCmd)
+			{
+				str_copy(m_aCommand, pCmd, sizeof(m_aCommand));
+				m_Result = 0;
+			}
+
+			int m_Result;
+			char m_aCommand[512];
+		};
 		int m_DnsblState;
-		CJob m_DnsblLookup;
+		std::shared_ptr<CDnsblLookup> m_pDnsblLookup;
+
+		class CPgscLookup : public IJob
+		{
+			void Run() override;
+		public:
+			CPgscLookup() {};
+			CPgscLookup(const NETADDR *pAddr, const char *pFindString)
+			{
+				net_addr_str(pAddr, m_aAddress, sizeof(m_aAddress), false);
+				str_copy(m_aFindString, pFindString, sizeof(m_aFindString));
+				m_Result = 0;
+			}
+
+			int m_Result;
+			char m_aAddress[NETADDR_MAXSTRSIZE];
+			char m_aFindString[128];
+		};
 		int m_PgscState; // Proxy Game Server Check
-		CJob m_PgscLookup;
+		std::shared_ptr<CPgscLookup> m_pPgscLookup;
 
 		int m_aIdMap[VANILLA_MAX_CLIENTS];
 		int m_aReverseIdMap[MAX_CLIENTS];
@@ -314,13 +347,11 @@ public:
 	int m_GeneratedRconPassword;
 
 	CDemoRecorder m_DemoRecorder;
-	CRegister m_Register;
-	CRegister m_RegisterTwo;
-	CRegister m_RegisterSevendown;
 	CMapChecker m_MapChecker;
 	CAuthManager m_AuthManager;
 
 	CServer();
+	~CServer();
 
 	int TrySetClientName(int ClientID, const char* pName);
 
@@ -387,6 +418,9 @@ public:
 	void SendServerInfo(int ClientID);
 	void GenerateServerInfo(CPacker *pPacker, int Token, int Socket);
 	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socket);
+	void UpdateRegisterServerInfo();
+	virtual void UpdateServerInfo(bool Resend = false);
+	const char *GetGameTypeServerInfo();
 
 	void PumpNetwork();
 
@@ -396,7 +430,6 @@ public:
 	virtual const char *GetMapName();
 	int LoadMap(const char *pMapName);
 
-	void InitRegister(CNetServer *pNetServer, IEngineMasterServer *pMasterServer, CConfig *pConfig, IConsole *pConsole);
 	void InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot);
 	int Run();
 
@@ -469,6 +502,17 @@ public:
 
 	bool IsBrowserScoreFix();
 
+	class CBotLookup : public IJob
+	{
+		void Run() override;
+	public:
+		// TODO: not rly thread safe xd
+		CBotLookup(CServer *pServer)
+		{
+			m_pServer = pServer;
+		}
+		CServer *m_pServer;
+	};
 	enum
 	{
 		BOTLOOKUP_STATE_DONE = 0,
@@ -498,9 +542,14 @@ public:
 	virtual void RemoveWhitelistByIndex(unsigned int Index);
 	virtual void PrintWhitelist();
 
+	class CWebhook : public IJob
+	{
+		void Run() override;
+	public:
+		CWebhook(const char *pCommand) { str_copy(m_aCommand, pCommand, sizeof(m_aCommand)); }
+		char m_aCommand[1024];
+	};
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "");
-	void AddJob(JOBFUNC pfnFunc, void *pData);
-	std::list<CJob *> m_Jobs;
 
 	virtual int *GetIdMap(int ClientID);
 	virtual int *GetReverseIdMap(int ClientID);
@@ -516,6 +565,25 @@ public:
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
 	bool IsDoubleInfo();
 
+	class CTranslateChat : public IJob
+	{
+		void Run() override;
+	public:
+		CTranslateChat(CServer *pServer, int ClientID, int Mode, const char *pMessage, const char *pLanguage)
+		{
+			m_pServer = pServer;
+			m_ClientID = ClientID;
+			m_Mode = Mode;
+			str_copy(m_aMessage, pMessage, sizeof(m_aMessage));
+			str_copy(m_aLanguage, pLanguage, sizeof(m_aLanguage));
+		}
+		
+		CServer *m_pServer;
+		int m_ClientID;
+		int m_Mode;
+		char m_aMessage[256];
+		char m_aLanguage[5];
+	};
 	enum
 	{
 		TRANSLATE_STATE_DONE = 0,

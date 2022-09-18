@@ -571,6 +571,12 @@ public:
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
+	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
+	{
+		str_format(pBuffer, BufferSize, "%s%s%s", m_aAppDir, !m_aAppDir[0] ? "" : "/", pFilename);
+		return pBuffer;
+	}
+
 	virtual bool GetHashAndSize(const char *pFilename, int StorageType, SHA256_DIGEST *pSha256, unsigned *pCrc, unsigned *pSize)
 	{
 		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, StorageType);

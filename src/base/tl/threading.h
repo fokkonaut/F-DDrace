@@ -72,11 +72,11 @@
 	{
 		SEMAPHORE sem;
 	public:
-		semaphore() { semaphore_init(&sem); }
-		~semaphore() { semaphore_destroy(&sem); }
+		semaphore() { sphore_init(&sem); }
+		~semaphore() { sphore_destroy(&sem); }
 		semaphore(const semaphore&) = delete;
-		void wait() { semaphore_wait(&sem); }
-		void signal() { semaphore_signal(&sem); }
+		void wait() { sphore_wait(&sem); }
+		void signal() { sphore_signal(&sem); }
 	};
 #endif
 

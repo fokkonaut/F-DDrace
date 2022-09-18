@@ -86,6 +86,8 @@ public:
 	virtual int GetDummy(int ClientID) = 0;
 	virtual bool IsDummy(int ClientID1, int ClientID2) = 0;
 
+	virtual void UpdateServerInfo(bool Resend = false) = 0;
+
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) = 0;
 
 	template<class T>
