@@ -345,12 +345,16 @@ void CLaser::Snap(int SnappingClient)
 		if(!pObj)
 			return;
 
+		int Owner = m_Owner;
+		if (!Server()->Translate(Owner, SnappingClient))
+			Owner = -1;
+
 		pObj->m_ToX = round_to_int(m_Pos.x);
 		pObj->m_ToY = round_to_int(m_Pos.y);
 		pObj->m_FromX = round_to_int(m_From.x);
 		pObj->m_FromY = round_to_int(m_From.y);
 		pObj->m_StartTick = m_EvalTick;
-		pObj->m_Owner = m_Owner;
+		pObj->m_Owner = Owner;
 		pObj->m_Type = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
 	}
 	else

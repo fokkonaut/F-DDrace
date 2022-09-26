@@ -45,8 +45,13 @@ CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "END
                   "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA",
 				  "NO_MOVEMENTS", "IN_FREEZE", "PRACTICE_MODE"])
 
-EntityClasses = Flags("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
-LaserTypes = Flags("LASERTYPE", ["RIFLE", "SHOTGUN", "DOOR", "FREEZE"])
+EntityClasses = Enum("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
+LaserTypes = Enum("LASERTYPE", ["RIFLE", "SHOTGUN", "DOOR", "FREEZE"])
+
+ProjectileFlags = Flags("PROJECTILEFLAG", ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
+	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
+	"EXPLOSIVE", "FREEZE",
+])
 
 
 RawHeader = '''
@@ -119,6 +124,7 @@ Flags = [
 	GameInfoFlags,
 	GameInfoFlags2,
 	CharacterFlags,
+	ProjectileFlags,
 ]
 
 Objects = [
@@ -296,13 +302,24 @@ Objects = [
 		NetIntAny("m_Flags2"),
 	], fixup=False),
 
+	# The code assumes that this has the same in-memory representation as
+	# the Projectile net object.
+	NetObjectEx("DDNetProjectile", "projectile@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntAny("m_Angle"),
+		NetIntAny("m_Data"),
+		NetIntRange("m_Type", 0, 'NUM_VANILLA_WEAPONS-1'),
+		NetTick("m_StartTick"),
+	]),
+
 	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.tw", [
 		NetIntAny("m_ToX"),
 		NetIntAny("m_ToY"),
 		NetIntAny("m_FromX"),
 		NetIntAny("m_FromY"),
 		NetTick("m_StartTick"),
-		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
 		NetIntAny("m_Type"),
 	]),
 
