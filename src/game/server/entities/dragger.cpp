@@ -222,34 +222,43 @@ void CDragger::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if (!pObj)
-		return;
+	// Build the object
+	vec2 From = pTarget ? pTarget->GetPos() : m_Pos;
+	int StartTick = 0;
 
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	if (pTarget)
+	if (!pEntData)
 	{
-		pObj->m_FromX = (int)pTarget->GetPos().x;
-		pObj->m_FromY = (int)pTarget->GetPos().y;
-	}
-	else
-	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
-	}
-
-	if (pEntData)
-	{
-		pObj->m_StartTick = 0;
-	}
-	else
-	{
-		int StartTick = m_EvalTick;
+		StartTick = m_EvalTick;
 		if (StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
 		else if (StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
+	}
+
+	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
+
+		pObj->m_ToX = round_to_int(m_Pos.x);
+		pObj->m_ToY = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = LASERTYPE_DOOR;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = round_to_int(m_Pos.x);
+		pObj->m_Y = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
 		pObj->m_StartTick = StartTick;
 	}
 }

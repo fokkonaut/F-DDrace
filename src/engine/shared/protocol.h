@@ -126,6 +126,7 @@ enum
 	VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM = 16000,
 	VERSION_DDNET_INTENDED_TICK = 16010, // last version with idle dummy intended tick broken
 	VERSION_DDNET_NEW_HUD = 16020,
+	VERSION_DDNET_MULTI_LASER = 16040, // This version also includes sitting animation
 };
 
 #endif

@@ -114,15 +114,30 @@ void CPlasma::Snap(int SnappingClient)
 		&& SnapPlayer->m_SpecTeam)
 		return;
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-			NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
 
-	if(!pObj)
-		return;
+		pObj->m_ToX = round_to_int(m_Pos.x);
+		pObj->m_ToY = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(m_Pos.x);
+		pObj->m_FromY = round_to_int(m_Pos.y);
+		pObj->m_StartTick = m_EvalTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
 
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_Pos.x;
-	pObj->m_FromY = (int)m_Pos.y;
-	pObj->m_StartTick = m_EvalTick;
+		pObj->m_X = round_to_int(m_Pos.x);
+		pObj->m_Y = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(m_Pos.x);
+		pObj->m_FromY = round_to_int(m_Pos.y);
+		pObj->m_StartTick = m_EvalTick;
+	}
 }

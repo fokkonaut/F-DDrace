@@ -138,46 +138,50 @@ void CLight::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if (!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
+	// Build the object
+	vec2 From = m_Pos;
+	int StartTick = 0;
 
 	if (Char && Char->Team() == TEAM_SUPER)
-	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
-	}
-	else if (Char && m_Layer == LAYER_SWITCH
-			&& GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
-	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-	}
+		From = m_Pos;
+	else if (Char && m_Layer == LAYER_SWITCH && GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[Char->Team()])
+		From = m_To;
 	else if (m_Layer != LAYER_SWITCH)
-	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-	}
-	else
-	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
-	}
+		From = m_To;
 
-	if (pEntData)
+	if (!pEntData)
 	{
-		pObj->m_StartTick = 0;
-	}
-	else
-	{
-		int StartTick = m_EvalTick;
+		StartTick = m_EvalTick;
 		if (StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
 		else if (StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
+	}
+
+	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return;
+
+		pObj->m_ToX = round_to_int(m_Pos.x);
+		pObj->m_ToY = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = -1;
+		pObj->m_Type = LASERTYPE_FREEZE;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return;
+
+		pObj->m_X = round_to_int(m_Pos.x);
+		pObj->m_Y = round_to_int(m_Pos.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
 		pObj->m_StartTick = StartTick;
 	}
 }

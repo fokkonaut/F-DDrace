@@ -716,11 +716,13 @@ void CPlayer::Snap(int SnappingClient)
 
 	pDDNetPlayer->m_AuthLevel = GetAuthedHighlighted();
 	pDDNetPlayer->m_Flags = 0;
+
+	bool Sitting = (m_pCharacter && m_pCharacter->m_MoneyTile) && SnappingClient != m_ClientID && GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER;
 	if(m_Afk || GameServer()->Arenas()->IsConfiguring(m_ClientID) || Server()->DesignChanging(m_ClientID))
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
 	if(m_Paused == PAUSE_SPEC)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
-	if(m_Paused == PAUSE_PAUSED || GameServer()->Arenas()->IsConfiguring(m_ClientID))
+	if(m_Paused == PAUSE_PAUSED || GameServer()->Arenas()->IsConfiguring(m_ClientID) || Sitting)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
 	bool ShowSpec = false;

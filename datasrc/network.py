@@ -46,6 +46,7 @@ CharacterFlags = Flags("CHARACTERFLAG", ["SOLO", "JETPACK", "NO_COLLISION", "END
 				  "NO_MOVEMENTS", "IN_FREEZE", "PRACTICE_MODE"])
 
 EntityClasses = Flags("ENTITYCLASS", ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"])
+LaserTypes = Flags("LASERTYPE", ["RIFLE", "SHOTGUN", "DOOR", "FREEZE"])
 
 
 RawHeader = '''
@@ -105,6 +106,7 @@ Enums = [
 	GameMsgIDs,
 	Authed,
 	EntityClasses,
+	LaserTypes,
 ]
 
 Flags = [
@@ -293,6 +295,16 @@ Objects = [
 		NetIntAny("m_Version"),
 		NetIntAny("m_Flags2"),
 	], fixup=False),
+
+	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.tw", [
+		NetIntAny("m_ToX"),
+		NetIntAny("m_ToY"),
+		NetIntAny("m_FromX"),
+		NetIntAny("m_FromY"),
+		NetTick("m_StartTick"),
+		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_Type"),
+	]),
 
 	## Events
 
