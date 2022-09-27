@@ -5149,6 +5149,7 @@ void CGameContext::UpdateTopAccounts(int Type)
 	case TOP_POINTS:	std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Points > b.m_Points; }); break;
 	case TOP_MONEY:		std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Money > b.m_Money; }); break;
 	case TOP_SPREE:		std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_KillStreak > b.m_KillStreak; }); break;
+	case TOP_PORTAL:	std::sort(m_TopAccounts.begin(), m_TopAccounts.end(), [](const TopAccounts& a, const TopAccounts& b) -> bool { return a.m_Portal > b.m_Portal; }); break;
 	}
 }
 
@@ -5189,6 +5190,7 @@ void CGameContext::SetTopAccStats(int FromID)
 			m_TopAccounts[i].m_Points = m_Accounts[FromID].m_BlockPoints;
 			m_TopAccounts[i].m_Money = m_Accounts[FromID].m_Money;
 			m_TopAccounts[i].m_KillStreak = m_Accounts[FromID].m_KillingSpreeRecord;
+			m_TopAccounts[i].m_Portal = m_Accounts[FromID].m_PortalBattery;
 			str_copy(m_TopAccounts[i].m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(m_TopAccounts[i].m_aUsername));
 			return;
 		}
@@ -5200,6 +5202,7 @@ void CGameContext::SetTopAccStats(int FromID)
 	Account.m_Points = m_Accounts[FromID].m_BlockPoints;
 	Account.m_Money = m_Accounts[FromID].m_Money;
 	Account.m_KillStreak = m_Accounts[FromID].m_KillingSpreeRecord;
+	Account.m_Portal = m_Accounts[FromID].m_PortalBattery;
 	str_copy(Account.m_aUsername, m_Accounts[FromID].m_aLastPlayerName, sizeof(Account.m_aUsername));
 	str_copy(Account.m_aAccountName, m_Accounts[FromID].m_Username, sizeof(Account.m_aAccountName));
 	m_TopAccounts.push_back(Account);

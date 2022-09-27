@@ -2843,7 +2843,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 	int Debut = pResult->NumArguments() >= 1 && pResult->GetInteger(0) != 0 ? pResult->GetInteger(0) : 1;
 	Debut = max(1, Debut < 0 ? (int)pSelf->m_TopAccounts.size() + Debut - 3 : Debut);
 
-	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : Type == TOP_MONEY ? "Money" : "Spree");
+	str_format(aType, sizeof(aType), "%s", Type == TOP_LEVEL ? "Level" : Type == TOP_POINTS ? "Points" : Type == TOP_MONEY ? "Money" : Type == TOP_SPREE ? "Spree" : "Portal");
 	str_format(aBuf, sizeof(aBuf), "----------- Top 5 %s -----------", aType);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	for (int i = 0; i < 5; i++)
@@ -2855,7 +2855,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 		if (Type == TOP_MONEY)
 			str_format(aBuf, sizeof(aBuf), "%d. %s Money: %lld", i + Debut, r->m_aUsername, r->m_Money);
 		else
-			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i + Debut, r->m_aUsername, aType, Type == TOP_LEVEL ? r->m_Level : Type == TOP_POINTS ? r->m_Points : r->m_KillStreak);
+			str_format(aBuf, sizeof(aBuf), "%d. %s %s: %d", i + Debut, r->m_aUsername, aType, Type == TOP_LEVEL ? r->m_Level : Type == TOP_POINTS ? r->m_Points : Type == TOP_SPREE ? r->m_KillStreak : r->m_Portal);
 
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
@@ -2884,6 +2884,12 @@ void CGameContext::ConTop5Spree(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_SPREE);
+}
+
+void CGameContext::ConTop5Portal(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->SendTop5AccMessage(pResult, pUserData, TOP_PORTAL);
 }
 
 void CGameContext::ConPoliceHelper(IConsole::IResult* pResult, void* pUserData)

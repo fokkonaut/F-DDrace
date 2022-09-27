@@ -79,6 +79,7 @@ enum Top5
 	TOP_POINTS,
 	TOP_MONEY,
 	TOP_SPREE,
+	TOP_PORTAL,
 };
 
 enum
@@ -457,6 +458,7 @@ public:
 		int m_Points;
 		int64 m_Money;
 		int m_KillStreak;
+		int m_Portal;
 		char m_aUsername[32];
 		char m_aAccountName[32];
 	};
@@ -867,6 +869,7 @@ private:
 	static void ConTop5Points(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5Money(IConsole::IResult* pResult, void* pUserData);
 	static void ConTop5Spree(IConsole::IResult* pResult, void* pUserData);
+	static void ConTop5Portal(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPoliceHelper(IConsole::IResult* pResult, void* pUserData);
 	static void ConWanted(IConsole::IResult* pResult, void* pUserData);
