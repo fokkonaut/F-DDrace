@@ -355,7 +355,7 @@ void CLaser::Snap(int SnappingClient)
 		pObj->m_FromY = round_to_int(m_From.y);
 		pObj->m_StartTick = m_EvalTick;
 		pObj->m_Owner = Owner;
-		pObj->m_Type = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
+		pObj->m_Type = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : m_Type == WEAPON_TASER ? LASERTYPE_FREEZE : -1;
 	}
 	else
 	{
