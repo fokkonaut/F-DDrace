@@ -68,30 +68,65 @@ void CButton::Snap(int SnappingClient)
 	if (!Status && (Server()->Tick() % Server()->TickSpeed()) % 11 == 0)
 		return;
 
-	CNetObj_Laser *pButton = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if (!pButton)
-		return;
+	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pButton = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
+		if(!pButton)
+			return;
 
-	pButton->m_X = round_to_int(m_Pos.x);
-	pButton->m_Y = round_to_int(m_Pos.y);
-	pButton->m_FromX = round_to_int(m_Pos.x);
-	pButton->m_FromY = round_to_int(m_Pos.y);
-	pButton->m_StartTick = 0;
+		pButton->m_ToX = round_to_int(m_Pos.x);
+		pButton->m_ToY = round_to_int(m_Pos.y);
+		pButton->m_FromX = round_to_int(m_Pos.x);
+		pButton->m_FromY = round_to_int(m_Pos.y);
+		pButton->m_StartTick = 0;
+		pButton->m_Owner = -1;
+		pButton->m_Type = LASERTYPE_DOOR;
+	}
+	else
+	{
+		CNetObj_Laser *pButton = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+		if (!pButton)
+			return;
+
+		pButton->m_X = round_to_int(m_Pos.x);
+		pButton->m_Y = round_to_int(m_Pos.y);
+		pButton->m_FromX = round_to_int(m_Pos.x);
+		pButton->m_FromY = round_to_int(m_Pos.y);
+		pButton->m_StartTick = 0;
+	}
 
 	if (!Status)
 		return;
 
 	for (int i = 0; i < NUM_SIDES; i++)
 	{
-		CNetObj_Laser *pSide = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aSides[i].m_ID, sizeof(CNetObj_Laser)));
-		if (!pSide)
-			return;
-
 		int To = i == POINT_LEFT ? POINT_TOP : i+1;
-		pSide->m_X = round_to_int(m_Pos.x + m_aSides[i].m_Pos.x);
-		pSide->m_Y = round_to_int(m_Pos.y + m_aSides[i].m_Pos.y);
-		pSide->m_FromX = round_to_int(m_Pos.x + m_aSides[To].m_Pos.x);
-		pSide->m_FromY = round_to_int(m_Pos.y + m_aSides[To].m_Pos.y);
-		pSide->m_StartTick = Server()->Tick();
+
+		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+		{
+			CNetObj_DDNetLaser * pSide = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_aSides[i].m_ID, sizeof(CNetObj_DDNetLaser)));
+			if(!pSide)
+				return;
+
+			pSide->m_ToX = round_to_int(m_Pos.x + m_aSides[i].m_Pos.x);
+			pSide->m_ToY = round_to_int(m_Pos.y + m_aSides[i].m_Pos.y);
+			pSide->m_FromX = round_to_int(m_Pos.x + m_aSides[To].m_Pos.x);
+			pSide->m_FromY = round_to_int(m_Pos.y + m_aSides[To].m_Pos.y);
+			pSide->m_StartTick = Server()->Tick();
+			pSide->m_Owner = -1;
+			pSide->m_Type = LASERTYPE_DOOR;
+		}
+		else
+		{
+			CNetObj_Laser *pSide = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aSides[i].m_ID, sizeof(CNetObj_Laser)));
+			if (!pSide)
+				return;
+
+			pSide->m_X = round_to_int(m_Pos.x + m_aSides[i].m_Pos.x);
+			pSide->m_Y = round_to_int(m_Pos.y + m_aSides[i].m_Pos.y);
+			pSide->m_FromX = round_to_int(m_Pos.x + m_aSides[To].m_Pos.x);
+			pSide->m_FromY = round_to_int(m_Pos.y + m_aSides[To].m_Pos.y);
+			pSide->m_StartTick = Server()->Tick();
+		}
 	}
 }
