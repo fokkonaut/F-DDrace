@@ -915,6 +915,7 @@ void CCharacter::FireWeapon()
 				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
 				if (!Found || !PortalPos
+					|| (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
 					|| (BatteryRequired && !pAccount->m_PortalBattery)
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
@@ -4531,11 +4532,16 @@ void CCharacter::UpdateWeaponIndicator()
 
 	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-	char aAmmo[16] = "";
+	char aAmmo[32] = "";
 	if (GetActiveWeapon() == WEAPON_TASER && pAccount->m_TaserLevel)
 		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_TaserBattery);
-	else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE && !pAccount->m_PortalRifle && Config()->m_SvPortalRifleAmmo)
-		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBattery);
+	else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE)
+	{
+		if (!pAccount->m_PortalRifle && Config()->m_SvPortalRifleAmmo)
+			str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBattery);
+		else if (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
+			str_copy(aAmmo, " [NOT VERIFIED → '/pin']", sizeof(aAmmo));
+	}
 
 	char aBuf[256] = "";
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
