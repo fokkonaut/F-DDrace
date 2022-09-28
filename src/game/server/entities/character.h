@@ -16,6 +16,7 @@
 #include "lightsaber.h"
 #include "stable_projectile.h"
 #include "helicopter.h"
+#include "portalblocker.h"
 
 #include "dummy/dummybase.h"
 
@@ -439,6 +440,7 @@ public:
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;
 	int64 m_LastBatteryDrop;
+	CPortalBlocker *m_pPortalBlocker;
 
 	int64 m_VipPlusAntiSpamTick;
 

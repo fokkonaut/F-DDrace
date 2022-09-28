@@ -232,7 +232,7 @@ void CPickup::Tick()
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 						else if (m_Subtype == WEAPON_HAMMER || m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HEART_GUN)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
-						else if (m_Subtype == WEAPON_TELEKINESIS)
+						else if (m_Subtype == WEAPON_TELEKINESIS || m_Subtype == WEAPON_PORTAL_BLOCKER)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->TeamMask());
 						else if (m_Subtype == WEAPON_LIGHTSABER)
 							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, pChr->TeamMask());
@@ -437,7 +437,7 @@ void CPickup::Snap(int SnappingClient)
 	}
 
 	bool Gun = m_Subtype == WEAPON_PROJECTILE_RIFLE;
-	bool Plasma = m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_LIGHTSABER || m_Subtype == WEAPON_PORTAL_RIFLE || m_Subtype == WEAPON_TELE_RIFLE || (m_Subtype == WEAPON_TASER && m_Type == POWERUP_WEAPON);
+	bool Plasma = m_Subtype == WEAPON_PLASMA_RIFLE || m_Subtype == WEAPON_LIGHTSABER || m_Subtype == WEAPON_PORTAL_RIFLE || m_Subtype == WEAPON_TELE_RIFLE || m_Subtype == WEAPON_PORTAL_BLOCKER || (m_Subtype == WEAPON_TASER && m_Type == POWERUP_WEAPON);
 	bool Heart = m_Subtype == WEAPON_HEART_GUN;
 	bool Grenade = m_Subtype == WEAPON_STRAIGHT_GRENADE || m_Subtype == WEAPON_BALL_GRENADE;
 
@@ -466,7 +466,7 @@ void CPickup::Snap(int SnappingClient)
 			pLaser->m_FromY = round_to_int(m_Pos.y - 30);
 			pLaser->m_StartTick = Server()->Tick();
 			pLaser->m_Owner = -1;
-			pLaser->m_Type = m_Subtype == WEAPON_TASER ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
+			pLaser->m_Type = m_Subtype == WEAPON_TASER ? LASERTYPE_FREEZE : m_Subtype == WEAPON_PORTAL_BLOCKER ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
 		}
 		else
 		{

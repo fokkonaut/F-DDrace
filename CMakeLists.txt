@@ -1732,6 +1732,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/plasma.h
   entities/portal.cpp
   entities/portal.h
+  entities/portalblocker.cpp
+  entities/portalblocker.h
   entities/projectile.cpp
   entities/projectile.h
   entities/rotating_ball.cpp

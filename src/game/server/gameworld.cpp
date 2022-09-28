@@ -896,3 +896,12 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 
 	return pClosest;
 }
+
+bool CGameWorld::IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1)
+{
+	CPortalBlocker *pPortalBlocker = (CPortalBlocker *)FindFirst(ENTTYPE_PORTAL_BLOCKER);
+	for (; pPortalBlocker; pPortalBlocker = (CPortalBlocker *)pPortalBlocker->TypeNext())
+		if (intersect(Pos0, Pos1, pPortalBlocker->GetPos(), pPortalBlocker->GetStartPos()))
+			return true;
+	return false;
+}

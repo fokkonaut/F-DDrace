@@ -533,6 +533,7 @@ public:
 		char m_aEmail[128];
 		char m_aDesign[128];
 		int m_PortalBattery;
+		int m_PortalBlocker;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -590,6 +591,7 @@ public:
 		ACC_EMAIL,
 		ACC_DESIGN,
 		ACC_PORTAL_BATTERY,
+		ACC_PORTAL_BLOCKER,
 		NUM_ACCOUNT_VARIABLES
 	};
 
@@ -917,6 +919,8 @@ private:
 	static void ConUnTeleRifle(IConsole::IResult* pResult, void* pUserData);
 	static void ConTaser(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnTaser(IConsole::IResult* pResult, void* pUserData);
+	static void ConPortalBlocker(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnPortalBlocker(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnHammer(IConsole::IResult* pResult, void* pUserData);

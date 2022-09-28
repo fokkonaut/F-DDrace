@@ -834,6 +834,18 @@ void CGameContext::ConUnTaser(IConsole::IResult* pResult, void* pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_TASER, true);
 }
 
+void CGameContext::ConPortalBlocker(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_BLOCKER, false);
+}
+
+void CGameContext::ConUnPortalBlocker(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_PORTAL_BLOCKER, true);
+}
+
 void CGameContext::ConScrollNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

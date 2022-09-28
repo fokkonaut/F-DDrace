@@ -31,8 +31,9 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.");
-		AddItem("Taser battery", 30, 10000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taser'.");
+		AddItem("Taser battery", 30, 100000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taser'.", false, 10);
 		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 500000, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", EuroMode);
+		AddItem("Portal Blocker", 20, 15000, TIME_FOREVER, "Create portal blockers using the ninja portal blocker and this ammo with your cursor. It can only be bought in packs of 5. See '/portal' for your current amount.", false, 5);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
 		for (int i = 0; i < NUM_POLICE_LEVELS; i++)
@@ -68,7 +69,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 	}
 }
 
-void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro)
+void CShop::AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro, int Amount)
 {
 	for (int i = 0; i < m_NumItems; i++)
 	{
@@ -80,6 +81,7 @@ void CShop::AddItem(const char *pName, int Level, int Price, int Time, const cha
 			m_aItems[i].m_Time = Time;
 			m_aItems[i].m_pDescription = pDescription;
 			m_aItems[i].m_IsEuro = IsEuro;
+			m_aItems[i].m_Amount = Amount;
 			m_aItems[i].m_Used = true;
 			break;
 		}
@@ -208,17 +210,23 @@ void CShop::OnPageChange(int ClientID)
 				aOwner, aRented);
 		}
 
+		char aAmount[64] = "\n";
+		if (IsType(HOUSE_SHOP) && m_aItems[Item].m_Amount > 1)
+			str_format(aAmount, sizeof(aAmount), "Amount: %d\n\n", m_aItems[Item].m_Amount);
+
 		str_format(aMsg, sizeof(aMsg),
 			"%s\n\n"
 			"Level: %d\n"
 			"Price: %d%s\n"
-			"Time: %s\n\n"
+			"Time: %s\n"
+			"%s"
 			"%s%s",
 			GetHeadline(Item),
 			m_aItems[Item].m_Level,
 			m_aItems[Item].m_Price,
-			m_aItems[Item].m_IsEuro ? " Euros" : (IsType(HOUSE_SHOP) && Item == ITEM_TASER_BATTERY) ? "x10" : "",
+			m_aItems[Item].m_IsEuro ? " Euros" : "",
 			GetTimeMessage(m_aItems[Item].m_Time),
+			aAmount,
 			aDescription,
 			(m_aItems[Item].m_IsEuro && GameServer()->Config()->m_SvEuroMode) ? "\n\nHow to get euros ingame? Contact the admin and donate to the server, it will get added to your ingame euros.\n\nCheck '/account' for your details." : ""
 		);
@@ -245,7 +253,7 @@ void CShop::BuyItem(int ClientID, int Item)
 
 	char aMsg[128];
 	int ItemID = Item;
-	int Amount = 1;
+	int Amount = m_aItems[Item].m_Amount;
 
 	char aDescription[64];
 	str_copy(aDescription, m_aItems[ItemID].m_pName, sizeof(aDescription));
@@ -309,7 +317,7 @@ void CShop::BuyItem(int ClientID, int Item)
 
 		if (Item == ITEM_TASER_BATTERY)
 		{
-			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, 10);
+			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, Amount);
 			str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
 		}
 	}
@@ -341,7 +349,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	if (Amount <= 0)
 		return;
 
-	int Price = Amount * m_aItems[ItemID].m_Price;
+	int Price = Amount * (m_aItems[ItemID].m_Price/m_aItems[ItemID].m_Amount);
 
 	// check for the correct price
 	if ((m_aItems[ItemID].m_IsEuro && pAccount->m_Euros < Price)
@@ -407,6 +415,7 @@ void CShop::BuyItem(int ClientID, int Item)
 									if (pPlayer->GetCharacter())
 										pPlayer->GetCharacter()->GiveWeapon(WEAPON_PORTAL_RIFLE);
 									break;
+		case ITEM_PORTAL_BLOCKER:	pAccount->m_PortalBlocker += Amount; break;
 		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))

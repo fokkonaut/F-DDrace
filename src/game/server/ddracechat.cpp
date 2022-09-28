@@ -2026,6 +2026,8 @@ void CGameContext::ConPortal(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Your portal stats ~~~");
 	str_format(aBuf, sizeof(aBuf), "Portal battery: %d", pAccount->m_PortalBattery);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Portal blocker: %d", pAccount->m_PortalBlocker);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, "Drop portal battery: '/portal drop <amount>'");
 }

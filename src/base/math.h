@@ -33,6 +33,18 @@ inline T mix(const T a, const T b, TB amount)
 	return a + (b-a)*amount;
 }
 
+template<typename T>
+inline bool ccw(const T a, const T b, const T c)
+{
+	return (c.y-a.y) * (b.x-a.x) > (b.y-a.y) * (c.x-a.x);
+}
+
+template<typename T>
+inline bool intersect(const T a, const T b, const T c, const T d)
+{
+	return ccw(a,c,d) != ccw(b,c,d) && ccw(a,b,c) != ccw(a,b,d);
+}
+
 template<typename T, typename TB>
 inline T bezier(const T p0, const T p1, const T p2, const T p3, TB amount)
 {

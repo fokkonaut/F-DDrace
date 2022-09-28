@@ -23,6 +23,7 @@ enum ShopItems
 	ITEM_TASER,
 	ITEM_TASER_BATTERY,
 	ITEM_PORTAL_RIFLE,
+	ITEM_PORTAL_BLOCKER,
 	NUM_ITEMS_SHOP_LIST,
 
 	POLICE_RANK_1 = NUM_ITEMS_SHOP_LIST,
@@ -76,10 +77,11 @@ private:
 		int m_Price;
 		int m_Time;
 		const char *m_pDescription;
+		int m_Amount;
 		bool m_IsEuro;
 	} m_aItems[MAX_PLOTS];
 
-	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false);
+	void AddItem(const char *pName, int Level, int Price, int Time, const char *pDescription, bool IsEuro = false, int Amount = 1);
 	void BuyItem(int ClientID, int Item);
 
 	const char *GetHeadline(int Item);

@@ -920,6 +920,7 @@ void CCharacter::FireWeapon()
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameLayerClipped(PortalPos)
+					|| GameWorld()->IntersectLinePortalBlocker(m_Pos, PortalPos)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false, true) // dont allow to place portals too close to other tees
@@ -1039,6 +1040,16 @@ void CCharacter::FireWeapon()
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
+			} break;
+
+			case WEAPON_PORTAL_BLOCKER:
+			{
+				if (!pAccount->m_PortalBlocker || !m_pPortalBlocker || !m_pPortalBlocker->OnPlace())
+				{
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+					return;
+				}
+
 			} break;
 		}
 
@@ -1977,7 +1988,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_StrongWeakID = pSnap ? (Config()->m_SvWeakHook ? pSnap->m_aStrongWeakID[ID] : SnappingClient == m_pPlayer->GetCID() ? 1 : 0) : m_StrongWeakID;
 
 	// Display Informations
-	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
+	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS || GetActiveWeapon() == WEAPON_PORTAL_BLOCKER;
 
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
 	pDDNetCharacter->m_NinjaActivationTick = NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
@@ -3838,6 +3849,8 @@ void CCharacter::FDDraceInit()
 
 	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		m_aUntranslatedID[i] = Server()->SnapNewID();
+
+	m_pPortalBlocker = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4405,6 +4418,10 @@ void CCharacter::SetActiveWeapon(int Weapon)
 	m_ActiveWeapon = Weapon;
 	UpdateWeaponIndicator();
 	m_DrawEditor.OnWeaponSwitch();
+
+	// Create portal blocker preview
+	if (m_ActiveWeapon == WEAPON_PORTAL_BLOCKER && !m_pPortalBlocker)
+		m_pPortalBlocker = new CPortalBlocker(GameWorld(), m_Pos, m_pPlayer->GetCID(), Config()->m_SvPortalBlockerDetonation);
 }
 
 int CCharacter::GetWeaponAmmo(int Type)

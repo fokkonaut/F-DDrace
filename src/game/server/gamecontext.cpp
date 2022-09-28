@@ -5261,6 +5261,7 @@ int CGameContext::AddAccount()
 	Account.m_aEmail[0] = '\0';
 	Account.m_aDesign[0] = '\0';
 	Account.m_PortalBattery = 0;
+	Account.m_PortalBlocker = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -5353,6 +5354,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_EMAIL:						str_copy(m_Accounts[ID].m_aEmail, pData, sizeof(m_Accounts[ID].m_aEmail)); break;
 	case ACC_DESIGN:					str_copy(m_Accounts[ID].m_aDesign, pData, sizeof(m_Accounts[ID].m_aDesign)); break;
 	case ACC_PORTAL_BATTERY:			m_Accounts[ID].m_PortalBattery = atoi(pData); break;
+	case ACC_PORTAL_BLOCKER:			m_Accounts[ID].m_PortalBlocker = atoi(pData); break;
 	}
 }
 
@@ -5410,6 +5412,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_EMAIL:						return "email";
 	case ACC_DESIGN:					return "design";
 	case ACC_PORTAL_BATTERY:			return "portal_battery";
+	case ACC_PORTAL_BLOCKER:			return "portal_blocker";
 	}
 	return "Unknown";
 }
@@ -5471,6 +5474,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_EMAIL:						str_copy(aBuf, m_Accounts[ID].m_aEmail, sizeof(aBuf)); break;
 	case ACC_DESIGN:					str_copy(aBuf, m_Accounts[ID].m_aDesign, sizeof(aBuf)); break;
 	case ACC_PORTAL_BATTERY:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalBattery); break;
+	case ACC_PORTAL_BLOCKER:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalBlocker); break;
 	}
 	return aBuf;
 }
@@ -6744,6 +6748,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Draw Editor";
 	case WEAPON_TELE_RIFLE:
 		return "Tele Rifle";
+	case WEAPON_PORTAL_BLOCKER:
+		return "Portal Blocker";
 	}
 	return "Unknown";
 }
@@ -6774,6 +6780,8 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_NINJA;
 	case WEAPON_TELE_RIFLE:
 		return WEAPON_LASER;
+	case WEAPON_PORTAL_BLOCKER:
+		return WEAPON_NINJA;
 	}
 	return Weapon;
 }
