@@ -1118,6 +1118,7 @@ void CServer::SendMap(int ClientID)
 		Msg.AddRaw(&m_CurrentMapSha256.data, sizeof(m_CurrentMapSha256.data));
 		Msg.AddInt(m_CurrentMapCrc);
 		Msg.AddInt(m_CurrentMapSize);
+		Msg.AddString(GetHttpsMapURL(), 0);
 		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
 	{
@@ -4149,6 +4150,7 @@ void CServer::SendMapDesign(int ClientID, int Design)
 		Msg.AddRaw(&m_aMapDesign[Design].m_Sha256.data, sizeof(m_aMapDesign[Design].m_Sha256.data));
 		Msg.AddInt(m_aMapDesign[Design].m_Crc);
 		Msg.AddInt(m_aMapDesign[Design].m_Size);
+		Msg.AddString(GetHttpsMapURL(Design), 0);
 		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
 	{
@@ -4174,6 +4176,29 @@ const char *CServer::GetMapDesign(int ClientID)
 	if (Design == -1)
 		return "default";
 	return m_aMapDesign[Design].m_aName;
+}
+
+const char *CServer::GetHttpsMapURL(int Design)
+{
+	if (!Config()->m_SvHttpsMapDownloadURL[0])
+		return "";
+
+	char aName[256];
+	char aSha256[SHA256_MAXSTRSIZE];
+	if (Design != -1)
+	{
+		sha256_str(m_aMapDesign[Design].m_Sha256, aSha256, sizeof(aSha256));
+		str_format(aName, sizeof(aName), "%s_%s_%s", GetMapName(), m_aMapDesign[Design].m_aName, aSha256);
+	}
+	else
+	{
+		sha256_str(m_CurrentMapSha256, aSha256, sizeof(aSha256));
+		str_format(aName, sizeof(aName), "%s_%s", GetMapName(), aSha256);
+	}
+
+	char aFullPath[512];
+	str_format(aFullPath, sizeof(aFullPath), "%s/%s.map", Config()->m_SvHttpsMapDownloadURL, aName);
+	return aFullPath;
 }
 
 void CServer::AddWhitelist(const NETADDR *pAddr, const char *pReason)

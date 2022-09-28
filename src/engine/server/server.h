@@ -288,6 +288,9 @@ public:
 	void SendMapDesign(int ClientID, int Design);
 	virtual const char *GetMapDesign(int ClientID);
 
+	// map https url
+	const char *GetHttpsMapURL(int Design = -1);
+
 	//maplist
 	struct CMapListEntry
 	{

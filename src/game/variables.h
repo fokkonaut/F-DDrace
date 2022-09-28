@@ -268,6 +268,7 @@ MACRO_CONFIG_INT(SvAllowSevendown, sv_allow_sevendown, 1, 0, 1, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvMapWindow, sv_map_window, 15, 0, 100, CFGFLAG_SERVER, "Map downloading send-ahead window", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDropOldClients, sv_drop_old_clients, 1, 0, 1, CFGFLAG_SERVER, "Whether old and not fully supported clients are getting dropped", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvBrowserScoreFix, sv_browser_score_fix, 0, 0, 2, CFGFLAG_SERVER, "Whether server tries to make clients display score correctly in browser (2=red color)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvHttpsMapDownloadURL, sv_https_map_download_url, 128, "", CFGFLAG_SERVER, "URL path to the maps folder", AUTHED_ADMIN)
 
 // map crc
 MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_SERVER, "Fake map file name to be loaded (path starting at binary!)", AUTHED_ADMIN)
