@@ -4196,7 +4196,7 @@ const char *CServer::GetHttpsMapURL(int Design)
 		str_format(aName, sizeof(aName), "%s_%s", GetMapName(), aSha256);
 	}
 
-	char aFullPath[512];
+	static char aFullPath[512];
 	str_format(aFullPath, sizeof(aFullPath), "%s/%s.map", Config()->m_SvHttpsMapDownloadURL, aName);
 	return aFullPath;
 }
