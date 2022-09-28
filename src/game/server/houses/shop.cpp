@@ -33,7 +33,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.");
 		AddItem("Taser battery", 30, 100000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taser'.", false, 10);
 		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 500000, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", EuroMode);
-		AddItem("Portal Blocker", 20, 15000, TIME_FOREVER, "Create portal blockers using the ninja portal blocker and this ammo with your cursor. It can only be bought in packs of 5. See '/portal' for your current amount.", false, 5);
+		AddItem("Portal Blocker", 20, 10000, TIME_FOREVER, "Create portal blockers using the ninja portal blocker and this ammo with your cursor. It can only be bought in packs of 5. See '/portal' for your current amount.", false, 5);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
 		for (int i = 0; i < NUM_POLICE_LEVELS; i++)
