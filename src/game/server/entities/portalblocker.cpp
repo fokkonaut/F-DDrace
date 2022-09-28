@@ -126,6 +126,10 @@ void CPortalBlocker::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwner && !CmaskIsSet(pOwner->TeamMask(), SnappingClient))
+		return;
+
 	for (int i = 0; i < 2; i++)
 	{
 		vec2 To = m_Pos;

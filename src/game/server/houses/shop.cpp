@@ -318,6 +318,10 @@ void CShop::BuyItem(int ClientID, int Item)
 		if (Item == ITEM_TASER_BATTERY)
 		{
 			Amount = clamp(MAX_TASER_BATTERY-pAccount->m_TaserBattery, 0, Amount);
+		}
+
+		if (Item == ITEM_TASER_BATTERY || Item == ITEM_PORTAL_BLOCKER)
+		{
 			str_format(aDescription, sizeof(aDescription), "%d %s", Amount, m_aItems[ItemID].m_pName);
 		}
 	}
