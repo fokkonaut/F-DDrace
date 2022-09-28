@@ -40,9 +40,9 @@ void CPortalBlocker::Tick()
 			return;
 		}
 
+		vec2 CursorPos = pOwner->GetCursorPos();
 		if (m_HasStartPos)
 		{
-			vec2 CursorPos = pOwner->GetCursorPos();
 			GameServer()->Collision()->IntersectLine(m_StartPos, CursorPos, 0, &CursorPos);
 
 			float Amount = 1.f;
@@ -56,7 +56,7 @@ void CPortalBlocker::Tick()
 		}
 		else
 		{
-			m_Pos = pOwner->GetCursorPos();
+			m_Pos = CursorPos;
 		}
 		return;
 	}
@@ -79,7 +79,7 @@ bool CPortalBlocker::OnPlace()
 		return false;
 
 	// Not out of the map and not too far away from the owner
-	if (GameLayerClipped(m_Pos) || distance(pOwner->GetPos(), pOwner->GetCursorPos()) > Config()->m_SvPortalMaxDistance)
+	if (GameLayerClipped(m_Pos) || distance(pOwner->GetPos(), m_Pos) > Config()->m_SvPortalMaxDistance)
 		return false;
 
 	if (!m_HasStartPos)
@@ -119,7 +119,7 @@ void CPortalBlocker::Snap(int SnappingClient)
 
 		// For the currently creating guy
 		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-		if (pOwner && distance(pOwner->GetPos(), pOwner->GetCursorPos()) > Config()->m_SvPortalMaxDistance)
+		if (pOwner && distance(pOwner->GetPos(), m_Pos) > Config()->m_SvPortalMaxDistance)
 			return;
 	}
 
