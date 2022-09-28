@@ -454,15 +454,32 @@ void CPickup::Snap(int SnappingClient)
 	}
 	else if (Plasma)
 	{
-		CNetObj_Laser* pLaser = static_cast<CNetObj_Laser*>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID2, sizeof(CNetObj_Laser)));
-		if (!pLaser)
-			return;
+		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+		{
+			CNetObj_DDNetLaser * pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_ID2, sizeof(CNetObj_DDNetLaser)));
+			if(!pLaser)
+				return;
 
-		pLaser->m_X = round_to_int(m_Pos.x);
-		pLaser->m_Y = round_to_int(m_Pos.y - 30);
-		pLaser->m_FromX = round_to_int(m_Pos.x);
-		pLaser->m_FromY = round_to_int(m_Pos.y - 30);
-		pLaser->m_StartTick = Server()->Tick();
+			pLaser->m_ToX = round_to_int(m_Pos.x);
+			pLaser->m_ToY = round_to_int(m_Pos.y - 30);
+			pLaser->m_FromX = round_to_int(m_Pos.x);
+			pLaser->m_FromY = round_to_int(m_Pos.y - 30);
+			pLaser->m_StartTick = Server()->Tick();
+			pLaser->m_Owner = -1;
+			pLaser->m_Type = m_Subtype == WEAPON_TASER ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
+		}
+		else
+		{
+			CNetObj_Laser * pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ID2, sizeof(CNetObj_Laser)));
+			if (!pLaser)
+				return;
+
+			pLaser->m_X = round_to_int(m_Pos.x);
+			pLaser->m_Y = round_to_int(m_Pos.y - 30);
+			pLaser->m_FromX = round_to_int(m_Pos.x);
+			pLaser->m_FromY = round_to_int(m_Pos.y - 30);
+			pLaser->m_StartTick = Server()->Tick();
+		}
 	}
 	else if (Heart)
 	{
