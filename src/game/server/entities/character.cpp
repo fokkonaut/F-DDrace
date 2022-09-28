@@ -4534,13 +4534,19 @@ void CCharacter::UpdateWeaponIndicator()
 
 	char aAmmo[32] = "";
 	if (GetActiveWeapon() == WEAPON_TASER && pAccount->m_TaserLevel)
+	{
 		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_TaserBattery);
+	}
 	else if (GetActiveWeapon() == WEAPON_PORTAL_RIFLE)
 	{
 		if (!pAccount->m_PortalRifle && Config()->m_SvPortalRifleAmmo)
 			str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBattery);
 		else if (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
 			str_copy(aAmmo, " [NOT VERIFIED → '/pin']", sizeof(aAmmo));
+	}
+	else if (GetActiveWeapon() == WEAPON_PORTAL_BLOCKER)
+	{
+		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBlocker);
 	}
 
 	char aBuf[256] = "";
