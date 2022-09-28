@@ -1002,21 +1002,21 @@ void CConsole::Init()
 	#define MACRO_CONFIG_INT(Name,ScriptName,Def,Min,Max,Flags,Desc,Accesslevel) \
 	{ \
 		static CIntVariableData Data = { this, &m_pConfig->m_##Name, Min, Max, Def }; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc, Accesslevel); \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")", Accesslevel); \
 	}
 
 	#define MACRO_CONFIG_STR(Name,ScriptName,Len,Def,Flags,Desc,Accesslevel) \
 	{ \
 		static char OldValue[Len] = Def; \
 		static CStrVariableData Data = { this, m_pConfig->m_##Name, Len, Len, OldValue }; \
-		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc " (default: " #Def ", max length: " #Len ")", Accesslevel); \
 	}
 
 	#define MACRO_CONFIG_UTF8STR(Name,ScriptName,Size,Len,Def,Flags,Desc,Accesslevel) \
 	{ \
 		static char OldValue[Len] = Def; \
 		static CStrVariableData Data = { this, m_pConfig->m_##Name, Size, Len, OldValue }; \
-		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc, Accesslevel); \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc " (default: " #Def ", max length: " #Len ", max size: " #Size ")", Accesslevel); \
 	}
 
 	#include "config_variables.h"
