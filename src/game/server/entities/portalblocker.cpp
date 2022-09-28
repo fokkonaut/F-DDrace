@@ -104,6 +104,7 @@ bool CPortalBlocker::OnPlace()
 
 		// Create a new portal blocker ready to be placed for the owner so we get detached from him aswell
 		pOwner->m_pPortalBlocker = new CPortalBlocker(GameWorld(), pOwner->GetPos(), m_Owner);
+		pOwner->UpdateWeaponIndicator();
 	}
 
 	return true;
