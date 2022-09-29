@@ -4379,13 +4379,16 @@ void CCharacter::DropLoot(int Weapon)
 				if (GetWeaponGot(i))
 					vExtraWeapons.push_back(i);
 
-			int Index = rand() % vExtraWeapons.size();
-			int Weapon = vExtraWeapons[Index];
+			if (vExtraWeapons.size())
+			{
+				int Index = rand() % vExtraWeapons.size();
+				int Weapon = vExtraWeapons[Index];
 
-			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
-			DropWeapon(Weapon, true, Dir);
-			if (Weapon == WEAPON_TASER)
-				DropBattery(WEAPON_TASER, 0, true, Dir);
+				float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
+				DropWeapon(Weapon, true, Dir);
+				if (Weapon == WEAPON_TASER)
+					DropBattery(WEAPON_TASER, 0, true, Dir);
+			}
 		}
 	}
 }
