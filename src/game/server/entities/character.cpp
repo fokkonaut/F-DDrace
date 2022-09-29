@@ -1070,7 +1070,6 @@ void CCharacter::FireWeapon()
 		Sound = false;
 	}
 
-	m_pPlayer->m_aSecurityPin[0] = '1';
 	if (GetActiveWeapon() != WEAPON_LIGHTSABER) // we don't want the client to render the fire animation
 		m_AttackTick = Server()->Tick();
 
