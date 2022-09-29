@@ -75,14 +75,14 @@ void CStableProjectile::Snap(int SnappingClient)
 		return;
 	}
 
+	if (m_OnlyShowOwner && SnappingClient != m_Owner)
+		return;
+
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwner && !CmaskIsSet(pOwner->TeamMask(), SnappingClient))
 		return;
 
 	if (m_HideOnSpec && pOwner && pOwner->IsPaused())
-		return;
-
-	if (m_OnlyShowOwner && SnappingClient != m_Owner)
 		return;
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));

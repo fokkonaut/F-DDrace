@@ -231,7 +231,7 @@ MACRO_CONFIG_INT(SvPortalRifleRespawnTime, sv_portal_rifle_respawn_time, 15, 1, 
 MACRO_CONFIG_INT(SvPortalThroughDoor, sv_portal_through_door, 1, 0, 1, CFGFLAG_SERVER, "Whether portal rilfe can be used through a closed door (outside of plot only)", AUTHED_ADMIN)
 
 // portal blocker
-MACRO_CONFIG_INT(SvPortalBlockerDetonation, sv_portal_blocker_detonation, 15, 0, 60, CFGFLAG_SERVER, "Time in seconds a portal blocker detonates", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortalBlockerDetonation, sv_portal_blocker_detonation, 10, 0, 60, CFGFLAG_SERVER, "Time in seconds a portal blocker detonates", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPortalBlockerMaxLength, sv_portal_blocker_max_length, 15, 0, 999, CFGFLAG_SERVER, "Maximum portal blocker length in blocks (0 = no limit)", AUTHED_ADMIN)
 
 // draw editor

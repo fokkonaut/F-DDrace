@@ -8,11 +8,17 @@ class CFlyingPoint : public CEntity
 private:
 	vec2 m_InitialVel;
 	float m_InitialAmount;
-	int m_To;
 	int m_Owner;
+
+	bool m_PortalBlocker;
+	vec2 m_PrevPos;
+
+	// Either a to clientid is set or a to position
+	int m_To;
+	vec2 m_ToPos;
 	
 public:
-	CFlyingPoint(CGameWorld *pGameWorld, vec2 Pos, int To, int Owner, vec2 InitialVel);
+	CFlyingPoint(CGameWorld *pGameWorld, vec2 Pos, int To, int Owner, vec2 InitialVel, vec2 ToPos = vec2(-1, -1), bool PortalBlocker = false);
 	
 	virtual void Reset();
 	virtual void Tick();

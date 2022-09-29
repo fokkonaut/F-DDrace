@@ -25,6 +25,7 @@
 #include "rotating_ball.h"
 #include "epic_circle.h"
 #include "staff_ind.h"
+#include "flyingpoint.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -921,12 +922,24 @@ void CCharacter::FireWeapon()
 					|| (m_pPlayer->m_pPortal[PORTAL_FIRST] && m_pPlayer->m_pPortal[PORTAL_SECOND])
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameLayerClipped(PortalPos)
-					|| GameWorld()->IntersectLinePortalBlocker(m_Pos, PortalPos)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false, true) // dont allow to place portals too close to other tees
 					)
 				{
+					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+					return;
+				}
+
+				vec2 IntersectedPos = vec2(-1, -1);
+				if (m_pPlayer->m_pPortal[PORTAL_FIRST] && GameWorld()->IntersectLinePortalBlocker(m_pPlayer->m_pPortal[PORTAL_FIRST]->GetPos(), PortalPos))
+					IntersectedPos = m_pPlayer->m_pPortal[PORTAL_FIRST]->GetPos();
+				else if (GameWorld()->IntersectLinePortalBlocker(m_Pos, PortalPos))
+					IntersectedPos = m_Pos;
+
+				if (IntersectedPos != vec2(-1, -1))
+				{
+					new CFlyingPoint(GameWorld(), IntersectedPos, -1, m_pPlayer->GetCID(), vec2((float)random(0, 400)/100.f, (float)random(0, 400)/100.f), PortalPos, true);
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 					return;
 				}
@@ -1057,6 +1070,7 @@ void CCharacter::FireWeapon()
 		Sound = false;
 	}
 
+	m_pPlayer->m_aSecurityPin[0] = '1';
 	if (GetActiveWeapon() != WEAPON_LIGHTSABER) // we don't want the client to render the fire animation
 		m_AttackTick = Server()->Tick();
 
