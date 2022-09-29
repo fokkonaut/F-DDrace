@@ -18,6 +18,7 @@ class CDoor: public CEntity
 	float m_Rotation;
 	vec2 m_PrevPos;
 	int m_Thickness;
+	int m_Color;
 	void Update();
 
 public:
@@ -25,14 +26,16 @@ public:
 	void Open(int Team);
 	void Close(int Team);
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-			int Number, bool Collision = true, int Thickness = 4);
+			int Number, bool Collision = true, int Thickness = 4, int Color = LASERTYPE_DOOR);
 
 	void SetDirection(float Rotation);
 	void SetLength(int Length);
 	void SetThickness(int Thickness) { m_Thickness = Thickness; }
+	void SetColor(int Lasertype) { m_Color = Lasertype; }
 	int GetLength() { return m_Length; }
 	float GetRotation() { return m_Rotation; }
 	int GetThickness() { return m_Thickness; }
+	int GetColor() { return m_Color; }
 	virtual ~CDoor();
 
 	virtual void Reset();

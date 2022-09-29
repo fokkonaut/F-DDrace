@@ -8,7 +8,7 @@
 #include "door.h"
 
 CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
-		int Number, bool Collision, int Thickness) :
+		int Number, bool Collision, int Thickness, int Color) :
 		CEntity(pGameWorld, CGameWorld::ENTTYPE_DOOR, Pos, 0, Collision)
 {
 	m_Number = Number;
@@ -16,6 +16,7 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_PrevPos = m_Pos;
 	m_Thickness = Thickness;
 	m_Length = Length;
+	m_Color = Color;
 
 	SetDirection(Rotation);
 	ResetCollision();
@@ -163,7 +164,7 @@ void CDoor::Snap(int SnappingClient)
 		pObj->m_FromY = round_to_int(From.y);
 		pObj->m_StartTick = StartTick;
 		pObj->m_Owner = -1;
-		pObj->m_Type = LASERTYPE_DOOR;
+		pObj->m_Type = m_Color;
 	}
 	else
 	{

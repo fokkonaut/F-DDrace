@@ -24,6 +24,7 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Laser.m_Angle = s_DefaultAngle;
 	m_Laser.m_Length = 3;
 	m_Laser.m_Thickness = s_MaxThickness;
+	m_Laser.m_Thickness = LASERTYPE_DOOR;
 	m_Laser.m_ButtonMode = false;
 	m_Laser.m_Number = 0;
 	m_Speedup.m_Angle = 0;
@@ -522,6 +523,15 @@ void CDrawEditor::HandleInput()
 						m_Laser.m_Thickness = s_MaxThickness;
 					((CDoor *)m_pPreview)->SetThickness(m_Laser.m_Thickness);
 				}
+				if (m_Setting == LASERWALL_COLOR)
+				{
+					m_Laser.m_Color += m_Input.m_Direction;
+					if (m_Laser.m_Color >= NUM_LASERTYPES)
+						m_Laser.m_Color = 0;
+					else if (m_Laser.m_Color < 0)
+						m_Laser.m_Color = NUM_LASERTYPES-1;
+					((CDoor *)m_pPreview)->SetColor(m_Laser.m_Color);
+				}
 			}
 			else if (m_Category == CAT_LASERDOORS)
 			{
@@ -647,6 +657,7 @@ void CDrawEditor::SetCategory(int Category)
 		m_Laser.m_Collision = true;
 		m_Laser.m_Thickness = s_MaxThickness;
 		m_Laser.m_ButtonMode = false;
+		m_Laser.m_Color = LASERTYPE_DOOR;
 	}
 	else if (Category == CAT_SPEEDUPS)
 	{
@@ -699,7 +710,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 	case CGameWorld::ENTTYPE_DOOR:
 	{
 		int Number = m_Category == CAT_LASERDOORS && !Preview ? GameServer()->Collision()->GetSwitchByPlotLaserDoor(CurrentPlotID(), m_Laser.m_Number) : 0;
-		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Laser.m_Angle, 32 * m_Laser.m_Length, Number, !Preview && m_Laser.m_Collision, m_Laser.m_Thickness);
+		return new CDoor(m_pCharacter->GameWorld(), m_Pos, m_Laser.m_Angle, 32 * m_Laser.m_Length, Number, !Preview && m_Laser.m_Collision, m_Laser.m_Thickness, m_Laser.m_Color);
 	}
 	case CGameWorld::ENTTYPE_BUTTON:
 	{
@@ -725,7 +736,7 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 	case CGameWorld::ENTTYPE_PICKUP:
 		pEntity = new CPickup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CPickup *)pTemplate)->GetType(), ((CPickup *)pTemplate)->GetSubtype(), 0, 0, -1, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_DOOR:
-		pEntity = new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision, ((CDoor *)pTemplate)->GetThickness()); break;
+		pEntity = new CDoor(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDoor *)pTemplate)->GetRotation(), ((CDoor *)pTemplate)->GetLength(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision, ((CDoor *)pTemplate)->GetThickness(), ((CDoor *)pTemplate)->GetColor()); break;
 	case CGameWorld::ENTTYPE_BUTTON:
 		pEntity = new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_SPEEDUP:
@@ -797,6 +808,8 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting(aBuf, LASERWALL_COLLISION), sizeof(aMsg));
 		str_format(aBuf, sizeof(aBuf), "Thickness: %d/%d", m_Laser.m_Thickness+1, s_MaxThickness+1);
 		str_append(aMsg, FormatSetting(aBuf, LASERWALL_THICKNESS), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Color: %s", GetLaserColor());
+		str_append(aMsg, FormatSetting(aBuf, LASERWALL_COLOR), sizeof(aMsg));
 	}
 	else if (m_Category == CAT_LASERDOORS)
 	{
@@ -858,6 +871,18 @@ const char *CDrawEditor::GetPickup(int Pickup)
 	case DRAW_PICKUP_SHOTGUN: return "Shotgun";
 	case DRAW_PICKUP_GRENADE: return "Grenade";
 	case DRAW_PICKUP_LASER: return "Rifle";
+	default: return "Unknown";
+	}
+}
+
+const char *CDrawEditor::GetLaserColor()
+{
+	switch (m_Laser.m_Color)
+	{
+	case LASERTYPE_RIFLE: return "Rifle";
+	case LASERTYPE_SHOTGUN: return "Shotgun";
+	case LASERTYPE_DOOR: return "Door";
+	case LASERTYPE_FREEZE: return "Freeze";
 	default: return "Unknown";
 	}
 }

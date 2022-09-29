@@ -26,6 +26,7 @@ class CDrawEditor
 		// Wall
 		LASERWALL_COLLISION = 0,
 		LASERWALL_THICKNESS,
+		LASERWALL_COLOR,
 		NUM_LASERWALL_SETTINGS,
 
 		// Door
@@ -112,6 +113,8 @@ class CDrawEditor
 	int GetFirstFreeNumber();
 	int GetNumSpeedups(int PlotID);
 
+	const char *GetLaserColor();
+
 	bool IsCategoryAllowed(int Category);
 	const char *GetCategoryListName(int Category);
 
@@ -158,6 +161,7 @@ class CDrawEditor
 		// Walls
 		bool m_Collision;
 		int m_Thickness;
+		int m_Color;
 		// Doors
 		int m_Number;
 		bool m_ButtonMode;
