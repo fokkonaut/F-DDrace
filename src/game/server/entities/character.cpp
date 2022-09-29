@@ -4374,7 +4374,14 @@ void CCharacter::DropLoot(int Weapon)
 			}
 
 			// up to one extra weapon
-			int Weapon = (rand() % (NUM_WEAPONS-NUM_VANILLA_WEAPONS)) + NUM_VANILLA_WEAPONS;
+			std::vector<int> vExtraWeapons;
+			for (int i = NUM_VANILLA_WEAPONS; i < NUM_WEAPONS; i++)
+				if (GetWeaponGot(i))
+					vExtraWeapons.push_back(i);
+
+			int Index = rand() % vExtraWeapons.size();
+			int Weapon = vExtraWeapons[Index];
+
 			float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5
 			DropWeapon(Weapon, true, Dir);
 			if (Weapon == WEAPON_TASER)
