@@ -220,7 +220,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
-	if (m_Type == POWERUP_BATTERY || m_Weapon == WEAPON_LIGHTSABER)
+	if (m_Type == POWERUP_BATTERY)
 	{
 		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if (!pProj)
