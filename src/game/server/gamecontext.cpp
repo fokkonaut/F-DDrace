@@ -4694,7 +4694,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_DOOR:
 		{
 			CDoor *pDoor = (CDoor *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->m_Collision, pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0]);
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%.2f:%d:%d:%d:%d:%d:%d,", CGameWorld::ENTTYPE_DOOR, Pos.x/32.f, Pos.y/32.f, pDoor->GetRotation(), pDoor->GetLength(), (int)pDoor->m_Collision, pDoor->GetThickness(), pDoor->m_Number, (int)Collision()->m_pSwitchers[pDoor->m_Number].m_Status[0], pDoor->GetColor());
 			*pFile << aEntry;
 			break;
 		}
@@ -4757,8 +4757,9 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 				int Thickness = -1;
 				int Number = -1;
 				int Status = -1;
-				sscanf(pData, "%d:%f/%f:%f:%d:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Rotation, &Length, &CollisionActive, &Thickness, &Number, &Status);
-				if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0)
+				int Color = -1;
+				sscanf(pData, "%d:%f/%f:%f:%d:%d:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Rotation, &Length, &CollisionActive, &Thickness, &Number, &Status, &Color);
+				if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0 && Color >= 0)
 				{
 					int NewNumber = -1;
 					if (Number == 0)
@@ -4786,7 +4787,7 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 						}
 					}
 
-					vEntities.push_back(new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, NewNumber, CollisionActive, Thickness));
+					vEntities.push_back(new CDoor(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Rotation, Length, NewNumber, CollisionActive, Thickness, Color));
 				}
 				break;
 			}
