@@ -124,7 +124,7 @@ void CDoor::Snap(int SnappingClient)
 	CNetObj_EntityEx *pEntData = 0;
 	if (m_Collision && !ForceOn)
 	{
-		if (pChr && pChr->SendExtendedEntity(this))
+		if (pChr && pChr->SendExtendedEntity(this) && m_Color == LASERTYPE_DOOR) // REMOVE THIS COLOR CHECK ONCE https://github.com/ddnet/ddnet/pull/5886 got merged
 		{
 			pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
 			if (pEntData)
