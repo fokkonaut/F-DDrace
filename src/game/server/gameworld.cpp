@@ -472,7 +472,6 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 
 void CGameWorld::Tick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if(m_ResetRequested)
 		Reset();
 
