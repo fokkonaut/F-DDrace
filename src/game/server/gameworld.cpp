@@ -901,7 +901,7 @@ bool CGameWorld::IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1)
 {
 	CPortalBlocker *pPortalBlocker = (CPortalBlocker *)FindFirst(ENTTYPE_PORTAL_BLOCKER);
 	for (; pPortalBlocker; pPortalBlocker = (CPortalBlocker *)pPortalBlocker->TypeNext())
-		if (intersect_segments(Pos0, Pos1, pPortalBlocker->GetPos(), pPortalBlocker->GetStartPos()))
+		if (pPortalBlocker->IsPlaced() && intersect_segments(Pos0, Pos1, pPortalBlocker->GetPos(), pPortalBlocker->GetStartPos()))
 			return true;
 	return false;
 }

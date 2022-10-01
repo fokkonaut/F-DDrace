@@ -22,6 +22,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 	bool OnPlace();
+	bool IsPlaced() { return m_HasEndPos; }
 	vec2 GetStartPos() { return m_StartPos; }
 };
 
