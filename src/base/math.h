@@ -33,18 +33,6 @@ inline T mix(const T a, const T b, TB amount)
 	return a + (b-a)*amount;
 }
 
-template<typename T>
-inline bool ccw(const T a, const T b, const T c)
-{
-	return (c.y-a.y) * (b.x-a.x) > (b.y-a.y) * (c.x-a.x);
-}
-
-template<typename T>
-inline bool intersect(const T a, const T b, const T c, const T d)
-{
-	return ccw(a,c,d) != ccw(b,c,d) && ccw(a,b,c) != ccw(a,b,d);
-}
-
 template<typename T, typename TB>
 inline T bezier(const T p0, const T p1, const T p2, const T p3, TB amount)
 {
@@ -99,5 +87,60 @@ const float pi = 3.1415926535897932384626433f;
 template <typename T> inline T min(T a, T b) { return a<b?a:b; }
 template <typename T> inline T max(T a, T b) { return a>b?a:b; }
 template <typename T> inline T absolute(T a) { return a<T(0)?-a:a; }
+
+// Two line segments intersection
+
+// To find orientation of ordered triplet (p, q, r).
+// The function returns following values
+// 0 --> p, q and r are collinear
+// 1 --> Clockwise
+// 2 --> Counterclockwise
+template<typename T>
+int orientation(const T p, const T q, const T r)
+{
+	// See https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/ for details of below formula.
+	int val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+	if (val == 0) return 0; // collinear
+	return (val > 0) ? 1 : 2; // clock or counterclock wise
+}
+
+// Given three collinear points p, q, r, the function checks if
+// point q lies on line segment 'pr'
+template<typename T>
+bool onSegment(const T p, const T q, const T r)
+{
+	return (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y));
+}
+
+// The main function that returns true if line segment 'p1q1' and 'p2q2' intersect.
+template<typename T>
+inline bool intersect_segments(const T p1, const T q1, const T p2, const T q2)
+{
+	// Find the four orientations needed for general and special cases
+	int o1 = orientation(p1, q1, p2);
+	int o2 = orientation(p1, q1, q2);
+	int o3 = orientation(p2, q2, p1);
+	int o4 = orientation(p2, q2, q1);
+
+	// General case
+	if (o1 != o2 && o3 != o4)
+		return true;
+
+	// Special Cases
+	// p1, q1 and p2 are collinear and p2 lies on segment p1q1
+	if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+
+	// p1, q1 and q2 are collinear and q2 lies on segment p1q1
+	if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+
+	// p2, q2 and p1 are collinear and p1 lies on segment p2q2
+	if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+
+	// p2, q2 and q1 are collinear and q1 lies on segment p2q2
+	if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+
+	// Doesn't fall in any of the above cases
+	return false;
+}
 
 #endif // BASE_MATH_H
