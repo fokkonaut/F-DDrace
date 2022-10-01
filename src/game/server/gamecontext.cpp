@@ -4757,9 +4757,9 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 				int Thickness = -1;
 				int Number = -1;
 				int Status = -1;
-				int Color = -1;
+				int Color = LASERTYPE_DOOR;
 				sscanf(pData, "%d:%f/%f:%f:%d:%d:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Rotation, &Length, &CollisionActive, &Thickness, &Number, &Status, &Color);
-				if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0 && Color >= 0)
+				if (Rotation >= 0 && Length >= 0 && CollisionActive >= 0 && Thickness >= 0 && Number >= 0 && Status >= 0)
 				{
 					int NewNumber = -1;
 					if (Number == 0)
