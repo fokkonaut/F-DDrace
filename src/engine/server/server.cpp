@@ -362,6 +362,8 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	m_pRegister = nullptr;
 	m_pRegisterTwo = nullptr;
 
+	m_ServerInfoNeedsUpdate = false;
+
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
@@ -457,7 +459,7 @@ void CServer::SetClientScore(int ClientID, int Score)
 		return;
 
 	if (m_aClients[ClientID].m_Score != Score)
-		UpdateServerInfo();
+		ExpireServerInfo();
 
 	m_aClients[ClientID].m_Score = Score;
 }
@@ -2202,6 +2204,13 @@ void CServer::UpdateServerInfo(bool Resend)
 	UpdateRegisterServerInfo();
 	if (Resend)
 		SendServerInfo(-1);
+
+	m_ServerInfoNeedsUpdate = false;
+}
+
+void CServer::ExpireServerInfo()
+{
+	m_ServerInfoNeedsUpdate = true;
 }
 
 void CServer::SendServerInfo(int ClientID)
@@ -2708,6 +2717,9 @@ int CServer::Run()
 			m_pRegister->Update();
 			if (IsDoubleInfo())
 				m_pRegisterTwo->Update();
+
+			if (m_ServerInfoNeedsUpdate)
+				UpdateServerInfo();
 
 			Antibot()->OnEngineTick();
 

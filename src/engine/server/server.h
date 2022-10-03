@@ -421,11 +421,13 @@ public:
 
 	void ProcessClientPacket(CNetChunk *pPacket);
 
+	bool m_ServerInfoNeedsUpdate;
 	void SendServerInfo(int ClientID);
 	void GenerateServerInfo(CPacker *pPacker, int Token, int Socket);
 	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socket);
 	void UpdateRegisterServerInfo();
-	virtual void UpdateServerInfo(bool Resend = false);
+	void UpdateServerInfo(bool Resend = false);
+	virtual void ExpireServerInfo();
 	const char *GetGameTypeServerInfo();
 
 	void PumpNetwork();
