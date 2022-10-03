@@ -2266,7 +2266,7 @@ void CServer::PumpNetwork()
 					pRegister = m_pRegisterTwo;
 				}
 
-				if (ResponseToken == NET_SECURITY_TOKEN_UNKNOWN && pRegister->OnPacket(&Packet))
+				if (ResponseToken == NET_TOKEN_NONE && pRegister->OnPacket(&Packet))
 					continue;
 
 				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) &&
