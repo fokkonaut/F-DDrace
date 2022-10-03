@@ -275,7 +275,13 @@ public:
 	IEngineMap *m_pMap;
 
 	int64 m_GameStartTime;
-	bool m_RunServer;
+	enum
+	{
+		UNINITIALIZED = 0,
+		RUNNING = 1,
+		STOPPING = 2
+	};
+	int m_RunServer;
 	bool m_MapReload;
 	int m_RconClientID;
 	int m_RconAuthLevel;

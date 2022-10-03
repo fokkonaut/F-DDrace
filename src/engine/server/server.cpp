@@ -27,6 +27,7 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/fifo.h>
 #include <engine/shared/json.h>
+#include <engine/shared/http.h>
 
 #include "register.h"
 #include "server.h"
@@ -331,7 +332,7 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 	m_pGameServer = 0;
 
 	m_CurrentGameTick = 0;
-	m_RunServer = true;
+	m_RunServer = UNINITIALIZED;
 
 	m_pCurrentMapData = 0;
 	m_CurrentMapSize = 0;
@@ -2194,6 +2195,9 @@ void CServer::UpdateRegisterServerInfo()
 
 void CServer::UpdateServerInfo(bool Resend)
 {
+	if (m_RunServer == UNINITIALIZED)
+		return;
+
 	UpdateRegisterServerInfo();
 	if (Resend)
 		SendServerInfo(-1);
@@ -2438,10 +2442,14 @@ void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *
 	m_pMap = pMap;
 	m_pStorage = pStorage;
 	m_pAntibot = pAntibot;
+	HttpInit(m_pStorage);
 }
 
 int CServer::Run()
 {
+	if (m_RunServer == UNINITIALIZED)
+		m_RunServer = RUNNING;
+
 	m_AuthManager.Init(m_pConfig);
 
 	if(Config()->m_Debug)
@@ -2529,7 +2537,7 @@ int CServer::Run()
 		m_GameStartTime = time_get();
 
 		UpdateServerInfo();
-		while(m_RunServer)
+		while(m_RunServer < STOPPING)
 		{
 			// load new map
 			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) //	force reload to make sure the ticks stay within a valid range
@@ -2713,7 +2721,7 @@ int CServer::Run()
 						ServerEmpty = false;
 
 				if(ServerEmpty)
-					m_RunServer = false;
+					m_RunServer = STOPPING;
 			}
 
 			// wait for incoming data
@@ -2893,7 +2901,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
 	str_copy(((CServer*)pUser)->m_NetServer.m_ShutdownMessage, pResult->GetString(0), sizeof(((CServer*)pUser)->m_NetServer.m_ShutdownMessage));
-	((CServer *)pUser)->m_RunServer = false;
+	((CServer *)pUser)->m_RunServer = STOPPING;
 }
 
 void CServer::LogoutClient(int ClientID, const char *pReason)
