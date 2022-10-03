@@ -2154,7 +2154,7 @@ void CServer::UpdateRegisterServerInfo()
 	bool FirstPlayer = true;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
 			// thats why we just send -9999, because it will be displayed as nothing
@@ -2190,7 +2190,8 @@ void CServer::UpdateRegisterServerInfo()
 	str_append(aInfo, "]}", sizeof(aInfo));
 
 	m_pRegister->OnNewInfo(aInfo);
-	m_pRegisterTwo->OnNewInfo("{\"type\":\"0.7-placeholder\"}");
+	if (IsDoubleInfo())
+		m_pRegisterTwo->OnNewInfo("{\"type\":\"0.7-placeholder\"}");
 }
 
 void CServer::UpdateServerInfo(bool Resend)
