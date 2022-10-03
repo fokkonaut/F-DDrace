@@ -142,7 +142,8 @@ bool CNetServer::GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket
 			return m_aSlots[i].m_Connection.m_Sevendown;
 	}
 	
-	int Flags = pBuffer[0]>>4;
+	// connless packets use this now: *pSevendown = (pBuffer[0] & 0x3) != 1;
+	/*int Flags = pBuffer[0]>>4;
 	if (pPacket->m_Flags&2) Flags |= NET_PACKETFLAG_CONNLESS;
 	if (Flags&NET_PACKETFLAG_CONNLESS)
 	{
@@ -151,7 +152,7 @@ bool CNetServer::GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket
 	}
 
 	if (pPacket->m_Flags&NET_PACKETFLAG_CONNLESS && pBuffer[0] != 0xff)
-		return false;
+		return false;*/
 
 	return !(pPacket->m_Flags&1);
 }

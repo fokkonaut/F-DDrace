@@ -307,15 +307,11 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 	}
 
 	// read the packet
-
 	pPacket->m_Flags = (pBuffer[0]&0xfc)>>2;
-		// FFFFFFxx
-
-	if (pNetServer)
-		*pSevendown = pNetServer->GetSevendown(pAddr, pPacket, pBuffer);
 
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
 	{
+		*pSevendown = (pBuffer[0] & 0x3) != 1;
 		int HeaderSize = *pSevendown ? 6 : NET_PACKETHEADERSIZE_CONNLESS;
 		if(Size < HeaderSize)
 		{
@@ -353,6 +349,9 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 	}
 	else
 	{
+		if (pNetServer)
+			*pSevendown = pNetServer->GetSevendown(pAddr, pPacket, pBuffer);
+
 		if(Size - NET_PACKETHEADERSIZE > NET_MAX_PAYLOAD)
 		{
 			if(m_pConfig->m_Debug)
