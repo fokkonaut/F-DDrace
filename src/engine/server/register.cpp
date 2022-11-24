@@ -11,6 +11,9 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <iostream> // for std::cout
+#include <iterator> // for std::size
+
 class CRegister : public IRegister
 {
 	enum
