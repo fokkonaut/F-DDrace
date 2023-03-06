@@ -59,7 +59,7 @@ private:
 
 	virtual void TickDeferred();
 	void CalculateVel();
-	void GetOriginalTunings(float *pCurvature, float *pSpeed, bool TuneZone = false);
+	void GetOriginalTunings(float *pCurvature, float *pSpeed, bool Pure = false);
 	void GetTunings(float *pCurvature, float *pSpeed);
 
 public:

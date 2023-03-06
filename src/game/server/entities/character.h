@@ -263,7 +263,7 @@ private:
 	void DDracePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
-	void SendZoneMsgs();
+	void SendTuneMsg(const char *pMessage);
 	IAntibot *Antibot();
 
 	bool m_SetSavePos;
@@ -277,6 +277,7 @@ private:
 
 public:
 	CGameTeams* Teams();
+	CTuningParams Tuning(int Zone = 0);
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(float Seconds);
@@ -312,6 +313,8 @@ public:
 	int m_Hit;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	LOCKED_TUNES m_LockedTunings;
+	LOCKED_TUNES m_LastLockedTunings;
 	int m_PainSoundTimer;
 	int m_LastMove;
 	int m_StartTime;

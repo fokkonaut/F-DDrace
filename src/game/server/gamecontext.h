@@ -137,6 +137,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
+	LOCKED_TUNES m_vLockedTuning[NUM_TUNEZONES];
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -158,6 +159,9 @@ class CGameContext : public IGameServer
 	static void ConTuneResetZone(IConsole::IResult* pResult, void* pUserData);
 	static void ConTuneSetZoneMsgEnter(IConsole::IResult* pResult, void* pUserData);
 	static void ConTuneSetZoneMsgLeave(IConsole::IResult* pResult, void* pUserData);
+	static void ConTuneLock(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockSetMsgEnter(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwitchOpen(IConsole::IResult* pResult, void* pUserData);
 	static void ConPause(IConsole::IResult* pResult, void* pUserData);	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
@@ -200,8 +204,14 @@ public:
 	IStorage* Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
+	CTuningParams Tuning(int ClientID, int Zone = 0);
 	CTuningParams* TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
+
+	LOCKED_TUNES *LockedTuning() { return &m_vLockedTuning[0]; }
+	bool SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune Tune);
+	void ApplyTuneLock(LOCKED_TUNES *pLockedTunings, int TuneLock);
+	CTuningParams ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNES LockedTunings);
 
 	CGameContext();
 	~CGameContext();
@@ -246,6 +256,7 @@ public:
 	int m_VoteEnforce;
 	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
 	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
+	char m_aaTuneLockMsg[NUM_TUNEZONES][256];
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();
@@ -943,6 +954,10 @@ private:
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDummymode(IConsole::IResult* pResult, void* pUserData);
 	static void ConConnectDefaultDummies(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConForceFlagOwner(IConsole::IResult* pResult, void* pUserData);
 

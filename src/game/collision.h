@@ -150,6 +150,7 @@ public:
 	int IsTCheckpoint(int Index);
 	int IsSpeedup(int Index);
 	int IsTune(int Index);
+	int IsTuneLock(int Index) const;
 	void GetSpeedup(int Index, vec2* Dir, int* Force, int* MaxSpeed);
 	int IsSwitch(int Index);
 	int GetSwitchNumber(int Index);

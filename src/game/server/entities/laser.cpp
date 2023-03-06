@@ -78,11 +78,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if (m_Type == WEAPON_SHOTGUN)
 	{
-		float Strength;
-		if (!m_TuneZone)
-			Strength = GameServer()->Tuning()->m_ShotgunStrength;
-		else
-			Strength = GameServer()->TuningList()[m_TuneZone].m_ShotgunStrength;
+		float Strength = GameServer()->Tuning(m_Owner, m_TuneZone).m_ShotgunStrength;
 
 		static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 		vec2 Vel = IsCharacter ? pChr->Core()->m_Vel : pEnt->GetVel();
@@ -185,10 +181,7 @@ void CLaser::DoBounce()
 			m_Pos = TempPos;
 			m_Dir = normalize(TempDir);
 
-			if (!m_TuneZone)
-				m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning()->m_LaserBounceCost;
-			else
-				m_Energy -= distance(m_From, m_Pos) + GameServer()->TuningList()[m_TuneZone].m_LaserBounceCost;
+			m_Energy -= distance(m_From, m_Pos) + GameServer()->Tuning(m_Owner, m_TuneZone).m_LaserBounceCost;
 
 			if (Res == TILE_TELEINWEAPON && ((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts[z - 1].size())
 			{
@@ -202,11 +195,7 @@ void CLaser::DoBounce()
 				m_WasTele = false;
 			}
 
-			int BounceNum = GameServer()->Tuning()->m_LaserBounceNum;
-			if (m_TuneZone)
-				BounceNum = GameServer()->TuningList()[m_TuneZone].m_LaserBounceNum;
-
-			if (m_Bounces > BounceNum)
+			if (m_Bounces > GameServer()->Tuning(m_Owner, m_TuneZone).m_LaserBounceNum)
 				m_Energy = -1;
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_TeamMask);
@@ -302,12 +291,7 @@ void CLaser::Tick()
 		}
 	}
 
-	float Delay;
-	if (m_TuneZone)
-		Delay = GameServer()->TuningList()[m_TuneZone].m_LaserBounceDelay;
-	else
-		Delay = GameServer()->Tuning()->m_LaserBounceDelay;
-
+	float Delay = GameServer()->Tuning(m_Owner, m_TuneZone).m_LaserBounceDelay;
 	if ((Server()->Tick() - m_EvalTick) > (Server()->TickSpeed() * Delay / 1000.0f))
 		DoBounce();
 }

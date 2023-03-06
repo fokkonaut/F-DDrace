@@ -31,21 +31,9 @@ void CMeteor::Tick()
 		Reset();
 	}
 
-	float Friction;
-	float MaxAccel;
-	float AccelPreserve;
-	if (!m_TuneZone)
-	{
-		Friction = GameServer()->Tuning()->m_MeteorFriction / 1000000.f;
-		MaxAccel = GameServer()->Tuning()->m_MeteorMaxAccel / 1000.f;
-		AccelPreserve = GameServer()->Tuning()->m_MeteorAccelPreserve / 1000.f;
-	}
-	else
-	{
-		Friction = GameServer()->TuningList()[m_TuneZone].m_MeteorFriction / 1000000.f;
-		MaxAccel = GameServer()->TuningList()[m_TuneZone].m_MeteorMaxAccel / 1000.f;
-		AccelPreserve = GameServer()->TuningList()[m_TuneZone].m_MeteorAccelPreserve / 1000.f;
-	}
+	float Friction = GameServer()->Tuning(m_Owner, m_TuneZone).m_MeteorFriction / 1000000.f;
+	float MaxAccel = GameServer()->Tuning(m_Owner, m_TuneZone).m_MeteorMaxAccel / 1000.f;
+	float AccelPreserve = GameServer()->Tuning(m_Owner, m_TuneZone).m_MeteorAccelPreserve / 1000.f;
 
 	if(pChr)
 	{

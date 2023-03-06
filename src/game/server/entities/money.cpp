@@ -91,7 +91,7 @@ void CMoney::Tick()
 
 void CMoney::MoveTo(vec2 Pos, int Radius)
 {
-	float MaxFlySpeed = m_TuneZone ? GameServer()->TuningList()[m_TuneZone].m_MoneyMaxFlySpeed : GameServer()->Tuning()->m_MoneyMaxFlySpeed;
+	float MaxFlySpeed = GameServer()->Tuning(m_Owner, m_TuneZone).m_MoneyMaxFlySpeed;
 	if (MaxFlySpeed <= 0.f)
 		return;
 

@@ -1408,6 +1408,62 @@ void CGameContext::ConConnectDefaultDummies(IConsole::IResult *pResult, void *pU
 	pSelf->ConnectDefaultDummies();
 }
 
+void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	CLockedTune LockedTune(pResult->GetString(1), pResult->GetFloat(2));
+	pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune);
+	pSelf->SendTuningParams(Victim);
+}
+
+void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	if (pResult->NumArguments() > 1)
+	{
+		const char *pParam = pResult->GetString(1);
+		float Value;
+		if (pSelf->m_Tuning.Get(pParam, &Value))
+		{
+			CLockedTune LockedTune(pParam, Value);
+			pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune);
+			pSelf->SendTuningParams(Victim);
+		}
+	}
+	else
+	{
+		pChr->m_LockedTunings.clear();
+		pSelf->SendTuningParams(Victim);
+	}
+}
+
+void CGameContext::ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->GetVictim();
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	char aBuf[256];
+	const char *pName = pSelf->Server()->ClientName(Victim);
+	for(unsigned int i = 0; i < pChr->m_LockedTunings.size(); i++)
+	{
+		str_format(aBuf, sizeof(aBuf), "lock '%s': %s %.2f", pName, pChr->m_LockedTunings[i].m_aParam, pChr->m_LockedTunings[i].m_Value);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+}
+
 void CGameContext::ConSound(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
