@@ -383,6 +383,8 @@ public:
 	bool RateLimitPlayerVote(int ClientID);
 	bool RateLimitPlayerMapVote(int ClientID);
 
+	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
+
 	// F-DDrace
 
 	//dummy
