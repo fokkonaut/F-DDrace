@@ -362,9 +362,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 
-		float Strength;
 		int TuneZone = m_apPlayers[Owner] ? m_apPlayers[Owner]->m_TuneZone : 0;
-		Strength = Tuning(Owner, TuneZone)->m_ExplosionStrength;
+		float Strength = Tuning(Owner, TuneZone)->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if (!(int)Dmg) continue;
