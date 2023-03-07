@@ -2180,6 +2180,7 @@ void CServer::UpdateRegisterServerInfo()
 				"\"country\":%d,"
 				"\"score\":%d,"
 				"\"is_player\":%s"
+				"%s"
 				"}",
 				!FirstPlayer ? "," : "",
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
