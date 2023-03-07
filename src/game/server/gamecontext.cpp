@@ -166,13 +166,13 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientID)
 	return m_apPlayers[ClientID]->GetCharacter();
 }
 
-CTuningParams CGameContext::Tuning(int ClientID, int Zone)
+CTuningParams *CGameContext::Tuning(int ClientID, int Zone)
 {
 	if(GetPlayerChar(ClientID))
 		return GetPlayerChar(ClientID)->Tuning(Zone);
 	if(Zone != 0)
-		return TuningList()[Zone];
-	return m_Tuning;
+		return &TuningList()[Zone];
+	return &m_Tuning;
 }
 
 bool CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune Tune)
@@ -364,7 +364,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 
 		float Strength;
 		int TuneZone = m_apPlayers[Owner] ? m_apPlayers[Owner]->m_TuneZone : 0;
-		Strength = Tuning(Owner, TuneZone).m_ExplosionStrength;
+		Strength = Tuning(Owner, TuneZone)->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if (!(int)Dmg) continue;
@@ -1070,7 +1070,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 	}
 
 	static CTuningParams Tunings;
-	Tunings = Tuning(ClientID, Zone);
+	Tunings = *Tuning(ClientID, Zone);
 
 	// set projectile tunings to normal ones, if they are different in zones for example its handled in CProjectile
 	Tunings.m_GrenadeCurvature = m_Tuning.m_GrenadeCurvature;

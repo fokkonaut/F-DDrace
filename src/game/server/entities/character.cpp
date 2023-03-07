@@ -221,7 +221,7 @@ void CCharacter::HandleJetpack()
 	{
 		if (m_Jetpack)
 		{
-			TakeDamage(Direction * -1.0f * (Tuning().m_JetpackStrength / 100.0f / 6.11f), vec2(0, 0), 0, m_pPlayer->GetCID(), WEAPON_GUN);
+			TakeDamage(Direction * -1.0f * (Tuning()->m_JetpackStrength / 100.0f / 6.11f), vec2(0, 0), 0, m_pPlayer->GetCID(), WEAPON_GUN);
 		}
 	}
 	}
@@ -619,7 +619,7 @@ void CCharacter::FireWeapon()
 						// do unfreeze before takedamage, so that we update the weapon and killer to hammer when we are still in freeze, so we dont reset it
 						pTarget->UnFreeze();
 
-						pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Tuning().m_HammerStrength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+						pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength, Dir * -1, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
 							m_pPlayer->GetCID(), GetActiveWeapon());
 
 						if (m_FreezeHammer)
@@ -634,7 +634,7 @@ void CCharacter::FireWeapon()
 				// if we Hit anything, we have to wait for the reload
 				if (Hits)
 				{
-					m_ReloadTimer = Tuning().m_HammerHitFireDelay * Server()->TickSpeed() / 1000;
+					m_ReloadTimer = Tuning()->m_HammerHitFireDelay * Server()->TickSpeed() / 1000;
 				}
 
 			} break;
@@ -662,7 +662,7 @@ void CCharacter::FireWeapon()
 					}
 					else
 					{
-						int Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? Tuning().m_VanillaGunLifetime : Tuning().m_GunLifetime));
+						int Lifetime = (int)(Server()->TickSpeed() * (m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? Tuning()->m_VanillaGunLifetime : Tuning()->m_GunLifetime));
 
 						new CProjectile
 						(
@@ -699,18 +699,18 @@ void CCharacter::FireWeapon()
 						float a = GetAngle(Direction);
 						a += Spreading[i + 2];
 						float v = 1 - (absolute(i) / (float)ShotSpread);
-						float Speed = mix((float)Tuning().m_ShotgunSpeeddiff, 1.0f, v);
+						float Speed = mix((float)Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
 						new CProjectile(GameWorld(), WEAPON_SHOTGUN,
 							m_pPlayer->GetCID(),
 							ProjStartPos,
 							vec2(cosf(a), sinf(a)) * Speed,
-							(int)(Server()->TickSpeed() * Tuning().m_ShotgunLifetime),
+							(int)(Server()->TickSpeed() * Tuning()->m_ShotgunLifetime),
 							false, false, 0, -1, 0, 0, false);
 					}
 				}
 				else
 				{
-					new CLaser(GameWorld(), m_Pos, Direction, Tuning().m_LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
+					new CLaser(GameWorld(), m_Pos, Direction, Tuning()->m_LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 				}
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask());
@@ -719,7 +719,7 @@ void CCharacter::FireWeapon()
 			case WEAPON_STRAIGHT_GRENADE:
 			case WEAPON_GRENADE:
 			{
-				int Lifetime = (int)(Server()->TickSpeed() * (GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE ? Tuning().m_StraightGrenadeLifetime : Tuning().m_GrenadeLifetime));
+				int Lifetime = (int)(Server()->TickSpeed() * (GetActiveWeapon() == WEAPON_STRAIGHT_GRENADE ? Tuning()->m_StraightGrenadeLifetime : Tuning()->m_GrenadeLifetime));
 
 				new CProjectile
 				(
@@ -745,7 +745,7 @@ void CCharacter::FireWeapon()
 			case WEAPON_TASER:
 			case WEAPON_LASER:
 			{
-				new CLaser(GameWorld(), m_Pos, Direction, Tuning().m_LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
+				new CLaser(GameWorld(), m_Pos, Direction, Tuning()->m_LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
@@ -943,7 +943,7 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_PROJECTILE_RIFLE:
 			{
-				int Lifetime = (int)(Server()->TickSpeed() * Tuning().m_GunLifetime);
+				int Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GunLifetime);
 
 				new CProjectile
 				(
@@ -968,7 +968,7 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_BALL_GRENADE:
 			{
-				int Lifetime = (int)(Server()->TickSpeed() * Tuning().m_GrenadeLifetime);
+				int Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GrenadeLifetime);
 
 				for (int i = 0; i < 7; i++)
 				{
@@ -1078,7 +1078,7 @@ float CCharacter::GetFireDelay(int Weapon)
 		Tune++; // the hammer hit fire delay got inserted inbetween, so we have to go one entry further
 
 	float FireDelay;
-	Tuning().Get(Tune, &FireDelay);
+	Tuning()->Get(Tune, &FireDelay);
 	return FireDelay;
 }
 
@@ -1988,9 +1988,9 @@ int CCharacter::GetDDNetCharacterFlags()
 		Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !Tuning().m_PlayerCollision || (m_Passive && !m_Super))
+	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super))
 		Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !Tuning().m_PlayerHooking || (m_Passive && !m_Super))
+	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super))
 		Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -2265,12 +2265,14 @@ CGameTeams* CCharacter::Teams()
 	return &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams;
 }
 
-CTuningParams CCharacter::Tuning(int Zone)
+CTuningParams *CCharacter::Tuning(int Zone)
 {
 	if (Zone == 0)
 		Zone = m_TuneZone;
 	CTuningParams *pTunings = Zone ? &GameServer()->TuningList()[Zone] : GameServer()->Tuning();
-	return GameServer()->ApplyLockedTunings(*pTunings, m_LockedTunings);
+	static CTuningParams Tuning;
+	Tuning = GameServer()->ApplyLockedTunings(*pTunings, m_LockedTunings);
+	return &Tuning;
 }
 
 IAntibot *CCharacter::Antibot()
@@ -3368,7 +3370,7 @@ void CCharacter::HandleTuneLayer()
 		}
 	}
 
-	m_Core.m_pWorld->m_Tuning = Tuning(); // throw tunings from specific zone into gamecore
+	m_Core.m_pWorld->m_Tuning = *Tuning(); // throw tunings from specific zone into gamecore
 
 	if (m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
