@@ -1557,6 +1557,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/teleporter.h
   entities/trail.cpp
   entities/trail.h
+  entities/treasurechest.cpp
+  entities/treasurechest.h
   entity.cpp
   entity.h
   eventhandler.cpp
