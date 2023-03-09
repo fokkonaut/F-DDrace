@@ -149,7 +149,6 @@ void CLightningLaser::HitCharacter()
 				pChrs->Freeze(3);
 				pChrs->Core()->m_Vel = vec2(0.f, 0.f);
 			}
-			
 		}
 	}
 }
