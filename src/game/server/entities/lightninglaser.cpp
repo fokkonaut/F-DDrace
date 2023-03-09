@@ -17,7 +17,7 @@ CLightningLaser::CLightningLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Directio
 	m_aIDs = (int *)calloc(sizeof(int), m_Count);
 	m_aaPositions = (vec2 **)calloc(sizeof(vec2 *), m_Count);
 	for (int i = 0; i < m_Count; i++)
-    	m_aaPositions[i] = (vec2 *)calloc(POS_COUNT, sizeof(vec2));
+		m_aaPositions[i] = (vec2 *)calloc(POS_COUNT, sizeof(vec2));
 	
 	m_aaPositions[0][POS_START] = Pos;
 	
@@ -36,6 +36,13 @@ CLightningLaser::~CLightningLaser()
 	for (int i = 0; i < m_Count; i++)
 		free(m_aaPositions[i]);
 	free(m_aaPositions);
+}
+
+void CLightningLaser::Reset()
+{
+	GameWorld()->DestroyEntity(this);
+	for(int i = 0; i < m_Count; i ++)
+		Server()->SnapFreeID(m_aIDs[i]);
 }
 
 void CLightningLaser::InitTarget()
@@ -112,13 +119,6 @@ void CLightningLaser::GenerateLights()
 	}
 }
 
-void CLightningLaser::Reset()
-{
-	GameWorld()->DestroyEntity(this);
-	for(int i = 0; i < m_Count; i ++)
-        Server()->SnapFreeID(m_aIDs[i]);
-}
-
 void CLightningLaser::HitCharacter()
 {
 	for(int i = 1; i < m_Count; i ++)
@@ -137,7 +137,7 @@ void CLightningLaser::HitCharacter()
 
 			// hit
 			if(distance(CPoint, pChrs->GetPos()) <= m_Length/2 && !IntersectLine)
-		     	m_aaPositions[i][POS_END] = pChrs->GetPos();
+				m_aaPositions[i][POS_END] = pChrs->GetPos();
 
 			// put next laser to -1, better.
 			if(m_aaPositions[i-1][POS_END] == pChrs->GetPos())
