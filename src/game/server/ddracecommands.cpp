@@ -1433,7 +1433,8 @@ void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData
 	float Value = pResult->GetFloat(2);
 
 	CLockedTune LockedTune(pParam, Value);
-	pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune);
+	if (!pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune))
+		return;
 	pSelf->SendTuningParams(Victim);
 
 	char aBuf[128];
