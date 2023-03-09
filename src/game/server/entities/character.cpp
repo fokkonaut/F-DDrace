@@ -1029,7 +1029,6 @@ void CCharacter::FireWeapon()
 			case WEAPON_LIGHTNING_LASER:
 			{
 				new CLightningLaser(GameWorld(), ProjStartPos, Direction, m_pPlayer->GetCID());
-				m_ReloadTimer = Server()->TickSpeed() / 9;
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
