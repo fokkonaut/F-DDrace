@@ -1314,7 +1314,7 @@ void CGameContext::OnTick()
 	if (Collision()->GetNumAllSwitchers() > 0)
 		for (int i = 0; i < Collision()->GetNumAllSwitchers() + 1; ++i)
 		{
-			for (int j = 0; j < MAX_CLIENTS; ++j)
+			for (int j = 0; j < VANILLA_MAX_CLIENTS; ++j)
 			{
 				// F-DDrace
 				// set current switcher client id to -1 if the player doesnt exist OR it is a non-timed switch and the player is not on the switch anymore

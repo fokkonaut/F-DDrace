@@ -193,7 +193,7 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		for (int i = 0; i < GetNumAllSwitchers() + 1; ++i)
 		{
 			m_pSwitchers[i].m_Initial = true;
-			for (int j = 0; j < MAX_CLIENTS; ++j)
+			for (int j = 0; j < VANILLA_MAX_CLIENTS; ++j)
 			{
 				m_pSwitchers[i].m_Status[j] = true;
 				m_pSwitchers[i].m_EndTick[j] = 0;

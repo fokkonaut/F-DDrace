@@ -178,14 +178,14 @@ public:
 
 	struct SSwitchers
 	{
-		bool m_Status[MAX_CLIENTS];
+		bool m_Status[VANILLA_MAX_CLIENTS];
 		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-		int m_LastUpdateTick[MAX_CLIENTS];
+		int m_EndTick[VANILLA_MAX_CLIENTS];
+		int m_Type[VANILLA_MAX_CLIENTS];
+		int m_LastUpdateTick[VANILLA_MAX_CLIENTS];
 		// F-DDrace
-		int m_ClientID[MAX_CLIENTS];
-		int m_StartTick[MAX_CLIENTS];
+		int m_ClientID[VANILLA_MAX_CLIENTS];
+		int m_StartTick[VANILLA_MAX_CLIENTS];
 	};
 
 	// F-DDrace
