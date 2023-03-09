@@ -78,6 +78,11 @@ public:
 	bool Get(const char *pName, float *pValue) const;
 };
 
+inline vec2 GetDir(float Angle)
+{
+	return vec2(cosf(Angle), sinf(Angle));
+}
+
 inline float GetAngle(vec2 Dir)
 {
 	if (Dir.x == 0 && Dir.y == 0)

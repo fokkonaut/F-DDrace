@@ -6939,6 +6939,8 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Tele Rifle";
 	case WEAPON_PORTAL_BLOCKER:
 		return "Portal Blocker";
+	case WEAPON_LIGHTNING_LASER:
+		return "Lightning Laser";
 	}
 	return "Unknown";
 }
@@ -6971,6 +6973,8 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_LASER;
 	case WEAPON_PORTAL_BLOCKER:
 		return WEAPON_NINJA;
+	case WEAPON_LIGHTNING_LASER:
+		return WEAPON_LASER;
 	}
 	return Weapon;
 }

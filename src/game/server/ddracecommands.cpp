@@ -227,7 +227,8 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		return;
 	}
 
-	int Amount = (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && Weapon != WEAPON_HAMMER && Weapon != WEAPON_TELEKINESIS && Weapon != WEAPON_LIGHTSABER) ? 10 : -1;
+	int Amount = (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && Weapon != WEAPON_HAMMER && Weapon != WEAPON_TELEKINESIS
+		&& Weapon != WEAPON_LIGHTSABER && Weapon != WEAPON_LIGHTNING_LASER) ? 10 : -1;
 
 	bool Spread = Remove ? false : pResult->NumArguments() > 1 + Offset ? pResult->GetInteger(1 + Offset) : Weapon >= 0 ? pChr->m_aSpreadWeapon[Weapon] : false;
 
@@ -864,6 +865,18 @@ void CGameContext::ConUnDrawEditor(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_DRAW_EDITOR, true);
+}
+
+void CGameContext::ConLightningLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LIGHTNING_LASER, false);
+}
+
+void CGameContext::ConUnLightningLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_LIGHTNING_LASER, true);
 }
 
 void CGameContext::ConSetJumps(IConsole::IResult *pResult, void *pUserData)

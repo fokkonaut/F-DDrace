@@ -376,6 +376,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_PORTAL_BLOCKER;
 	}
+	else if (Index == ENTITY_WEAPON_LIGHTNING_LASER)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_LIGHTNING_LASER;
+	}
 	else if (Index == ENTITY_PICKUP_TASER_BATTERY)
 	{
 		Type = POWERUP_BATTERY;

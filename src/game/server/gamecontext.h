@@ -934,6 +934,8 @@ private:
 	static void ConUnTaser(IConsole::IResult* pResult, void* pUserData);
 	static void ConPortalBlocker(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnPortalBlocker(IConsole::IResult* pResult, void* pUserData);
+	static void ConLightningLaser(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnLightningLaser(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnHammer(IConsole::IResult* pResult, void* pUserData);

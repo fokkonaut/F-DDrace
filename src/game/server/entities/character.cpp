@@ -26,6 +26,7 @@
 #include "epic_circle.h"
 #include "staff_ind.h"
 #include "flyingpoint.h"
+#include "lightninglaser.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -413,6 +414,7 @@ void CCharacter::FireWeapon()
 		|| GetActiveWeapon() == WEAPON_PROJECTILE_RIFLE
 		|| GetActiveWeapon() == WEAPON_BALL_GRENADE
 		|| GetActiveWeapon() == WEAPON_TELE_RIFLE
+		|| GetActiveWeapon() == WEAPON_LIGHTNING_LASER
 	)
 		FullAuto = true;
 	if(m_Jetpack && GetActiveWeapon() == WEAPON_GUN)
@@ -1022,6 +1024,15 @@ void CCharacter::FireWeapon()
 					return;
 				}
 
+			} break;
+
+			case WEAPON_LIGHTNING_LASER:
+			{
+				new CLightningLaser(GameWorld(), ProjStartPos, Direction, m_pPlayer->GetCID());
+				m_ReloadTimer = Server()->TickSpeed() / 9;
+
+				if (Sound)
+					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
 		}
 
@@ -4849,8 +4860,8 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
-	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER
-		|| Type == WEAPON_PORTAL_RIFLE || Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_PORTAL_BLOCKER)
+	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_PORTAL_RIFLE
+		|| Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_PORTAL_BLOCKER || Type == WEAPON_LIGHTNING_LASER)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);

@@ -1525,6 +1525,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/lasertext.h
   entities/light.cpp
   entities/light.h
+  entities/lightninglaser.cpp
+  entities/lightninglaser.h
   entities/lightsaber.cpp
   entities/lightsaber.h
   entities/lovely.cpp
