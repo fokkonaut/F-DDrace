@@ -862,14 +862,14 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	Parameters:
 		sock - Socket to use.
 		addr - Pointer to an NETADDR that will receive the address.
-		data - Pointer to a buffer that will receive the data.
-		maxsize - Maximum size to receive.
+		data - Received data. Will be invalidated when this function is
+		called again.
 
 	Returns:
-		On success it returns the number of bytes recived. Returns -1
+		On success it returns the number of bytes received. Returns -1
 		on error.
 */
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize);
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data);
 
 /*
 	Function: net_udp_close

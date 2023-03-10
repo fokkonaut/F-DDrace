@@ -68,12 +68,34 @@ static int num_loggers = 0;
 
 static NETSTATS network_stats = {0};
 
+#define VLEN 128
+#define PACKETSIZE 1400
+typedef struct
+{
+#ifdef CONF_PLATFORM_LINUX
+	int pos;
+	int size;
+	struct mmsghdr msgs[VLEN];
+	struct iovec iovecs[VLEN];
+	char bufs[VLEN][PACKETSIZE];
+	char sockaddrs[VLEN][128];
+#else
+	char buf[PACKETSIZE];
+#endif
+} NETSOCKET_BUFFER;
+
+void net_buffer_init(NETSOCKET_BUFFER *buffer);
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer);
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size);
+
 struct NETSOCKET_INTERNAL
 {
 	int type;
 	int ipv4sock;
 	int ipv6sock;
 	int web_ipv4sock;
+
+	NETSOCKET_BUFFER buffer;
 };
 static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 
@@ -1217,8 +1239,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr, int use_random_port)
 		}
 	}
 
-	/* set non-blocking */
-	net_set_non_blocking(sock);
+	if(socket < 0)
+	{
+		free(sock);
+		sock = nullptr;
+	}
+	else
+	{
+		/* set non-blocking */
+		net_set_non_blocking(sock);
+
+		net_buffer_init(&sock->buffer);
+	}
 
 	/* return */
 	return sock;
@@ -1292,23 +1324,100 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 	return d;
 }
 
-int net_udp_recv(NETSOCKET sock, NETADDR *addr, void *data, int maxsize)
+void net_buffer_init(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	int i;
+	buffer->pos = 0;
+	buffer->size = 0;
+	mem_zero(buffer->msgs, sizeof(buffer->msgs));
+	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
+	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
+	for(i = 0; i < VLEN; ++i)
+	{
+		buffer->iovecs[i].iov_base = buffer->bufs[i];
+		buffer->iovecs[i].iov_len = PACKETSIZE;
+		buffer->msgs[i].msg_hdr.msg_iov = &(buffer->iovecs[i]);
+		buffer->msgs[i].msg_hdr.msg_iovlen = 1;
+		buffer->msgs[i].msg_hdr.msg_name = &(buffer->sockaddrs[i]);
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
+void net_buffer_reinit(NETSOCKET_BUFFER *buffer)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	for(int i = 0; i < VLEN; i++)
+	{
+		buffer->msgs[i].msg_hdr.msg_namelen = sizeof(buffer->sockaddrs[i]);
+	}
+#endif
+}
+
+void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
+{
+#if defined(CONF_PLATFORM_LINUX)
+	*buf = buffer->bufs[0];
+	*size = sizeof(buffer->bufs[0]);
+#else
+	*buf = buffer->buf;
+	*size = sizeof(buffer->buf);
+#endif
+}
+
+int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	char sockaddrbuf[128];
 	socklen_t fromlen;// = sizeof(sockaddrbuf);
 	int bytes = 0;
 
+	#if defined(CONF_PLATFORM_LINUX)
 	if(sock->ipv4sock >= 0)
 	{
-		fromlen = sizeof(struct sockaddr_in);
-		bytes = recvfrom(sock->ipv4sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		if(sock->buffer.pos >= sock->buffer.size)
+		{
+			net_buffer_reinit(&sock->buffer);
+			sock->buffer.size = recvmmsg(sock->ipv4sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
+		}
+	}
+
+	if(sock->ipv6sock >= 0)
+	{
+		if(sock->buffer.pos >= sock->buffer.size)
+		{
+			net_buffer_reinit(&sock->buffer);
+			sock->buffer.size = recvmmsg(sock->ipv6sock, sock->buffer.msgs, VLEN, 0, NULL);
+			sock->buffer.pos = 0;
+		}
+	}
+
+	if(sock->buffer.pos < sock->buffer.size)
+	{
+		sockaddr_to_netaddr((struct sockaddr *)&(sock->buffer.sockaddrs[sock->buffer.pos]), addr);
+		bytes = sock->buffer.msgs[sock->buffer.pos].msg_len;
+		*data = (unsigned char *)sock->buffer.bufs[sock->buffer.pos];
+		sock->buffer.pos++;
+		network_stats.recv_bytes += bytes;
+		network_stats.recv_packets++;
+		return bytes;
+	}
+#else
+	if(sock->ipv4sock >= 0)
+	{
+		socklen_t fromlen = sizeof(struct sockaddr_in);
+		bytes = recvfrom(sock->ipv4sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
 
 	if(bytes <= 0 && sock->ipv6sock >= 0)
 	{
-		fromlen = sizeof(struct sockaddr_in6);
-		bytes = recvfrom(sock->ipv6sock, (char*)data, maxsize, 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		socklen_t fromlen = sizeof(struct sockaddr_in6);
+		bytes = recvfrom(sock->ipv6sock, sock->buffer.buf, sizeof(sock->buffer.buf), 0, (struct sockaddr *)&sockaddrbuf, &fromlen);
+		*data = (unsigned char *)sock->buffer.buf;
 	}
+#endif
 
 	if(bytes > 0)
 	{
