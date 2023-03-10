@@ -118,7 +118,7 @@ CNetBase::CNetBase()
 CNetBase::~CNetBase()
 {
 	for (int i = 0; i < NUM_SOCKETS; i++)
-		if(m_aSocket[i].type != NETTYPE_INVALID)
+		if(NetType(i) != NETTYPE_INVALID)
 			Shutdown();
 }
 
@@ -283,6 +283,9 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 // TODO: rename this function
 int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, CNetServer *pNetServer)
 {
+	if (Socket == 1)
+		return 1;
+
 	int Size = net_udp_recv(m_aSocket[Socket], pAddr, pBuffer, NET_MAX_PACKETSIZE);
 	// no more packets for now
 	if(Size <= 0)

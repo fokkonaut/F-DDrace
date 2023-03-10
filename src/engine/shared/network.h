@@ -238,7 +238,7 @@ public:
 	~CNetBase();
 	CConfig *Config() { return m_pConfig; }
 	class IEngine *Engine() { return m_pEngine; }
-	int NetType(int Socket) { return m_aSocket[Socket].type; }
+	int NetType(int Socket) { return net_socket_type(m_aSocket[Socket]); }
 	
 	void Init(NETSOCKET Socket, NETSOCKET SocketTwo, class CConfig *pConfig, class IConsole *pConsole, class IEngine *pEngine);
 	void Shutdown();

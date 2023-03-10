@@ -26,12 +26,12 @@ bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 
 	// open socket
 	NETSOCKET Socket = net_udp_create(BindAddr, 0);
-	if(!Socket.type)
+	if(!Socket)
 		return false;
 
 	BindAddr.port = pConfig->m_SvPortTwo;
 	NETSOCKET SocketTwo = net_udp_create(BindAddr, 0);
-	if(!SocketTwo.type)
+	if(!SocketTwo)
 		return false;
 
 	// init

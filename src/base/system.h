@@ -703,12 +703,7 @@ int time_isxmasday();
 int time_iseasterday();
 
 /* Group: Network General */
-typedef struct
-{
-	int type;
-	int ipv4sock;
-	int ipv6sock;
-} NETSOCKET;
+typedef struct NETSOCKET_INTERNAL *NETSOCKET;
 
 enum
 {
@@ -721,7 +716,8 @@ enum
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
 	NETTYPE_LINK_BROADCAST = 4,
-	NETTYPE_ALL = NETTYPE_IPV4|NETTYPE_IPV6
+	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6,
+	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
 };
 
 typedef struct
@@ -817,6 +813,17 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 int net_addr_from_str(NETADDR *addr, const char *string);
 
 /* Group: Network UDP */
+
+/*
+	Function: net_socket_type
+		Determine a socket's type.
+	Parameters:
+		sock - Socket whose type should be determined.
+	Returns:
+		The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and
+		`NETTYPE_WEBSOCKET_IPV4`.
+*/
+int net_socket_type(NETSOCKET sock);
 
 /*
 	Function: net_udp_create
