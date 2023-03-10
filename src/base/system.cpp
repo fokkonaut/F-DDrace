@@ -1177,6 +1177,14 @@ NETSOCKET net_udp_create(NETADDR bindaddr, int use_random_port)
 
 			/* set receive buffer size */
 			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
+
+			{
+				/* set DSCP/TOS */
+				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				//int iptos = 46; /* High Priority */
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
+					dbg_msg("socket", "Setting TOS on ipv4 failed: %d", errno);
+			}
 		}
 	}
 
@@ -1199,6 +1207,14 @@ NETSOCKET net_udp_create(NETADDR bindaddr, int use_random_port)
 
 			/* set receive buffer size */
 			setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)&recvsize, sizeof(recvsize));
+
+			{
+				/* set DSCP/TOS */
+				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				//int iptos = 46; /* High Priority */
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
+					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", errno);
+			}
 		}
 	}
 
