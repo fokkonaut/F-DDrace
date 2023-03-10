@@ -283,6 +283,10 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 // TODO: rename this function
 int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, CNetServer *pNetServer)
 {
+	// Don't do it for now, cuz it causes delay unpacking this socket aswell...
+	if (Socket == SOCKET_TWO)
+		return 1;
+
 	int Size = net_udp_recv(m_aSocket[Socket], pAddr, &pBuffer);
 	// no more packets for now
 	if(Size <= 0)
