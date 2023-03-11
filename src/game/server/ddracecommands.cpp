@@ -250,7 +250,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		}
 		if (Weapon == -2 || Weapon == -3)
 		{
-			for (int i = WEAPON_NINJA; i < NUM_WEAPONS; i++)
+			for (int i = NUM_VANILLA_WEAPONS; i < NUM_WEAPONS; i++)
 			{
 				if (i != WEAPON_DRAW_EDITOR)
 					pChr->GiveWeapon(i, Remove, Amount);
