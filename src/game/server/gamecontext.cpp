@@ -7317,6 +7317,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force)
 	pPlayer->KillCharacter(WEAPON_MINIGAME_CHANGE);
 	pPlayer->m_Minigame = Minigame;
 	pPlayer->SetPlaying();
+	pPlayer->m_LastMovementTick = Server()->Tick();
 
 	UpdateHidePlayers();
 

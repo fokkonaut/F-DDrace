@@ -428,6 +428,10 @@ public:
 	int m_RequestedMinigame;
 	int64 m_LastMinigameRequest;
 
+	// minigame afk
+	void MinigameAfkCheck();
+	int m_LastMovementTick;
+
 	// 128p
 	void SendConnect(int FakeID, int ClientID);
 	void SendDisconnect(int FakeID);

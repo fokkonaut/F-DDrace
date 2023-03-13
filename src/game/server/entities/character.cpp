@@ -1278,6 +1278,10 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		}
 	}
 
+	// Specifically only check for movement, not mouse pos change or anything else, for minigame auto leave, which could before be abused with dummy hammer
+	if (pNewInput->m_Direction != m_SavedInput.m_Direction || pNewInput->m_Jump != m_SavedInput.m_Jump)
+		m_pPlayer->m_LastMovementTick = Server()->Tick();
+
 	// check for changes
 	if(mem_comp(&m_SavedInput, pNewInput, sizeof(CNetObj_PlayerInput)) != 0)
 		m_LastAction = Server()->Tick();

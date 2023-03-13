@@ -224,6 +224,7 @@ void CPlayer::Reset()
 		m_aStrongWeakID[i] = 0;
 
 	m_HideDrawings = false;
+	m_LastMovementTick = 0;
 }
 
 void CPlayer::Tick()
@@ -413,6 +414,7 @@ void CPlayer::Tick()
 	}
 
 	MinigameRequestTick();
+	MinigameAfkCheck();
 }
 
 void CPlayer::PostTick()
@@ -2287,6 +2289,25 @@ bool CPlayer::MinigameRequestTick()
 	}
 
 	return false;
+}
+
+void CPlayer::MinigameAfkCheck()
+{
+	if (!IsMinigame() || !GameServer()->Config()->m_SvMinigameAfkAutoLeave)
+		return;
+
+	int TimeLeft = ((m_LastMovementTick + Server()->TickSpeed() * GameServer()->Config()->m_SvMinigameAfkAutoLeave) - Server()->Tick()) / Server()->TickSpeed();
+	if (TimeLeft <= 0)
+	{
+		GameServer()->SetMinigame(m_ClientID, MINIGAME_NONE);
+		GameServer()->SendChatTarget(m_ClientID, "You automatically left the minigame because you were afk for too long");
+	}
+	else if (TimeLeft <= 10 && Server()->Tick() % Server()->TickSpeed() == 0)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Please move within %d seconds or you will leave the minigame", TimeLeft);
+		GameServer()->SendChatTarget(m_ClientID, aBuf);
+	}
 }
 
 bool CPlayer::ShowDDraceHud()
