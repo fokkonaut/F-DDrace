@@ -610,6 +610,7 @@ public:
 	virtual bool IsUniqueAddress(int ClientID);
 	virtual int GetDummy(int ClientID);
 	virtual bool IsDummy(int ClientID1, int ClientID2);
+	virtual bool DummyControlOrCopyMoves(int ClientID);
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

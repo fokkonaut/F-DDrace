@@ -114,6 +114,7 @@ public:
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void ResetInput();
 	bool IsIdle();
+	void UpdateMovementTick(CNetObj_PlayerInput *pNewInput);
 	void FireWeapon();
 
 	void Die(int Weapon = WEAPON_SELF, bool UpdateTeeControl = true, bool OnArenaDie = true);

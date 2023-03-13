@@ -85,6 +85,7 @@ public:
 	virtual bool IsUniqueAddress(int ClientID) = 0;
 	virtual int GetDummy(int ClientID) = 0;
 	virtual bool IsDummy(int ClientID1, int ClientID2) = 0;
+	virtual bool DummyControlOrCopyMoves(int ClientID) = 0;
 
 	virtual void ExpireServerInfo() = 0;
 

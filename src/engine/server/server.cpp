@@ -3761,6 +3761,15 @@ bool CServer::IsDummy(int ClientID1, int ClientID2)
 		&& m_aClients[ClientID1].m_ConnectionID == m_aClients[ClientID2].m_ConnectionID;
 }
 
+bool CServer::DummyControlOrCopyMoves(int ClientID)
+{
+	int Dummy = GetDummy(ClientID);
+	if (Dummy == -1)
+		return false;
+	// if both are not marked as idle, then we can assume copy moves is activated or dummy control is being used (to control dummy independently)
+	return !m_aClients[ClientID].m_IdleDummy && !m_aClients[Dummy].m_IdleDummy;
+}
+
 void CServer::CWebhook::Run()
 {
 	int ret = system(m_aCommand);
