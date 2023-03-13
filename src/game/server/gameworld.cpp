@@ -488,14 +488,28 @@ void CGameWorld::Tick()
 	}
 	else
 	{
+		// process lightning laser before character, so that vel set to vec2(0, 0) will make a chr fall slowly, and make him slightly movable
+		for(CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_LIGHTNING_LASER]; pEnt; )
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			pEnt->Tick();
+			pEnt = m_pNextTraverseEntity;
+		}
+
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
+		{
+			// processed above
+			if (i == ENTTYPE_LIGHTNING_LASER)
+				continue;
+
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 
 		// we need to do this between core tick and Move of all the players, because otherwise its getting jiggly for those whose coretick didnt happen yet
 		for (CCharacter *pChr = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())

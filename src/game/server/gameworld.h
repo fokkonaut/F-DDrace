@@ -40,7 +40,6 @@ public:
 		ENTTYPE_PROJECTILE = 0,
 		ENTTYPE_LASER,
 		ENTTYPE_PICKUP,
-		ENTTYPE_LIGHTNING_LASER, // put lightning laser before character, so that vel set to vec2(0, 0) will make a chr fall slowly, and make him slightly movable
 		ENTTYPE_CHARACTER,
 		ENTTYPE_FLAG,
 
@@ -70,6 +69,7 @@ public:
 		ENTTYPE_ROTATING_BALL,
 		ENTTYPE_STAFF_IND,
 		ENTTYPE_PORTAL_BLOCKER,
+		ENTTYPE_LIGHTNING_LASER,
 
 		NUM_ENTTYPES
 	};
