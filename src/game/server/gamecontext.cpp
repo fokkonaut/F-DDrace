@@ -5211,7 +5211,7 @@ void CGameContext::SetPlotDoorStatus(int PlotID, bool Close)
 		return;
 
 	int Switch = Collision()->GetSwitchByPlot(PlotID);
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
 }
 
@@ -5221,7 +5221,7 @@ void CGameContext::SetPlotDrawDoorStatus(int PlotID, int Door, bool Close)
 		return;
 
 	int Switch = Collision()->GetSwitchByPlotLaserDoor(PlotID, Door);
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
 }
 
