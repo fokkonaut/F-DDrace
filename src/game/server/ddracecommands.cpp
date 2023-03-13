@@ -1189,13 +1189,10 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 	int Dummy = pSelf->Server()->GetDummy(ID);
 	if (Dummy != -1)
 	{
-		if (pSelf->GetClientDDNetVersion(ID) <= VERSION_DDNET_INTENDED_TICK)
-		{
-			if (pSelf->Server()->IsIdleDummy(ID))
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: True");
-			else
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: False");
-		}
+		if (pSelf->Server()->IsIdleDummy(ID))
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: True");
+		else
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: False");
 
 		if (pSelf->Server()->IsDummyHammer(ID))
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");

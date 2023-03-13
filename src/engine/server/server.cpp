@@ -318,6 +318,9 @@ void CServer::CClient::ResetContent()
 	m_IdleDummy = false;
 	m_DummyHammer = false;
 	m_HammerflyMarked = false;
+	for (int i = 0; i < 5; i++)
+		m_aIdleDummyTrack[i] = 0;
+	m_CurrentIdleTrackPos = 0;
 
 	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 	m_Main = true;
@@ -1581,6 +1584,23 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				// dummy copy moves could be detected aswell by checking whether its the idle dummy and then counting inputs a bit, bcs they get sent twice as often with it acitavted
 
 				m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
+			}
+			else
+			{
+				m_aClients[ClientID].m_CurrentIdleTrackPos++;
+				m_aClients[ClientID].m_CurrentIdleTrackPos %= 5;
+
+				// Idle dummy sends input just half as often as the active player
+				m_aClients[ClientID].m_aIdleDummyTrack[m_aClients[ClientID].m_CurrentIdleTrackPos] = (LastAckedSnapshot - m_aClients[ClientID].m_LastAckedSnapshot > 2);
+
+				int Count = 0;
+				for (int i = 0; i < 5; i++)
+					if (m_aClients[ClientID].m_aIdleDummyTrack[i])
+						Count++;
+
+				// 4/5 inputs should be fine to prove this one is idle, cuz also the idle dummy can have a gap of > 2 sometimes
+				// NOTE: this is not 100% reliable all the time + can be dodged by using dummy control on the client side. But in most cases it should be okay-ish
+				m_aClients[ClientID].m_IdleDummy = Count >= 4;
 			}
 
 			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;

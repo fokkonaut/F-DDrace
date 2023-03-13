@@ -206,6 +206,9 @@ public:
 		bool m_HammerflyMarked;
 		int m_LastFire;
 
+		int m_aIdleDummyTrack[5];
+		int m_CurrentIdleTrackPos;
+
 		// design
 		bool m_DesignChange;
 		int m_CurrentMapDesign;
