@@ -1585,9 +1585,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 				m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
 			}
-			
-			// lets just do this for all versions, also the old versions before intended tick got fixed
-			// so that also old versions can be detected for dummycopymoves or dummycontrol
+			else
 			{
 				m_aClients[ClientID].m_CurrentIdleTrackPos++;
 				m_aClients[ClientID].m_CurrentIdleTrackPos %= 5;
