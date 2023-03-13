@@ -180,20 +180,42 @@ void CLightningLaser::Snap(int SnappingClient)
 
 	int Start = (int)max((float)ceil(Percentage * m_Count / 100.f), 1.f);
 
-	CNetObj_Laser **apObjs = (CNetObj_Laser **)calloc(sizeof(CNetObj_Laser *), m_Count);
-	for(int i = Start - 1; i >= 0; i--)
+	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
 	{
-		apObjs[i] = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aIDs[i], sizeof(CNetObj_Laser)));
-		if(!apObjs[i])
-			return;
+		CNetObj_DDNetLaser **apObjs = (CNetObj_DDNetLaser **)calloc(sizeof(CNetObj_DDNetLaser *), m_Count);
+		for(int i = Start - 1; i >= 0; i--)
+		{
+			apObjs[i] = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_aIDs[i], sizeof(CNetObj_DDNetLaser)));
+			if(!apObjs[i])
+				return;
 
-		// POS_END and POS_START reversed
-		apObjs[i]->m_X = (int)m_aaPositions[i][POS_START].x;
-		apObjs[i]->m_Y = (int)m_aaPositions[i][POS_START].y;
-		apObjs[i]->m_FromX = (int)m_aaPositions[i][POS_END].x;
-		apObjs[i]->m_FromY = (int)m_aaPositions[i][POS_END].y;
-		apObjs[i]->m_StartTick = Server()->Tick() + m_StartTick;
+			// POS_END and POS_START reversed
+			apObjs[i]->m_ToX = (int)m_aaPositions[i][POS_START].x;
+			apObjs[i]->m_ToY = (int)m_aaPositions[i][POS_START].y;
+			apObjs[i]->m_FromX = (int)m_aaPositions[i][POS_END].x;
+			apObjs[i]->m_FromY = (int)m_aaPositions[i][POS_END].y;
+			apObjs[i]->m_StartTick = Server()->Tick() + m_StartTick;
+			apObjs[i]->m_Owner = m_Owner;
+			apObjs[i]->m_Type = LASERTYPE_FREEZE;
+		}
+		free(apObjs);
 	}
+	else
+	{
+		CNetObj_Laser **apObjs = (CNetObj_Laser **)calloc(sizeof(CNetObj_Laser *), m_Count);
+		for(int i = Start - 1; i >= 0; i--)
+		{
+			apObjs[i] = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aIDs[i], sizeof(CNetObj_Laser)));
+			if(!apObjs[i])
+				return;
 
-	free(apObjs);
+			// POS_END and POS_START reversed
+			apObjs[i]->m_X = (int)m_aaPositions[i][POS_START].x;
+			apObjs[i]->m_Y = (int)m_aaPositions[i][POS_START].y;
+			apObjs[i]->m_FromX = (int)m_aaPositions[i][POS_END].x;
+			apObjs[i]->m_FromY = (int)m_aaPositions[i][POS_END].y;
+			apObjs[i]->m_StartTick = Server()->Tick() + m_StartTick;
+		}
+		free(apObjs);
+	}
 }
