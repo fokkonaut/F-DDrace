@@ -1196,8 +1196,6 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 
 		if (pSelf->Server()->IsDummyHammer(ID))
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");
-		if (pSelf->Server()->DummyControlOrCopyMoves(ID))
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Copy moves/dummy control: True");
 	}
 
 	// then character vars

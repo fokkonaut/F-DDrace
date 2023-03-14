@@ -154,7 +154,6 @@ public:
 		public:
 			int m_aData[MAX_INPUT_SIZE];
 			int m_GameTick; // the tick that was chosen for the input
-			bool m_HammerflyMarked;
 		};
 
 		// connection state info
@@ -199,15 +198,9 @@ public:
 
 		// dummy
 		bool m_IdleDummy;
-		int m_LastIntendedTick;
+		int m_LastIdleDummyTick;
 		bool m_DummyHammer;
 		bool m_Main;
-
-		bool m_HammerflyMarked;
-		int m_LastFire;
-
-		int m_aIdleDummyTrack[5];
-		int m_CurrentIdleTrackPos;
 
 		// design
 		bool m_DesignChange;
@@ -570,7 +563,6 @@ public:
 
 	virtual bool IsMain(int ClientID) { return m_aClients[ClientID].m_Main; }
 	virtual bool DesignChanging(int ClientID) { return m_aClients[ClientID].m_DesignChange; }
-	virtual bool HammerflyMarked(int ClientID) { return m_aClients[ClientID].m_HammerflyMarked; }
 	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
 	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
@@ -610,7 +602,6 @@ public:
 	virtual bool IsUniqueAddress(int ClientID);
 	virtual int GetDummy(int ClientID);
 	virtual bool IsDummy(int ClientID1, int ClientID2);
-	virtual bool DummyControlOrCopyMoves(int ClientID);
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

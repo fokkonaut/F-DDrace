@@ -1339,15 +1339,9 @@ void CCharacter::UpdateMovementTick(CNetObj_PlayerInput *pNewInput)
 	// Specifically only check for movement, not mouse pos change or anything else, for minigame auto leave, which could before be abused with dummy hammer
 	if (pNewInput->m_Direction == m_SavedInput.m_Direction && pNewInput->m_Jump == m_SavedInput.m_Jump)
 		return;
-
-	// dont update when the dummy is idle (this is basically only to catch dummy control when an input happens, at that time the function below would return false still
+	// dont update when the dummy is idle
 	if (Server()->IsIdleDummy(m_pPlayer->GetCID()))
 		return;
-
-	// Don't update when dummy copy is activated or dummy control has been used
-	if (Server()->DummyControlOrCopyMoves(m_pPlayer->GetCID()))
-		return;
-
 	m_pPlayer->m_LastMovementTick = Server()->Tick();
 }
 

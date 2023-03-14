@@ -317,14 +317,9 @@ void CServer::CClient::ResetContent()
 	m_PgscState = CClient::PGSC_STATE_NONE;
 	m_IdleDummy = false;
 	m_DummyHammer = false;
-	m_HammerflyMarked = false;
-	for (int i = 0; i < 5; i++)
-		m_aIdleDummyTrack[i] = 0;
-	m_CurrentIdleTrackPos = 0;
-
-	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
+	m_LastIdleDummyTick = 0;
 	m_Main = true;
-
+	str_copy(m_aLanguage, "none", sizeof(m_aLanguage));
 	m_Rejoining = false;
 }
 
@@ -1578,30 +1573,22 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if (m_aClients[ClientID].m_DDNetVersion <= VERSION_DDNET_INTENDED_TICK)
 			{
 				// This does also apply when dummy hammer or dummy copy moves is activated, the "idle" dummy will always send the intended tick of before the swap
-				m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIntendedTick == IntendedTick);
-				// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
-				m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
-				// dummy copy moves could be detected aswell by checking whether its the idle dummy and then counting inputs a bit, bcs they get sent twice as often with it acitavted
-
-				m_aClients[ClientID].m_LastIntendedTick = IntendedTick;
+				m_aClients[ClientID].m_IdleDummy = (m_aClients[ClientID].m_LastIdleDummyTick == IntendedTick);
+				m_aClients[ClientID].m_LastIdleDummyTick = IntendedTick;
 			}
 			else
 			{
-				m_aClients[ClientID].m_CurrentIdleTrackPos++;
-				m_aClients[ClientID].m_CurrentIdleTrackPos %= 5;
-
-				// Idle dummy sends input just half as often as the active player
-				m_aClients[ClientID].m_aIdleDummyTrack[m_aClients[ClientID].m_CurrentIdleTrackPos] = (LastAckedSnapshot - m_aClients[ClientID].m_LastAckedSnapshot > 2);
-
-				int Count = 0;
-				for (int i = 0; i < 5; i++)
-					if (m_aClients[ClientID].m_aIdleDummyTrack[i])
-						Count++;
-
-				// 4/5 inputs should be fine to prove this one is idle, cuz also the idle dummy can have a gap of > 2 sometimes
-				// NOTE: this is not 100% reliable all the time + can be dodged by using dummy control on the client side. But in most cases it should be okay-ish
-				m_aClients[ClientID].m_IdleDummy = Count >= 4;
+				// The currently active dummy will always send the input first for in a given tick
+				// means, we check the lastinputprocesstick of the other one, to see if there has been an input packet already in this tick. if yes, we are the idle one
+				int Dummy = GetDummy(ClientID);
+				if (Dummy != -1)
+					m_aClients[ClientID].m_IdleDummy = (m_aClients[Dummy].m_LastIdleDummyTick == Tick());
+				m_aClients[ClientID].m_LastIdleDummyTick = m_CurrentGameTick;
+				dbg_msg("hi", "cid: %d tick: %d idle: %d", ClientID, Tick(), (int)m_aClients[ClientID].m_IdleDummy);
 			}
+
+			// During dummy hammerfly inputs are not sent except on the hammer thus leading to big gaps inbetween the last lastackedsnapshots
+			m_aClients[ClientID].m_DummyHammer = (m_aClients[ClientID].m_IdleDummy && LastAckedSnapshot > m_aClients[ClientID].m_LastAckedSnapshot + 20);
 
 			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
@@ -1642,24 +1629,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			m_aClients[ClientID].m_CurrentInput++;
 			m_aClients[ClientID].m_CurrentInput %= 200;
-
-			// new way of checking for hammerfly since dummy intended tick got fixed
-			if (m_aClients[ClientID].m_DDNetVersion > VERSION_DDNET_INTENDED_TICK)
-			{
-				CNetObj_PlayerInput *pPlayerInput = (CNetObj_PlayerInput *)m_aClients[ClientID].m_LatestInput.m_aData;
-				if (m_aClients[ClientID].m_HammerflyMarked)
-				{
-					m_aClients[ClientID].m_DummyHammer = (pPlayerInput->m_Fire == m_aClients[ClientID].m_LastFire + 2);
-					if (!m_aClients[ClientID].m_DummyHammer)
-						m_aClients[ClientID].m_HammerflyMarked = false;
-				}
-				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0 && pPlayerInput->m_Fire != m_aClients[ClientID].m_LastFire)
-				{
-					m_aClients[ClientID].m_HammerflyMarked = true;
-				}
-
-				m_aClients[ClientID].m_LastFire = pPlayerInput->m_Fire;
-			}
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
@@ -3759,15 +3728,6 @@ bool CServer::IsDummy(int ClientID1, int ClientID2)
 		return false;
 	return net_addr_comp(m_NetServer.ClientAddr(ClientID1), m_NetServer.ClientAddr(ClientID2), false) == 0
 		&& m_aClients[ClientID1].m_ConnectionID == m_aClients[ClientID2].m_ConnectionID;
-}
-
-bool CServer::DummyControlOrCopyMoves(int ClientID)
-{
-	int Dummy = GetDummy(ClientID);
-	if (Dummy == -1)
-		return false;
-	// if both are not marked as idle, then we can assume copy moves is activated or dummy control is being used (to control dummy independently)
-	return !m_aClients[ClientID].m_IdleDummy && !m_aClients[Dummy].m_IdleDummy;
 }
 
 void CServer::CWebhook::Run()

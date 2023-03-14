@@ -65,7 +65,6 @@ public:
 	virtual bool IsSevendown(int ClientID) = 0;
 	virtual bool IsIdleDummy(int ClientID) = 0;
 	virtual bool IsDummyHammer(int ClientID) = 0;
-	virtual bool HammerflyMarked(int ClientID) = 0;
 	virtual bool DesignChanging(int ClientID) = 0;
 	virtual bool IsMain(int ClientID) = 0;
 	virtual const char *GetLanguage(int ClientID) = 0;
@@ -85,7 +84,6 @@ public:
 	virtual bool IsUniqueAddress(int ClientID) = 0;
 	virtual int GetDummy(int ClientID) = 0;
 	virtual bool IsDummy(int ClientID1, int ClientID2) = 0;
-	virtual bool DummyControlOrCopyMoves(int ClientID) = 0;
 
 	virtual void ExpireServerInfo() = 0;
 
