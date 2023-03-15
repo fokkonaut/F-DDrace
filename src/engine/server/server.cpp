@@ -560,7 +560,7 @@ int CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "client_id is not valid");
 	dbg_assert(pInfo != 0, "info can not be null");
 
-	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+	if(m_aClients[ClientID].m_State == CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_DUMMY)
 	{
 		pInfo->m_pName = m_aClients[ClientID].m_aName;
 		pInfo->m_Latency = m_aClients[ClientID].m_Latency;
@@ -4420,6 +4420,8 @@ void CServer::DummyJoin(int DummyID)
 	};
 
 	m_NetServer.DummyInit(DummyID);
+	m_aClients[DummyID].Reset();
+	m_aClients[DummyID].ResetContent();
 	m_aClients[DummyID].m_State = CClient::STATE_DUMMY;
 	m_aClients[DummyID].m_Authed = AUTHED_NO;
 	m_aClients[DummyID].m_Sevendown = false;
@@ -4433,6 +4435,7 @@ void CServer::DummyLeave(int DummyID)
 {
 	GameServer()->OnClientDrop(DummyID, "");
 	m_aClients[DummyID].m_Snapshots.PurgeAll();
+	m_aClients[DummyID].Reset();
 	m_aClients[DummyID].ResetContent();
 	m_NetServer.DummyDelete(DummyID);
 }
