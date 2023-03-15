@@ -95,4 +95,7 @@ MACRO_TUNING_PARAM(MeteorMaxAccel, meteor_max_accel, 2000, "Max meteor accelerat
 MACRO_TUNING_PARAM(MeteorAccelPreserve, meteor_accel_preserve, 100000, "How much acceleration is preserved with growing distance to the player")
 
 MACRO_TUNING_PARAM(MoneyMaxFlySpeed, money_max_fly_speed, 3, "Fly speed for following or merging money drops")
+
+MACRO_TUNING_PARAM(LightningLaserCount, lightning_laser_count, 7, "Number of lasers used for the lightning laser (min: 1)")
+MACRO_TUNING_PARAM(LightningLaserLength, lightning_laser_length, 70, "Length of lasers used for the lightning laser (min: 1)")
 #endif

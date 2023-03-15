@@ -11,8 +11,10 @@ CLightningLaser::CLightningLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Directio
 	m_StartTick = -2.5f;
 
 	m_Lifespan  = m_StartLifespan = Server()->TickSpeed() / 5; // timer for the laser
-	m_Count = Config()->m_SvLightningLaserCount;
-	m_Length = Config()->m_SvLightningLaserLength;
+
+	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
+	m_Count = max(1, (int)GameServer()->Tuning(m_Owner, m_TuneZone)->m_LightningLaserCount);
+	m_Length = max(1, (int)GameServer()->Tuning(m_Owner, m_TuneZone)->m_LightningLaserLength);
 
 	m_aIDs = (int *)calloc(sizeof(int), m_Count);
 	m_aaPositions = (vec2 **)calloc(sizeof(vec2 *), m_Count);

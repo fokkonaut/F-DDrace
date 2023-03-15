@@ -245,10 +245,6 @@ MACRO_CONFIG_INT(SvEditorPresetLevel, sv_editor_preset_level, AUTHED_ADMIN, AUTH
 // taser battery
 MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFLAG_SERVER, "Time in minutes a taser battery respawns after pickup", AUTHED_ADMIN)
 
-// lightning laser
-MACRO_CONFIG_INT(SvLightningLaserCount, sv_lightning_laser_count, 7, 1, 20, CFGFLAG_SERVER, "Number of lasers used for the lightning laser", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvLightningLaserLength, sv_lightning_laser_length, 70, 1, 200, CFGFLAG_SERVER, "Length of lasers used for the lightning laser", AUTHED_ADMIN)
-
 // snake
 MACRO_CONFIG_INT(SvSnakeAutoMove, sv_snake_auto_move, 1, 0, 1, CFGFLAG_SERVER, "Whether snake keeps last input or can stand still if no inputs applied", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSnakeSpeed, sv_snake_speed, 4, 1, 50, CFGFLAG_SERVER, "Snake blocks per second speed", AUTHED_ADMIN)

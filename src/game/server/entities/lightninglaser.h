@@ -44,6 +44,7 @@ class CLightningLaser : public CEntity
 	int *m_aIDs;
 	vec2 **m_aaPositions;
 
+	int m_TuneZone;
 	int m_Count;
 	int m_Length;
 	
