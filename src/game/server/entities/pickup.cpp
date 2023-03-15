@@ -468,7 +468,7 @@ void CPickup::Snap(int SnappingClient)
 			pLaser->m_FromY = round_to_int(m_Pos.y - 30);
 			pLaser->m_StartTick = Server()->Tick();
 			pLaser->m_Owner = -1;
-			pLaser->m_Type = m_Subtype == WEAPON_TASER ? LASERTYPE_FREEZE : m_Subtype == WEAPON_PORTAL_BLOCKER ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
+			pLaser->m_Type = (m_Subtype == WEAPON_TASER || m_Subtype == WEAPON_LIGHTNING_LASER) ? LASERTYPE_FREEZE : m_Subtype == WEAPON_PORTAL_BLOCKER ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
 		}
 		else
 		{
