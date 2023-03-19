@@ -292,7 +292,7 @@ void CCharacterCore::Tick(bool UseInput)
 				for (int i = 0; i < 2; i++)
 				{
 					vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
-					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 40.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
+					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 32.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
 					{
 						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
 						m_HookState = HOOK_GRABBED;
