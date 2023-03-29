@@ -205,4 +205,5 @@ CONSOLE_COMMAND("acc_disable", "s[username]", CFGFLAG_SERVER, ConAccDisable, thi
 CONSOLE_COMMAND("acc_info", "s[username]", CFGFLAG_SERVER, ConAccInfo, this, "Shows information about account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_add_euros", "s[username] i[amount]", CFGFLAG_SERVER, ConAccAddEuros, this, "Adds i euros to account s", AUTHED_ADMIN)
 CONSOLE_COMMAND("acc_edit", "s[username] s[variable] ?r[value]", CFGFLAG_SERVER, ConAccEdit, this, "Prints or changes the value of account variable", AUTHED_ADMIN)
+CONSOLE_COMMAND("acc_level_needed_xp", "i[level]", CFGFLAG_SERVER, ConAccLevelNeededXP, this, "Shows how much XP is required to reach level i", AUTHED_ADMIN)
 #undef CONSOLE_COMMAND

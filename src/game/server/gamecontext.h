@@ -1014,6 +1014,7 @@ private:
 	static void ConAccInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccAddEuros(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccEdit(IConsole::IResult* pResult, void* pUserData);
+	static void ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);

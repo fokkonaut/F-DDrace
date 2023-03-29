@@ -1754,6 +1754,21 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		pSelf->Logout(ID);
 }
 
+void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Level = pResult->GetInteger(0);
+	if (Level <= 0)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid level");
+		return;
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Required XP to reach level %d: %lld", Level, pSelf->GetNeededXP(Level - 1));
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
