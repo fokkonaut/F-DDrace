@@ -11,8 +11,14 @@ void CSnake::Init(CCharacter *pChr)
 {
 	m_pCharacter = pChr;
 	m_Active = false;
+	Reset();
+}
+
+void CSnake::Reset()
+{
 	m_MoveLifespan = 0;
 	m_Dir = vec2(0, 0);
+	m_WantedDir = vec2(0, 0);
 }
 
 bool CSnake::Active()
@@ -26,8 +32,7 @@ bool CSnake::SetActive(bool Active)
 		return false;
 
 	m_Active = Active;
-	m_MoveLifespan = 0;
-	m_Dir = vec2(0, 0);
+	Reset();
 
 	if (m_Active)
 	{
@@ -98,15 +103,18 @@ bool CSnake::HandleInput()
 
 	if (Dir != vec2(0, 0) && (!(Dir.x && Dir.y) || GameServer()->Config()->m_SvSnakeDiagonal))
 	{
-		m_Dir = Dir;
+		m_WantedDir = Dir;
 	}
 	else if (!GameServer()->Config()->m_SvSnakeAutoMove)
 	{
-		m_Dir = vec2(0, 0);
-		return false;
+		m_WantedDir = vec2(0, 0);
 	}
 
 	if (m_MoveLifespan > 0)
+		return false;
+
+	m_Dir = m_WantedDir;
+	if (m_Dir == vec2(0, 0))
 		return false;
 
 	m_MoveLifespan = Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed;
