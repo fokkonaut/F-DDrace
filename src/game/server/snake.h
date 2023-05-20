@@ -17,6 +17,7 @@ class CSnake
 	bool m_Active;
 	int m_MoveLifespan;
 	vec2 m_Dir;
+	vec2 m_PrevLastPos;
 
 	struct SSnakeInput
 	{

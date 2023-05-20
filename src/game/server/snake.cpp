@@ -111,6 +111,7 @@ bool CSnake::HandleInput()
 
 	m_MoveLifespan = Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed;
 
+	m_PrevLastPos = m_vSnake[m_vSnake.size() - 1].m_Pos;
 	if (m_vSnake.size() > 1)
 		for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
 			m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
@@ -151,10 +152,20 @@ void CSnake::AddNewTees()
 
 void CSnake::UpdateTees()
 {
+	float Amount = (float)m_MoveLifespan / (Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed);
 	for (unsigned int i = 0; i < m_vSnake.size(); i++)
 	{
 		m_vSnake[i].m_pChr->Core()->m_Vel = vec2(0, 0);
-		m_vSnake[i].m_pChr->Core()->m_Pos = m_vSnake[i].m_Pos;
+		if (GameServer()->Config()->m_SvSnakeSmooth)
+		{
+			vec2 PrevPos = i == (m_vSnake.size() - 1) ? m_PrevLastPos : m_vSnake[i + 1].m_Pos;
+			vec2 NewPos = vec2(mix(m_vSnake[i].m_Pos.x, PrevPos.x, Amount), mix(m_vSnake[i].m_Pos.y, PrevPos.y, Amount));
+			m_vSnake[i].m_pChr->Core()->m_Pos = NewPos;
+		}
+		else
+		{
+			m_vSnake[i].m_pChr->Core()->m_Pos = m_vSnake[i].m_Pos;
+		}
 	}
 }
 
