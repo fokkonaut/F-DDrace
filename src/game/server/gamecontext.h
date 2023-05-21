@@ -871,6 +871,7 @@ private:
 	static void Con1VS1(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConResumeMoved(IConsole::IResult* pResult, void* pUserData);
+	static void ConWeapon(IConsole::IResult* pResult, void* pUserData);
 	static void ConMutePlayer(IConsole::IResult* pResult, void* pUserData);
 	static void ConDesign(IConsole::IResult* pResult, void* pUserData);
 	static void ConLanguage(IConsole::IResult* pResult, void* pUserData);
