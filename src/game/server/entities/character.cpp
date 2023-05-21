@@ -381,12 +381,8 @@ void CCharacter::HandleWeaponSwitch()
 	if(m_LatestInput.m_WantedWeapon)
 		WantedWeapon = m_Input.m_WantedWeapon-1;
 
-	dbg_msg("hi", "%d %d %d %d", WantedWeapon, GetActiveWeapon(), m_SkipWantedWeapon, m_QueuedWeapon);
-	if (m_QueuedWeapon == -1 && WantedWeapon == GameServer()->GetWeaponType(GetActiveWeapon()))
-		m_SkipWantedWeapon = false;
-
 	// check for insane values
-	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != GameServer()->GetWeaponType(GetActiveWeapon()) && m_aWeapons[WantedWeapon].m_Got && !m_SkipWantedWeapon)
+	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != GetActiveWeapon() && m_aWeapons[WantedWeapon].m_Got)
 		m_QueuedWeapon = WantedWeapon;
 
 	DoWeaponSwitch();
@@ -3858,7 +3854,6 @@ void CCharacter::FDDraceInit()
 		m_aUntranslatedID[i] = Server()->SnapNewID();
 
 	m_pPortalBlocker = 0;
-	m_SkipWantedWeapon = false;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)

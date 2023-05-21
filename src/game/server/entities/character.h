@@ -552,8 +552,6 @@ public:
 	// true if the character is constantly getting freezed by Freeze() function, e.g. on a freeze tile or while deepfrozen
 	bool m_IsFrozen;
 
-	bool m_SkipWantedWeapon;
-
 	void OnPlayerHook();
 	void ReleaseHook(bool Other = true);
 

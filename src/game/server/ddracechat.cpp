@@ -2619,23 +2619,6 @@ void CGameContext::ConResumeMoved(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer resume from pause if your tee gets moved");
 }
 
-void CGameContext::ConWeapon(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int ClientID = pResult->m_ClientID;
-	CCharacter *pChr = pSelf->GetPlayerChar(ClientID);
-	if (!pChr)
-		return;
-	int Weapon = pResult->GetInteger(0);
-	pChr->SetQueuedWeapon(Weapon);
-	int Type = pSelf->GetWeaponType(Weapon);
-	if (Type != WEAPON_NINJA)
-		pSelf->SendWeaponPickup(ClientID, Type);
-	pChr->m_SkipWantedWeapon = true;
-
-	pSelf->Config()->m_SvTestingCommands = 1;
-}
-
 void CGameContext::ConMutePlayer(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
