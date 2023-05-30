@@ -574,6 +574,7 @@ public:
 	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
 	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
 	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
+	virtual int NumClients();
 	bool IsDoubleInfo();
 
 	class CTranslateChat : public IJob

@@ -87,6 +87,14 @@ private:
 
 	struct PlayerMap
 	{
+		enum SSeeOthers {
+			STATE_NONE = -1,
+			STATE_PAGE_FIRST,
+			STATE_PAGE_SECOND,
+
+			MAX_NUM_SEE_OTHERS = 34,
+		};
+
 		void Init(int ClientID, CGameWorld *pGameWorld);
 		void InitPlayer(bool Rejoin);
 		CGameWorld *m_pGameWorld;
@@ -102,6 +110,16 @@ private:
 		void Add(int MapID, int ClientID);
 		int Remove(int MapID);
 		void InsertNextEmpty(int ClientID);
+		int GetMapSize() { return VANILLA_MAX_CLIENTS - m_NumReserved; }
+		// See others
+		int m_SeeOthersState;
+		int m_TotalOverhang;
+		int m_NumSeeOthers;
+		bool m_aWasSeeOthers[MAX_CLIENTS];
+		void DoSeeOthers();
+		void CycleSeeOthers();
+		void UpdateSeeOthers();
+		void ResetSeeOthers();
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);
 
@@ -118,6 +136,13 @@ public:
 	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
+
+	int GetSeeOthersID(int ClientID);
+	void DoSeeOthers(int ClientID);
+	void ResetSeeOthers(int ClientID);
+	int GetTotalOverhang(int ClientID);
+	int GetSeeOthersInd(int ClientID, int MapID);
+	const char *GetSeeOthersName(int ClientID);
 
 	CGameWorld();
 	~CGameWorld();

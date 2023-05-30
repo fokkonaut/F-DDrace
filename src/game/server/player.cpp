@@ -757,9 +757,51 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
-	if (!Server()->IsSevendown(m_ClientID))
-		return;
+	// see others in spec
+	int SeeOthersID = GameServer()->m_World.GetSeeOthersID(m_ClientID);
 
+	if (!Server()->IsSevendown(m_ClientID))
+	{
+		if (GameServer()->m_World.GetTotalOverhang(m_ClientID))
+		{
+			CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, SeeOthersID, sizeof(CNetObj_PlayerInfo)));
+			if(!pPlayerInfo)
+				return;
+
+			pPlayerInfo->m_PlayerFlags = 0;
+			pPlayerInfo->m_Score = m_ScoreMode == SCORE_TIME ? -9999 : -1;
+			pPlayerInfo->m_Latency = 0;
+		}
+
+		// nothing more to process in fake snap for 0.7
+		return;
+	}
+
+	// see others
+	if (GameServer()->m_World.GetTotalOverhang(m_ClientID))
+	{
+		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETOBJTYPES, SeeOthersID, 17*4); // NETOBJTYPE_CLIENTINFO
+		if(!pClientInfo)
+			return;
+
+		StrToInts(&pClientInfo[0], 4, GameServer()->m_World.GetSeeOthersName(m_ClientID));
+		StrToInts(&pClientInfo[4], 3, "");
+		StrToInts(&pClientInfo[8], 6, "default");
+		pClientInfo[14] = 1;
+		pClientInfo[15] = pClientInfo[16] = 6618880;
+
+		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, SeeOthersID, 5*4));
+		if (!pPlayerInfo)
+			return;
+
+		((int*)pPlayerInfo)[0] = 0;
+		((int*)pPlayerInfo)[1] = SeeOthersID;
+		((int*)pPlayerInfo)[2] = TEAM_BLUE;
+		((int*)pPlayerInfo)[3] = m_ScoreMode == SCORE_TIME ? -9999 : -1;
+		((int*)pPlayerInfo)[4] = 0;
+	}
+
+	// empty name to say chat messages
 	int FakeID = VANILLA_MAX_CLIENTS - 1;
 
 	int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETOBJTYPES, FakeID, 17*4); // NETOBJTYPE_CLIENTINFO
@@ -770,6 +812,7 @@ void CPlayer::FakeSnap()
 	StrToInts(&pClientInfo[4], 3, "");
 	StrToInts(&pClientInfo[8], 6, "default");
 
+	// flags
 	if (!GameServer()->FlagsUsed())
 		return;
 
@@ -1179,11 +1222,13 @@ bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
 				if (!m_pSpecFlag)
 					return false;
 				m_SpecMode = SpecMode;
+				GameServer()->m_World.ResetSeeOthers(m_ClientID);
 				return true;
 			}
 			m_pSpecFlag = 0;
 			m_SpecMode = SpecMode;
 			m_SpectatorID = SpectatorID;
+			GameServer()->m_World.ResetSeeOthers(m_ClientID);
 			return true;
 		}
 	}
@@ -1549,6 +1594,11 @@ int CPlayer::Pause(int State, bool Force)
 				m_pCharacter->SetTeeControlCursor();
 			else
 				m_pCharacter->RemoveTeeControlCursor();
+		}
+
+		if (m_Paused == PAUSE_NONE)
+		{
+			GameServer()->m_World.ResetSeeOthers(m_ClientID);
 		}
 	}
 

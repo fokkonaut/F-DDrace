@@ -189,18 +189,187 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
+int CGameWorld::GetSeeOthersID(int ClientID)
+{
+	// 0.7 or if no flags been used on the map
+	if (!Server()->IsSevendown(ClientID) || !GameServer()->FlagsUsed())
+		return VANILLA_MAX_CLIENTS - 2;
+	// 0.6 AND flags
+	return SPEC_SELECT_FLAG_BLUE - 1;
+}
+
+void CGameWorld::DoSeeOthers(int ClientID)
+{
+	m_aMap[ClientID].DoSeeOthers();
+}
+
+void CGameWorld::ResetSeeOthers(int ClientID)
+{
+	m_aMap[ClientID].ResetSeeOthers();
+}
+
+int CGameWorld::GetTotalOverhang(int ClientID)
+{
+	return m_aMap[ClientID].m_TotalOverhang;
+}
+
 void CGameWorld::UpdatePlayerMap(int ClientID)
 {
 	if (ClientID == -1)
 	{
-		if (Server()->Tick() % Config()->m_SvMapUpdateRate == 0)
-			for (int i = 0; i < MAX_CLIENTS; i++)
+		bool Update = Server()->Tick() % Config()->m_SvMapUpdateRate == 0;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			// Calculate overhang every tick, not only when the map updates
+			int Overhang = max(0, Server()->NumClients() - m_aMap[i].GetMapSize());
+			if (Overhang != m_aMap[i].m_TotalOverhang)
+			{
+				m_aMap[i].m_TotalOverhang = Overhang;
+				if (m_aMap[i].m_TotalOverhang <= 0 && m_aMap[i].m_SeeOthersState != PlayerMap::SSeeOthers::STATE_NONE)
+					m_aMap[i].ResetSeeOthers();
+
+				m_aMap[i].UpdateSeeOthers();
+				m_aMap[i].m_UpdateTeamsState = true;
+			}
+
+			if (Update)
+			{
 				m_aMap[i].Update();
+			}
+		}
 	}
 	else
 	{
 		m_aMap[ClientID].Update();
 	}
+}
+
+int CGameWorld::GetSeeOthersInd(int ClientID, int MapID)
+{
+	if (m_aMap[ClientID].m_TotalOverhang && MapID == GetSeeOthersID(ClientID))
+		return 25;
+	if (m_aMap[ClientID].m_NumSeeOthers && MapID >= m_aMap[ClientID].GetMapSize() - m_aMap[ClientID].m_NumSeeOthers)
+		return 24;
+	return -1;
+}
+
+const char *CGameWorld::GetSeeOthersName(int ClientID)
+{
+	static char aName[MAX_NAME_LENGTH];
+	int State = m_aMap[ClientID].m_SeeOthersState;
+	const char *pDot = "\xe2\x8b\x85";
+
+	if (State == PlayerMap::SSeeOthers::STATE_PAGE_FIRST)
+	{
+		if (m_aMap[ClientID].m_TotalOverhang > PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS)
+			str_format(aName, sizeof(aName), "%s 1/2", pDot);
+		else
+			str_format(aName, sizeof(aName), "%s Close", pDot);
+	}
+	else if (State == PlayerMap::SSeeOthers::STATE_PAGE_SECOND)
+	{
+		str_format(aName, sizeof(aName), "%s 2/2 | Close", pDot);
+	}
+	else
+	{
+		str_format(aName, sizeof(aName), "%s %d others", pDot, m_aMap[ClientID].m_TotalOverhang);
+	}
+	return aName;
+}
+
+void CGameWorld::PlayerMap::CycleSeeOthers()
+{
+	if (m_TotalOverhang <= 0)
+		return;
+
+	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
+		if (m_pMap[i] != -1)
+			m_aWasSeeOthers[m_pMap[i]] = true;
+
+	int Size = min(m_TotalOverhang, (int)PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
+	int Added = 0;
+	int MapID = GetMapSize()-1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if (!m_pGameWorld->GameServer()->m_apPlayers[i] || m_aWasSeeOthers[i])
+			continue;
+
+		Add(MapID, i);
+		m_aWasSeeOthers[i] = true;
+		Added++;
+		MapID--;
+
+		if (Added >= Size)
+			break;
+	}
+
+	m_NumSeeOthers = Added;
+}
+
+void CGameWorld::PlayerMap::DoSeeOthers()
+{
+	if (m_TotalOverhang <= 0)
+		return;
+
+	m_SeeOthersState++;
+	UpdateSeeOthers();
+
+	CycleSeeOthers();
+
+	// aggressively trigger reset now
+	if (m_NumSeeOthers == 0)
+	{
+		// Reset these for the next cycle so we can get the fresh page we had before
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			m_aWasSeeOthers[i] = false;
+		CycleSeeOthers();
+		ResetSeeOthers();
+	}
+
+	// instantly update so we dont have to wait for the map to be executed
+	m_UpdateTeamsState = true;
+	Update();
+}
+
+void CGameWorld::PlayerMap::ResetSeeOthers()
+{
+	m_SeeOthersState = SSeeOthers::STATE_NONE;
+	m_NumSeeOthers = 0;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aWasSeeOthers[i] = false;
+	m_UpdateTeamsState = true;
+	UpdateSeeOthers();
+}
+
+void CGameWorld::PlayerMap::UpdateSeeOthers()
+{
+	if (m_pGameWorld->Server()->IsSevendown(m_ClientID))
+		return;
+
+	int SeeOthersID = m_pGameWorld->GetSeeOthersID(m_ClientID);
+	CNetMsg_Sv_ClientDrop ClientDropMsg;
+	ClientDropMsg.m_ClientID = SeeOthersID;
+	ClientDropMsg.m_pReason = "";
+	ClientDropMsg.m_Silent = 1;
+
+	CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientID = SeeOthersID;
+	NewClientInfoMsg.m_Local = 0;
+	NewClientInfoMsg.m_Team = TEAM_BLUE;
+	NewClientInfoMsg.m_pName = m_pGameWorld->GetSeeOthersName(m_ClientID);
+	NewClientInfoMsg.m_pClan = "";
+	NewClientInfoMsg.m_Country = -1;
+	NewClientInfoMsg.m_Silent = 1;
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		bool Colored = p == SKINPART_BODY || p == SKINPART_FEET;
+		NewClientInfoMsg.m_apSkinPartNames[p] = "standard";
+		NewClientInfoMsg.m_aUseCustomColors[p] = (int)Colored;
+		NewClientInfoMsg.m_aSkinPartColors[p] = Colored ? 5963600 : 0;
+	}
+
+	m_pGameWorld->Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
+	m_pGameWorld->Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
 }
 
 void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
@@ -210,6 +379,7 @@ void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
 	m_pMap = m_pGameWorld->Server()->GetIdMap(m_ClientID);
 	m_pReverseMap = m_pGameWorld->Server()->GetReverseIdMap(m_ClientID);
 	m_UpdateTeamsState = false;
+	ResetSeeOthers();
 }
 
 void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
@@ -264,12 +434,17 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 	m_NumReserved = 1;
 	m_pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 
+	// see others in spec menu
+	m_NumReserved++;
+	m_pMap[m_pGameWorld->GetSeeOthersID(m_ClientID)] = -1;
+	m_TotalOverhang = 0;
+
 	if (!m_pGameWorld->Server()->IsSevendown(m_ClientID))
 	{
 		CNetMsg_Sv_ClientInfo FakeInfo;
 		FakeInfo.m_ClientID = VANILLA_MAX_CLIENTS-1;
 		FakeInfo.m_Local = 0;
-		FakeInfo.m_Team = TEAM_SPECTATORS;
+		FakeInfo.m_Team = TEAM_BLUE;
 		FakeInfo.m_pName = " ";
 		FakeInfo.m_pClan = "";
 		FakeInfo.m_Country = -1;
@@ -281,6 +456,8 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 			FakeInfo.m_aSkinPartColors[p] = 0;
 		}
 		m_pGameWorld->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientID);
+		// see others
+		UpdateSeeOthers();
 	}
 	else
 	{
@@ -292,7 +469,7 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 		}
 	}
 
-	if (NextFreeID < VANILLA_MAX_CLIENTS-m_NumReserved)
+	if (NextFreeID < GetMapSize())
 	{
 		m_aReserved[m_ClientID] = true;
 		Add(NextFreeID, m_ClientID);
@@ -308,14 +485,14 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 			continue;
 
 		// update us with other same ip player infos
-		if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] < VANILLA_MAX_CLIENTS-m_NumReserved)
+		if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] < GetMapSize())
 		{
 			m_aReserved[i] = true;
 			Add(m_pGameWorld->m_aMap[i].m_pReverseMap[i], i);
 		}
 
 		// update other same ip players with our info
-		if (NextFreeID < VANILLA_MAX_CLIENTS-m_pGameWorld->m_aMap[i].m_NumReserved)
+		if (NextFreeID < m_pGameWorld->m_aMap[i].GetMapSize())
 		{
 			m_pGameWorld->m_aMap[i].m_aReserved[m_ClientID] = true;
 			m_pGameWorld->m_aMap[i].Add(NextFreeID, m_ClientID);
@@ -409,7 +586,7 @@ void CGameWorld::PlayerMap::Update()
 		int Insert = -1;
 		if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
 		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_NumReserved; j++)
+			for (int j = 0; j < GetMapSize()-m_NumSeeOthers; j++)
 			{
 				int CID = m_pMap[j];
 				if (CID == -1 || !m_aReserved[CID])
@@ -426,7 +603,7 @@ void CGameWorld::PlayerMap::Update()
 		}
 		else
 		{
-			for (int j = 0; j < VANILLA_MAX_CLIENTS-m_NumReserved; j++)
+			for (int j = 0; j < GetMapSize()-m_NumSeeOthers; j++)
 				if (m_pMap[j] == -1)
 				{
 					Insert = j;
@@ -456,7 +633,7 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 	if (ClientID == -1 || m_pReverseMap[ClientID] != -1)
 		return;
 
-	for (int i = 0; i < VANILLA_MAX_CLIENTS-m_NumReserved; i++)
+	for (int i = 0; i < GetMapSize()-m_NumSeeOthers; i++)
 	{
 		int CID = m_pMap[i];
 		if (CID != -1 && m_aReserved[CID])

@@ -3722,9 +3722,14 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	return true;
 }
 
+int CServer::NumClients()
+{
+	return m_NetServer.NumClients();
+}
+
 bool CServer::IsDoubleInfo()
 {
-	return m_NetServer.NumClients() >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS;
+	return NumClients() >= VANILLA_MAX_CLIENTS && Config()->m_SvMaxClients > VANILLA_MAX_CLIENTS;
 }
 
 bool CServer::IsBrowserScoreFix()

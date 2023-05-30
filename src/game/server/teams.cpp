@@ -446,9 +446,9 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
 	{
-		int Team = -1;
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
+			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)
 				Team = 63; // red colored team, used 1 before but that is the most common team for 1vs1
 			else if (i == SPEC_SELECT_FLAG_BLUE)
@@ -466,15 +466,28 @@ void CGameTeams::SendTeamsState(int ClientID)
 			}
 		}
 
-		Team = 0;
+		// see others selector
+		int Indicator = GameServer()->m_World.GetSeeOthersInd(ClientID, i);
+		if (Indicator != -1)
+		{
+			Msg.AddInt(Indicator);
+			continue;
+		}
+
+		// Rainbow name
+		int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, i);
+		if (Color != -1)
+		{
+			Msg.AddInt(Color);
+			continue;
+		}
+
+		// Else -> Normal teams
+		int Team = 0;
 		int ID = i;
 		if (Server()->ReverseTranslate(ID, ClientID))
 		{
 			Team = m_Core.Team(ID);
-			int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, i);
-			if (Color != -1)
-				Team = Color;
-
 			if (Team == TEAM_SUPER)
 				Team = VANILLA_MAX_CLIENTS;
 			else if (Team > VANILLA_MAX_CLIENTS)

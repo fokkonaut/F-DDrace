@@ -62,6 +62,7 @@ public:
 	virtual void DummyJoin(int DummyID) = 0;
 	virtual void DummyLeave(int DummyID) = 0;
 
+	virtual int NumClients() = 0;
 	virtual bool IsSevendown(int ClientID) = 0;
 	virtual bool IsIdleDummy(int ClientID) = 0;
 	virtual bool IsDummyHammer(int ClientID) = 0;

@@ -2678,12 +2678,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				return;
 
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
+			pPlayer->UpdatePlaytime();
+
+			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID == m_World.GetSeeOthersID(ClientID))
+			{
+				m_World.DoSeeOthers(ClientID);
+				return;
+			}
 
 			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID >= 0)
 				if (!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))
 					return;
-
-			pPlayer->UpdatePlaytime();
 
 			if (pPlayer->m_TeeControlMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused())
 			{
