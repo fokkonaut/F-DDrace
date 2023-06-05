@@ -117,7 +117,7 @@ void CRainbowName::Update(int ClientID)
 		int SpectatorID = pPlayer->GetSpectatorID();
 		bool NoSpecOrFollow = (pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused()) || (SpectatorID != -1 && GameServer()->m_apPlayers[SpectatorID]);
 		if (NoSpecOrFollow)
-			pInfo->m_aTeam[OwnMapID] = TEAM_SUPER;
+			pInfo->m_aTeam[OwnMapID] = VANILLA_MAX_CLIENTS; // TEAM_SUPER, but it's 128 due to increased client capability
 	}
 
 	// if a player close to a rainbow name player sent a chat message, we send himself to t0 for one run, cuz that resets the chat color from TEAM_SUPER to grey
