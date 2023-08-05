@@ -100,4 +100,5 @@ MACRO_TUNING_PARAM(LightningLaserCount, lightning_laser_count, 7, "Number of las
 MACRO_TUNING_PARAM(LightningLaserLength, lightning_laser_length, 70, "Length of lasers used for the lightning laser (min: 1)")
 
 MACRO_TUNING_PARAM(Elasticity, elasticity, 0, "Elasticity, bouncing off of blocks")
+MACRO_TUNING_PARAM(NumSpreadShots, num_spread_shots, 3, "Number of shots for the spread weapons")
 #endif

@@ -499,12 +499,13 @@ void CCharacter::FireWeapon()
 		m_LastTaserUse = Server()->Tick();
 	}
 
+	int NumShots = !m_aSpreadWeapon[GetActiveWeapon()] ? 1 : clamp(round_to_int(Tuning()->m_NumSpreadShots), 2, 9);
+
 	float Spread[] = { 0, -0.1f, 0.1f, -0.2f, 0.2f, -0.3f, 0.3f, -0.4f, 0.4f };
-	if (Config()->m_SvNumSpreadShots % 2 == 0)
+	if (NumShots % 2 == 0)
 		for (unsigned int i = 0; i < (sizeof(Spread)/sizeof(*Spread)); i++)
 			Spread[i] += 0.05f;
 
-	int NumShots = m_aSpreadWeapon[GetActiveWeapon()] ? Config()->m_SvNumSpreadShots : 1;
 	if (m_pPlayer->IsMinigame() || (GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
 		NumShots = 1;
 	bool Sound = true;
