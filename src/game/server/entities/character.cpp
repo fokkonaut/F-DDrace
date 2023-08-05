@@ -2107,6 +2107,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	{
 		pCharacter->m_Jumped |= 2;
 		Events |= COREEVENTFLAG_AIR_JUMP;
+
+		if (m_pHelicopter)
+		{
+			vec2 Vel = m_pHelicopter->GetVel();
+			pCharacter->m_VelX = round_to_int(Vel.x * 256.0f);
+			pCharacter->m_VelY = round_to_int(Vel.y * 256.0f);
+		}
 	}
 	else if (SnappingClient >= 0 && GameServer()->m_apPlayers[SnappingClient]->SilentFarmActive())
 	{
