@@ -2010,7 +2010,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (m_aWeapons[i].m_Got)
 			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
-	Config()->m_SvTestingCommands = 1;
+
 	bool Helicopter = SnappingClient == m_pPlayer->GetCID() && m_pHelicopter;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
