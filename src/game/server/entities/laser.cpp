@@ -282,7 +282,7 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if (Config()->m_SvDestroyLasersOnDeath && m_Owner >= 0)
+	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner)))
 	{
 		CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 		if (!(pOwnerChar && pOwnerChar->IsAlive()))
