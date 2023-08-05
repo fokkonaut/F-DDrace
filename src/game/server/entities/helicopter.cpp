@@ -56,9 +56,6 @@ void CHelicopter::Tick()
 	ApplyAcceleration();
 	SpinPropellers();
 
-	if (Server()->Tick() % 10 == 0 && (GetOwner() || !IsGrounded()))
-		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, m_TeamMask);
-
 	m_PrevPos = m_Pos;
 }
 
