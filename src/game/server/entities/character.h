@@ -513,7 +513,7 @@ public:
 	// broadcast and ddrace hud
 	bool ShowAmmoHud();
 	int NumDDraceHudRows();
-	int GetDDNetCharacterFlags();
+	int GetDDNetCharacterFlags(int SnappingClient = -1);
 	void SendBroadcastHud(const char *pMessage);
 
 	// ResetNumInputs() gets called when player is paused or when (un)setting teecontrol. its to prevent weird shooting and weapon switching after unpause/(un)setting teecontrol

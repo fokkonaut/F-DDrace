@@ -1978,7 +1978,7 @@ void CCharacter::Snap(int SnappingClient)
 	if(!pDDNetCharacter)
 		return;
 
-	pDDNetCharacter->m_Flags = GetDDNetCharacterFlags();
+	pDDNetCharacter->m_Flags = GetDDNetCharacterFlags(SnappingClient);
 	pDDNetCharacter->m_FreezeEnd = m_DeepFreeze ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
@@ -2002,7 +2002,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 }
 
-int CCharacter::GetDDNetCharacterFlags()
+int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 {
 	int Flags = 0;
 
@@ -2010,16 +2010,17 @@ int CCharacter::GetDDNetCharacterFlags()
 	for (int i = 0; i < NUM_WEAPONS; i++)
 		if (m_aWeapons[i].m_Got)
 			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
-
+	Config()->m_SvTestingCommands = 1;
+	bool Helicopter = SnappingClient == m_pPlayer->GetCID() && m_pHelicopter;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
 	if(m_Super)
 		Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super))
+	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super) || Helicopter)
 		Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super))
+	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super) || Helicopter)
 		Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump)
 		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -4495,7 +4496,7 @@ int CCharacter::NumDDraceHudRows()
 	if ((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->GetSpectatorID() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID()))
 		pChr = GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID());
 
-	int Flags = pChr->GetDDNetCharacterFlags();
+	int Flags = pChr->GetDDNetCharacterFlags(pChr->GetPlayer()->GetCID());
 	int Rows = 0;
 	if (ShowAmmoHud() && pChr->GetPlayer()->ShowDDraceHud()) // when we dont show ddrace hud we have either nothing or health/armor. then we dont need to add a row
 		Rows++;
