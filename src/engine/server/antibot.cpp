@@ -50,12 +50,12 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 	CAntibot *pAntibot = (CAntibot *)pUser;
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
-	if (pAntibot->Config()->m_SvAntibotTreshold != 0 && Count >= pAntibot->Config()->m_SvAntibotTreshold)
+	/*if (pAntibot->Config()->m_SvAntibotTreshold != 0 && Count >= pAntibot->Config()->m_SvAntibotTreshold)
 	{
 		str_format(aBuf, sizeof(aBuf), "%d: %s has been banned", ClientID, pAntibot->Server()->ClientName(ClientID));
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 		pAntibot->GameServer()->SetBotDetected(ClientID);
-	}
+	}*/
 }
 void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
 {
