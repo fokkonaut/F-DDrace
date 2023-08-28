@@ -41,7 +41,7 @@ void CAntibot::Log(const char *pMessage, void *pUser)
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
-void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser)
+void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *pUser)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
