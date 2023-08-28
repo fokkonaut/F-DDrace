@@ -1108,11 +1108,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
 			Tunings.m_Gravity = 0.f;
-		if (pChr->m_InSnake)
-		{
-			Tunings.m_AirControlSpeed = 2.56f; // Snake.GetVel() ABER mit direction!!
-			Tunings.m_AirFriction = 1.f;
-		}
 	}
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
@@ -1133,7 +1128,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
-	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
