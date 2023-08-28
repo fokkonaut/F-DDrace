@@ -133,7 +133,7 @@ void mem_free(void *block);
 	See Also:
 		<mem_move>
 */
-void mem_copy(void *dest, const void *source, unsigned size);
+void mem_copy(void *dest, const void *source, size_t size);
 
 /*
 	Function: mem_move
@@ -151,7 +151,7 @@ void mem_copy(void *dest, const void *source, unsigned size);
 	See Also:
 		<mem_copy>
 */
-void mem_move(void *dest, const void *source, unsigned size);
+void mem_move(void *dest, const void *source, size_t size);
 
 /*
 	Function: mem_zero
@@ -161,7 +161,7 @@ void mem_move(void *dest, const void *source, unsigned size);
 		block - Pointer to the block to zero out
 		size - Size of the block
 */
-void mem_zero(void *block, unsigned size);
+void mem_zero(void *block, size_t size);
 
 /*
 	Function: mem_comp
@@ -177,7 +177,7 @@ void mem_zero(void *block, unsigned size);
 		0 - Block a is equal to block b
 		>0 - Block a is greater than block b
 */
-int mem_comp(const void *a, const void *b, int size);
+int mem_comp(const void *a, const void *b, size_t size);
 
 /*
 	Function: mem_has_null
@@ -191,7 +191,7 @@ int mem_comp(const void *a, const void *b, int size);
 		1 - The block has a null byte.
 		0 - The block does not have a null byte.
 */
-int mem_has_null(const void *block, unsigned size);
+int mem_has_null(const void *block, size_t size);
 
 /* Group: File IO */
 enum {

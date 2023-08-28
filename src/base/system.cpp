@@ -330,17 +330,17 @@ void mem_free(void *p)
 	free(p);
 }
 
-void mem_copy(void *dest, const void *source, unsigned size)
+void mem_copy(void *dest, const void *source, size_t size)
 {
 	memcpy(dest, source, size);
 }
 
-void mem_move(void *dest, const void *source, unsigned size)
+void mem_move(void *dest, const void *source, size_t size)
 {
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block,unsigned size)
+void mem_zero(void *block, size_t size)
 {
 	memset(block, 0, size);
 }
@@ -2815,12 +2815,12 @@ int str_span(const char *str, const char *set)
 	return strcspn(str, set);
 }
 
-int mem_comp(const void *a, const void *b, int size)
+int mem_comp(const void *a, const void *b, size_t size)
 {
 	return memcmp(a,b,size);
 }
 
-int mem_has_null(const void *block, unsigned size)
+int mem_has_null(const void *block, size_t size)
 {
 	const unsigned char *bytes = (const unsigned char *)block;
 	unsigned i;        
