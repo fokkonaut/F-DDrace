@@ -50,5 +50,7 @@ public:
 
 	void OnPlayerDeath();
 	void OnInput(CNetObj_PlayerInput *pNewInput);
+
+	vec2 GetVel();
 };
 #endif //GAME_SERVER_SNAKE_H

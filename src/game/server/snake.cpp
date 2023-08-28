@@ -160,7 +160,8 @@ void CSnake::AddNewTees()
 
 void CSnake::UpdateTees()
 {
-	float Amount = (float)m_MoveLifespan / (Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed);
+	float Amount = (float)m_MoveLifespan / ((float)Server()->TickSpeed() / GameServer()->Config()->m_SvSnakeSpeed);
+	dbg_msg("hi", "%.2f", Amount);
 	for (unsigned int i = 0; i < m_vSnake.size(); i++)
 	{
 		m_vSnake[i].m_pChr->Core()->m_Vel = vec2(0, 0);
@@ -182,4 +183,10 @@ void CSnake::OnPlayerDeath()
 	SetActive(false);
 	if (m_pCharacter->m_InSnake)
 		m_pCharacter->GetPlayer()->m_ShowName = true;
+}
+
+vec2 CSnake::GetVel()
+{
+	float Vel = (float)GameServer()->Config()->m_SvSnakeSpeed / Server()->TickSpeed();
+	return m_Dir * Vel * 32.f;
 }
