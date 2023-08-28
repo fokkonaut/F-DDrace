@@ -41,7 +41,7 @@ void CAntibot::Log(const char *pMessage, void *pUser)
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
-void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser)
+/*void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
@@ -56,14 +56,12 @@ void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 		pAntibot->GameServer()->SetBotDetected(ClientID);
 	}
-}
-
+}*/
 void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
 {
 	//CAntibot *pAntibot = (CAntibot *)pUser;
 	//pAntibot->m_pGameServer->TeehistorianRecordAntibot(pData, Size);
 }
-
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -79,9 +77,9 @@ void CAntibot::Init()
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
 	m_Data.m_pfnLog = Log;
-	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
 	m_Data.m_pfnTeehistorian = Teehistorian;
+	//m_Data.m_pfnReport = Report;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
 

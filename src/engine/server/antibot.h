@@ -24,9 +24,9 @@ private:
 
 	void Update();
 	static void Log(const char *pMessage, void *pUser);
-	static void Report(int ClientID, const char *pMessage, int Count, void *pUser);
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
 	static void Teehistorian(const void *pData, int Size, void *pUser);
+	//static void Report(int ClientID, const char *pMessage, int Count, void *pUser);
 
 public:
 	CAntibot();
