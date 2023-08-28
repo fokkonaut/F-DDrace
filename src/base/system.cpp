@@ -57,8 +57,6 @@
 	#include <sys/filio.h>
 #endif
 
-extern "C" {
-
 IOHANDLE io_stdin() { return (IOHANDLE)stdin; }
 IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
 IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
@@ -3346,6 +3344,4 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value)
 	bytes[1] = (value>>16)&0xff;
 	bytes[2] = (value>>8)&0xff;
 	bytes[3] = value&0xff;
-}
-
 }

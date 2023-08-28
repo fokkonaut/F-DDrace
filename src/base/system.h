@@ -16,8 +16,6 @@
 #include <sys/un.h>
 #endif
 
-extern "C" {
-
 #ifdef __GNUC__
 #define GNUC_ATTRIBUTE(x) __attribute__(x)
 #else
@@ -2212,7 +2210,6 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value);
  * @remark The strings are treated as zero-terminated strings.
  * @remark Guarantees that dst string will contain zero-termination.
  */
-}
 
 template<int N>
 void str_copy(char (&dst)[N], const char *src)
