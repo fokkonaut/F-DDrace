@@ -431,6 +431,7 @@ public:
 	void UpdateRegisterServerInfo();
 	void UpdateServerInfo(bool Resend = false);
 	virtual void ExpireServerInfo();
+	void FillAntibot(CAntibotRoundData *pData) override;
 	const char *GetGameTypeServerInfo();
 
 	void PumpNetwork();

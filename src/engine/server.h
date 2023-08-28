@@ -265,6 +265,8 @@ public:
 	virtual const char *GetCurrentMapName() = 0;
 	virtual const char *GetFileName(char *pPath) = 0;
 
+	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;

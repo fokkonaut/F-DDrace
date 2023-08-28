@@ -1852,6 +1852,15 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	}
 }
 
+void CServer::FillAntibot(CAntibotRoundData *pData)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[i];
+		net_addr_str(m_NetServer.ClientAddr(i), pPlayer->m_aAddress, sizeof(pPlayer->m_aAddress), true);
+	}
+}
+
 void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 {
 	// count the players

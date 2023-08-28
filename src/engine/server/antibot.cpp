@@ -102,6 +102,7 @@ void CAntibot::Update()
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
 
+	Server()->FillAntibot(&m_RoundData);
 	if(GameServer())
 	{
 		GameServer()->FillAntibot(&m_RoundData);
