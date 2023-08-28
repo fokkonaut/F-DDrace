@@ -57,6 +57,13 @@ void CAntibot::Report(int ClientID, const char *pMessage, int Count, void *pUser
 		pAntibot->GameServer()->SetBotDetected(ClientID);
 	}
 }
+
+void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
+{
+	//CAntibot *pAntibot = (CAntibot *)pUser;
+	//pAntibot->m_pGameServer->TeehistorianRecordAntibot(pData, Size);
+}
+
 void CAntibot::Init()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -74,6 +81,7 @@ void CAntibot::Init()
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
+	m_Data.m_pfnTeehistorian = Teehistorian;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
 
