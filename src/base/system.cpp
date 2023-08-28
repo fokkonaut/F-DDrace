@@ -1191,12 +1191,12 @@ NETSOCKET net_udp_create(NETADDR bindaddr, int use_random_port)
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
 	int broadcast = 1;
+	int socket = -1;
 	int recvsize = 65536;
 
 	if(bindaddr.type&NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
@@ -1218,7 +1218,6 @@ NETSOCKET net_udp_create(NETADDR bindaddr, int use_random_port)
 	if(bindaddr.type&NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-		int socket = -1;
 
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
@@ -1367,7 +1366,6 @@ void net_buffer_simple(NETSOCKET_BUFFER *buffer, char **buf, int *size)
 int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 {
 	char sockaddrbuf[128];
-	socklen_t fromlen;// = sizeof(sockaddrbuf);
 	int bytes = 0;
 
 	#if defined(CONF_PLATFORM_LINUX)
