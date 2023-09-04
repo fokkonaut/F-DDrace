@@ -662,8 +662,7 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	int ClientID = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
-	pSelf->Antibot()->Dump(ClientID);
+	pSelf->Antibot()->Dump();
 }
 
 // F-DDrace

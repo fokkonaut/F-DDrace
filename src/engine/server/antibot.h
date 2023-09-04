@@ -29,10 +29,6 @@ private:
 	static void Teehistorian(const void *pData, int Size, void *pUser);
 	static void Report(int ClientID, const char *pMessage, /*int Count,*/ void *pUser);
 
-	char m_aKind[MAX_CLIENTS][16];
-	int m_DumpFilterID;
-	int m_FetchKindID;
-
 public:
 	CAntibot();
 	virtual ~CAntibot();
@@ -61,7 +57,7 @@ public:
 	virtual void OnCharacterTick(int ClientID);
 	virtual void OnHookAttach(int ClientID, bool Player);
 
-	virtual void Dump(int ClientID = -1);
+	virtual void Dump();
 };
 
 extern IEngineAntibot *CreateEngineAntibot();
