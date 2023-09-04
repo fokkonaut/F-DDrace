@@ -3611,7 +3611,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "s[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option", AUTHED_ADMIN);
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options", AUTHED_ADMIN);
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no", AUTHED_ADMIN);
-	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status", AUTHED_ADMIN);
+	Console()->Register("dump_antibot", "?i[id]", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status", AUTHED_ADMIN);
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 

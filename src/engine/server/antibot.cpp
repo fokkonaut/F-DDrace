@@ -10,6 +10,10 @@
 CAntibot::CAntibot() :
 	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
+	m_DumpFilterID = -1;
+	m_FetchKindID = -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		str_copy(m_aKind[i], "pending", sizeof(m_aKind[i]));
 }
 CAntibot::~CAntibot()
 {
@@ -37,17 +41,43 @@ void CAntibot::Send(int ClientID, const void *pData, int Size, int Flags, void *
 void CAntibot::Log(const char *pMessage, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
+	if (pAntibot->m_DumpFilterID != -1)
+	{
+		char aID[4];
+		str_copy(aID, pMessage, sizeof(aID));
+		if (atoi(aID) != pAntibot->m_DumpFilterID)
+			return;
+	}
+
+	if (pAntibot->m_FetchKindID != -1)
+	{
+		const char *pKind = str_find(pMessage, "kind=");
+		if (pKind)
+			str_copy(pAntibot->m_aKind[pAntibot->m_FetchKindID], pKind + 5, sizeof(pAntibot->m_aKind[pAntibot->m_FetchKindID]));
+		return;
+	}
+
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_MOD); // Send antibot triggers to moderators
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
 void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *pUser)
 {
+	CAntibot *pAntibot = (CAntibot *)pUser;
+	if (!str_comp(pAntibot->m_aKind[ClientID], "pending"))
+	{
+		pAntibot->m_FetchKindID = ClientID;
+		pAntibot->Dump(ClientID);
+		pAntibot->m_FetchKindID = -1;
+	}
+
+	if (str_comp(pAntibot->m_aKind[ClientID], "known_bot") && str_comp(pAntibot->m_aKind[ClientID], "weird") && str_comp(pAntibot->m_aKind[ClientID], "selfbuilt/linux") && str_comp(pAntibot->m_aKind[ClientID], "pending"))
+		return;
+
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
 
-	CAntibot *pAntibot = (CAntibot *)pUser;
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
 	if (pAntibot->Config()->m_SvAntibotTreshold != 0 /*&& Count >= pAntibot->Config()->m_SvAntibotTreshold*/ && str_startswith(pMessage, "known_bot"))
@@ -102,9 +132,11 @@ void CAntibot::RoundEnd()
 	if(m_RoundData.m_Map.m_pTiles)
 		free(m_RoundData.m_Map.m_pTiles);
 }
-void CAntibot::Dump()
+void CAntibot::Dump(int ClientID)
 {
+	m_DumpFilterID = ClientID;
 	AntibotDump();
+	m_DumpFilterID = -1;
 }
 void CAntibot::Update()
 {
@@ -218,6 +250,10 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int 
 CAntibot::CAntibot() :
 	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
 {
+	m_DumpFilterID = -1;
+	m_FetchKindID = -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		str_copy(m_aKind[i], "pending", sizeof(m_aKind[i]));
 }
 CAntibot::~CAntibot()
 {
@@ -236,7 +272,7 @@ void CAntibot::RoundEnd()
 {
 	m_pGameServer = 0;
 }
-void CAntibot::Dump()
+void CAntibot::Dump(int ClientID)
 {
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
 }
