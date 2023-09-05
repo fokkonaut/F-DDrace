@@ -211,6 +211,8 @@ void CAntibot::OnEngineClientDrop(int ClientID, const char *pReason)
 {
 	Update();
 	AntibotOnEngineClientDrop(ClientID, pReason);
+	// Reset for next to determine
+	str_copy(m_aKind[ClientID], "pending", sizeof(m_aKind[ClientID]));
 }
 bool CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags)
 {
