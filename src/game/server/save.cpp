@@ -435,7 +435,6 @@ char* CSaveTee::GetString()
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
-		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -485,7 +484,6 @@ char* CSaveTee::GetString()
 		m_aWeapons[15].m_AmmoRegenStart, m_aWeapons[15].m_Ammo, m_aWeapons[15].m_Got,
 		m_aWeapons[16].m_AmmoRegenStart, m_aWeapons[16].m_Ammo, m_aWeapons[16].m_Got,
 		m_aWeapons[17].m_AmmoRegenStart, m_aWeapons[17].m_Ammo, m_aWeapons[17].m_Got,
-		m_aWeapons[18].m_AmmoRegenStart, m_aWeapons[18].m_Ammo, m_aWeapons[18].m_Got,
 		m_Invisible, m_Rainbow, m_Atom, m_Trail, m_Meteors, m_Bloody, m_StrongBloody, m_ScrollNinja, m_HookPower,
 		m_aSpreadWeapon[0], m_aSpreadWeapon[1], m_aSpreadWeapon[2], m_aSpreadWeapon[3], m_aSpreadWeapon[4], m_aSpreadWeapon[5], m_aSpreadWeapon[6], m_aSpreadWeapon[7],
 		m_aSpreadWeapon[8], m_aSpreadWeapon[9], m_aSpreadWeapon[10], m_aSpreadWeapon[11], m_aSpreadWeapon[12], m_aSpreadWeapon[13], m_aSpreadWeapon[14], m_aSpreadWeapon[15], m_aSpreadWeapon[16], m_aSpreadWeapon[17], m_aSpreadWeapon[18],
@@ -547,7 +545,6 @@ int CSaveTee::LoadString(char* String)
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
-		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -597,7 +594,6 @@ int CSaveTee::LoadString(char* String)
 		&m_aWeapons[15].m_AmmoRegenStart, &m_aWeapons[15].m_Ammo, &m_aWeapons[15].m_Got,
 		&m_aWeapons[16].m_AmmoRegenStart, &m_aWeapons[16].m_Ammo, &m_aWeapons[16].m_Got,
 		&m_aWeapons[17].m_AmmoRegenStart, &m_aWeapons[17].m_Ammo, &m_aWeapons[17].m_Got,
-		&m_aWeapons[18].m_AmmoRegenStart, &m_aWeapons[18].m_Ammo, &m_aWeapons[18].m_Got,
 		&m_Invisible, &m_Rainbow, &m_Atom, &m_Trail, &m_Meteors, &m_Bloody, &m_StrongBloody, &m_ScrollNinja, &m_HookPower,
 		&m_aSpreadWeapon[0], &m_aSpreadWeapon[1], &m_aSpreadWeapon[2], &m_aSpreadWeapon[3], &m_aSpreadWeapon[4], &m_aSpreadWeapon[5], &m_aSpreadWeapon[6], &m_aSpreadWeapon[7],
 		&m_aSpreadWeapon[8], &m_aSpreadWeapon[9], &m_aSpreadWeapon[10], &m_aSpreadWeapon[11], &m_aSpreadWeapon[12], &m_aSpreadWeapon[13], &m_aSpreadWeapon[14], &m_aSpreadWeapon[15], &m_aSpreadWeapon[16], &m_aSpreadWeapon[17], &m_aSpreadWeapon[18],
@@ -639,7 +635,7 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 91:
 		return 0;
-	case 241: // F-DDrace extra vars
+	case 238: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
