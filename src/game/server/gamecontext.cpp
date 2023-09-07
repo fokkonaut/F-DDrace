@@ -6942,8 +6942,6 @@ const char *CGameContext::GetWeaponName(int Weapon)
 		return "Draw Editor";
 	case WEAPON_TELE_RIFLE:
 		return "Tele Rifle";
-	case WEAPON_PORTAL_BLOCKER:
-		return "Portal Blocker";
 	case WEAPON_LIGHTNING_LASER:
 		return "Lightning Laser";
 	}
@@ -6976,8 +6974,6 @@ int CGameContext::GetWeaponType(int Weapon)
 		return WEAPON_NINJA;
 	case WEAPON_TELE_RIFLE:
 		return WEAPON_LASER;
-	case WEAPON_PORTAL_BLOCKER:
-		return WEAPON_NINJA;
 	case WEAPON_LIGHTNING_LASER:
 		return WEAPON_LASER;
 	}

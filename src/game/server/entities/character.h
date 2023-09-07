@@ -407,7 +407,10 @@ public:
 	//spooky ghost
 	void SetSpookyGhost();
 	void UnsetSpookyGhost();
-	int m_NumGhostShots;
+	// for ghost and portal blocker
+	int m_TabDoubleClickCount;
+	bool m_IsPortalBlocker;
+	int m_PortalBlockerIndSnapID;
 
 	//extras
 	bool m_Rainbow;

@@ -333,7 +333,7 @@ void CPlayer::Tick()
 				GameServer()->m_pHouses[i]->ResetLastMotd(m_ClientID);
 		}
 		else
-			m_pCharacter->m_NumGhostShots = 0;
+			m_pCharacter->m_TabDoubleClickCount = 0;
 	}
 
 	// name

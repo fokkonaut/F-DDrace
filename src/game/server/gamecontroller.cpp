@@ -371,11 +371,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_TASER;
 	}
-	else if (Index == ENTITY_WEAPON_PORTAL_BLOCKER)
-	{
-		Type = POWERUP_WEAPON;
-		SubType = WEAPON_PORTAL_BLOCKER;
-	}
 	else if (Index == ENTITY_WEAPON_LIGHTNING_LASER)
 	{
 		Type = POWERUP_WEAPON;
@@ -703,7 +698,7 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_UNLIMITED_AMMO;
 
 	int W = pSnappingChar->GetActiveWeapon();
-	if (!pSnap->m_ZoomCursor && (pSnappingChar->m_DrawEditor.Active() || W == WEAPON_TELEKINESIS || W == WEAPON_PORTAL_RIFLE || W == WEAPON_TELE_RIFLE || W == WEAPON_PORTAL_BLOCKER))
+	if (!pSnap->m_ZoomCursor && (pSnappingChar->m_DrawEditor.Active() || W == WEAPON_TELEKINESIS || W == WEAPON_PORTAL_RIFLE || W == WEAPON_TELE_RIFLE || pSnappingChar->m_IsPortalBlocker))
 		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_ALLOW_ZOOM;
 
 	if (pSnappingChar->ShowAmmoHud())

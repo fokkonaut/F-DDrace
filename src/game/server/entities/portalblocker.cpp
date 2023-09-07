@@ -32,7 +32,7 @@ void CPortalBlocker::Tick()
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (!m_HasEndPos)
 	{
-		if (!pOwner || pOwner->GetActiveWeapon() != WEAPON_PORTAL_BLOCKER)
+		if (!pOwner || !pOwner->m_IsPortalBlocker)
 		{
 			if (pOwner)
 				pOwner->m_pPortalBlocker = 0;

@@ -75,8 +75,6 @@ CONSOLE_COMMAND("telerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleRifle
 CONSOLE_COMMAND("untelerifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnTeleRifle, this, "Takes the tele rifle from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("taser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTaser, this, "Gives a taser to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("untaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnTaser, this, "Takes the taser from player v", AUTHED_ADMIN)
-CONSOLE_COMMAND("portalblocker", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConPortalBlocker, this, "Gives a portal blocker to player v", AUTHED_ADMIN)
-CONSOLE_COMMAND("unportalblocker", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnPortalBlocker, this, "Takes the portal blocker from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("lightninglaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConLightningLaser, this, "Gives a lightning laser to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("unlightninglaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnLightningLaser, this, "Takes the lightning laser from player v", AUTHED_ADMIN)
 

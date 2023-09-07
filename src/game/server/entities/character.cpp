@@ -87,6 +87,7 @@ CCharacter::~CCharacter()
 	if (m_pDummyHandle)
 		delete m_pDummyHandle;
 	Server()->SnapFreeID(m_ViewCursorSnapID);
+	Server()->SnapFreeID(m_PortalBlockerIndSnapID);
 	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		Server()->SnapFreeID(m_aUntranslatedID[i]);
 }
@@ -520,6 +521,17 @@ void CCharacter::FireWeapon()
 		{
 			case WEAPON_HAMMER:
 			{
+				if (m_IsPortalBlocker)
+				{
+					// Only process portal blocker when scoreboard is closed, as it is used for toggling so we dont place accidentally
+					if (!(m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD) && (!pAccount->m_PortalBlocker || !m_pPortalBlocker || !m_pPortalBlocker->OnPlace()))
+					{
+						GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
+						return;
+					}
+					break;
+				}
+
 				// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
 				CDoor* apDoors[12];
 				int NumDoors = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apDoors, 12, CGameWorld::ENTTYPE_DOOR);
@@ -749,6 +761,12 @@ void CCharacter::FireWeapon()
 			case WEAPON_LASER:
 			{
 				new CLaser(GameWorld(), m_Pos, Direction, Tuning()->m_LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
+
+				if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
+				{
+					pAccount->m_TaserBattery--;
+					UpdateWeaponIndicator();
+				}
 
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
@@ -1017,16 +1035,6 @@ void CCharacter::FireWeapon()
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
 
-			case WEAPON_PORTAL_BLOCKER:
-			{
-				if (!pAccount->m_PortalBlocker || !m_pPortalBlocker || !m_pPortalBlocker->OnPlace())
-				{
-					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
-					return;
-				}
-
-			} break;
-
 			case WEAPON_LIGHTNING_LASER:
 			{
 				new CLightningLaser(GameWorld(), ProjStartPos, Direction, m_pPlayer->GetCID());
@@ -1042,25 +1050,6 @@ void CCharacter::FireWeapon()
 	if (GetActiveWeapon() != WEAPON_LIGHTSABER) // we don't want the client to render the fire animation
 		m_AttackTick = Server()->Tick();
 
-	//spooky ghost
-	if (m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN)
-	{
-		if (CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
-		{
-			m_NumGhostShots++;
-			if ((m_pPlayer->m_HasSpookyGhost || pAccount->m_SpookyGhost) && m_NumGhostShots == 2 && !m_pPlayer->m_SpookyGhost)
-			{
-				SetSpookyGhost();
-				m_NumGhostShots = 0;
-			}
-			else if (m_NumGhostShots == 2 && m_pPlayer->m_SpookyGhost)
-			{
-				UnsetSpookyGhost();
-				m_NumGhostShots = 0;
-			}
-		}
-	}
-
 	if (!m_ReloadTimer)
 	{
 		m_ReloadTimer = GetFireDelay(GetActiveWeapon()) * Server()->TickSpeed() / 1000;
@@ -1075,10 +1064,32 @@ void CCharacter::FireWeapon()
 			GiveWeapon(GetActiveWeapon(), true);
 	}
 
-	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
+	bool IsTypeGun = GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN;
+	bool CanTabDoubleClick = IsTypeGun || GetActiveWeapon() == WEAPON_HAMMER;
+	if (CanTabDoubleClick && m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 	{
-		pAccount->m_TaserBattery--;
-		UpdateWeaponIndicator();
+		m_TabDoubleClickCount++;
+		if (m_TabDoubleClickCount == 2)
+		{
+			if (IsTypeGun)
+			{
+				if (m_pPlayer->m_SpookyGhost)
+					UnsetSpookyGhost();
+				else if (pAccount->m_SpookyGhost || m_pPlayer->m_HasSpookyGhost)
+					SetSpookyGhost();
+			}
+			else if (GetActiveWeapon() == WEAPON_HAMMER)
+			{
+				m_IsPortalBlocker = m_IsPortalBlocker ? false : pAccount->m_PortalBlocker;
+				UpdateWeaponIndicator();
+
+				// Create portal blocker preview
+				if (m_IsPortalBlocker && !m_pPortalBlocker)
+					m_pPortalBlocker = new CPortalBlocker(GameWorld(), m_Pos, m_pPlayer->GetCID());
+			}
+
+			m_TabDoubleClickCount = 0;
+		}
 	}
 }
 
@@ -1935,6 +1946,36 @@ void CCharacter::Snap(int SnappingClient)
 		pCursor->m_StartTick = Server()->Tick() - 5;
 	}
 
+	if (m_IsPortalBlocker)
+	{
+		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
+		{
+			CNetObj_DDNetLaser *pInd = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_PortalBlockerIndSnapID, sizeof(CNetObj_DDNetLaser)));
+			if(!pInd)
+				return;
+
+			pInd->m_ToX = round_to_int(m_Pos.x);
+			pInd->m_ToY = round_to_int(m_Pos.y - 80);
+			pInd->m_FromX = round_to_int(m_Pos.x);
+			pInd->m_FromY = round_to_int(m_Pos.y - 80);
+			pInd->m_StartTick = Server()->Tick();
+			pInd->m_Owner = m_pPlayer->GetCID();
+			pInd->m_Type = LASERTYPE_SHOTGUN;
+		}
+		else
+		{
+			CNetObj_Laser *pInd = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_PortalBlockerIndSnapID, sizeof(CNetObj_Laser)));
+			if (!pInd)
+				return;
+
+			pInd->m_X = round_to_int(m_Pos.x);
+			pInd->m_Y = round_to_int(m_Pos.y - 80);
+			pInd->m_FromX = round_to_int(m_Pos.x);
+			pInd->m_FromY = round_to_int(m_Pos.y - 80);
+			pInd->m_StartTick = Server()->Tick();
+		}
+	}
+
 	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
 	int ID = m_pPlayer->GetCID();
 	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
@@ -1986,7 +2027,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_StrongWeakID = pSnap ? (Config()->m_SvWeakHook ? pSnap->m_aStrongWeakID[ID] : SnappingClient == m_pPlayer->GetCID() ? 1 : 0) : m_StrongWeakID;
 
 	// Display Informations
-	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS || GetActiveWeapon() == WEAPON_PORTAL_BLOCKER;
+	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
 
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
 	pDDNetCharacter->m_NinjaActivationTick = NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
@@ -3778,7 +3819,9 @@ void CCharacter::FDDraceInit()
 	m_pPlayer->m_SavedGamemode = m_pPlayer->m_Gamemode;
 	m_Armor = m_pPlayer->m_Gamemode == GAMEMODE_VANILLA ? 0 : 10;
 
-	m_NumGhostShots = 0;
+	m_TabDoubleClickCount = 0;
+	m_IsPortalBlocker = false;
+	m_PortalBlockerIndSnapID = Server()->SnapNewID();
 
 	m_CollectedPortalRifle = false;
 	m_LastBatteryDrop = 0;
@@ -4438,12 +4481,9 @@ void CCharacter::SetActiveWeapon(int Weapon)
 		return;
 
 	m_ActiveWeapon = Weapon;
+	m_IsPortalBlocker = false;
 	UpdateWeaponIndicator();
 	m_DrawEditor.OnWeaponSwitch();
-
-	// Create portal blocker preview
-	if (m_ActiveWeapon == WEAPON_PORTAL_BLOCKER && !m_pPortalBlocker)
-		m_pPortalBlocker = new CPortalBlocker(GameWorld(), m_Pos, m_pPlayer->GetCID());
 }
 
 int CCharacter::GetWeaponAmmo(int Type)
@@ -4565,27 +4605,28 @@ void CCharacter::UpdateWeaponIndicator()
 		else if (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
 			str_copy(aAmmo, " [NOT VERIFIED → '/pin']", sizeof(aAmmo));
 	}
-	else if (GetActiveWeapon() == WEAPON_PORTAL_BLOCKER)
+	else if (m_IsPortalBlocker)
 	{
 		str_format(aAmmo, sizeof(aAmmo), " [%d]", pAccount->m_PortalBlocker);
 	}
 
 	char aBuf[256] = "";
+	const char *pName = m_IsPortalBlocker ? "Portal Blocker" : GameServer()->GetWeaponName(GetActiveWeapon());
 	if (Server()->IsSevendown(m_pPlayer->GetCID()))
 	{
 		if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
 		{
-			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
+			str_format(aBuf, sizeof(aBuf), "Weapon: %s%s", pName, aAmmo);
 		}
 		else
 		{
-			if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
-				str_format(aBuf, sizeof(aBuf), "> %s%s", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
+			if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS || m_IsPortalBlocker)
+				str_format(aBuf, sizeof(aBuf), "> %s%s", pName, aAmmo);
 		}
 	}
 	else
 	{
-		str_format(aBuf, sizeof(aBuf), "> %s%s <", GameServer()->GetWeaponName(GetActiveWeapon()), aAmmo);
+		str_format(aBuf, sizeof(aBuf), "> %s%s <", pName, aAmmo);
 	}
 
 	// dont update, when we change between vanilla weapons, so that no "" is being sent to remove another broadcast, for example a money broadcast
@@ -4888,7 +4929,7 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
 	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_PORTAL_RIFLE
-		|| Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_PORTAL_BLOCKER || Type == WEAPON_LIGHTNING_LASER)
+		|| Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_LIGHTNING_LASER)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
