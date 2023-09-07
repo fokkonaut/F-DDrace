@@ -100,7 +100,11 @@ bool CPortalBlocker::OnPlace()
 
 		int AccID = pOwner->GetPlayer()->GetAccID();
 		if (AccID >= ACC_START)
+		{
 			GameServer()->m_Accounts[AccID].m_PortalBlocker--;
+			if (!GameServer()->m_Accounts[AccID].m_PortalBlocker)
+				pOwner->m_IsPortalBlocker = false;
+		}
 
 		// Create a new portal blocker ready to be placed for the owner so we get detached from him aswell
 		pOwner->m_pPortalBlocker = new CPortalBlocker(GameWorld(), pOwner->GetPos(), m_Owner);
