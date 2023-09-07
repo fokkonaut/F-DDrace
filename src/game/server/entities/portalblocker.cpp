@@ -4,11 +4,11 @@
 #include <game/server/gamecontext.h>
 #include "portalblocker.h"
 
-CPortalBlocker::CPortalBlocker(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Lifetime)
+CPortalBlocker::CPortalBlocker(CGameWorld *pGameWorld, vec2 Pos, int Owner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTAL_BLOCKER, Pos)
 {
 	m_Owner = Owner;
-	m_Lifetime = Lifetime * Server()->TickSpeed();
+	m_Lifetime = Config()->m_SvPortalBlockerDetonation * Server()->TickSpeed();
 
 	m_HasStartPos = false;
 	m_HasEndPos = false;

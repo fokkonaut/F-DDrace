@@ -4443,7 +4443,7 @@ void CCharacter::SetActiveWeapon(int Weapon)
 
 	// Create portal blocker preview
 	if (m_ActiveWeapon == WEAPON_PORTAL_BLOCKER && !m_pPortalBlocker)
-		m_pPortalBlocker = new CPortalBlocker(GameWorld(), m_Pos, m_pPlayer->GetCID(), Config()->m_SvPortalBlockerDetonation);
+		m_pPortalBlocker = new CPortalBlocker(GameWorld(), m_Pos, m_pPlayer->GetCID());
 }
 
 int CCharacter::GetWeaponAmmo(int Type)

@@ -16,7 +16,7 @@ class CPortalBlocker : public CEntity
 	bool m_HasEndPos;
 
 public:
-	CPortalBlocker(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Lifetime = 10);
+	CPortalBlocker(CGameWorld *pGameWorld, vec2 Pos, int Owner);
 	virtual ~CPortalBlocker();
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
