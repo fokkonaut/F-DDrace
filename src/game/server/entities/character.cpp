@@ -1374,7 +1374,7 @@ void CCharacter::Tick()
 
 	DDraceTick();
 
-	if (!m_pTelekinesisEntity)
+	if (!m_pTelekinesisEntity && !m_pPlayer->m_IsDummy)
 		Antibot()->OnCharacterTick(m_pPlayer->GetCID());
 
 	// F-DDrace
