@@ -762,12 +762,6 @@ void CCharacter::FireWeapon()
 			{
 				new CLaser(GameWorld(), m_Pos, Direction, Tuning()->m_LaserReach, m_pPlayer->GetCID(), GetActiveWeapon(), TaserFreezeTime);
 
-				if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
-				{
-					pAccount->m_TaserBattery--;
-					UpdateWeaponIndicator();
-				}
-
 				if (Sound)
 					GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
 			} break;
@@ -1062,6 +1056,12 @@ void CCharacter::FireWeapon()
 		int W = GetSpawnWeaponIndex(GetActiveWeapon());
 		if (W != -1 && m_aSpawnWeaponActive[W] && m_aWeapons[GetActiveWeapon()].m_Ammo == 0)
 			GiveWeapon(GetActiveWeapon(), true);
+	}
+
+	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
+	{
+		pAccount->m_TaserBattery--;
+		UpdateWeaponIndicator();
 	}
 
 	bool IsTypeGun = GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN;
