@@ -128,7 +128,7 @@ void CPortalBlocker::Snap(int SnappingClient)
 			return;
 	}
 
-	if (NetworkClipped(SnappingClient))
+	if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_StartPos))
 		return;
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
