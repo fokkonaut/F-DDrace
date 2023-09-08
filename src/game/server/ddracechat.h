@@ -53,7 +53,7 @@ CHAT_COMMAND("stats", "?r[player name]", CFGFLAG_CHAT, ConStats, this, "Shows st
 CHAT_COMMAND("account", "", CFGFLAG_CHAT, ConAccount, this, "Shows information about your account", AUTHED_NO)
 
 //info
-CHAT_COMMAND("spookyghost", "", CFGFLAG_CHAT, ConSpookyGhostInfo, this, "Shows information about the spooky ghost", AUTHED_NO)
+CHAT_COMMAND("helptoggle", "", CFGFLAG_CHAT, ConHelpToggle, this, "Shows help to enable spookyghost or portal blocker", AUTHED_NO)
 CHAT_COMMAND("police", "?i[page]", CFGFLAG_CHAT, ConPoliceInfo, this, "Shows information about police", AUTHED_NO)
 CHAT_COMMAND("vip", "", CFGFLAG_CHAT, ConVIPInfo, this, "Shows information about VIP and VIP+", AUTHED_NO)
 CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows information about spawn weapons", AUTHED_NO)

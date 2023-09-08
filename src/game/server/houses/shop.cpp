@@ -22,7 +22,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
 		AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
 		AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.");
-		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. For more information please visit '/spookyghost'.");
+		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. How it works: '/helptoggle'");
 		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
 		AddItem("VIP Classic", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP Classic gives you some benefits, check '/vip'.", EuroMode);
 		AddItem("VIP+", 1, EuroMode ? 10 : 1000000, TIME_20_DAYS, "VIP+ gives you even more benefits than VIP Classic, check '/vip'.", EuroMode);
@@ -31,9 +31,9 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, "It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.");
 		AddItem("Taser", 30, -1, TIME_FOREVER, "Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.");
-		AddItem("Taser battery", 30, 100000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. The price is listed per ammo and it can only be bought in packs of 10. Plase visit '/taser'.", false, 10);
+		AddItem("Taser battery", 30, 100000, TIME_FOREVER, "Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.", false, 10);
 		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 500000, TIME_20_DAYS, "With Portal Rifle you can create two portals where your cursor is, then teleport between them.", EuroMode);
-		AddItem("Portal Blocker", 20, 10000, TIME_FOREVER, "Create portal blockers using the ninja portal blocker and this ammo with your cursor. It can only be bought in packs of 5. See '/portal' for your current amount.", false, 10);
+		AddItem("Portal Blocker", 20, 10000, TIME_FOREVER, "Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'", false, 10);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
 		for (int i = 0; i < NUM_POLICE_LEVELS; i++)

@@ -35,7 +35,7 @@ void CHouse::Reset(int ClientID)
 void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg, int Page)
 {
 	char aMsg[900];
-	const char *pCut = "**************************************\n";
+	const char *pCut = "*************************************\n";
 
 	char aPage[8] = "";
 	if (m_aClients[ClientID].m_Page > PAGE_MAIN && m_Type != HOUSE_BANK)

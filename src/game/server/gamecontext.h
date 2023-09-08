@@ -841,7 +841,7 @@ private:
 	static void ConWeaponIndicator(IConsole::IResult* pResult, void* pUserData);
 	static void ConZoomCursor(IConsole::IResult* pResult, void* pUserData);
 
-	static void ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData);
+	static void ConHelpToggle(IConsole::IResult* pResult, void* pUserData);
 	static void ConVIPInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPoliceInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConSpawnWeaponsInfo(IConsole::IResult* pResult, void* pUserData);

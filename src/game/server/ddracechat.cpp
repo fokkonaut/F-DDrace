@@ -1446,16 +1446,16 @@ void CGameContext::ConStats(IConsole::IResult* pResult, void* pUserData)
 	}
 }
 
-void CGameContext::ConSpookyGhostInfo(IConsole::IResult* pResult, void* pUserData)
+void CGameContext::ConHelpToggle(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
 
-	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Spooky Ghost ~~~");
-	pSelf->SendChatTarget(pResult->m_ClientID, "The Spooky Ghost is an extra, that can be toggled like this:");
-	pSelf->SendChatTarget(pResult->m_ClientID, "Hold TAB (or other scoreboard key) and shoot two times with your gun.");
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~ Toggle | Spooky Ghost & Portal Blocker ~~~");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Spooky ghost (gun) and portal blocker (hammer) can be enabled like the following:");
+	pSelf->SendChatTarget(pResult->m_ClientID, "Hold TAB (or other scoreboard key) and during that fire your weapon two times.");
 }
 
 void CGameContext::ConVIPInfo(IConsole::IResult* pResult, void* pUserData)
