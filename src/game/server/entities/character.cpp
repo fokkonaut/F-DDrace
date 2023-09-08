@@ -1058,6 +1058,7 @@ void CCharacter::FireWeapon()
 			GiveWeapon(GetActiveWeapon(), true);
 	}
 
+	// Do this here and not in the switch case so that spread taser will only take 1 battery either. Portal can't be spread, so it can be handled there
 	if (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery > 0)
 	{
 		pAccount->m_TaserBattery--;
