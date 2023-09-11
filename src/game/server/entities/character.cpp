@@ -1067,7 +1067,7 @@ void CCharacter::FireWeapon()
 
 	bool IsTypeGun = GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_GUN;
 	bool CanTabDoubleClick = IsTypeGun || GetActiveWeapon() == WEAPON_HAMMER;
-	if (CanTabDoubleClick && m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
+	if (CanTabDoubleClick && m_pPlayer->m_PlayerFlags&PLAYERFLAG_SCOREBOARD && !m_pPlayer->IsMinigame() && CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 	{
 		m_TabDoubleClickCount++;
 		if (m_TabDoubleClickCount == 2)
