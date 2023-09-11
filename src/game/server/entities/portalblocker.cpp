@@ -72,7 +72,7 @@ void CPortalBlocker::Tick()
 	}
 }
 
-bool CPortalBlocker::OnPlace()
+bool CPortalBlocker::CanPlace()
 {
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	if (!pOwner)
@@ -82,12 +82,25 @@ bool CPortalBlocker::OnPlace()
 	if (GameLayerClipped(m_Pos) || distance(pOwner->GetPos(), m_Pos) > Config()->m_SvPortalMaxDistance)
 		return false;
 
+	// For the first position we check this relative to the owner's position, the second position gets clamped to the closest pos to a wall if it's cutting through
+	if (!m_HasStartPos && GameServer()->Collision()->IntersectLine(pOwner->GetPos(), m_Pos, 0, 0))
+		return false;
+
+	// if we have start position already we validated that the general position is reachable and dont need to validate intersectline
+	return true;
+}
+
+bool CPortalBlocker::OnPlace()
+{
+	if (!CanPlace())
+		return false;
+
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (!pOwner)
+		return false;
+
 	if (!m_HasStartPos)
 	{
-		// For the first position we check this relative to the owner's position, the second position gets clamped to the closest pos to a wall if it's cutting through
-		if (GameServer()->Collision()->IntersectLine(pOwner->GetPos(), m_Pos, 0, 0))
-			return false;
-
 		m_StartPos = m_Pos;
 		m_HasStartPos = true;
 	}
@@ -116,17 +129,9 @@ bool CPortalBlocker::OnPlace()
 
 void CPortalBlocker::Snap(int SnappingClient)
 {
-	// Preview for now only
-	if (!m_HasEndPos)
-	{
-		if (SnappingClient != m_Owner)
-			return;
-
-		// For the currently creating guy
-		CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-		if (pOwner && distance(pOwner->GetPos(), m_Pos) > Config()->m_SvPortalMaxDistance)
-			return;
-	}
+	// Preview for now only, for the currently creating guy
+	if (!m_HasEndPos && SnappingClient == m_Owner && !CanPlace())
+		return;
 
 	if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_StartPos))
 		return;

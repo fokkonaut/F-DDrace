@@ -15,6 +15,8 @@ class CPortalBlocker : public CEntity
 	bool m_HasStartPos;
 	bool m_HasEndPos;
 
+	bool CanPlace();
+
 public:
 	CPortalBlocker(CGameWorld *pGameWorld, vec2 Pos, int Owner);
 	virtual ~CPortalBlocker();
