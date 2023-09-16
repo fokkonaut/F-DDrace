@@ -130,7 +130,7 @@ bool CPortalBlocker::OnPlace()
 void CPortalBlocker::Snap(int SnappingClient)
 {
 	// Preview for now only, for the currently creating guy
-	if (!m_HasEndPos && SnappingClient == m_Owner && !CanPlace())
+	if (!m_HasEndPos && (SnappingClient != m_Owner || !CanPlace()))
 		return;
 
 	if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_StartPos))
