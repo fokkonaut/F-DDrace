@@ -10,6 +10,9 @@ CGameTeams::CGameTeams(CGameContext *pGameContext) :
 	Reset();
 }
 
+static const int s_aLegacyTeams[VANILLA_MAX_CLIENTS] = { 1, 56, 22, 43, 9, 64, 30, 51, 17, 38, 4, 59, 25, 46, 12, 33, 54, 20, 41, 7, 62, 28, 49, 15, 36, 2, 57, 23, 44, 10, 31,
+												52, 18, 39, 5, 60, 26, 47, 13, 34, 55, 21, 42, 8, 63, 29, 50, 16, 37, 3, 58, 24, 45, 11, 32, 53, 19, 40, 6, 61, 27, 48, 14, 35 };
+
 void CGameTeams::Reset()
 {
 	m_Core.Reset();
@@ -436,12 +439,14 @@ Mask128 CGameTeams::TeamMask(int Team, int ExceptID, int Asker, bool SevendownOn
 
 void CGameTeams::SendTeamsState(int ClientID)
 {
-	if (GameServer()->Config()->m_SvTeam == 3)
+	if (GameServer()->Config()->m_SvTeam == 3 || !m_pGameContext->m_apPlayers[ClientID])
 		return;
 
-	if (!m_pGameContext->m_apPlayers[ClientID] || m_pGameContext->GetClientDDNetVersion(ClientID) < VERSION_DDNET)
+	int DDNetVersion = m_pGameContext->GetClientDDNetVersion(ClientID);
+	if (DDNetVersion < VERSION_DDNET)
 		return;
 
+	bool LegacyTeams = DDNetVersion >= VERSION_DDNET_UNIQUE_TEAMS;
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 
 	for(unsigned i = 0; i < VANILLA_MAX_CLIENTS; i++)
@@ -461,7 +466,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 			if (Team != -1)
 			{
-				Msg.AddInt(Team);
+				Msg.AddInt(LegacyTeams ? s_aLegacyTeams[Team] : Team);
 				continue;
 			}
 		}
@@ -470,7 +475,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		int Indicator = GameServer()->m_World.GetSeeOthersInd(ClientID, i);
 		if (Indicator != -1)
 		{
-			Msg.AddInt(Indicator);
+			Msg.AddInt(LegacyTeams ? s_aLegacyTeams[Indicator] : Indicator);
 			continue;
 		}
 
@@ -478,7 +483,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, i);
 		if (Color != -1)
 		{
-			Msg.AddInt(Color);
+			Msg.AddInt(LegacyTeams ? s_aLegacyTeams[Color] : Color);
 			continue;
 		}
 
