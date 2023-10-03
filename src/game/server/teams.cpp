@@ -493,8 +493,15 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Color != -1)
 		{
 			int Team = LegacyTeams ? s_aLegacyTeams[Color] : Color;
-			if (Team == -2) // TEAM_SUPER
-				Team = s_aLegacyTeams[Color - 1]; // keep the previous color
+
+			// If color is >= 56 we simply use the previous color, so that the spectate menu won't change order all the time.
+			bool IsSpec = LegacyTeams && Team >= 56 && Team < VANILLA_MAX_CLIENTS && (GameServer()->m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[ClientID]->IsPaused());
+			if (Team == -2 || IsSpec) // TEAM_SUPER
+			{
+				// keep the previous color
+				Team = s_aLegacyTeams[Color - 1];
+			}
+
 			Msg.AddInt(Team);
 			continue;
 		}
