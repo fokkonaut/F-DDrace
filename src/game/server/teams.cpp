@@ -455,7 +455,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		{
 			int Team = -1;
 			if (i == SPEC_SELECT_FLAG_RED)
-				Team = LegacyTeams ? 56 : 63; // red colored team, used 1 before but that is the most common team for 1vs1
+				Team = LegacyTeams ? s_aLegacyTeams[2] : 63; // red colored team, used 1 before but that is the most common team for 1vs1
 			else if (i == SPEC_SELECT_FLAG_BLUE)
 				Team = LegacyTeams ? s_aLegacyTeams[36] : 36; // blue colored team
 			// try to make hook visible in most cases, i dont want to use TEAM_SUPER cause that would make names red when NONAME e.g. spookyghost

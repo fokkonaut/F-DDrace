@@ -17,6 +17,7 @@ void CRainbowName::Init(CGameContext *pGameServer)
 	{
 		m_aInfo[i].m_UpdateTeams = false;
 		m_aInfo[i].m_ResetChatColor = false;
+		mem_zero(&m_aInfo[i].m_aTeam, sizeof(m_aInfo[i].m_aTeam));
 	}
 }
 
