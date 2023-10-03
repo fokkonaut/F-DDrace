@@ -137,6 +137,13 @@ public:
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 
+	enum
+	{
+		SEE_OTHERS_IND_NONE = -1,
+		SEE_OTHERS_IND_PLAYER,
+		SEE_OTHERS_IND_BUTTON,
+	};
+
 	int GetSeeOthersID(int ClientID);
 	void DoSeeOthers(int ClientID);
 	void ResetSeeOthers(int ClientID);

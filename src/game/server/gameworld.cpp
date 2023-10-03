@@ -247,9 +247,9 @@ void CGameWorld::UpdatePlayerMap(int ClientID)
 int CGameWorld::GetSeeOthersInd(int ClientID, int MapID)
 {
 	if (m_aMap[ClientID].m_TotalOverhang && MapID == GetSeeOthersID(ClientID))
-		return 25;
+		return SEE_OTHERS_IND_BUTTON;
 	if (m_aMap[ClientID].m_NumSeeOthers && MapID >= m_aMap[ClientID].GetMapSize() - m_aMap[ClientID].m_NumSeeOthers)
-		return 24;
+		return SEE_OTHERS_IND_PLAYER;
 	return -1;
 }
 
