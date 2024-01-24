@@ -630,6 +630,9 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 		bool First = true;
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
+			if (!pSelf->m_apPlayers[j])
+				continue;
+
 			NETADDR Addr;
 			pSelf->Server()->GetClientAddr(j, &Addr);
 			if (net_addr_comp(&pSelf->m_aMutes[i].m_Addr, &Addr, 0) == 0)
