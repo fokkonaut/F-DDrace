@@ -622,13 +622,31 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 
 	char aIpBuf[64];
 	char aBuf[128];
+	char aCurrentlyOnline[256] = "";
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 			"Active mutes:");
 	for (int i = 0; i < pSelf->m_NumMutes; i++)
 	{
+		bool First = true;
+		for (int j = 0; j < MAX_CLIENTS; j++)
+		{
+			NETADDR Addr;
+			pSelf->Server()->GetClientAddr(j, &Addr);
+			if (net_addr_comp(&pSelf->m_aMutes[i].m_Addr, &Addr) == 0)
+			{
+				char aAppend[64];
+				str_format(aAppend, sizeof(aAppend), "%s%s", First ? "(" : ", ", pSelf->Server()->ClientName(j));
+				str_append(aCurrentlyOnline, aAppend, sizeof(aCurrentlyOnline));
+				First = false;
+			}
+		}
+		// only when we got at least one guy
+		if (!First)
+			str_append(aCurrentlyOnline, ")", sizeof(aCurrentlyOnline));
+
 		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left (%s)", i, aIpBuf,
-				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aMutes[i].m_aReason);
+		str_format(aBuf, sizeof aBuf, "%d: \"<{%s}>\", %d seconds left (%s)%s", i, aIpBuf,
+				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aMutes[i].m_aReason, aCurrentlyOnline);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
 	}
 }
