@@ -2098,6 +2098,12 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 	if (PlotID < 0 || PlotID > pSelf->Collision()->m_NumPlots)
 		return;
 
+	if (PlotID == 0 && pSelf->Server()->GetAuthedState(pResult->m_ClientID) < pSelf->Config()->m_SvClearFreeDrawLevel)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", "No permission to clear free draw area");
+		return;
+	}
+
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "Cleared plot %d", PlotID);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
