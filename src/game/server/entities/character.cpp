@@ -3946,8 +3946,6 @@ void CCharacter::HandleCursor()
 
 void CCharacter::CalculateCursorPosZoomed()
 {
-	Config()->m_SvTestingCommands = 1;
-
 	vec2 Pos = m_Pos;
 	if (m_DynamicCamera)
 	{
