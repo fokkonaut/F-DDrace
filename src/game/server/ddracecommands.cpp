@@ -622,11 +622,11 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 
 	char aIpBuf[64];
 	char aBuf[128];
-	char aCurrentlyOnline[256] = "";
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
 			"Active mutes:");
 	for (int i = 0; i < pSelf->m_NumMutes; i++)
 	{
+		char aCurrentlyOnline[256] = "";
 		bool First = true;
 		for (int j = 0; j < MAX_CLIENTS; j++)
 		{
