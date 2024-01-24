@@ -635,7 +635,7 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 			if (net_addr_comp(&pSelf->m_aMutes[i].m_Addr, &Addr, 0) == 0)
 			{
 				char aAppend[64];
-				str_format(aAppend, sizeof(aAppend), "%s%s", First ? "(" : ", ", pSelf->Server()->ClientName(j));
+				str_format(aAppend, sizeof(aAppend), "%s%s", First ? " (Currently online: " : ", ", pSelf->Server()->ClientName(j));
 				str_append(aCurrentlyOnline, aAppend, sizeof(aCurrentlyOnline));
 				First = false;
 			}

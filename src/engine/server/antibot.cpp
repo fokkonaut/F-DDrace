@@ -57,7 +57,7 @@ void CAntibot::Log(const char *pMessage, void *pUser)
 		return;
 	}
 
-	pAntibot->Server()->SetRconAuthLevel(AUTHED_MOD); // Send antibot triggers to moderators
+	pAntibot->Server()->SetRconAuthLevel(pAntibot->Config()->m_SvAntibotReportsLevel); // Send antibot triggers to moderators
 	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
 	pAntibot->Server()->SetRconAuthLevel(AUTHED_ADMIN);
 }
