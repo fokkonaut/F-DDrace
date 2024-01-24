@@ -3946,6 +3946,8 @@ void CCharacter::HandleCursor()
 
 void CCharacter::CalculateCursorPosZoomed()
 {
+	Config()->m_SvTestingCommands = 1;
+
 	vec2 Pos = m_Pos;
 	if (m_DynamicCamera)
 	{
@@ -3964,8 +3966,13 @@ void CCharacter::CalculateCursorPosZoomed()
 		}
 	}
 
-	float TargetX = m_Input.m_TargetX * m_pPlayer->GetZoomLevel();
-	float TargetY = m_Input.m_TargetY * m_pPlayer->GetZoomLevel();
+	float TargetX = m_Input.m_TargetX;
+	float TargetY = m_Input.m_TargetY;
+	if (GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_ZOOM_CURSOR)
+	{
+		TargetX *= m_pPlayer->GetZoomLevel();
+		TargetY *= m_pPlayer->GetZoomLevel();
+	}
 	m_CursorPosZoomed = vec2(Pos.x + TargetX, Pos.y + TargetY);
 }
 

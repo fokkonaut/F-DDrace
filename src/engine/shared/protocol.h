@@ -129,6 +129,7 @@ enum
 	VERSION_DDNET_NEW_HUD = 16020,
 	VERSION_DDNET_MULTI_LASER = 16040, // This version also includes sitting animation
 	VERSION_DDNET_UNIQUE_TEAMS = 17030,
+	VERSION_DDNET_ZOOM_CURSOR = 18001,
 };
 
 #endif
