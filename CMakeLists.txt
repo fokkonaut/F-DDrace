@@ -314,7 +314,7 @@ else()
   set(MYSQL_LIBRARIES)
 endif()
 find_package(Pnglite)
-find_package(PythonInterp)
+find_package(Python3)
 find_package(SDL2)
 find_package(Threads)
 find_package(Wavpack)
@@ -370,7 +370,7 @@ if(MYSQL)
 endif()
 show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Pnglite" PNGLITE)
-show_dependency_status("PythonInterp" PYTHONINTERP)
+show_dependency_status("Python3" Python3)
 show_dependency_status("SDL2" SDL2)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
@@ -378,7 +378,7 @@ show_dependency_status("Zlib" ZLIB)
 if(NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile ${CMAKE_PROJECT_NAME}")
 endif()
-if(NOT(PYTHONINTERP_FOUND))
+if(NOT(Python3_FOUND))
   message(SEND_ERROR "You must install Python to compile Teeworlds")
 endif()
 if(MYSQL AND NOT(MYSQL_FOUND))
@@ -429,7 +429,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(TEEWORLDS_GTEST_VERSION release-1.8.1)
+  set(TEEWORLDS_GTEST_VERSION v1.13.0)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -1238,7 +1238,7 @@ file(COPY ${COPY_FILES} DESTINATION .)
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
@@ -1265,7 +1265,7 @@ if(GIT_FOUND)
   endif()
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
     > ${PROJECT_BINARY_DIR}/src/generated/git_revision.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
