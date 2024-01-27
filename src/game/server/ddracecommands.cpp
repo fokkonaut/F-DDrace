@@ -2210,4 +2210,5 @@ void CGameContext::ConReloadDesigns(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Server()->LoadMapDesigns();
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "designs", "Reloaded map designs");
 }
