@@ -141,6 +141,9 @@ CONSOLE_COMMAND("plot_owner", "s[username] i[plotid]", CFGFLAG_SERVER, ConPlotOw
 CONSOLE_COMMAND("plot_info", "i[plotid]", CFGFLAG_SERVER, ConPlotInfo, this, "Shows information about plot i", AUTHED_ADMIN)
 CONSOLE_COMMAND("preset_list", "", CFGFLAG_SERVER, ConPresetList, this, "Shows a list with presets to load from the draw editor", AUTHED_ADMIN)
 
+//designs
+CONSOLE_COMMAND("reload_designs", "", CFGFLAG_SERVER, ConReloadDesigns, this, "Reloads map designs", AUTHED_ADMIN)
+
 //fun
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)

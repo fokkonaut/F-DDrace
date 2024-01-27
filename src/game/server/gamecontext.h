@@ -1046,6 +1046,8 @@ private:
 	static void ConPlotInfo(IConsole::IResult* pResult, void* pUserData);
 	static void ConPresetList(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConReloadDesigns(IConsole::IResult* pResult, void* pUserData);
+
 	enum
 	{
 		MAX_MUTES = 64,

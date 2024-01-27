@@ -2205,3 +2205,9 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 	if (Bufcnt != 0)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
 }
+
+void CGameContext::ConReloadDesigns(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Server()->LoadMapDesigns();
+}
