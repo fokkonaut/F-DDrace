@@ -47,7 +47,7 @@ protected:
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(pData, aAddrStr, sizeof(aAddrStr), false);
-		str_format(pBuffer, BufferSize, "'%s'", aAddrStr);
+		str_format(pBuffer, BufferSize, "'<{%s}>'", aAddrStr);
 		return pBuffer;
 	}
 
