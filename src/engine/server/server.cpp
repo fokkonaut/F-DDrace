@@ -1445,7 +1445,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				else
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-					SendMap(ClientID);
+					if (Config()->m_SvDefaultMapDesign[0])
+						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
+					else
+						SendMap(ClientID);
 				}
 			}
 		}
@@ -1519,10 +1522,27 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				SendConnectionReady(ClientID);
 
+				if (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC)
+				{
+					char aAddrStr[NETADDR_MAXSTRSIZE];
+					net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+
+					bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
+					m_aClients[ClientID].m_State = CClient::STATE_READY;
+					GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
+				}
+
 				if (m_aClients[ClientID].m_DesignChange)
 				{
 					m_aClients[ClientID].m_DesignChange = false;
-					GameServer()->MapDesignChangeDone(ClientID);
+
+					// When default map design is specified and we just joined, don't call this function
+					if (m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+						GameServer()->MapDesignChangeDone(ClientID);
 
 					int Dummy = GetDummy(ClientID);
 					if (Dummy != -1)
@@ -1537,22 +1557,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 					SendMap(ClientID);
-				}
-				else if (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC)
-				{
-					char aAddrStr[NETADDR_MAXSTRSIZE];
-					net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
-
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "player is ready. ClientID=%d addr=<{%s}>", ClientID, aAddrStr);
-					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-
-					bool ConnectAsSpec = m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC;
-					m_aClients[ClientID].m_State = CClient::STATE_READY;
-					GameServer()->OnClientConnected(ClientID, ConnectAsSpec);
-
-					if (Config()->m_SvDefaultMapDesign[0])
-						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 				}
 			}
 		}
