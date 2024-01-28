@@ -263,7 +263,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			if (pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "'%s' has been banned (%s)", pThis->Server()->ClientName(ClientID), pReason);
+				str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", pThis->Server()->ClientName(ClientID), Minutes, pReason);
 				pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 			}
 		}
