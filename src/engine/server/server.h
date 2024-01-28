@@ -369,7 +369,7 @@ public:
 	virtual void SetClientCountry(int ClientID, int Country);
 	virtual void SetClientScore(int ClientID, int Score);
 
-	void Kick(int ClientID, const char *pReason);
+	int Kick(int ClientID, const char *pReason);
 	void Ban(int ClientID, int Seconds, const char *pReason); // bans ip of player with clientid
 
 	void DemoRecorder_HandleAutoStart();

@@ -260,10 +260,12 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (can't ban dummies)");
 		else
 		{
+			char aName[32];
+			str_copy(aName, pThis->Server()->ClientName(ClientID), sizeof(aName));
 			if (pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", pThis->Server()->ClientName(ClientID), Minutes, pReason);
+				str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", aName, Minutes, pReason);
 				pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 			}
 		}
@@ -474,30 +476,31 @@ void CServer::SetClientScore(int ClientID, int Score)
 	m_aClients[ClientID].m_Score = Score;
 }
 
-void CServer::Kick(int ClientID, const char *pReason)
+int CServer::Kick(int ClientID, const char *pReason)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CClient::STATE_EMPTY)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id to kick");
-		return;
+		return 1;
 	}
 	else if(m_RconClientID == ClientID)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick yourself");
- 		return;
+ 		return 1;
 	}
 	else if(m_aClients[ClientID].m_Authed > m_RconAuthLevel)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "kick command denied");
- 		return;
+ 		return 1;
 	}
 	else if (m_aClients[ClientID].m_State == CClient::STATE_DUMMY)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick dummies");
-		return;
+		return 1;
 	}
 
 	m_NetServer.Drop(ClientID, pReason);
+	return 0;
 }
 
 void CServer::Ban(int ClientID, int Seconds, const char *pReason)
@@ -2895,24 +2898,32 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 	CServer *pThis = (CServer *)pUser;
 	int KickedID = pResult->GetInteger(0);
 	const char *pReason = pResult->GetString(1);
+
+	int Ret = -1;
+	char aName[32];
+	str_copy(aName, pThis->ClientName(KickedID), sizeof(aName));
+
 	if(pResult->NumArguments() > 1)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pReason);
-		pThis->Kick(KickedID, aBuf);
+		Ret = pThis->Kick(KickedID, aBuf);
 	}
 	else
-		pThis->Kick(pResult->GetInteger(0), "Kicked by console");
+		Ret = pThis->Kick(pResult->GetInteger(0), "Kicked by console");
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' has been kicked", pThis->ClientName(KickedID));
-	if (pReason[0])
+	if (Ret == 0)
 	{
-		char aReason[128];
-		str_format(aReason, sizeof(aReason), " (%s)", pReason);
-		str_append(aBuf, aReason, sizeof(aBuf));
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' has been kicked", aName);
+		if (pReason[0])
+		{
+			char aReason[128];
+			str_format(aReason, sizeof(aReason), " (%s)", pReason);
+			str_append(aBuf, aReason, sizeof(aBuf));
+		}
+		pThis->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 	}
-	pThis->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)

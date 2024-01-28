@@ -261,7 +261,7 @@ public:
 	virtual int GetAuthedState(int ClientID) const = 0;
 	virtual const char *AuthName(int ClientID) const = 0;
 	virtual bool IsBanned(int ClientID) = 0;
-	virtual void Kick(int ClientID, const char *pReason) = 0;
+	virtual int Kick(int ClientID, const char *pReason) = 0;
 	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual const char *GetMapName() = 0;
