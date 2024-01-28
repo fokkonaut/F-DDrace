@@ -1448,7 +1448,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				else
 				{
 					m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
-					if (Config()->m_SvDefaultMapDesign[0])
+					if (Config()->m_SvDefaultMapDesign[0] && GetDummy(ClientID) == -1)
 						ChangeMapDesign(ClientID, Config()->m_SvDefaultMapDesign);
 					else
 						SendMap(ClientID);
