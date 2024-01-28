@@ -451,7 +451,7 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason)
 	return false;
 }
 
-void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason)
+void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason, int ExecutorID)
 {
 	if (!TryMute(pAddr, Secs, pReason))
 		return;
@@ -465,6 +465,9 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 	else
 		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds", pDisplayName, Secs);
 	SendChat(-1, CHAT_ALL, -1, aBuf);
+
+	if (ExecutorID != -1)
+		SendModLogMessage(ExecutorID, aBuf);
 }
 
 void CGameContext::ConVoteMute(IConsole::IResult* pResult, void* pUserData)
@@ -568,8 +571,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
-			pSelf->Server()->ClientName(Victim), pReason);
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), pSelf->Server()->ClientName(Victim), pReason, pResult->m_ClientID);
 }
 
 // mute through ip, arguments reversed to workaround parsing
@@ -584,7 +586,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL, pReason);
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL, pReason, pResult->m_ClientID);
 }
 
 // unmute by mute list index
@@ -1915,6 +1917,7 @@ void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d seconds", pSelf->Server()->ClientName(Victim), Seconds);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->SendModLogMessage(pResult->m_ClientID, aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "You were arrested for %d seconds", Seconds);
 		pSelf->SendChatTarget(Victim, aBuf);
@@ -1931,6 +1934,7 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' was released from jail", pSelf->Server()->ClientName(Victim));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
 void CGameContext::SetViewCursor(IConsole::IResult *pResult, void *pUserData, bool Zoomed)
@@ -2111,6 +2115,7 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Cleared plot %d", PlotID);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
 	pSelf->ClearPlot(PlotID);
+	pSelf->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
 void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)

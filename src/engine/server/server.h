@@ -563,6 +563,8 @@ public:
 	};
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "");
 
+	virtual const char *GetAuthIdent(int ClientID);
+
 	virtual int *GetIdMap(int ClientID);
 	virtual int *GetReverseIdMap(int ClientID);
 

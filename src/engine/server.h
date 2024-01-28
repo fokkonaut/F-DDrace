@@ -56,6 +56,8 @@ public:
 
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "") = 0;
 
+	virtual const char *GetAuthIdent(int ClientID) = 0;
+
 	virtual int *GetIdMap(int ClientID) = 0;
 	virtual int *GetReverseIdMap(int ClientID) = 0;
 
@@ -314,6 +316,7 @@ public:
 	virtual bool IsClientSpectator(int ClientID) const = 0;
 
 	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) = 0;
+	virtual void SendModLogMessage(int ClientID, const char *pMsg) = 0;
 
 	virtual const CUuid GameUuid() const = 0;
 	virtual const char *GameType() const = 0;

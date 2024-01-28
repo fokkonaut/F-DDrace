@@ -683,6 +683,9 @@ public:
 	void SendStartMessages(int ClientID);
 
 	const char *FormatURL(const char *pURL);
+	const char *GetAvatarURL(int ClientID);
+
+	virtual void SendModLogMessage(int ClientID, const char *pMsg);
 
 	void SnapSelectedArea(CSelectedArea *pSelectedArea);
 
@@ -1073,7 +1076,7 @@ private:
 	CVoteMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason);
-	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "");
+	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", int ExecutorID = -1);
 	bool TryVoteMute(const NETADDR* pAddr, int Secs);
 	bool VoteMute(const NETADDR* pAddr, int Secs, const char* pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR* pAddr, const char* pDisplayName, int AuthedID);

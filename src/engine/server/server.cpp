@@ -259,7 +259,14 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 		else if (pThis->Server()->m_aClients[ClientID].m_State == CServer::CClient::STATE_DUMMY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (can't ban dummies)");
 		else
-			pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason);
+		{
+			if (pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "'%s' has been banned (%s)", pThis->Server()->ClientName(ClientID), pReason);
+				pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
+			}
+		}
 	}
 	else
 		ConBan(pResult, pUser);
@@ -2885,14 +2892,27 @@ void CServer::ConRescue(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
+	CServer *pThis = (CServer *)pUser;
+	int KickedID = pResult->GetInteger(0);
+	const char *pReason = pResult->GetString(1);
 	if(pResult->NumArguments() > 1)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pResult->GetString(1));
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), aBuf);
+		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pReason);
+		pThis->Kick(KickedID, aBuf);
 	}
 	else
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
+		pThis->Kick(pResult->GetInteger(0), "Kicked by console");
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' has been kicked", pThis->ClientName(KickedID));
+	if (pReason[0])
+	{
+		char aReason[128];
+		str_format(aReason, sizeof(aReason), " (%s)", pReason);
+		str_append(aBuf, aReason, sizeof(aBuf));
+	}
+	pThis->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
@@ -3792,6 +3812,13 @@ void CServer::CWebhook::Run()
 		dbg_msg("webhook", "Sending webhook message failed, returned %d", ret);
 		dbg_msg("webhook", "%s", m_aCommand);
 	}
+}
+
+const char *CServer::GetAuthIdent(int ClientID)
+{
+	if (ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return "";
+	return m_AuthManager.KeyIdent(m_aClients[ClientID].m_AuthKey);
 }
 
 void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername, const char *pAvatarURL)
