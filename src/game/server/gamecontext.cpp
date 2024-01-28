@@ -2663,6 +2663,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastSetTeam = Server()->Tick();
 
+			if (pPlayer->m_EscapeTime)
+			{
+				SendChatTarget(ClientID, "You can't join the spectators while being searched by the police");
+				return;
+			}
+
 			// Switch team on given client and kill/respawn him
 			if(m_pController->CanJoinTeam(pMsg->m_Team, ClientID))
 			{
