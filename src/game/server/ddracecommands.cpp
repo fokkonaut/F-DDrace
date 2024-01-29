@@ -466,7 +466,7 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 		str_format(aBuf, sizeof aBuf, "'%s' has been muted for %d seconds", pDisplayName, Secs);
 	SendChat(-1, CHAT_ALL, -1, aBuf);
 
-	if (ExecutorID != -1)
+	if (ExecutorID >= 0)
 		SendModLogMessage(ExecutorID, aBuf);
 }
 
