@@ -501,6 +501,9 @@ void CGameContext::SendChatTeam(int Team, const char *pText)
 
 void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
 {
+	if (ClientID < 0)
+		return;
+
 	char aName[128];
 	str_format(aName, sizeof(aName), "%s (%s)", Server()->ClientName(ClientID), Server()->GetAuthIdent(ClientID));
 	Server()->SendWebhookMessage(Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(GetAvatarURL(ClientID)));
