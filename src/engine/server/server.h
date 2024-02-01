@@ -328,6 +328,7 @@ public:
 	static int InitMapDesign(const char *pName, int IsDir, int StorageType, void *pUser);
 	virtual void ChangeMapDesign(int ClientID, const char *pName);
 	void SendMapDesign(int ClientID, int Design);
+	int GetMapDesignID(const char *pName);
 	virtual const char *GetMapDesign(int ClientID);
 
 	// map https url

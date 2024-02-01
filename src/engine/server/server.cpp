@@ -963,6 +963,7 @@ int CServer::ClientRejoinCallback(int ClientID, bool Sevendown, int Socket, void
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 
+	int PrevDesign = pThis->m_aClients[ClientID].m_CurrentMapDesign;
 	pThis->m_aClients[ClientID].Reset();
 	pThis->m_aClients[ClientID].m_Rejoining = true;
 	pThis->m_aClients[ClientID].m_Sevendown = Sevendown;
@@ -971,13 +972,13 @@ int CServer::ClientRejoinCallback(int ClientID, bool Sevendown, int Socket, void
 	if (pThis->m_aClients[ClientID].m_Main)
 	{
 		pThis->m_aClients[ClientID].m_DesignChange = false;
-		pThis->m_aClients[ClientID].m_CurrentMapDesign = -1;
+		pThis->m_aClients[ClientID].m_CurrentMapDesign = PrevDesign;
 	}
 	else
 	{
 		int Dummy = pThis->GetDummy(ClientID);
 		if (Dummy != -1)
-			pThis->m_aClients[Dummy].m_CurrentMapDesign = pThis->m_aClients[ClientID].m_CurrentMapDesign;
+			pThis->m_aClients[ClientID].m_CurrentMapDesign = pThis->m_aClients[Dummy].m_CurrentMapDesign;
 	}
 
 	pThis->SendMap(ClientID);
