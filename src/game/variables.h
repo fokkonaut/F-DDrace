@@ -318,6 +318,7 @@ MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord
 MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 16, CFGFLAG_SERVER, "Treshold for antibot autoban (0=off)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotBanMinutes, sv_antibot_ban_minutes, 10000, 0, 99999, CFGFLAG_SERVER, "Time in minutes a player gets banned for by antibot", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotReportsLevel, sv_antibot_reports_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to see antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotReportsFilter, sv_antibot_reports_filter, 1, 0, 1, CFGFLAG_SERVER, "Whether antibot reports are filtered if they are legit", AUTHED_ADMIN)
 
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)

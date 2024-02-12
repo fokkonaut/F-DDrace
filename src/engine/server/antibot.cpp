@@ -71,7 +71,8 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 		pAntibot->m_FetchKindID = -1;
 	}
 
-	if (str_comp(pAntibot->m_aKind[ClientID], "known_bot")
+	if (pAntibot->Config()->m_SvAntibotReportsFilter
+		&& str_comp(pAntibot->m_aKind[ClientID], "known_bot")
 		&& str_comp(pAntibot->m_aKind[ClientID], "weird")
 		&& str_comp(pAntibot->m_aKind[ClientID], "selfbuilt/linux")
 		&& str_comp(pAntibot->m_aKind[ClientID], "pending")
