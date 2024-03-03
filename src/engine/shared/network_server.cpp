@@ -131,32 +131,6 @@ SECURITY_TOKEN CNetServer::GetSecurityToken(const NETADDR &Addr)
 	return SecurityToken;
 }
 
-bool CNetServer::GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer)
-{
-	for(int i = 0; i < NET_MAX_CLIENTS; i++)
-	{
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-			continue;
-
-		if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), pAddr, true) == 0)
-			return m_aSlots[i].m_Connection.m_Sevendown;
-	}
-	
-	// connless packets use this now: *pSevendown = (pBuffer[0] & 0x3) != 1;
-	/*int Flags = pBuffer[0]>>4;
-	if (pPacket->m_Flags&2) Flags |= NET_PACKETFLAG_CONNLESS;
-	if (Flags&NET_PACKETFLAG_CONNLESS)
-	{
-		pPacket->m_Flags = Flags;
-		return true;
-	}
-
-	if (pPacket->m_Flags&NET_PACKETFLAG_CONNLESS && pBuffer[0] != 0xff)
-		return false;*/
-
-	return !(pPacket->m_Flags&1);
-}
-
 /*
 	TODO: chopp up this function into smaller working parts
 */
@@ -167,10 +141,11 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 		// check for a chunk
 		if(m_RecvUnpacker.IsActive() && m_RecvUnpacker.FetchChunk(pChunk))
 			return 1;
-
+		
 		// TODO: empty the recvinfo
 		NETADDR Addr;
-		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, pSevendown, Socket, this);
+		int Size = 0;
+		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, pSevendown, Socket, &Size);
 		// no more packets for now
 		if(Result > 0)
 			break;
@@ -235,6 +210,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 						Slot = i;
 						break;
 					}
+				}
+
+				if (*pSevendown && Slot != -1 && !m_aSlots[Slot].m_Connection.m_Sevendown)
+				{
+					*pSevendown = false;
+					if (UnpackPacket(m_RecvUnpacker.m_aBuffer, Size, &m_RecvUnpacker.m_Data, pSevendown))
+						continue;
 				}
 
 				int ControlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];

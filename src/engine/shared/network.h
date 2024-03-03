@@ -249,7 +249,8 @@ public:
 	void SendControlMsgWithToken(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended, int Socket);
 	void SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown, int Socket);
 	void SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bool Sevendown, int Socket, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
-	int UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, class CNetServer *pNetServer = 0);
+	int UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, int *pSize);
+	int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool *pSevendown);
 };
 
 class CNetTokenManager
@@ -556,7 +557,6 @@ public:
 	int NumClients() { return m_NumClients; }
 	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
-	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
 
 	int ResetErrorString(int ClientID);
 	const char *ErrorString(int ClientID);

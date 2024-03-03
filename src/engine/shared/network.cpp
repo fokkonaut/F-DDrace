@@ -279,9 +279,7 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 		}
 	}
 }
-
-// TODO: rename this function
-int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, CNetServer *pNetServer)
+int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, int *pSize)
 {
 	// Don't do it for now, cuz it causes delay unpacking this socket aswell...
 	if (Socket == SOCKET_TWO)
@@ -292,6 +290,16 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 	if(Size <= 0)
 		return 1;
 
+	int Result = UnpackPacket(pBuffer, Size, pPacket, pSevendown);
+	if(pSize)
+		*pSize = Size;
+	return Result;
+}
+
+
+// TODO: rename this function
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool *pSevendown)
+{
 	// log the data
 	if(m_DataLogRecv)
 	{
@@ -353,8 +361,8 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 	}
 	else
 	{
-		if (pNetServer)
-			*pSevendown = pNetServer->GetSevendown(pAddr, pPacket, pBuffer);
+		if (pPacket->m_Flags & 1)
+			*pSevendown = false;
 
 		if(Size - NET_PACKETHEADERSIZE > NET_MAX_PAYLOAD)
 		{
@@ -367,15 +375,14 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 		if (*pSevendown)
 		{
 			HeaderSize = 3;
-			pPacket->m_Flags = pBuffer[0]>>4;
 			pPacket->m_Ack = ((pBuffer[0]&0xf)<<8) | pBuffer[1];
 			pPacket->m_Token = NET_TOKEN_NONE;
 
 			int Flags = 0;
-			if (pPacket->m_Flags&1) Flags |= NET_PACKETFLAG_CONTROL;
-			if (pPacket->m_Flags&2) Flags |= NET_PACKETFLAG_CONNLESS;
-			if (pPacket->m_Flags&4) Flags |= NET_PACKETFLAG_RESEND;
-			if (pPacket->m_Flags&8) Flags |= NET_PACKETFLAG_COMPRESSION;
+			if (pPacket->m_Flags&4) Flags |= NET_PACKETFLAG_CONTROL;
+			if (pPacket->m_Flags&8) Flags |= NET_PACKETFLAG_CONNLESS;
+			if (pPacket->m_Flags&16) Flags |= NET_PACKETFLAG_RESEND;
+			if (pPacket->m_Flags&32) Flags |= NET_PACKETFLAG_COMPRESSION;
 			pPacket->m_Flags = Flags;
 		}
 		else
