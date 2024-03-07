@@ -2681,7 +2681,7 @@ void CCharacter::HandleTiles(int Index)
 				// broadcast
 				if (!IsWeaponIndicator())
 				{
-					char aMsg[256];
+					char aMsg[512];
 					char aSurvival[32];
 					char aPolice[32];
 					char aPlusXP[128];
