@@ -2,11 +2,7 @@ F-DDrace ![GitHub Actions](https://github.com/fokkonaut/F-DDrace/workflows/Build
 =========
 
 F-DDrace is a modification of Teeworlds, developed by fokkonaut. <br>
-Discord: fokkonaut#5556 and https://discord.gg/qccRrtb
-
-To clone this repository with full history and external libraries:
-
-	git clone -b F-DDrace https://github.com/fokkonaut/F-DDrace --recursive
+Discord: fokkonaut#5556 or https://discord.gg/qccRrtb
 	
 History
 =======
