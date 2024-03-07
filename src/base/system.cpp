@@ -2282,19 +2282,31 @@ void str_append(char *dst, const char *src, int dst_size)
 	}
 
 	dst[dst_size-1] = 0; /* assure null termination */
+	str_utf8_fix_truncation(dst);
 }
 
 void str_copy(char *dst, const char *src, int dst_size)
 {
-#if defined(__GNUC__) && __GNUC__ >= 8
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-truncation" // false positive, added in gcc 8.0
-#endif
-	strncpy(dst, src, dst_size);
-#if defined(__GNUC__) && __GNUC__ >= 8
-#pragma GCC diagnostic pop
-#endif
-	dst[dst_size-1] = 0; /* assure null termination */
+	dst[0] = '\0';
+	strncat(dst, src, dst_size - 1);
+	str_utf8_fix_truncation(dst);
+}
+
+void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_len)
+{
+	int size = -1;
+	const char *cursor = src;
+	int pos = 0;
+	while(pos <= truncation_len && cursor - src < dst_size && size != cursor - src)
+	{
+		size = cursor - src;
+		if(str_utf8_decode(&cursor) == 0)
+		{
+			break;
+		}
+		pos++;
+	}
+	str_copy(dst, src, size + 1);
 }
 
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len)
@@ -2312,21 +2324,25 @@ int str_length(const char *str)
 	return (int)strlen(str);
 }
 
-void str_format(char *buffer, int buffer_size, const char *format, ...)
+int str_format_v(char* buffer, int buffer_size, const char* format, va_list args)
 {
-#if defined(CONF_FAMILY_WINDOWS) && !defined(__GNUC__)
-	va_list ap;
-	va_start(ap, format);
-	_vsprintf_p(buffer, buffer_size, format, ap);
-	va_end(ap);
+#if defined(CONF_FAMILY_WINDOWS)
+	_vsprintf_p(buffer, buffer_size, format, args);
+	buffer[buffer_size - 1] = 0; /* assure null termination */
 #else
-	va_list ap;
-	va_start(ap, format);
-	vsnprintf(buffer, buffer_size, format, ap);
-	va_end(ap);
+	vsnprintf(buffer, buffer_size, format, args);
+	/* null termination is assured by definition of vsnprintf */
 #endif
+	return str_utf8_fix_truncation(buffer);
+}
 
-	buffer[buffer_size-1] = 0; /* assure null termination */
+int str_format(char* buffer, int buffer_size, const char* format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int length = str_format_v(buffer, buffer_size, format, args);
+	va_end(args);
+	return length;
 }
 
 FILE *pipe_open(const char *cmd, const char *mode)
@@ -3011,35 +3027,31 @@ int str_utf8_rewind(const char *str, int cursor)
 	return cursor;
 }
 
+int str_utf8_fix_truncation(char *str)
+{
+	int len = str_length(str);
+	if(len > 0)
+	{
+		int last_char_index = str_utf8_rewind(str, len);
+		const char *last_char = str + last_char_index;
+		// Fix truncated UTF-8.
+		if(str_utf8_decode(&last_char) == -1)
+		{
+			str[last_char_index] = 0;
+			return last_char_index;
+		}
+	}
+	return len;
+}
+
 int str_utf8_forward(const char *str, int cursor)
 {
-	const char *buf = str + cursor;
-	if(!buf[0])
+	const char *ptr = str + cursor;
+	if(str_utf8_decode(&ptr) == 0)
+	{
 		return cursor;
-
-	if((*buf&0x80) == 0x0)  /* 0xxxxxxx */
-		return cursor+1;
-	else if((*buf&0xE0) == 0xC0) /* 110xxxxx */
-	{
-		if(!buf[1]) return cursor+1;
-		return cursor+2;
 	}
-	else  if((*buf & 0xF0) == 0xE0)	/* 1110xxxx */
-	{
-		if(!buf[1]) return cursor+1;
-		if(!buf[2]) return cursor+2;
-		return cursor+3;
-	}
-	else if((*buf & 0xF8) == 0xF0)	/* 11110xxx */
-	{
-		if(!buf[1]) return cursor+1;
-		if(!buf[2]) return cursor+2;
-		if(!buf[3]) return cursor+3;
-		return cursor+4;
-	}
-
-	/* invalid */
-	return cursor+1;
+	return ptr - str;
 }
 
 int str_utf8_encode(char *ptr, int chr)

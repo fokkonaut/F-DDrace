@@ -1120,7 +1120,7 @@ int str_length(const char *str);
 		- The strings are treated as zero-termineted strings.
 		- Guarantees that dst string will contain zero-termination.
 */
-void str_format(char *buffer, int buffer_size, const char *format, ...)
+int str_format(char *buffer, int buffer_size, const char *format, ...)
 GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
 FILE *pipe_open(const char *cmd, const char *mode);
@@ -2008,6 +2008,17 @@ void str_utf8_trim_whitespaces_right(char *str);
 		- Won't move the cursor less then 0
 */
 int str_utf8_rewind(const char *str, int cursor);
+
+/*
+	Function: str_utf8_fix_truncation
+		Fixes truncation of a Unicode character at the end of a UTF-8
+		string.
+	Returns:
+		The new string length.
+	Parameters:
+		str - utf8 string
+*/
+int str_utf8_fix_truncation(char *str);
 
 /*
 	Function: str_utf8_forward
