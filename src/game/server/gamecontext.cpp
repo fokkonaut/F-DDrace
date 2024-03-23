@@ -2013,7 +2013,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char aOldName[MAX_NAME_LENGTH];
 				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
-				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0 && !ProcessSpamProtection(ClientID))
+				if(str_comp(aOldName, pName) != 0 && !ProcessSpamProtection(ClientID))
 				{
 					Server()->SetClientName(ClientID, pName);
 					char aChatText[256];
