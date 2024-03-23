@@ -1983,8 +1983,6 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			if(pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*Config()->m_SvInfoChangeDelay > Server()->Tick())
 				return 0;
-			if(ProcessSpamProtection(ClientID))
-				return 0;
 
 			CNetMsg_Cl_SkinChange *pMsg = (CNetMsg_Cl_SkinChange *)s_aRawMsg;
 
@@ -2016,7 +2014,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				char aOldName[MAX_NAME_LENGTH];
 				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 				Server()->SetClientName(ClientID, pName);
-				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0)
+				if(str_comp(aOldName, Server()->ClientName(ClientID)) != 0 && !ProcessSpamProtection(ClientID))
 				{
 					char aChatText[256];
 					str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
@@ -2888,8 +2886,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(MsgID == NETMSGTYPE_CL_SKINCHANGE)
 		{
 			if(pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo+Server()->TickSpeed()*Config()->m_SvInfoChangeDelay > Server()->Tick())
-				return;
-			if(ProcessSpamProtection(ClientID))
 				return;
 
 			pPlayer->UpdatePlaytime();
