@@ -79,20 +79,3 @@ You can easily spectate the flags using the spectate menu (`bind x +spectate`).
 
 * **Extra weapons** <br>
 The inventory has been extended to support more than the regular weapons. If not placed in the map, most of the extra weapons are admin-only.
-
-Chat commands
-=============
-
-| Command | Arguments | Description |
-| ------- | --------- | ----------- |
-| /account | | Shows information about your account |
-| /police | ?page | Shows information about police |
-| /score | 'time', 'level', 'points' | Changes the displayed score in scoreboard |
-| /spookyghost | | Shows information about the spooky ghost |
-| /stats | ?playername | Shows stats about specific player, otherwise self |
-
-Admin commands
-==============
-
-Settings
-========
