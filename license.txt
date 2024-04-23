@@ -1,5 +1,5 @@
 Copyright (C) 2007-2020 Magnus Auvinen
-Copyright (C) 2019-2020 fokkonaut
+Copyright (C) 2019-2024 fokkonaut
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
