@@ -114,7 +114,7 @@ MACRO_CONFIG_INT(SvTournamentMode, sv_tournament_mode, 0, 0, 2, CFGFLAG_SAVE|CFG
 MACRO_CONFIG_INT(SvPlayerReadyMode, sv_player_ready_mode, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "When enabled, players can pause/unpause the game and start the game on warmup via their ready state", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSpamprotection, sv_spamprotection, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_SERVER, "Spam protection", AUTHED_ADMIN)
 
-MACRO_CONFIG_INT(SvPlayerSlots, sv_player_slots, 64, 0, MAX_PLAYERS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Number of slots to reserve for players", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPlayerSlots, sv_player_slots, 128, 0, MAX_PLAYERS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Number of slots to reserve for players", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvSkillLevel, sv_skill_level, 2, SERVERINFO_LEVEL_MIN, SERVERINFO_LEVEL_MAX, CFGFLAG_SAVE|CFGFLAG_SERVER, "Supposed player skill level", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvInactiveKickTime, sv_inactivekick_time, 0, 0, 1000, CFGFLAG_SAVE|CFGFLAG_SERVER, "How many minutes to wait before taking care of inactive clients", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvInactiveKick, sv_inactivekick, 2, 1, 3, CFGFLAG_SAVE|CFGFLAG_SERVER, "How to deal with inactive clients (1=move player to spectator, 2=move to free spectator slot/kick, 3=kick)", AUTHED_ADMIN)
@@ -182,8 +182,8 @@ MACRO_CONFIG_INT(SvShutdownSaveTeeExpire, sv_shutdown_save_tee_expire, 1, 1, 24*
 MACRO_CONFIG_INT(SvJailSaveTeeExpire, sv_jail_save_tee_expire, 24, 1, 24*7, CFGFLAG_SERVER, "How many hours until a jail save expires", AUTHED_ADMIN)
 
 // flags
-MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 0, 0, 2, CFGFLAG_SERVER, "Flag sounds on drop/pickup/respawn (0=off, 1=public sounds, 2=respawn public rest local)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 2, 0, 2, CFGFLAG_SERVER, "Flag sounds on drop/pickup/respawn (0=off, 1=public sounds, 2=respawn public rest local)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFlagRespawnDropped, sv_flag_respawn_dropped, 90, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a dropped flag resets", AUTHED_ADMIN)
 
 // dummy
@@ -193,19 +193,19 @@ MACRO_CONFIG_INT(SvFakeDummyPing, sv_fake_dummy_ping, 0, 0, 1, CFGFLAG_SERVER, "
 MACRO_CONFIG_INT(SvV3OffsetX, sv_v3_offset_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvV3OffsetY, sv_v3_offset_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset Y for the blmapV3 dummy", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDummyBotSkin, sv_dummy_bot_skin, 1, 0, 1, CFGFLAG_SERVER, "Whether dummies should have the bot skin applied", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDummyBlocking, sv_dummy_blocking, 1, 0, 1, CFGFLAG_SERVER, "Whether blocking dummies increases killstreak and gives block points", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDummyBlocking, sv_dummy_blocking, 0, 0, 1, CFGFLAG_SERVER, "Whether blocking dummies increases killstreak and gives block points", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHideBotsStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from status command", AUTHED_ADMIN)
 
 // weapon indicator
 MACRO_CONFIG_INT(SvWeaponIndicatorDefault, sv_weapon_indicator_default, 1, 0, 1, CFGFLAG_SERVER, "Whether the weapon names are displayed in the broadcast", AUTHED_ADMIN)
 
 // drops
-MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to allow dropping weapons with f4", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDropsOnDeath, sv_drops_on_death, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether there is a chance of dropping weapons on death (health and armor in survival, after 5min in no minigame)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to allow dropping weapons with f4", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDropsOnDeath, sv_drops_on_death, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether there is a chance of dropping weapons on death (health and armor in survival, after 5min in no minigame)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDestroyDropsOnLeave, sv_destroy_drops_on_leave, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Destroy dropped weapons (hearts, shields) when their owner disconnects", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxWeaponDrops, sv_max_weapon_drops, 5, 0, 10, CFGFLAG_SERVER, "Maximum amount of dropped weapons per player", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxPickupDrops, sv_max_pickup_drops, 500, 0, 600, CFGFLAG_SERVER, "Maximum amount of dropped hearts and shields", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvInteractiveDrops, sv_interactive_drops, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether dropped weapons, flags, money interact with shotgun and explosions", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvInteractiveDrops, sv_interactive_drops, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether dropped weapons, flags, money interact with shotgun and explosions", AUTHED_ADMIN)
 
 // vanilla
 MACRO_CONFIG_INT(SvVanillaModeStart, sv_vanilla_mode_start, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to set the players mode to vanilla on spawn or ddrace", AUTHED_ADMIN)
@@ -252,8 +252,8 @@ MACRO_CONFIG_INT(SvSnakeSmooth, sv_snake_smooth, 1, 0, 1, CFGFLAG_SERVER, "Wheth
 // chat
 MACRO_CONFIG_INT(SvAtEveryoneLevel, sv_ateveryone_level, AUTHED_MOD, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use @everyone in chat", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvChatAdminPingLevel, sv_chat_admin_ping_level, AUTHED_NO, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to ping authed players in chat", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvLolFilter, sv_lol_filter, 0, 0, 1, CFGFLAG_SERVER, "I like turtles.", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvLocalChat, sv_local_chat, 0, 0, 1, CFGFLAG_SERVER, "Whether local chat is enabled (deactivates sv_authed_highlighted)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvLolFilter, sv_lol_filter, 1, 0, 1, CFGFLAG_SERVER, "I like turtles.", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvLocalChat, sv_local_chat, 1, 0, 1, CFGFLAG_SERVER, "Whether local chat is enabled (deactivates sv_authed_highlighted)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWhisperLog, sv_whisper_log, 0, 0, 1, CFGFLAG_SERVER, "Whether whisper messages get logged aswell", AUTHED_ADMIN)
 
 // admin highlight
@@ -326,24 +326,24 @@ MACRO_CONFIG_INT(SvWhoIs, sv_whois, 0, 0, 1, CFGFLAG_SERVER, "Whether WhoIs is e
 MACRO_CONFIG_STR(SvWhoIsFile, sv_whois_file, 128, "data", CFGFLAG_SERVER, "WhoIs file", AUTHED_ADMIN)
 
 // bugs
-MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 1, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength and bounce or weak is also there", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvWeakHook, sv_weak_hook, 0, 0, 1, CFGFLAG_SERVER, "Whether everybody has the same hook strength and bounce or weak is also there", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvStoppersPassthrough, sv_stoppers_passthrough, 0, 0, 1, CFGFLAG_SERVER, "Whether tees can pass through stoppers with enough speed", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 1, 0, 1, CFGFLAG_SERVER, "Whether firing shotgun while standing in another tee gives an insane boost", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 0, 0, 1, CFGFLAG_SERVER, "Whether firing shotgun while standing in another tee gives an insane boost", AUTHED_ADMIN)
 
 // other
-MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 0, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 1, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, 0, 0, 1, CFGFLAG_SERVER, "Default score (0 = time, 1 = level, 2 = blockpoints)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 1, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, 1, 0, 1, CFGFLAG_SERVER, "Default score (0 = time, 1 = level, 2 = blockpoints)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 0, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClanProtection, sv_clan_protection, 1, 0, 1, CFGFLAG_SERVER, "Whether players have to use greensward skin for Chilli.* clantag", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 0, 0, 1, CFGFLAG_SERVER, "Whether your tee bounces while moving in freeze", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 1, 0, 1, CFGFLAG_SERVER, "Whether your tee bounces while moving in freeze", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 15, 1, 100, CFGFLAG_SERVER, "Player map update rate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "bans.cfg", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowDummy, sv_allow_dummy, 1, 0, 1, CFGFLAG_SERVER, "Whether clients can connect their dummy to the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600, CFGFLAG_SERVER, "Minigame auto leave when afk for x seconds (0=off)", AUTHED_ADMIN)
