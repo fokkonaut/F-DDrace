@@ -1,4 +1,5 @@
 /.bam
+/enc_temp_folder
 /bam
 /build
 /config.lua
