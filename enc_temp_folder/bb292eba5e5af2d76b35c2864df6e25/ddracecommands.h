@@ -22,7 +22,7 @@ CONSOLE_COMMAND("unrifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnRifle, th
 CONSOLE_COMMAND("unweapons", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnWeapons, this, "Takes all weapons from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("ninja", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConNinja, this, "Makes player v a ninja", AUTHED_ADMIN)
 CONSOLE_COMMAND("super", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST|CFGFLAG_CHAT, ConSuper, this, "Makes player v super", AUTHED_NO)
-CONSOLE_COMMAND("unsuper", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST|CFGFLAG_CHAT, ConUnSuper, this, "Removes super from player v", AUTHED_NO)
+CONSOLE_COMMAND("unsuper", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnSuper, this, "Removes super from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("unsolo", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnSolo, this, "Puts player v out of solo part", AUTHED_ADMIN)
 CONSOLE_COMMAND("undeep", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnDeep, this, "Puts player v out of deep freeze", AUTHED_ADMIN)
 CONSOLE_COMMAND("left", "", CFGFLAG_SERVER|CMDFLAG_TEST, ConGoLeft, this, "Makes you move 1 tile left", AUTHED_ADMIN)
@@ -104,12 +104,7 @@ CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_TEST,
 CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says a chat message as player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("teecontrol", "?v[id] ?i[forcedid]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 CONSOLE_COMMAND("set_minigame", "v[id] s[minigame]", CFGFLAG_SERVER, ConSetMinigame, this, "Sets player v to minigame s", AUTHED_ADMIN)
-CONSOLE_COMMAND("set_no_bonus_area", "?v[id]", CFGFLAG_SERVER, ConSetNoBonusArea, this, "Sets player v no-bonus area state", AUTHED_ADMIN)
-CONSOLE_COMMAND("unset_no_bonus_area", "?v[id]", CFGFLAG_SERVER, ConUnsetNoBonusArea, this, "Unsets player v no-bonus area state", AUTHED_ADMIN)
-
-// savedtees
-CONSOLE_COMMAND("save_drop", "?v[id] ?f[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
-CONSOLE_COMMAND("list_saved_tees", "", CFGFLAG_SERVER, ConListSavedTees, this, "List all saved players with basic info", AUTHED_HELPER)
+CONSOLE_COMMAND("save_drop", "?v[id] ?i[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
 
 // 1vs1 tourna
 CONSOLE_COMMAND("1vs1_global_create", "?i[scorelimit] ?i[killborder]", CFGFLAG_SERVER, Con1VS1GlobalCreate, this, "Creates a 1vs1 arena to let other people fight there", AUTHED_ADMIN)
@@ -203,7 +198,6 @@ CONSOLE_COMMAND("rotatingball", "?v[id]", CFGFLAG_SERVER, ConRotatingBall, this,
 CONSOLE_COMMAND("epiccircle", "?v[id]", CFGFLAG_SERVER, ConEpicCircle, this, "Toggles epic circle for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("staffind", "?v[id]", CFGFLAG_SERVER, ConStaffInd, this, "Toggles staff indicator for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("rainbowname", "?v[id]", CFGFLAG_SERVER, ConRainbowName, this, "Toggles rainbow name for player v", AUTHED_ADMIN)
-CONSOLE_COMMAND("confetti", "?v[id]", CFGFLAG_SERVER, ConConfetti, this, "Toggles confetti for player v", AUTHED_ADMIN)
 
 //account
 CONSOLE_COMMAND("acc_logout_port", "i[port]", CFGFLAG_SERVER, ConAccLogoutPort, this, "Logs out all accounts with last port i", AUTHED_ADMIN)
