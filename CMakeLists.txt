@@ -237,7 +237,8 @@ endfunction()
 
 if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
   if(ANTIBOT)
-    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
+    message(
+        "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
   endif()
 endif()
 
@@ -339,7 +340,8 @@ if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   endif()
 endif()
 
-message(STATUS "******** Teeworlds ********")
+message(
+    "******** Teeworlds ********")
 message(STATUS "Target OS: ${TARGET_OS} ${TARGET_BITS}bit")
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")

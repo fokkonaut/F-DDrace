@@ -242,7 +242,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 		return;
 	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 	{
-		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP < VIP_CLASSIC && pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP > VIP_PLUSPLUS)
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP < VIP_CLASSIC)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
 			return;
