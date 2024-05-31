@@ -101,13 +101,19 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	if (!CheckClientID(Victim))
 		return;
+	CCharacter* pChr2 = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr2)
+		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr && !pChr->m_Super)
 	{
-		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+		if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
-			return;
+			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+				return;
+			}
 		}
 		pChr->m_Super = true;
 		pChr->UnFreeze();
@@ -125,13 +131,19 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	if (!CheckClientID(Victim))
 		return;
+	CCharacter* pChr2 = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if (!pChr2)
+		return;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
 	if (pChr && pChr->m_Super)
 	{
-		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+		if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		{
-			pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
-			return;
+			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+			{
+				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+				return;
+			}
 		}
 		pChr->m_Super = false;
 		pChr->Teams()->SetForceCharacterTeam(Victim, pChr->m_TeamBeforeSuper);
