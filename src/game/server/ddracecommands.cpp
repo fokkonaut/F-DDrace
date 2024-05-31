@@ -588,7 +588,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
@@ -635,7 +635,7 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	char aIpBuf[64];
 	char aBuf[64];
 	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
@@ -2002,7 +2002,7 @@ void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
@@ -2030,7 +2030,7 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
-	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if (!pChr)
 		return;
 	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
