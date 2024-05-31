@@ -15,7 +15,7 @@ CONSOLE_COMMAND("removeweapon", "i[weapon-id] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TE
 CONSOLE_COMMAND("shotgun", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConShotgun, this, "Gives a shotgun to player v, or spread shotgun", AUTHED_ADMIN)
 CONSOLE_COMMAND("grenade", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConGrenade, this, "Gives a grenade launcher to player v, or spread grenade", AUTHED_ADMIN)
 CONSOLE_COMMAND("rifle", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConRifle, this, "Gives a rifle to player v, or spread rifle", AUTHED_ADMIN)
-CONSOLE_COMMAND("weapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST, ConWeapons, this, "Gives all weapons to player v, or spread weapons", AUTHED_ADMIN)
+CONSOLE_COMMAND("weapons", "?v[id] ?i[spread]", CFGFLAG_SERVER|CMDFLAG_TEST|CMDFLAG_CHAT, ConWeapons, this, "Gives all weapons to player v, or spread weapons", AUTHED_NO)
 CONSOLE_COMMAND("unshotgun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnShotgun, this, "Takes the shotgun from player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("ungrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnGrenade, this, "Takes the grenade launcher player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("unrifle", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConUnRifle, this, "Takes the rifle from player v", AUTHED_ADMIN)
@@ -41,10 +41,10 @@ CONSOLE_COMMAND("uninvite", "v[id] ?i[team]", CFGFLAG_SERVER, ConUninvite, this,
 CONSOLE_COMMAND("vote_mute", "v[id] i[seconds]", CFGFLAG_SERVER, ConVoteMute, this, "Remove v's right to vote for i seconds", AUTHED_ADMIN)
 CONSOLE_COMMAND("vote_unmute", "v[id]", CFGFLAG_SERVER, ConVoteUnmute, this, "Give back v's right to vote.", AUTHED_ADMIN)
 CONSOLE_COMMAND("vote_mutes", "", CFGFLAG_SERVER, ConVoteMutes, this, "List the current active vote mutes.", AUTHED_ADMIN)
-CONSOLE_COMMAND("mute", "", CFGFLAG_SERVER, ConMute, this, "", AUTHED_MOD)
-CONSOLE_COMMAND("muteid", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConMuteID, this, "", AUTHED_MOD)
+CONSOLE_COMMAND("muteplayer", "", CFGFLAG_SERVER|CMDFLAG_CHAT, ConMute, this, "", AUTHED_MOD)
+CONSOLE_COMMAND("mute", "v[id] i[seconds] ?r[reason]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConMuteID, this, "", AUTHED_NO)
 CONSOLE_COMMAND("muteip", "s[ip] i[seconds] ?r[reason]", CFGFLAG_SERVER, ConMuteIP, this, "", AUTHED_MOD)
-CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER, ConUnmute, this, "", AUTHED_MOD)
+CONSOLE_COMMAND("unmute", "v[id]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConUnmute, this, "", AUTHED_NO)
 CONSOLE_COMMAND("mutes", "", CFGFLAG_SERVER, ConMutes, this, "", AUTHED_HELPER)
 
 // F-DDrace
@@ -117,8 +117,8 @@ CONSOLE_COMMAND("1vs1_global_create", "?i[scorelimit] ?i[killborder]", CFGFLAG_S
 CONSOLE_COMMAND("1vs1_global_start", "i[id] i[id]", CFGFLAG_SERVER, Con1VS1GlobalStart, this, "Puts two players in the previously created 1vs1 arena to fight", AUTHED_ADMIN)
 
 // jail
-CONSOLE_COMMAND("jail_arrest", "v[id] i[seconds]", CFGFLAG_SERVER, ConJailArrest, this, "Arrests player v for i minutes", AUTHED_ADMIN)
-CONSOLE_COMMAND("jail_release", "v[id]", CFGFLAG_SERVER, ConJailRelease, this, "Releases player v from jail", AUTHED_ADMIN)
+CONSOLE_COMMAND("jail", "v[id] i[seconds]", CFGFLAG_SERVER|CFGFLAG_CHAT, ConJailArrest, this, "Arrests player v for i minutes", AUTHED_NO)
+CONSOLE_COMMAND("unjail", "v[id]", CFGFLAG_SERVER|CFGFLAG_CHAT , ConJailRelease, this, "Releases player v from jail", AUTHED_NO)
 
 // view cursor
 CONSOLE_COMMAND("view_cursor", "?i[id]", CFGFLAG_SERVER, ConViewCursor, this, "View cursor of player i (-2 = off, -1 = everyone)", AUTHED_ADMIN)

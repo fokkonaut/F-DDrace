@@ -240,6 +240,14 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 	CCharacter* pChr = GetPlayerChar(Victim);
 	if (!pChr)
 		return;
+	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+	{
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP < VIP_CLASSIC && pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP > VIP_PLUSPLUS)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP");
+			return;
+		}
+	}
 
 	int NumWeapons = NUM_WEAPONS;
 	if (clamp(Weapon, -3, NumWeapons) != Weapon)
@@ -580,6 +588,17 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	int Victim = pResult->GetVictim();
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+	{
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != MOD_CLASSIC)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not Moderator");
+			return;
+		}
+	}
 
 	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
@@ -616,6 +635,17 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	char aIpBuf[64];
 	char aBuf[64];
 	int Victim = pResult->GetVictim();
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+	{
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != MOD_CLASSIC)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not Moderator");
+			return;
+		}
+	}
 
 	if (Victim < 0 || Victim >= pSelf->m_NumMutes)
 		return;
@@ -1980,6 +2010,17 @@ void CGameContext::ConJailArrest(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+	{
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != MOD_CLASSIC)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not Moderator");
+			return;
+		}
+	}
 	int Seconds = pResult->GetInteger(1);
 	if (pSelf->JailPlayer(Victim, Seconds))
 	{
@@ -1997,6 +2038,17 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->GetVictim();
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+	if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
+	{
+		if (pSelf->m_Accounts[pChr->GetPlayer()->GetAccID()].m_VIP != MOD_CLASSIC)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, "You are not Moderator");
+			return;
+		}
+	}
 	if (!pSelf->ForceJailRelease(Victim))
 		return;
 
