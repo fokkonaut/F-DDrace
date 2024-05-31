@@ -104,6 +104,8 @@ enum
 	// vip
 	VIP_CLASSIC = 1,
 	VIP_PLUS,
+	VIP_PLUSPLUS,
+    MOD_CLASSIC = 10,
 
 	// motd
 	MOTD_MAX_LINES = 24,
