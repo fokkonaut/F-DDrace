@@ -19,13 +19,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		m_NumItemsList = NUM_ITEMS_SHOP_LIST;
 
 		bool EuroMode = GameServer()->Config()->m_SvEuroMode;
-		AddItem("Rainbow", 5, 1500, TIME_DEATH, "Rainbow will make your tee change the color very fast.");
-		AddItem("Bloody", 15, 3500, TIME_DEATH, "Bloody will give your tee a permanent kill effect.");
 		AddItem("Police", -1, 100000, TIME_FOREVER, "Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.");
-		AddItem("Spooky Ghost", 1, 1000000, TIME_FOREVER, "Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. How it works: '/helptoggle'");
-		AddItem("Room Key", 16, 5000, TIME_DISCONNECT, "If you have the room key you can enter the room. It's under the spawn and there is a money tile.");
-		AddItem("VIP Classic", 1, EuroMode ? 5 : 500000, TIME_30_DAYS, "VIP Classic gives you some benefits, check '/vip'.", EuroMode);
-		AddItem("VIP+", 1, EuroMode ? 10 : 1000000, TIME_20_DAYS, "VIP+ gives you even more benefits than VIP Classic, check '/vip'.", EuroMode);
 		AddItem("Spawn Shotgun", 33, 600000, TIME_FOREVER, "You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Grenade", 33, 600000, TIME_FOREVER, "You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
 		AddItem("Spawn Rifle", 33, 600000, TIME_FOREVER, "You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.");
@@ -303,12 +297,6 @@ void CShop::BuyItem(int ClientID, int Item)
 			return;
 		}
 
-		if (pAccount->m_VIP && ((Item == ITEM_VIP && pAccount->m_VIP != VIP_CLASSIC) || (Item == ITEM_VIP_PLUS && pAccount->m_VIP != VIP_PLUS)))
-		{
-			GameServer()->SendChatTarget(ClientID, "You can not buy this VIP level while owning another one");
-			return;
-		}
-
 		if (Item == ITEM_BLOODY && (pChr->m_Atom || pChr->m_Trail || pChr->m_RotatingBall || pChr->m_EpicCircle))
 		{
 			GameServer()->SendChatTarget(ClientID, "You can not buy bloody while specific cosmetics are activated");
@@ -380,7 +368,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	// send a message that we bought the item
 	str_format(aMsg, sizeof(aMsg), "You bought %s %s", aDescription, m_aItems[ItemID].m_Time == TIME_DEATH ? "until death" : m_aItems[ItemID].m_Time == TIME_DISCONNECT ? "until disconnect" : "");
 	GameServer()->SendChatTarget(ClientID, aMsg);
-	if (Item == ITEM_VIP || Item == ITEM_VIP_PLUS || Item == ITEM_PORTAL_RIFLE)
+	if (Item == ITEM_PORTAL_RIFLE)
 		GameServer()->SendChatTarget(ClientID, "Check '/account' for more information about the expiration date");
 
 	// apply a message to the history
@@ -403,9 +391,6 @@ void CShop::BuyItem(int ClientID, int Item)
 		case ITEM_POLICE:			pAccount->m_PoliceLevel++; break;
 		case ITEM_SPOOKY_GHOST:		pAccount->m_SpookyGhost = true; break;
 		case ITEM_ROOM_KEY:			pPlayer->m_HasRoomKey = true; pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = true; break;
-		case ITEM_VIP_PLUS:			pChr->Core()->m_MoveRestrictionExtra.m_VipPlus = true;
-			// fallthrough
-		case ITEM_VIP:				pAccount->m_VIP = Item == ITEM_VIP ? VIP_CLASSIC : VIP_PLUS; pPlayer->SetExpireDate(Item); break;
 		case ITEM_SPAWN_SHOTGUN:	if (Weapon == -1) Weapon = 0;
 			// fallthrough
 		case ITEM_SPAWN_GRENADE:	if (Weapon == -1) Weapon = 1;
