@@ -76,3 +76,4 @@ install_manifest.txt
 pack_*/
 rules.ninja
 /cmake-build-debug/
+/cmake-build-debug-visual-studio
