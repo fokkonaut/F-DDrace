@@ -1705,8 +1705,8 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
-        if (!pSelf->m_Accounts[ID].m_LoggedIn)
-            pSelf->FreeAccount(ID);
+		if (!pSelf->m_Accounts[ID].m_LoggedIn)
+			pSelf->FreeAccount(ID);
 		return;
 	}
 

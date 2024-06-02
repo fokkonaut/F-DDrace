@@ -3246,3 +3246,10 @@ void CGameContext::ConRainbowNameVIP(IConsole::IResult *pResult, void *pUserData
 
 	pChr->RainbowName(!pChr->GetPlayer()->m_RainbowName, pResult->m_ClientID);
 }
+
+void CGameContext::ConShrug(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(pPlayer) pSelf->SendChat(pResult->m_ClientID, pPlayer->m_LocalChat ? CHAT_LOCAL : CHAT_ALL, -1, "¯\\_(ツ)_/¯", pResult->m_ClientID);
+}
