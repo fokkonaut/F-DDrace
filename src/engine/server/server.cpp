@@ -2088,11 +2088,11 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			ADD_INT(pp, m_aClients[i].m_Country);
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
 			// thats why we just send -9999, because it will be displayed as nothing
-			// browserscorefix is not required anymore since we have client_score_kind
+			// browserscorefix is not required anymore since we have client_score_kind, but we keep it in this, in case it's not fetched via http master and doesnt know about score kind
 			int Score = -9999;
 			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
 				Score = abs(m_aClients[i].m_Score) * -1;
-			else/* if (IsBrowserScoreFix())*/
+			else if (IsBrowserScoreFix())
 				Score = m_aClients[i].m_Score;
 			ADD_INT(pp, Score);
 			ADD_INT(pp, GameServer()->IsClientPlayer(i) ? 1 : 0);
@@ -2210,13 +2210,9 @@ void CServer::UpdateRegisterServerInfo()
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
-			// thats why we just send -9999, because it will be displayed as nothing
-			// browserscorefix is not required anymore since we have client_score_kind
-			int Score = -9999;
-			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
-				Score = abs(m_aClients[i].m_Score) * -1;
-			else/* if (IsBrowserScoreFix())*/
-				Score = m_aClients[i].m_Score;
+			int Score = m_aClients[i].m_Score;
+			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score == -1)
+				Score = -9999;
 
 			char aCName[32];
 			char aCClan[32];
