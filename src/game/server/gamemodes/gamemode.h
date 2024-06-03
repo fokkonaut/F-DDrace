@@ -3,6 +3,6 @@
 #ifndef GAME_SERVER_GAMEMODES_GAMEMODE_H
 #define GAME_SERVER_GAMEMODES_GAMEMODE_H
 
-#define GAME_NAME "F-DDrace"
-#define TEST_NAME "F-DDrace"
+#define GAME_NAME "DDrace"
+#define TEST_NAME "DDrace"
 #endif // GAME_SERVER_GAMEMODES_GAMEMODE_H
