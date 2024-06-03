@@ -6171,37 +6171,38 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 
 void CGameContext::CreateFolders()
 {
-	Storage()->CreateFolder(Config()->m_SvAccFilePath, IStorage::TYPE_SAVE);
-	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
+	char aBuf[IO_MAX_PATH_LENGTH] = { 0 };
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvAccFilePath, aBuf, sizeof(aBuf)));
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvDonationFilePath, aBuf, sizeof(aBuf)));
 
-	char aPath[256];
-	// money history
-	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	char aPath[IO_MAX_PATH_LENGTH];
 
 	// plots
-	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvPlotFilePath, aBuf, sizeof(aBuf)));
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Server()->GetMapName());
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
 
 	str_format(aPath, sizeof(aPath), "%s/presets", Config()->m_SvPlotFilePath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
 
 	// money drops
-	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvMoneyDropsFilePath, aBuf, sizeof(aBuf)));
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
+
+	// map designs
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvMapDesignPath, aBuf, sizeof(aBuf)));
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, Server()->GetMapName());
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
+
+	// money history
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// saved tee
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-
-	// map designs
-	str_format(aPath, sizeof(aPath), "%s", Config()->m_SvMapDesignPath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
