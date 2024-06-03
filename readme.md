@@ -79,3 +79,6 @@ You can easily spectate the flags using the spectate menu (`bind x +spectate`).
 
 * **Extra weapons** <br>
 The inventory has been extended to support more than the regular weapons. If not placed in the map, most of the extra weapons are admin-only.
+
+* **Persistent gameplay after server restart or reload** <br>
+Things such as money drops and plots are saved and loaded upon server start so you don't lose important things. `sv_shutdown_save_tees 1` allows you to also save and load all players automatically.
