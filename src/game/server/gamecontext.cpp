@@ -234,7 +234,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 	}
 	pData->m_Tick = Server()->Tick();
 	mem_zero(pData->m_aCharacters, sizeof(pData->m_aCharacters));
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CAntibotCharacterData *pChar = &pData->m_aCharacters[i];
 		for(auto &LatestInput : pChar->m_aLatestInputs)
