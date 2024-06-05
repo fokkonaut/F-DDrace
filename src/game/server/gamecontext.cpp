@@ -1601,7 +1601,7 @@ void CGameContext::OnClientEnter(int ClientID)
 			return; // kicked
 	}
 
-	SendChatTarget(ClientID, "DDrace Mod. Version: " GAME_VERSION "");
+	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	if (Config()->m_SvWelcome[0] != 0)
 		SendChatTarget(ClientID, Config()->m_SvWelcome);
 
