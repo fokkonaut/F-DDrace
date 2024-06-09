@@ -2,7 +2,7 @@ F-DDrace [![](https://github.com/fokkonaut/F-DDrace/workflows/Build/badge.svg)](
 =========
 
 F-DDrace is a modification of Teeworlds, developed by fokkonaut. <br>
-Discord: fokkonaut#5556 or https://discord.gg/qccRrtb
+Discord: fokkonaut or https://discord.gg/qccRrtb
 	
 History
 =======
