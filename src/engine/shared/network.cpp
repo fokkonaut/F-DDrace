@@ -115,13 +115,6 @@ CNetBase::CNetBase()
 	m_DataLogRecv = 0;
 }
 
-CNetBase::~CNetBase()
-{
-	for (int i = 0; i < NUM_SOCKETS; i++)
-		if(NetType(i) != NETTYPE_INVALID)
-			Shutdown();
-}
-
 void CNetBase::Init(NETSOCKET Socket, NETSOCKET SocketTwo, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine)
 {
 	m_aSocket[SOCKET_MAIN] = Socket;
@@ -149,7 +142,6 @@ void CNetBase::Wait(int Time)
 		net_socket_read_wait(m_aSocket[i], Time);
 }
 
-static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
 // packs the data tight and sends it
 void CNetBase::SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown, int Socket)
 {
@@ -332,7 +324,8 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 
 		if (*pSevendown)
 		{
-			mem_copy(pPacket->m_aExtraData, pBuffer + sizeof(NET_HEADER_EXTENDED), sizeof(pPacket->m_aExtraData));
+			//static const unsigned char NET_HEADER_EXTENDED[] = {'x', 'e'};
+			mem_copy(pPacket->m_aExtraData, pBuffer + 2/*sizeof(NET_HEADER_EXTENDED)*/, sizeof(pPacket->m_aExtraData));
 		}
 		else
 		{

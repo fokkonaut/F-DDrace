@@ -2075,7 +2075,6 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	pPrefix = SERVERBROWSE_INFO_EXTENDED_MORE;
 	PrefixSize = sizeof(SERVERBROWSE_INFO_EXTENDED_MORE);
 
-	int Sent = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
@@ -2109,7 +2108,6 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 				pp.AddString("", 0);
 				continue;
 			}
-			Sent++;
 		}
 	}
 

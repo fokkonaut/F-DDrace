@@ -282,7 +282,6 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pD
 	const CSnapshotItem *pFromItem;
 	const CSnapshotItem *pCurItem;
 	const CSnapshotItem *pPastItem;
-	int SizeCount = 0;
 
 	pDelta->m_NumDeletedItems = 0;
 	pDelta->m_NumUpdateItems = 0;
@@ -353,7 +352,6 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pD
 				*pData++ = ItemSize/4;
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
-			SizeCount += ItemSize;
 			pData += ItemSize/4;
 			pDelta->m_NumUpdateItems++;
 		}
