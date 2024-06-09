@@ -1,4 +1,4 @@
-F-DDrace ![GitHub Actions](https://github.com/fokkonaut/F-DDrace/workflows/Build/badge.svg)
+F-DDrace [![](https://github.com/fokkonaut/F-DDrace/workflows/Build/badge.svg)](https://github.com/fokkonaut/F-DDrace/actions?query=workflow%3ABuild+event%3Apush+branch%3AF-DDrace)
 =========
 
 F-DDrace is a modification of Teeworlds, developed by fokkonaut. <br>
