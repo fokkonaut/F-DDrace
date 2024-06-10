@@ -84,4 +84,4 @@ The inventory has been extended to support more than the regular weapons. If not
 Things such as money drops and plots are saved and loaded upon server start so you don't lose important things. `sv_shutdown_save_tees 1` allows you to also save and load all players automatically.
 
 * **Many settings and commands** <br>
-The list of [settings](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/variables.h) and [commands](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/ddracecommands.h) can be found in the source files.
+The list of [settings](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/variables.h) and [commands](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/ddracecommands.h) can be found in the source files when scrolling down a little bit.
