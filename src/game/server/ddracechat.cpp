@@ -20,7 +20,11 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"F-DDrace is a mod by fokkonaut");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Based on Teeworlds 0.7 by the Teeworlds developers, uses parts of the 0.6 DDRace mod by the DDRace developers.");
+		"Based on Teeworlds 0.7 by the Teeworlds developers, uses parts of the 0.6 DDNet mod by the DDNet developers.");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"https://github.com/fokkonaut/F-DDrace");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
