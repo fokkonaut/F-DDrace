@@ -633,6 +633,7 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "'%s' left a 1vs1 round against '%s'! Current scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+			GameServer()->m_apPlayers[Other]->m_ConfettiWinEffectTick = Server()->Tick();
 		}
 
 		EndFight(Fight);
