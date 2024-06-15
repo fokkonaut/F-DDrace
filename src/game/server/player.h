@@ -294,6 +294,7 @@ public:
 	bool m_HasSpookyGhost;
 
 	CPortal *m_pPortal[NUM_PORTALS];
+	int64 m_ConfettiWinEffectTick;
 
 	//teecontrol
 	void SetTeeControl(CPlayer *pVictim);

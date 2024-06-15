@@ -165,6 +165,8 @@ void CPlayer::Reset()
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
 
+	m_ConfettiWinEffectTick = 0;
+
 	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 
