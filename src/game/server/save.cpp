@@ -190,6 +190,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_RotatingBall = pChr->m_RotatingBall;
 	m_EpicCircle = pChr->m_EpicCircle;
 	m_StaffInd = pChr->m_StaffInd;
+	m_Confetti = pChr->m_Confetti;
 
 	// core
 	m_MoveRestrictionExtraRoomKey = pChr->Core()->m_MoveRestrictionExtra.m_RoomKey;
@@ -364,6 +365,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->RotatingBall(m_RotatingBall, -1, true);
 		pChr->EpicCircle(m_EpicCircle, -1, true);
 		pChr->StaffInd(m_StaffInd, -1, true);
+		pChr->Confetti(m_Confetti, -1, true);
 
 		// core
 		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = m_MoveRestrictionExtraRoomKey;
@@ -441,7 +443,7 @@ char* CSaveTee::GetString()
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%lld\t%lld\t%d\t%d\t"
 		"%s\t%s\t%s\t%s\t%lld\t"
@@ -492,7 +494,7 @@ char* CSaveTee::GetString()
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
-		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle, m_StaffInd,
+		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle, m_StaffInd, m_Confetti,
 		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_JailTime, m_EscapeTime, m_CollectedPortalRifle, m_RainbowName,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, (int64)m_Identity.m_ExpireDate,
@@ -551,7 +553,7 @@ int CSaveTee::LoadString(char* String)
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%lld\t%lld\t%d\t%d\t"
 		"%s\t%s\t%s\t%s\t%lld\t"
@@ -602,7 +604,7 @@ int CSaveTee::LoadString(char* String)
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
-		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle, &m_StaffInd,
+		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle, &m_StaffInd, &m_Confetti,
 		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		&m_JailTime, &m_EscapeTime, &m_CollectedPortalRifle, &m_RainbowName,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, &ExpireDate,
