@@ -2731,6 +2731,7 @@ void CCharacter::HandleTiles(int Index)
 			m_pPlayer->GiveXP(750, "finish the special race");
 
 			m_HasFinishedSpecialRace = true;
+			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
 		}
 	}
 
@@ -3902,6 +3903,7 @@ void CCharacter::FDDraceInit()
 	m_RotatingBall = false;
 	m_EpicCircle = false;
 	m_StaffInd = false;
+	m_Confetti = false;
 
 	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		m_aUntranslatedID[i] = Server()->SnapNewID();
@@ -4092,6 +4094,12 @@ void CCharacter::FDDraceTick()
 	{
 		if (Server()->Tick() % 6 == 0)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
+	}
+
+	if (m_Confetti)
+	{
+		if (Server()->Tick() % (Server()->TickSpeed() / 3) == 0)
+			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
 	}
 
 	// update
@@ -5040,4 +5048,10 @@ void CCharacter::RainbowName(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_RainbowName = Set;
 	GameServer()->SendExtraMessage(RAINBOW_NAME, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::Confetti(bool Set, int FromID, bool Silent)
+{
+	m_Confetti = Set;
+	GameServer()->SendExtraMessage(CONFETTI, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

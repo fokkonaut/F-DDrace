@@ -283,6 +283,7 @@ public:
 	void CreateHammerHit(vec2 Pos, Mask128 Mask = Mask128());
 	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask = Mask128());
 	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
+	void CreateFinishConfetti(vec2 Pos, Mask128 Mask = Mask128());
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
 	enum
@@ -1009,6 +1010,7 @@ private:
 	static void ConEpicCircle(IConsole::IResult* pResult, void* pUserData);
 	static void ConStaffInd(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowName(IConsole::IResult* pResult, void* pUserData);
+	static void ConConfetti(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);

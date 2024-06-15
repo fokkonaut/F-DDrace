@@ -421,6 +421,17 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientID, Mask128 Mask)
 	}
 }
 
+void CGameContext::CreateFinishConfetti(vec2 Pos, Mask128 Mask)
+{
+	// create the event
+	CNetEvent_Finish *pEvent = (CNetEvent_Finish *)m_Events.Create(NETEVENTTYPE_FINISH, sizeof(CNetEvent_Finish), Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+	}
+}
+
 void CGameContext::CreateSound(vec2 Pos, int Sound, Mask128 Mask)
 {
 	if (Sound < 0)
@@ -7190,6 +7201,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Staff Indicator";
 	case RAINBOW_NAME:
 		return "Rainbow Name";
+	case CONFETTI:
+		return "Confetti";
 	}
 	return "Unknown";
 }
