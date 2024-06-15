@@ -585,10 +585,10 @@ void CCharacter::FireWeapon()
 						continue;
 
 					// set his velocity to fast upward (for now)
+					vec2 EffectPos = ProjStartPos;
 					if (length(pTarget->m_Pos - ProjStartPos) > 0.0f)
-						GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, TeamMask());
-					else
-						GameServer()->CreateHammerHit(ProjStartPos, TeamMask());
+						EffectPos = pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f;
+					GameServer()->CreateHammerHit(EffectPos, TeamMask());
 
 					int TargetCID = pTarget->GetPlayer()->GetCID();
 
@@ -617,6 +617,7 @@ void CCharacter::FireWeapon()
 
 						str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes by '%s'", Minutes, Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChatTarget(TargetCID, aBuf);
+						GameServer()->CreateFinishConfetti(EffectPos, TeamMask());
 						GameServer()->JailPlayer(TargetCID, Minutes * 60); // minimum 5 maximum 20 minutes jail
 					}
 					else
@@ -1635,6 +1636,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
 				GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+				GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
 			}
 		}
 
@@ -1643,6 +1645,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 			pKiller->GiveXP(250, "end a killing spree");
+			GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
 		}
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
