@@ -1984,7 +1984,7 @@ void CPlayer::OnLogout()
 void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 {
 	char aText[128] = { 0 };
-	switch (Type)
+	switch ((int)Type)
 	{
 	case CPlayer::VOTE_QUESTION_DESIGN:
 	{
@@ -2022,7 +2022,7 @@ void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 
 void CPlayer::OnVoteQuestion(int Result)
 {
-	switch (m_VoteQuestionType)
+	switch ((int)m_VoteQuestionType)
 	{
 	case CPlayer::VOTE_QUESTION_DESIGN:
 	{
