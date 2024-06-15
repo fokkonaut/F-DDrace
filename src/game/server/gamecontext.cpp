@@ -2552,6 +2552,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastVote = Server()->Tick();
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
 
+			if (pPlayer->m_VoteQuestionRunning)
+			{
+				pPlayer->OnVoteQuestion(pMsg->m_Vote);
+				return;
+			}
+
 			if (m_VoteCloseTime)
 			{
 				if(pPlayer->m_Vote == 0)

@@ -441,6 +441,18 @@ public:
 	bool m_CheckedSavePlayer;
 	bool m_LoadedSavedPlayer;
 
+	// vote question
+	enum VoteQuestionType
+	{
+		VOTE_QUESTION_NONE = -1,
+		VOTE_QUESTION_DESIGN,
+	};
+
+	void StartVoteQuestion(VoteQuestionType Type);
+	void OnVoteQuestion(int Result);
+	bool m_VoteQuestionRunning;
+	VoteQuestionType m_VoteQuestionType;
+
 private:
 	int64 m_WalletMoney;
 };

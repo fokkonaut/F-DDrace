@@ -209,7 +209,7 @@ public:
 
 	int SendPackMsgTranslate(CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
 	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
+		return (Flags&MSGFLAG_NOTRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(CNetMsg_Sv_RaceFinish *pMsg, int Flags, int ClientID)
