@@ -4099,7 +4099,7 @@ void CCharacter::FDDraceTick()
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 	}
 
-	if (m_Confetti || (m_pPlayer->m_ConfettiWinEffectTick > Server()->Tick() - Server()->TickSpeed() * 10))
+	if (m_Confetti || (m_pPlayer->m_ConfettiWinEffectTick && m_pPlayer->m_ConfettiWinEffectTick > Server()->Tick() - Server()->TickSpeed() * 10))
 	{
 		if (Server()->Tick() % (Server()->TickSpeed() / 3) == 0)
 			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
