@@ -116,7 +116,7 @@ const char *CShop::GetHeadline(int Item)
 		return "Unknown";
 
 	static char aRet[64];
-	str_copy(aRet, "", sizeof(aRet));
+	mem_zero(aRet, sizeof(aRet));
 
 	int s = 0;
 
