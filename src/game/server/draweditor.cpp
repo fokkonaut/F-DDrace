@@ -107,8 +107,9 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 		}
 	}
 
+	bool InRange = (distance(Pos, m_pCharacter->GetPos()) < GameServer()->Config()->m_SvEditorMaxDistance) || Server()->GetAuthedState(GetCID()) >= AUTHED_ADMIN;
 	int OwnPlotID = GetPlotID();
-	bool FreeDraw = OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID;
+	bool FreeDraw = InRange && (OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID);
 	return (ValidTile && ((CursorPlotID >= PLOT_START && CursorPlotID == OwnPlotID) || FreeDraw));
 }
 
