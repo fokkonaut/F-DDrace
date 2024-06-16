@@ -2028,11 +2028,12 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// set infos
 			if (str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID)) == 0) // check that we dont have a name on right now set by an admin
 			{
-				char aOldName[MAX_NAME_LENGTH];
-				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
-				if(str_comp(aOldName, pName) != 0 && !ProcessSpamProtection(ClientID))
+				if(Server()->WouldClientNameChange(ClientID, pName) && !ProcessSpamProtection(ClientID))
 				{
+					char aOldName[MAX_NAME_LENGTH];
+					str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 					Server()->SetClientName(ClientID, pName);
+
 					char aChatText[256];
 					str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
 					SendChat(-1, CHAT_ALL, -1, aChatText);

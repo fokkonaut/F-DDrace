@@ -399,57 +399,74 @@ CServer::~CServer()
 	delete m_pRegisterTwo;
 }
 
-int CServer::TrySetClientName(int ClientID, const char* pName)
+bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
 {
-	char aTrimmedName[MAX_NAME_LENGTH];
-
-	// trim the name
-	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pName), sizeof(aTrimmedName));
-	str_utf8_trim_right(aTrimmedName);
-
 	// check for empty names
-	if (!aTrimmedName[0])
-		return -1;
+	if(!pNameRequest[0])
+		return false;
 
 	// check for names starting with /, as they can be abused to make people
 	// write chat commands
-	if (aTrimmedName[0] == '/')
-		return -1;
+	if(pNameRequest[0] == '/')
+		return false;
 
 	// make sure that two clients don't have the same name
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
+		if(i != ClientId && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if (str_utf8_comp_confusable(aTrimmedName, m_aClients[i].m_aName) == 0)
-				return -1;
+			if(str_utf8_comp_confusable(pNameRequest, m_aClients[i].m_aName) == 0)
+				return false;
 		}
 	}
 
-	pName = aTrimmedName;
-
-	// set the client name
-	str_copy(m_aClients[ClientID].m_aName, pName, sizeof(m_aClients[ClientID].m_aName));
-	return 0;
+	return true;
 }
 
-void CServer::SetClientName(int ClientID, const char *pName)
+bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pName)
-		return;
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	if(m_aClients[ClientId].m_State < CClient::STATE_READY)
+		return false;
+
+	// trim the name
+	char aTrimmedName[MAX_NAME_LENGTH];
+	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pNameRequest));
+	str_utf8_trim_right(aTrimmedName);
 
 	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, sizeof(aNameTry));
-	if (TrySetClientName(ClientID, aNameTry))
+	str_copy(aNameTry, aTrimmedName);
+
+	if(!IsClientNameAvailable(ClientId, aNameTry))
 	{
 		// auto rename
-		for (int i = 1;; i++)
+		for(int i = 1;; i++)
 		{
-			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, pName);
-			if (TrySetClientName(ClientID, aNameTry) == 0)
+			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, aTrimmedName);
+			if(IsClientNameAvailable(ClientId, aNameTry))
 				break;
 		}
 	}
+
+	bool Changed = str_comp(m_aClients[ClientId].m_aName, aNameTry) != 0;
+
+	if(Set && Changed)
+	{
+		// set the client name
+		str_copy(m_aClients[ClientId].m_aName, aNameTry);
+	}
+
+	return Changed;
+}
+
+bool CServer::WouldClientNameChange(int ClientId, const char *pNameRequest)
+{
+	return SetClientNameImpl(ClientId, pNameRequest, false);
+}
+
+void CServer::SetClientName(int ClientId, const char *pName)
+{
+	SetClientNameImpl(ClientId, pName, true);
 }
 
 void CServer::SetClientClan(int ClientID, const char *pClan)

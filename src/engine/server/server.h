@@ -362,7 +362,9 @@ public:
 	CServer();
 	~CServer();
 
-	int TrySetClientName(int ClientID, const char* pName);
+	bool IsClientNameAvailable(int ClientId, const char* pNameRequest);
+	bool SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set);
+	bool WouldClientNameChange(int ClientId, const char *pNameRequest) override;
 
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, char const *pClan) override;
@@ -378,8 +380,6 @@ public:
 	int64 TickStartTime(int Tick);
 
 	int Init();
-
-	void InitRconPasswordIfUnset();
 
 	void SetRconCID(int ClientID) override;
 	int GetAuthedState(int ClientID) const override;
