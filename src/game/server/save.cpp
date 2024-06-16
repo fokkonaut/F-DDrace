@@ -556,7 +556,7 @@ int CSaveTee::LoadString(char* String)
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%lld\t%lld\t%d\t%d\t"
-		"%s\t%s\t%s\t%s\t%lld\t"
+		"%s\t%s\t%s\t%[^\t]\t%lld\t"
 		"%s\t%s\t%s\t%s\t%s\t%s\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
