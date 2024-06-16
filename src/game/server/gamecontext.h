@@ -1023,9 +1023,11 @@ private:
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);
-	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
+	static void ConListSavedTees(IConsole::IResult* pResult, void* pUserData);
 
 	static void Con1VS1GlobalCreate(IConsole::IResult* pResult, void* pUserData);
 	static void Con1VS1GlobalStart(IConsole::IResult* pResult, void* pUserData);

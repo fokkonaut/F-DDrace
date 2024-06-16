@@ -1885,6 +1885,19 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SaveDrop(Victim, Hours, pReason);
 }
 
+void CGameContext::ConListSavedTees(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Listing all saved identities:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "----------------------------------");
+	for (int i = 0; i < (int)pSelf->m_vSavedIdentities.size(); i++)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate), pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
+}
+
 void CGameContext::Con1VS1GlobalCreate(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext*)pUserData;
