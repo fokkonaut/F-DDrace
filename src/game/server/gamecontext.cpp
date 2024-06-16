@@ -6047,7 +6047,7 @@ void CGameContext::RemoveSavedIdentityFile(const char *pHash, const char *pName)
 	Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 }
 
-void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
+void CGameContext::SaveDrop(int ClientID, float Hours, const char *pReason)
 {
 	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
 		return;
@@ -6061,7 +6061,7 @@ void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
 	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
 }
 
-bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
+bool CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (!pChr || pChr->GetPlayer()->m_IsDummy)

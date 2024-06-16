@@ -104,7 +104,7 @@ CONSOLE_COMMAND("forceflagowner", "i[flag] ?i[id]", CFGFLAG_SERVER|CMDFLAG_TEST,
 CONSOLE_COMMAND("say_by", "v[id] r[text]", CFGFLAG_SERVER, ConSayBy, this, "Says a chat message as player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("teecontrol", "?v[id] ?i[forcedid]", CFGFLAG_SERVER, ConTeeControl, this, "Control another tee", AUTHED_ADMIN)
 CONSOLE_COMMAND("set_minigame", "v[id] s[minigame]", CFGFLAG_SERVER, ConSetMinigame, this, "Sets player v to minigame s", AUTHED_ADMIN)
-CONSOLE_COMMAND("save_drop", "?v[id] ?i[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
+CONSOLE_COMMAND("save_drop", "?v[id] ?f[hours] ?r[text]", CFGFLAG_SERVER, ConSaveDrop, this, "Saves stats of player v for i hours and kicks him", AUTHED_ADMIN)
 
 // 1vs1 tourna
 CONSOLE_COMMAND("1vs1_global_create", "?i[scorelimit] ?i[killborder]", CFGFLAG_SERVER, Con1VS1GlobalCreate, this, "Creates a 1vs1 arena to let other people fight there", AUTHED_ADMIN)
