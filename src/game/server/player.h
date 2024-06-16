@@ -449,9 +449,10 @@ public:
 	};
 
 	void StartVoteQuestion(VoteQuestionType Type);
-	void OnVoteQuestion(int Result);
+	void OnEndVoteQuestion(int Result = -1);
 	bool m_VoteQuestionRunning;
 	VoteQuestionType m_VoteQuestionType;
+	int64 m_VoteQuestionEndTick;
 
 private:
 	int64 m_WalletMoney;

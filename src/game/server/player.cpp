@@ -230,6 +230,7 @@ void CPlayer::Reset()
 
 	m_VoteQuestionRunning = false;
 	m_VoteQuestionType = CPlayer::VOTE_QUESTION_NONE;
+	m_VoteQuestionEndTick = 0;
 }
 
 void CPlayer::Tick()
@@ -420,6 +421,10 @@ void CPlayer::Tick()
 
 	MinigameRequestTick();
 	MinigameAfkCheck();
+
+	// Automatic close/stop after 30 seconds
+	if (m_VoteQuestionEndTick && Server()->Tick() > m_VoteQuestionEndTick)
+		OnEndVoteQuestion();
 }
 
 void CPlayer::PostTick()
@@ -1978,7 +1983,7 @@ void CPlayer::OnLogout()
 	str_copy(pAccount->m_aDesign, Server()->GetMapDesign(m_ClientID), sizeof(pAccount->m_aDesign));
 
 	if (m_VoteQuestionType == CPlayer::VOTE_QUESTION_DESIGN)
-		OnVoteQuestion(-1);
+		OnEndVoteQuestion();
 }
 
 void CPlayer::StartVoteQuestion(VoteQuestionType Type)
@@ -1997,14 +2002,17 @@ void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 	}
 	}
 
+	const int TimeoutSec = 30;
+
 	m_VoteQuestionRunning = true;
 	m_VoteQuestionType = Type;
+	m_VoteQuestionEndTick = Server()->Tick() + Server()->TickSpeed() * TimeoutSec;
 
 	if (!Server()->IsSevendown(m_ClientID))
 	{
 		CNetMsg_Sv_VoteSet Msg;
 		Msg.m_Type = VOTE_START_OP;
-		Msg.m_Timeout = 30;
+		Msg.m_Timeout = TimeoutSec;
 		Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
 		Msg.m_pDescription = aText;
 		Msg.m_pReason = "";
@@ -2013,14 +2021,14 @@ void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 	else
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_VOTESET);
-		Msg.AddInt(30);
+		Msg.AddInt(TimeoutSec);
 		Msg.AddString(aText, -1);
 		Msg.AddString("", -1);
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, m_ClientID);
 	}
 }
 
-void CPlayer::OnVoteQuestion(int Result)
+void CPlayer::OnEndVoteQuestion(int Result)
 {
 	switch ((int)m_VoteQuestionType)
 	{
@@ -2036,6 +2044,7 @@ void CPlayer::OnVoteQuestion(int Result)
 
 	m_VoteQuestionRunning = false;
 	m_VoteQuestionType = CPlayer::VOTE_QUESTION_NONE;
+	m_VoteQuestionEndTick = 0;
 	//GameServer()->SendVoteStatus(m_ClientID, 2, Result == 1, Result == -1);
 
 	if (!Server()->IsSevendown(m_ClientID))

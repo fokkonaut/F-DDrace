@@ -2554,7 +2554,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			if (pPlayer->m_VoteQuestionRunning)
 			{
-				pPlayer->OnVoteQuestion(pMsg->m_Vote);
+				pPlayer->OnEndVoteQuestion(pMsg->m_Vote);
 				return;
 			}
 
