@@ -3284,7 +3284,8 @@ bool CServer::DemoRecorder_IsRecording()
 
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
-	CServer* pServer = (CServer *)pUser;
+	// Crashes, cuz snap functions dont handle clientid -1 properly :) xd
+	/*CServer* pServer = (CServer *)pUser;
 	char aFilename[128];
 	if(pResult->NumArguments())
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pResult->GetString(0));
@@ -3294,7 +3295,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aDate);
 	}
-	pServer->m_DemoRecorder.Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapSha256, pServer->m_CurrentMapCrc, "server");
+	pServer->m_DemoRecorder.Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapSha256, pServer->m_CurrentMapCrc, "server");*/
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
