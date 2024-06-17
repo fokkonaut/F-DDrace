@@ -293,6 +293,10 @@ MACRO_CONFIG_STR(SvWebhookChatAvatarURL, sv_webhook_chat_avatar_url, 128, "", CF
 MACRO_CONFIG_INT(SvWebhookChatSkinAvatars, sv_webhook_chat_skin_avatars, 0, 0, 1, CFGFLAG_SERVER, "Whether chat bridge webhook shows skins as avatars", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWebhookChatSkinRenderer, sv_webhook_chat_skin_renderer, 0, 0, 1, CFGFLAG_SERVER, "Webhook chat bridge skin renderer (0=skins.tw, 1=KoG)", AUTHED_ADMIN)
 
+MACRO_CONFIG_STR(SvWebhook1vs1URL, sv_webhook_1vs1_url, 128, "", CFGFLAG_SERVER, "Webhook URL for 1vs1", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhook1vs1Name, sv_webhook_1vs1_name, 128, "", CFGFLAG_SERVER, "Webhook name for 1vs1", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhook1vs1AvatarURL, sv_webhook_1vs1_avatar_url, 128, "", CFGFLAG_SERVER, "Webhook URL for 1vs1 bridge avatar", AUTHED_ADMIN)
+
 // vpn/proxy detection
 MACRO_CONFIG_STR(SvIPHubXKey, sv_iphub_x_key, 128, "", CFGFLAG_SERVER, "IPHub.info X-Key", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWhitelistFile, sv_whitelist_file, 128, "whitelist.cfg", CFGFLAG_SERVER, "Whitelist file in case IPHub.info falsely flagged someone", AUTHED_ADMIN)

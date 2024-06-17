@@ -55,6 +55,7 @@ public:
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
 
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "") = 0;
+	virtual void SendWebhook1vs1(const char *pMessage, const char *pUsername, const char *pAvatarURL) = 0;
 
 	virtual const char *GetAuthIdent(int ClientID) = 0;
 

@@ -562,6 +562,7 @@ public:
 		char m_aCommand[1024];
 	};
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "");
+	virtual void SendWebhook1vs1(const char *pMessage, const char *pUsername, const char *pAvatarURL);
 
 	virtual const char *GetAuthIdent(int ClientID);
 
