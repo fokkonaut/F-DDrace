@@ -204,7 +204,7 @@ public:
 	IStorage* Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-	CTuningParams *Tuning(int ClientID, int Zone = 0);
+	CTuningParams *Tuning(int ClientID, int Zone = -1);
 	CTuningParams* TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 

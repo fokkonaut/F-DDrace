@@ -2350,9 +2350,9 @@ CGameTeams* CCharacter::Teams()
 
 CTuningParams *CCharacter::Tuning(int Zone)
 {
-	if (Zone == 0)
+	if (Zone == -1)
 		Zone = m_TuneZone;
-	CTuningParams *pTunings = Zone ? &GameServer()->TuningList()[Zone] : GameServer()->Tuning();
+	CTuningParams *pTunings = Zone > 0 ? &GameServer()->TuningList()[Zone] : GameServer()->Tuning();
 	static CTuningParams Tuning;
 	Tuning = GameServer()->ApplyLockedTunings(*pTunings, m_LockedTunings);
 	return &Tuning;

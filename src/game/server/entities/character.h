@@ -280,7 +280,7 @@ private:
 
 public:
 	CGameTeams* Teams();
-	CTuningParams *Tuning(int Zone = 0);
+	CTuningParams *Tuning(int Zone = -1);
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(float Seconds);

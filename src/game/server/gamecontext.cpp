@@ -170,7 +170,7 @@ CTuningParams *CGameContext::Tuning(int ClientID, int Zone)
 {
 	if(GetPlayerChar(ClientID))
 		return GetPlayerChar(ClientID)->Tuning(Zone);
-	if(Zone != 0)
+	if(Zone > 0)
 		return &TuningList()[Zone];
 	return &m_Tuning;
 }
