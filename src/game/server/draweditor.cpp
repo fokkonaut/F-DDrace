@@ -284,7 +284,9 @@ void CDrawEditor::Tick()
 			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 			{
 				vec2 Pos = m_Pos + m_Transform.m_vPreview[i].m_Offset;
-				if (m_Transform.m_vPreview[i].m_pEnt->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || m_Transform.m_vPreview[i].m_pEnt->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER)
+				CEntity *pEntity = m_Transform.m_vPreview[i].m_pEnt;
+				if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON
+					|| (pEntity->GetObjType() == CGameWorld::ENTTYPE_DOOR && GameServer()->Collision()->IsPlotDrawDoor(pEntity->m_Number)))
 					Pos = GameServer()->RoundPos(Pos);
 				m_Transform.m_vPreview[i].m_pEnt->SetPos(Pos);
 			}
