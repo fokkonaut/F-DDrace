@@ -93,7 +93,8 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
 				return false;
 
-			ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+			if (m_Transform.m_State != TRANSFORM_STATE_RUNNING || m_Setting != TRANSFORM_MOVE)
+				ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 		}
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
 		{
@@ -103,7 +104,8 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 		}
 		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
-			ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
+			if (m_Transform.m_State != TRANSFORM_STATE_RUNNING || m_Setting != TRANSFORM_MOVE)
+				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
 		}
 	}
 
