@@ -99,7 +99,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 11,
+	ACC_CURRENT_VERSION = 10,
 
 	// vip
 	VIP_CLASSIC = 1,
@@ -548,7 +548,6 @@ public:
 		char m_aDesign[128];
 		int m_PortalBattery;
 		int m_PortalBlocker;
-		std::vector<CEntity *> m_vPlotPresetObjects;
 	};
 	std::vector<AccountInfo> m_Accounts;
 
@@ -607,7 +606,6 @@ public:
 		ACC_DESIGN,
 		ACC_PORTAL_BATTERY,
 		ACC_PORTAL_BLOCKER,
-		ACC_PLOT_PRESET_OBJECTS,
 		NUM_ACCOUNT_VARIABLES
 	};
 
