@@ -33,11 +33,11 @@ class CSpeedup : public CEntity
 	float m_CurrentDist;
 
 	void Rotate(int Angle);
-	void ResetCollision(bool Remove = false);
 
 public:
 	CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision = true);
-	virtual void Reset();
+	virtual ~CSpeedup();
+	virtual void ResetCollision(bool Remove = false);
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 

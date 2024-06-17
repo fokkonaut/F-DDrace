@@ -25,11 +25,11 @@ class CTeleporter : public CEntity
 
 	int m_aID[NUM_TELEPORTER_IDS];
 	int m_Type;
-	void ResetCollision(bool Remove = false);
 
 public:
 	CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number, bool Collision = true);
-	virtual void Reset();
+	virtual ~CTeleporter();
+	virtual void ResetCollision(bool Remove = false);
 	virtual void Snap(int SnappingClient);
 	int GetType() { return m_Type; }
 };

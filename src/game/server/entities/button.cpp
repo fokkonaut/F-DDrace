@@ -41,7 +41,10 @@ void CButton::ResetCollision(bool Remove)
 
 	int Index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 	if (Remove)
+	{
 		GameServer()->Collision()->RemoveDoorTile(Index, TILE_SWITCHTOGGLE, m_Number);
+		m_Collision = false;
+	}
 	else
 		GameServer()->Collision()->AddDoorTile(Index, TILE_SWITCHTOGGLE, m_Number);
 }

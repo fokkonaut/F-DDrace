@@ -22,11 +22,10 @@ class CButton : public CEntity
 		vec2 m_Pos;
 	} m_aSides[NUM_SIDES];
 
-	void ResetCollision(bool Remove = false);
-
 public:
 	CButton(CGameWorld *pGameWorld, vec2 Pos, int Number, bool Collision = true);
 	virtual ~CButton();
+	virtual void ResetCollision(bool Remove = false);
 	virtual void Snap(int SnappingClient);
 };
 

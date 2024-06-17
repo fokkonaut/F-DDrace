@@ -165,6 +165,7 @@ public:
 	bool m_InitialCollision;
 	// whether other entities are affected by us, not guaranteed to work, only if implemented into the entity
 	bool m_Collision;
+	virtual void ResetCollision(bool Remove = false) {}
 };
 
 #endif

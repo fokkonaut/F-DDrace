@@ -63,7 +63,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	vec2 Pos = m_Pos;
 	int CursorPlotID = GetCursorPlotID();
 	int Type = m_Entity;
-	int DoorNumber = m_Laser.m_Number;
+	int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
 	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER;
 
 	if (pEntity)
@@ -71,7 +71,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		Pos = pEntity->GetPos();
 		CursorPlotID = GameServer()->GetTilePlotID(Pos);
 		Type = pEntity->GetObjType();
-		DoorNumber = pEntity->m_Number;
+		Number = pEntity->m_Number;
 		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER;
 		Remove = false;
 	}
@@ -99,8 +99,8 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
 		{
 			// disallow placing buttons on already existing buttons with the same number
-			int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, DoorNumber);
-			ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
+			if (!TransformPreview)
+				ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
 		}
 		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
@@ -137,8 +137,9 @@ bool CDrawEditor::RemoveEntity(CEntity *pEntity)
 		}
 
 	// We want to remove the collision instantly so that transform move can place objects on the same posititon
-	if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER)
-		pEntity->Reset();
+	// we dont need to do it for plot draw doors, because they are handled as doors and can have multiple on the same position anyways
+	if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON)
+		pEntity->ResetCollision(true);
 	GameServer()->m_World.DestroyEntity(pEntity);
 	return true;
 }

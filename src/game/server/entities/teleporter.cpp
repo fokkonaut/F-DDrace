@@ -22,7 +22,7 @@ CTeleporter::CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number,
 	GameWorld()->InsertEntity(this);
 }
 
-void CTeleporter::Reset()
+CTeleporter::~CTeleporter()
 {
 	ResetCollision(true);
 	for (int i = 0; i < NUM_TELEPORTER_IDS; i++)
@@ -64,6 +64,7 @@ void CTeleporter::ResetCollision(bool Remove)
 	{
 		Type = 0;
 		Number = 0;
+		m_Collision = false;
 	}
 	GameServer()->Collision()->SetTeleporter(m_Pos, Type, Number);
 }
