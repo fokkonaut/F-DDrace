@@ -5228,6 +5228,19 @@ int CGameContext::GetMaxPlotSpeedups(int PlotID)
 	return 0;
 }
 
+int CGameContext::GetMaxPlotTeleporters(int PlotID)
+{
+	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots)
+		return 0; // free draw has unlimited, so doesnt matter
+
+	switch (m_aPlots[PlotID].m_Size)
+	{
+	case PLOT_SMALL: return 6;
+	case PLOT_BIG: return 12;
+	}
+	return 0;
+}
+
 void CGameContext::ExpirePlots()
 {
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)

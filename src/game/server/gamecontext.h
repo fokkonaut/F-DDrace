@@ -414,6 +414,7 @@ public:
 	void SetPlotExpire(int PlotID);
 
 	int GetMaxPlotSpeedups(int PlotID);
+	int GetMaxPlotTeleporters(int PlotID);
 	unsigned int GetMaxPlotObjects(int PlotID);
 	const char *GetPlotSizeString(int PlotID);
 

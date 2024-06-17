@@ -87,13 +87,14 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
 	if (!Remove)
 	{
+		bool TransformMove = m_Transform.m_State == TRANSFORM_STATE_RUNNING && m_Setting == TRANSFORM_MOVE;
 		int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
 		if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 		{
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
 				return false;
 
-			if (m_Transform.m_State != TRANSFORM_STATE_RUNNING || m_Setting != TRANSFORM_MOVE)
+			if (!TransformMove)
 				ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 		}
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
@@ -104,7 +105,10 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 		}
 		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
-			if (m_Transform.m_State != TRANSFORM_STATE_RUNNING || m_Setting != TRANSFORM_MOVE)
+			if (CursorPlotID >= PLOT_START && GetNumTeleporters(CursorPlotID) >= GameServer()->GetMaxPlotTeleporters(CursorPlotID))
+				return false;
+
+			if (!TransformMove)
 				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
 		}
 	}
@@ -220,8 +224,27 @@ int CDrawEditor::GetNumSpeedups(int PlotID)
 
 	int Num = 0;
 	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
-		if (GameServer()->m_aPlots[PlotID].m_vObjects[i]->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP)
+	{
+		CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP && pEntity->m_TransformCID == -1)
 			Num++;
+	}
+
+	return Num;
+}
+
+int CDrawEditor::GetNumTeleporters(int PlotID)
+{
+	if (PlotID < PLOT_START)
+		return 0; // doesnt matter on free draw, has unlimited anyways
+
+	int Num = 0;
+	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	{
+		CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		if (pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER && pEntity->m_TransformCID == -1)
+			Num++;
+	}
 
 	return Num;
 }

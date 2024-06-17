@@ -112,6 +112,7 @@ class CDrawEditor
 	int GetNumMaxTeleporters();
 	int GetFirstFreeNumber();
 	int GetNumSpeedups(int PlotID);
+	int GetNumTeleporters(int PlotID);
 
 	const char *GetLaserColor();
 
