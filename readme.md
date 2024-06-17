@@ -81,7 +81,7 @@ You can easily spectate the flags using the spectate menu (`bind x +spectate`).
 The inventory has been extended to support more than the regular weapons. If not placed in the map, most of the extra weapons are admin-only.
 
 * **Persistent gameplay after server restart or reload** <br>
-Things such as money drops and plots are saved and loaded upon server start so you don't lose important things. `sv_shutdown_save_tees 1` allows you to also save and load all players automatically.
+Things such as money drops and plots are saved and loaded upon server start so you don't lose important things. `sv_shutdown_save_tees 1` allows you to also save and load all players automatically, even upon restart everything is stored in files and later loaded and matched when you join.
 
 * **Many settings and commands** <br>
 The list of [settings](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/variables.h) and [commands](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/ddracecommands.h) can be found in the source files when scrolling down a little bit.
