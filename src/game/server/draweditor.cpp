@@ -415,6 +415,9 @@ void CDrawEditor::OnPlayerFire()
 				{
 					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
 					{
+						if (m_Setting == TRANSFORM_COPY && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+							break;
+
 						CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
 						pEntity->m_PlotID = PlotID;
 						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
