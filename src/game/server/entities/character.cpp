@@ -3258,6 +3258,13 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
+	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
+	// Reset inout teleporter if we aint on one
+	if ((!z || z != m_LastInOutTeleporter) && (!evilz || evilz != m_LastInOutTeleporter))
+	{
+		m_LastInOutTeleporter = 0;
+	}
+
 	if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z - 1].size())
 	{
 		if (m_Super)
@@ -3296,7 +3303,6 @@ void CCharacter::HandleTiles(int Index)
 		}
 		return;
 	}
-	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
 		if (m_Super)
