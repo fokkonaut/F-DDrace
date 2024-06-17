@@ -1647,6 +1647,10 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 			if (str_comp_nocase(pValue, "0") != 0)
 				str_format(aDate, sizeof(aDate), " (%s)", pSelf->GetDate(str_toint(pValue)));
 		}
+		else if (i == ACC_PLOT_PRESET_OBJECTS)
+		{
+			pValue = pValue[0] ? "existing" : "empty";
+		}
 
 		str_format(aBuf, sizeof(aBuf), "%s: %s%s", pSelf->GetAccVarName(i), pValue, aDate);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
@@ -1719,9 +1723,12 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[256];
-	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
+	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME || VariableID == ACC_PLOT_PRESET_OBJECTS)
 	{
-		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
+		const char *pValue = pSelf->GetAccVarValue(ID, VariableID);
+		if (VariableID == ACC_PLOT_PRESET_OBJECTS)
+			pValue = pValue[0] ? "existing" : "empty";
+		str_format(aBuf, sizeof(aBuf), "Value: %s", pValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 	else

@@ -5518,7 +5518,20 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 	{
 		getline(AccFile, data);
 		const char *pData = data.c_str();
-		SetAccVar(ID, i, pData);
+
+		if (i == ACC_PLOT_PRESET_OBJECTS)
+		{
+			std::vector<CEntity *> vEntities = ReadPlotObjects(pData, ID);
+			for (unsigned int j = 0; j < vEntities.size(); j++)
+			{
+				vEntities[j]->m_PlotID = ID;
+				m_aPlots[ID].m_vObjects.push_back(vEntities[j]);
+			}
+		}
+		else
+		{
+			SetAccVar(ID, i, pData);
+		}
 	}
 }
 
@@ -5533,7 +5546,15 @@ void CGameContext::WriteAccountStats(int ID)
 	{
 		for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 		{
-			AccFile << GetAccVarValue(ID, i) << "\n";
+			if (i == ACC_PLOT_PRESET_OBJECTS)
+			{
+				for (unsigned int i = 0; i < m_Accounts[ID].m_vPlotPresetObjects.size(); i++)
+					WritePlotObject(m_Accounts[ID].m_vPlotPresetObjects[i], &AccFile);
+			}
+			else
+			{
+				AccFile << GetAccVarValue(ID, i) << "\n";
+			}
 		}
 		dbg_msg("acc", "saved acc '%s'", m_Accounts[ID].m_Username);
 	}
@@ -5595,6 +5616,15 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_DESIGN:					str_copy(m_Accounts[ID].m_aDesign, pData, sizeof(m_Accounts[ID].m_aDesign)); break;
 	case ACC_PORTAL_BATTERY:			m_Accounts[ID].m_PortalBattery = atoi(pData); break;
 	case ACC_PORTAL_BLOCKER:			m_Accounts[ID].m_PortalBlocker = atoi(pData); break;
+	case ACC_PLOT_PRESET_OBJECTS:
+		{
+			std::vector<CEntity*> vEntities = ReadPlotObjects(pData, ID);
+			for (unsigned int j = 0; j < vEntities.size(); j++)
+			{
+				vEntities[j]->m_PlotID = ID;
+				m_aPlots[ID].m_vObjects.push_back(vEntities[j]);
+			}
+		}
 	}
 }
 
@@ -5653,6 +5683,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_DESIGN:					return "design";
 	case ACC_PORTAL_BATTERY:			return "portal_battery";
 	case ACC_PORTAL_BLOCKER:			return "portal_blocker";
+	case ACC_PLOT_PRESET_OBJECTS:		return "plot_preset_objects";
 	}
 	return "Unknown";
 }
@@ -5715,6 +5746,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_DESIGN:					str_copy(aBuf, m_Accounts[ID].m_aDesign, sizeof(aBuf)); break;
 	case ACC_PORTAL_BATTERY:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalBattery); break;
 	case ACC_PORTAL_BLOCKER:			str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalBlocker); break;
+	case ACC_PLOT_PRESET_OBJECTS:		str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_PortalBlocker); break;
 	}
 	return aBuf;
 }
