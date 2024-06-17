@@ -295,7 +295,7 @@ MACRO_CONFIG_INT(SvWebhookChatSkinAvatars, sv_webhook_chat_skin_avatars, 0, 0, 1
 MACRO_CONFIG_INT(SvWebhookChatSkinRenderer, sv_webhook_chat_skin_renderer, 0, 0, 1, CFGFLAG_SERVER, "Webhook chat bridge skin renderer (0=skins.tw, 1=KoG)", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvWebhook1vs1URL, sv_webhook_1vs1_url, 128, "", CFGFLAG_SERVER, "Webhook URL for 1vs1", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvWebhook1vs1Name, sv_webhook_1vs1_name, 128, "", CFGFLAG_SERVER, "Webhook name for 1vs1", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhook1vs1Name, sv_webhook_1vs1_name, 128, "F-DDrace 1vs1", CFGFLAG_SERVER, "Webhook name for 1vs1", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWebhook1vs1AvatarURL, sv_webhook_1vs1_avatar_url, 128, "", CFGFLAG_SERVER, "Webhook URL for 1vs1 bridge avatar", AUTHED_ADMIN)
 
 // vpn/proxy detection
