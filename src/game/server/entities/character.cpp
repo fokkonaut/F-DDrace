@@ -585,10 +585,10 @@ void CCharacter::FireWeapon()
 						continue;
 
 					// set his velocity to fast upward (for now)
+					vec2 EffectPos = ProjStartPos;
 					if (length(pTarget->m_Pos - ProjStartPos) > 0.0f)
-						GameServer()->CreateHammerHit(pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f, TeamMask());
-					else
-						GameServer()->CreateHammerHit(ProjStartPos, TeamMask());
+						EffectPos = pTarget->m_Pos - normalize(pTarget->m_Pos - ProjStartPos) * GetProximityRadius() * 0.5f;
+					GameServer()->CreateHammerHit(EffectPos, TeamMask());
 
 					int TargetCID = pTarget->GetPlayer()->GetCID();
 
@@ -617,6 +617,7 @@ void CCharacter::FireWeapon()
 
 						str_format(aBuf, sizeof(aBuf), "You were arrested for %d minutes by '%s'", Minutes, Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChatTarget(TargetCID, aBuf);
+						GameServer()->CreateFinishConfetti(EffectPos, TeamMask());
 						GameServer()->JailPlayer(TargetCID, Minutes * 60); // minimum 5 maximum 20 minutes jail
 					}
 					else
@@ -1635,6 +1636,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 			{
 				str_format(aBuf, sizeof(aBuf), "%s is on a killing spree with %d %s", Server()->ClientName(Killer), pKillerChar->m_KillStreak, IsBlock ? "blocks" : "kills");
 				GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
+				GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
 			}
 		}
 
@@ -1643,6 +1645,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 			str_format(aBuf, sizeof(aBuf), "%s's killing spree was ended by %s (%d %s)", Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak, IsBlock ? "blocks" : "kills");
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 			pKiller->GiveXP(250, "end a killing spree");
+			GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
 		}
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
@@ -2347,9 +2350,9 @@ CGameTeams* CCharacter::Teams()
 
 CTuningParams *CCharacter::Tuning(int Zone)
 {
-	if (Zone == 0)
+	if (Zone == -1)
 		Zone = m_TuneZone;
-	CTuningParams *pTunings = Zone ? &GameServer()->TuningList()[Zone] : GameServer()->Tuning();
+	CTuningParams *pTunings = Zone > 0 ? &GameServer()->TuningList()[Zone] : GameServer()->Tuning();
 	static CTuningParams Tuning;
 	Tuning = GameServer()->ApplyLockedTunings(*pTunings, m_LockedTunings);
 	return &Tuning;
@@ -2731,6 +2734,7 @@ void CCharacter::HandleTiles(int Index)
 			m_pPlayer->GiveXP(750, "finish the special race");
 
 			m_HasFinishedSpecialRace = true;
+			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
 		}
 	}
 
@@ -3902,6 +3906,7 @@ void CCharacter::FDDraceInit()
 	m_RotatingBall = false;
 	m_EpicCircle = false;
 	m_StaffInd = false;
+	m_Confetti = false;
 
 	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		m_aUntranslatedID[i] = Server()->SnapNewID();
@@ -4092,6 +4097,12 @@ void CCharacter::FDDraceTick()
 	{
 		if (Server()->Tick() % 6 == 0)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
+	}
+
+	if (m_Confetti || (m_pPlayer->m_ConfettiWinEffectTick && m_pPlayer->m_ConfettiWinEffectTick > Server()->Tick() - Server()->TickSpeed() * 5))
+	{
+		if (Server()->Tick() % (Server()->TickSpeed() / 3) == 0)
+			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
 	}
 
 	// update
@@ -5040,4 +5051,10 @@ void CCharacter::RainbowName(bool Set, int FromID, bool Silent)
 {
 	m_pPlayer->m_RainbowName = Set;
 	GameServer()->SendExtraMessage(RAINBOW_NAME, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::Confetti(bool Set, int FromID, bool Silent)
+{
+	m_Confetti = Set;
+	GameServer()->SendExtraMessage(CONFETTI, m_pPlayer->GetCID(), Set, FromID, Silent);
 }

@@ -1,8 +1,8 @@
-F-DDrace ![GitHub Actions](https://github.com/fokkonaut/F-DDrace/workflows/Build/badge.svg)
+F-DDrace [![](https://github.com/fokkonaut/F-DDrace/workflows/Build/badge.svg)](https://github.com/fokkonaut/F-DDrace/actions?query=workflow%3ABuild+event%3Apush+branch%3AF-DDrace)
 =========
 
 F-DDrace is a modification of Teeworlds, developed by fokkonaut. <br>
-Discord: fokkonaut#5556 or https://discord.gg/qccRrtb
+Discord: fokkonaut (old: #5556) or https://discord.gg/qccRrtb
 	
 History
 =======
@@ -79,3 +79,9 @@ You can easily spectate the flags using the spectate menu (`bind x +spectate`).
 
 * **Extra weapons** <br>
 The inventory has been extended to support more than the regular weapons. If not placed in the map, most of the extra weapons are admin-only.
+
+* **Persistent gameplay after server restart or reload** <br>
+Things such as money drops and plots are saved and loaded upon server start so you don't lose important things. `sv_shutdown_save_tees 1` allows you to also save and load all players automatically.
+
+* **Many settings and commands** <br>
+The list of [settings](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/variables.h) and [commands](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/ddracecommands.h) can be found in the source files when scrolling down a little bit.

@@ -399,57 +399,74 @@ CServer::~CServer()
 	delete m_pRegisterTwo;
 }
 
-int CServer::TrySetClientName(int ClientID, const char* pName)
+bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
 {
-	char aTrimmedName[MAX_NAME_LENGTH];
-
-	// trim the name
-	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pName), sizeof(aTrimmedName));
-	str_utf8_trim_right(aTrimmedName);
-
 	// check for empty names
-	if (!aTrimmedName[0])
-		return -1;
+	if(!pNameRequest[0])
+		return false;
 
 	// check for names starting with /, as they can be abused to make people
 	// write chat commands
-	if (aTrimmedName[0] == '/')
-		return -1;
+	if(pNameRequest[0] == '/')
+		return false;
 
 	// make sure that two clients don't have the same name
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i != ClientID && m_aClients[i].m_State >= CClient::STATE_READY)
+		if(i != ClientId && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if (str_utf8_comp_confusable(aTrimmedName, m_aClients[i].m_aName) == 0)
-				return -1;
+			if(str_utf8_comp_confusable(pNameRequest, m_aClients[i].m_aName) == 0)
+				return false;
 		}
 	}
 
-	pName = aTrimmedName;
-
-	// set the client name
-	str_copy(m_aClients[ClientID].m_aName, pName, sizeof(m_aClients[ClientID].m_aName));
-	return 0;
+	return true;
 }
 
-void CServer::SetClientName(int ClientID, const char *pName)
+bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pName)
-		return;
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+	if(m_aClients[ClientId].m_State < CClient::STATE_READY)
+		return false;
+
+	// trim the name
+	char aTrimmedName[MAX_NAME_LENGTH];
+	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pNameRequest));
+	str_utf8_trim_right(aTrimmedName);
 
 	char aNameTry[MAX_NAME_LENGTH];
-	str_copy(aNameTry, pName, sizeof(aNameTry));
-	if (TrySetClientName(ClientID, aNameTry))
+	str_copy(aNameTry, aTrimmedName);
+
+	if(!IsClientNameAvailable(ClientId, aNameTry))
 	{
 		// auto rename
-		for (int i = 1;; i++)
+		for(int i = 1;; i++)
 		{
-			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, pName);
-			if (TrySetClientName(ClientID, aNameTry) == 0)
+			str_format(aNameTry, sizeof(aNameTry), "(%d)%s", i, aTrimmedName);
+			if(IsClientNameAvailable(ClientId, aNameTry))
 				break;
 		}
 	}
+
+	bool Changed = str_comp(m_aClients[ClientId].m_aName, aNameTry) != 0;
+
+	if(Set && Changed)
+	{
+		// set the client name
+		str_copy(m_aClients[ClientId].m_aName, aNameTry);
+	}
+
+	return Changed;
+}
+
+bool CServer::WouldClientNameChange(int ClientId, const char *pNameRequest)
+{
+	return SetClientNameImpl(ClientId, pNameRequest, false);
+}
+
+void CServer::SetClientName(int ClientId, const char *pName)
+{
+	SetClientNameImpl(ClientId, pName, true);
 }
 
 void CServer::SetClientClan(int ClientID, const char *pClan)
@@ -2075,7 +2092,6 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 	pPrefix = SERVERBROWSE_INFO_EXTENDED_MORE;
 	PrefixSize = sizeof(SERVERBROWSE_INFO_EXTENDED_MORE);
 
-	int Sent = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
@@ -2088,6 +2104,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			ADD_INT(pp, m_aClients[i].m_Country);
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
 			// thats why we just send -9999, because it will be displayed as nothing
+			// browserscorefix is not required anymore since we have client_score_kind, but we keep it in this, in case it's not fetched via http master and doesnt know about score kind
 			int Score = -9999;
 			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
 				Score = abs(m_aClients[i].m_Score) * -1;
@@ -2108,7 +2125,6 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 				pp.AddString("", 0);
 				continue;
 			}
-			Sent++;
 		}
 	}
 
@@ -2171,6 +2187,7 @@ void CServer::UpdateRegisterServerInfo()
 	char aGameType[32];
 	char aMapName[64];
 	char aVersion[64];
+	char aScoreKind[32];
 	char aMapSha256[SHA256_MAXSTRSIZE];
 
 	sha256_str(m_CurrentMapSha256, aMapSha256, sizeof(aMapSha256));
@@ -2189,6 +2206,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
+		"\"client_score_kind\":\"%s\","
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
@@ -2198,7 +2216,8 @@ void CServer::UpdateRegisterServerInfo()
 		EscapeJson(aMapName, sizeof(aMapName), GetMapName()),
 		aMapSha256,
 		m_CurrentMapSize,
-		EscapeJson(aVersion, sizeof(aVersion), GameServer()->VersionSevendown()));
+		EscapeJson(aVersion, sizeof(aVersion), GameServer()->VersionSevendown()),
+		EscapeJson(aScoreKind, sizeof(aScoreKind), Config()->m_SvDefaultScoreMode == 0 ? "time" : "points"));
 
 	bool FirstPlayer = true;
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2206,12 +2225,9 @@ void CServer::UpdateRegisterServerInfo()
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_DUMMY)
 		{
 			// 0 means CPlayer::SCORE_TIME, so the other score modes use scoreformat instead of time format
-			// thats why we just send -9999, because it will be displayed as nothing
-			int Score = -9999;
-			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
-				Score = abs(m_aClients[i].m_Score) * -1;
-			else if (IsBrowserScoreFix())
-				Score = m_aClients[i].m_Score;
+			int Score = m_aClients[i].m_Score;
+			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score == -1)
+				Score = -9999;
 
 			char aCName[32];
 			char aCClan[32];
@@ -3268,7 +3284,8 @@ bool CServer::DemoRecorder_IsRecording()
 
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
-	CServer* pServer = (CServer *)pUser;
+	// Crashes, cuz snap functions dont handle clientid -1 properly :) xd
+	/*CServer* pServer = (CServer *)pUser;
 	char aFilename[128];
 	if(pResult->NumArguments())
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pResult->GetString(0));
@@ -3278,7 +3295,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aDate);
 	}
-	pServer->m_DemoRecorder.Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapSha256, pServer->m_CurrentMapCrc, "server");
+	pServer->m_DemoRecorder.Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_CurrentMapSha256, pServer->m_CurrentMapCrc, "server");*/
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)

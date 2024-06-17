@@ -170,7 +170,7 @@ CTuningParams *CGameContext::Tuning(int ClientID, int Zone)
 {
 	if(GetPlayerChar(ClientID))
 		return GetPlayerChar(ClientID)->Tuning(Zone);
-	if(Zone != 0)
+	if(Zone > 0)
 		return &TuningList()[Zone];
 	return &m_Tuning;
 }
@@ -418,6 +418,17 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientID, Mask128 Mask)
 		pEvent->m_X = (int)Pos.x;
 		pEvent->m_Y = (int)Pos.y;
 		pEvent->m_ClientID = ClientID;
+	}
+}
+
+void CGameContext::CreateFinishConfetti(vec2 Pos, Mask128 Mask)
+{
+	// create the event
+	CNetEvent_Finish *pEvent = (CNetEvent_Finish *)m_Events.Create(NETEVENTTYPE_FINISH, sizeof(CNetEvent_Finish), Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
 	}
 }
 
@@ -1635,6 +1646,9 @@ void CGameContext::OnClientRejoin(int ClientID)
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);
+
+	CNetMsg_Sv_ReadyToEnter m;
+	Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 }
 
 void CGameContext::MapDesignChangeDone(int ClientID)
@@ -1656,6 +1670,9 @@ void CGameContext::MapDesignChangeDone(int ClientID)
 
 	if (Server()->GetDummy(ClientID) != -1)
 		SendChatTarget(ClientID, "[WARNING] You need to reconnect your dummy after the design change is done, so it can get back it's old state.");
+
+	CNetMsg_Sv_ReadyToEnter m;
+	Server()->SendPackMsg(&m, MSGFLAG_VITAL|MSGFLAG_FLUSH, ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -2011,11 +2028,12 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			// set infos
 			if (str_comp(m_apPlayers[ClientID]->m_CurrentInfo.m_aName, Server()->ClientName(ClientID)) == 0) // check that we dont have a name on right now set by an admin
 			{
-				char aOldName[MAX_NAME_LENGTH];
-				str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
-				if(str_comp(aOldName, pName) != 0 && !ProcessSpamProtection(ClientID))
+				if(Server()->WouldClientNameChange(ClientID, pName) && !ProcessSpamProtection(ClientID))
 				{
+					char aOldName[MAX_NAME_LENGTH];
+					str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 					Server()->SetClientName(ClientID, pName);
+
 					char aChatText[256];
 					str_format(aChatText, sizeof(aChatText), "'%s' changed name to '%s'", aOldName, Server()->ClientName(ClientID));
 					SendChat(-1, CHAT_ALL, -1, aChatText);
@@ -2534,6 +2552,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 			pPlayer->m_LastVote = Server()->Tick();
 			CNetMsg_Cl_Vote *pMsg = (CNetMsg_Cl_Vote *)pRawMsg;
+
+			if (pPlayer->m_VoteQuestionRunning)
+			{
+				pPlayer->OnEndVoteQuestion(pMsg->m_Vote);
+				return;
+			}
 
 			if (m_VoteCloseTime)
 			{
@@ -6024,7 +6048,7 @@ void CGameContext::RemoveSavedIdentityFile(const char *pHash, const char *pName)
 	Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 }
 
-void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
+void CGameContext::SaveDrop(int ClientID, float Hours, const char *pReason)
 {
 	if (!GetPlayerChar(ClientID) || m_apPlayers[ClientID]->m_IsDummy)
 		return;
@@ -6038,7 +6062,7 @@ void CGameContext::SaveDrop(int ClientID, int Hours, const char *pReason)
 	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
 }
 
-bool CGameContext::SaveCharacter(int ClientID, int Flags, int Hours)
+bool CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (!pChr || pChr->GetPlayer()->m_IsDummy)
@@ -6165,37 +6189,38 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 
 void CGameContext::CreateFolders()
 {
-	Storage()->CreateFolder(Config()->m_SvAccFilePath, IStorage::TYPE_SAVE);
-	Storage()->CreateFolder(Config()->m_SvDonationFilePath, IStorage::TYPE_SAVE);
+	char aBuf[IO_MAX_PATH_LENGTH] = { 0 };
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvAccFilePath, aBuf, sizeof(aBuf)));
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvDonationFilePath, aBuf, sizeof(aBuf)));
 
-	char aPath[256];
-	// money history
-	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	char aPath[IO_MAX_PATH_LENGTH];
 
 	// plots
-	Storage()->CreateFolder(Config()->m_SvPlotFilePath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvPlotFilePath, aBuf, sizeof(aBuf)));
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvPlotFilePath, Server()->GetMapName());
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
 
 	str_format(aPath, sizeof(aPath), "%s/presets", Config()->m_SvPlotFilePath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
 
 	// money drops
-	Storage()->CreateFolder(Config()->m_SvMoneyDropsFilePath, IStorage::TYPE_SAVE);
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvMoneyDropsFilePath, aBuf, sizeof(aBuf)));
 	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMoneyDropsFilePath, Server()->GetMapName());
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
+
+	// map designs
+	fs_makedir(Storage()->GetBinaryPath(Config()->m_SvMapDesignPath, aBuf, sizeof(aBuf)));
+	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, Server()->GetMapName());
+	fs_makedir(Storage()->GetBinaryPath(aPath, aBuf, sizeof(aBuf)));
+
+	// money history
+	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvMoneyHistoryFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 
 	// saved tee
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-
-	// map designs
-	str_format(aPath, sizeof(aPath), "%s", Config()->m_SvMapDesignPath);
-	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
-	str_format(aPath, sizeof(aPath), "%s/%s", Config()->m_SvMapDesignPath, Server()->GetMapName());
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 
@@ -7183,6 +7208,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Staff Indicator";
 	case RAINBOW_NAME:
 		return "Rainbow Name";
+	case CONFETTI:
+		return "Confetti";
 	}
 	return "Unknown";
 }

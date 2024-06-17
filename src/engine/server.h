@@ -210,7 +210,7 @@ public:
 
 	int SendPackMsgTranslate(CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
 	{
-		return Translate(pMsg->m_ClientID, ClientID) && SendPackMsgOne(pMsg, Flags, ClientID);
+		return (Flags&MSGFLAG_NOTRANSLATE || Translate(pMsg->m_ClientID, ClientID)) && SendPackMsgOne(pMsg, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(CNetMsg_Sv_RaceFinish *pMsg, int Flags, int ClientID)
@@ -242,6 +242,7 @@ public:
 
 	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
 
+	virtual bool WouldClientNameChange(int ClientId, const char *pNameRequest) = 0;
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;

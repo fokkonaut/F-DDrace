@@ -204,7 +204,7 @@ public:
 	IStorage* Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-	CTuningParams *Tuning(int ClientID, int Zone = 0);
+	CTuningParams *Tuning(int ClientID, int Zone = -1);
 	CTuningParams* TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 
@@ -283,6 +283,7 @@ public:
 	void CreateHammerHit(vec2 Pos, Mask128 Mask = Mask128());
 	void CreatePlayerSpawn(vec2 Pos, Mask128 Mask = Mask128());
 	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
+	void CreateFinishConfetti(vec2 Pos, Mask128 Mask = Mask128());
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
 	enum
@@ -296,7 +297,7 @@ public:
 	void SendChatMsg(CNetMsg_Sv_Chat *pMsg, int Flags, int To);
 	void SendChatTarget(int To, const char* pText, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendChatTeam(int Team, const char* pText);
-	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) { SendChat(ChatterClientID, Mode, To, pText); }
+	void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) override { SendChat(ChatterClientID, Mode, To, pText); }
 	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SEVEN|CHAT_SEVENDOWN);
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true);
 	void SendEmoticon(int ClientID, int Emoticon);
@@ -329,48 +330,48 @@ public:
 	void LoadMapSettings();
 
 	// engine events
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnMapChange(char* pNewMapName, int MapNameSize);
-	virtual void OnShutdown(bool FullShutdown = false);
-	virtual void OnPreShutdown();
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnMapChange(char* pNewMapName, int MapNameSize) override;
+	void OnShutdown(bool FullShutdown = false) override;
+	void OnPreShutdown() override;
 
-	virtual void OnTick();
-	virtual void OnPreSnap();
-	virtual void OnSnap(int ClientID);
-	virtual void OnPostSnap();
+	void OnTick() override;
+	void OnPreSnap() override;
+	void OnSnap(int ClientID) override;
+	void OnPostSnap() override;
 
 	void *PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID);
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
+	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
 
-	virtual void OnClientConnected(int ClientID, bool AsSpec) { OnClientConnected(ClientID, false, AsSpec); }
+	void OnClientConnected(int ClientID, bool AsSpec) override { OnClientConnected(ClientID, false, AsSpec); }
 	void OnClientConnected(int ClientID, bool Dummy, bool AsSpec);
 	void OnClientTeamChange(int ClientID);
-	virtual void OnClientEnter(int ClientID);
-	virtual void OnClientDrop(int ClientID, const char *pReason);
-	virtual void OnClientAuth(int ClientID, int Level);
-	virtual void OnClientDirectInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
-	virtual void OnClientRejoin(int ClientID);
+	void OnClientEnter(int ClientID) override;
+	void OnClientDrop(int ClientID, const char *pReason) override;
+	void OnClientAuth(int ClientID, int Level) override;
+	void OnClientDirectInput(int ClientID, void *pInput) override;
+	void OnClientPredictedInput(int ClientID, void *pInput) override;
+	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
+	void OnClientRejoin(int ClientID) override;
 
-	virtual void OnClientEngineJoin(int ClientID);
-	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
+	void OnClientEngineJoin(int ClientID) override;
+	void OnClientEngineDrop(int ClientID, const char *pReason) override;
 
-	virtual bool IsClientBot(int ClientID) const;
-	virtual bool IsClientReady(int ClientID) const;
-	virtual bool IsClientPlayer(int ClientID) const;
-	virtual bool IsClientSpectator(int ClientID) const;
+	bool IsClientBot(int ClientID) const override;
+	bool IsClientReady(int ClientID) const override;
+	bool IsClientPlayer(int ClientID) const override;
+	bool IsClientSpectator(int ClientID) const override;
 
-	virtual const CUuid GameUuid() const;
-	virtual const char *GameType() const;
-	virtual const char *Version() const;
-	virtual const char *VersionSevendown() const;
-	virtual const char *NetVersion() const;
-	virtual const char *NetVersionSevendown() const;
+	const CUuid GameUuid() const override;
+	const char *GameType() const override;
+	const char *Version() const override;
+	const char *VersionSevendown() const override;
+	const char *NetVersion() const override;
+	const char *NetVersionSevendown() const override;
 
-	virtual void SetBotDetected(int ClientID);
-	virtual void FillAntibot(CAntibotRoundData *pData);
+	void SetBotDetected(int ClientID) override;
+	void FillAntibot(CAntibotRoundData *pData) override;
 	bool OnClientDDNetVersionKnown(int ClientID);
 	int GetClientDDNetVersion(int ClientID);
 	Mask128 ClientsMaskExcludeClientVersionAndHigher(int Version);
@@ -679,13 +680,13 @@ public:
 	vec2 RoundPos(vec2 Pos);
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
 
-	virtual void MapDesignChangeDone(int ClientID);
+	void MapDesignChangeDone(int ClientID) override;
 	void SendStartMessages(int ClientID);
 
 	const char *FormatURL(const char *pURL);
 	const char *GetAvatarURL(int ClientID);
 
-	virtual void SendModLogMessage(int ClientID, const char *pMsg);
+	void SendModLogMessage(int ClientID, const char *pMsg) override;
 
 	void SnapSelectedArea(CSelectedArea *pSelectedArea);
 
@@ -718,7 +719,7 @@ public:
 	static void ConsoleIsDummyCallback(int ClientID, bool *pIsDummy, void *pUser);
 
 	//
-	virtual void OnSetTimedOut(int ClientID, int OrigID);
+	void OnSetTimedOut(int ClientID, int OrigID) override;
 
 	// map specific
 	void SetMapSpecificOptions();
@@ -733,7 +734,7 @@ public:
 	bool IsSpawnArea(vec2 Pos);
 
 	// saved
-	bool SaveCharacter(int ClientID, int Flags = 0, int Hours = -1);
+	bool SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
 	int FindSavedPlayer(int ClientID);
 	bool CheckLoadPlayer(int ClientID);
 	const char *GetSavedIdentityHash(SSavedIdentity Info);
@@ -745,7 +746,7 @@ public:
 	void ExpireSavedIdentities();
 	void RemoveSavedIdentityFile(const char *pHash, const char *pName);
 	
-	void SaveDrop(int ClientID, int Hours, const char *pReason);
+	void SaveDrop(int ClientID, float Hours, const char *pReason);
 
 private:
 
@@ -902,6 +903,7 @@ private:
 	static void ConLovelyVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowHookVIP(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowNameVIP(IConsole::IResult* pResult, void* pUserData);
+	static void ConShrug(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);
@@ -1008,6 +1010,7 @@ private:
 	static void ConEpicCircle(IConsole::IResult* pResult, void* pUserData);
 	static void ConStaffInd(IConsole::IResult* pResult, void* pUserData);
 	static void ConRainbowName(IConsole::IResult* pResult, void* pUserData);
+	static void ConConfetti(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccLogout(IConsole::IResult* pResult, void* pUserData);
@@ -1020,9 +1023,11 @@ private:
 	static void ConSayBy(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeeControl(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);
-	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
+
+	static void ConSaveDrop(IConsole::IResult* pResult, void* pUserData);
+	static void ConListSavedTees(IConsole::IResult* pResult, void* pUserData);
 
 	static void Con1VS1GlobalCreate(IConsole::IResult* pResult, void* pUserData);
 	static void Con1VS1GlobalStart(IConsole::IResult* pResult, void* pUserData);
@@ -1123,9 +1128,9 @@ public:
 	int m_VoteEnforcer;
 	static void SendChatResponse(const char* pLine, void* pUser, bool Highlighted = false);
 	static void SendChatResponseAll(const char* pLine, void* pUser);
-	virtual bool PlayerCollision();
-	virtual bool PlayerHooking();
-	virtual float PlayerJetpack();
+	bool PlayerCollision();
+	bool PlayerHooking();
+	float PlayerJetpack();
 
 	void ResetTuning();
 

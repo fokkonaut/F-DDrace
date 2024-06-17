@@ -156,10 +156,10 @@ MACRO_CONFIG_INT(SvVotesPerTick, sv_votes_per_tick, 5, 1, 15, CFGFLAG_SERVER, "N
 
 // account
 MACRO_CONFIG_INT(SvAccounts, sv_accounts, 0, 0, 1, CFGFLAG_SERVER, "Whether accounts are activated or deactivated", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path where the server searches the account files", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvAccFilePath, sv_acc_file_path, 128, "data/accounts", CFGFLAG_SERVER, "The path where the server searches the account files (relative to binary)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDataSaveInterval, sv_data_save_interval, 30, 5, 60, CFGFLAG_SERVER, "Intervall in minutes between data saves", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvDonationFilePath, sv_donation_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the for the donation file", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvPlotFilePath, sv_plot_file_path, 128, "data/plots", CFGFLAG_SERVER, "The path where the server searches the plot files", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvDonationFilePath, sv_donation_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the for the donation file (relative to binary)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvPlotFilePath, sv_plot_file_path, 128, "data/plots", CFGFLAG_SERVER, "The path where the server searches the plot files (relative to binary)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvKillLogout, sv_kill_logout, 0, 0, 60, CFGFLAG_SERVER, "Time in seconds a tee can kill after trying to logout (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEuroMode, sv_euro_mode, 0, 0, 1, CFGFLAG_SERVER, "Whether euro mode is enabled", AUTHED_ADMIN)
 
@@ -167,7 +167,7 @@ MACRO_CONFIG_STR(SvExpMsgColorText, sv_exp_msg_color_text, 4, "999", CFGFLAG_SER
 MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Symbol color for the experience broadcast", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvExpMsgColorValue, sv_exp_msg_color_value, 4, "595", CFGFLAG_SERVER|CFGFLAG_GAME, "Value color for the experience broadcast", AUTHED_ADMIN)
 
-MACRO_CONFIG_STR(SvMoneyDropsFilePath, sv_money_drops_file_path, 128, "data/money_drops", CFGFLAG_SERVER, "The path where the server searches the money drops file", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvMoneyDropsFilePath, sv_money_drops_file_path, 128, "data/money_drops", CFGFLAG_SERVER, "The path where the server searches the money drops file (relative to binary)", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money_history", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
 
 // account system ban
@@ -239,6 +239,7 @@ MACRO_CONFIG_INT(SvLightSpeedups, sv_light_speedups, 1, 0, 1, CFGFLAG_SERVER, "W
 MACRO_CONFIG_STR(SvPlotEditorCategories, sv_plot_editor_categories, 128, "pickups,walls,doors,speedups,teleporters,transform", CFGFLAG_SERVER, "Comma separated list (pickups,walls,doors,speedups,teleporters)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEditorPresetLevel, sv_editor_preset_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to use the draw editor preset save/load feature", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClearFreeDrawLevel, sv_clear_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS, CFGFLAG_SERVER, "Required auth level to clear free draw area (clearplot 0)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvEditorMaxDistance, sv_editor_max_distance, 750, 0, 99999, CFGFLAG_SERVER, "Maximum distance to place something with draw editor", AUTHED_ADMIN)
 
 // taser battery
 MACRO_CONFIG_INT(SvBatteryRespawnTime, sv_battery_respawn_time, 10, 1, 60, CFGFLAG_SERVER, "Time in minutes a taser battery respawns after pickup", AUTHED_ADMIN)
@@ -274,12 +275,12 @@ MACRO_CONFIG_INT(SvBrowserScoreFix, sv_browser_score_fix, 0, 0, 2, CFGFLAG_SERVE
 MACRO_CONFIG_STR(SvHttpsMapDownloadURL, sv_https_map_download_url, 128, "", CFGFLAG_SERVER, "URL path to the maps folder", AUTHED_ADMIN)
 
 // map crc
-MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_SERVER, "Fake map file name to be loaded (path starting at binary!)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(FakeMapFile, fake_map_file, 128, "data/maps/fakemap", CFGFLAG_SERVER, "Fake map file name to be loaded (relative to binary)", AUTHED_ADMIN)
 MACRO_CONFIG_STR(FakeMapName, fake_map_name, 128, "", CFGFLAG_SERVER, "Fake map name", AUTHED_ADMIN)
 MACRO_CONFIG_STR(FakeMapCrc, fake_map_crc, 128, "", CFGFLAG_SERVER, "Fake map crc", AUTHED_ADMIN)
 
 // map design
-MACRO_CONFIG_STR(SvMapDesignPath, sv_map_design_path, 128, "data/designs", CFGFLAG_SERVER, "The path where the server searches the map designs", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvMapDesignPath, sv_map_design_path, 128, "data/designs", CFGFLAG_SERVER, "The path where the server searches the map designs (relative to binary)", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvDefaultMapDesign, sv_default_map_design, 128, "", CFGFLAG_SERVER, "Default map design name", AUTHED_ADMIN)
 
 // webhook
@@ -337,7 +338,7 @@ MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 0, 0, 1, CFGFLAG_SERVER, "Whether
 // other
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 1, 0, 1, CFGFLAG_SERVER, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER, "Default speed for rainbow", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, 1, 0, 1, CFGFLAG_SERVER, "Default score (0 = time, 1 = level, 2 = blockpoints)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, 1, 0, 2, CFGFLAG_SERVER, "Default score (0 = time, 1 = level, 2 = blockpoints)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 0, 0, 1, CFGFLAG_SERVER, "Whether to use the default gun sound for jetpack or another sound", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones", AUTHED_ADMIN)

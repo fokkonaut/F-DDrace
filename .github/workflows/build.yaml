@@ -7,29 +7,27 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-18.04]
+        os: [ubuntu-latest, windows-latest, ubuntu-20.04]
         include:
         - os: ubuntu-latest
-          cmake-args: -G "Unix Makefiles"
-          build-args: --parallel
+          cmake-args: -G Ninja
           package-file: teeworlds-*-linux_x86_64.tar.xz
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
-        - os: ubuntu-18.04
+        - os: ubuntu-20.04
           cmake-path: /usr/bin/
-          cmake-args: -G "Unix Makefiles"
+          cmake-args: -G Ninja
           package-file: teeworlds-*-linux_x86_64.tar.xz
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
-        - os: macOS-latest
-          cmake-args: -G "Unix Makefiles"
-          build-args: --parallel
-          package-file: teeworlds-*-osx.dmg
-          env:
-            CFLAGS: -Wdeclaration-after-statement -Werror
-            CXXFLAGS: -Werror
+        #- os: macOS-latest
+        #  cmake-args: -G Ninja
+        #  package-file: teeworlds-*-macos.dmg
+        #  env:
+        #    CFLAGS: -Wdeclaration-after-statement -Werror
+        #    CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -A x64
           package-file: teeworlds-*-win64.zip
@@ -47,13 +45,15 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake libfreetype6-dev libsdl2-dev -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libsdl2-dev -y
 
     - name: Prepare MacOS
       if: contains(matrix.os, 'macOS')
       run: |
-        brew update
-        brew install pkg-config sdl2
+        brew update || true
+        brew install pkg-config sdl2 python3 ninja || true
+        brew upgrade freetype
+        sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Build in debug mode
       env: ${{ matrix.env }}
@@ -97,8 +97,8 @@ jobs:
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
 
-    #- name: Upload Artifacts
-    #  uses: actions/upload-artifact@v1
-    #  with:
-    #    name: teeworlds-${{ matrix.os }}
-    #    path: release/artifacts
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: teeworlds-${{ matrix.os }}
+        path: release/artifacts

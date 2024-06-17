@@ -20,7 +20,11 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"F-DDrace is a mod by fokkonaut");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
-		"Based on Teeworlds 0.7 by the Teeworlds developers, uses parts of the 0.6 DDRace mod by the DDRace developers.");
+		"Based on Teeworlds 0.7 by the Teeworlds developers, uses parts of the 0.6 DDNet mod by the DDNet developers.");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+		"https://github.com/fokkonaut/F-DDrace");
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
@@ -3245,4 +3249,11 @@ void CGameContext::ConRainbowNameVIP(IConsole::IResult *pResult, void *pUserData
 	}
 
 	pChr->RainbowName(!pChr->GetPlayer()->m_RainbowName, pResult->m_ClientID);
+}
+
+void CGameContext::ConShrug(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(pPlayer) pSelf->SendChat(pResult->m_ClientID, pPlayer->m_LocalChat ? CHAT_LOCAL : CHAT_ALL, -1, "¯\\_(ツ)_/¯", pResult->m_ClientID);
 }

@@ -324,11 +324,11 @@ public:
 		unsigned int m_Size;
 	} m_aMapDesign[NUM_MAP_DESIGNS];
 	std::vector<std::string> m_vMapDesignFiles;
-	void LoadMapDesigns();
+	void LoadMapDesigns() override;
 	static int InitMapDesign(const char *pName, int IsDir, int StorageType, void *pUser);
-	virtual void ChangeMapDesign(int ClientID, const char *pName);
+	void ChangeMapDesign(int ClientID, const char *pName) override;
 	void SendMapDesign(int ClientID, int Design);
-	virtual const char *GetMapDesign(int ClientID);
+	const char *GetMapDesign(int ClientID) override;
 
 	// map https url
 	const char *GetHttpsMapURL(int Design = -1);
@@ -362,40 +362,40 @@ public:
 	CServer();
 	~CServer();
 
-	int TrySetClientName(int ClientID, const char* pName);
+	bool IsClientNameAvailable(int ClientId, const char* pNameRequest);
+	bool SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set);
+	bool WouldClientNameChange(int ClientId, const char *pNameRequest) override;
 
-	virtual void SetClientName(int ClientID, const char *pName);
-	virtual void SetClientClan(int ClientID, char const *pClan);
-	virtual void SetClientCountry(int ClientID, int Country);
-	virtual void SetClientScore(int ClientID, int Score);
+	void SetClientName(int ClientID, const char *pName) override;
+	void SetClientClan(int ClientID, char const *pClan) override;
+	void SetClientCountry(int ClientID, int Country) override;
+	void SetClientScore(int ClientID, int Score) override;
 
-	int Kick(int ClientID, const char *pReason);
-	void Ban(int ClientID, int Seconds, const char *pReason); // bans ip of player with clientid
+	int Kick(int ClientID, const char *pReason) override;
+	void Ban(int ClientID, int Seconds, const char *pReason) override; // bans ip of player with clientid
 
-	void DemoRecorder_HandleAutoStart();
-	bool DemoRecorder_IsRecording();
+	void DemoRecorder_HandleAutoStart() override;
+	bool DemoRecorder_IsRecording() override;
 
 	int64 TickStartTime(int Tick);
 
 	int Init();
 
-	void InitRconPasswordIfUnset();
+	void SetRconCID(int ClientID) override;
+	int GetAuthedState(int ClientID) const override;
+	const char *AuthName(int ClientID) const override;
+	bool IsBanned(int ClientID) override;
+	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
+	int GetClientInfo(int ClientID, CClientInfo *pInfo) const override;
+	void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const override;
+	void SetClientDDNetVersion(int ClientID, int DDNetVersion) override;
+	int GetClientVersion(int ClientID) const override;
+	const char *ClientName(int ClientID) const override;
+	const char *ClientClan(int ClientID) const override;
+	int ClientCountry(int ClientID) const override;
+	bool ClientIngame(int ClientID) const override;
 
-	void SetRconCID(int ClientID);
-	int GetAuthedState(int ClientID) const;
-	const char *AuthName(int ClientID) const;
-	bool IsBanned(int ClientID);
-	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc);
-	int GetClientInfo(int ClientID, CClientInfo *pInfo) const;
-	void GetClientAddr(int ClientID, char *pAddrStr, int Size, bool AddPort = false) const;
-	void SetClientDDNetVersion(int ClientID, int DDNetVersion);
-	int GetClientVersion(int ClientID) const;
-	const char *ClientName(int ClientID) const;
-	const char *ClientClan(int ClientID) const;
-	int ClientCountry(int ClientID) const;
-	bool ClientIngame(int ClientID) const;
-
-	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
+	int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID) override;
 
 	void DoSnapshot();
 
@@ -430,16 +430,16 @@ public:
 	void SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socket);
 	void UpdateRegisterServerInfo();
 	void UpdateServerInfo(bool Resend = false);
-	virtual void ExpireServerInfo();
+	void ExpireServerInfo() override;
 	void FillAntibot(CAntibotRoundData *pData) override;
 	const char *GetGameTypeServerInfo();
 
 	void PumpNetwork();
 
-	virtual void ChangeMap(const char *pMap);
-	virtual const char *GetFileName(char *pPath);
-	virtual const char *GetCurrentMapName();
-	virtual const char *GetMapName();
+	void ChangeMap(const char *pMap) override;
+	const char *GetFileName(char *pPath) override;
+	const char *GetCurrentMapName() override;
+	const char *GetMapName() override;
 	int LoadMap(const char *pMapName);
 
 	void InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *pGameServer, IEngineMap *pMap, IStorage *pStorage, IEngineAntibot *pAntibot);
@@ -491,25 +491,25 @@ public:
 
 	void RegisterCommands();
 
-	virtual int SnapNewID();
-	virtual void SnapFreeID(int ID);
-	virtual void *SnapNewItem(int Type, int ID, int Size);
-	void SnapSetStaticsize(int ItemType, int Size);
+	int SnapNewID() override;
+	void SnapFreeID(int ID) override;
+	void *SnapNewItem(int Type, int ID, int Size) override;
+	void SnapSetStaticsize(int ItemType, int Size) override;
 
-	virtual void RestrictRconOutput(int ClientID) { m_RconRestrict = ClientID; }
-	virtual void SetRconAuthLevel(int AuthLevel) { m_RconAuthLevel = AuthLevel; }
+	void RestrictRconOutput(int ClientID) override { m_RconRestrict = ClientID; }
+	void SetRconAuthLevel(int AuthLevel) override { m_RconAuthLevel = AuthLevel; }
 
 	// F-DDrace
 
-	const char *GetNetErrorString(int ClientID) { return m_NetServer.ErrorString(ClientID); };
-	void ResetNetErrorString(int ClientID) { m_NetServer.ResetErrorString(ClientID); };
-	bool SetTimedOut(int ClientID, int OrigID);
-	void SetTimeoutProtected(int ClientID) { m_NetServer.SetTimeoutProtected(ClientID); };
+	const char *GetNetErrorString(int ClientID) override { return m_NetServer.ErrorString(ClientID); };
+	void ResetNetErrorString(int ClientID) override { m_NetServer.ResetErrorString(ClientID); };
+	bool SetTimedOut(int ClientID, int OrigID) override;
+	void SetTimeoutProtected(int ClientID) override { m_NetServer.SetTimeoutProtected(ClientID); };
 
-	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags);
+	void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) override;
 
-	void GetClientAddr(int ClientID, NETADDR* pAddr);
-	const char* GetAnnouncementLine(char const* FileName);
+	void GetClientAddr(int ClientID, NETADDR* pAddr) override;
+	const char* GetAnnouncementLine(char const* FileName) override;
 	unsigned m_AnnouncementLastLine;
 
 	bool IsBrowserScoreFix();
@@ -530,7 +530,7 @@ public:
 		BOTLOOKUP_STATE_DONE = 0,
 		BOTLOOKUP_STATE_PENDING
 	};
-	virtual void PrintBotLookup();
+	void PrintBotLookup() override;
 	int m_BotLookupState;
 
 	void InitProxyGameServerCheck(int ClientID);
@@ -548,11 +548,11 @@ public:
 		char m_aReason[64];
 	};
 	std::vector<SWhitelist> m_vWhitelist;
-	virtual void SaveWhitelist();
-	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason);
-	virtual void RemoveWhitelist(const NETADDR *pAddr);
-	virtual void RemoveWhitelistByIndex(unsigned int Index);
-	virtual void PrintWhitelist();
+	void SaveWhitelist() override;
+	void AddWhitelist(const NETADDR *pAddr, const char *pReason) override;
+	void RemoveWhitelist(const NETADDR *pAddr) override;
+	void RemoveWhitelistByIndex(unsigned int Index) override;
+	void PrintWhitelist() override;
 
 	class CWebhook : public IJob
 	{
@@ -561,24 +561,24 @@ public:
 		CWebhook(const char *pCommand) { str_copy(m_aCommand, pCommand, sizeof(m_aCommand)); }
 		char m_aCommand[1024];
 	};
-	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "");
-	virtual void SendWebhook1vs1(const char *pMessage, const char *pUsername, const char *pAvatarURL);
+  
+	void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "") override;
 
-	virtual const char *GetAuthIdent(int ClientID);
+	const char *GetAuthIdent(int ClientID) override;
 
-	virtual int *GetIdMap(int ClientID);
-	virtual int *GetReverseIdMap(int ClientID);
+	int *GetIdMap(int ClientID) override;
+	int *GetReverseIdMap(int ClientID) override;
 
-	void DummyJoin(int DummyID);
-	void DummyLeave(int DummyID);
+	void DummyJoin(int DummyID) override;
+	void DummyLeave(int DummyID) override;
 
-	virtual bool IsMain(int ClientID) { return m_aClients[ClientID].m_Main; }
-	virtual bool DesignChanging(int ClientID) { return m_aClients[ClientID].m_DesignChange; }
-	virtual bool HammerflyMarked(int ClientID) { return m_aClients[ClientID].m_HammerflyMarked; }
-	virtual bool IsIdleDummy(int ClientID) { return m_aClients[ClientID].m_IdleDummy; }
-	virtual bool IsDummyHammer(int ClientID) { return m_aClients[ClientID].m_DummyHammer; }
-	virtual bool IsSevendown(int ClientID) { return m_aClients[ClientID].m_Sevendown; }
-	virtual int NumClients();
+	bool IsMain(int ClientID) override { return m_aClients[ClientID].m_Main; }
+	bool DesignChanging(int ClientID) override { return m_aClients[ClientID].m_DesignChange; }
+	bool HammerflyMarked(int ClientID) override { return m_aClients[ClientID].m_HammerflyMarked; }
+	bool IsIdleDummy(int ClientID) override { return m_aClients[ClientID].m_IdleDummy; }
+	bool IsDummyHammer(int ClientID) override { return m_aClients[ClientID].m_DummyHammer; }
+	bool IsSevendown(int ClientID) override { return m_aClients[ClientID].m_Sevendown; }
+	int NumClients() override;
 	bool IsDoubleInfo();
 
 	class CTranslateChat : public IJob
@@ -605,17 +605,17 @@ public:
 		TRANSLATE_STATE_DONE = 0,
 		TRANSLATE_STATE_PENDING
 	};
-	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode);
+	void TranslateChat(int ClientID, const char *pMsg, int Mode) override;
 	int m_TranslateState;
-	virtual const char *GetLanguage(int ClientID) { return m_aClients[ClientID].m_aLanguage; }
-	virtual void SetLanguage(int ClientID, const char *pLanguage) { str_copy(m_aClients[ClientID].m_aLanguage, pLanguage, sizeof(m_aClients[ClientID].m_aLanguage)); }
+	const char *GetLanguage(int ClientID) override { return m_aClients[ClientID].m_aLanguage; }
+	void SetLanguage(int ClientID, const char *pLanguage) override { str_copy(m_aClients[ClientID].m_aLanguage, pLanguage, sizeof(m_aClients[ClientID].m_aLanguage)); }
 
 	const char *GetClientVersionStr(int ClientID) const;
 
-	virtual bool IsUniqueAddress(int ClientID);
-	virtual int GetDummy(int ClientID);
-	virtual bool IsDummy(int ClientID1, int ClientID2);
-	virtual bool DummyControlOrCopyMoves(int ClientID);
+	bool IsUniqueAddress(int ClientID) override;
+	int GetDummy(int ClientID) override;
+	bool IsDummy(int ClientID1, int ClientID2) override;
+	bool DummyControlOrCopyMoves(int ClientID) override;
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

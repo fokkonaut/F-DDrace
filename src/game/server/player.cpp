@@ -165,6 +165,8 @@ void CPlayer::Reset()
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
 
+	m_ConfettiWinEffectTick = 0;
+
 	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
 
@@ -225,6 +227,10 @@ void CPlayer::Reset()
 
 	m_HideDrawings = false;
 	m_LastMovementTick = 0;
+
+	m_VoteQuestionRunning = false;
+	m_VoteQuestionType = CPlayer::VOTE_QUESTION_NONE;
+	m_VoteQuestionEndTick = 0;
 }
 
 void CPlayer::Tick()
@@ -415,6 +421,10 @@ void CPlayer::Tick()
 
 	MinigameRequestTick();
 	MinigameAfkCheck();
+
+	// Automatic close/stop after 30 seconds
+	if (m_VoteQuestionEndTick && Server()->Tick() > m_VoteQuestionEndTick)
+		OnEndVoteQuestion();
 }
 
 void CPlayer::PostTick()
@@ -1931,8 +1941,7 @@ void CPlayer::OnLogin()
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
 		m_HideDrawings = true;
 
-	if (Server()->IsMain(m_ClientID))
-		Server()->ChangeMapDesign(m_ClientID, pAccount->m_aDesign);
+	StartVoteQuestion(CPlayer::VOTE_QUESTION_DESIGN);
 }
 
 void CPlayer::OnLogout()
@@ -1972,6 +1981,92 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEDRAWINGS;
 
 	str_copy(pAccount->m_aDesign, Server()->GetMapDesign(m_ClientID), sizeof(pAccount->m_aDesign));
+
+	if (m_VoteQuestionType == CPlayer::VOTE_QUESTION_DESIGN)
+		OnEndVoteQuestion();
+}
+
+void CPlayer::StartVoteQuestion(VoteQuestionType Type)
+{
+	char aText[128] = { 0 };
+	switch ((int)Type)
+	{
+	case CPlayer::VOTE_QUESTION_DESIGN:
+	{
+		const char *pDesign = GameServer()->m_Accounts[GetAccID()].m_aDesign;
+		if (!pDesign[0] || !str_comp(pDesign, Server()->GetMapDesign(m_ClientID)))
+			return;
+
+		str_format(aText, sizeof(aText), "Load recent design '%s'?", GameServer()->m_Accounts[GetAccID()].m_aDesign);
+		break;
+	}
+	}
+
+	const int TimeoutSec = 30;
+
+	m_VoteQuestionRunning = true;
+	m_VoteQuestionType = Type;
+	m_VoteQuestionEndTick = Server()->Tick() + Server()->TickSpeed() * TimeoutSec;
+
+	if (!Server()->IsSevendown(m_ClientID))
+	{
+		CNetMsg_Sv_VoteSet Msg;
+		Msg.m_Type = VOTE_START_OP;
+		Msg.m_Timeout = TimeoutSec;
+		Msg.m_ClientID = VANILLA_MAX_CLIENTS-1;
+		Msg.m_pDescription = aText;
+		Msg.m_pReason = "";
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOTRANSLATE, m_ClientID);
+	}
+	else
+	{
+		CMsgPacker Msg(NETMSGTYPE_SV_VOTESET);
+		Msg.AddInt(TimeoutSec);
+		Msg.AddString(aText, -1);
+		Msg.AddString("", -1);
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, m_ClientID);
+	}
+}
+
+void CPlayer::OnEndVoteQuestion(int Result)
+{
+	switch ((int)m_VoteQuestionType)
+	{
+	case CPlayer::VOTE_QUESTION_DESIGN:
+	{
+		if (Result == 1)
+		{
+			Server()->ChangeMapDesign(m_ClientID, GameServer()->m_Accounts[GetAccID()].m_aDesign);
+		}
+		break;
+	}
+	}
+
+	m_VoteQuestionRunning = false;
+	m_VoteQuestionType = CPlayer::VOTE_QUESTION_NONE;
+	m_VoteQuestionEndTick = 0;
+	//GameServer()->SendVoteStatus(m_ClientID, 2, Result == 1, Result == -1);
+
+	if (!Server()->IsSevendown(m_ClientID))
+	{
+		CNetMsg_Sv_VoteSet Msg;
+		Msg.m_Type = Result == 1 ? VOTE_END_PASS : Result == -1 ? VOTE_END_FAIL : VOTE_END_ABORT;
+		Msg.m_Timeout = 0;
+		int id = m_ClientID;
+		Server()->Translate(id, m_ClientID);
+		Msg.m_ClientID = id;
+		Msg.m_pDescription = "";
+		Msg.m_pReason = "";
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, m_ClientID);
+	}
+	else
+	{
+		CMsgPacker Msg(NETMSGTYPE_SV_VOTESET);
+		Msg.AddInt(0);
+		Msg.AddString("", -1);
+		Msg.AddString("", -1);
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, m_ClientID);
+	}
 }
 
 void CPlayer::StopPlotEditing()

@@ -190,6 +190,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_RotatingBall = pChr->m_RotatingBall;
 	m_EpicCircle = pChr->m_EpicCircle;
 	m_StaffInd = pChr->m_StaffInd;
+	m_Confetti = pChr->m_Confetti;
 
 	// core
 	m_MoveRestrictionExtraRoomKey = pChr->Core()->m_MoveRestrictionExtra.m_RoomKey;
@@ -364,6 +365,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->RotatingBall(m_RotatingBall, -1, true);
 		pChr->EpicCircle(m_EpicCircle, -1, true);
 		pChr->StaffInd(m_StaffInd, -1, true);
+		pChr->Confetti(m_Confetti, -1, true);
 
 		// core
 		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = m_MoveRestrictionExtraRoomKey;
@@ -436,12 +438,12 @@ char* CSaveTee::GetString()
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%lld\t%lld\t%d\t%d\t"
 		"%s\t%s\t%s\t%s\t%lld\t"
@@ -486,13 +488,13 @@ char* CSaveTee::GetString()
 		m_aWeapons[17].m_AmmoRegenStart, m_aWeapons[17].m_Ammo, m_aWeapons[17].m_Got,
 		m_Invisible, m_Rainbow, m_Atom, m_Trail, m_Meteors, m_Bloody, m_StrongBloody, m_ScrollNinja, m_HookPower,
 		m_aSpreadWeapon[0], m_aSpreadWeapon[1], m_aSpreadWeapon[2], m_aSpreadWeapon[3], m_aSpreadWeapon[4], m_aSpreadWeapon[5], m_aSpreadWeapon[6], m_aSpreadWeapon[7],
-		m_aSpreadWeapon[8], m_aSpreadWeapon[9], m_aSpreadWeapon[10], m_aSpreadWeapon[11], m_aSpreadWeapon[12], m_aSpreadWeapon[13], m_aSpreadWeapon[14], m_aSpreadWeapon[15], m_aSpreadWeapon[16], m_aSpreadWeapon[17], m_aSpreadWeapon[18],
+		m_aSpreadWeapon[8], m_aSpreadWeapon[9], m_aSpreadWeapon[10], m_aSpreadWeapon[11], m_aSpreadWeapon[12], m_aSpreadWeapon[13], m_aSpreadWeapon[14], m_aSpreadWeapon[15], m_aSpreadWeapon[16], m_aSpreadWeapon[17],
 		m_aHadWeapon[0], m_aHadWeapon[1], m_aHadWeapon[2], m_aHadWeapon[3], m_aHadWeapon[4], m_aHadWeapon[5], m_aHadWeapon[6], m_aHadWeapon[7],
-		m_aHadWeapon[8], m_aHadWeapon[9], m_aHadWeapon[10], m_aHadWeapon[11], m_aHadWeapon[12], m_aHadWeapon[13], m_aHadWeapon[14], m_aHadWeapon[15], m_aHadWeapon[16], m_aHadWeapon[17], m_aHadWeapon[18],
+		m_aHadWeapon[8], m_aHadWeapon[9], m_aHadWeapon[10], m_aHadWeapon[11], m_aHadWeapon[12], m_aHadWeapon[13], m_aHadWeapon[14], m_aHadWeapon[15], m_aHadWeapon[16], m_aHadWeapon[17],
 		m_FakeTuneCollision, m_OldFakeTuneCollision, m_Passive, m_PoliceHelper, m_Item, m_DoorHammer, m_AlwaysTeleWeapon, m_FreezeHammer,
 		m_aSpawnWeaponActive[0], m_aSpawnWeaponActive[1], m_aSpawnWeaponActive[2],
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
-		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle, m_StaffInd,
+		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle, m_StaffInd, m_Confetti,
 		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
 		m_JailTime, m_EscapeTime, m_CollectedPortalRifle, m_RainbowName,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, (int64)m_Identity.m_ExpireDate,
@@ -546,15 +548,15 @@ int CSaveTee::LoadString(char* String)
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t"
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
-		"%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%lld\t%lld\t%d\t%d\t"
-		"%s\t%s\t%s\t%s\t%lld\t"
+		"%s\t%s\t%s\t%[^\t]\t%lld\t"
 		"%s\t%s\t%s\t%s\t%s\t%s\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -596,13 +598,13 @@ int CSaveTee::LoadString(char* String)
 		&m_aWeapons[17].m_AmmoRegenStart, &m_aWeapons[17].m_Ammo, &m_aWeapons[17].m_Got,
 		&m_Invisible, &m_Rainbow, &m_Atom, &m_Trail, &m_Meteors, &m_Bloody, &m_StrongBloody, &m_ScrollNinja, &m_HookPower,
 		&m_aSpreadWeapon[0], &m_aSpreadWeapon[1], &m_aSpreadWeapon[2], &m_aSpreadWeapon[3], &m_aSpreadWeapon[4], &m_aSpreadWeapon[5], &m_aSpreadWeapon[6], &m_aSpreadWeapon[7],
-		&m_aSpreadWeapon[8], &m_aSpreadWeapon[9], &m_aSpreadWeapon[10], &m_aSpreadWeapon[11], &m_aSpreadWeapon[12], &m_aSpreadWeapon[13], &m_aSpreadWeapon[14], &m_aSpreadWeapon[15], &m_aSpreadWeapon[16], &m_aSpreadWeapon[17], &m_aSpreadWeapon[18],
+		&m_aSpreadWeapon[8], &m_aSpreadWeapon[9], &m_aSpreadWeapon[10], &m_aSpreadWeapon[11], &m_aSpreadWeapon[12], &m_aSpreadWeapon[13], &m_aSpreadWeapon[14], &m_aSpreadWeapon[15], &m_aSpreadWeapon[16], &m_aSpreadWeapon[17],
 		&m_aHadWeapon[0], &m_aHadWeapon[1], &m_aHadWeapon[2], &m_aHadWeapon[3], &m_aHadWeapon[4], &m_aHadWeapon[5], &m_aHadWeapon[6], &m_aHadWeapon[7],
-		&m_aHadWeapon[8], &m_aHadWeapon[9], &m_aHadWeapon[10], &m_aHadWeapon[11], &m_aHadWeapon[12], &m_aHadWeapon[13], &m_aHadWeapon[14], &m_aHadWeapon[15], &m_aHadWeapon[16], &m_aHadWeapon[17], &m_aHadWeapon[18],
+		&m_aHadWeapon[8], &m_aHadWeapon[9], &m_aHadWeapon[10], &m_aHadWeapon[11], &m_aHadWeapon[12], &m_aHadWeapon[13], &m_aHadWeapon[14], &m_aHadWeapon[15], &m_aHadWeapon[16], &m_aHadWeapon[17],
 		&m_FakeTuneCollision, &m_OldFakeTuneCollision, &m_Passive, &m_PoliceHelper, &m_Item, &m_DoorHammer, &m_AlwaysTeleWeapon, &m_FreezeHammer,
 		&m_aSpawnWeaponActive[0], &m_aSpawnWeaponActive[1], &m_aSpawnWeaponActive[2],
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
-		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle, &m_StaffInd,
+		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle, &m_StaffInd, &m_Confetti,
 		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
 		&m_JailTime, &m_EscapeTime, &m_CollectedPortalRifle, &m_RainbowName,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, &ExpireDate,
@@ -635,7 +637,7 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 91:
 		return 0;
-	case 238: // F-DDrace extra vars
+	case 239: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

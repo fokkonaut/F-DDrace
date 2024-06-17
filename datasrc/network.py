@@ -363,6 +363,8 @@ Objects = [
 		NetFlag("m_RaceFlags", RaceFlags),
 	]),
 
+    NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
+
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),
 	]),

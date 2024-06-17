@@ -1372,6 +1372,14 @@ void CGameContext::ConRainbowName(IConsole::IResult *pResult, void *pUserData)
 	if (pChr) pChr->RainbowName(!pChr->GetPlayer()->m_RainbowName, pResult->m_ClientID);
 }
 
+void CGameContext::ConConfetti(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->Confetti(!pChr->m_Confetti, pResult->m_ClientID);
+}
+
 void CGameContext::ConConnectDummy(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1705,7 +1713,8 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
-		pSelf->FreeAccount(ID);
+		if (!pSelf->m_Accounts[ID].m_LoggedIn)
+			pSelf->FreeAccount(ID);
 		return;
 	}
 
@@ -1868,12 +1877,25 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = !pResult->NumArguments() ? pResult->m_ClientID : pResult->GetVictim();
-	int Hours = pResult->NumArguments() >= 2 ? pResult->GetInteger(1) : 6;
+	float Hours = pResult->NumArguments() >= 2 ? pResult->GetFloat(1) : 6;
 	const char *pReason = pResult->NumArguments() == 3 ? pResult->GetString(2) : "automatic kick due to save drop";
 	int Dummy = pSelf->Server()->GetDummy(Victim);
 	if (Dummy != -1)
 		pSelf->SaveDrop(Dummy, Hours, pReason);
 	pSelf->SaveDrop(Victim, Hours, pReason);
+}
+
+void CGameContext::ConListSavedTees(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Listing all saved identities:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "----------------------------------");
+	for (int i = 0; i < (int)pSelf->m_vSavedIdentities.size(); i++)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate), pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	}
 }
 
 void CGameContext::Con1VS1GlobalCreate(IConsole::IResult *pResult, void *pUserData)

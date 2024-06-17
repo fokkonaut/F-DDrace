@@ -235,7 +235,6 @@ class CNetBase
 
 public:
 	CNetBase();
-	~CNetBase();
 	CConfig *Config() { return m_pConfig; }
 	class IEngine *Engine() { return m_pEngine; }
 	int NetType(int Socket) { return net_socket_type(m_aSocket[Socket]); }

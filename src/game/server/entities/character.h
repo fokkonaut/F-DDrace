@@ -54,6 +54,7 @@ enum Extra
 	EPIC_CIRCLE,
 	STAFF_IND,
 	RAINBOW_NAME,
+	CONFETTI,
 	NUM_EXTRAS
 };
 
@@ -179,6 +180,7 @@ public:
 	void EpicCircle(bool Set = true, int FromID = -1, bool Silent = false);
 	void StaffInd(bool Set = true, int FromID = -1, bool Silent = false);
 	void RainbowName(bool Set = true, int FromID = -1, bool Silent = false);
+	void Confetti(bool Set = true, int FromID = -1, bool Silent = false);
 
 private:
 	// player controlling this character
@@ -278,7 +280,7 @@ private:
 
 public:
 	CGameTeams* Teams();
-	CTuningParams *Tuning(int Zone = 0);
+	CTuningParams *Tuning(int Zone = -1);
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
 	bool Freeze(float Seconds);
@@ -442,6 +444,7 @@ public:
 	bool m_RotatingBall;
 	bool m_EpicCircle;
 	bool m_StaffInd;
+	bool m_Confetti;
 
 	void ResetOnlyFirstPortal();
 	int64 m_LastLinkedPortals;

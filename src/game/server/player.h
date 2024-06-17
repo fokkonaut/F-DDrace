@@ -294,6 +294,7 @@ public:
 	bool m_HasSpookyGhost;
 
 	CPortal *m_pPortal[NUM_PORTALS];
+	int64 m_ConfettiWinEffectTick;
 
 	//teecontrol
 	void SetTeeControl(CPlayer *pVictim);
@@ -439,6 +440,19 @@ public:
 	// shutdown tee
 	bool m_CheckedSavePlayer;
 	bool m_LoadedSavedPlayer;
+
+	// vote question
+	enum VoteQuestionType
+	{
+		VOTE_QUESTION_NONE = -1,
+		VOTE_QUESTION_DESIGN,
+	};
+
+	void StartVoteQuestion(VoteQuestionType Type);
+	void OnEndVoteQuestion(int Result = -1);
+	bool m_VoteQuestionRunning;
+	VoteQuestionType m_VoteQuestionType;
+	int64 m_VoteQuestionEndTick;
 
 private:
 	int64 m_WalletMoney;

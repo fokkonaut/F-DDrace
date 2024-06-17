@@ -592,7 +592,8 @@ void CArenas::IncreaseScore(int Fight, int Index)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' won a 1vs1 round against '%s'! Final scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-		Server()->SendWebhook1vs1(aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
+		Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
+		GameServer()->m_apPlayers[ClientID]->m_ConfettiWinEffectTick = Server()->Tick();
 
 		EndFight(Fight);
 	}
@@ -633,7 +634,8 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "'%s' left a 1vs1 round against '%s'! Current scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-			Server()->SendWebhook1vs1(aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
+      Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
+			GameServer()->m_apPlayers[OtherID]->m_ConfettiWinEffectTick = Server()->Tick();
 		}
 
 		EndFight(Fight);

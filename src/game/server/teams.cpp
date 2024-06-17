@@ -710,6 +710,10 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 
 	// F-DDrace
 	Player->m_Score = GameServer()->Score()->PlayerData(Player->GetCID())->m_BestTime;
+
+	// Confetti
+	CCharacter *pChar = Player->GetCharacter();
+	m_pGameContext->CreateFinishConfetti(pChar->GetPos(), pChar->TeamMask());
 }
 
 void CGameTeams::OnCharacterSpawn(int ClientID)
