@@ -58,7 +58,7 @@ bool CDrawEditor::Active()
 	return m_pCharacter->GetActiveWeapon() == WEAPON_DRAW_EDITOR;
 }
 
-bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
+bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 {
 	vec2 Pos = m_Pos;
 	int CursorPlotID = GetCursorPlotID();
@@ -87,14 +87,13 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
 	if (!Remove)
 	{
-		bool TransformMove = m_Transform.m_State == TRANSFORM_STATE_RUNNING && m_Setting == TRANSFORM_MOVE;
 		int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
 		if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 		{
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
 				return false;
 
-			if (!TransformMove)
+			if (!TransformPreview)
 				ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
 		}
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
@@ -108,7 +107,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity)
 			if (CursorPlotID >= PLOT_START && GetNumTeleporters(CursorPlotID) >= GameServer()->GetMaxPlotTeleporters(CursorPlotID))
 				return false;
 
-			if (!TransformMove)
+			if (!TransformPreview)
 				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
 		}
 	}
@@ -137,6 +136,9 @@ bool CDrawEditor::RemoveEntity(CEntity *pEntity)
 			break;
 		}
 
+	// We want to remove the collision instantly so that transform move can place objects on the same posititon
+	if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER)
+		pEntity->Reset();
 	GameServer()->m_World.DestroyEntity(pEntity);
 	return true;
 }
@@ -411,6 +413,10 @@ void CDrawEditor::OnPlayerFire()
 		{
 			if (m_Setting != TRANSFORM_SAVE_PRESET && m_Setting != TRANSFORM_LOAD_PRESET)
 			{
+				if (m_Setting == TRANSFORM_MOVE)
+					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
+						RemoveEntity(m_Transform.m_vSelected[i]);
+
 				for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
 				{
 					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
@@ -423,10 +429,6 @@ void CDrawEditor::OnPlayerFire()
 						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
 					}
 				}
-
-				if (m_Setting == TRANSFORM_MOVE)
-					for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
-						RemoveEntity(m_Transform.m_vSelected[i]);
 
 				StopTransform();
 				m_pCharacter->SetAttackTick(Server()->Tick());
@@ -1232,7 +1234,7 @@ void CDrawEditor::UpdatePreview()
 
 bool CDrawEditor::OnSnapPreview(CEntity *pEntity)
 {
-	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity))) || (pEntity->m_TransformCID == GetCID() && m_Category == CAT_TRANSFORM && m_Setting == TRANSFORM_MOVE);
+	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity, true))) || (pEntity->m_TransformCID == GetCID() && m_Category == CAT_TRANSFORM && m_Setting == TRANSFORM_MOVE);
 }
 
 bool CDrawEditor::TryEnterPresetName(const char *pName)

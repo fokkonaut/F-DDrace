@@ -37,7 +37,7 @@ class CSpeedup : public CEntity
 
 public:
 	CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision = true);
-	virtual ~CSpeedup();
+	virtual void Reset();
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 

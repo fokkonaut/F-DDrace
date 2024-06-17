@@ -29,7 +29,7 @@ class CTeleporter : public CEntity
 
 public:
 	CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number, bool Collision = true);
-	virtual ~CTeleporter();
+	virtual void Reset();
 	virtual void Snap(int SnappingClient);
 	int GetType() { return m_Type; }
 };

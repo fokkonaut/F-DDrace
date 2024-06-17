@@ -35,7 +35,7 @@ CSpeedup::CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int
 	GameWorld()->InsertEntity(this);
 }
 
-CSpeedup::~CSpeedup()
+void CSpeedup::Reset()
 {
 	ResetCollision(true);
 	for (int i = 0; i < NUM_DOTS; i++)

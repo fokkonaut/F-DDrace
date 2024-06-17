@@ -102,7 +102,7 @@ class CDrawEditor
 	DrawInput m_PrevInput;
 	int m_PrevPlotID;
 
-	bool CanPlace(bool Remove = false, CEntity *pEntity = 0);
+	bool CanPlace(bool Remove = false, CEntity *pEntity = 0, bool TransformPreview = false);
 	bool CanRemove(CEntity *pEntity);
 	int GetPlotID();
 	int CurrentPlotID();
