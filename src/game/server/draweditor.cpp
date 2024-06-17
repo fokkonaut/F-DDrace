@@ -282,7 +282,12 @@ void CDrawEditor::Tick()
 		if (m_Transform.m_State == TRANSFORM_STATE_RUNNING)
 		{
 			for (unsigned int i = 0; i < m_Transform.m_vPreview.size(); i++)
-				m_Transform.m_vPreview[i].m_pEnt->SetPos(m_Pos + m_Transform.m_vPreview[i].m_Offset);
+			{
+				vec2 Pos = m_Pos + m_Transform.m_vPreview[i].m_Offset;
+				if (m_Transform.m_vPreview[i].m_pEnt->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || m_Transform.m_vPreview[i].m_pEnt->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER)
+					Pos = GameServer()->RoundPos(Pos);
+				m_Transform.m_vPreview[i].m_pEnt->SetPos(Pos);
+			}
 		}
 	}
 
