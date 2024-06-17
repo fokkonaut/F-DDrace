@@ -106,8 +106,8 @@ enum
 	ENTITY_WEAPON_TASER,
 
 	ENTITY_BANK_DUMMY_SPAWN = 253,
-	ENTITY_PLOT_SHOP_DUMMY_SPAWN,
-	ENTITY_SHOP_DUMMY_SPAWN,
+	ENTITY_PLOT_SHOP_DUMMY_SPAWN = 252,
+	ENTITY_SHOP_DUMMY_SPAWN = 251,
 	//End Of Lower Tiles
 	NUM_ENTITIES,
 	//Start From Top Left
@@ -214,15 +214,12 @@ enum
 	TILE_JAIL = 121,
 	TILE_JAIL_RELEASE = 122,
 	TILE_MONEY = 160,
-	TILE_SHOP = 168,
+	TILE_SHOP = 161,
 	TILE_ROOM,
 	TILE_SPECIAL_FINISH,
 	TILE_MONEY_POLICE,
 	TILE_MONEY_EXTRA,
-	TILE_PLOT_SHOP,
-
-	TILE_NO_BONUS_AREA = 170,
-	TILE_NO_BONUS_AREA_LEAVE,
+	TILE_PLOT_SHOP = 168,
 
 	TILE_VIP_PLUS_ONLY = 172,
 	TILE_HELPERS_ONLY,
@@ -230,20 +227,18 @@ enum
 	TILE_ADMINS_ONLY,
 
 	TILE_MINIGAME_BLOCK = 176,
-	TILE_SURVIVAL_LOBBY,
-	TILE_SURVIVAL_SPAWN,
+	TILE_SURVIVAL_LOBBY = 131,
+	TILE_SURVIVAL_SPAWN = 133,
 	TILE_SURVIVAL_DEATHMATCH,
 	TILE_1VS1_LOBBY = 132,
 
 	TILE_PORTAL_RIFLE_STOP = 189,
 	//End of higher tiles
-
+ 
 	// Switch layer only for plots
-	TILE_SWITCH_PLOT = 192, // plot inside (able to place objects here)
-	TILE_SWITCH_PLOT_DOOR, // door lenght in blocks: delay
-	TILE_SWITCH_PLOT_TOTELE, // totele plot position, // plot size; delay=0: small, delay=1: big
-	TILE_SWITCH_REDIRECT_SERVER_FROM, // from tp for server redirection
-	TILE_SWITCH_REDIRECT_SERVER_TO,
+	TILE_SWITCH_PLOT = 192, // plot size; delay=0: small, delay=1: big
+	TILE_SWITCH_PLOT_DOOR = 193, // door lenght in blocks: delay
+	TILE_SWITCH_PLOT_TOTELE = 194, // totele plot position
 	TILE_SWITCHTOGGLE = 28, // for draw editor placed buttons for plot draw doors, also supported as mappable tiles
 	TILE_TELE_INOUT_EVIL = 94, // also supported as mappable tiles
 	TILE_TELE_INOUT = 95, // also supported as mappable tiles
