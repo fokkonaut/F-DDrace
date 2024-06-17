@@ -203,7 +203,7 @@ void CPickupDrop::IsShieldNear()
 
 	for (int i = 0; i < Num; i++)
 	{
-		if (apEnts[i]->GetType() == POWERUP_ARMOR && apEnts[i]->GetOwner() < 0)
+		if (apEnts[i]->GetType() == POWERUP_ARMOR && apEnts[i]->GetOwner() < 0 && apEnts[i]->m_BrushCID == -1)
 		{
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, m_TeamMask);
 			Reset();
