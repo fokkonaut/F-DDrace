@@ -3899,50 +3899,6 @@ void CServer::SendWebhookMessage(const char *pURL, const char *pMessage, const c
 	pEngine->AddJob(std::make_shared<CWebhook>(aBuf));
 }
 
-void CServer::SendWebhook1vs1(const char *pMessage, const char *pUsername, const char *pAvatarURL)
-{
-	const char *pURL = Config()->m_SvWebhook1vs1URL;
-
-	if (!pURL[0] || !pMessage[0])
-		return;
-
-	char *pMsg = strdup(pMessage);
-	char *pName = strdup(pUsername);
-	for (int i = 0; i < 2; i++)
-	{
-		char *ptr = i == 0 ? pMsg : pName;
-		for (; *ptr; ptr++)
-			if (*ptr == '\"' || *ptr == '\'' || *ptr == '\\' || *ptr == '\n' || *ptr == '|' || *ptr == '`' || *ptr == '@')
-				*ptr = ' ';
-	}
-
-	const char *pBase = "curl -i -H \"Accept: application/json\" -H \"Content-Type:application/json\" -X POST --data";
-
-	const char *pRedirect = "/dev/null";
-	const char *pSingleQuote = "'";
-	const char *pQuote = "\"";
-#if defined(CONF_FAMILY_WINDOWS)
-	pRedirect = "nul";
-	pSingleQuote = "\"";
-	pQuote = "\\\"";
-#endif
-
-	char aData[512];
-	str_format(aData, sizeof(aData), "%s{%susername%s: %s%s%s, %scontent%s: %s%s%s, %savatar_url%s: %s%s%s}%s", pSingleQuote,
-	           pQuote, pQuote, pQuote, pName, pQuote,
-	           pQuote, pQuote, pQuote, pMsg, pQuote,
-	           pQuote, pQuote, pQuote, pAvatarURL, pQuote,
-	           pSingleQuote);
-
-	char aBuf[1024];
-	str_format(aBuf, sizeof(aBuf), "%s %s %s >%s 2>&1", pBase, aData, pURL, pRedirect);
-	free(pMsg);
-	free(pName);
-
-	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	pEngine->AddJob(std::make_shared<CWebhook>(aBuf));
-}
-
 void CServer::CBotLookup::Run()
 {
 	if (!m_pServer->Config()->m_SvBotLookupURL[0])

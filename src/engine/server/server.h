@@ -561,7 +561,6 @@ public:
 		CWebhook(const char *pCommand) { str_copy(m_aCommand, pCommand, sizeof(m_aCommand)); }
 		char m_aCommand[1024];
 	};
-  
 	void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "") override;
 
 	const char *GetAuthIdent(int ClientID) override;
