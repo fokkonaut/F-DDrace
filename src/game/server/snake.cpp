@@ -45,6 +45,9 @@ bool CSnake::SetActive(bool Active)
 		m_pCharacter->m_InSnake = true;
 		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
 		GameServer()->UnsetTelekinesis(m_pCharacter);
+		m_pCharacter->GetPlayer()->StopPlotEditing();
+		if (m_pCharacter->m_pHelicopter)
+			m_pCharacter->m_pHelicopter->Dismount();
 	}
 	else
 	{
@@ -154,6 +157,9 @@ void CSnake::AddNewTees()
 			pChr->m_InSnake = true;
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
 			GameServer()->UnsetTelekinesis(pChr);
+			pChr->GetPlayer()->StopPlotEditing();
+			if (pChr->m_pHelicopter)
+				pChr->m_pHelicopter->Dismount();
 		}
 	}
 }
