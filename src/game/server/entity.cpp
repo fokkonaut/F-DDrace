@@ -60,6 +60,30 @@ int CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll
 	return 0;
 }
 
+bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos, bool CheckShowAll)
+{
+	if(SnappingClient == -1 || (CheckShowAll && GameServer()->m_apPlayers[SnappingClient]->m_ShowAll))
+		return false;
+
+	vec2 &ViewPos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
+	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+
+	vec2 DistanceToLine, ClosestPoint;
+	if(closest_point_on_line(StartPos, EndPos, ViewPos, ClosestPoint))
+	{
+		DistanceToLine = ViewPos - ClosestPoint;
+	}
+	else
+	{
+		// No line section was passed but two equal points
+		DistanceToLine = ViewPos - StartPos;
+	}
+	// Border to also receive objects a bit off the screen so they dont pop up, 6 blocks should be okay
+	float Border = 32.f * 6.f;
+	float ClippDistance = max(ShowDistance.x, ShowDistance.y) / 2.f + Border;
+	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
+}
+
 bool CEntity::GameLayerClipped(vec2 CheckPos)
 {
 	int rx = round_to_int(CheckPos.x) / 32;

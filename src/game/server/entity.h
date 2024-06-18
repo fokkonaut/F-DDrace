@@ -138,6 +138,7 @@ public:
 	*/
 	int NetworkClipped(int SnappingClient, bool CheckShowAll = false, bool DefaultRange = false);
 	int NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAll = false, bool DefaultRange = false);
+	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos, bool CheckShowAll = false);
 
 	bool GameLayerClipped(vec2 CheckPos);
 

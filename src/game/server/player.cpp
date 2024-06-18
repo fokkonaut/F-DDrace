@@ -854,9 +854,9 @@ void CPlayer::FakeSnap()
 	int Team = -1;
 	if (GetCharacter())
 	{
-		if (GetCharacter()->Core()->m_HookedPlayer == HOOK_FLAG_BLUE)
+		if (GetCharacter()->Core()->HookedPlayer() == HOOK_FLAG_BLUE)
 			Team = TEAM_BLUE;
-		else if (GetCharacter()->Core()->m_HookedPlayer == HOOK_FLAG_RED)
+		else if (GetCharacter()->Core()->HookedPlayer() == HOOK_FLAG_RED)
 			Team = TEAM_RED;
 	}
 

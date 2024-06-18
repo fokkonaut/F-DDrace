@@ -133,7 +133,8 @@ void CLightningLaser::HitCharacter()
 				continue;
 
 			// closest point in the light near of a tee
-			vec2 CPoint = closest_point_on_line(m_aaPositions[i][POS_END], m_aaPositions[i][POS_START], pChrs->GetPos());
+			vec2 CPoint;
+			closest_point_on_line(m_aaPositions[i][POS_END], m_aaPositions[i][POS_START], pChrs->GetPos(), CPoint);
 
 			bool IntersectLine = GameServer()->Collision()->IntersectLine(m_aaPositions[i][POS_END], pChrs->GetPos(), NULL, NULL);
 

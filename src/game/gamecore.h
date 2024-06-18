@@ -7,6 +7,7 @@
 #include <base/math.h>
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include <math.h>
@@ -216,7 +217,9 @@ public:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
-	int m_HookedPlayer;
+	std::set<int> m_AttachedPlayers;
+	int HookedPlayer() const { return m_HookedPlayer; }
+	void SetHookedPlayer(int HookedPlayer);
 
 	bool m_NewHook;
 
@@ -285,6 +288,7 @@ private:
 
 	CTeamsCore* m_pTeams;
 	int m_MoveRestrictions;
+	int m_HookedPlayer;
 	void *m_pSwitchActiveUser;
 	CALLBACK_SWITCHACTIVE m_pfnSwitchActive;
 };

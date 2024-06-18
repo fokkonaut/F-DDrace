@@ -98,6 +98,7 @@ public:
 	virtual void PostSnap();
 
 	bool CanSnapCharacter(int SnappingClient);
+	bool IsSnappingCharacterInView(int SnappingClientId);
 
 	bool IsGrounded();
 
@@ -384,7 +385,7 @@ public:
 	void SetCoreJumpedTotal(int JumpedTotal) { m_Core.m_JumpedTotal = JumpedTotal; }
 	void SetCoreJumps(int Jumps) { m_Core.m_Jumps = Jumps; }
 	void SetCoreHookTick(int HookTick) { m_Core.m_HookTick = HookTick; }
-	void SetCoreHookedPlayer(int HookedPlayer) { m_Core.m_HookedPlayer = HookedPlayer; }
+	void SetCoreHookedPlayer(int HookedPlayer) { m_Core.SetHookedPlayer(HookedPlayer); }
 	void SetCoreHookState(int HookState) { m_Core.m_HookState = HookState; }
 	void SetCoreHookPos(vec2 HookPos) { m_Core.m_HookPos = HookPos; }
 	void SetCoreHookDir(vec2 HookDir) { m_Core.m_HookDir = HookDir; }

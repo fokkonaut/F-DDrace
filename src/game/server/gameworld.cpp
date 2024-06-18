@@ -753,16 +753,19 @@ CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 		if (CollideWith != -1 && !p->CanCollide(CollideWith))
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
-		float Len = distance(p->m_Pos, IntersectPos);
-		if(Len < p->m_ProximityRadius+Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 		{
-			Len = distance(Pos0, IntersectPos);
-			if(Len < ClosestLen)
+			float Len = distance(p->m_Pos, IntersectPos);
+			if(Len < p->m_ProximityRadius+Radius)
 			{
-				NewPos = IntersectPos;
-				ClosestLen = Len;
-				pClosest = p;
+				Len = distance(Pos0, IntersectPos);
+				if(Len < ClosestLen)
+				{
+					NewPos = IntersectPos;
+					ClosestLen = Len;
+					pClosest = p;
+				}
 			}
 		}
 	}
@@ -852,12 +855,15 @@ std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 P
 		if (CollideWith != -1 && !pChr->CanCollide(CollideWith))
 			continue;
 
-		vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, pChr->m_Pos);
-		float Len = distance(pChr->m_Pos, IntersectPos);
-		if (Len < pChr->m_ProximityRadius + Radius)
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, pChr->m_Pos, IntersectPos))
 		{
-			pChr->m_Intersection = IntersectPos;
-			listOfChars.push_back(pChr);
+			float Len = distance(pChr->m_Pos, IntersectPos);
+			if (Len < pChr->m_ProximityRadius + Radius)
+			{
+				pChr->m_Intersection = IntersectPos;
+				listOfChars.push_back(pChr);
+			}
 		}
 	}
 	return listOfChars;
@@ -869,9 +875,9 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
 	{
 		CCharacterCore* Core = pChr->Core();
-		if (Core->m_HookedPlayer == ClientID && !pChr->m_Super)
+		if (Core->HookedPlayer() == ClientID && !pChr->m_Super)
 		{
-			Core->m_HookedPlayer = -1;
+			Core->SetHookedPlayer(-1);
 			Core->m_HookState = HOOK_RETRACTED;
 		}
 	}
@@ -1070,16 +1076,19 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 					continue;
 			}
 
-			vec2 IntersectPos = closest_point_on_line(Pos0, Pos1, p->m_Pos);
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius+Radius)
+			vec2 IntersectPos;
+			if (closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 			{
-				Len = distance(Pos0, IntersectPos);
-				if(Len < ClosestLen)
+				float Len = distance(p->m_Pos, IntersectPos);
+				if(Len < p->m_ProximityRadius+Radius)
 				{
-					NewPos = IntersectPos;
-					ClosestLen = Len;
-					pClosest = p;
+					Len = distance(Pos0, IntersectPos);
+					if(Len < ClosestLen)
+					{
+						NewPos = IntersectPos;
+						ClosestLen = Len;
+						pClosest = p;
+					}
 				}
 			}
 		}

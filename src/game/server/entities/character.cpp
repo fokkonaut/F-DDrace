@@ -111,12 +111,13 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameServer()->Collision(), &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.m_Core, &((CGameControllerDDRace*)GameServer()->m_pController)->m_TeleOuts, IsSwitchActiveCb, this);
 	m_Core.m_Pos = m_Pos;
+	m_Core.m_Id = m_pPlayer->GetCID();
 	SetActiveWeapon(WEAPON_GUN);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
 	m_ReckoningTick = 0;
-	mem_zero(&m_SendCore, sizeof(m_SendCore));
-	mem_zero(&m_ReckoningCore, sizeof(m_ReckoningCore));
+	m_SendCore = CCharacterCore();
+	m_ReckoningCore = CCharacterCore();
 
 	GameWorld()->InsertEntity(this);
 	m_Alive = true;
@@ -1914,15 +1915,45 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	return true;
 }
 
-void CCharacter::Snap(int SnappingClient)
+bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 {
-	// explicitly check for /showall, in case a client that doesnt support showdistance wants to see characters while zooming out
+	int Id = m_pPlayer->GetCID();
+
+	// explicitly check for /showall in NetworkClippedLine, in case a client that doesnt support showdistance wants to see characters while zooming out
 	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
 	// when showdistance is supported, then all entities within that showdistance range are being sent
-	if(NetworkClipped(SnappingClient, true) && SendDroppedFlagCooldown(SnappingClient) == -1)
+
+	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
+	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClientId, m_Pos, m_Core.m_HookPos, true);
+	bool AttachedHookInView = false;
+	if(PlayerAndHookNotInView)
+	{
+		for(const auto &AttachedPlayerId : m_Core.m_AttachedPlayers)
+		{
+			const CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerId);
+			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == Id)
+			{
+				if(!NetworkClippedLine(SnappingClientId, m_Pos, pOtherPlayer->m_Pos, true))
+				{
+					AttachedHookInView = true;
+					break;
+				}
+			}
+		}
+	}
+	if(PlayerAndHookNotInView && !AttachedHookInView)
+	{
+		return false;
+	}
+	return true;
+}
+
+void CCharacter::Snap(int SnappingClient)
+{
+	if (!CanSnapCharacter(SnappingClient))
 		return;
 
-	if (!CanSnapCharacter(SnappingClient))
+	if(!IsSnappingCharacterInView(SnappingClient) && SendDroppedFlagCooldown(SnappingClient) == -1)
 		return;
 
 	// F-DDrace
@@ -3291,7 +3322,7 @@ void CCharacter::HandleTiles(int Index)
 		ForceSetPos(NewPos);
 		if (!Config()->m_SvTeleportHoldHook)
 		{
-			m_Core.m_HookedPlayer = -1;
+			m_Core.SetHookedPlayer(-1);
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_HookPos = m_Core.m_Pos;
 		}
@@ -3410,7 +3441,7 @@ void CCharacter::HandleTiles(int Index)
 
 				if (!Config()->m_SvTeleportHoldHook)
 				{
-					m_Core.m_HookedPlayer = -1;
+					m_Core.SetHookedPlayer(-1);
 					m_Core.m_HookState = HOOK_RETRACTED;
 					m_Core.m_HookPos = m_Core.m_Pos;
 				}
@@ -3431,7 +3462,7 @@ void CCharacter::HandleTiles(int Index)
 
 			if (!Config()->m_SvTeleportHoldHook)
 			{
-				m_Core.m_HookedPlayer = -1;
+				m_Core.SetHookedPlayer(-1);
 				m_Core.m_HookState = HOOK_RETRACTED;
 				m_Core.m_HookPos = m_Core.m_Pos;
 			}
@@ -3697,7 +3728,7 @@ void CCharacter::Pause(bool Pause)
 
 		if (m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
 		{
-			m_Core.m_HookedPlayer = -1;
+			m_Core.SetHookedPlayer(-1);
 			m_Core.m_HookState = HOOK_RETRACTED;
 		}
 	}
@@ -4757,7 +4788,7 @@ void CCharacter::OnPlayerHook()
 
 void CCharacter::ReleaseHook(bool Other)
 {
-	m_Core.m_HookedPlayer = -1;
+	m_Core.SetHookedPlayer(-1);
 	m_Core.m_HookState = HOOK_RETRACTED;
 	m_Core.m_HookPos = m_Core.m_Pos;
 	if (Other)

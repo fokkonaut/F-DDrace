@@ -79,7 +79,8 @@ void CCharacterCore::Reset()
 	m_HookDir = vec2(0,0);
 	m_HookTick = 0;
 	m_HookState = HOOK_IDLE;
-	m_HookedPlayer = -1;
+	SetHookedPlayer(-1);
+	m_AttachedPlayers.clear();
 	m_Jumped = 0;
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
@@ -184,14 +185,14 @@ void CCharacterCore::Tick(bool UseInput)
 				m_HookState = HOOK_FLYING;
 				m_HookPos = m_Pos+TargetDirection*PHYS_SIZE*1.5f;
 				m_HookDir = TargetDirection;
-				m_HookedPlayer = -1;
+				SetHookedPlayer(-1);
 				m_HookTick = 0;
 				//m_TriggeredEvents |= COREEVENTFLAG_HOOK_LAUNCH;
 			}
 		}
 		else
 		{
-			m_HookedPlayer = -1;
+			SetHookedPlayer(-1);
 			m_HookState = HOOK_IDLE;
 			m_HookPos = m_Pos;
 		}
@@ -217,7 +218,7 @@ void CCharacterCore::Tick(bool UseInput)
 	// do hook
 	if(m_HookState == HOOK_IDLE)
 	{
-		m_HookedPlayer = -1;
+		SetHookedPlayer(-1);
 		m_HookState = HOOK_IDLE;
 		m_HookPos = m_Pos;
 	}
@@ -266,23 +267,26 @@ void CCharacterCore::Tick(bool UseInput)
 				if (!pCharCore || pCharCore == this || !m_pTeams->CanCollide(i, m_Id))
 					continue;
 
-				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
-				if(distance(pCharCore->m_Pos, ClosestPoint) < PHYS_SIZE+2.0f)
+				vec2 ClosestPoint;
+				if (closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
 				{
-					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+					if(distance(pCharCore->m_Pos, ClosestPoint) < PHYS_SIZE+2.0f)
 					{
-						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_PLAYER;
-						m_HookState = HOOK_GRABBED;
-						m_HookedPlayer = i;
-						Distance = distance(m_HookPos, pCharCore->m_Pos);
+						if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+						{
+							m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+							m_HookState = HOOK_GRABBED;
+							SetHookedPlayer(i);
+							Distance = distance(m_HookPos, pCharCore->m_Pos);
 						
-						// F-DDrace
+							// F-DDrace
 
-						// reset last hit weapon if someone new hooks us
-						if (pCharCore->m_Killer.m_ClientID != m_Id)
-							pCharCore->m_Killer.m_Weapon = -1;
+							// reset last hit weapon if someone new hooks us
+							if (pCharCore->m_Killer.m_ClientID != m_Id)
+								pCharCore->m_Killer.m_Weapon = -1;
 
-						pCharCore->m_Killer.m_ClientID = m_Id;
+							pCharCore->m_Killer.m_ClientID = m_Id;
+						}
 					}
 				}
 			}
@@ -291,19 +295,22 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				for (int i = 0; i < 2; i++)
 				{
-					vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i]);
-					if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 32.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
+					vec2 ClosestPoint;
+					if (closest_point_on_line(m_HookPos, NewPos, m_FlagPos[i], ClosestPoint))
 					{
-						m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
-						m_HookState = HOOK_GRABBED;
-						if (i == TEAM_RED)
-							m_HookedPlayer = HOOK_FLAG_RED;
-						if (i == TEAM_BLUE)
-							m_HookedPlayer = HOOK_FLAG_BLUE;
-						Distance = distance(m_HookPos, m_FlagPos[i]);
+						if ((/*bottom half*/(distance(m_FlagPos[i], ClosestPoint) < PHYS_SIZE + 2.0f) || /*top half*/(distance(vec2(m_FlagPos[i].x, m_FlagPos[i].y - 32.f), ClosestPoint) < PHYS_SIZE + 2.0f)) && !m_Carried[i] && m_HookedPlayer == -1)
+						{
+							m_TriggeredEvents |= COREEVENTFLAG_HOOK_ATTACH_FLAG;
+							m_HookState = HOOK_GRABBED;
+							if (i == TEAM_RED)
+								SetHookedPlayer(HOOK_FLAG_RED);
+							if (i == TEAM_BLUE)
+								SetHookedPlayer(HOOK_FLAG_BLUE);
+							Distance = distance(m_HookPos, m_FlagPos[i]);
 
-						if (m_AtStand[i])
-							m_UpdateFlagAtStand = m_HookedPlayer;
+							if (m_AtStand[i])
+								m_UpdateFlagAtStand = m_HookedPlayer;
+						}
 					}
 				}
 			}
@@ -326,7 +333,7 @@ void CCharacterCore::Tick(bool UseInput)
 			if (GoingThroughTele && m_pTeleOuts && m_pTeleOuts->size() && (*m_pTeleOuts)[teleNr - 1].size())
 			{
 				m_TriggeredEvents = 0;
-				m_HookedPlayer = -1;
+				SetHookedPlayer(-1);
 
 				m_NewHook = true;
 				int Num = (*m_pTeleOuts)[teleNr - 1].size();
@@ -354,7 +361,7 @@ void CCharacterCore::Tick(bool UseInput)
 						m_HookPos = m_FlagPos[i];
 					else
 					{
-						m_HookedPlayer = -1;
+						SetHookedPlayer(-1);
 						m_HookState = HOOK_RETRACTED;
 						m_HookPos = m_Pos;
 					}
@@ -369,7 +376,7 @@ void CCharacterCore::Tick(bool UseInput)
 			else
 			{
 				// release hook
-				m_HookedPlayer = -1;
+				SetHookedPlayer(-1);
 				m_HookState = HOOK_RETRACTED;
 				m_HookPos = m_Pos;
 			}
@@ -407,7 +414,7 @@ void CCharacterCore::Tick(bool UseInput)
 		m_HookTick++;
 		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5 || (m_HookedPlayer < MAX_CLIENTS && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
-			m_HookedPlayer = -1;
+			SetHookedPlayer(-1);
 			m_HookState = HOOK_RETRACTED;
 			m_HookPos = m_Pos;
 		}
@@ -624,7 +631,7 @@ void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
 	m_HookPos.y = pObjCore->m_HookY;
 	m_HookDir.x = pObjCore->m_HookDx/256.0f;
 	m_HookDir.y = pObjCore->m_HookDy/256.0f;
-	m_HookedPlayer = pObjCore->m_HookedPlayer;
+	SetHookedPlayer(pObjCore->m_HookedPlayer);
 	m_Jumped = pObjCore->m_Jumped;
 	m_Direction = pObjCore->m_Direction;
 	m_Angle = pObjCore->m_Angle;
@@ -635,6 +642,33 @@ void CCharacterCore::Quantize()
 	CNetObj_CharacterCore Core;
 	Write(&Core);
 	Read(&Core);
+}
+
+void CCharacterCore::SetHookedPlayer(int HookedPlayer)
+{
+	if(HookedPlayer != m_HookedPlayer)
+	{
+		if (HookedPlayer != HOOK_FLAG_RED && HookedPlayer != HOOK_FLAG_BLUE)
+		{
+			if(m_HookedPlayer != -1 && m_Id != -1 && m_pWorld)
+			{
+				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
+				if(pCharCore)
+				{
+					pCharCore->m_AttachedPlayers.erase(m_Id);
+				}
+			}
+			if(HookedPlayer != -1 && m_Id != -1 && m_pWorld)
+			{
+				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[HookedPlayer];
+				if(pCharCore)
+				{
+					pCharCore->m_AttachedPlayers.insert(m_Id);
+				}
+			}
+		}
+		m_HookedPlayer = HookedPlayer;
+	}
 }
 
 // F-DDrace
