@@ -11,6 +11,7 @@ class CEntity;
 class CCharacter;
 class CPlayer;
 class CGameContext;
+class CDoor;
 
 // Needs to be here because we need it in gamecontext.h but also in draweditor.h
 class CSelectedArea
@@ -297,6 +298,7 @@ public:
 	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types);
 	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int Types, class CCharacter *pThisOnly = 0);
 	bool IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1);
+	int IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDoors, int Max);
 };
 
 #endif

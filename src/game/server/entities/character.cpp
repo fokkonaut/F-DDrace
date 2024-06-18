@@ -534,11 +534,11 @@ void CCharacter::FireWeapon()
 				}
 
 				// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
-				CDoor* apDoors[12];
-				int NumDoors = GameWorld()->FindEntities(ProjStartPos, GetProximityRadius(), (CEntity * *)apDoors, 12, CGameWorld::ENTTYPE_DOOR);
+				CDoor *apDoors[12];
+				int NumDoors = GameWorld()->IntersectDoorsUniqueNumbers(ProjStartPos, GetProximityRadius() * 0.75f, apDoors, 12);
 				for (int i = 0; i < NumDoors; i++)
 				{
-					CDoor* pDoor = apDoors[i];
+					CDoor *pDoor = apDoors[i];
 
 					// number 0 can't be opened and also functions as plot walls that can't be opened
 					// plotid -1: map objects

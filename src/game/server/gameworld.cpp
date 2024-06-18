@@ -1105,3 +1105,52 @@ bool CGameWorld::IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1)
 			return true;
 	return false;
 }
+
+int CGameWorld::IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDoors, int Max)
+{
+	int Num = 0;
+	CDoor *pDoor = (CDoor *)FindFirst(ENTTYPE_DOOR);
+	for (; pDoor; pDoor = (CDoor *)pDoor->TypeNext())
+	{
+		if (pDoor->m_Number == 0)
+			continue;
+
+		vec2 DistanceToLine, ClosestPoint;
+		if(closest_point_on_line(pDoor->GetPos(), pDoor->GetToPos(), Pos, ClosestPoint))
+		{
+			DistanceToLine = Pos - ClosestPoint;
+		}
+		else
+		{
+			// No line section was passed but two equal points
+			DistanceToLine = Pos - pDoor->GetPos();
+		}
+
+		if (absolute(DistanceToLine.x) < Radius && absolute(DistanceToLine.y) < Radius)
+		{
+			if(ppDoors)
+			{
+				bool Continue = false;
+				for (int i = 0; i < Num; i++)
+				{
+					// only unique doors, since they overlap most of the time and it would put both in then
+					if (pDoor->m_Number == ppDoors[i]->m_Number)
+					{
+						Continue = true;
+						break;
+					}
+				}
+
+				if (Continue)
+					continue;
+
+				ppDoors[Num] = pDoor;
+			}
+			Num++;
+			if(Num == Max)
+				break;
+		}
+	}
+
+	return Num;
+}

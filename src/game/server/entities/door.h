@@ -36,6 +36,7 @@ public:
 	float GetRotation() { return m_Rotation; }
 	int GetThickness() { return m_Thickness; }
 	int GetColor() { return m_Color; }
+	vec2 GetToPos() { return m_To; }
 	virtual ~CDoor();
 
 	virtual void Reset();
