@@ -134,23 +134,24 @@ void CLightningLaser::HitCharacter()
 
 			// closest point in the light near of a tee
 			vec2 Point;
-			closest_point_on_line(m_aaPositions[i][POS_END], m_aaPositions[i][POS_START], pChrs->GetPos(), Point);
-
-			bool IntersectLine = GameServer()->Collision()->IntersectLine(m_aaPositions[i][POS_END], pChrs->GetPos(), NULL, NULL);
-
-			// hit
-			if(distance(Point, pChrs->GetPos()) <= m_Length/2 && !IntersectLine)
-				m_aaPositions[i][POS_END] = pChrs->GetPos();
-
-			// put next laser to -1, better.
-			if(m_aaPositions[i-1][POS_END] == pChrs->GetPos())
-				m_aaPositions[i][POS_END] = m_aaPositions[i][POS_START] = m_aaPositions[i-1][POS_END]; 
-
-			if(distance(Point, pChrs->GetPos()) < 10)
+			if (closest_point_on_line(m_aaPositions[i][POS_END], m_aaPositions[i][POS_START], pChrs->GetPos(), Point))
 			{
-				// freeze if the player is near the light
-				pChrs->Freeze(3);
-				pChrs->Core()->m_Vel = vec2(0.f, 0.f);
+				bool IntersectLine = GameServer()->Collision()->IntersectLine(m_aaPositions[i][POS_END], pChrs->GetPos(), NULL, NULL);
+
+				// hit
+				if(distance(Point, pChrs->GetPos()) <= m_Length/2 && !IntersectLine)
+					m_aaPositions[i][POS_END] = pChrs->GetPos();
+
+				// put next laser to -1, better.
+				if(m_aaPositions[i-1][POS_END] == pChrs->GetPos())
+					m_aaPositions[i][POS_END] = m_aaPositions[i][POS_START] = m_aaPositions[i-1][POS_END]; 
+
+				if(distance(Point, pChrs->GetPos()) < 10)
+				{
+					// freeze if the player is near the light
+					pChrs->Freeze(3);
+					pChrs->Core()->m_Vel = vec2(0.f, 0.f);
+				}
 			}
 		}
 	}
