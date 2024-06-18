@@ -5235,8 +5235,8 @@ int CGameContext::GetMaxPlotTeleporters(int PlotID)
 
 	switch (m_aPlots[PlotID].m_Size)
 	{
-	case PLOT_SMALL: return 6;
-	case PLOT_BIG: return 12;
+	case PLOT_SMALL: return 4;
+	case PLOT_BIG: return 10;
 	}
 	return 0;
 }
