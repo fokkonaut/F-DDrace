@@ -78,7 +78,7 @@ bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos,
 		// No line section was passed but two equal points
 		DistanceToLine = ViewPos - StartPos;
 	}
-	// Border to also receive objects a bit off the screen so they dont pop up, 6 blocks should be okay
+	// Border to also receive objects a bit off the screen so they dont pop up, 10 blocks should be okay
 	float Border = 32.f * 10.f;
 	float ClippDistance = max(ShowDistance.x, ShowDistance.y) / 2.f + Border;
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
