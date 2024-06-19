@@ -39,7 +39,7 @@ As said earlier, F-DDrace is a 0.7 modification. DDNet client support has been i
 
 * **128 player support** <br>
 F-DDrace is the first modification to fully support more than 64 players at once. There may have been other modifications before, but F-DDrace implemented the support for more clients perfectly and flawlessly, covering all edge cases as good as possible. <br>
-Also it is the first server to actually reach such high player counts at once and therefore testing and improving the performance with live tests made it an unique experience.
+Also it is the first server to actually reach such high player counts at once, during the very active "corona phase", and therefore testing and improving the performance with live tests made it an unique experience.
 
 * **Account system** <br>
 Accounts are used to save your stats, such as your level, experience, money, kills, deaths and much more. <br>
