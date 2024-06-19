@@ -1918,7 +1918,7 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 {
-	int Id = m_pPlayer->GetCID();
+	//int Id = m_pPlayer->GetCID();
 
 	// explicitly check for /showall in NetworkClippedLine, in case a client that doesnt support showdistance wants to see characters while zooming out
 	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
