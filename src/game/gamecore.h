@@ -220,7 +220,7 @@ public:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
-	std::set<int> m_AttachedPlayers;
+	//std::set<int> m_AttachedPlayers;
 	int HookedPlayer() const { return m_HookedPlayer; }
 	void SetHookedPlayer(int HookedPlayer);
 

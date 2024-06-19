@@ -1927,7 +1927,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
 	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClientId, m_Pos, m_Core.m_HookPos, true);
 	bool AttachedHookInView = false;
-	if(PlayerAndHookNotInView)
+	/*if(PlayerAndHookNotInView)
 	{
 		for(const auto &AttachedPlayerId : m_Core.m_AttachedPlayers)
 		{
@@ -1941,7 +1941,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 				}
 			}
 		}
-	}
+	}*/
 	if(PlayerAndHookNotInView && !AttachedHookInView)
 	{
 		return false;
