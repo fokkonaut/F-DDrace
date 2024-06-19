@@ -189,7 +189,10 @@ class CWorldCore
 public:
 	CWorldCore()
 	{
-		mem_zero(m_apCharacters, sizeof(m_apCharacters));
+		for(auto &pCharacter : m_apCharacters)
+		{
+			pCharacter = nullptr;
+		}
 	}
 
 	CTuningParams m_Tuning;
