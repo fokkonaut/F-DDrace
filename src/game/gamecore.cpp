@@ -67,6 +67,7 @@ void CCharacterCore::Init(CWorldCore* pWorld, CCollision* pCollision, CTeamsCore
 	m_pfnSwitchActive = pfnSwitchActive;
 	m_pSwitchActiveUser = pSwitchActiveUser;
 	m_Id = -1;
+	Reset();
 }
 
 void CCharacterCore::Reset()
