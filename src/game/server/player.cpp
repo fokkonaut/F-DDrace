@@ -1123,7 +1123,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 		m_ActiveSpecSwitch = false;
 
 	// check for activity
-	if(mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
+	if(!m_IsDummy && mem_comp(NewInput, m_pLastTarget, sizeof(CNetObj_PlayerInput)))
 	{
 		mem_copy(m_pLastTarget, NewInput, sizeof(CNetObj_PlayerInput));
 		// Ignore the first direct input and keep the player afk as it is sent automatically
