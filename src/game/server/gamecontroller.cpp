@@ -521,7 +521,7 @@ void IGameController::Snap(int SnappingClient)
 
 	CPlayer *pSnap = GameServer()->m_apPlayers[SnappingClient];
 	CCharacter *pSnappingChar = GameServer()->GetPlayerChar(SnappingClient);
-	CCharacter *pSpectator = (pSnap && (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused())) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : pSnap->m_pControlledTee ? pSnap->m_pControlledTee->GetCharacter() : 0;
+	CCharacter *pSpectator = !pSnap ? 0 : (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused()) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : pSnap->m_pControlledTee ? pSnap->m_pControlledTee->GetCharacter() : 0;
 	int GameStartTick = 0;
 	{
 		if (pSpectator && pSpectator->m_DDRaceState == DDRACE_STARTED)
