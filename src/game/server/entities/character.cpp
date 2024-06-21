@@ -269,6 +269,7 @@ void CCharacter::HandleNinja()
 		vec2 OldPos = m_Pos;
 		GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false, m_Core.m_MoveRestrictionExtra);
 
+		// Don't skip no-bonus tile with ninja
 		if (GameServer()->Collision()->IntersectLineNoBonus(m_Pos, m_Core.m_Pos, 0, 0, !m_NoBonusContext.m_InArea))
 		{
 			OnNoBonusArea(!m_NoBonusContext.m_InArea);
@@ -4757,6 +4758,7 @@ void CCharacter::ForceSetPos(vec2 Pos)
 
 void CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 {
+	// We check whether it got set this tick already, because that can happen when someone tries to skip the tile using ninja.
 	if ((Enter && m_NoBonusContext.m_InArea) || (!Enter && !m_NoBonusContext.m_InArea) || m_LastNoBonusTick == Server()->Tick())
 		return;
 

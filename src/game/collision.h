@@ -54,7 +54,6 @@ enum
 	CANTMOVE_VIP_PLUS_ONLY=1<<13,
 	CANTMOVE_PLOT_DOOR=1<<14,
 	CANTMOVE_DOWN_LASERDOOR=1<<15, // used by prediction
-	CANTMOVE_NO_BONUS_AREA=1<<16,
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
