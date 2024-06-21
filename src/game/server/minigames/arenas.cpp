@@ -632,9 +632,13 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 			int OtherID = m_aFights[Fight].m_aParticipants[Other].m_ClientID;
 
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "'%s' left a 1vs1 round against '%s'! Current scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
+			int FightScore = m_aFights[Fight].m_aParticipants[Index].m_Score;
+			int OtherScore = m_aFights[Fight].m_aParticipants[Other].m_Score;
+
+			str_format(aBuf, sizeof(aBuf), "'%s' left a 1vs1 round against '%s'! Current scores: %d - %d", Server()->ClientName(ClientID), Server()->ClientName(OtherID), FightScore, OtherScore);
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
-      Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
+			if(FightScore > 0 || OtherScore > 0)
+				Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 			GameServer()->m_apPlayers[OtherID]->m_ConfettiWinEffectTick = Server()->Tick();
 		}
 
