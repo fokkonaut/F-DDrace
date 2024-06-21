@@ -54,6 +54,7 @@ enum
 	CANTMOVE_VIP_PLUS_ONLY=1<<13,
 	CANTMOVE_PLOT_DOOR=1<<14,
 	CANTMOVE_DOWN_LASERDOOR=1<<15, // used by prediction
+	CANTMOVE_NO_BONUS_AREA=1<<16,
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
@@ -190,8 +191,9 @@ public:
 
 	// F-DDrace
 	class CConfig *m_pConfig;
-	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
 	int IntersectLineFlagPickup(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
+	int IntersectLineNoBonus(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool Enter);
 
 	// tiles
 	bool TileUsed(int Index) { return GetRandomTile(Index) != vec2(-1, -1); }

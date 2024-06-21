@@ -1155,6 +1155,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 void CGameContext::OnTick()
 {
+	Config()->m_SvTestingCommands = 1;
 	if(m_TeeHistorianActive)
 	{
 		if(!m_TeeHistorian.Starting())
@@ -6090,6 +6091,13 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 	pChr->GetPlayer()->StopPlotEditing();
 	pChr->UnsetSpookyGhost();
 
+	// Pretend we leave no bonus area so we can save the real values, and later override it by calling this function again
+	if (pChr->m_NoBonusContext.m_InArea)
+	{
+		pChr->OnNoBonusArea(false);
+		pChr->m_NoBonusContext.m_InArea = true;
+	}
+
 	// save identity to cache
 	SSavedIdentity Info;
 	Server()->GetClientAddr(ClientID, &Info.m_Addr);
@@ -7121,10 +7129,8 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
 		else if (Extra == PASSIVE || Extra == SNAKE)
 			str_format(aMsg, sizeof(aMsg), "You are %s in %s", Set ? "now" : "no longer", aItem);
-		else if (Extra == ENDLESS_HOOK)
-			str_format(aMsg, sizeof(aMsg), "%s has been %s", aItem, Set ? "activated" : "deactivated");
-		else if (Extra == INFINITE_JUMPS)
-			str_format(aMsg, sizeof(aMsg), "You %shave %s", Set ? "" : "don't ", aItem);
+		else if (Extra == ENDLESS_HOOK || Extra == INFINITE_JUMPS)
+			str_format(aMsg, sizeof(aMsg), "%s %s been %s", aItem, Extra == INFINITE_JUMPS ? "have" : "has", Set ? "activated" : "deactivated");
 		else if (Extra == TEE_CONTROL)
 			str_format(aMsg, sizeof(aMsg), "You are %s permitted to use the tee controller", Set ? "now" : "no longer");
 		else
@@ -7180,7 +7186,7 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 	case ENDLESS_HOOK:
 		return "Endless Hook";
 	case INFINITE_JUMPS:
-		return "Unlimited Air Jumps";
+		return "Infinite Jumps";
 	case SPREAD_WEAPON:
 		{
 			static char aWeapon[64];

@@ -21,13 +21,14 @@ class CPortal : public CEntity
 
 	int m_Owner;
 	int m_ThroughPlotDoor; // for flags
+	bool m_InNoBonusArea;
 	int m_aID[NUM_PORTAL_IDS];
 
 	std::vector<CEntity*> m_vTeleported;
 	void EntitiesEnter();
 
 public:
-	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor = 0);
+	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor = 0, bool InNoBonusArea = false);
 	virtual ~CPortal();
 
 	virtual void Reset();
@@ -36,6 +37,7 @@ public:
 
 	void SetThroughPlotDoor(int PlotID) { m_ThroughPlotDoor = PlotID; }
 	int GetThroughPlotDoor() { return m_ThroughPlotDoor; }
+	void SetNoBonusArea() { m_InNoBonusArea = true; }
 
 	void SetLinkedPortal(CPortal *pPortal);
 	void DestroyLinkedPortal();

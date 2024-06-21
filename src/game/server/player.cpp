@@ -2348,6 +2348,12 @@ void CPlayer::SaveMinigameTee()
 		return;
 
 	m_pCharacter->UnsetSpookyGhost(); // unset spookyghost to avoid conflicts after loading again
+	// Pretend we leave no bonus area so we can save the real values, and later override it by calling this function again
+	if (m_pCharacter->m_NoBonusContext.m_InArea)
+	{
+		m_pCharacter->OnNoBonusArea(false, true);
+		m_pCharacter->m_NoBonusContext.m_InArea = true;
+	}
 	m_MinigameTee.Save(m_pCharacter);
 	m_SavedMinigameTee = true;
 }

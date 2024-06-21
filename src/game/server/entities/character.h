@@ -474,6 +474,21 @@ public:
 	std::vector<int> m_vLastButtonNumbers;
 	int m_LastInOutTeleporter;
 
+	// no bonus area
+	void OnNoBonusArea(bool Enter, bool Silent = false);
+	struct SNoBonusContext
+	{
+		bool m_InArea = false;
+
+		struct SNoBonusSave
+		{
+			bool m_EndlessHook = false;
+			bool m_InfiniteJumps = false;
+		} m_SavedBonus;
+	};
+	SNoBonusContext m_NoBonusContext;
+	int64 m_LastNoBonusTick;
+
 	// helicopter
 	CHelicopter *m_pHelicopter;
 	bool TryMountHelicopter();

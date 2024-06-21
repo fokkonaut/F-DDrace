@@ -191,6 +191,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_EpicCircle = pChr->m_EpicCircle;
 	m_StaffInd = pChr->m_StaffInd;
 	m_Confetti = pChr->m_Confetti;
+	m_InNoBonusArea = pChr->m_NoBonusContext.m_InArea;
 
 	// core
 	m_MoveRestrictionExtraRoomKey = pChr->Core()->m_MoveRestrictionExtra.m_RoomKey;
@@ -366,6 +367,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->EpicCircle(m_EpicCircle, -1, true);
 		pChr->StaffInd(m_StaffInd, -1, true);
 		pChr->Confetti(m_Confetti, -1, true);
+		pChr->OnNoBonusArea(m_InNoBonusArea, true);
 
 		// core
 		pChr->Core()->m_MoveRestrictionExtra.m_RoomKey = m_MoveRestrictionExtraRoomKey;
@@ -445,7 +447,7 @@ char* CSaveTee::GetString()
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%lld\t%lld\t%d\t%d\t"
+		"%lld\t%lld\t%d\t%d\t%d\t"
 		"%s\t%s\t%s\t%s\t%lld\t"
 		"%s\t%s\t%s\t%s\t%s\t%s\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -496,7 +498,7 @@ char* CSaveTee::GetString()
 		m_HasFinishedSpecialRace, m_GotMoneyXPBomb, m_SpawnTick, m_KillStreak, m_MaxJumps, m_CarriedFlag,
 		m_MoveRestrictionExtraRoomKey, m_Lovely, m_RotatingBall, m_EpicCircle, m_StaffInd, m_Confetti,
 		m_Gamemode, m_SavedGamemode, m_Minigame, m_WalletMoney, m_RainbowSpeed, m_InfRainbow, m_InfMeteors, m_HasSpookyGhost, m_PlotSpawn, m_HasRoomKey,
-		m_JailTime, m_EscapeTime, m_CollectedPortalRifle, m_RainbowName,
+		m_JailTime, m_EscapeTime, m_CollectedPortalRifle, m_RainbowName, m_InNoBonusArea,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, (int64)m_Identity.m_ExpireDate,
 		m_Identity.m_TeeInfo.m_aaSkinPartNames[0], m_Identity.m_TeeInfo.m_aaSkinPartNames[1], m_Identity.m_TeeInfo.m_aaSkinPartNames[2], m_Identity.m_TeeInfo.m_aaSkinPartNames[3], m_Identity.m_TeeInfo.m_aaSkinPartNames[4], m_Identity.m_TeeInfo.m_aaSkinPartNames[5],
 		m_Identity.m_TeeInfo.m_aUseCustomColors[0], m_Identity.m_TeeInfo.m_aUseCustomColors[1], m_Identity.m_TeeInfo.m_aUseCustomColors[2], m_Identity.m_TeeInfo.m_aUseCustomColors[3], m_Identity.m_TeeInfo.m_aUseCustomColors[4], m_Identity.m_TeeInfo.m_aUseCustomColors[5],
@@ -555,7 +557,7 @@ int CSaveTee::LoadString(char* String)
 		"%d\t%d\t%lld\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%lld\t%d\t%d\t%d\t%d\t%d\t%d\t"
-		"%lld\t%lld\t%d\t%d\t"
+		"%lld\t%lld\t%d\t%d\t%d\t"
 		"%s\t%s\t%s\t%[^\t]\t%lld\t"
 		"%s\t%s\t%s\t%s\t%s\t%s\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -606,7 +608,7 @@ int CSaveTee::LoadString(char* String)
 		&m_HasFinishedSpecialRace, &m_GotMoneyXPBomb, &m_SpawnTick, &m_KillStreak, &m_MaxJumps, &m_CarriedFlag,
 		&m_MoveRestrictionExtraRoomKey, &m_Lovely, &m_RotatingBall, &m_EpicCircle, &m_StaffInd, &m_Confetti,
 		&m_Gamemode, &m_SavedGamemode, &m_Minigame, &m_WalletMoney, &m_RainbowSpeed, &m_InfRainbow, &m_InfMeteors, &m_HasSpookyGhost, &m_PlotSpawn, &m_HasRoomKey,
-		&m_JailTime, &m_EscapeTime, &m_CollectedPortalRifle, &m_RainbowName,
+		&m_JailTime, &m_EscapeTime, &m_CollectedPortalRifle, &m_RainbowName, &m_InNoBonusArea,
 		m_Identity.m_aAccUsername, aSavedAddress, m_Identity.m_aTimeoutCode, m_Identity.m_aName, &ExpireDate,
 		m_Identity.m_TeeInfo.m_aaSkinPartNames[0], m_Identity.m_TeeInfo.m_aaSkinPartNames[1], m_Identity.m_TeeInfo.m_aaSkinPartNames[2], m_Identity.m_TeeInfo.m_aaSkinPartNames[3], m_Identity.m_TeeInfo.m_aaSkinPartNames[4], m_Identity.m_TeeInfo.m_aaSkinPartNames[5],
 		&m_Identity.m_TeeInfo.m_aUseCustomColors[0], &m_Identity.m_TeeInfo.m_aUseCustomColors[1], &m_Identity.m_TeeInfo.m_aUseCustomColors[2], &m_Identity.m_TeeInfo.m_aUseCustomColors[3], &m_Identity.m_TeeInfo.m_aUseCustomColors[4], &m_Identity.m_TeeInfo.m_aUseCustomColors[5],
@@ -637,7 +639,7 @@ int CSaveTee::LoadString(char* String)
 	{
 	case 91:
 		return 0;
-	case 239: // F-DDrace extra vars
+	case 240: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

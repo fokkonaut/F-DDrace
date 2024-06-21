@@ -269,6 +269,11 @@ void CCharacter::HandleNinja()
 		vec2 OldPos = m_Pos;
 		GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false, m_Core.m_MoveRestrictionExtra);
 
+		if (GameServer()->Collision()->IntersectLineNoBonus(m_Pos, m_Core.m_Pos, 0, 0, !m_NoBonusContext.m_InArea))
+		{
+			OnNoBonusArea(!m_NoBonusContext.m_InArea);
+		}
+
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
 
@@ -933,14 +938,22 @@ void CCharacter::FireWeapon()
 					if (!m_pPlayer->m_pPortal[i])
 					{
 						int PlotDoorNumber = GameServer()->Collision()->GetPlotBySwitch(GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false));
-						if (i == PORTAL_SECOND && PlotDoorNumber < PLOT_START)
+						if (i == PORTAL_SECOND)
 						{
-							int OtherThroughPlotDoor = m_pPlayer->m_pPortal[PORTAL_FIRST]->GetThroughPlotDoor();
-							if (OtherThroughPlotDoor >= PLOT_START)
-								PlotDoorNumber = OtherThroughPlotDoor;
+							if (PlotDoorNumber < PLOT_START)
+							{
+								int OtherThroughPlotDoor = m_pPlayer->m_pPortal[PORTAL_FIRST]->GetThroughPlotDoor();
+								if (OtherThroughPlotDoor >= PLOT_START)
+									PlotDoorNumber = OtherThroughPlotDoor;
+							}
 						}
 
-						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), PlotDoorNumber);
+						bool IsPortalInNoBonusArea = m_NoBonusContext.m_InArea;
+						int NoBonusTile = GameServer()->Collision()->IntersectLineNoBonus(m_Pos, PortalPos, 0, 0, !m_NoBonusContext.m_InArea);
+						if (NoBonusTile != 0)
+							IsPortalInNoBonusArea = NoBonusTile == TILE_NO_BONUS_AREA; // else TILE_NO_BONUS_AREA_LEAVE
+
+						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), PlotDoorNumber, IsPortalInNoBonusArea);
 						if (i == PORTAL_SECOND)
 						{
 							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);
@@ -2987,6 +3000,11 @@ void CCharacter::HandleTiles(int Index)
 		m_pPlayer->m_pPortal[PORTAL_FIRST]->SetThroughPlotDoor(PlotDoor);
 	}
 
+	if ((m_TileIndex == TILE_NO_BONUS_AREA) || (m_TileFIndex == TILE_NO_BONUS_AREA))
+		OnNoBonusArea(true);
+	else if ((m_TileIndex == TILE_NO_BONUS_AREA_LEAVE) || (m_TileFIndex == TILE_NO_BONUS_AREA_LEAVE))
+		OnNoBonusArea(false);
+
 	// update this AFTER you are done using this var above
 	m_LastIndexTile = m_TileIndex;
 	m_LastIndexFrontTile = m_TileFIndex;
@@ -3950,6 +3968,7 @@ void CCharacter::FDDraceInit()
 		m_aUntranslatedID[i] = Server()->SnapNewID();
 
 	m_pPortalBlocker = 0;
+	m_LastNoBonusTick = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4736,6 +4755,31 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	}
 }
 
+void CCharacter::OnNoBonusArea(bool Enter, bool Silent)
+{
+	if ((Enter && m_NoBonusContext.m_InArea) || (!Enter && !m_NoBonusContext.m_InArea) || m_LastNoBonusTick == Server()->Tick())
+		return;
+
+	m_NoBonusContext.m_InArea = !m_NoBonusContext.m_InArea;
+	m_LastNoBonusTick = Server()->Tick();
+
+	// Save or load previous bonuses
+	if (Enter)
+	{
+		m_NoBonusContext.m_SavedBonus.m_EndlessHook = m_EndlessHook;
+		m_NoBonusContext.m_SavedBonus.m_InfiniteJumps = m_SuperJump;
+		EndlessHook(false, -1, Silent);
+		InfiniteJumps(false, -1, Silent);
+	}
+	else
+	{
+		EndlessHook(m_NoBonusContext.m_SavedBonus.m_EndlessHook, -1, Silent);
+		InfiniteJumps(m_NoBonusContext.m_SavedBonus.m_InfiniteJumps, -1, Silent);
+		m_NoBonusContext.m_SavedBonus.m_EndlessHook = false;
+		m_NoBonusContext.m_SavedBonus.m_InfiniteJumps = false;
+	}
+}
+
 bool CCharacter::TryMountHelicopter()
 {
 	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 48.f, CGameWorld::ENTTYPE_HELICOPTER, 0, true);
@@ -4971,12 +5015,16 @@ void CCharacter::HookPower(int Extra, int FromID, bool Silent)
 
 void CCharacter::EndlessHook(bool Set, int FromID, bool Silent)
 {
+	if (m_EndlessHook == Set)
+		return;
 	m_EndlessHook = Set;
 	GameServer()->SendExtraMessage(ENDLESS_HOOK, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
 void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 {
+	if (m_SuperJump == Set)
+		return;
 	m_SuperJump = Set;
 	GameServer()->SendExtraMessage(INFINITE_JUMPS, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
