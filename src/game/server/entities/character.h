@@ -475,7 +475,7 @@ public:
 	int m_LastInOutTeleporter;
 
 	// no bonus area
-	void OnNoBonusArea(bool Enter, bool Silent = false);
+	bool OnNoBonusArea(bool Enter, bool Silent = false);
 	struct SNoBonusContext
 	{
 		bool m_InArea = false;

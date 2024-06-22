@@ -1878,11 +1878,8 @@ void CGameContext::ConSetNoBonusArea(IConsole::IResult* pResult, void* pUserData
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr)
-	{
+	if (pChr && pChr->OnNoBonusArea(true))
 		pSelf->SendChatTarget(Victim, "You are now in no-bonus area mode");
-		pChr->OnNoBonusArea(true);
-	}
 }
 
 void CGameContext::ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserData)
@@ -1890,11 +1887,8 @@ void CGameContext::ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserDa
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr)
-	{
+	if (pChr && pChr->OnNoBonusArea(true))
 		pSelf->SendChatTarget(Victim, "You are no longer in no-bonus area mode");
-		pChr->OnNoBonusArea(false);
-	}
 }
 
 void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)

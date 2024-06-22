@@ -4762,11 +4762,11 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	}
 }
 
-void CCharacter::OnNoBonusArea(bool Enter, bool Silent)
+bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 {
 	// We check whether it got set this tick already, because that can happen when someone tries to skip the tile using ninja.
 	if ((Enter && m_NoBonusContext.m_InArea) || (!Enter && !m_NoBonusContext.m_InArea) || m_LastNoBonusTick == Server()->Tick())
-		return;
+		return false;
 
 	m_NoBonusContext.m_InArea = !m_NoBonusContext.m_InArea;
 	m_LastNoBonusTick = Server()->Tick();
@@ -4786,6 +4786,8 @@ void CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 		m_NoBonusContext.m_SavedBonus.m_EndlessHook = false;
 		m_NoBonusContext.m_SavedBonus.m_InfiniteJumps = false;
 	}
+
+	return true;
 }
 
 bool CCharacter::TryMountHelicopter()
