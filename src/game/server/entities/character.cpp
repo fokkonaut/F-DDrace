@@ -2146,6 +2146,12 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	//if(m_Core.m_LiveFrozen)
 	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
+	if(Teams()->IsPractice(Team()))
+		Flags |= CHARACTERFLAG_PRACTICE_MODE;
+	if(Teams()->TeamLocked(Team()) || m_NoBonusContext.m_InArea)
+		Flags |= CHARACTERFLAG_LOCK_MODE;
+	//if(Teams()->TeamLocked(Team()))
+	//	Flags |= CHARACTERFLAG_TEAM0_MODE;
 
 	return Flags;
 }
