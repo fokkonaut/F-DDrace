@@ -1887,7 +1887,7 @@ void CGameContext::ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserDa
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr && pChr->OnNoBonusArea(true))
+	if (pChr && pChr->OnNoBonusArea(false))
 		pSelf->SendChatTarget(Victim, "You are no longer in no-bonus area mode");
 }
 
