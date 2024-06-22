@@ -37,7 +37,6 @@ public:
 
 	void SetThroughPlotDoor(int PlotID) { m_ThroughPlotDoor = PlotID; }
 	int GetThroughPlotDoor() { return m_ThroughPlotDoor; }
-	void SetNoBonusArea() { m_InNoBonusArea = true; }
 
 	void SetLinkedPortal(CPortal *pPortal);
 	void DestroyLinkedPortal();
