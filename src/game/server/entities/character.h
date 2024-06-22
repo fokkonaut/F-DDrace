@@ -482,6 +482,10 @@ public:
 
 		struct SNoBonusSave
 		{
+			bool NonEmpty()
+			{
+				return m_EndlessHook || m_InfiniteJumps;
+			}
 			bool m_EndlessHook = false;
 			bool m_InfiniteJumps = false;
 		} m_SavedBonus;

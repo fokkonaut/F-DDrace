@@ -2148,7 +2148,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
 	if(Teams()->IsPractice(Team()))
 		Flags |= CHARACTERFLAG_PRACTICE_MODE;
-	if(Teams()->TeamLocked(Team()) || m_NoBonusContext.m_InArea)
+	if(Teams()->TeamLocked(Team()) || m_NoBonusContext.m_SavedBonus.NonEmpty())
 		Flags |= CHARACTERFLAG_LOCK_MODE;
 	//if(Teams()->TeamLocked(Team()))
 	//	Flags |= CHARACTERFLAG_TEAM0_MODE;
@@ -4626,7 +4626,7 @@ int CCharacter::NumDDraceHudRows()
 		Rows++;
 	if (Flags&(CHARACTERFLAG_SOLO|CHARACTERFLAG_NO_COLLISION|CHARACTERFLAG_NO_HOOK|CHARACTERFLAG_NO_HAMMER_HIT|CHARACTERFLAG_NO_SHOTGUN_HIT|CHARACTERFLAG_NO_GRENADE_HIT|CHARACTERFLAG_NO_LASER_HIT))
 		Rows++;
-	if (Teams()->IsPractice(pChr->Team()) || pChr->m_DeepFreeze/* || pChr->Core()->m_LiveFreeze*/)
+	if (Flags&(CHARACTERFLAG_PRACTICE_MODE|CHARACTERFLAG_LOCK_MODE) || pChr->m_DeepFreeze/* || pChr->Core()->m_LiveFreeze*/)
 		Rows++;
 	return Rows;
 }
