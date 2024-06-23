@@ -1971,6 +1971,21 @@ int fs_makedir_recursive(const char *path)
 	return fs_makedir(path);
 }
 
+int fs_is_file(const char *path)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	WCHAR wPath[IO_MAX_PATH_LENGTH];
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, IO_MAX_PATH_LENGTH) > 0, "MultiByteToWideChar failure");
+	DWORD attributes = GetFileAttributesW(wPath);
+	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
+#else
+	struct stat sb;
+	if(stat(path, &sb) == -1)
+		return 0;
+	return S_ISREG(sb.st_mode) ? 1 : 0;
+#endif
+}
+
 int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -3354,4 +3369,86 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value)
 	bytes[1] = (value>>16)&0xff;
 	bytes[2] = (value>>8)&0xff;
 	bytes[3] = value&0xff;
+}
+
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::wstring wide_file = windows_utf8_to_wide(file);
+
+	SHELLEXECUTEINFOW info;
+	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
+	info.cbSize = sizeof(SHELLEXECUTEINFOW);
+	info.lpVerb = L"open";
+	info.lpFile = wide_file.c_str();
+	switch(window_state)
+	{
+	case EShellExecuteWindowState::FOREGROUND:
+		info.nShow = SW_SHOW;
+		break;
+	case EShellExecuteWindowState::BACKGROUND:
+		info.nShow = SW_SHOWMINNOACTIVE;
+		break;
+	default:
+		dbg_assert(false, "window_state invalid");
+		dbg_break();
+	}
+	info.fMask = SEE_MASK_NOCLOSEPROCESS;
+	// Save and restore the FPU control word because ShellExecute might change it
+	fenv_t floating_point_environment;
+	int fegetenv_result = fegetenv(&floating_point_environment);
+	ShellExecuteExW(&info);
+	if(fegetenv_result == 0)
+		fesetenv(&floating_point_environment);
+	return info.hProcess;
+#elif defined(CONF_FAMILY_UNIX)
+	char *argv[2];
+	pid_t pid;
+	argv[0] = (char *)file;
+	argv[1] = NULL;
+	pid = fork();
+	if(pid == -1)
+	{
+		return 0;
+	}
+	if(pid == 0)
+	{
+		execvp(file, argv);
+		_exit(1);
+	}
+	return pid;
+#endif
+}
+
+int kill_process(PROCESS process)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	BOOL success = TerminateProcess(process, 0);
+	BOOL is_alive = is_process_alive(process);
+	if(success || !is_alive)
+	{
+		CloseHandle(process);
+		return true;
+	}
+	return false;
+#elif defined(CONF_FAMILY_UNIX)
+	if(!is_process_alive(process))
+		return true;
+	int status;
+	kill(process, SIGTERM);
+	return waitpid(process, &status, 0) != -1;
+#endif
+}
+
+bool is_process_alive(PROCESS process)
+{
+	if(process == INVALID_PROCESS)
+		return false;
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD exit_code;
+	GetExitCodeProcess(process, &exit_code);
+	return exit_code == STILL_ACTIVE;
+#else
+	return waitpid(process, nullptr, WNOHANG) == 0;
+#endif
 }

@@ -264,6 +264,7 @@ public:
 	virtual bool IsBanned(int ClientID) = 0;
 	virtual int Kick(int ClientID, const char *pReason) = 0;
 	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
+	virtual void RedirectClient(int ClientID, int Port, bool Verbose = false) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual const char *GetMapName() = 0;
 	virtual const char *GetCurrentMapName() = 0;

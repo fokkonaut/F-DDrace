@@ -302,6 +302,7 @@ void CServer::CClient::Reset()
 
 	m_CurrentMapDesign = -1;
 	m_DesignChange = false;
+	m_RedirectDropTime = 0;
 }
 
 void CServer::CClient::ResetContent()
@@ -338,6 +339,7 @@ void CServer::CClient::ResetContent()
 	m_Main = true;
 
 	m_Rejoining = false;
+	m_RedirectDropTime = 0;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
@@ -526,6 +528,35 @@ int CServer::Kick(int ClientID, const char *pReason)
 void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 {
 	m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Seconds, pReason);
+}
+
+void CServer::RedirectClient(int ClientID, int Port, bool Verbose)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	char aBuf[512];
+	bool SupportsRedirect = m_aClients[ClientID].m_DDNetVersion >= VERSION_DDNET_REDIRECT;
+	if(Verbose)
+	{
+		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d supported=%d", ClientName(ClientID), Port, SupportsRedirect);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "redirect", aBuf);
+	}
+
+	if(!SupportsRedirect)
+	{
+		bool SamePort = Port == Config()->m_SvPort;
+		str_format(aBuf, sizeof(aBuf), "Redirect unsupported: please connect to port %d", Port);
+		Kick(ClientID, SamePort ? "Redirect unsupported: please reconnect" : aBuf);
+		return;
+	}
+
+	CMsgPacker Msg(NETMSG_REDIRECT, true);
+	Msg.AddInt(Port);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+
+	m_aClients[ClientID].m_RedirectDropTime = time_get() + time_freq() * 10;
+	m_aClients[ClientID].m_State = CClient::STATE_REDIRECTED;
 }
 
 /*int CServer::Tick()
@@ -1594,6 +1625,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				SendServerInfo(ClientID);
 				GameServer()->OnClientEnter(ClientID);
+
+				char aPath[IO_MAX_PATH_LENGTH];
+				Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
+				// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
+				if (str_find(aPath, "/") == 0 || fs_is_file(aPath))
+				{
+					PROCESS Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
+				}
 			}
 		}
 		else if(Msg == NETMSG_INPUT)
@@ -2385,6 +2424,9 @@ void CServer::PumpNetwork()
 			}
 			else
 			{
+				if(m_aClients[Packet.m_ClientID].m_State == CClient::STATE_REDIRECTED)
+					continue;
+
 				int GameFlags = 0;
 				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
 				{
@@ -2798,8 +2840,14 @@ int CServer::Run()
 				bool ServerEmpty = true;
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
+				{
+					if(m_aClients[c].m_State == CClient::STATE_REDIRECTED)
+						if(time_get() > m_aClients[c].m_RedirectDropTime)
+							m_NetServer.Drop(c, "redirected");
+
 					if(m_aClients[c].m_State != CClient::STATE_EMPTY && m_aClients[c].m_State != CClient::STATE_DUMMY)
 						ServerEmpty = false;
+				}
 
 				if(ServerEmpty)
 					m_RunServer = STOPPING;

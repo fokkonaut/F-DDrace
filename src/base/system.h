@@ -1650,6 +1650,20 @@ int fs_makedir_recursive(const char *path);
 */
 int fs_storage_path(const char *appname, char *path, int max);
 
+/**
+ * Checks if a file exists.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path the path to check.
+ *
+ * @return 1 if a file with the given path exists,
+ * 0 on failure or if the file does not exist.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+int fs_is_file(const char *path);
+
 /*
 	Function: fs_is_dir
 		Checks if directory exists
@@ -2212,6 +2226,90 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
 		- Assumes unsigned is 4 bytes
 */
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
+
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef void *PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = nullptr;
+#else
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef pid_t PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = 0;
+#endif
+
+/**
+ * Determines the initial window state when using @link shell_execute @endlink
+ * to execute a process.
+ *
+ * @ingroup Shell
+ *
+ * @remark Currently only supported on Windows.
+ */
+enum class EShellExecuteWindowState
+{
+	/**
+	 * The process window is opened in the foreground and activated.
+	 */
+	FOREGROUND,
+
+	/**
+	 * The process window is opened in the background without focus.
+	 */
+	BACKGROUND,
+};
+
+/**
+ * Executes a given file.
+ *
+ * @ingroup Shell
+ *
+ * @param file The file to execute.
+ * @param window_state The window state how the process window should be shown.
+ *
+ * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
+ */
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state);
+
+/**
+ * Sends kill signal to a process.
+ *
+ * @ingroup Shell
+ *
+ * @param process Handle of the process to kill.
+ *
+ * @return `1` on success, `0` on error.
+ */
+int kill_process(PROCESS process);
+
+/**
+ * Checks if a process is alive.
+ *
+ * @ingroup Shell
+ *
+ * @param process Handle/PID of the process.
+ *
+ * @return `true` if the process is currently running,
+ * `false` if the process is not running (dead).
+ */
+bool is_process_alive(PROCESS process);
 
 /**
  * Copies a string to a fixed-size array of chars.
