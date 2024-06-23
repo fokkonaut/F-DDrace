@@ -168,7 +168,7 @@ MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG
 MACRO_CONFIG_STR(SvExpMsgColorValue, sv_exp_msg_color_value, 4, "595", CFGFLAG_SERVER|CFGFLAG_GAME, "Value color for the experience broadcast", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvMoneyDropsFilePath, sv_money_drops_file_path, 128, "data/money_drops", CFGFLAG_SERVER, "The path where the server searches the money drops file (relative to binary)", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money_history", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money_history", CFGFLAG_SERVER, "The path to money history files (relative to dumps dir)", AUTHED_ADMIN)
 
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 3, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 6 hours", AUTHED_ADMIN)
@@ -177,7 +177,7 @@ MACRO_CONFIG_INT(SvAccSysBanPinFails, sv_acc_sys_ban_pin_fails, 3, 0, 10, CFGFLA
 
 // saved tees
 MACRO_CONFIG_INT(SvShutdownSaveTees, sv_shutdown_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before shutdown/reload to load them again", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvSavedTeesFilePath, sv_saved_tees_file_path, 128, "savedtees", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to saved tees files (relative to dumps dir)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvSavedTeesFilePath, sv_saved_tees_file_path, 128, "savedtees", CFGFLAG_SERVER, "The path to saved tees files (relative to dumps dir)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvShutdownSaveTeeExpire, sv_shutdown_save_tee_expire, 1, 1, 24*7, CFGFLAG_SERVER, "How many hours until a shutdown save expires", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvJailSaveTeeExpire, sv_jail_save_tee_expire, 24, 1, 24*7, CFGFLAG_SERVER, "How many hours until a jail save expires", AUTHED_ADMIN)
 
@@ -310,7 +310,11 @@ MACRO_CONFIG_STR(SvLibreTranslateURL, sv_libretranslate_url, 128, "https://trans
 MACRO_CONFIG_STR(SvLibreTranslateKey, sv_libretranslate_key, 128, "", CFGFLAG_SERVER, "LibreTranslate API Key", AUTHED_ADMIN)
 
 // sockets
-MACRO_CONFIG_INT(SvPortTwo, sv_port_two, 8304, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the second serverinfo", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPortTwo, sv_port_two, 8304, 0, 0, CFGFLAG_SERVER, "Port to use for the second serverinfo", AUTHED_ADMIN)
+// restart queue server
+MACRO_CONFIG_INT(SvRestartQueueMainPort, sv_restart_queue_main_port, 0, 0, 0, CFGFLAG_SERVER, "Port of the main server (has to stay 0!)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvRestartQueuePort, sv_restart_queue_port, 8305, 0, 0, CFGFLAG_SERVER, "Port to use for the restart queue server", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvRestartQueueMap, sv_restart_queue_map, 128, "BlmapChill", CFGFLAG_SERVER, "Restart queue map file name to be loaded", AUTHED_ADMIN)
 
 #if defined(CONF_FAMILY_UNIX)
 MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_SERVER, "Unix socket server for IP address logging (Unix only)", AUTHED_ADMIN)

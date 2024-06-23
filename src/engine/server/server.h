@@ -343,6 +343,9 @@ public:
 	// map https url
 	const char *GetHttpsMapURL(int Design = -1);
 
+	// restart queue
+	int64 m_LastServerInfoRequest;
+
 	//maplist
 	struct CMapListEntry
 	{
@@ -458,6 +461,7 @@ public:
 
 	static int MapListEntryCallback(const char *pFilename, int IsDir, int DirType, void *pUser);
 
+	static void ConRestartQueueMainPort(IConsole::IResult *pResult, void *pUser);
 	static void ConEuroMode(IConsole::IResult *pResult, void *pUser);
 	static void ConTestingCommands(IConsole::IResult *pResult, void *pUser);
 	static void ConRescue(IConsole::IResult *pResult, void *pUser);
@@ -480,6 +484,7 @@ public:
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConShowIps(IConsole::IResult* pResult, void* pUser);
+	static void ConRestartQueueInitAndShutdown(IConsole::IResult* pResult, void* pUser);
 	void ConchainRconPasswordChangeGeneric(int Level, const char *pCurrent, IConsole::IResult *pResult);
 	static void ConchainRconPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainRconModPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

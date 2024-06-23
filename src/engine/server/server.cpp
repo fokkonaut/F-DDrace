@@ -381,6 +381,8 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 
 	m_ServerInfoNeedsUpdate = false;
 
+	m_LastServerInfoRequest = 0;
+
 #if defined (CONF_SQL)
 	for (int i = 0; i < MAX_SQLSERVERS; i++)
 	{
@@ -1625,14 +1627,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				SendServerInfo(ClientID);
 				GameServer()->OnClientEnter(ClientID);
-
-				char aPath[IO_MAX_PATH_LENGTH];
-				Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
-				// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
-				if (str_find(aPath, "/") == 0 || fs_is_file(aPath))
-				{
-					PROCESS Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
-				}
 			}
 		}
 		else if(Msg == NETMSG_INPUT)
@@ -2407,7 +2401,7 @@ void CServer::PumpNetwork()
 						SrvBrwsToken = Unpacker.GetInt();
 						if (Unpacker.Error())
 							continue;
-
+						
 						CPacker Packer;
 						CNetChunk Response;
 
@@ -2419,6 +2413,17 @@ void CServer::PumpNetwork()
 						Response.m_pData = Packer.Data();
 						Response.m_DataSize = Packer.Size();
 						m_NetServer.Send(&Response, ResponseToken, false, Socket);
+					}
+				}
+				else if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_INFO) && mem_comp(Packet.m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
+				{
+					if (Config()->m_SvRestartQueueMainPort && Packet.m_Address.port == Config()->m_SvRestartQueueMainPort)
+					{
+						dbg_msg("hi", "received serverinfo from main server: %d", Config()->m_SvRestartQueueMainPort);
+						GameServer()->OnPreShutdown();
+						for (int i = 0; i < MAX_CLIENTS; i++)
+							RedirectClient(i, Config()->m_SvRestartQueueMainPort);
+						m_RunServer = STOPPING;
 					}
 				}
 			}
@@ -2807,6 +2812,29 @@ int CServer::Run()
 						}
 					}
 				}
+
+				if (Config()->m_SvRestartQueueMainPort)
+				{
+					if (Tick() > m_LastServerInfoRequest + TickSpeed() * 2)
+					{
+						m_LastServerInfoRequest = Tick();
+
+						CPacker Packer;
+						Packer.Reset();
+						Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+						Packer.AddInt(69);
+
+						CNetChunk Packet;
+						mem_zero(&Packet, sizeof(Packet));
+						Packet.m_Address.type = m_NetServer.NetType(SOCKET_MAIN)|NETTYPE_LINK_BROADCAST;
+						Packet.m_Address.port = Config()->m_SvRestartQueueMainPort;
+						Packet.m_ClientID = -1;
+						Packet.m_Flags = NETSENDFLAG_CONNLESS;
+						Packet.m_DataSize = Packer.Size();
+						Packet.m_pData = Packer.Data();
+						m_NetServer.Send(&Packet);
+					}
+				}
 			}
 
 			// snap game
@@ -2948,6 +2976,13 @@ void CServer::ConEuroMode(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvEuroMode);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+}
+
+void CServer::ConRestartQueueMainPort(IConsole::IResult *pResult, void *pUser)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvRestartQueueMainPort);
 	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
@@ -3388,6 +3423,34 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConRestartQueueInitAndShutdown(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	// Start restart queue server
+	char aPath[IO_MAX_PATH_LENGTH];
+	pServer->Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
+	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
+	if (str_find(aPath, "/") == 0 || fs_is_file(aPath))
+	{
+		char aParams[256];
+		CConfig *pConfig = pServer->Config();
+		str_format(aParams, sizeof(aParams), "\"sv_port %d\" \"sv_port_two %d\" \"sv_map %s\" \"sv_restart_queue_main_port %d\" \"bindaddr %s\" \"sv_accounts 0\"",
+			pConfig->m_SvRestartQueuePort, pConfig->m_SvRestartQueuePort + 1, pConfig->m_SvRestartQueueMap, pConfig->m_SvPort, pConfig->m_Bindaddr);
+		PROCESS Process = shell_execute(aPath, EShellExecuteWindowState::BACKGROUND, aParams);
+		if (!Process)
+		{
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Couldn't create process.");
+			return;
+		}
+	}
+
+	pServer->GameServer()->OnPreShutdown();
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		pServer->RedirectClient(i, pServer->Config()->m_SvRestartQueuePort);
+	pServer->m_RunServer = STOPPING;
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3578,6 +3641,9 @@ void CServer::RegisterCommands()
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map", AUTHED_ADMIN);
 
+	// F-DDrace
+	Console()->Register("restart_queue_init_and_shutdown", "", CFGFLAG_SERVER, ConRestartQueueInitAndShutdown, this, "Initialize restart queue and shutdown", AUTHED_ADMIN);
+
 	// Auth Manager
 	// TODO: Maybe move these into CAuthManager?
 	Console()->Register("auth_add", "s[ident] s[level] s[pw]", CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, ConAuthAdd, this, "Add a rcon key", AUTHED_ADMIN);
@@ -3734,6 +3800,7 @@ int main(int argc, const char **argv) // ignore_convention
 	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pServer, "Turns testing commands aka cheats on/off", AUTHED_ADMIN);
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pServer, "Allow /rescue command so players can teleport themselves out of freeze", AUTHED_ADMIN);
 	pConsole->Register("sv_euro_mode", "", CFGFLAG_SERVER, CServer::ConEuroMode, pServer, "Whether euro mode is enabled", AUTHED_ADMIN);
+	pConsole->Register("sv_restart_queue_main_port", "", CFGFLAG_SERVER, CServer::ConRestartQueueMainPort, pServer, "Port of the main server", AUTHED_ADMIN);
 
 	pEngine->InitLogfile();
 

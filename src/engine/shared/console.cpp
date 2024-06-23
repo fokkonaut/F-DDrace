@@ -1046,6 +1046,7 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 		else
 		{
 			// search arguments for overrides
+			dbg_msg("hi", "%s", ppArguments[i]);
 			ExecuteLine(ppArguments[i]);
 		}
 	}

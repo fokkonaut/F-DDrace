@@ -12,6 +12,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <iterator>
 
 #if defined(CONF_FAMILY_UNIX)
 	#include <sys/time.h>
@@ -45,6 +46,8 @@
 	#include <errno.h>
 	#include <process.h>
 	#include <wincrypt.h>
+	#include <shellapi.h>
+	#include <cfenv>
 #else
 	#error NOT IMPLEMENTED
 #endif
@@ -3371,16 +3374,20 @@ void uint_to_bytes_be(unsigned char *bytes, unsigned value)
 	bytes[3] = value&0xff;
 }
 
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char *params)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	const std::wstring wide_file = windows_utf8_to_wide(file);
+	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	WCHAR wParams[IO_MAX_PATH_LENGTH];
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, params, -1, wParams, std::size(wParams)) > 0, "MultiByteToWideChar failure");
 
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
-	info.lpFile = wide_file.c_str();
+	info.lpFile = wBuffer;
+	info.lpParameters = wParams;
 	switch(window_state)
 	{
 	case EShellExecuteWindowState::FOREGROUND:
@@ -3402,19 +3409,45 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 		fesetenv(&floating_point_environment);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
-	char *argv[2];
-	pid_t pid;
-	argv[0] = (char *)file;
-	argv[1] = NULL;
-	pid = fork();
+	pid_t pid = fork();
 	if(pid == -1)
 	{
 		return 0;
 	}
 	if(pid == 0)
 	{
+		int Size = sizeof(char *) * 2;
+		char **argv = (char **)malloc(Size);
+
+		int Length = str_length(file) + 1;
+		argv[0] = (char *)malloc(Length);
+		str_copy(argv[0], file, Length);
+
+		int count = 1;
+		const char *pNext = params;
+		while(pNext && (pNext = str_find(pNext, "\"")))
+		{
+			const char *pStart = pNext;
+			if ((pNext = str_find(pStart + 1, "\"")))
+			{
+				Size += sizeof(char *);
+				argv = (char**)realloc(argv, Size);
+
+				count++;
+				int Length = str_length(pStart) - str_length(pNext) + 2;
+				argv[count - 1] = (char *)malloc(Length);
+				str_copy(argv[count - 1], pStart, Length);
+				pNext++;
+			}
+		}
+		argv[count] = NULL;
+
 		execvp(file, argv);
 		_exit(1);
+
+		for (int i = 0; i < count + 1; i++)
+			free(argv[i]);
+		free(argv);
 	}
 	return pid;
 #endif
