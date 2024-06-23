@@ -2185,7 +2185,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 	bool Help = !str_comp_nocase(pCommand, "help");
 	if (pResult->NumArguments() == 0 || (Help && pResult->NumArguments() == 1))
 	{
-		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, cancel, buy, swap, spawn");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Plot subcommands: edit, clear, sell, cancel, buy, swap, spawn, list");
 		pSelf->SendChatTarget(pResult->m_ClientID, "For detailed info, type '/plot help <command>'");
 		return;
 	}
