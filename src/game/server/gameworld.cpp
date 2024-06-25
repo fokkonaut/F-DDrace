@@ -130,8 +130,19 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 //
 void CGameWorld::Snap(int SnappingClient)
 {
+	for(CEntity *pEnt = m_apFirstEntityTypes[ENTTYPE_CHARACTER]; pEnt;)
+	{
+		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+		pEnt->Snap(SnappingClient);
+		pEnt = m_pNextTraverseEntity;
+	}
+
 	std::vector<CEntity *> vpPlotObjects;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if(i == ENTTYPE_CHARACTER)
+			continue;
+
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
@@ -141,6 +152,7 @@ void CGameWorld::Snap(int SnappingClient)
 				pEnt->Snap(SnappingClient);
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 
 	// snap plot objects after we got everything else, so we dont fill the snap with plot objects before everything important
 	for (unsigned int i = 0; i < vpPlotObjects.size(); i++)
