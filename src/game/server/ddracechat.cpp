@@ -1777,6 +1777,7 @@ void CGameContext::ConContact(IConsole::IResult* pResult, void* pUserData)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, "You need to enter a way to contact you, for example: Discord, E-Mail, Skype, etc.");
 		pSelf->SendChatTarget(pResult->m_ClientID, "To see your current contact information, use '/account'");
+		pSelf->SendChatTarget(pResult->m_ClientID, "Example: '/contact Discord: fokkonaut'");
 		return;
 	}
 
