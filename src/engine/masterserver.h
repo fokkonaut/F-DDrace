@@ -36,4 +36,9 @@ static const unsigned char SERVERBROWSE_FWRESPONSE[] = {255, 255, 255, 255, 'f',
 static const unsigned char SERVERBROWSE_FWOK[] = {255, 255, 255, 255, 'f', 'w', 'o', 'k'};
 static const unsigned char SERVERBROWSE_FWERROR[] = {255, 255, 255, 255, 'f', 'w', 'e', 'r'};
 
+// F-DDrace
+// redirect tile communication
+static const unsigned char REDIRECT_SAVE_TEE_ADD[] = { 255, 255, 255, 255, 'r', 's', 't', 'a' };
+static const unsigned char REDIRECT_SAVE_TEE_REMOVE[] = { 255, 255, 255, 255, 'r', 's', 't', 'r' };
+
 #endif

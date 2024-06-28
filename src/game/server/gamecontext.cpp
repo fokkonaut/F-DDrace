@@ -4061,6 +4061,8 @@ void CGameContext::FDDraceInitPreMapInit()
 	Collision()->m_vTiles.clear();
 	Collision()->m_vTiles.resize(NUM_INDICES);
 
+	Collision()->m_vRedirectTiles.clear();
+
 	// reset plots here but load them after the map init
 	for (int i = 0; i < MAX_PLOTS; i++)
 	{
@@ -6019,13 +6021,41 @@ void CGameContext::ReadSavedPlayersFile()
 		{
 			if (IsExpired(SaveTee.GetIdentity().m_ExpireDate))
 			{
-				RemoveSavedIdentityFile(m_vSavedIdentitiesFiles[i].c_str(), SaveTee.GetIdentity().m_aName);
+				RemoveSavedIdentityFile(SaveTee.GetIdentity());
 				continue;
 			}
 
 			m_vSavedIdentities.push_back(SaveTee.GetIdentity());
 		}
 	}
+
+	// Clear
+	m_vSavedIdentitiesFiles.clear();
+
+	// Check for redirect tile saves
+	str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile", Config()->m_SvSavedTeesFilePath);
+	Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, LoadSavedPlayersCallback, this);
+
+	for (unsigned int i = 0; i < m_vSavedIdentitiesFiles.size(); i++)
+	{
+		str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile/%s.save", Config()->m_SvSavedTeesFilePath, m_vSavedIdentitiesFiles[i].c_str());
+		CSaveTee SaveTee;
+		if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity())
+		{
+			if (IsExpired(SaveTee.GetIdentity().m_ExpireDate))
+			{
+				RemoveSavedIdentityFile(SaveTee.GetIdentity());
+				continue;
+			}
+
+			if (SaveTee.GetIdentity().m_RedirectTilePort == Config()->m_SvPort)
+			{
+				m_vSavedIdentities.push_back(SaveTee.GetIdentity());
+			}
+		}
+	}
+
+	// Clear
 	m_vSavedIdentitiesFiles.clear();
 }
 
@@ -6046,18 +6076,21 @@ void CGameContext::ExpireSavedIdentities()
 	{
 		if (IsExpired(m_vSavedIdentities[i].m_ExpireDate))
 		{
-			RemoveSavedIdentityFile(GetSavedIdentityHash(m_vSavedIdentities[i]), m_vSavedIdentities[i].m_aName);
+			RemoveSavedIdentityFile(m_vSavedIdentities[i]);
 			m_vSavedIdentities.erase(m_vSavedIdentities.begin() + i);
 			i--;
 		}
 	}
 }
 
-void CGameContext::RemoveSavedIdentityFile(const char *pHash, const char *pName)
+void CGameContext::RemoveSavedIdentityFile(SSavedIdentity SavedIdentity)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), pHash);
-	dbg_msg("save", "%s: removing saved identity due to expiration", pName);
+	if (SavedIdentity.m_RedirectTilePort)
+		str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile/%s.save", Config()->m_SvSavedTeesFilePath, GetSavedIdentityHash(SavedIdentity));
+	else
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(SavedIdentity));
+	dbg_msg("save", "%s: removing saved identity due to expiration", SavedIdentity.m_aName);
 	Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
 }
 
@@ -6075,11 +6108,11 @@ void CGameContext::SaveDrop(int ClientID, float Hours, const char *pReason)
 	((CServer *)Server())->m_NetServer.Drop(ClientID, pReason);
 }
 
-bool CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
+int CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 {
 	CCharacter *pChr = GetPlayerChar(ClientID);
 	if (!pChr || pChr->GetPlayer()->m_IsDummy)
-		return false;
+		return -1;
 
 	// Pretend we leave the minigame, so that the shutdown save saves our main tee, not the minigame :D
 	// We cant use SetMinigame(MINIGAME_NONE) here because that would kill the character, ending in a crash
@@ -6107,14 +6140,24 @@ bool CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 	Info.m_ExpireDate = 0;
 	if (Hours != -1)
 		SetExpireDate(&Info.m_ExpireDate, Hours);
+	Info.m_RedirectTilePort = pChr->m_RedirectTilePort;
 	m_vSavedIdentities.push_back(Info);
 
 	// create file and save the character
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));
+	if (!(Flags & SAVE_REDIRECT))
+	{
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(Info));
+	}
+	else
+	{
+		str_format(aFilename, sizeof(aFilename), "dumps/%s/x_redirect_tile/%s.save", Config()->m_SvSavedTeesFilePath, GetSavedIdentityHash(Info));
+	}
 	CSaveTee SaveTee(Flags|SAVE_IDENTITY);
 	SaveTee.SaveFile(aFilename, pChr);
-	return true;
+	
+	// return index of newly added identity
+	return m_vSavedIdentities.size() - 1;
 }
 
 int CGameContext::FindSavedPlayer(int ClientID)
@@ -6192,11 +6235,27 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 		return false;
 
 	// Get path and load
+	bool Success = TryLoadPlayer(ClientID, Index, false);
+	if (!Success)
+	{
+		// Normal path didn't work, let's see if we can find the file in the redirect tile folder
+		Success = TryLoadPlayer(ClientID, Index, true);
+	}
+	return Success;
+}
+
+bool CGameContext::TryLoadPlayer(int ClientID, int Index, bool RedirectTile)
+{
+	const char *pHash = GetSavedIdentityHash(m_vSavedIdentities[Index]);
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), GetSavedIdentityHash(m_vSavedIdentities[Index]));
+	if (RedirectTile)
+		str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile/%s.save", Config()->m_SvSavedTeesFilePath, pHash);
+	else
+		str_format(aPath, sizeof(aPath), "dumps/%s/%s/%s.save", Config()->m_SvSavedTeesFilePath, Server()->GetCurrentMapName(), pHash);
 	CSaveTee SaveTee;
 	if (SaveTee.LoadFile(aPath, m_apPlayers[ClientID]->GetCharacter()))
 	{
+		Server()->SendRedirectSaveTeeRemove(SaveTee.GetPreviousPort(), pHash);
 		// Remove file, this save has been used now
 		dbg_msg("save", "%d:%s used his save, removing save file", ClientID, Server()->ClientName(ClientID));
 		Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
@@ -6205,6 +6264,41 @@ bool CGameContext::CheckLoadPlayer(int ClientID)
 		return true;
 	}
 	return false;
+}
+
+void CGameContext::OnRedirectSaveTeeAdd(const char *pHash)
+{
+	if (!pHash[0])
+		return;
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile/%s.save", Config()->m_SvSavedTeesFilePath, pHash);
+	CSaveTee SaveTee;
+	if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity() && SaveTee.GetIdentity().m_RedirectTilePort == Config()->m_SvPort)
+	{
+		m_vSavedIdentities.push_back(SaveTee.GetIdentity());
+	}
+}
+
+void CGameContext::OnRedirectSaveTeeRemove(const char *pHash)
+{
+	if (!pHash[0])
+		return;
+
+	int Index = -1;
+	for (unsigned int i = 0; i < m_vSavedIdentities.size(); i++)
+	{
+		if (str_comp(GetSavedIdentityHash(m_vSavedIdentities[i]), pHash) == 0)
+		{
+			Index = i;
+			break;
+		}
+	}
+
+	if (Index == -1)
+		return;
+
+	m_vSavedIdentities.erase(m_vSavedIdentities.begin() + Index);
 }
 
 void CGameContext::CreateFolders()
@@ -6241,6 +6335,8 @@ void CGameContext::CreateFolders()
 	str_format(aPath, sizeof(aPath), "dumps/%s", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 	str_format(aPath, sizeof(aPath), "dumps/%s/%s", Config()->m_SvSavedTeesFilePath, Server()->GetMapName());
+	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
+	str_format(aPath, sizeof(aPath), "dumps/%s/x_redirect_tile", Config()->m_SvSavedTeesFilePath);
 	Storage()->CreateFolder(aPath, IStorage::TYPE_SAVE);
 }
 

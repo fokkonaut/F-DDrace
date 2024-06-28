@@ -194,6 +194,15 @@ public:
 	int IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);
 	int IntersectLineNoBonus(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool Enter);
 
+	// redirect tiles
+	struct SRedirectTile
+	{
+		int m_Number;
+		vec2 m_Pos;
+	};
+	std::vector<SRedirectTile> m_vRedirectTiles;
+	vec2 GetRandomRedirectTile(int Number);
+
 	// tiles
 	bool TileUsed(int Index) { return GetRandomTile(Index) != vec2(-1, -1); }
 	vec2 GetRandomTile(int Index);

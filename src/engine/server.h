@@ -264,12 +264,16 @@ public:
 	virtual bool IsBanned(int ClientID) = 0;
 	virtual int Kick(int ClientID, const char *pReason) = 0;
 	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
+	virtual void RedirectClient(int ClientID, int Port, bool Verbose = false) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual const char *GetMapName() = 0;
 	virtual const char *GetCurrentMapName() = 0;
 	virtual const char *GetFileName(char *pPath) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
+	virtual void SendRedirectSaveTeeAdd(int Port, const char *pHash) = 0;
+	virtual void SendRedirectSaveTeeRemove(int Port, const char *pHash) = 0;
 
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
@@ -318,6 +322,9 @@ public:
 
 	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) = 0;
 	virtual void SendModLogMessage(int ClientID, const char *pMsg) = 0;
+
+	virtual void OnRedirectSaveTeeAdd(const char *pHash) = 0;
+	virtual void OnRedirectSaveTeeRemove(const char *pHash) = 0;
 
 	virtual const CUuid GameUuid() const = 0;
 	virtual const char *GameType() const = 0;

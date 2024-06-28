@@ -3303,6 +3303,28 @@ void CCharacter::HandleTiles(int Index)
 
 		m_LastBonus = true;
 	}
+	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCH_REDIRECT_SERVER_FROM && Team() != TEAM_SUPER && SwitchNumber > 0 && !m_pPlayer->m_IsDummy)
+	{
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "%d:", SwitchNumber);	
+		const char *pPort = str_find(Config()->m_SvRedirectServerTilePorts, aBuf);
+		if (pPort && (pPort + 2) && !m_RedirectTilePort)
+		{
+			// We need the port here so it gets saved aswell. If saving didn't work, we reset it
+			m_RedirectTilePort = atoi(pPort + 2);
+			if (m_RedirectTilePort != Config()->m_SvPort)
+			{
+				int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT, Config()->m_SvShutdownSaveTeeExpire);
+				if (IdentityIndex != -1)
+				{
+					Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
+					Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
+					return;
+				}
+			}
+			m_RedirectTilePort = 0;
+		}
+	}
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
 	{
@@ -3976,6 +3998,7 @@ void CCharacter::FDDraceInit()
 
 	m_pPortalBlocker = 0;
 	m_LastNoBonusTick = 0;
+	m_RedirectTilePort = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4788,6 +4811,41 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 	}
 
 	return true;
+}
+
+void CCharacter::LoadRedirectTile(int Port)
+{
+	if (!Port)
+		return;
+
+	const char *pList = Config()->m_SvRedirectServerTilePorts;
+	while (1)
+	{
+		if (!pList)
+			break;
+
+		int EntryNumber = 0;
+		int EntryPort = 0;
+		sscanf(pList, "%d:%d", &EntryNumber, &EntryPort);
+		if (EntryNumber > 0 && EntryPort == Port)
+		{
+			vec2 Pos = GameServer()->Collision()->GetRandomRedirectTile(EntryNumber);
+			if (Pos != vec2(-1, -1))
+			{
+				ForceSetPos(Pos);
+			}
+			else
+			{
+				if (GameServer()->m_pController->CanSpawn(&Pos, ENTITY_SPAWN))
+					ForceSetPos(Pos);
+			}
+			break;
+		}
+
+		// jump to next comma, if it exists skip it so we can start the next loop run with the next data
+		if ((pList = str_find(pList, ",")))
+			pList++;
+	}
 }
 
 bool CCharacter::TryMountHelicopter()

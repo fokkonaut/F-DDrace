@@ -21,6 +21,7 @@ struct SSavedIdentity
 	CTeeInfo m_TeeInfo;
 
 	time_t m_ExpireDate;
+	int m_RedirectTilePort;
 };
 
 enum
@@ -29,6 +30,7 @@ enum
 	SAVE_FLAG = 1<<1, // saves and gives back flag if no one else has it
 	SAVE_IDENTITY = 1<<2, // saves the identity of a player aswell as logs him back in when this save gets loaded
 	SAVE_JAIL = 1<<3, // only saves and loads escape and jail time of a player
+	SAVE_REDIRECT = 1<<4, // saves tee to redirect folder so other server can load it and adjust the position to the TO tile, requires SAVE_IDENTITY
 };
 
 class CSaveTee
@@ -49,6 +51,8 @@ public:
 	bool HasSavedIdentity() { return m_Flags&SAVE_IDENTITY; }
 	void TeleOutOfPlot(vec2 ToTele);
 	void StopPlotEditing();
+
+	int GetPreviousPort() { return m_PreviousPort; }
 
 	bool SaveFile(const char *pFileName, CCharacter *pChr);
 	bool LoadFile(const char *pFileName, CCharacter *pChr, CGameContext *pGameContext = 0);
@@ -120,6 +124,7 @@ private:
 
 	// F-DDrace
 	int m_Flags;
+	int m_PreviousPort;
 
 	// character
 	int m_Health;

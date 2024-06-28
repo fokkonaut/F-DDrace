@@ -519,6 +519,10 @@ public:
 	};
 	int m_aUntranslatedID[EUntranslatedMap::NUM_IDS];
 
+	// redirect tile
+	void LoadRedirectTile(int Port);
+	int m_RedirectTilePort;
+
 	//others
 	int HasFlag();
 	void CheckMoved();

@@ -228,6 +228,13 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		GameServer()->m_aPlots[PlotID].m_ToTele = Pos;
 		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->m_apPlotSize[PlotID];
 	}
+	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_REDIRECT_SERVER_TO && Number > 0)
+	{
+		CCollision::SRedirectTile RedirectTile;
+		RedirectTile.m_Number = Number;
+		RedirectTile.m_Pos = Pos;
+		GameServer()->Collision()->m_vRedirectTiles.push_back(RedirectTile);
+	}
 	else if(Index == ENTITY_CRAZY_SHOTGUN_EX)
 	{
 		int Dir;

@@ -1604,6 +1604,23 @@ int CCollision::IsFCheckpoint(int Index)
 }
 
 // F-DDrace
+vec2 CCollision::GetRandomRedirectTile(int Number)
+{
+	if (m_vRedirectTiles.size())
+	{
+		std::vector<vec2> vPos;
+		for (unsigned int i = 0; i < m_vRedirectTiles.size(); i++)
+			if (m_vRedirectTiles[i].m_Number == Number)
+				vPos.push_back(m_vRedirectTiles[i].m_Pos);
+		if (vPos.size())
+		{
+			int Rand = rand() % vPos.size();
+			return vPos[Rand];
+		}
+	}
+	return vec2(-1, -1);
+}
+
 vec2 CCollision::GetRandomTile(int Index)
 {
 	if (m_vTiles[Index].size())

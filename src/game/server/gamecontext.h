@@ -687,9 +687,9 @@ public:
 	const char *FormatURL(const char *pURL);
 	const char *GetAvatarURL(int ClientID);
 
-	void SendModLogMessage(int ClientID, const char *pMsg) override;
-
 	void SnapSelectedArea(CSelectedArea *pSelectedArea);
+
+	void SendModLogMessage(int ClientID, const char *pMsg) override;
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
@@ -735,9 +735,10 @@ public:
 	bool IsSpawnArea(vec2 Pos);
 
 	// saved
-	bool SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
+	int SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
 	int FindSavedPlayer(int ClientID);
 	bool CheckLoadPlayer(int ClientID);
+	bool TryLoadPlayer(int ClientID, int Index, bool RedirectTile);
 	const char *GetSavedIdentityHash(SSavedIdentity Info);
 	std::vector<SSavedIdentity> m_vSavedIdentities;
 	std::vector<std::string> m_vSavedIdentitiesFiles; // only for init, to read all saved identities structs to m_vSavedIdentities
@@ -745,9 +746,13 @@ public:
 	void ReadSavedPlayersFile();
 	static int LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 	void ExpireSavedIdentities();
-	void RemoveSavedIdentityFile(const char *pHash, const char *pName);
+	void RemoveSavedIdentityFile(SSavedIdentity SavedIdentity);
 	
 	void SaveDrop(int ClientID, float Hours, const char *pReason);
+
+	// Redirect tile
+	void OnRedirectSaveTeeAdd(const char *pHash) override;
+	void OnRedirectSaveTeeRemove(const char *pHash) override;
 
 private:
 

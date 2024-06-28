@@ -133,6 +133,7 @@ public:
 			STATE_CONNECTING_AS_SPEC,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_REDIRECTED,
 			STATE_DUMMY,
 
 			SNAPRATE_INIT=0,
@@ -261,6 +262,7 @@ public:
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
+		int64_t m_RedirectDropTime;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -373,6 +375,7 @@ public:
 
 	int Kick(int ClientID, const char *pReason) override;
 	void Ban(int ClientID, int Seconds, const char *pReason) override; // bans ip of player with clientid
+	void RedirectClient(int ClientID, int Port, bool Verbose = false) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 	bool DemoRecorder_IsRecording() override;
@@ -433,6 +436,10 @@ public:
 	void ExpireServerInfo() override;
 	void FillAntibot(CAntibotRoundData *pData) override;
 	const char *GetGameTypeServerInfo();
+
+	void SendRedirectSaveTeeAdd(int Port, const char *pHash) override;
+	void SendRedirectSaveTeeRemove(int Port, const char *pHash) override;
+	void SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash);
 
 	void PumpNetwork();
 

@@ -302,6 +302,7 @@ void CServer::CClient::Reset()
 
 	m_CurrentMapDesign = -1;
 	m_DesignChange = false;
+	m_RedirectDropTime = 0;
 }
 
 void CServer::CClient::ResetContent()
@@ -338,6 +339,7 @@ void CServer::CClient::ResetContent()
 	m_Main = true;
 
 	m_Rejoining = false;
+	m_RedirectDropTime = 0;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
@@ -526,6 +528,35 @@ int CServer::Kick(int ClientID, const char *pReason)
 void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 {
 	m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Seconds, pReason);
+}
+
+void CServer::RedirectClient(int ClientID, int Port, bool Verbose)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	char aBuf[512];
+	bool SupportsRedirect = m_aClients[ClientID].m_DDNetVersion >= VERSION_DDNET_REDIRECT;
+	if(Verbose)
+	{
+		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d supported=%d", ClientName(ClientID), Port, SupportsRedirect);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "redirect", aBuf);
+	}
+
+	if(!SupportsRedirect)
+	{
+		bool SamePort = Port == Config()->m_SvPort;
+		str_format(aBuf, sizeof(aBuf), "Redirect unsupported: please connect to port %d", Port);
+		Kick(ClientID, SamePort ? "Redirect unsupported: please reconnect" : aBuf);
+		return;
+	}
+
+	CMsgPacker Msg(NETMSG_REDIRECT, true);
+	Msg.AddInt(Port);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+
+	m_aClients[ClientID].m_RedirectDropTime = time_get() + time_freq() * 10;
+	m_aClients[ClientID].m_State = CClient::STATE_REDIRECTED;
 }
 
 /*int CServer::Tick()
@@ -2320,6 +2351,41 @@ void CServer::SendServerInfo(int ClientID)
 	}
 }
 
+void CServer::SendRedirectSaveTeeAdd(int Port, const char *pHash)
+{
+	SendRedirectSaveTeeImpl(true, Port, pHash);
+}
+
+void CServer::SendRedirectSaveTeeRemove(int Port, const char *pHash)
+{
+	SendRedirectSaveTeeImpl(false, Port, pHash);
+}
+
+void CServer::SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash)
+{
+	if (!pHash[0])
+		return;
+
+	CPacker Packer;
+	Packer.Reset();
+	if (Add)
+		Packer.AddRaw(REDIRECT_SAVE_TEE_ADD, sizeof(REDIRECT_SAVE_TEE_ADD));
+	else
+		Packer.AddRaw(REDIRECT_SAVE_TEE_REMOVE, sizeof(REDIRECT_SAVE_TEE_REMOVE));
+	Packer.AddInt(Port);
+	Packer.AddString(pHash, SHA256_MAXSTRSIZE);
+
+	CNetChunk Packet;
+	Packet.m_ClientID = -1;
+	mem_zero(&Packet.m_Address, sizeof(Packet.m_Address));
+	Packet.m_Address.type = m_NetServer.NetType(SOCKET_MAIN) | NETTYPE_LINK_BROADCAST;
+	Packet.m_Address.port = Port;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = Packer.Size();
+	Packet.m_pData = Packer.Data();
+	m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
+}
+
 void CServer::PumpNetwork()
 {
 	CNetChunk Packet;
@@ -2346,8 +2412,7 @@ void CServer::PumpNetwork()
 				if (ResponseToken == NET_TOKEN_NONE && pRegister->OnPacket(&Packet))
 					continue;
 
-				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) &&
-					mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
+				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) && mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
 				{
 					CUnpacker Unpacker;
 					Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
@@ -2382,9 +2447,38 @@ void CServer::PumpNetwork()
 						m_NetServer.Send(&Response, ResponseToken, false, Socket);
 					}
 				}
+				else if (Packet.m_DataSize >= int(sizeof(REDIRECT_SAVE_TEE_ADD)) && mem_comp(Packet.m_pData, REDIRECT_SAVE_TEE_ADD, sizeof(REDIRECT_SAVE_TEE_ADD)) == 0)
+				{
+					CUnpacker Unpacker;
+					Unpacker.Reset((unsigned char*)Packet.m_pData + sizeof(REDIRECT_SAVE_TEE_ADD), Packet.m_DataSize - sizeof(REDIRECT_SAVE_TEE_ADD));
+
+					int Port = Unpacker.GetInt();
+					const char *pHash = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+
+					if (Unpacker.Error() || Port != Config()->m_SvPort)
+						continue;
+
+					GameServer()->OnRedirectSaveTeeAdd(pHash);
+				}
+				else if (Packet.m_DataSize >= int(sizeof(REDIRECT_SAVE_TEE_REMOVE)) && mem_comp(Packet.m_pData, REDIRECT_SAVE_TEE_REMOVE, sizeof(REDIRECT_SAVE_TEE_REMOVE)) == 0)
+				{
+					CUnpacker Unpacker;
+					Unpacker.Reset((unsigned char*)Packet.m_pData + sizeof(REDIRECT_SAVE_TEE_REMOVE), Packet.m_DataSize - sizeof(REDIRECT_SAVE_TEE_REMOVE));
+
+					int Port = Unpacker.GetInt();
+					const char *pHash = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+
+					if (Unpacker.Error() || Port != Config()->m_SvPort)
+						continue;
+
+					GameServer()->OnRedirectSaveTeeRemove(pHash);
+				}
 			}
 			else
 			{
+				if(m_aClients[Packet.m_ClientID].m_State == CClient::STATE_REDIRECTED)
+					continue;
+
 				int GameFlags = 0;
 				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
 				{
@@ -2798,8 +2892,14 @@ int CServer::Run()
 				bool ServerEmpty = true;
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
+				{
+					if(m_aClients[c].m_State == CClient::STATE_REDIRECTED)
+						if(time_get() > m_aClients[c].m_RedirectDropTime)
+							m_NetServer.Drop(c, "redirected");
+
 					if(m_aClients[c].m_State != CClient::STATE_EMPTY && m_aClients[c].m_State != CClient::STATE_DUMMY)
 						ServerEmpty = false;
+				}
 
 				if(ServerEmpty)
 					m_RunServer = STOPPING;

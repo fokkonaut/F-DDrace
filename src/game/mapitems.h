@@ -242,6 +242,8 @@ enum
 	TILE_SWITCH_PLOT = 192, // plot inside (able to place objects here)
 	TILE_SWITCH_PLOT_DOOR, // door lenght in blocks: delay
 	TILE_SWITCH_PLOT_TOTELE, // totele plot position, // plot size; delay=0: small, delay=1: big
+	TILE_SWITCH_REDIRECT_SERVER_FROM, // from tp for server redirection
+	TILE_SWITCH_REDIRECT_SERVER_TO,
 	TILE_SWITCHTOGGLE = 28, // for draw editor placed buttons for plot draw doors, also supported as mappable tiles
 	TILE_TELE_INOUT_EVIL = 94, // also supported as mappable tiles
 	TILE_TELE_INOUT = 95, // also supported as mappable tiles
