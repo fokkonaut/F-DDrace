@@ -31,8 +31,9 @@ bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IE
 
 	BindAddr.port = pConfig->m_SvPortTwo;
 	NETSOCKET SocketTwo = net_udp_create(BindAddr, 0);
-	if(!SocketTwo)
-		return false;
+	// Ignore and don't use when port is 0
+	//if(!SocketTwo)
+	//	return false;
 
 	// init
 	m_pNetBan = pNetBan;
