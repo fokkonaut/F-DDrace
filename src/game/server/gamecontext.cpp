@@ -6276,29 +6276,27 @@ void CGameContext::OnRedirectSaveTeeAdd(const char *pHash)
 	CSaveTee SaveTee;
 	if (SaveTee.LoadFile(aPath, 0, this) && SaveTee.HasSavedIdentity() && SaveTee.GetIdentity().m_RedirectTilePort == Config()->m_SvPort)
 	{
-		m_vSavedIdentities.push_back(SaveTee.GetIdentity());
+		int Index = GetIdentityIndexByHash(pHash);
+		if (Index == -1)
+			m_vSavedIdentities.push_back(SaveTee.GetIdentity());
 	}
 }
 
 void CGameContext::OnRedirectSaveTeeRemove(const char *pHash)
 {
-	if (!pHash[0])
-		return;
-
-	int Index = -1;
-	for (unsigned int i = 0; i < m_vSavedIdentities.size(); i++)
-	{
-		if (str_comp(GetSavedIdentityHash(m_vSavedIdentities[i]), pHash) == 0)
-		{
-			Index = i;
-			break;
-		}
-	}
-
+	int Index = GetIdentityIndexByHash(pHash);
 	if (Index == -1)
 		return;
-
 	m_vSavedIdentities.erase(m_vSavedIdentities.begin() + Index);
+}
+
+int CGameContext::GetIdentityIndexByHash(const char *pHash)
+{
+	if (pHash[0])
+		for (unsigned int i = 0; i < m_vSavedIdentities.size(); i++)
+			if (str_comp(GetSavedIdentityHash(m_vSavedIdentities[i]), pHash) == 0)
+				return i;
+	return -1;
 }
 
 void CGameContext::CreateFolders()

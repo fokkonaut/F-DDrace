@@ -753,6 +753,7 @@ public:
 	// Redirect tile
 	void OnRedirectSaveTeeAdd(const char *pHash) override;
 	void OnRedirectSaveTeeRemove(const char *pHash) override;
+	int GetIdentityIndexByHash(const char *pHash);
 
 private:
 
