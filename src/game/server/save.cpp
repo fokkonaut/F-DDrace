@@ -394,7 +394,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		if (m_Identity.m_aAccUsername[0] != '\0')
 			pChr->GameServer()->Login(pChr->GetPlayer()->GetCID(), m_Identity.m_aAccUsername, "", false);
 		if (m_Flags&SAVE_REDIRECT)
-			pChr->LoadRedirectTile(m_PreviousPort);
+			pChr->LoadRedirectTile(m_PreviousPort == pChr->Config()->m_SvPort ? m_Identity.m_RedirectTilePort : m_PreviousPort);
 	}
 
 	pChr->GetPlayer()->m_EscapeTime = m_EscapeTime;
