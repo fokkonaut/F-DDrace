@@ -523,6 +523,7 @@ public:
 	void LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
 	int64 m_LastRedirectTileMsg;
+	int64 m_RedirectPassiveEndTick;
 
 	//others
 	int HasFlag();

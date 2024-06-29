@@ -4021,6 +4021,7 @@ void CCharacter::FDDraceInit()
 	m_LastNoBonusTick = 0;
 	m_RedirectTilePort = 0;
 	m_LastRedirectTileMsg = 0;
+	m_RedirectPassiveEndTick = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4212,6 +4213,12 @@ void CCharacter::FDDraceTick()
 	{
 		if (Server()->Tick() % (Server()->TickSpeed() / 3) == 0)
 			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
+	}
+
+	if (m_RedirectPassiveEndTick && m_RedirectPassiveEndTick < Server()->Tick())
+	{
+		m_RedirectPassiveEndTick = 0;
+		Passive(false, -1, true);
 	}
 
 	// update
@@ -4855,6 +4862,11 @@ void CCharacter::LoadRedirectTile(int Port)
 			if (Pos != vec2(-1, -1))
 			{
 				ForceSetPos(Pos);
+				if (!m_Passive)
+				{
+					m_RedirectPassiveEndTick = Server()->Tick() + Server()->TickSpeed() * 3;
+					Passive(true, -1, true);
+				}
 			}
 			else
 			{
