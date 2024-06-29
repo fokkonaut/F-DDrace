@@ -200,7 +200,7 @@ MACRO_CONFIG_INT(SvHideBotsStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERV
 MACRO_CONFIG_INT(SvWeaponIndicatorDefault, sv_weapon_indicator_default, 1, 0, 1, CFGFLAG_SERVER, "Whether the weapon names are displayed in the broadcast", AUTHED_ADMIN)
 
 // redirect server tiles
-MACRO_CONFIG_STR(SvRedirectServerTilePorts, sv_redirect_server_tile_ports, 128, "", CFGFLAG_SERVER, "Comma separated list of switch number to port mapping (e.g. 1:8305,2:8307)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvRedirectServerTilePorts, sv_redirect_server_tile_ports, 128, "", CFGFLAG_SERVER, "Comma separated list of switch number to port mapping (e.g. 1:8305,2:8303)", AUTHED_ADMIN)
 
 // drops
 MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to allow dropping weapons with f4", AUTHED_ADMIN)
