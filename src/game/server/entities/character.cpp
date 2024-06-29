@@ -3340,6 +3340,12 @@ void CCharacter::HandleTiles(int Index)
 						// Wallet got saved, we don't want to drop something to duplicate money or smth
 						m_pPlayer->SetWalletMoney(0);
 
+						if (m_RedirectPassiveEndTick)
+						{
+							m_RedirectPassiveEndTick = 0;
+							Passive(false, -1, true);
+						}
+
 						char aMsg[128];
 						str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
@@ -4869,8 +4875,11 @@ void CCharacter::LoadRedirectTile(int Port)
 			if (Pos != vec2(-1, -1))
 			{
 				ForceSetPos(Pos);
-				m_RedirectPassiveEndTick = Server()->Tick() + Server()->TickSpeed() * 3;
-				Passive(true, -1, true);
+				if (!m_Passive)
+				{
+					m_RedirectPassiveEndTick = Server()->Tick() + Server()->TickSpeed() * 3;
+					Passive(true, -1, true);
+				}
 			}
 			else
 			{
