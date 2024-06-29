@@ -3327,6 +3327,10 @@ void CCharacter::HandleTiles(int Index)
 					int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT, Config()->m_SvShutdownSaveTeeExpire);
 					if (IdentityIndex != -1)
 					{
+						int DummyID = Server()->GetDummy(m_pPlayer->GetCID());
+						if (DummyID != -1)
+							GameServer()->SaveDrop(DummyID, 1, "automatic kick due to redirect tile");
+
 						Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
 						Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 						return;
