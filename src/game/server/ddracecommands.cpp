@@ -1891,6 +1891,14 @@ void CGameContext::ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserDa
 		pSelf->SendChatTarget(Victim, "You are no longer in no-bonus area mode");
 }
 
+void CGameContext::ConRedirectPort(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr) pChr->TrySavelyRedirectClient(pResult->GetInteger(0));
+}
+
 void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;

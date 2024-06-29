@@ -1032,6 +1032,7 @@ private:
 	static void ConSetMinigame(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetNoBonusArea(IConsole::IResult* pResult, void* pUserData);
 	static void ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserData);
+	static void ConRedirectPort(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailArrest(IConsole::IResult* pResult, void* pUserData);
 	static void ConJailRelease(IConsole::IResult* pResult, void* pUserData);
 
