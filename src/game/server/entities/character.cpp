@@ -3333,12 +3333,13 @@ void CCharacter::HandleTiles(int Index)
 
 						// Wallet got saved, we don't want to drop something to duplicate money or smth
 						m_pPlayer->SetWalletMoney(0);
-						Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
-						Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 
 						char aMsg[128];
 						str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
 						GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
+
+						Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
+						Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 						return;
 					}
 				}
