@@ -3303,8 +3303,14 @@ void CCharacter::HandleTiles(int Index)
 
 		m_LastBonus = true;
 	}
-	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCH_REDIRECT_SERVER_FROM && Team() != TEAM_SUPER && SwitchNumber > 0 && !FightStarted && !m_pPlayer->m_IsDummy)
+	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCH_REDIRECT_SERVER_FROM && Team() != TEAM_SUPER && SwitchNumber > 0 && !m_pPlayer->m_IsDummy)
 	{
+		if (FightStarted)
+		{
+			Die(WEAPON_SELF);
+			return;
+		}
+
 		if (!Server()->IsMain(m_pPlayer->GetCID()))
 		{
 			if (!m_LastRedirectTileMsg || m_LastRedirectTileMsg < Server()->Tick() - Server()->TickSpeed() * 5)
