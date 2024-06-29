@@ -67,8 +67,8 @@ bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, 
 		return true;
 
 	int Team = -1;
-	if (Index == ENTITY_FLAGSTAND_RED) Team = TEAM_RED;
-	if (Index == ENTITY_FLAGSTAND_BLUE) Team = TEAM_BLUE;
+	if (Index == ENTITY_FLAGSTAND_RED && (Layer == LAYER_GAME || Layer == LAYER_FRONT)) Team = TEAM_RED;
+	if (Index == ENTITY_FLAGSTAND_BLUE && (Layer == LAYER_GAME || Layer == LAYER_FRONT)) Team = TEAM_BLUE;
 	if (Team == -1 || m_apFlags[Team])
 		return false;
 
