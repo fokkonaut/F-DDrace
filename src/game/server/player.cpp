@@ -1811,6 +1811,8 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 
 		str_format(aBuf, sizeof(aBuf), "You are now level %d!", pAccount->m_Level);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
+
+		GameServer()->CreateFinishConfetti(m_pCharacter->GetPos(), m_pCharacter->TeamMask());
 	}
 }
 
