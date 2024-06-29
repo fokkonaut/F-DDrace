@@ -983,6 +983,7 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/BlmapChill.map
+  maps/blmapV3multistarbox.map
   maps/BlmapChill_versions/BlmapChill_v0004.map
   maps/BlmapChill_versions/BlmapChill_v0052.map
   maps/BlmapChill_versions/BlmapChill_v0059.map
