@@ -3324,13 +3324,15 @@ void CCharacter::HandleTiles(int Index)
 				m_RedirectTilePort = atoi(pPort + 2);
 				if (m_RedirectTilePort != Config()->m_SvPort)
 				{
-					int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT, Config()->m_SvShutdownSaveTeeExpire);
+					int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
 					if (IdentityIndex != -1)
 					{
 						int DummyID = Server()->GetDummy(m_pPlayer->GetCID());
 						if (DummyID != -1)
 							GameServer()->SaveDrop(DummyID, 1, "automatic kick due to redirect tile");
 
+						// Wallet got saved, we don't want to drop something to duplicate money or smth
+						m_pPlayer->SetWalletMoney(0);
 						Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
 						Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 						return;
