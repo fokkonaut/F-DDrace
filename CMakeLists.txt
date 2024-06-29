@@ -983,7 +983,6 @@ set(EXPECTED_DATA
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
   maps/BlmapChill.map
-  maps/blmapV3multistarbox.map
   maps/BlmapChill_versions/BlmapChill_v0004.map
   maps/BlmapChill_versions/BlmapChill_v0052.map
   maps/BlmapChill_versions/BlmapChill_v0059.map
@@ -1021,6 +1020,7 @@ set(EXPECTED_DATA
   maps/ChillBlock_versions/ChillBlock5_v006_christmas.map
   maps/ChillBlock_versions/ChillBlock5_v007.map
   maps/ChillBlock_versions/ChillBlock5_v008.map
+  maps/blmapV3multistarbox.map
   maps/blmapV5_ddpp.map
   maps/ctf5_fngores.map
   maps/ddpp_survival.map
