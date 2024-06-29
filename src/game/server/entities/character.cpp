@@ -4863,11 +4863,8 @@ void CCharacter::LoadRedirectTile(int Port)
 			if (Pos != vec2(-1, -1))
 			{
 				ForceSetPos(Pos);
-				if (!m_Passive)
-				{
-					m_RedirectPassiveEndTick = Server()->Tick() + Server()->TickSpeed() * 3;
-					Passive(true, -1, true);
-				}
+				m_RedirectPassiveEndTick = Server()->Tick() + Server()->TickSpeed() * 3;
+				Passive(true, -1, true);
 			}
 			else
 			{
