@@ -1911,7 +1911,8 @@ void CGameContext::ConListSavedTees(IConsole::IResult* pResult, void* pUserData)
 	for (int i = 0; i < (int)pSelf->m_vSavedIdentities.size(); i++)
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate), pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername);
+		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s | %d |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate),
+			pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername[0] ? pSelf->m_vSavedIdentities[i].m_aAccUsername : "<no_acc>", pSelf->m_vSavedIdentities[i].m_RedirectTilePort);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 }
