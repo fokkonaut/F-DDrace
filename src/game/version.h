@@ -2,7 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_VERSION_H
 #define GAME_VERSION_H
-#define VERSION_RELEASE "16.0"
+#define VERSION_RELEASE "16.5.1"
 #define GAME_NAME "F-DDrace"
 #define GAME_VERSION "0.7/0.6, " VERSION_RELEASE
 #define GAME_VERSION_SEVENDOWN "0.6/0.7, " VERSION_RELEASE

@@ -109,9 +109,9 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		{
-			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUSPLUS)
 			{
-				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP++");
 				return;
 			}
 		}
@@ -139,9 +139,9 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	{
 		if (pSelf->m_pServer->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		{
-			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUS)
+			if (pSelf->m_Accounts[pChr2->GetPlayer()->GetAccID()].m_VIP != VIP_PLUSPLUS)
 			{
-				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP+");
+				pSelf->SendChatTarget(pResult->m_ClientID, "You are not VIP++");
 				return;
 			}
 		}
