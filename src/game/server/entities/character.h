@@ -522,6 +522,7 @@ public:
 	// redirect tile
 	void LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
+	int64 m_LastRedirectTileMsg;
 
 	//others
 	int HasFlag();
