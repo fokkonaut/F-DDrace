@@ -3335,6 +3335,10 @@ void CCharacter::HandleTiles(int Index)
 						m_pPlayer->SetWalletMoney(0);
 						Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
 						Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
+
+						char aMsg[128];
+						str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
+						GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
 						return;
 					}
 				}

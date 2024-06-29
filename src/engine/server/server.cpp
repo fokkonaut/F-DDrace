@@ -2887,7 +2887,6 @@ int CServer::Run()
 
 			PumpNetwork();
 
-			if(Config()->m_SvShutdownWhenEmpty)
 			{
 				bool ServerEmpty = true;
 
@@ -2901,7 +2900,7 @@ int CServer::Run()
 						ServerEmpty = false;
 				}
 
-				if(ServerEmpty)
+				if(Config()->m_SvShutdownWhenEmpty && ServerEmpty)
 					m_RunServer = STOPPING;
 			}
 
