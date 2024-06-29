@@ -4832,6 +4832,10 @@ bool CCharacter::TrySavelyRedirectClient(int Port)
 	m_RedirectTilePort = Port;
 	if (m_RedirectTilePort != Config()->m_SvPort)
 	{
+		// Reset for saving
+		if (m_RedirectPassiveEndTick)
+			Passive(false, -1, true);
+
 		int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
 		if (IdentityIndex != -1)
 		{
@@ -4842,12 +4846,6 @@ bool CCharacter::TrySavelyRedirectClient(int Port)
 			// Wallet got saved, we don't want to drop something to duplicate money or smth
 			m_pPlayer->SetWalletMoney(0);
 
-			if (m_RedirectPassiveEndTick)
-			{
-				m_RedirectPassiveEndTick = 0;
-				Passive(false, -1, true);
-			}
-
 			char aMsg[128];
 			str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
@@ -4856,6 +4854,10 @@ bool CCharacter::TrySavelyRedirectClient(int Port)
 			Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 			return true;
 		}
+
+		// Restore, probably not needed but whatever
+		if (m_RedirectPassiveEndTick)
+			Passive(true, -1, true);
 	}
 	m_RedirectTilePort = 0;
 	return false;
