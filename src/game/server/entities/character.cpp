@@ -3318,7 +3318,7 @@ void CCharacter::HandleTiles(int Index)
 
 		if (Server()->IsMain(m_pPlayer->GetCID()))
 		{
-			if (Port && !m_RedirectTilePort && TrySavelyRedirectClient(Port))
+			if (Port && !m_RedirectTilePort && TrySafelyRedirectClient(Port))
 				return;
 		}
 		else
@@ -4829,7 +4829,7 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 	return true;
 }
 
-bool CCharacter::TrySavelyRedirectClient(int Port)
+bool CCharacter::TrySafelyRedirectClient(int Port)
 {
 	// We need the port here so it gets saved aswell. If saving didn't work, we reset it
 	m_RedirectTilePort = Port;

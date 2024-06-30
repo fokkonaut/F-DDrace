@@ -520,7 +520,7 @@ public:
 	int m_aUntranslatedID[EUntranslatedMap::NUM_IDS];
 
 	// redirect tile
-	bool TrySavelyRedirectClient(int Port);
+	bool TrySafelyRedirectClient(int Port);
 	bool LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
 	int64 m_LastRedirectTileMsg;

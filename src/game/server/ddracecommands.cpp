@@ -1896,7 +1896,7 @@ void CGameContext::ConRedirectPort(IConsole::IResult* pResult, void* pUserData)
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	int Victim = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->TrySavelyRedirectClient(pResult->GetInteger(0));
+	if (pChr) pChr->TrySafelyRedirectClient(pResult->GetInteger(0));
 }
 
 void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
