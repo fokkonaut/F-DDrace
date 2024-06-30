@@ -5759,7 +5759,7 @@ void CGameContext::LogoutAllAccounts()
 	dbg_msg("acc", "logged out all accounts");
 }
 
-bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired)
+bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired, bool ForceDesignLoad)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer)
@@ -5852,7 +5852,7 @@ bool CGameContext::Login(int ClientID, const char *pUsername, const char *pPassw
 		WriteAccountStats(ID);
 	}
 
-	pPlayer->OnLogin();
+	pPlayer->OnLogin(ForceDesignLoad);
 	return true;
 }
 

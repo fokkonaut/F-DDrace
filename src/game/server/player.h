@@ -312,7 +312,7 @@ public:
 	void GiveBlockPoints(int Amount, int Victim);
 	bool GiveTaserBattery(int Amount);
 	bool GivePortalBattery(int Amount);
-	void OnLogin();
+	void OnLogin(bool ForceDesignLoad = false);
 	void OnLogout();
 	void SetExpireDate(int Item);
 	bool IsExpiredItem(int Item);

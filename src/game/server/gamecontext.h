@@ -498,7 +498,7 @@ public:
 	void WriteAccountStats(int ID);
 	void Logout(int ID, bool Silent = false);
 	void LogoutAllAccounts();
-	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true);
+	bool Login(int ClientID, const char *pUsername, const char *pPassword, bool PasswordRequired = true, bool ForceDesignLoad = false);
 	SHA256_DIGEST HashPassword(const char *pPassword);
 	void SetPassword(int ID, const char *pPassword);
 	bool CheckPassword(int ID, const char *pPassword);

@@ -1904,13 +1904,14 @@ bool CPlayer::GivePortalBattery(int Amount)
 	return true;
 }
 
-void CPlayer::OnLogin()
+void CPlayer::OnLogin(bool ForceDesignLoad)
 {
 	GameServer()->SendChatTarget(m_ClientID, "Successfully logged in");
 
 	ExpireItems();
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	int AccID = GetAccID();
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
 	if (m_pCharacter)
 	{
 		if (pAccount->m_VIP == VIP_PLUS)
@@ -1943,7 +1944,10 @@ void CPlayer::OnLogin()
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
 		m_HideDrawings = true;
 
-	StartVoteQuestion(CPlayer::VOTE_QUESTION_DESIGN);
+	if (ForceDesignLoad)
+		Server()->ChangeMapDesign(m_ClientID, GameServer()->GetCurrentDesignFromList(AccID));
+	else
+		StartVoteQuestion(CPlayer::VOTE_QUESTION_DESIGN);
 }
 
 void CPlayer::OnLogout()
