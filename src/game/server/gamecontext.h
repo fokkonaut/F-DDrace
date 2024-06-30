@@ -463,6 +463,16 @@ public:
 	int GetAccount(const char *pUsername);
 	void FreeAccount(int ID);
 
+	// acc saved design
+	void UpdateDesignList(int ID, const char *pMapDesign);
+	const char *GetCurrentDesignFromList(int ID);
+	struct SSavedDesignEntry
+	{
+		char m_aMapName[128];
+		char m_aDesign[64];
+	};
+	std::vector<SSavedDesignEntry> GetDesignList(int ID);
+
 	const char *GetAccVarName(int VariableID);
 	const char *GetAccVarValue(int ID, int VariableID);
 	void SetAccVar(int ID, int VariableID, const char *pData);
@@ -546,7 +556,7 @@ public:
 		time_t m_LastLoginDate;
 		int m_Flags;
 		char m_aEmail[128];
-		char m_aDesign[128];
+		char m_aDesign[256];
 		int m_PortalBattery;
 		int m_PortalBlocker;
 	};

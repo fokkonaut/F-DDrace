@@ -5927,6 +5927,93 @@ void CGameContext::FreeAccount(int ID)
 	m_Accounts.erase(m_Accounts.begin() + ID);
 }
 
+void CGameContext::UpdateDesignList(int ID, const char *pMapDesign)
+{
+	std::vector<SSavedDesignEntry> vDesigns = GetDesignList(ID);
+
+	// Update the list
+	bool Found = false;
+	for (unsigned int i = 0; i < vDesigns.size(); i++)
+	{
+		if (str_comp(vDesigns[i].m_aMapName, Server()->GetCurrentMapName()) == 0)
+		{
+			// Update
+			str_copy(vDesigns[i].m_aDesign, pMapDesign, sizeof(vDesigns[i].m_aDesign));
+			Found = true;
+			break;
+		}
+	}
+
+	// Add if not found
+	if (!Found)
+	{
+		SSavedDesignEntry Entry;
+		str_copy(Entry.m_aDesign, pMapDesign, sizeof(Entry.m_aDesign));
+		str_copy(Entry.m_aMapName, Server()->GetCurrentMapName(), sizeof(Entry.m_aDesign));
+		vDesigns.push_back(Entry);
+	}
+
+	// Write list
+	m_Accounts[ID].m_aDesign[0] = '\0';
+	for (unsigned int i = 0; i < vDesigns.size(); i++)
+	{
+		// don't add default's to the list, waste
+		if (str_comp(vDesigns[i].m_aDesign, "default") == 0)
+			continue;
+
+		bool Last = i == vDesigns.size() - 1;
+		char aEntry[196];
+		str_format(aEntry, sizeof(aEntry), "%s:%s,", vDesigns[i].m_aMapName, vDesigns[i].m_aDesign);
+		str_append(m_Accounts[ID].m_aDesign, aEntry, sizeof(m_Accounts[ID].m_aDesign));
+	}
+}
+
+const char *CGameContext::GetCurrentDesignFromList(int ID)
+{
+	static char aBuf[128];
+	str_copy(aBuf, "default", sizeof(aBuf));
+
+	std::vector<SSavedDesignEntry> vDesigns = GetDesignList(ID);
+	for (unsigned int i = 0; i < vDesigns.size(); i++)
+	{
+		if (str_comp(vDesigns[i].m_aMapName, Server()->GetCurrentMapName()) == 0)
+		{
+			str_copy(aBuf, vDesigns[i].m_aDesign, sizeof(aBuf));
+			break;
+		}
+	}
+	return aBuf;
+}
+
+std::vector<CGameContext::SSavedDesignEntry> CGameContext::GetDesignList(int ID)
+{
+	std::vector<SSavedDesignEntry> vDesigns;
+	if (ID < ACC_START)
+		return vDesigns;
+
+	const char *pList = m_Accounts[ID].m_aDesign;
+	while (1)
+	{
+		if (!pList[0])
+			break;
+
+		SSavedDesignEntry Entry;
+		Entry.m_aMapName[0] = '\0';
+		Entry.m_aDesign[0] = '\0';
+		sscanf(pList, "%[^:]:%[^,]", Entry.m_aMapName, Entry.m_aDesign);
+		if (Entry.m_aMapName[0] && Entry.m_aDesign[0])
+		{
+			vDesigns.push_back(Entry);
+		}
+
+		// jump to next comma, if it exists skip it so we can start the next loop run with the next data
+		if ((pList = str_find(pList, ",")))
+			pList++;
+	}
+
+	return vDesigns;
+}
+
 const char *CGameContext::GetDate(time_t Time, bool ShowTime)
 {
 	if (Time < 0)
