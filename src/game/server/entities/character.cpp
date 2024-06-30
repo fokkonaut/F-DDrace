@@ -3311,23 +3311,25 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		}
 
-		if (!Server()->IsMain(m_pPlayer->GetCID()))
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "%d:", SwitchNumber);	
+		const char *pPort = str_find(Config()->m_SvRedirectServerTilePorts, aBuf);
+		int Port = pPort && (pPort + 2) ? atoi(pPort + 2) : 0;
+
+		if (Server()->IsMain(m_pPlayer->GetCID()))
+		{
+			if (Port && !m_RedirectTilePort)
+				TrySavelyRedirectClient(Port);
+		}
+		else
 		{
 			if (!m_LastRedirectTileMsg || m_LastRedirectTileMsg < Server()->Tick() - Server()->TickSpeed() * 5)
 			{
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't use this tile as dummy, only with main player");
 				m_LastRedirectTileMsg = Server()->Tick();
 			}
-		}
-		else
-		{
-			char aBuf[16];
-			str_format(aBuf, sizeof(aBuf), "%d:", SwitchNumber);	
-			const char *pPort = str_find(Config()->m_SvRedirectServerTilePorts, aBuf);
-			if (pPort && (pPort + 2) && !m_RedirectTilePort)
-			{
-				TrySavelyRedirectClient(atoi(pPort + 2));
-			}
+			// Send dummy to the correct to tile
+			LoadRedirectTile(Port);
 		}
 	}
 
