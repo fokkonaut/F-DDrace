@@ -340,6 +340,7 @@ void CServer::CClient::ResetContent()
 
 	m_Rejoining = false;
 	m_RedirectDropTime = 0;
+	m_Version = 0x0000;
 }
 
 CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
@@ -536,7 +537,7 @@ void CServer::RedirectClient(int ClientID, int Port, bool Verbose)
 		return;
 
 	char aBuf[512];
-	bool SupportsRedirect = m_aClients[ClientID].m_DDNetVersion >= VERSION_DDNET_REDIRECT;
+	bool SupportsRedirect = m_aClients[ClientID].m_DDNetVersion >= VERSION_DDNET_REDIRECT || m_aClients[ClientID].m_Version >= MIN_FCLIENT_VERSION_REDIRECT;
 	if(Verbose)
 	{
 		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d supported=%d", ClientName(ClientID), Port, SupportsRedirect);
