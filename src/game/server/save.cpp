@@ -222,6 +222,23 @@ void CSaveTee::Save(CCharacter *pChr)
 		if (Index != -1)
 			m_Identity = pChr->GameServer()->m_vSavedIdentities[Index];
 	}
+
+	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)
+	// we cant just set it to 0 or '\0' because that would fuck up the LoadString() as it is a null terminator
+	if (m_Identity.m_aAccUsername[0] == '\0')
+		str_copy(m_Identity.m_aAccUsername, "$", sizeof(m_Identity.m_aAccUsername));
+
+	if (m_Identity.m_aTimeoutCode[0] == '\0')
+		str_copy(m_Identity.m_aTimeoutCode, "$", sizeof(m_Identity.m_aTimeoutCode));
+
+	for (int p = 0; p < NUM_SKINPARTS; p++)
+	{
+		if (m_Identity.m_TeeInfo.m_aaSkinPartNames[p][0] == '\0')
+			str_copy(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "x_", sizeof(m_Identity.m_TeeInfo.m_aaSkinPartNames[p]));
+	}
+
+	if (m_Identity.m_TeeInfo.m_Sevendown.m_SkinName[0] == '\0')
+		str_copy(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "x_", sizeof(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName));
 }
 
 void CSaveTee::Load(CCharacter *pChr, int Team)
@@ -606,6 +623,21 @@ int CSaveTee::LoadString(char* String)
 	{
 		m_Identity.m_ExpireDate = (time_t)ExpireDate;
 		net_addr_from_str(&m_Identity.m_Addr, aSavedAddress);
+
+		if (str_comp(m_Identity.m_aAccUsername, "$") == 0)
+			str_copy(m_Identity.m_aAccUsername, "", sizeof(m_Identity.m_aAccUsername));
+
+		if (str_comp(m_Identity.m_aTimeoutCode, "$") == 0)
+			str_copy(m_Identity.m_aTimeoutCode, "", sizeof(m_Identity.m_aTimeoutCode));
+
+		for (int p = 0; p < NUM_SKINPARTS; p++)
+		{
+			if (str_comp(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "x_") == 0)
+				str_copy(m_Identity.m_TeeInfo.m_aaSkinPartNames[p], "", sizeof(m_Identity.m_TeeInfo.m_aaSkinPartNames[p]));
+		}
+
+		if (str_comp(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "x_") == 0)
+			str_copy(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, "", sizeof(m_Identity.m_TeeInfo.m_Sevendown.m_SkinName));
 	}
 
 	switch(Num) // Don't forget to update this when you save / load more / less.
