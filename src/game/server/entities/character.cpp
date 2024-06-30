@@ -3315,23 +3315,8 @@ void CCharacter::HandleTiles(int Index)
 		str_format(aBuf, sizeof(aBuf), "%d:", SwitchNumber);	
 		const char *pPort = str_find(Config()->m_SvRedirectServerTilePorts, aBuf);
 		int Port = pPort && (pPort + 2) ? atoi(pPort + 2) : 0;
-
-		if (Server()->IsMain(m_pPlayer->GetCID()))
-		{
-			if (Port && !m_RedirectTilePort && TrySafelyRedirectClient(Port))
-				return;
-		}
-		else
-		{
-			if (!m_LastRedirectTileMsg || m_LastRedirectTileMsg < Server()->Tick() - Server()->TickSpeed() * 5)
-			{
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "You can't use this tile as dummy, only with main player");
-				m_LastRedirectTileMsg = Server()->Tick();
-			}
-			// Send dummy to the correct to tile
-			if (LoadRedirectTile(Port))
-				return;
-		}
+		if (Port && !m_RedirectTilePort && TrySafelyRedirectClient(Port))
+			return;
 	}
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
@@ -4007,7 +3992,6 @@ void CCharacter::FDDraceInit()
 	m_pPortalBlocker = 0;
 	m_LastNoBonusTick = 0;
 	m_RedirectTilePort = 0;
-	m_LastRedirectTileMsg = 0;
 	m_RedirectPassiveEndTick = 0;
 }
 
@@ -4831,28 +4815,41 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 
 bool CCharacter::TrySafelyRedirectClient(int Port)
 {
+	if (TrySafelyRedirectClientImpl(Port, true))
+	{
+		// Forcefully move the dummy asell, but dont send redirect a second time
+		int DummyID = Server()->GetDummy(m_pPlayer->GetCID());
+		CCharacter *pDummy = GameServer()->GetPlayerChar(DummyID);
+		if (pDummy)
+			pDummy->TrySafelyRedirectClientImpl(Port, false);
+		return true;
+	}
+	return false;
+}
+
+bool CCharacter::TrySafelyRedirectClientImpl(int Port, bool SendRedirect)
+{
+	if (Port == Config()->m_SvPort)
+		return false;
+
 	// We need the port here so it gets saved aswell. If saving didn't work, we reset it
 	m_RedirectTilePort = Port;
-	if (m_RedirectTilePort != Config()->m_SvPort)
+	int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
+	if (IdentityIndex != -1)
 	{
-		int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
-		if (IdentityIndex != -1)
-		{
-			int DummyID = Server()->GetDummy(m_pPlayer->GetCID());
-			if (DummyID != -1)
-				GameServer()->SaveDrop(DummyID, 1, "automatic kick due to redirect tile");
+		// Wallet got saved, we don't want to drop something to duplicate money or smth
+		m_pPlayer->SetWalletMoney(0);
 
-			// Wallet got saved, we don't want to drop something to duplicate money or smth
-			m_pPlayer->SetWalletMoney(0);
+		// Send msg
+		char aMsg[128];
+		str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
+		GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
 
-			char aMsg[128];
-			str_format(aMsg, sizeof(aMsg), "'%s' has been moved to another map", Server()->ClientName(m_pPlayer->GetCID()));
-			GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
+		Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
 
-			Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
+		if (SendRedirect)
 			Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
-			return true;
-		}
+		return true;
 	}
 	m_RedirectTilePort = 0;
 	return false;
