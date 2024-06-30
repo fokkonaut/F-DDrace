@@ -173,7 +173,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	}
 	m_FakeTuneCollision = pChr->m_FakeTuneCollision;
 	m_OldFakeTuneCollision = pChr->m_OldFakeTuneCollision;
-	m_Passive = pChr->m_Passive;
+	m_Passive = pChr->m_RedirectPassiveEndTick ? false : pChr->m_Passive;
 	m_PoliceHelper = pChr->m_PoliceHelper;
 	m_Item = pChr->m_Item;
 	m_DoorHammer = pChr->m_DoorHammer;

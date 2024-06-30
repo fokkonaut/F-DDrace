@@ -4835,10 +4835,6 @@ bool CCharacter::TrySafelyRedirectClient(int Port)
 	m_RedirectTilePort = Port;
 	if (m_RedirectTilePort != Config()->m_SvPort)
 	{
-		// Reset for saving
-		if (m_RedirectPassiveEndTick)
-			Passive(false, -1, true);
-
 		int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
 		if (IdentityIndex != -1)
 		{
@@ -4857,10 +4853,6 @@ bool CCharacter::TrySafelyRedirectClient(int Port)
 			Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 			return true;
 		}
-
-		// Restore, probably not needed but whatever
-		if (m_RedirectPassiveEndTick)
-			Passive(true, -1, true);
 	}
 	m_RedirectTilePort = 0;
 	return false;
