@@ -1594,7 +1594,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 					// When default map design is specified and we just joined, don't call this function
 					if (m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+					{
 						GameServer()->MapDesignChangeDone(ClientID);
+						// Reset so the server doesnt need to resend big snapshot deltas or smth, we can connect quicker
+						m_aClients[ClientID].m_LastAckedSnapshot = -1;
+					}
 
 					int Dummy = GetDummy(ClientID);
 					if (Dummy != -1)
