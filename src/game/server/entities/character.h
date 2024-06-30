@@ -521,7 +521,7 @@ public:
 
 	// redirect tile
 	bool TrySavelyRedirectClient(int Port);
-	void LoadRedirectTile(int Port);
+	bool LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
 	int64 m_LastRedirectTileMsg;
 	int64 m_RedirectPassiveEndTick;

@@ -3318,8 +3318,8 @@ void CCharacter::HandleTiles(int Index)
 
 		if (Server()->IsMain(m_pPlayer->GetCID()))
 		{
-			if (Port && !m_RedirectTilePort)
-				TrySavelyRedirectClient(Port);
+			if (Port && !m_RedirectTilePort && TrySavelyRedirectClient(Port))
+				return;
 		}
 		else
 		{
@@ -3329,7 +3329,8 @@ void CCharacter::HandleTiles(int Index)
 				m_LastRedirectTileMsg = Server()->Tick();
 			}
 			// Send dummy to the correct to tile
-			LoadRedirectTile(Port);
+			if (LoadRedirectTile(Port))
+				return;
 		}
 	}
 
@@ -4865,10 +4866,10 @@ bool CCharacter::TrySavelyRedirectClient(int Port)
 	return false;
 }
 
-void CCharacter::LoadRedirectTile(int Port)
+bool CCharacter::LoadRedirectTile(int Port)
 {
 	if (!Port)
-		return;
+		return false;
 
 	const char *pList = Config()->m_SvRedirectServerTilePorts;
 	while (1)
@@ -4896,13 +4897,15 @@ void CCharacter::LoadRedirectTile(int Port)
 				if (GameServer()->m_pController->CanSpawn(&Pos, ENTITY_SPAWN))
 					ForceSetPos(Pos);
 			}
-			break;
+			return true;
 		}
 
 		// jump to next comma, if it exists skip it so we can start the next loop run with the next data
 		if ((pList = str_find(pList, ",")))
 			pList++;
 	}
+
+	return false;
 }
 
 bool CCharacter::TryMountHelicopter()
