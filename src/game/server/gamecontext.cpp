@@ -5961,7 +5961,6 @@ void CGameContext::UpdateDesignList(int ID, const char *pMapDesign)
 		if (str_comp(vDesigns[i].m_aDesign, "default") == 0)
 			continue;
 
-		bool Last = i == vDesigns.size() - 1;
 		char aEntry[196];
 		str_format(aEntry, sizeof(aEntry), "%s:%s,", vDesigns[i].m_aMapName, vDesigns[i].m_aDesign);
 		str_append(m_Accounts[ID].m_aDesign, aEntry, sizeof(m_Accounts[ID].m_aDesign));
