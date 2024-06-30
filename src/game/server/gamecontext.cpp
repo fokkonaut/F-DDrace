@@ -5993,7 +5993,7 @@ std::vector<CGameContext::SSavedDesignEntry> CGameContext::GetDesignList(int ID)
 	const char *pList = m_Accounts[ID].m_aDesign;
 	while (1)
 	{
-		if (!pList[0])
+		if (!pList || !pList[0])
 			break;
 
 		SSavedDesignEntry Entry;
