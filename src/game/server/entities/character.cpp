@@ -4829,7 +4829,7 @@ bool CCharacter::TrySafelyRedirectClient(int Port, bool Force)
 	}
 
 	CCharacter *pDummyChar = GameServer()->GetPlayerChar(DummyID);
-	if (!Force && !pDummyChar)
+	if (!Force && pDummy && !pDummyChar)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "[WARNING] Your dummy has to be alive in order to get moved safely");
 		LoadRedirectTile(Port);
