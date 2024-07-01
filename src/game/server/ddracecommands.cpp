@@ -1698,6 +1698,13 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	if (pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, port differs from server");
+		pSelf->FreeAccount(ID);
+		return;
+	}
+
 	const char *pVariable = pResult->GetString(1);
 	int VariableID = -1;
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
