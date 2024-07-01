@@ -4080,6 +4080,7 @@ void CGameContext::FDDraceInit()
 	CreateFolders();
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
+	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
 	// load plot data AFTER map init
@@ -5424,7 +5425,7 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		pSelf->SetTopAccStats(ID);
 
 		// logout account if needed
-		if (pSelf->IsAccLoggedInThisPort(ID))
+		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
 			pSelf->Logout(ID, true);
 		else
 			pSelf->FreeAccount(ID);

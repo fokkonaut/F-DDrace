@@ -492,6 +492,7 @@ public:
 	void UpdateTopAccounts(int Type);
 	void SetTopAccStats(int FromID);
 
+	int m_LogoutAccountsPort;
 	static int InitAccounts(const char* pName, int IsDir, int StorageType, void* pUser);
 	int AddAccount();
 	void ReadAccountStats(int ID, const char* pName);
