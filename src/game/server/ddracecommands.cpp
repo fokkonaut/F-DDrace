@@ -1582,9 +1582,9 @@ void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+	if (!pSelf->IsAccLoggedInThisPort(ID))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account is not marked as logged in");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account is not marked as logged in on this port");
 		pSelf->FreeAccount(ID);
 		return;
 	}
@@ -1652,7 +1652,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
 
-	if (!pSelf->m_Accounts[ID].m_LoggedIn)
+	if (!pSelf->IsAccLoggedInThisPort(ID))
 		pSelf->FreeAccount(ID);
 }
 
@@ -1682,10 +1682,9 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 
 	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID, "");
 
-	if (pSelf->m_Accounts[ID].m_LoggedIn)
-		pSelf->WriteAccountStats(ID);
-	else
-		pSelf->Logout(ID);
+	pSelf->WriteAccountStats(ID);
+	if (!pSelf->IsAccLoggedInThisPort(ID))
+		pSelf->FreeAccount(ID);
 }
 
 void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
@@ -1713,7 +1712,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
-		if (!pSelf->m_Accounts[ID].m_LoggedIn)
+		if (!pSelf->IsAccLoggedInThisPort(ID))
 			pSelf->FreeAccount(ID);
 		return;
 	}
@@ -1767,10 +1766,9 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SetAccVar(ID, VariableID, pValue);
 	}
 
-	if (pSelf->m_Accounts[ID].m_LoggedIn)
-		pSelf->WriteAccountStats(ID);
-	else
-		pSelf->Logout(ID);
+	pSelf->WriteAccountStats(ID);
+	if (!pSelf->IsAccLoggedInThisPort(ID))
+		pSelf->FreeAccount(ID);
 }
 
 void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserData)

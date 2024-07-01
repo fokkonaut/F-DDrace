@@ -4080,7 +4080,6 @@ void CGameContext::FDDraceInit()
 	CreateFolders();
 
 	AddAccount(); // account id 0 means not logged in, so we add an unused account with id 0
-	m_LogoutAccountsPort = Config()->m_SvPort; // set before calling InitAccounts
 	Storage()->ListDirectory(IStorage::TYPE_ALL, Config()->m_SvAccFilePath, InitAccounts, this);
 
 	// load plot data AFTER map init
@@ -5176,7 +5175,7 @@ bool CGameContext::HasPlotByIP(int ClientID)
 		if (SameIP(ID, &Addr))
 			HasPlot = true;
 
-		if (!m_Accounts[ID].m_LoggedIn)
+		if (!IsAccLoggedInThisPort(ID))
 			FreeAccount(ID);
 
 		if (HasPlot)
@@ -5425,7 +5424,7 @@ int CGameContext::InitAccounts(const char *pName, int IsDir, int StorageType, vo
 		pSelf->SetTopAccStats(ID);
 
 		// logout account if needed
-		if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port == pSelf->m_LogoutAccountsPort)
+		if (pSelf->IsAccLoggedInThisPort(ID))
 			pSelf->Logout(ID, true);
 		else
 			pSelf->FreeAccount(ID);
@@ -5925,6 +5924,11 @@ int CGameContext::GetAccount(const char *pUsername)
 void CGameContext::FreeAccount(int ID)
 {
 	m_Accounts.erase(m_Accounts.begin() + ID);
+}
+
+bool CGameContext::IsAccLoggedInThisPort(int ID)
+{
+	return m_Accounts[ID].m_LoggedIn && m_Accounts[ID].m_Port == Config()->m_SvPort;
 }
 
 void CGameContext::UpdateDesignList(int ID, const char *pMapDesign)
