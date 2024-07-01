@@ -441,6 +441,9 @@ public:
 	bool m_CheckedSavePlayer;
 	bool m_LoadedSavedPlayer;
 
+	// redirect tile
+	int64 m_LastRedirectTryTick;
+
 	// vote question
 	enum VoteQuestionType
 	{

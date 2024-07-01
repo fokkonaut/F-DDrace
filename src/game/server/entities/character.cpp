@@ -3993,7 +3993,6 @@ void CCharacter::FDDraceInit()
 	m_LastNoBonusTick = 0;
 	m_RedirectTilePort = 0;
 	m_RedirectPassiveEndTick = 0;
-	m_LastRedirectTryTick = 0;
 }
 
 void CCharacter::CreateDummyHandle(int Dummymode)
@@ -4820,11 +4819,19 @@ bool CCharacter::TrySafelyRedirectClient(int Port, bool Force)
 		return false;
 
 	int DummyID = Server()->GetDummy(m_pPlayer->GetCID());
-	CCharacter *pDummy = GameServer()->GetPlayerChar(DummyID);
+	CPlayer *pDummy = DummyID != -1 ? GameServer()->m_apPlayers[DummyID] : 0;
 	if (!Force && pDummy && (!pDummy->m_LastRedirectTryTick || pDummy->m_LastRedirectTryTick + Server()->TickSpeed() * 30 < Server()->Tick()))
 	{
-		m_LastRedirectTryTick = Server()->Tick();
+		m_pPlayer->m_LastRedirectTryTick = Server()->Tick();
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "[WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely");
+		LoadRedirectTile(Port);
+		return false;
+	}
+
+	CCharacter *pDummyChar = GameServer()->GetPlayerChar(DummyID);
+	if (!Force && !pDummyChar)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "[WARNING] Your dummy has to be alive in order to get moved safely");
 		LoadRedirectTile(Port);
 		return false;
 	}
@@ -4832,8 +4839,8 @@ bool CCharacter::TrySafelyRedirectClient(int Port, bool Force)
 	if (TrySafelyRedirectClientImpl(Port, true))
 	{
 		// Forcefully move the dummy asell, but dont send redirect a second time
-		if (pDummy)
-			pDummy->TrySafelyRedirectClientImpl(Port, false);
+		if (pDummyChar)
+			pDummyChar->TrySafelyRedirectClientImpl(Port, false);
 		return true;
 	}
 	return false;

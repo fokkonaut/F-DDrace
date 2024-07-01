@@ -231,6 +231,7 @@ void CPlayer::Reset()
 	m_VoteQuestionRunning = false;
 	m_VoteQuestionType = CPlayer::VOTE_QUESTION_NONE;
 	m_VoteQuestionEndTick = 0;
+	m_LastRedirectTryTick = 0;
 }
 
 void CPlayer::Tick()

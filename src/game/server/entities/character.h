@@ -524,7 +524,6 @@ public:
 	bool TrySafelyRedirectClientImpl(int Port, bool SendRedirect);
 	bool LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
-	int64 m_LastRedirectTryTick;
 	int64 m_RedirectPassiveEndTick;
 
 	//others
