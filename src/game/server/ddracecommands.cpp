@@ -1698,9 +1698,9 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
+	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, port differs from server");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, logged in on another port");
 		pSelf->FreeAccount(ID);
 		return;
 	}
