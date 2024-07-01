@@ -1335,7 +1335,7 @@ void CGameContext::OnTick()
 	{
 		const char* Line = Server()->GetAnnouncementLine(Config()->m_SvAnnouncementFileName);
 		if (Line)
-			SendChat(-1, CHAT_ALL, -1, Line);
+			SendChat(-1, CHAT_ALL, -1, Line, -1, CHAT_NO_WEBHOOK);
 	}
 
 	if (Collision()->GetNumAllSwitchers() > 0)
