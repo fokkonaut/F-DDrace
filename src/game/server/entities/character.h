@@ -521,7 +521,7 @@ public:
 
 	// redirect tile
 	bool TrySafelyRedirectClient(int Port, bool Force = false);
-	bool TrySafelyRedirectClientImpl(int Port, bool SendRedirect);
+	bool TrySafelyRedirectClientImpl(int Port);
 	bool LoadRedirectTile(int Port);
 	int m_RedirectTilePort;
 	int64 m_RedirectPassiveEndTick;

@@ -4836,17 +4836,17 @@ bool CCharacter::TrySafelyRedirectClient(int Port, bool Force)
 		return false;
 	}
 
-	if (TrySafelyRedirectClientImpl(Port, true))
+	if (TrySafelyRedirectClientImpl(Port))
 	{
 		// Forcefully move the dummy asell, but dont send redirect a second time
 		if (pDummyChar)
-			pDummyChar->TrySafelyRedirectClientImpl(Port, false);
+			pDummyChar->TrySafelyRedirectClientImpl(Port);
 		return true;
 	}
 	return false;
 }
 
-bool CCharacter::TrySafelyRedirectClientImpl(int Port, bool SendRedirect)
+bool CCharacter::TrySafelyRedirectClientImpl(int Port)
 {
 	if (Port == Config()->m_SvPort)
 		return false;
@@ -4865,9 +4865,7 @@ bool CCharacter::TrySafelyRedirectClientImpl(int Port, bool SendRedirect)
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aMsg);
 
 		Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
-
-		if (SendRedirect)
-			Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
+		Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 		return true;
 	}
 	m_RedirectTilePort = 0;
