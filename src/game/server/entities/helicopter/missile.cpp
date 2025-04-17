@@ -39,7 +39,8 @@ void CSpark::Tick()
 	if (!m_pMissile->IsIgnited())
 		return;
 
-	if (m_Lifespan <= 0)
+	// Only make `new` spark when old one has died and the missile is flying(not exploding)
+	if (m_Lifespan <= 0 && !m_pMissile->IsExploding())
 	{
 		ResetFromMissile();
 		m_Lifespan = m_ResetLifespan;
@@ -147,17 +148,18 @@ void CMissile::HandleCollisions()
 
 void CMissile::UpdateStableProjectiles()
 {
-	if (m_ExplosionsLeft >= 0)
-		return;
-
 	// When ignition started, teleport/reset smoke trail to the missile
 	if (m_IgnitionTime == 0)
 		for (int i = 0; i < NUM_SPARKS; i++)
 			m_apSparks[i]->ResetFromMissile();
 
-	m_pStableRocket->SetPos(m_Pos);
 	for (int i = 1; i < NUM_SPARKS; i++)
 		m_apSparks[i]->Tick();
+
+	if (m_ExplosionsLeft >= 0)
+		return;
+
+	m_pStableRocket->SetPos(m_Pos);
 }
 
 void CMissile::TriggerExplosions()
@@ -165,8 +167,6 @@ void CMissile::TriggerExplosions()
 	m_ExplosionsLeft = 5;
 
 	GameWorld()->DestroyEntity(m_pStableRocket);
-	for (int i = 0; i < NUM_SPARKS; i++)
-		delete m_apSparks[i];
 }
 
 void CMissile::HandleExplosions()
@@ -178,20 +178,20 @@ void CMissile::HandleExplosions()
 	{
 		vec2 nearbyPos = m_Pos + vec2((float)(rand() % 151 - 75), (float)(rand() % 151 - 75));
 		GameServer()->CreateExplosion(nearbyPos,
-									  m_Owner,
-									  WEAPON_GRENADE,
-									  m_Owner == -1,
-									  m_DDTeam, m_TeamMask);
+			m_Owner,
+			WEAPON_GRENADE,
+			m_Owner == -1,
+			m_DDTeam, m_TeamMask);
 		GameServer()->CreateSound(nearbyPos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 	else
 	{ // Explode only once
 		m_ExplosionsLeft = 0;
 		GameServer()->CreateExplosion(m_Pos,
-									  m_Owner,
-									  WEAPON_GRENADE,
-									  m_Owner == -1,
-									  m_DDTeam, m_TeamMask);
+			m_Owner,
+			WEAPON_GRENADE,
+			m_Owner == -1,
+			m_DDTeam, m_TeamMask);
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 
@@ -231,7 +231,8 @@ CMissile::CMissile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Vel, vec2 D
 
 CMissile::~CMissile()
 {
-
+	for (int i = 0; i < NUM_SPARKS; i++)
+		delete m_apSparks[i];
 }
 
 void CMissile::Tick()
@@ -243,6 +244,7 @@ void CMissile::Tick()
 
 	UpdateStableProjectiles();
 
+	// Entity destroyed at m_ExplosionsLeft == 0
 	HandleExplosions();
 
 	m_PrevPos = m_Pos;
@@ -250,7 +252,7 @@ void CMissile::Tick()
 
 void CMissile::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient, m_Pos) || !IsIgnited() || IsExploding())
+	if (NetworkClipped(SnappingClient, m_Pos) || !IsIgnited())
 		return;
 
 	if (!CmaskIsSet(m_TeamMask, SnappingClient))

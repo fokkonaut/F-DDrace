@@ -72,7 +72,7 @@ public:
 	// Getting
 	vec2 GetVel() { return m_Vel; }
 	bool IsIgnited() { return m_IgnitionTime <= 0; }
-	bool IsExploding() { return m_ExplosionsLeft >= 0; }
+	bool IsExploding() { return m_ExplosionsLeft > -1; }
 
 	// Ticking
 	void Tick() override;

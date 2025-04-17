@@ -43,7 +43,7 @@ protected:
 
 	/*
 		Variable: m_Pos
-			Contains the current posititon of the entity.
+			Contains the current position of the entity.
 	*/
 	vec2 m_Pos;
 

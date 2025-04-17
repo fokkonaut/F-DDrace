@@ -2844,7 +2844,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 					
 					if (!InHouse)
-						pChr->DropFlag();
+					{
+						if (pChr->m_pHelicopter) // temp explode button
+						{
+							pChr->m_pHelicopter->Explode();
+						}
+						else
+						{
+							pChr->DropFlag();
+						}
+					}
 				}
 			}
 			else if (pMsg->m_Vote == -1) //vote no (f4)
@@ -7721,12 +7730,12 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
 }
 
-void CGameContext::SpawnHelicopter(vec2 Pos, int TurretType, int Team)
+void CGameContext::SpawnHelicopter(int Team, vec2 Pos, int TurretType, float Scale)
 {
 	Pos.y -= 64.f;
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, Pos, Team);
+	CHelicopter *pHelicopter = new CHelicopter(&m_World, Team, Pos, Scale);
 
-	CHelicopterTurret* pTurret = nullptr;
+	CVehicleTurret* pTurret = nullptr;
 	switch (TurretType)
 	{
 		case TURRETTYPE_MINIGUN:
@@ -7737,6 +7746,7 @@ void CGameContext::SpawnHelicopter(vec2 Pos, int TurretType, int Team)
 		{
 			pTurret = new CLauncherTurret();
 		} break;
+
 		case TURRETTYPE_NONE:
 		default:
 		{ } break;

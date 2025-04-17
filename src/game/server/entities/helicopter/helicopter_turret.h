@@ -15,7 +15,7 @@ enum
 };
 
 class CHelicopter;
-class CHelicopterTurret
+class CVehicleTurret
 {
 protected:
 	friend class CHelicopter;
@@ -32,28 +32,30 @@ protected:
 	bool m_Flipped;
 	virtual void SetFlipped(bool flipped);
 
-	float m_TurretAngle;
+	float m_Angle;
 	virtual void Rotate(float Angle);
 
 	vec2 m_AimPosition;
-	float m_AimingAngle;
+	float m_PivotAngle;
 	float m_AimingRange;
 	void AimTurret();
-	virtual void RotateTurret(float Angle);
+	virtual void RotateTurret(float ByAngle);
 
 	bool m_Shooting;
 	int m_LastShot;
 	int m_ShootingCooldown;
 	virtual void FireTurret();
 
+	float m_Scale;
+
 	// Generating
 	vec2 GetTurretDirection();
 
 public:
-	CHelicopterTurret(int TurretType, int NumBones,
-		const SBone& TurretBone, const vec2& Pivot,
-		float AimingRange, int ShootingCooldown);
-	virtual ~CHelicopterTurret();
+	CVehicleTurret(int TurretType, int NumBones,
+				   const SBone& TurretBone, const vec2& Pivot,
+				   float AimingRange, int ShootingCooldown);
+	virtual ~CVehicleTurret();
 
 	// Sense
 	IServer *Server();
@@ -65,6 +67,7 @@ public:
 
 	// Manipulating
 	bool TryBindHelicopter(CHelicopter *helicopter);
+	virtual void ApplyScale(float TurretScale);
 
 	// Ticking
 	virtual void Tick();
@@ -74,7 +77,7 @@ public:
 };
 
 class CHelicopter;
-class CMinigunTurret : public CHelicopterTurret
+class CMinigunTurret : public CVehicleTurret
 {
 private:
 	friend class CHelicopter;
@@ -114,13 +117,16 @@ public:
 	CMinigunTurret();
 	~CMinigunTurret();
 
+	// Manipulating
+	virtual void ApplyScale(float TurretScale);
+
 	// Ticking
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnInput(CNetObj_PlayerInput *pNewInput) override;
 };
 
-class CLauncherTurret : public CHelicopterTurret
+class CLauncherTurret : public CVehicleTurret
 {
 private:
 	friend class CHelicopter;
@@ -155,6 +161,9 @@ private:
 public:
 	CLauncherTurret();
 	virtual ~CLauncherTurret();
+
+	// Manipulating
+	virtual void ApplyScale(float TurretScale);
 
 	// Ticking
 	void Tick() override;

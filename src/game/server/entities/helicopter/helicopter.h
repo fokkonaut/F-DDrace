@@ -25,10 +25,11 @@ private:
 	float m_Health;
 	bool m_EngineOn;
 
+	float m_Scale;
 	void InitBody();
 	void InitPropellers();
 	void SpinPropellers();
-	void ResetTopPropellers();
+	void ResetAndTurnOff();
 
 	bool m_Flipped;
 	void Flip();
@@ -40,18 +41,20 @@ private:
 	void ApplyAcceleration();
 	vec2 m_Accel;
 
-	int m_aBonedCharacters[MAX_CLIENTS];
-	void DestroyThingsInItsPath();
+	int m_aFlungCharacters[MAX_CLIENTS];
+	void FlingTeesInPropellersPath();
 
 	float m_BackPropellerRadius;
 	float m_TopPropellerRadius;
-	bool m_TopPropellersReset;
 	vec2 m_LastTopPropellerA, m_LastTopPropellerB;
 	void GetFullPropellerPositions(vec2& outPosA, vec2& outPosB);
 
 	STrail m_aTrails[NUM_TRAILS];
 	SBone m_aBones[NUM_BONES];
-	CHelicopterTurret *m_pTurretAttachment;
+	CVehicleTurret *m_pTurret;
+
+	int m_ExplosionsLeft;
+	void HandleExplosions();
 
 	SBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
 	SBone *TopPropeller() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS_TOP
@@ -59,17 +62,21 @@ private:
 	void SortBones();
 
 public:
-	CHelicopter(CGameWorld *pGameWorld, vec2 Pos, int Team);
+	CHelicopter(CGameWorld *pGameWorld, int Team, vec2 Pos, float Scale = 1.f);
 	virtual ~CHelicopter();
 
 	// Sense
+	float GetScale() { return m_Scale; }
 	bool IsFlipped() { return m_Flipped; }
 	float Angle() { return m_Angle; }
+	bool IsExploding() { return m_ExplosionsLeft > -1; }
 
 	// Manipulating
-	bool AttachTurret(CHelicopterTurret *helicopterTurret);
+	bool AttachTurret(CVehicleTurret *helicopterTurret);
 	void DestroyTurret();
 	void FlingTee(CCharacter *pChar);
+	void ApplyScale(float HelicopterScale);
+	void Explode();
 
 	// Ticking
 	void Tick() override;

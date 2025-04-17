@@ -7,31 +7,31 @@
 #include "game/server/entities/projectile.h"
 #include "helicopter_turret.h"
 
-void CHelicopterTurret::SetFlipped(bool flipped)
+void CVehicleTurret::SetFlipped(bool flipped)
 { // SetFlipped instead of Flip because if turret is attached later to match the helicopter flip, flip |ovo|
 	if (flipped == m_Flipped)
 		return;
 
 	m_Flipped = !m_Flipped;
-	m_TurretAngle *= -1.f;
-	m_AimingAngle *= -1.f;
+	m_Angle *= -1.f;
+	m_PivotAngle *= -1.f;
 	m_Pivot.x *= -1.f;
-	m_TurretBone.Flip(); // Cluster bones update dynamically
+	m_TurretBone.Flip();
 	for (int i = 0; i < m_NumBones; i++)
 		m_apBones[i].Flip();
 }
 
-void CHelicopterTurret::Rotate(float Angle)
+void CVehicleTurret::Rotate(float Angle)
 {
-	m_TurretAngle += Angle;
-	m_AimingAngle += Angle;
+	m_Angle += Angle;
+	m_PivotAngle += Angle;
 	rotate(m_Pivot, Angle);
-	m_TurretBone.Rotate(Angle); // Cluster bones update dynamically
+	m_TurretBone.Rotate(Angle);
 	for (int i = 0; i < m_NumBones; i++)
 		m_apBones[i].Rotate(Angle);
 }
 
-void CHelicopterTurret::AimTurret()
+void CVehicleTurret::AimTurret()
 {
 	if (!m_pHelicopter->GetOwner())
 		return;
@@ -39,20 +39,20 @@ void CHelicopterTurret::AimTurret()
 	vec2 aimFromTurret = (m_pHelicopter->GetOwner()->GetCursorPos() - m_pHelicopter->GetPos() - m_TurretBone.m_To) * (m_Flipped ? -1.f : 1.f);
 	float targetAngle = (atan2f(aimFromTurret.y, aimFromTurret.x) / pi * 180.f);
 
-	float targetAngleClamped = clamp(targetAngle, m_TurretAngle - m_AimingRange, m_TurretAngle + m_AimingRange);
-	float correctionAngle = (targetAngleClamped - m_AimingAngle) * 0.1f;
+	float targetAngleClamped = clamp(targetAngle, m_Angle - m_AimingRange, m_Angle + m_AimingRange);
+	float correctionAngle = (targetAngleClamped - m_PivotAngle) * 0.1f; // Slow rotation
 
 	RotateTurret(correctionAngle);
 }
 
-void CHelicopterTurret::RotateTurret(float Angle)
+void CVehicleTurret::RotateTurret(float ByAngle)
 {
-	m_AimingAngle += Angle;
+	m_PivotAngle += ByAngle;
 
 	// Rotate turret
 	m_TurretBone.m_To -= m_Pivot;
 	m_TurretBone.m_From -= m_Pivot;
-	m_TurretBone.Rotate(Angle);
+	m_TurretBone.Rotate(ByAngle);
 	m_TurretBone.m_To += m_Pivot;
 	m_TurretBone.m_From += m_Pivot;
 
@@ -60,13 +60,13 @@ void CHelicopterTurret::RotateTurret(float Angle)
 	{
 		m_apBones[i].m_To -= m_Pivot;
 		m_apBones[i].m_From -= m_Pivot;
-		m_apBones[i].Rotate(Angle);
+		m_apBones[i].Rotate(ByAngle);
 		m_apBones[i].m_To += m_Pivot;
 		m_apBones[i].m_From += m_Pivot;
 	}
 }
 
-void CHelicopterTurret::FireTurret()
+void CVehicleTurret::FireTurret()
 {
 	if (!m_pHelicopter->GetOwner() || m_pHelicopter->GetOwner()->m_FreezeTime || !m_Shooting ||
 		Server()->Tick() - m_LastShot <= m_ShootingCooldown)
@@ -88,14 +88,14 @@ void CHelicopterTurret::FireTurret()
 		0.f, -1);
 }
 
-vec2 CHelicopterTurret::GetTurretDirection()
+vec2 CVehicleTurret::GetTurretDirection()
 {
 	return normalize(m_TurretBone.m_From - m_TurretBone.m_To);
 }
 
-CHelicopterTurret::CHelicopterTurret(int TurretType, int NumBones,
-	const SBone& TurretBone, const vec2& Pivot,
-	float AimingRange, int ShootingCooldown)
+CVehicleTurret::CVehicleTurret(int TurretType, int NumBones,
+							   const SBone& TurretBone, const vec2& Pivot,
+							   float AimingRange, int ShootingCooldown)
 {
 	m_TurretType = TurretType;
 	m_pHelicopter = nullptr;
@@ -108,18 +108,20 @@ CHelicopterTurret::CHelicopterTurret(int TurretType, int NumBones,
 	m_Length = m_TurretBone.GetLength();
 
 	m_Flipped = false;
-	m_TurretAngle = 0.f;
+	m_Angle = 0.f;
 
 	m_AimPosition = vec2(0.f, 0.f);
-	m_AimingAngle = 0.f;
+	m_PivotAngle = 0.f;
 	m_AimingRange = AimingRange;
 
 	m_Shooting = false;
 	m_LastShot = 0;
 	m_ShootingCooldown = ShootingCooldown;
+
+	m_Scale = 1.f;
 }
 
-CHelicopterTurret::~CHelicopterTurret()
+CVehicleTurret::~CVehicleTurret()
 {
 	if (m_pHelicopter) // if helicopter was never set, ids were never set either
 		for (int i = 0; i < m_NumBones; i++)
@@ -128,23 +130,23 @@ CHelicopterTurret::~CHelicopterTurret()
 	delete[] m_apBones;
 }
 
-IServer *CHelicopterTurret::Server()
+IServer *CVehicleTurret::Server()
 {
 	return m_pHelicopter->Server();
 }
 
-CGameWorld *CHelicopterTurret::GameWorld()
+CGameWorld *CVehicleTurret::GameWorld()
 {
 	return m_pHelicopter->GameWorld();
 }
 
-CGameContext *CHelicopterTurret::GameServer()
+CGameContext *CVehicleTurret::GameServer()
 {
 	return m_pHelicopter->GameServer();
 }
 
-bool CHelicopterTurret::TryBindHelicopter(CHelicopter *helicopter)
-{ // returns true on success, on failure clean up yourself
+bool CVehicleTurret::TryBindHelicopter(CHelicopter *helicopter)
+{ // returns true on passed ownership, on failure clean up yourself
 	if (helicopter == nullptr)
 		return false;
 
@@ -155,6 +157,7 @@ bool CHelicopterTurret::TryBindHelicopter(CHelicopter *helicopter)
 			m_apBones[i].AssignEntityAndID(m_pHelicopter, Server()->SnapNewID());
 
 		// Match helicopter posture initially
+		ApplyScale(m_pHelicopter->GetScale());
 		SetFlipped(m_pHelicopter->IsFlipped());
 		Rotate(m_pHelicopter->Angle());
 		return true;
@@ -162,7 +165,19 @@ bool CHelicopterTurret::TryBindHelicopter(CHelicopter *helicopter)
 	return false;
 }
 
-void CHelicopterTurret::Tick()
+void CVehicleTurret::ApplyScale(float TurretScale)
+{
+	// Experimental
+	m_Scale *= TurretScale;
+	m_Length *= TurretScale;
+	m_Pivot *= TurretScale;
+	m_TurretBone.Scale(TurretScale);
+	for (int i = 0; i < m_NumBones; i++)
+		m_apBones[i].Scale(TurretScale);
+	//
+}
+
+void CVehicleTurret::Tick()
 {
 //    if (!m_pHelicopter) don't even try to run this function without a heli
 //        return;
@@ -171,7 +186,7 @@ void CHelicopterTurret::Tick()
 	FireTurret();
 }
 
-void CHelicopterTurret::Snap(int SnappingClient)
+void CVehicleTurret::Snap(int SnappingClient)
 {
 	if (!m_pHelicopter)
 		return;
@@ -180,7 +195,7 @@ void CHelicopterTurret::Snap(int SnappingClient)
 		m_apBones[i].Snap(SnappingClient);
 }
 
-void CHelicopterTurret::OnInput(CNetObj_PlayerInput *pNewInput)
+void CVehicleTurret::OnInput(CNetObj_PlayerInput *pNewInput)
 {
 	if (!m_pHelicopter->GetOwner() || m_pHelicopter->GetOwner()->m_FreezeTime)
 		return;
@@ -196,7 +211,10 @@ void CMinigunTurret::InitCluster()
 	UpdateClusterBones();
 
 	for (int i = 0; i < NUM_BONES_CLUSTER; i++)
+	{
 		Cluster()[i].m_Color = LASERTYPE_FREEZE;
+		Cluster()[i].m_Thickness = 3;
+	}
 }
 
 void CMinigunTurret::UpdateClusterBones()
@@ -229,7 +247,7 @@ void CMinigunTurret::SpinCluster()
 	if (m_pHelicopter->GetOwner() && !m_pHelicopter->GetOwner()->m_FreezeTime && m_Shooting)
 		m_ClusterSpeed += (float)Server()->TickSpeed() / 5000.f;
 	m_ClusterSpeed *= 0.98f;
-//	m_ClusterRotation = fmodf(m_ClusterRotation + m_ClusterSpeed, 2.f * pi);
+	m_ClusterRotation += m_ClusterSpeed;
 
 	UpdateClusterBones();
 }
@@ -246,6 +264,7 @@ void CMinigunTurret::InitRetainer()
 		Retainer()[i].m_To = toPosition;
 		Retainer()[i].m_From = fromPosition;
 		Retainer()[i].m_Color = LASERTYPE_FREEZE;
+		Retainer()[i].m_Thickness = 2;
 		Radius *= -1.f;
 	}
 }
@@ -256,9 +275,9 @@ void CMinigunTurret::SetFlipped(bool flipped)
 		return;
 
 	m_Flipped = !m_Flipped;
-	m_TurretAngle *= -1.f;
+	m_Angle *= -1.f;
 
-	m_AimingAngle *= -1.f;
+	m_PivotAngle *= -1.f;
 
 	m_Pivot.x *= -1.f;
 	m_TurretBone.Flip(); // Cluster bones update dynamically
@@ -268,8 +287,8 @@ void CMinigunTurret::SetFlipped(bool flipped)
 
 void CMinigunTurret::Rotate(float Angle)
 {
-	m_TurretAngle += Angle;
-	m_AimingAngle += Angle;
+	m_Angle += Angle;
+	m_PivotAngle += Angle;
 	rotate(m_Pivot, Angle);
 	m_TurretBone.Rotate(Angle); // Cluster bones update dynamically
 	for (int i = 0; i < NUM_BONES_RETAINER; i++)
@@ -278,7 +297,7 @@ void CMinigunTurret::Rotate(float Angle)
 
 void CMinigunTurret::RotateTurret(float Angle)
 {
-	m_AimingAngle += Angle;
+	m_PivotAngle += Angle;
 
 	// Rotate turret
 	m_TurretBone.m_To -= m_Pivot;
@@ -327,9 +346,9 @@ void CMinigunTurret::FireTurret()
 }
 
 CMinigunTurret::CMinigunTurret()
-	: CHelicopterTurret(TURRETTYPE_MINIGUN, NUM_BONES,
-	SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
-	vec2(4.f, 50.f), 15.f, 7)
+	: CVehicleTurret(TURRETTYPE_MINIGUN, NUM_BONES,
+		SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
+		vec2(4.f, 50.f), 15.f, 7)
 {
 	m_pHelicopter = nullptr;
 
@@ -345,26 +364,26 @@ CMinigunTurret::CMinigunTurret()
 
 	InitCluster();
 	InitRetainer();
-
-	// Experimental: Downscale turret
-	float scaleFactor = 0.9f;
-	m_Length *= scaleFactor;
-	m_Pivot *= scaleFactor;
-	m_RetainerPosition *= scaleFactor;
-	m_RetainerRadius *= scaleFactor;
-	m_ClusterHorizontalRange *= scaleFactor;
-	m_ClusterVerticalRange *= scaleFactor;
-	m_TurretBone.Scale(scaleFactor);
-	for (int i = 0; i < m_NumBones; i++) // Cluster will scale from m_TurretBone automatically
-		m_apBones[i].Scale(scaleFactor);
-	//
 }
 
 CMinigunTurret::~CMinigunTurret()
 {
-//	if (m_pHelicopter) // if helicopter was never set, ids were never set either
-//		for (int i = 0; i < m_NumBones; i++)
-//			Server()->SnapFreeID(m_apBones[i].m_ID);
+
+}
+
+void CMinigunTurret::ApplyScale(float TurretScale)
+{
+	// Experimental
+	m_Length *= TurretScale;
+	m_Pivot *= TurretScale;
+	m_RetainerPosition *= TurretScale;
+	m_RetainerRadius *= TurretScale;
+	m_ClusterHorizontalRange *= TurretScale;
+	m_ClusterVerticalRange *= TurretScale;
+	m_TurretBone.Scale(TurretScale);
+	for (int i = 0; i < m_NumBones; i++) // Cluster will scale from m_TurretBone automatically
+		m_apBones[i].Scale(TurretScale);
+	//
 }
 
 void CMinigunTurret::Tick()
@@ -401,8 +420,17 @@ void CMinigunTurret::OnInput(CNetObj_PlayerInput *pNewInput)
 void CLauncherTurret::InitBones()
 {
 	UpdateBones();
+
+	Shaft()[0].m_Thickness = 2;
+	Shaft()[1].m_Thickness = 2;
+	Shaft()[2].m_Thickness = 2;
+
+	Retainer()[0].m_Thickness = 2;
+	Retainer()[1].m_Thickness = 2;
+
 	for (int i = 0; i < NUM_BONES; i++)
 		m_apBones[i].m_Color = LASERTYPE_FREEZE;
+	Ejector()[0].m_Color = LASERTYPE_SHOTGUN;
 }
 
 void CLauncherTurret::UpdateBones()
@@ -425,7 +453,6 @@ void CLauncherTurret::UpdateBones()
 	// Base
 	Shaft()[0].m_To = m_TurretBone.m_To + perpendicularShaft - recoilPosDiff;
 	Shaft()[0].m_From = m_TurretBone.m_To - perpendicularShaft - recoilPosDiff;
-
 	// Sides (startpoint): same as base
 	Shaft()[1].m_To = Shaft()[0].m_To;
 	Shaft()[2].m_To = Shaft()[0].m_From;
@@ -470,9 +497,9 @@ void CLauncherTurret::FireTurret()
 }
 
 CLauncherTurret::CLauncherTurret()
-	: CHelicopterTurret(TURRETTYPE_LAUNCHER, NUM_BONES,
-		SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
-		vec2(-10.f, 50.f), 15.f, 50)
+	: CVehicleTurret(TURRETTYPE_LAUNCHER, NUM_BONES,
+					 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
+					 vec2(-10.f, 50.f), 15.f, 50)
 {
 	m_pHelicopter = nullptr;
 
@@ -485,26 +512,26 @@ CLauncherTurret::CLauncherTurret()
 	m_CurrentRecoilFactor = 0.f;
 
 	InitBones();
-
-	// Experimental: Downscale turret
-	float scaleFactor = 0.9f;
-	m_Length *= scaleFactor;
-	m_Pivot *= scaleFactor;
-	m_ShaftRadius *= scaleFactor;
-	m_RetainerPosition *= scaleFactor;
-	m_RetainerRadius *= scaleFactor;
-	m_RecoilAmount *= scaleFactor;
-	m_TurretBone.Scale(scaleFactor);
-	for (int i = 0; i < m_NumBones; i++) // Cluster will scale from m_TurretBone automatically
-		m_apBones[i].Scale(scaleFactor);
-	//
 }
 
 CLauncherTurret::~CLauncherTurret()
 {
-//	if (m_pHelicopter) // if helicopter was never set, ids were never set either
-//		for (int i = 0; i < m_NumBones; i++)
-//			Server()->SnapFreeID(m_apBones[i].m_ID);
+
+}
+
+void CLauncherTurret::ApplyScale(float TurretScale)
+{
+	// Experimental
+	m_Length *= TurretScale;
+	m_Pivot *= TurretScale;
+	m_ShaftRadius *= TurretScale;
+	m_RetainerPosition *= TurretScale;
+	m_RetainerRadius *= TurretScale;
+	m_RecoilAmount *= TurretScale;
+	m_TurretBone.Scale(TurretScale);
+	for (int i = 0; i < m_NumBones; i++)
+		m_apBones[i].Scale(TurretScale);
+	//
 }
 
 void CLauncherTurret::Tick()

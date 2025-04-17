@@ -14,12 +14,16 @@ struct SBone
 	vec2 m_From;
 	vec2 m_To;
 	int m_Color;
+	int m_Thickness;
 
-	SBone() : SBone(nullptr, -1, 0, 0, 0, 0) { }
-	SBone(CEntity *pEntity, int SnapID, float FromX, float FromY, float ToX, float ToY)
-		: SBone(pEntity, SnapID, vec2(FromX, FromY), vec2(ToX, ToY)) { }
-	SBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To)
-		: m_pEntity(pEntity), m_ID(SnapID), m_From(From), m_To(To), m_Color(LASERTYPE_RIFLE) { }
+//	SBone() : SBone(nullptr, -1, 0, 0, 0, 0) { }
+	SBone(CEntity *pEntity = nullptr, int SnapID = -1,
+		float FromX = 0, float FromY = 0,
+		float ToX = 0, float ToY = 0,
+		int Thickness = 5)
+		: SBone(pEntity, SnapID, vec2(FromX, FromY), vec2(ToX, ToY), Thickness) { }
+	SBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness = 5)
+		: m_pEntity(pEntity), m_ID(SnapID), m_From(From), m_To(To), m_Color(LASERTYPE_RIFLE), m_Thickness(Thickness) { }
 
 	// Sense
 	IServer *Server() { return m_pEntity->Server(); }
