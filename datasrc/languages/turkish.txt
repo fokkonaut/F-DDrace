@@ -2057,7 +2057,7 @@ Waiting…
 
 {durak-name}
 Players - %d/%d
-== Oyuncular - %d/%
+== Oyuncular - %d/%d
 
 {durak-name}
 Select attack
@@ -2089,4 +2089,4 @@ Passed…
 
 {durak-name}
 Next move: %ds
-== Sonraki hamle: %ds
+== Sıradaki: %ds
