@@ -481,7 +481,7 @@ void CLauncherTurret::FireTurret()
 
 	m_LastShot = Server()->Tick();
 
-	vec2 startingPos = m_pHelicopter->GetPos() + m_TurretBone.m_From;;
+	vec2 startingPos = m_pHelicopter->GetPos() + m_TurretBone.m_From;
 	vec2 Direction = GetTurretDirection();
 	float missileStartingSpeed = 8.f;
 	new CMissile(GameWorld(),

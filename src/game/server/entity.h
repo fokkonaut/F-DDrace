@@ -151,6 +151,7 @@ public:
 	int m_Layer;
 
 	int GetObjType() { return m_ObjType; };
+	bool IsAdvancedEntity();
 	void SetPos(vec2 Pos) { m_Pos = Pos; }
 
 	// used for entities inside of plots, created by the draw editor. if not on a plot but still from the editor, its 0, if not an object from editor its -1

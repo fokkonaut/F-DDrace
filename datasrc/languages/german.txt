@@ -2050,3 +2050,43 @@ W I T H D R A W
 
 Everything (%d)
 == Alles (%d)
+
+{durak-name}
+Waiting…
+== Warten…
+
+{durak-name}
+Players - %d/%d
+== Spieler - %d/%d
+
+{durak-name}
+Select attack
+== Angriff wählen
+
+{durak-name}
+Attack!
+== Angreifen!
+
+{durak-name}
+Defend
+== Verteidigen
+
+{durak-name}
+Pass!
+== Schieben!
+
+{durak-name}
+End move
+== Zug beenden
+
+{durak-name}
+Take cards
+== Karten nehmen
+
+{durak-name}
+Passed…
+== Geschoben…
+
+{durak-name}
+Next move: %ds
+== Weiter in: %ds

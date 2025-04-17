@@ -1,5 +1,5 @@
 #
-# Author: claude.ai
+# Author: claude.ai & fokkonaut
 #
 
 /cmdlist will show a list of all chat commands
@@ -1868,59 +1868,59 @@ You can jump %d times
 
 {vote-header}
 Oᴘᴛɪᴏɴs
-== Oᴘᴄɪи
+== Опции
 
 {vote-header}
 Wᴀɴᴛᴇᴅ Pʟᴀʏᴇʀs
-== Рᴏзыскивᴀᴇᴍыᴇ Игʀᴏки
+== Разыскиваемые
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Iɴғᴏ
-== Иɴғᴏʀᴍᴀция ᴏ Учёᴛɴᴏй Зᴀᴘиси
+== Инфо об аккаунте
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Sᴛᴀᴛs
-== Сᴛᴀᴛисᴛикᴀ Учёᴛɴᴏй Зᴀᴘиси
+== Статистика аккаунта
 
 {vote-header}
 Pʟᴏᴛ
-== Учᴀсᴛᴏк
+== Участок
 
 {vote-header}
 Vᴏᴛᴇs
-== Гᴏʟᴏᴄᴀ
+== Голоса
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ
-== Уᴄᴛʀᴀɴᴏᴠᴋᴀ
+== Аккаунт
 
 {vote-header}
 Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs
-== Пʀᴏᴄᴄᴇᴇᴘᴀ
+== Прочее
 
 {vote-header}
 Cᴏʟʟᴇᴄᴛᴀʙʟᴇs
-== Кᴏʟʟᴇᴋᴄᴎиᴏɴɴʏᴇ Пʀᴇᴅᴍᴇᴛʏ
+== Коллекции
 
 {vote-header}
 Dᴇsɪɢɴs
-== Дизᴀйны
+== Дизайны
 
 {vote-header}
 Mɪɴɪɢᴀᴍᴇs
-== Mиɴиигʀы
+== Миниигры
 
 {vote-header}
 Sᴄᴏʀᴇ Mᴏᴅᴇ
-== Рᴇжɪᴍ Oчᴋᴏᴠ
+== Режим очков
 
 {vote-header}
 Lᴀɴɢᴜᴀɢᴇs
-== яᴢʏᴋɪ
+== Языки
 
 {vote-header}
 Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
-== Дᴏsᴛᴜᴘɴʏᴇ яᴢʏᴋɪ
+== Доступные языки
 
 Rainbow will make your tee change the color very fast.
 == Радуга заставит ваш тройник очень быстро менять цвет.
@@ -2050,3 +2050,43 @@ W I T H D R A W
 
 Everything (%d)
 == Всё (%d)
+
+{durak-name}
+Waiting…
+== 
+
+{durak-name}
+Players - %d/%d
+== 
+
+{durak-name}
+Select attack
+== 
+
+{durak-name}
+Attack!
+== 
+
+{durak-name}
+Defend
+== 
+
+{durak-name}
+Pass!
+== 
+
+{durak-name}
+End move
+== 
+
+{durak-name}
+Take cards
+== 
+
+{durak-name}
+Passed…
+== 
+
+{durak-name}
+Next move: %ds
+== 

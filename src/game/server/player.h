@@ -508,6 +508,7 @@ public:
 		VOTE_QUESTION_LANGUAGE_SUGGESTION,
 	};
 
+	int GetDefaultResult(VoteQuestionType Type);
 	void StartVoteQuestion(VoteQuestionType Type);
 	void OnEndVoteQuestion(int Result = -1);
 	bool m_VoteQuestionRunning;

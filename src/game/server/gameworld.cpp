@@ -76,7 +76,7 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 		{
 			if (Type == ENTTYPE_CHARACTER && Team != ((CCharacter*)pEnt)->Team())
 				continue;
-			if ((Type == ENTTYPE_MONEY || Type == ENTTYPE_PICKUP_DROP || Type == ENTTYPE_GROG || Type == ENTTYPE_HELICOPTER) && Team != ((CAdvancedEntity*)pEnt)->GetDDTeam())
+			if (pEnt->IsAdvancedEntity() && Team != ((CAdvancedEntity*)pEnt)->GetDDTeam())
 				continue;
 		}
 
@@ -849,7 +849,7 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 		{
 			if (Type == ENTTYPE_CHARACTER && Team != ((CCharacter*)p)->Team())
 				continue;
-			if ((Type == ENTTYPE_MONEY || Type == ENTTYPE_PICKUP_DROP || Type == ENTTYPE_GROG || Type == ENTTYPE_HELICOPTER) && Team != ((CAdvancedEntity*)p)->GetDDTeam())
+			if (p->IsAdvancedEntity() && Team != ((CAdvancedEntity*)p)->GetDDTeam())
 				continue;
 		}
 
@@ -1086,7 +1086,7 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEnti
 	return 0;
 }
 
-int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types)
+int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types, int Team)
 {
 	int Num = 0;
 
@@ -1097,6 +1097,14 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 		{
+			if (Team != -1 && Team != TEAM_SUPER)
+			{
+				if (i == ENTTYPE_CHARACTER && Team != ((CCharacter*)pEnt)->Team())
+					continue;
+				if (pEnt->IsAdvancedEntity() && Team != ((CAdvancedEntity*)pEnt)->GetDDTeam())
+					continue;
+			}
+
 			if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
 			{
 				if(ppEnts)
@@ -1117,6 +1125,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = 0;
 
+	int Team = CollideWith == -1 ? 0 : GameServer()->GetDDRaceTeam(CollideWith);
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
 		if (!(Types&1<<i))
@@ -1126,7 +1135,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 		for(; p; p = p->TypeNext())
  		{
 			float ProximityRadius = p->m_ProximityRadius;
-			if (!CheckPlotTaserDestroy || (i != ENTTYPE_DOOR && i != ENTTYPE_PICKUP && i != ENTTYPE_BUTTON && i != ENTTYPE_SPEEDUP && i != ENTTYPE_TELEPORTER))
+			if (CheckPlotTaserDestroy || (i != ENTTYPE_DOOR && i != ENTTYPE_PICKUP && i != ENTTYPE_BUTTON && i != ENTTYPE_SPEEDUP && i != ENTTYPE_TELEPORTER))
 			{
 				if(p == pNotThis)
 					continue;
@@ -1142,8 +1151,12 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 					CCharacter *pChr = 0;
 					if (i == ENTTYPE_CHARACTER)
 						pChr = (CCharacter *)p;
-					else if (i == ENTTYPE_FLAG || i == ENTTYPE_PICKUP_DROP || i == ENTTYPE_MONEY || i == ENTTYPE_HELICOPTER)
+					else if (p->IsAdvancedEntity())
+					{
 						pChr = ((CAdvancedEntity *)p)->GetOwner();
+						if (((CAdvancedEntity *)p)->GetDDTeam() != Team)
+							continue;
+					}
 
 					if (pChr && !pChr->CanCollide(CollideWith))
 						continue;
@@ -1164,7 +1177,6 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 					CDoor *pDoor = (CDoor *)p;
 					if (IsPlotDoor)
 					{
-						int Team = GameServer()->GetPlayerChar(CollideWith) ? GameServer()->GetPlayerChar(CollideWith)->Team() : 0;
 						if (!GameServer()->Collision()->m_pSwitchers || !GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team])
 							continue;
 					}

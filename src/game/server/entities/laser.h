@@ -16,7 +16,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 protected:
-	bool HitCharacter(vec2 From, vec2 To);
+	bool HitEntity(vec2 From, vec2 To);
 	void DoBounce();
 
 private:

@@ -87,15 +87,31 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, m_CurPos, &ColPos, &NewPos);
-	CCharacter* pOwnerChar = 0;
-
-	if (m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-
-	CCharacter* pTargetChr = 0;
-
+	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
+	CCharacter *pTargetChr = 0;
+	CHelicopter *pTargetHelicopter = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
-		pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	{
+		int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+		if (Config()->m_SvInteractiveDrops)
+		{
+			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+		}
+		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
+		CEntity *pTargetEnt = GameWorld()->IntersectEntityTypes(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
+		if (pTargetEnt)
+		{
+			if (pTargetEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+			{
+				pTargetChr = (CCharacter *)pTargetEnt;
+			}
+			else if (pTargetEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			{
+				pTargetHelicopter = (CHelicopter *)pTargetEnt;
+				pTargetChr = pTargetHelicopter->GetOwner();
+			}
+		}
+	}
 
 	if (m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -123,7 +139,9 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if (((pTargetChr && (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit || m_Owner == -1 || pTargetChr == pOwnerChar)) || Collide || GameLayerClipped(m_CurPos)) && !IsWeaponCollide)
+	if (!IsWeaponCollide && (Collide || GameLayerClipped(m_CurPos) || (pTargetHelicopter && !pTargetChr) ||
+		(pTargetChr && (m_Owner == -1 || pTargetChr == pOwnerChar || (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)))
+		))
 	{
 		if (m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
@@ -139,7 +157,15 @@ void CProjectile::Tick()
 					apEnts[i]->Freeze();
 		}
 		// F-DDrace
-		if (pTargetChr)
+		if (pTargetHelicopter)
+		{
+			if (m_Explosive)
+			{
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, pTargetHelicopter->GetDDTeam(), m_TeamMask);
+				GameServer()->CreateSound(ColPos, m_SoundImpact, m_TeamMask);
+			}
+		}
+		else if (pTargetChr)
 		{
 			if (!m_Explosive)
 			{
@@ -226,6 +252,7 @@ void CProjectile::Tick()
 			}
 		}
 	}
+
 	if (m_LifeSpan == -1)
 	{
 		if (m_Explosive)

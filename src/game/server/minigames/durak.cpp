@@ -130,6 +130,8 @@ void CDurak::OnCharacterSpawn(CCharacter *pChr)
 	// Player can't move while playing and grenade, hammer, shotgun doesn't affect them, so we dont have to forcefully set the position in Tick anymore
 	int Game = GetGameByClient(ClientID);
 	pChr->ForceSetPos(GameServer()->Collision()->GetPos(m_vpGames[Game]->GetSeatByClient(ClientID)->m_MapIndex));
+	// Update velocity, so we are always perfectly on the seat.
+	pChr->SetCoreVel(vec2(0.f, 0.f));
 	pChr->Core()->m_ActivelyPlayingDurak = ActivelyPlaying(ClientID);
 
 	CLockedTune Tune("gravity", 0.3f);
@@ -772,65 +774,69 @@ bool CDurak::HandleMoneyTransaction(int ClientID, int Amount, const char *pMsg)
 	return false;
 }
 
-const char *CDurak::GetCardSymbol(int Suit, int Rank, CDurakGame *pGame)
+const char *CDurak::GetCardSymbol(int Suit, int Rank, CDurakGame *pGame, int SnappingClient)
 {
-	if (Suit == -1 && Rank == -1) {
+	if (Suit == -1 && Rank == -1)
+	{
 		static const char *pBackCard = "🂠";
 		return pBackCard;
 	}
+	if (!(Suit < 0 || Suit > 3 || Rank < 6 || Rank > 14))
+	{
+		static const char *aapCards[4][9] = {
+			{"🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮", "🂡"}, // Spades
+			{"🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾", "🂱"}, // Hearts
+			{"🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎", "🃁"}, // Diamonds
+			{"🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞", "🃑"}  // Clubs
+		};
+		return aapCards[Suit][Rank - 6];
+	}
 	static char aBuf[MAX_NAME_LENGTH];
+	#define Localize(str, context) SnappingClient == -1 ? Localizable((str), (context)) : GameServer()->m_apPlayers[SnappingClient]->Localize((str), (context))
 	switch (Suit)
 	{
-	case CCard::IND_EMPTY: return " ";
-	case CCard::IND_DURAK_TABLE_LABEL: return "🂭   Durák";
-	case CCard::IND_KEYBOARD_ON: return "⌨☒";
-	case CCard::IND_KEYBOARD_OFF: return "⌨☐";
-	case CCard::IND_END_MOVE_BUTTON: return "[✓]";
-	case CCard::IND_START_TIMER:
-	{
-		if (pGame->NumParticipants() < MIN_DURAK_PLAYERS) return "Waiting…";
-		str_format(aBuf, sizeof(aBuf), "Start in %ds…", (int)(pGame->m_GameStartTick - Server()->Tick()) / Server()->TickSpeed() + 1);
-		return aBuf;
+		case CCard::IND_EMPTY: return " ";
+		case CCard::IND_DURAK_TABLE_LABEL: return "🂭   Durák";
+		case CCard::IND_KEYBOARD_ON: return "⌨☒";
+		case CCard::IND_KEYBOARD_OFF: return "⌨☐";
+		case CCard::IND_END_MOVE_BUTTON: return "[✓]";
+		case CCard::IND_START_TIMER:
+		{
+			if (pGame->NumParticipants() < MIN_DURAK_PLAYERS) return Localize("Waiting…", "durak-name");
+			str_format(aBuf, sizeof(aBuf), "Start in %ds…", (int)(pGame->m_GameStartTick - Server()->Tick()) / Server()->TickSpeed() + 1);
+			return aBuf;
+		}
+		case CCard::IND_PLAYERCOUNTER:
+		{
+			str_format(aBuf, sizeof(aBuf), Localize("Players - %d/%d", "durak-name"), pGame->NumParticipants(), (int)MAX_DURAK_PLAYERS);
+			return aBuf;
+		}
+		case CCard::IND_STAKE:
+		{
+			if (pGame->m_Stake == -1) return "> ??? <";
+			str_format(aBuf, sizeof(aBuf), "> %lld$ <", pGame->m_Stake);
+			return aBuf;
+		}
+		case CCard::IND_TOOLTIP_SELECT_ATTACK: return Localize("Select attack", "durak-name");
+		case CCard::IND_TOOLTIP_ATTACK: return Localize("Attack!", "durak-name");
+		case CCard::IND_TOOLTIP_DEFEND: return Localize("Defend", "durak-name");
+		case CCard::IND_TOOLTIP_PASS: return Localize("Pass!", "durak-name");
+		case CCard::IND_TOOLTIP_END_MOVE: return Localize("End move", "durak-name");
+		case CCard::IND_TOOLTIP_TAKE_CARDS: return Localize("Take cards", "durak-name");
+		case CCard::IND_TOOLTIP_ATTACKERS_TURN:
+		{
+			str_format(aBuf, sizeof(aBuf), "%s", Server()->ClientName(pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_ClientID));
+			return aBuf;
+		}
+		case CCard::IND_TOOLTIP_DEFENDER_PASSED: return Localize("Passed…", "durak-name");
+		case CCard::IND_TOOLTIP_NEXT_MOVE:
+		{
+			str_format(aBuf, sizeof(aBuf), Localize("Next move: %ds", "durak-name"), (int)(pGame->m_NextMove - Server()->Tick()) / Server()->TickSpeed() + 1);
+			return aBuf;
+		}
+		default: return "??";
 	}
-	case CCard::IND_PLAYERCOUNTER:
-	{
-		str_format(aBuf, sizeof(aBuf), "Players - %d/%d", pGame->NumParticipants(), (int)MAX_DURAK_PLAYERS);
-		return aBuf;
-	}
-	case CCard::IND_STAKE:
-	{
-		if (pGame->m_Stake == -1) return "> ??? <";
-		str_format(aBuf, sizeof(aBuf), "> %lld$ <", pGame->m_Stake);
-		return aBuf;
-	}
-	case CCard::IND_TOOLTIP_SELECT_ATTACK: return "Select attack";
-	case CCard::IND_TOOLTIP_ATTACK: return "Attack!";
-	case CCard::IND_TOOLTIP_DEFEND: return "Defend";
-	case CCard::IND_TOOLTIP_PASS: return "Pass!";
-	case CCard::IND_TOOLTIP_END_MOVE: return "End move";
-	case CCard::IND_TOOLTIP_TAKE_CARDS: return "Take cards";
-	case CCard::IND_TOOLTIP_ATTACKERS_TURN:
-	{
-		str_format(aBuf, sizeof(aBuf), "%s", Server()->ClientName(pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_ClientID));
-		return aBuf;
-	}
-	case CCard::IND_TOOLTIP_DEFENDER_PASSED: return "Passed…";
-	case CCard::IND_TOOLTIP_NEXT_MOVE:
-	{
-		str_format(aBuf, sizeof(aBuf), "Next move: %llds", (pGame->m_NextMove - Server()->Tick()) / Server()->TickSpeed() + 1);
-		return aBuf;
-	}
-	}
-	if (Suit < 0 || Suit > 3 || Rank < 6 || Rank > 14) {
-		return "??";
-	}
-	static const char *aapCards[4][9] = {
-		{"🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮", "🂡"}, // Spades
-		{"🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾", "🂱"}, // Hearts
-		{"🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎", "🃁"}, // Diamonds
-		{"🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞", "🃑"}  // Clubs
-	};
-	return aapCards[Suit][Rank - 6];
+	#undef Localize
 }
 
 int CDurak::GetPlayerState(int ClientID)
@@ -853,15 +859,11 @@ void CDurak::Tick()
 {
 	for (int g = (int)m_vpGames.size() - 1; g >= 0; g--)
 	{
-		if (UpdateGame(g))
-		{
-			// no need to decrement g even though m_vpGames[g] got erased, since we're iterating backwards
-			continue;
-		}
+		UpdateGame(g);
 	}
 }
 
-bool CDurak::UpdateGame(int Game)
+void CDurak::UpdateGame(int Game)
 {
 	auto &&HandleCardHover = [this](int Game, int Seat, int Card, vec2 CursorPos, bool Dragging) {
 		CDurakGame::SSeat *pSeat = &m_vpGames[Game]->m_aSeats[Seat];
@@ -948,7 +950,7 @@ bool CDurak::UpdateGame(int Game)
 			}
 
 			EndGame(Game);
-			return true;
+			return;
 		}
 	}
 
@@ -956,7 +958,7 @@ bool CDurak::UpdateGame(int Game)
 	if (TimerUpGameStart && !StartGame(Game))
 	{
 		// will only trigger when the timer is up and startgame fails, if no team is free
-		return true;
+		return;
 	}
 
 	for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
@@ -1016,7 +1018,6 @@ bool CDurak::UpdateGame(int Game)
 		if (!pChr || ProcessedWinAlready)
 			continue;
 
-		pChr->EpicCircle(pGame->m_DefenderIndex == i, -1, true);
 		if (!pSeat->m_Player.m_EndedMove)
 		{
 			const int NumHands = (int)pSeat->m_Player.m_vHandCards.size();
@@ -1191,7 +1192,7 @@ bool CDurak::UpdateGame(int Game)
 
 	// Handle game logic
 	if (!pGame->m_Running)
-		return false;
+		return;
 
 	if (pGame->IsGameOver())
 	{
@@ -1201,7 +1202,7 @@ bool CDurak::UpdateGame(int Game)
 			{
 				EndGame(Game);
 			}
-			return true;
+			return;
 		}
 
 		for (unsigned int w = 0; w < pGame->m_vWinners.size(); w++)
@@ -1218,15 +1219,25 @@ bool CDurak::UpdateGame(int Game)
 		pGame->m_GameOverTick = Server()->Tick();
 		std::pair<int, int64> Pair(pGame->m_DurakClientID, pGame->m_GameOverTick);
 		m_vLastDuraks.push_back(Pair);
-		return true;
+		return;
 	}
 
+	bool AttackersEndedMove = false;
 	if(pGame->NextMoveSoon(Server()->Tick()))
 	{
 		SetTurnTooltip(Game, CCard::TOOLTIP_NEXT_MOVE);
 	}
+	else
+	{
+		AttackersEndedMove = pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_EndedMove && pGame->m_aSeats[pGame->GetNextPlayer(pGame->m_DefenderIndex)].m_Player.m_EndedMove;
+		if (AttackersEndedMove)
+		{
+			SetNextMoveSoon(Game);
+			// Process next tick, and send tooltip next move
+			return;
+		}
+	}
 
-	bool AttackersEndedMove = pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_EndedMove && pGame->m_aSeats[pGame->GetNextPlayer(pGame->m_DefenderIndex)].m_Player.m_EndedMove;
 	bool ProcessMove = pGame->ProcessNextMove(Server()->Tick());
 	if (ProcessMove || AttackersEndedMove)
 	{
@@ -1271,9 +1282,6 @@ bool CDurak::UpdateGame(int Game)
 			StartNextRound(Game, true);
 		}
 	}
-
-	// Safely return and let the tick function know we are still alive
-	return false;
 }
 
 void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
@@ -1284,7 +1292,13 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 	for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
 	{
 		int ClientID = pGame->m_aSeats[i].m_Player.m_ClientID;
-		if (ClientID != -1 && pGame->m_aSeats[i].m_Player.m_Stake >= 0)
+		if (ClientID == -1)
+			continue;
+		// Disable passive also when won already, on next round
+		CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+		if (pChr) pChr->EpicCircle(pGame->m_DefenderIndex == i, -1, true);
+
+		if (pGame->m_aSeats[i].m_Player.m_Stake >= 0)
 		{
 			// Making sure to update handcards for 0.7 here, because we can not catch every case from within CDurakGame where SortHand() gets called for example.
 			UpdateHandcards(Game, &pGame->m_aSeats[i]);
@@ -1292,7 +1306,6 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 			pGame->m_aSeats[i].m_Player.m_EndedMove = false;
 			pGame->m_aSeats[i].m_Player.m_CanSetNextMove = true;
 			GameServer()->m_apPlayers[ClientID]->m_ShowName = true;
-			CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
 			if (pChr)
 			{
 				OnCharacterSpawn(pChr);
@@ -1349,6 +1362,12 @@ bool CDurak::TryDefend(int Game, int Seat, int Attack, CCard *pCard)
 		}
 		SetTurnTooltip(Game, CCard::TOOLTIP_NONE);
 		ProcessCardPlacement(Game, &pGame->m_aSeats[Seat], &m_vpGames[Game]->m_Attacks[Attack].m_Defense);
+
+		if (pGame->GetOpenAttacks().empty())
+		{
+			// Let others see what card you placed
+			SetNextMoveSoon(Game);
+		}
 		return true;
 	}
 	return false;
@@ -1449,10 +1468,19 @@ void CDurak::TakeCardsFromTable(int Game)
 	SendChatToParticipants(Game, Localizable("'%s' couldn't defend all attacks and takes all cards"), Server()->ClientName(DefenderID));
 
 	// Sort hand cards after taking
-	pGame->SortHand(pGame->m_aSeats[pGame->m_DefenderIndex].m_Player.m_vHandCards, pGame->m_Deck.GetTrumpSuit());
+	pGame->SortHand(&pGame->m_aSeats[pGame->m_DefenderIndex], pGame->m_Deck.GetTrumpSuit());
 	UpdateHandcards(Game, &pGame->m_aSeats[pGame->m_DefenderIndex]);
 	// Next round
 	StartNextRound(Game);
+}
+
+void CDurak::SetNextMoveSoon(int Game)
+{
+	const int64 NextMoveTick = Server()->Tick() + Server()->TickSpeed() * 5;
+	if (m_vpGames[Game]->m_NextMove > NextMoveTick)
+	{
+		m_vpGames[Game]->m_NextMove = NextMoveTick;
+	}
 }
 
 void CDurak::SetTurnTooltip(int Game, int Tooltip)
@@ -1733,7 +1761,7 @@ void CDurak::PrepareStaticCards(CDurakGame *pGame, CDurakGame::SSeat *pSeat)
 						}
 					}
 
-					if (pSeat->m_Player.m_KeyboardControl || pSeat->m_Player.m_LastCursorMove < Server()->Tick() - Server()->TickSpeed() / 4)
+					if (pSeat->m_Player.m_KeyboardControl || pSeat->m_Player.m_LastCursorMove < Server()->Tick() - Server()->TickSpeed() * 0.15f)
 					{
 						pCard->SetTooltip(pSeat->m_Player.m_Tooltip);
 					}
@@ -1857,7 +1885,7 @@ void CDurak::UpdateCardSnapMapping(int SnappingClient, const std::map<CCard *, i
 			m_aUpdateTeamsState[SnappingClient] = true;
 			if (!Server()->IsSevendown(SnappingClient))
 			{
-				const char *pName = IsSpectator ? GetCardSymbol(-1, -1) : GetCardSymbol(pCard->m_Suit, pCard->m_Rank, pGame);
+				const char *pName = IsSpectator ? GetCardSymbol(-1, -1) : GetCardSymbol(pCard->m_Suit, pCard->m_Rank, pGame, SnappingClient);
 				CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 				NewClientInfoMsg.m_ClientID = NewID;
 				NewClientInfoMsg.m_Local = 0;
@@ -1900,7 +1928,7 @@ void CDurak::SnapDurakCard(int SnappingClient, CDurakGame *pGame, CCard *pCard, 
 		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETOBJTYPES, ID, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
-		const char *pName = IsSpectator ? GetCardSymbol(-1, -1) : GetCardSymbol(pCard->m_Suit, pCard->m_Rank, pGame);
+		const char *pName = IsSpectator ? GetCardSymbol(-1, -1) : GetCardSymbol(pCard->m_Suit, pCard->m_Rank, pGame, SnappingClient);
 		StrToInts(&pClientInfo[0], 4, pName);
 		StrToInts(&pClientInfo[4], 3, "");
 		StrToInts(&pClientInfo[8], 6, pGame ? "x_spec" : "default");

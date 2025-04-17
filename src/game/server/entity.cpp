@@ -145,3 +145,9 @@ bool CEntity::IsPlotDoor()
 {
 	return m_ObjType == CGameWorld::ENTTYPE_DOOR && GameServer()->Collision()->IsPlotDoor(m_Number);
 }
+
+bool CEntity::IsAdvancedEntity()
+{
+	return m_ObjType == CGameWorld::ENTTYPE_MONEY || m_ObjType == CGameWorld::ENTTYPE_PICKUP_DROP
+		|| m_ObjType == CGameWorld::ENTTYPE_GROG || m_ObjType == CGameWorld::ENTTYPE_HELICOPTER;
+}

@@ -2050,3 +2050,43 @@ W I T H D R A W
 
 Everything (%d)
 == Tout (%d)
+
+{durak-name}
+Waiting…
+== 
+
+{durak-name}
+Players - %d/%d
+== 
+
+{durak-name}
+Select attack
+== 
+
+{durak-name}
+Attack!
+== 
+
+{durak-name}
+Defend
+== 
+
+{durak-name}
+Pass!
+== 
+
+{durak-name}
+End move
+== 
+
+{durak-name}
+Take cards
+== 
+
+{durak-name}
+Passed…
+== 
+
+{durak-name}
+Next move: %ds
+== 

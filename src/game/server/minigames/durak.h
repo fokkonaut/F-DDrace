@@ -378,11 +378,23 @@ public:
 
 		for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
 		{
-			SortHand(m_aSeats[i].m_Player.m_vHandCards, m_Deck.GetTrumpSuit());
+			SortHand(&m_aSeats[i], m_Deck.GetTrumpSuit());
 		}
 	}
 
-	void SortHand(std::vector<CCard> &vHandCards, int TrumpSuit) {
+	void SortHand(SSeat *pSeat, int TrumpSuit)
+	{
+		std::vector<CCard> &vHandCards = pSeat->m_Player.m_vHandCards;
+		for (int i = 0; i < (int)vHandCards.size(); i++)
+		{
+			if (pSeat->m_Player.m_HoveredCard == i)
+			{
+				vHandCards[i].SetHovered(false);
+				pSeat->m_Player.m_HoveredCard = -1;
+				break;
+			}
+		}
+
 		// Card count per suit
 		int aSuitCount[4] = { 0 };
 		for (const CCard &Card : vHandCards)
@@ -428,7 +440,7 @@ public:
 	bool ProcessNextMove(int64 CurrentTick)
 	{
 		if (!m_NextMove)
-			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 60;
+			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 45;
 		return m_NextMove <= CurrentTick;
 	}
 
@@ -510,7 +522,7 @@ public:
 		int CurPlayer = m_InitialAttackerIndex;
 		for (int i = 1; i < MAX_DURAK_PLAYERS; i++)
 		{
-			CurPlayer = (CurPlayer + i) % MAX_DURAK_PLAYERS;
+			CurPlayer = (CurPlayer + 1) % MAX_DURAK_PLAYERS;
 			if (CurPlayer != m_DefenderIndex && m_aSeats[CurPlayer].m_Player.m_ClientID != -1 && m_aSeats[CurPlayer].m_Player.m_Stake >= 0)
 			{
 				vDrawOrder.push_back(CurPlayer);
@@ -540,7 +552,7 @@ public:
 						break;
 					}
 				}
-				SortHand(m_aSeats[Index].m_Player.m_vHandCards, m_Deck.GetTrumpSuit());
+				SortHand(&m_aSeats[Index], m_Deck.GetTrumpSuit());
 			}
 		}
 	}
@@ -575,7 +587,7 @@ public:
 
 	bool NextMoveSoon(int Tick)
 	{
-		return m_NextMove && m_NextMove > Tick && Tick + SERVER_TICK_SPEED * 5 > m_NextMove;
+		return m_NextMove && m_NextMove > Tick && Tick + SERVER_TICK_SPEED * 5 >= m_NextMove;
 	}
 
 	bool CanProcessWin(int Seat)
@@ -759,7 +771,7 @@ class CDurak : public CMinigame
 	std::vector<std::pair<int, int64> > m_vLastDuraks; // first: ClientID, second: DurakLoseTick
 
 	std::vector<CDurakGame *> m_vpGames;
-	bool UpdateGame(int Game);
+	void UpdateGame(int Game);
 	bool StartGame(int Game);
 	void EndGame(int Game);
 	void StartNextRound(int Game, bool SuccessfulDefense = false);
@@ -771,6 +783,7 @@ class CDurak : public CMinigame
 	bool TryAttack(int Game, int Seat, CCard *pCard);
 	void ProcessCardPlacement(int Game, CDurakGame::SSeat *pSeat, CCard *pFlyingPointToCard);
 	void SetTurnTooltip(int Game, int Tooltip);
+	void SetNextMoveSoon(int Game);
 	void ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bool ForceEnd = false);
 	bool HandleMoneyTransaction(int ClientID, int Amount, const char *pMsg);
 
@@ -780,7 +793,7 @@ class CDurak : public CMinigame
 	void SendChatToParticipants(int Game, const char *pFormat, Args&&... args);
 
 	int GetPlayerState(int ClientID);
-	const char *GetCardSymbol(int Suit, int Rank, CDurakGame *pGame = 0);
+	const char *GetCardSymbol(int Suit, int Rank, CDurakGame *pGame = 0, int SnappingClient = -1);
 	void UpdatePassive(int ClientID, int Seconds);
 	void CreateFlyingPoint(int FromClientID, int Game, CCard *pToCard);
 

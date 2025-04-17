@@ -632,6 +632,10 @@ Messages = [
 
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
+	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
+		NetIntRange("m_Voted", -1, 1),
+	]),
+
 	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
 	NetMessageEx("Sv_VoteOptionGroupEnd", "sv-vote-option-group-end@netmsg.ddnet.org", []),
 
