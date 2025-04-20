@@ -12,6 +12,7 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/mapchecker.h>
 #include <engine/shared/netban.h>
+#include <engine/shared/http.h>
 #include "register.h"
 #include <engine/shared/fifo.h>
 
@@ -109,6 +110,7 @@ public:
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
+	IHttp *Http() { return &m_Http; }
 
 	enum
 	{
@@ -298,6 +300,7 @@ public:
 	CSnapshotBuilder m_SnapshotBuilder;
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
+	CHttp m_Http;
 	CEcon m_Econ;
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;

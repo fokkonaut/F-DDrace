@@ -437,10 +437,15 @@ public:
 		return -1;
 	}
 
+	bool NextMoveSoon(int Tick)
+	{
+		return m_NextMove && m_NextMove > Tick && m_NextMove < Tick + SERVER_TICK_SPEED * 5;
+	}
+
 	bool ProcessNextMove(int64 CurrentTick)
 	{
 		if (!m_NextMove)
-			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 45;
+			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 60;
 		return m_NextMove <= CurrentTick;
 	}
 
@@ -585,11 +590,6 @@ public:
 		return true;
 	}
 
-	bool NextMoveSoon(int Tick)
-	{
-		return m_NextMove && m_NextMove > Tick && Tick + SERVER_TICK_SPEED * 5 >= m_NextMove;
-	}
-
 	bool CanProcessWin(int Seat)
 	{
 		return m_Running && m_aSeats[Seat].m_Player.m_Stake >= 0 && m_aSeats[Seat].m_Player.m_ClientID != m_DurakClientID;
@@ -645,7 +645,8 @@ public:
 		// Remove card from hand
 		RemoveCard(Seat, pCard);
 
-		if (!NextMoveSoon(Tick))
+		// Also update timer if attacker waited 59 seconds to place first card. give defender the opportunity to defend.
+		if (!NextMoveSoon(Tick) || GetOpenAttacks().size() == 1)
 		{
 			m_NextMove = 0;
 		}
@@ -788,7 +789,7 @@ class CDurak : public CMinigame
 	bool HandleMoneyTransaction(int ClientID, int Amount, const char *pMsg);
 
 	template<typename... Args>
-	void SendChatToDeployedStakePlayers(int Game, int NotThisID, const char *pFormat, Args&&... args);
+	void ProposeNewStake(int Game, int NotThisID, const char *pFormat, Args&&... args);
 	template<typename... Args>
 	void SendChatToParticipants(int Game, const char *pFormat, Args&&... args);
 

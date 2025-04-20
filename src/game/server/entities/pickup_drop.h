@@ -17,7 +17,7 @@ public:
 	virtual void Snap(int SnappingClient);
 
 private:
-	static int const ms_PhysSize = 14;
+	static int const ms_PhysSize = 16;
 
 	int IsCharacterNear();
 	void IsShieldNear();

@@ -143,6 +143,9 @@ typedef int SECURITY_TOKEN;
 
 static const unsigned char SECURITY_TOKEN_MAGIC[] = {'T', 'K', 'E', 'N'};
 
+SECURITY_TOKEN ToSecurityToken(const unsigned char *pData);
+void WriteSecurityToken(unsigned char *pData, SECURITY_TOKEN Token);
+
 enum
 {
 	NET_SECURITY_TOKEN_UNKNOWN = -1,
@@ -227,11 +230,13 @@ class CNetBase
 
 	class CConfig *m_pConfig;
 	class IEngine *m_pEngine;
-	NETSOCKET m_aSocket[NUM_SOCKETS];
 	IOHANDLE m_DataLogSent;
 	IOHANDLE m_DataLogRecv;
 	CHuffman m_Huffman;
 	unsigned char m_aRequestTokenBuf[NET_TOKENREQUEST_DATASIZE];
+
+protected:
+	NETSOCKET m_aSocket[NUM_SOCKETS];
 
 public:
 	CNetBase();
@@ -248,7 +253,7 @@ public:
 	void SendControlMsgWithToken(const NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended, int Socket);
 	void SendPacketConnless(const NETADDR *pAddr, TOKEN Token, TOKEN ResponseToken, const void *pData, int DataSize, bool Sevendown, int Socket);
 	void SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bool Sevendown, int Socket, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
-	int UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, class CNetServer *pNetServer = 0);
+	int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool *pSevendown);
 };
 
 class CNetTokenManager
@@ -555,7 +560,6 @@ public:
 	int NumClients() { return m_NumClients; }
 	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetSecurityToken(const NETADDR& Addr);
-	bool GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer);
 
 	int ResetErrorString(int ClientID);
 	const char *ErrorString(int ClientID);

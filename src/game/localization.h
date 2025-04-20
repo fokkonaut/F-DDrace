@@ -47,6 +47,12 @@ public:
 		m_Loaded = false;
 		m_Available = false;
 	}
+	~CLanguage()
+	{
+		m_vStrings.clear();
+		delete m_pStringsHeap;
+		m_pStringsHeap = 0;
+	}
 
 	std::string m_Name;
 	std::string m_FileName;

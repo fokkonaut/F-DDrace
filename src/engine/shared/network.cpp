@@ -10,6 +10,16 @@
 #include "network.h"
 #include "huffman.h"
 
+SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
+{
+	return bytes_be_to_uint(pData);
+}
+ 
+void WriteSecurityToken(unsigned char *pData, SECURITY_TOKEN Token)
+{
+	uint_to_bytes_be(pData, Token);
+}
+
 
 static void ConchainDbgLognetwork(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -202,7 +212,7 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 	{
 		// append security token
 		// if SecurityToken is NET_SECURITY_TOKEN_UNKNOWN we will still append it hoping to negotiate it
-		mem_copy(&pPacket->m_aChunkData[pPacket->m_DataSize], &SecurityToken, sizeof(SecurityToken));
+		WriteSecurityToken(pPacket->m_aChunkData + pPacket->m_DataSize, SecurityToken);
 		pPacket->m_DataSize += sizeof(SecurityToken);
 	}
 
@@ -275,16 +285,8 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 }
 
 // TODO: rename this function
-int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketConstruct *pPacket, bool *pSevendown, int Socket, CNetServer *pNetServer)
+int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool *pSevendown)
 {
-	if (!m_aSocket[Socket])
-		return 1;
-
-	int Size = net_udp_recv(m_aSocket[Socket], pAddr, &pBuffer);
-	// no more packets for now
-	if(Size <= 0)
-		return 1;
-
 	// log the data
 	if(m_DataLogRecv)
 	{
@@ -347,8 +349,8 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 	}
 	else
 	{
-		if (pNetServer)
-			*pSevendown = pNetServer->GetSevendown(pAddr, pPacket, pBuffer);
+		if (pPacket->m_Flags & 1)
+			*pSevendown = false;
 
 		if(Size - NET_PACKETHEADERSIZE > NET_MAX_PAYLOAD)
 		{
@@ -357,31 +359,22 @@ int CNetBase::UnpackPacket(NETADDR *pAddr, unsigned char *pBuffer, CNetPacketCon
 			return -1;
 		}
 
-		int HeaderSize;
+		int HeaderSize = *pSevendown ? 3 : NET_PACKETHEADERSIZE;
 		if (*pSevendown)
 		{
-			HeaderSize = 3;
-			pPacket->m_Flags = pBuffer[0]>>4;
-			pPacket->m_Ack = ((pBuffer[0]&0xf)<<8) | pBuffer[1];
 			pPacket->m_Token = NET_TOKEN_NONE;
-
 			int Flags = 0;
-			if (pPacket->m_Flags&1) Flags |= NET_PACKETFLAG_CONTROL;
-			if (pPacket->m_Flags&2) Flags |= NET_PACKETFLAG_CONNLESS;
-			if (pPacket->m_Flags&4) Flags |= NET_PACKETFLAG_RESEND;
-			if (pPacket->m_Flags&8) Flags |= NET_PACKETFLAG_COMPRESSION;
+			if (pPacket->m_Flags&4) Flags |= NET_PACKETFLAG_CONTROL;
+			if (pPacket->m_Flags&8) Flags |= NET_PACKETFLAG_CONNLESS;
+			if (pPacket->m_Flags&16) Flags |= NET_PACKETFLAG_RESEND;
+			if (pPacket->m_Flags&32) Flags |= NET_PACKETFLAG_COMPRESSION;
 			pPacket->m_Flags = Flags;
 		}
-		else
-		{
-			HeaderSize = NET_PACKETHEADERSIZE;
-			pPacket->m_Ack = ((pBuffer[0]&0x3)<<8) | pBuffer[1];
+
+		pPacket->m_Ack = ((pBuffer[0]&0x3)<<8) | pBuffer[1];
 				// xxxxxxAA AAAAAAAA
-
-			pPacket->m_Token = (pBuffer[3] << 24) | (pBuffer[4] << 16) | (pBuffer[5] << 8) | pBuffer[6];
+		pPacket->m_Token = (pBuffer[3] << 24) | (pBuffer[4] << 16) | (pBuffer[5] << 8) | pBuffer[6];
 				// TTTTTTTT TTTTTTTT TTTTTTTT TTTTTTTT
-		}
-
 		pPacket->m_NumChunks = pBuffer[2];
 				// NNNNNNNN
 		pPacket->m_DataSize = Size - HeaderSize;

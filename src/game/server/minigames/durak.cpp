@@ -127,15 +127,22 @@ void CDurak::OnCharacterSpawn(CCharacter *pChr)
 	if (!InDurakGame(ClientID))
 		return;
 
-	// Player can't move while playing and grenade, hammer, shotgun doesn't affect them, so we dont have to forcefully set the position in Tick anymore
 	int Game = GetGameByClient(ClientID);
+	CDurakGame *pGame = m_vpGames[Game];
+	CDurakGame::SSeat *pSeat = pGame->GetSeatByClient(ClientID);
+
+	// Player can't move while playing and grenade, hammer, shotgun doesn't affect them, so we dont have to forcefully set the position in Tick anymore
 	pChr->ForceSetPos(GameServer()->Collision()->GetPos(m_vpGames[Game]->GetSeatByClient(ClientID)->m_MapIndex));
 	// Update velocity, so we are always perfectly on the seat.
 	pChr->SetCoreVel(vec2(0.f, 0.f));
 	pChr->Core()->m_ActivelyPlayingDurak = ActivelyPlaying(ClientID);
+	// Disable passive also when won already, on next round
+	pChr->EpicCircle(pGame->m_DefenderIndex == pSeat->m_ID, -1, true);
 
-	CLockedTune Tune("gravity", 0.3f);
-	GameServer()->SetLockedTune(&pChr->m_LockedTunings, Tune);
+	CLockedTune TuneGravity("gravity", 0.3f);
+	GameServer()->SetLockedTune(&pChr->m_LockedTunings, TuneGravity);
+	CLockedTune TuneHookLength("hook_length", 540.f);
+	GameServer()->SetLockedTune(&pChr->m_LockedTunings, TuneHookLength);
 	pChr->ApplyLockedTunings();
 }
 
@@ -245,8 +252,7 @@ bool CDurak::TryEnterBetStake(int ClientID, const char *pMessage)
 		{
 			VALIDATE_WALLET();
 
-			SendChatToDeployedStakePlayers(Game, ClientID, Localizable("'%s' proposed a new stake, please enter the current stake of '%lld' or propose a new one in the chat."), Server()->ClientName(ClientID), Stake);
-
+			ProposeNewStake(Game, ClientID, Localizable("'%s' proposed a new stake, please enter the current stake of '%lld' or propose a new one in the chat."), Server()->ClientName(ClientID), Stake);
 			pGame->m_Stake = Stake;
 			pPlayer->m_Stake = Stake;
 			UpdatePassive(ClientID, 30);
@@ -288,19 +294,25 @@ void CDurak::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
 			}
 			m_vpGames[g]->m_aSeats[i].m_Player.Reset();
 
+			CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 			if (!GameServer()->Collision()->TileUsed(TILE_DURAK_LOBBY) && !Shutdown) // don't kill player on shutdown, we need character for SaveCharacter()
 			{
 				GameServer()->SetMinigame(ClientID, MINIGAME_NONE, false, false);
 			}
+			else if (pPlayer->GetCharacter())
+			{
+				pPlayer->GetCharacter()->EpicCircle(false, -1, true);
+			}
+
 			pTeams->SetForceCharacterTeam(ClientID, 0);
 			// Set before tunings
 			m_aInDurakGame[ClientID] = false;
 			GameServer()->SendTuningParams(ClientID);
-			CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+			
 			pPlayer->m_ForceSpawnPos = vec2(-1, -1);
 			pPlayer->m_ShowName = true;
 			pPlayer->SetName(Server()->ClientName(ClientID));
-			pPlayer->SetClan(Server()->ClientName(ClientID));
+			pPlayer->SetClan(Server()->ClientClan(ClientID));
 			pPlayer->UpdateInformation();
 			break;
 		}
@@ -341,6 +353,11 @@ int CDurak::GetTeam(int ClientID, int MapID)
 
 	if (!InDurakGame(ProcessedID))
 		return -1;
+
+	int Team = GameServer()->GetDDRaceTeam(ProcessedID);
+	if (Team == TEAM_SUPER && GameServer()->GetPlayerChar(ProcessedID))
+		Team = GameServer()->GetPlayerChar(ProcessedID)->m_TeamBeforeSuper;
+
 	int HighestDurakID = GameServer()->m_World.GetFirstDurakID(ClientID);
 	if (MapID > HighestDurakID - m_aDurakNumReserved[ClientID] && MapID <= HighestDurakID)
 	{
@@ -348,7 +365,7 @@ int CDurak::GetTeam(int ClientID, int MapID)
 		if (MapID == m_aLastSnapID[ClientID][&m_aStaticCards[DURAK_TEXT_KEYBOARD_CONTROL]] || MapID == m_aLastSnapID[ClientID][&m_aStaticCards[DURAK_TEXT_TOOLTIP]])
 			return 0;
 		if (GameServer()->Config()->m_SvDurakTeamColor)
-			return GameServer()->GetDDRaceTeam(ProcessedID);
+			return Team;
 		return 0;
 	}
 
@@ -360,7 +377,7 @@ int CDurak::GetTeam(int ClientID, int MapID)
 	if (Server()->ReverseTranslate(ID, ClientID))
 	{
 		// Player or self
-		if (ID == ProcessedID || GameServer()->GetDDRaceTeam(ID) == GameServer()->GetDDRaceTeam(ProcessedID))
+		if (ID == ProcessedID || GameServer()->GetDDRaceTeam(ID) == Team)
 			return 0;
 	}
 	return -1;
@@ -368,13 +385,15 @@ int CDurak::GetTeam(int ClientID, int MapID)
 
 bool CDurak::OnDropMoney(int ClientID, int Amount, bool OnDeath)
 {
+	// Disallow accidental money dropping in durak game
+	// When m_vpGames[Game]->m_Running is true, player is sent to minigame. so we dont have to check for running && ondeath anymore since its included
+	if (OnDeath && GameServer()->m_apPlayers[ClientID]->m_Minigame == MINIGAME_DURAK)
+		return true;
+
 	int Game = GetGameByClient(ClientID);
 	// If the game is running already, the money has been subtracted already
-	if (Game < 0)
+	if (Game < 0 || m_vpGames[Game]->m_Running)
 		return false;
-	// Disallow accidental money dropping in durak game
-	if (m_vpGames[Game]->m_Running && OnDeath)
-		return true;
 	bool CanDrop = GameServer()->m_apPlayers[ClientID]->GetUsableMoney() - Amount >= m_vpGames[Game]->GetSeatByClient(ClientID)->m_Player.m_Stake;
 	if (!CanDrop)
 	{
@@ -412,9 +431,11 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 	bool Jump = !pSeat->m_Player.m_LastInput.m_Jump ? pNewInput->m_Jump : false;
 
 	pSeat->m_Player.m_LastKeyboardControl = pSeat->m_Player.m_KeyboardControl;
-	if (Direction || HookColl || Jump)
+	if ((Direction || HookColl || Jump) && !pSeat->m_Player.m_KeyboardControl)
 	{
 		pSeat->m_Player.m_KeyboardControl = true;
+		// Dont switch back to mouse control for half a sec
+		pSeat->m_Player.m_LastCursorMove = Server()->Tick() + Server()->TickSpeed() / 2;
 	}
 
 	if (Direction)
@@ -572,16 +593,17 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 			}
 		}
 	}
-	else if (abs(pNewInput->m_TargetX - pSeat->m_Player.m_LastInput.m_TargetX) > 2.f || abs(pNewInput->m_TargetY - pSeat->m_Player.m_LastInput.m_TargetY) > 2.f)
+	else if (abs(pNewInput->m_TargetX - pSeat->m_Player.m_LastInput.m_TargetX) > 3.f || abs(pNewInput->m_TargetY - pSeat->m_Player.m_LastInput.m_TargetY) > 3.f)
 	{
 		if (pSeat->m_Player.m_KeyboardControl)
 		{
 			pSeat->m_Player.m_Tooltip = CCard::TOOLTIP_NONE;
 		}
-		pSeat->m_Player.m_KeyboardControl = false;
+
 		if (pSeat->m_Player.m_LastCursorMove < Server()->Tick())
 		{
 			pSeat->m_Player.m_LastCursorMove = Server()->Tick();
+			pSeat->m_Player.m_KeyboardControl = false;
 		}
 	}
 
@@ -598,7 +620,7 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 }
 
 template<typename... Args>
-void CDurak::SendChatToDeployedStakePlayers(int Game, int NotThisID, const char *pFormat, Args&&... args)
+void CDurak::ProposeNewStake(int Game, int NotThisID, const char *pFormat, Args&&... args)
 {
 	if (Game < 0 || Game >= (int)m_vpGames.size())
 		return;
@@ -608,6 +630,8 @@ void CDurak::SendChatToDeployedStakePlayers(int Game, int NotThisID, const char 
 		int ClientID = pGame->m_aSeats[i].m_Player.m_ClientID;
 		if (ClientID != -1 && pGame->m_aSeats[i].m_Player.m_Stake != -1 && (NotThisID == -1 || ClientID != NotThisID))
 		{
+			// Reset stake
+			pGame->m_aSeats[i].m_Player.m_Stake = -1;
 			char aBuf[256];
 			CFormatArg aArgs[] = { CFormatArg(std::forward<Args>(args))... };
 			str_format_args(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize(pFormat), aArgs, std::size(aArgs));
@@ -825,7 +849,8 @@ const char *CDurak::GetCardSymbol(int Suit, int Rank, CDurakGame *pGame, int Sna
 		case CCard::IND_TOOLTIP_TAKE_CARDS: return Localize("Take cards", "durak-name");
 		case CCard::IND_TOOLTIP_ATTACKERS_TURN:
 		{
-			str_format(aBuf, sizeof(aBuf), "%s", Server()->ClientName(pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_ClientID));
+			int ClientID = pGame->m_DurakClientID != -1 ? pGame->m_DurakClientID : pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_ClientID;
+			str_format(aBuf, sizeof(aBuf), "%s", Server()->ClientName(ClientID));
 			return aBuf;
 		}
 		case CCard::IND_TOOLTIP_DEFENDER_PASSED: return Localize("Passed…", "durak-name");
@@ -1219,9 +1244,13 @@ void CDurak::UpdateGame(int Game)
 		pGame->m_GameOverTick = Server()->Tick();
 		std::pair<int, int64> Pair(pGame->m_DurakClientID, pGame->m_GameOverTick);
 		m_vLastDuraks.push_back(Pair);
+
+		// Abuse tooltip attackers turn for showing durak's name in the end, it's handled there
+		SetTurnTooltip(Game, CCard::TOOLTIP_ATTACKERS_TURN);
 		return;
 	}
 
+	bool ProcessMove = pGame->ProcessNextMove(Server()->Tick());
 	bool AttackersEndedMove = false;
 	if(pGame->NextMoveSoon(Server()->Tick()))
 	{
@@ -1230,7 +1259,7 @@ void CDurak::UpdateGame(int Game)
 	else
 	{
 		AttackersEndedMove = pGame->m_aSeats[pGame->m_AttackerIndex].m_Player.m_EndedMove && pGame->m_aSeats[pGame->GetNextPlayer(pGame->m_DefenderIndex)].m_Player.m_EndedMove;
-		if (AttackersEndedMove)
+		if (AttackersEndedMove && !ProcessMove && pGame->GetOpenAttacks().empty())
 		{
 			SetNextMoveSoon(Game);
 			// Process next tick, and send tooltip next move
@@ -1238,7 +1267,6 @@ void CDurak::UpdateGame(int Game)
 		}
 	}
 
-	bool ProcessMove = pGame->ProcessNextMove(Server()->Tick());
 	if (ProcessMove || AttackersEndedMove)
 	{
 		bool AllAttacksDefended = true;
@@ -1294,9 +1322,6 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 		int ClientID = pGame->m_aSeats[i].m_Player.m_ClientID;
 		if (ClientID == -1)
 			continue;
-		// Disable passive also when won already, on next round
-		CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
-		if (pChr) pChr->EpicCircle(pGame->m_DefenderIndex == i, -1, true);
 
 		if (pGame->m_aSeats[i].m_Player.m_Stake >= 0)
 		{
@@ -1306,6 +1331,7 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 			pGame->m_aSeats[i].m_Player.m_EndedMove = false;
 			pGame->m_aSeats[i].m_Player.m_CanSetNextMove = true;
 			GameServer()->m_apPlayers[ClientID]->m_ShowName = true;
+			CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
 			if (pChr)
 			{
 				OnCharacterSpawn(pChr);
@@ -1381,6 +1407,13 @@ bool CDurak::TryPass(int Game, int Seat, CCard *pCard)
 	{
 		SetTurnTooltip(Game, CCard::TOOLTIP_DEFENDER_PASSED);
 		ProcessCardPlacement(Game, &pGame->m_aSeats[Seat], &m_vpGames[Game]->m_Attacks[Attack].m_Offense);
+		// update epic circle defender indicator on pass, not only nextround
+		CCharacter *pOldDefender = GameServer()->GetPlayerChar(pGame->m_aSeats[Seat].m_Player.m_ClientID);
+		if (pOldDefender)
+			pOldDefender->EpicCircle(false, -1, true);
+		CCharacter *pNewDefender = GameServer()->GetPlayerChar(pGame->m_aSeats[pGame->m_DefenderIndex].m_Player.m_ClientID);
+		if (pNewDefender)
+			pNewDefender->EpicCircle(true, -1, true);
 		return true;
 	}
 	return false;
@@ -1430,13 +1463,7 @@ void CDurak::TakeCardsFromTable(int Game)
 		if (!pSeat->m_Player.m_EndedMove)
 		{
 			EndMove(Game, pSeat);
-			SetTurnTooltip(Game, CCard::TOOLTIP_NEXT_MOVE);
-			// Force next move in 5 sec so others can throw in cards still
-			const int64 NextMoveTick = Server()->Tick() + Server()->TickSpeed() * 5;
-			if (pGame->m_NextMove > NextMoveTick)
-			{
-				pGame->m_NextMove = NextMoveTick;
-			}
+			SetNextMoveSoon(Game);
 		}
 		// Clicking it again will not help and will not speed up the process
 		return;
@@ -1598,10 +1625,14 @@ void CDurak::Snap(int SnappingClient)
 		return;
 
 	int ClientID = SnappingClient;
+	bool IsSpectator = false;
+
 	CPlayer *pSnap = GameServer()->m_apPlayers[SnappingClient];
-	if ((pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused()) && pSnap->GetSpectatorID() >= 0)
+	if ((pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused()) && pSnap->GetSpectatorID() >= 0 && pSnap->GetSpectatorID() != SnappingClient)
+	{
 		ClientID = pSnap->GetSpectatorID();
-	bool IsSpectator = SnappingClient != ClientID;
+		IsSpectator = true;
+	}
 
 	int Game = GetGameByClient(ClientID);
 	CDurakGame *pGame = Game >= 0 ? m_vpGames[Game] : 0;
@@ -1609,7 +1640,15 @@ void CDurak::Snap(int SnappingClient)
 	CDurakGame::SSeat *pSeat = 0;
 	if (pGame)
 	{
-		pSeat = IsSpectator && pGame->m_DefenderIndex != -1 ? &pGame->m_aSeats[pGame->m_DefenderIndex] : pGame->GetSeatByClient(ClientID);
+		if (pGame->m_DurakClientID != -1)
+		{
+			pSeat = pGame->GetSeatByClient(pGame->m_DurakClientID);
+			IsSpectator = false;
+		}
+		else
+		{
+			pSeat = IsSpectator && pGame->m_DefenderIndex != -1 ? &pGame->m_aSeats[pGame->m_DefenderIndex] : pGame->GetSeatByClient(ClientID);
+		}
 	}
 
 	// Prepare snap ids..
@@ -1761,7 +1800,7 @@ void CDurak::PrepareStaticCards(CDurakGame *pGame, CDurakGame::SSeat *pSeat)
 						}
 					}
 
-					if (pSeat->m_Player.m_KeyboardControl || pSeat->m_Player.m_LastCursorMove < Server()->Tick() - Server()->TickSpeed() * 0.15f)
+					if (pSeat->m_Player.m_KeyboardControl || pSeat->m_Player.m_LastCursorMove < Server()->Tick() - Server()->TickSpeed() / 10)
 					{
 						pCard->SetTooltip(pSeat->m_Player.m_Tooltip);
 					}

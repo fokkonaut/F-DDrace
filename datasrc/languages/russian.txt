@@ -1672,7 +1672,7 @@ Everyone in your locked team was killed because '%s' died.
 == Все в вашей заблокированной команде были убиты, потому что '%s' умер.
 
 Silent Farm
-== Тихая ферма
+== Тихий фарм
 
 Ninjajetpack
 == Реактивный ранец ниндзя
@@ -2053,40 +2053,40 @@ Everything (%d)
 
 {durak-name}
 Waiting…
-== 
+== Ждем…
 
 {durak-name}
 Players - %d/%d
-== 
+== Игрок: %d/%d
 
 {durak-name}
 Select attack
-== 
+== Выбрать
 
 {durak-name}
 Attack!
-== 
+== Атака!
 
 {durak-name}
 Defend
-== 
+== Защита
 
 {durak-name}
 Pass!
-== 
+== Пас!
 
 {durak-name}
 End move
-== 
+== Конец
 
 {durak-name}
 Take cards
-== 
+== Взять
 
 {durak-name}
 Passed…
-== 
+== Пас..
 
 {durak-name}
 Next move: %ds
-== 
+== Ход: %ds

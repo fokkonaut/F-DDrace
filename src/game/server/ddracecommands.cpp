@@ -2442,10 +2442,9 @@ void CGameContext::ConReloadDesigns(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConReloadLanguages(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	// If unloaded, load again
 	for (unsigned int i = 0; i < g_Localization.Languages().size(); i++)
-		if (g_Localization.TryUnload(pSelf, i))
-			g_Localization.Load(i);
+		if (g_Localization.Languages()[i].m_Loaded)
+			g_Localization.Load(g_Localization.Languages()[i].m_FileName.c_str(), true);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "localization", "Reloaded languages");
 }
 
@@ -2460,7 +2459,7 @@ void CGameContext::ConListLoadedLanguages(IConsole::IResult *pResult, void *pUse
 			continue;
 		int NumUsed = 0;
 		for (int c = 0; c < MAX_CLIENTS; c++)
-			if (pSelf->m_apPlayers[c] && pSelf->m_apPlayers[c]->m_Language == i)
+			if (pSelf->m_apPlayers[c] && !pSelf->m_apPlayers[c]->m_IsDummy && pSelf->m_apPlayers[c]->m_Language == i)
 				NumUsed++;
 		str_format(aBuf, sizeof(aBuf), "%s (%d players)", g_Localization.GetLanguageFileName(i), NumUsed);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "localization", aBuf);

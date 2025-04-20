@@ -89,26 +89,26 @@ void CProjectile::Tick()
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, m_CurPos, &ColPos, &NewPos);
 	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
 	CCharacter *pTargetChr = 0;
-	CHelicopter *pTargetHelicopter = 0;
+	CAdvancedEntity *pTargetEntity = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
 	{
 		int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
 		}
 		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
-		CEntity *pTargetEnt = GameWorld()->IntersectEntityTypes(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
-		if (pTargetEnt)
+		CEntity *pEnt = GameWorld()->IntersectEntityTypes(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
+		if (pEnt)
 		{
-			if (pTargetEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
 			{
-				pTargetChr = (CCharacter *)pTargetEnt;
+				pTargetChr = (CCharacter *)pEnt;
 			}
-			else if (pTargetEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			else if (pEnt->IsAdvancedEntity())
 			{
-				pTargetHelicopter = (CHelicopter *)pTargetEnt;
-				pTargetChr = pTargetHelicopter->GetOwner();
+				pTargetEntity = (CHelicopter *)pEnt;
+				pTargetChr = pTargetEntity->GetOwner();
 			}
 		}
 	}
@@ -139,13 +139,14 @@ void CProjectile::Tick()
 		return;
 	}
 
-	if (!IsWeaponCollide && (Collide || GameLayerClipped(m_CurPos) || (pTargetHelicopter && !pTargetChr) ||
+	if (!IsWeaponCollide && (Collide || GameLayerClipped(m_CurPos) || (pTargetEntity && !pTargetChr) ||
 		(pTargetChr && (m_Owner == -1 || pTargetChr == pOwnerChar || (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)))
 		))
 	{
 		if (m_Explosive/*??*/ && (!pTargetChr || (pTargetChr && (!m_Freeze || (m_Type == WEAPON_SHOTGUN && Collide)))))
 		{
-			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), m_TeamMask);
+			int ActivatedTeam = pTargetChr ? pTargetChr->Team() : (pTargetEntity ? pTargetEntity->GetDDTeam() : -1);
+			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, ActivatedTeam, m_TeamMask);
 			GameServer()->CreateSound(ColPos, m_SoundImpact, m_TeamMask);
 		}
 		else if (m_Freeze)
@@ -157,13 +158,14 @@ void CProjectile::Tick()
 					apEnts[i]->Freeze();
 		}
 		// F-DDrace
-		if (pTargetHelicopter)
+		if (pTargetEntity)
 		{
-			if (m_Explosive)
+			// Don't trigger a double explosion. Explosive is checked above.
+			/*if (m_Explosive)
 			{
-				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, pTargetHelicopter->GetDDTeam(), m_TeamMask);
+				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, pTargetEntity->GetDDTeam(), m_TeamMask);
 				GameServer()->CreateSound(ColPos, m_SoundImpact, m_TeamMask);
-			}
+			}*/
 		}
 		else if (pTargetChr)
 		{

@@ -2016,7 +2016,7 @@ Are you sure you want to buy a grog?
 == Bist du sicher, dass du einen Grog kaufen möchtest?
 
 Press F3 to confirm your assignment.
-== Drücke F3, um deine Zuweisung zu bestätigen.
+== Drücke F3, um deinen Auftrag zu bestätigen.
 
 Welcome to the tavern!\n\nIf you would like to buy a grog for %d money, please press F3.
 == Willkommen in der Taverne!\n\nWenn du einen Grog für %d Geld kaufen möchtest, drücke bitte F3.

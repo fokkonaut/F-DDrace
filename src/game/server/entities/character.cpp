@@ -616,7 +616,7 @@ void CCharacter::FireWeapon()
 				int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 				if (Config()->m_SvInteractiveDrops)
 				{
-					Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
 				}
 				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team());
 
@@ -625,11 +625,14 @@ void CCharacter::FireWeapon()
 				{
 					CEntity *pEnt = apEnts[i];
 					CCharacter *pTarget = 0;
-					CHelicopter *pHelicopter = 0;
-					switch (pEnt->GetObjType())
+					CAdvancedEntity *pEntity = 0;
+					if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
 					{
-					case CGameWorld::ENTTYPE_CHARACTER: pTarget = (CCharacter *)pEnt; break;
-					case CGameWorld::ENTTYPE_HELICOPTER: pHelicopter = (CHelicopter *)pEnt; break;
+						pTarget = (CCharacter *)pEnt;
+					}
+					else if (pEnt->IsAdvancedEntity())
+					{
+						pEntity = (CAdvancedEntity *)pEnt;
 					}
 
 					// set his velocity to fast upward (for now)
@@ -645,7 +648,7 @@ void CCharacter::FireWeapon()
 
 					if (pTarget)
 					{
-						if ((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCID()))))
+						if (pTarget == this || !pTarget->IsAlive() || !CanCollide(pTarget->GetPlayer()->GetCID()))
 							continue;
 
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
@@ -681,12 +684,18 @@ void CCharacter::FireWeapon()
 						Antibot()->OnHammerHit(m_pPlayer->GetCID(), TargetCID);
 						Hits++;
 					}
-					else if (pHelicopter)
+					else if (pEntity)
 					{
+						if (pEntity->GetObjType() == CGameWorld::ENTTYPE_FLAG)
+						{
+							if (((CFlag *)pEntity)->GetCarrier())
+								continue; // carrier is getting hit
+						}
+
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
 						vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-						Temp = pHelicopter->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
-						pHelicopter->SetVel(ClampVel(pHelicopter->GetOwner() ? pHelicopter->GetMoveRestrictions() : m_MoveRestrictions, Temp));
+						Temp = pEntity->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
+						pEntity->SetVel(ClampVel(pEntity->GetOwner() ? pEntity->GetMoveRestrictions() : m_MoveRestrictions, Temp));
 						Hits++;
 					}
 				}
@@ -870,7 +879,7 @@ void CCharacter::FireWeapon()
 
 				if (!m_pTelekinesisEntity)
 				{
-					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY);
+					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
 					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f * max(1.f, m_pPlayer->GetZoomLevel()), Types, this, m_pPlayer->GetCID(), !m_Passive);
 
 					CCharacter *pChr = 0;
@@ -4424,36 +4433,17 @@ void CCharacter::FDDraceTick()
 		{
 			vec2 Vel = vec2(0.f, 0.f);
 
-			switch (m_pTelekinesisEntity->GetObjType())
+			if (m_pTelekinesisEntity->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
 			{
-				case (CGameWorld::ENTTYPE_CHARACTER): 
-				{
-					CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
-					pChr->Core()->m_Pos = GetCursorPos();
-					pChr->Core()->m_Vel = Vel;
-					break;
-				}
-				case (CGameWorld::ENTTYPE_FLAG):
-				{
-					CFlag *pFlag = (CFlag *)m_pTelekinesisEntity;
-					pFlag->SetPos(GetCursorPos());
-					pFlag->SetVel(Vel);
-					break;
-				}
-				case (CGameWorld::ENTTYPE_PICKUP_DROP):
-				{
-					CPickupDrop *pPickup = (CPickupDrop *)m_pTelekinesisEntity;
-					pPickup->SetPos(GetCursorPos());
-					pPickup->SetVel(Vel);
-					break;
-				}
-				case (CGameWorld::ENTTYPE_MONEY):
-				{
-					CMoney *pMoney = (CMoney *)m_pTelekinesisEntity;
-					pMoney->SetPos(GetCursorPos());
-					pMoney->SetVel(Vel);
-					break;
-				}
+				CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
+				pChr->Core()->m_Pos = GetCursorPos();
+				pChr->Core()->m_Vel = Vel;
+			}
+			else if (m_pTelekinesisEntity->IsAdvancedEntity())
+			{
+				CAdvancedEntity* pEntity = (CAdvancedEntity*)m_pTelekinesisEntity;
+				pEntity->SetPos(GetCursorPos());
+				pEntity->SetVel(Vel);
 			}
 		}
 		else
@@ -5770,8 +5760,10 @@ bool CCharacter::TryCatchingWanted(int TargetCID, vec2 EffectPos)
 		pTarget->GetPlayer()->BankTransaction(-Corrupt, aBuf);
 		str_format(aBuf, sizeof(aBuf), "corrupted by gangster '%s'", Server()->ClientName(TargetCID));
 		m_pPlayer->BankTransaction(Corrupt, aBuf);
+
 		str_format(aBuf, sizeof(aBuf), pTarget->GetPlayer()->Localize("You paid %d money to '%s' to reduce your jailtime by 5 minutes"), Corrupt, Server()->ClientName(m_pPlayer->GetCID()));
 		GameServer()->SendChatTarget(TargetCID, aBuf);
+
 		str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("You got %d money from '%s' to reduce his jailtime by 5 minutes"), Corrupt, Server()->ClientName(TargetCID));
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 		Minutes -= 5;

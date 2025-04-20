@@ -12,7 +12,7 @@
 
 const char *Localize(const char *pStr, int Language, const char *pContext)
 {
-	const char *pNewStr = g_Localization.FindString(str_quickhash(pStr), str_quickhash(pContext), Language);
+	const char *pNewStr = g_Localization.FindString(str_quickhash_raw(pStr), str_quickhash(pContext), Language);
 	return pNewStr ? pNewStr : pStr;
 }
 

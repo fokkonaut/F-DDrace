@@ -83,7 +83,7 @@ galician
 german
 == Deutsch
 == 276
-== de
+== de;ch;at
 
 greek
 == Ελληνικά

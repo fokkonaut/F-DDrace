@@ -1317,6 +1317,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   editor.h
   engine.h
   graphics.h
+  http.h
   input.h
   kernel.h
   keys.h

@@ -313,7 +313,7 @@ public:
 	void SendChatTarget(int To, const char *pText, int Flags = CHATFLAG_ALL);
 	void SendChatTeam(int Team, const char *pText, CFormatArg *pArgs = 0, int NumArgs = 0);
 	void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) override { SendChat(ChatterClientID, Mode, To, pText); }
-	void SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1, int Flags = CHATFLAG_ALL, CFormatArg *pArgs = 0, int NumArgs = 0);
+	bool SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID = -1, int Flags = CHATFLAG_ALL, CFormatArg *pArgs = 0, int NumArgs = 0);
 
 	template<typename... Args>
 	void SendChatTeamFormat(int Team, const char *pFormat, Args&&... args)
@@ -326,7 +326,7 @@ public:
 	void SendChatFormat(int ChatterClientID, int Mode, int To, int Flags, const char* pFormat, Args&&... args)
 	{
 		CFormatArg aArgs[] = { CFormatArg(std::forward<Args>(args))... };
-		SendChat(ChatterClientID, CHAT_ALL, To, pFormat, -1, Flags, aArgs, std::size(aArgs));
+		SendChat(ChatterClientID, Mode, To, pFormat, -1, Flags, aArgs, std::size(aArgs));
 	}
 
 	void SendBroadcast(const char* pText, int ClientID, bool IsImportant = true, CFormatArg *pArgs = 0, int NumArgs = 0);

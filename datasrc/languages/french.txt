@@ -2053,40 +2053,40 @@ Everything (%d)
 
 {durak-name}
 Waiting…
-== 
+== En attente…
 
 {durak-name}
 Players - %d/%d
-== 
+== Joueurs - %d/%d
 
 {durak-name}
 Select attack
-== 
+== Choisir attaque
 
 {durak-name}
 Attack!
-== 
+== Attaquez!
 
 {durak-name}
 Defend
-== 
+== Défendre
 
 {durak-name}
 Pass!
-== 
+== Passer!
 
 {durak-name}
 End move
-== 
+== Fin du tour
 
 {durak-name}
 Take cards
-== 
+== Prendre cartes
 
 {durak-name}
 Passed…
-== 
+== A passé…
 
 {durak-name}
 Next move: %ds
-== 
+== Prochain: %ds

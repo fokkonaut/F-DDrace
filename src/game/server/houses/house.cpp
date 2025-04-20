@@ -87,7 +87,7 @@ void CHouse::OnEnter(int ClientID)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
 		int From = GameServer()->m_World.GetClosestHouseDummy(pChr->GetPos(), pChr, m_Type, ClientID);
-		GameServer()->SendChat(From, CHAT_SINGLE, ClientID, pChr->GetPlayer()->Localize(GetWelcomeMessage(ClientID)));
+		GameServer()->SendChatFormat(From, CHAT_SINGLE, ClientID, CGameContext::CHATFLAG_ALL, pChr->GetPlayer()->Localize(GetWelcomeMessage(ClientID)), Server()->ClientName(ClientID));
 	}
 }
 
