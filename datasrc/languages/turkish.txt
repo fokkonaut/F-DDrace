@@ -1267,10 +1267,10 @@ Police is searching you because of illegal bonus use
 == '%s' aşırı grog tüketimi sonucu öldü (%.1f‰ / %.1f‰)
 
 You paid %d money to '%s' to reduce your jailtime by 5 minutes
-== "%d para ödediniz '%s' oyuncusuna, hapis sürenizi 5 dakika azaltmak için"
+== "Hapis sürenizi 5 dakika azaltmak için %d para ödediniz, ödenen oyuncu: '%s'"
 
 You got %d money from '%s' to reduce his jailtime by 5 minutes
-== "%d para aldınız '%s' oyuncusundan, hapis süresini 5 dakika azaltmak için"
+== "Hapis süresini 5 dakika azaltmak için %d para aldınız, alınan oyuncu: '%s'"
 
 '%s' has been caught by '%s' (%d minutes arrest)
 == '%s', '%s' tarafından yakalandı (%d dakika tutuklama)
