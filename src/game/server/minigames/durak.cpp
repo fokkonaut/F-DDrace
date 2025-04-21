@@ -293,6 +293,9 @@ void CDurak::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
 				}
 			}
 			m_vpGames[g]->m_aSeats[i].m_Player.Reset();
+			// Don't let others wait, even though we resetted.
+			// We don't have to care about the player values anymore because a new CDurakGame is created and this one will get deleted.
+			m_vpGames[g]->m_aSeats[i].m_Player.m_EndedMove = true;
 
 			CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 			if (!GameServer()->Collision()->TileUsed(TILE_DURAK_LOBBY) && !Shutdown) // don't kill player on shutdown, we need character for SaveCharacter()
@@ -304,9 +307,9 @@ void CDurak::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
 				pPlayer->GetCharacter()->EpicCircle(false, -1, true);
 			}
 
-			pTeams->SetForceCharacterTeam(ClientID, 0);
-			// Set before tunings
+			// Set before tunings and team leaving
 			m_aInDurakGame[ClientID] = false;
+			pTeams->SetForceCharacterTeam(ClientID, 0);
 			GameServer()->SendTuningParams(ClientID);
 			
 			pPlayer->m_ForceSpawnPos = vec2(-1, -1);
@@ -434,8 +437,8 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 	if ((Direction || HookColl || Jump) && !pSeat->m_Player.m_KeyboardControl)
 	{
 		pSeat->m_Player.m_KeyboardControl = true;
-		// Dont switch back to mouse control for half a sec
-		pSeat->m_Player.m_LastCursorMove = Server()->Tick() + Server()->TickSpeed() / 2;
+		// Dont switch back to mouse control for 1/3 sec
+		pSeat->m_Player.m_LastCursorMove = Server()->Tick() + Server()->TickSpeed() / 3;
 	}
 
 	if (Direction)
@@ -604,6 +607,9 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 		{
 			pSeat->m_Player.m_LastCursorMove = Server()->Tick();
 			pSeat->m_Player.m_KeyboardControl = false;
+			if (pSeat->m_Player.m_SelectedAttack != -1)
+				pGame->m_Attacks[pSeat->m_Player.m_SelectedAttack].m_Offense.SetHovered(false);
+			pSeat->m_Player.m_SelectedAttack = -1;
 		}
 	}
 
@@ -680,7 +686,7 @@ bool CDurak::StartGame(int Game)
 
 	CGameTeams *pTeams = &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams;
 	int FirstFreeTeam = -1;
-	for (int i = 1; i < VANILLA_MAX_CLIENTS; i++)
+	for (int i = 1; i < MAX_CLIENTS; i++)
 	{
 		if (pTeams->Count(i) == 0)
 		{
@@ -968,8 +974,7 @@ void CDurak::UpdateGame(int Game)
 					// Forcefully process win on last player, we do not want any money glitched away.
 					// In this case the "Durak", or simply last player, will benefit from other's leaving the round
 					// If anyone has won before, the durak/losers stake has been given to the winner already. Again: No money dupe xD
-					// If nobody won before, we enter WinPos = 0, to receive our own stake as we didn't lose, but also the money of people who left.
-					ProcessPlayerWin(Game, pSeat, pGame->m_vWinners.size() ? -1 : 0, true);
+					ProcessPlayerWin(Game, pSeat, -1);
 					break;
 				}
 			}
@@ -1323,6 +1328,7 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 		if (ClientID == -1)
 			continue;
 
+		CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
 		if (pGame->m_aSeats[i].m_Player.m_Stake >= 0)
 		{
 			// Making sure to update handcards for 0.7 here, because we can not catch every case from within CDurakGame where SortHand() gets called for example.
@@ -1331,7 +1337,6 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 			pGame->m_aSeats[i].m_Player.m_EndedMove = false;
 			pGame->m_aSeats[i].m_Player.m_CanSetNextMove = true;
 			GameServer()->m_apPlayers[ClientID]->m_ShowName = true;
-			CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
 			if (pChr)
 			{
 				OnCharacterSpawn(pChr);
@@ -1340,6 +1345,11 @@ void CDurak::StartNextRound(int Game, bool SuccessfulDefense)
 			{
 				GameServer()->SendTuningParams(ClientID);
 			}
+		}
+		else if (pChr)
+		{
+			// Just disable our epic circle, if we won already and was the defender before.
+			pChr->EpicCircle(false, -1, true);
 		}
 	}
 }
@@ -1536,7 +1546,7 @@ void CDurak::SetTurnTooltip(int Game, int Tooltip)
 	}
 }
 
-void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bool ForceEnd)
+void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos)
 {
 	CDurakGame *pGame = m_vpGames[Game];
 	int ClientID = pSeat->m_Player.m_ClientID;
@@ -1548,7 +1558,7 @@ void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bo
 
 	// WinPos == -1: Force last player, if somebody won before, 0: nobody won before
 	int64 ReturnStake = 0;
-	if (WinPos >= 0 && pSeat->m_Player.m_Stake >= 0)
+	if (pSeat->m_Player.m_Stake >= 0)
 	{
 		ReturnStake = pSeat->m_Player.m_Stake;
 		HandleMoneyTransaction(ClientID, ReturnStake, "Durák stake return");
@@ -1556,7 +1566,7 @@ void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bo
 
 	// First winner get's the stake of the loser, plus the stake of those who left inbetween
 	int64 WinStake = 0;
-	if (WinPos <= 0)
+	if (WinPos == 0)
 	{
 		WinStake = pGame->m_Stake;
 		HandleMoneyTransaction(ClientID, WinStake, "Durák win");
@@ -1611,7 +1621,7 @@ void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bo
 	pPlayer->m_ConfettiWinEffectTick = Server()->Tick();
 
 	// Update acc stats
-	if (!ForceEnd && pPlayer->GetAccID() >= ACC_START)
+	if (WinPos >= 0 && pPlayer->GetAccID() >= ACC_START)
 	{
 		GameServer()->m_Accounts[pPlayer->GetAccID()].m_DurakWins++;
 	}

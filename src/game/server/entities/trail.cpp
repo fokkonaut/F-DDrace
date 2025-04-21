@@ -1,3 +1,5 @@
+// original version has been created by timakro
+
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include "character.h"

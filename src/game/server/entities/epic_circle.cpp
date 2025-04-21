@@ -1,3 +1,5 @@
+// originally made by Loic KASSEL (Rei/ReiTw)
+
 #include <game/server/gamecontext.h>
 #include "epic_circle.h"
 

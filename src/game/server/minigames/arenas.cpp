@@ -51,7 +51,7 @@ void CArenas::Reset(int ClientID)
 int CArenas::GetFreeArena()
 {
 	for (int i = 0; i < MAX_FIGHTS; i++)
-		if (!m_aFights[i].m_Active && ((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.Count(i) == 0)
+		if (!m_aFights[i].m_Active)
 			return i;
 	return -1;
 }
@@ -467,12 +467,29 @@ void CArenas::StartFight(int Fight)
 	if (Fight < 0)
 		return;
 
+	CGameTeams *pTeams = &((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams;
+	int FirstFreeTeam = -1;
+	for (int i = 1; i < MAX_CLIENTS; i++)
+	{
+		if (pTeams->Count(i) == 0)
+		{
+			FirstFreeTeam = i;
+			break;
+		}
+	}
+
+	if (FirstFreeTeam == -1)
+	{
+		EndFight(Fight);
+		return;
+	}
+
 	KillParticipants(Fight);
 	int aID[2] = { m_aFights[Fight].m_aParticipants[0].m_ClientID, m_aFights[Fight].m_aParticipants[1].m_ClientID };
 	for (int i = 0; i < 2; i++)
 	{
 		m_aInFight[aID[i]] = true;
-		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(aID[i], Fight + 1);
+		((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetForceCharacterTeam(aID[i], FirstFreeTeam);
 		GameServer()->m_pController->UpdateGameInfo(aID[i]);
 
 		if (GameServer()->m_apPlayers[aID[i]])

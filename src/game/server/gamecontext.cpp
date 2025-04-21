@@ -695,19 +695,20 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	if(Mode == CHAT_ALL)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i) && !str_comp(Server()->GetChatLanguage(i), "none"))
-			{
-				bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
-				if (Send)
+			if (To == -1 || i == To)
+				if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i) && !str_comp(Server()->GetChatLanguage(i), "none"))
 				{
-					if (ChatterClientID == -1)
+					bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
+					if (Send)
 					{
-						str_format_args(aText, sizeof(aText), m_apPlayers[i]->Localize(pText), pArgs, NumArgs);
-						Msg.m_pMessage = aText;
+						if (ChatterClientID == -1)
+						{
+							str_format_args(aText, sizeof(aText), m_apPlayers[i]->Localize(pText), pArgs, NumArgs);
+							Msg.m_pMessage = aText;
+						}
+						SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 					}
-					SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 				}
-			}
 	}
 	else if(Mode == CHAT_TEAM)
 	{

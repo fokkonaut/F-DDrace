@@ -1,4 +1,4 @@
-// made by ChillerDragon, improved by fokkonaut
+// made by ChillerDragon, updated by fokkonaut
 
 #include "v3_blocker.h"
 #include <game/server/gamecontext.h>

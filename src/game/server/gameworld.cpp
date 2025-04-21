@@ -1135,7 +1135,8 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 		for(; p; p = p->TypeNext())
  		{
 			float ProximityRadius = p->m_ProximityRadius;
-			if (CheckPlotTaserDestroy || (i != ENTTYPE_DOOR && i != ENTTYPE_PICKUP && i != ENTTYPE_BUTTON && i != ENTTYPE_SPEEDUP && i != ENTTYPE_TELEPORTER))
+			bool EntTypeDestroyable = i == ENTTYPE_DOOR || i == ENTTYPE_PICKUP || i == ENTTYPE_BUTTON || i == ENTTYPE_SPEEDUP || i == ENTTYPE_TELEPORTER;
+			if ((CheckPlotTaserDestroy && !EntTypeDestroyable) || !CheckPlotTaserDestroy)
 			{
 				if(p == pNotThis)
 					continue;

@@ -1,3 +1,5 @@
+// original version has been created by timakro
+
 #ifndef GAME_SERVER_ENTITIES_TRAIL_H
 #define GAME_SERVER_ENTITIES_TRAIL_H
 

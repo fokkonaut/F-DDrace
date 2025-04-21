@@ -1,3 +1,5 @@
+// original version has been created by timakro
+
 #include <game/server/gamecontext.h>
 #include "meteor.h"
 #include "character.h"

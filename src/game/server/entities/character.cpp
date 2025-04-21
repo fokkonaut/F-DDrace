@@ -616,7 +616,7 @@ void CCharacter::FireWeapon()
 				int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 				if (Config()->m_SvInteractiveDrops)
 				{
-					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
+					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 				}
 				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team());
 

@@ -1,4 +1,4 @@
-// originally made by Loic KASSEL (Rei), updated by fokkonaut
+// originally made by Loic KASSEL (Rei/ReiTw), updated by fokkonaut
 
 #ifndef GAME_SERVER_ENTITIES_SPECIAL_LIGHTNINGLASER_H
 #define GAME_SERVER_ENTITIES_SPECIAL_LIGHTNINGLASER_H

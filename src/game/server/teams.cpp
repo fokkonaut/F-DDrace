@@ -639,10 +639,10 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	char aBuf[128];
 	SetCpActive(Player, -2);
 	str_format(aBuf, sizeof(aBuf),
-			Player->Localize("%s finished in: %d minute(s) %5.2f second(s)"),
+			Localizable("%s finished in: %d minute(s) %5.2f second(s)"),
 			Server()->ClientName(Player->GetCID()), (int)Time / 60,
 			Time - ((int)Time / 60 * 60));
-	if (GameServer()->Config()->m_SvHideScore || !GameServer()->Config()->m_SvSaveWorseScores)
+	if (GameServer()->Config()->m_SvHideScore)
 		GameServer()->SendChatTarget(Player->GetCID(), aBuf);
 	else
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
@@ -668,7 +668,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 			aArgs[0] = Diff;
 			aArgs[1] = 0;
 		}
-		if (GameServer()->Config()->m_SvHideScore || !GameServer()->Config()->m_SvSaveWorseScores)
+		if (GameServer()->Config()->m_SvHideScore)
 			GameServer()->SendChat(-1, CHAT_ALL, Player->GetCID(), aBuf, -1, CGameContext::CHATFLAG_ALL, aArgs, NumArgs);
 		else
 			GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf, -1, CGameContext::CHATFLAG_ALL, aArgs, NumArgs);
