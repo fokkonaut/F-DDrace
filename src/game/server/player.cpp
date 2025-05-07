@@ -276,7 +276,12 @@ void CPlayer::Tick()
 		m_ChatScore--;
 
 	int AccID = GetAccID();
-	Server()->SetClientScore(m_ClientID, GameServer()->Config()->m_SvDefaultScoreMode == SCORE_TIME ? m_Score : GameServer()->Config()->m_SvDefaultScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[AccID].m_Level : GameServer()->m_Accounts[AccID].m_BlockPoints);
+	int DefScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
+	Server()->SetClientScore(m_ClientID, DefScoreMode == SCORE_TIME ? m_Score
+		: DefScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[AccID].m_Level
+		: DefScoreMode == SCORE_BLOCK_POINTS ? GameServer()->m_Accounts[AccID].m_BlockPoints
+		: DefScoreMode == SCORE_BONUS && m_pCharacter ? m_pCharacter->m_NoBonusContext.m_Score
+		: 0);
 
 	// do latency stuff
 	if (!m_IsDummy)
@@ -1094,7 +1099,9 @@ void CPlayer::OnDisconnect()
 	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
 
 	GameServer()->m_VotingMenu.Reset(m_ClientID);
-	g_Localization.TryUnload(GameServer(), m_Language);
+
+	// Invalidate our own language already, so that g_localization::TryUnload might succeed in SetLanguage
+	SetLanguage(-1, true, false);
 	if (m_VoteQuestionType == VOTE_QUESTION_LANGUAGE_SUGGESTION)
 	{
 		/// Unload suggested language from cache again
@@ -2117,7 +2124,7 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 	if (pAccount->m_aLanguage[0] != '\0')
 	{
 		int DummyID = Server()->GetDummy(m_ClientID);
-		if (DummyID == -1 || GameServer()->m_apPlayers[DummyID]->GetAccID() < ACC_START)
+		if (DummyID == -1 || (GameServer()->m_apPlayers[DummyID] && GameServer()->m_apPlayers[DummyID]->GetAccID() < ACC_START))
 		{
 			// Only set language when other dummy is not logged in
 			SetLanguage(g_Localization.GetLanguage(pAccount->m_aLanguage));
@@ -2177,9 +2184,8 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 
 	GameServer()->StartResendingVotes(m_ClientID, false);
 
-	if (GameServer()->Config()->m_SvMoneyBankMode == 0)
+	if (GameServer()->Config()->m_SvMoneyBankMode == 0 && BankTransaction(GetWalletMoney(), "automatic wallet to bank due to login and disabled bank"))
 	{
-		BankTransaction(GetWalletMoney(), "automatic wallet to bank due to login and disabled bank");
 		// Manually set wallet money instead of using WalletTransaction, because SvMoneyBankMode 0 redirects walelttransactions to bank, which doesn't make any sense here
 		SetWalletMoney(0);
 		GameServer()->SendChatTarget(m_ClientID, Localize("Your previously collected money got added to your account due to login"));
@@ -2256,6 +2262,8 @@ void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 	case CPlayer::VOTE_QUESTION_LANGUAGE_SUGGESTION:
 	{
 		int LanguageFromCode = g_Localization.GetLanguageByCode(Server()->GetCountryCode(m_ClientID));
+		if (LanguageFromCode == -1 || !g_Localization.Languages()[LanguageFromCode].m_Available)
+			return;
 		if (str_comp(g_Localization.GetLanguageFileName(LanguageFromCode), GameServer()->Config()->m_SvDefaultLanguage) == 0)
 			return;
 
@@ -2764,7 +2772,7 @@ void CPlayer::MinigameAfkCheck()
 	}
 	else if (TimeLeft <= 10 && Server()->Tick() % Server()->TickSpeed() == 0)
 	{
-		char aBuf[64];
+		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), Localize("Please move within %d seconds or you will leave the minigame"), TimeLeft);
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
@@ -2788,16 +2796,19 @@ const char *CPlayer::Localize(const char *pText, const char *pContext)
 	return ::Localize(pText, m_Language, pContext);
 }
 
-void CPlayer::SetLanguage(int Language, bool Silent)
+void CPlayer::SetLanguage(int Language, bool Silent, bool UpdateDummy)
 {
 	if (Language == m_Language)
 		return;
 
-	int DummyID = Server()->GetDummy(m_ClientID);
-	if (DummyID != -1)
+	if (UpdateDummy)
 	{
-		// Always keep track of dummy language
-		GameServer()->m_apPlayers[DummyID]->m_Language = Language;
+		int DummyID = Server()->GetDummy(m_ClientID);
+		if (DummyID != -1)
+		{
+			// Always keep track of dummy language
+			GameServer()->m_apPlayers[DummyID]->m_Language = Language;
+		}
 	}
 
 	int PrevLanguage = m_Language;

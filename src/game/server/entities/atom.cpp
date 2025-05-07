@@ -1,3 +1,5 @@
+// originally made by timakro
+
 #include <game/server/gamecontext.h>
 #include "atom.h"
 #include "character.h"

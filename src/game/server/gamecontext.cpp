@@ -590,14 +590,15 @@ void CGameContext::SendChatPolice(const char *pMessage)
 	SendChat(-1, CHAT_POLICE_CHANNEL, -1, pMessage);
 }
 
-void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID, int Flags, CFormatArg *pArgs, int NumArgs)
+bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText, int SpamProtectionClientID, int Flags, CFormatArg *pArgs, int NumArgs)
 {
 	if (SpamProtectionClientID >= 0 && SpamProtectionClientID < MAX_CLIENTS)
 		if (ProcessSpamProtection(SpamProtectionClientID))
-			return;
+			return false;
 
 	// client id used to check against muted
 	int MuteChecked = ChatterClientID;
+	bool SlashMe = false;
 
 	char aBuf[512], aText[256];
 	if (Mode == CHAT_POLICE_CHANNEL)
@@ -614,7 +615,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	{
 		// Can happen when translating a player message and that player left the server before translator finished...
 		if (!m_apPlayers[ChatterClientID])
-			return;
+			return false;
 
 		// dont trigger updating of teams twice. this means people who translate chat will probably receive the color update before their chat msg appeared
 		// CHAT_SINGLE and CHAT_SINGLE_TEAM are used for translating aswell, so they would cause that
@@ -638,6 +639,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		ChatterClientID = -1;
 		// if '/me' is used, still dont send the message when sender is muted
 		MuteChecked = SpamProtectionClientID;
+		SlashMe = true;
 	}
 	else
 	{
@@ -695,19 +697,20 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	if(Mode == CHAT_ALL)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
-			if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i) && !str_comp(Server()->GetChatLanguage(i), "none"))
-			{
-				bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
-				if (Send)
+			if (To == -1 || i == To)
+				if (!IsMuted(MuteChecked, i) && CanReceiveMessage(ChatterClientID, i) && !str_comp(Server()->GetChatLanguage(i), "none"))
 				{
-					if (ChatterClientID == -1)
+					bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
+					if (Send)
 					{
-						str_format_args(aText, sizeof(aText), m_apPlayers[i]->Localize(pText), pArgs, NumArgs);
-						Msg.m_pMessage = aText;
+						if (ChatterClientID == -1 && !SlashMe)
+						{
+							str_format_args(aText, sizeof(aText), m_apPlayers[i]->Localize(pText), pArgs, NumArgs);
+							Msg.m_pMessage = aText;
+						}
+						SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 					}
-					SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, i);
 				}
-			}
 	}
 	else if(Mode == CHAT_TEAM)
 	{
@@ -792,7 +795,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			char aMsg[32];
 			str_format(aMsg, sizeof(aMsg), "Invalid whisper");
 			SendChatTarget(ChatterClientID, aMsg);
-			return;
+			return false;
 		}
 
 		m_apPlayers[ChatterClientID]->m_LastWhisperTo = To;
@@ -818,6 +821,7 @@ void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 			SendChatMsg(&Msg, MsgFlags|MSGFLAG_VITAL, ChatterClientID);
 		}
 	}
+	return true;
 }
 
 void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImportant, CFormatArg *pArgs, int NumArgs)
@@ -837,8 +841,28 @@ void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImporta
 		return;
 
 	CNetMsg_Sv_Broadcast Msg;
-	char aBuf[256];
+	char aBuf[1024];
 	str_format_args(aBuf, sizeof(aBuf), m_apPlayers[ClientID]->Localize(pText), pArgs, NumArgs);
+
+	// This is done clientside in 0.7, but DDNet clients only parse aBuf[i] == '\n'
+	if (Server()->IsSevendown(ClientID))
+	{
+		int i, j;
+		for(i = 0, j = 0; aBuf[i]; i++, j++)
+		{
+			if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
+			{
+				aBuf[j] = '\n';
+				i++;
+			}
+			else if(i != j)
+			{
+				aBuf[j] = aBuf[i];
+			}
+		}
+		aBuf[j] = '\0';
+	}
+
 	Msg.m_pMessage = aBuf;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	m_apPlayers[ClientID]->m_LastBroadcast = Server()->Tick();
@@ -1768,7 +1792,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	int DummyID = Server()->GetDummy(ClientID);
-	if (DummyID != -1)
+	if (DummyID != -1 && m_apPlayers[DummyID])
 	{
 		// Always keep track of dummy language
 		m_apPlayers[ClientID]->SetLanguage(m_apPlayers[DummyID]->m_Language, true);
@@ -2440,10 +2464,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(Mode != CHAT_NONE)
 			{
-				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID);
 				pPlayer->UpdatePlaytime();
 
-				if (Mode != CHAT_WHISPER)
+				if (SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage, ClientID) && Mode != CHAT_WHISPER)
 				{
 					char aLocalNames[256] = "";
 					for (int i = 0; i < MAX_CLIENTS; i++)
@@ -3525,27 +3548,7 @@ void CGameContext::ConSay(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConBroadcast(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-
-	// This is done clientside in 0.7, but DDNet clients only parse aBuf[i] == '\n'
-	char aBuf[1024];
-	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
-
-	int i, j;
-	for(i = 0, j = 0; aBuf[i]; i++, j++)
-	{
-		if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
-		{
-			aBuf[j] = '\n';
-			i++;
-		}
-		else if(i != j)
-		{
-			aBuf[j] = aBuf[i];
-		}
-	}
-	aBuf[j] = '\0';
-
-	pSelf->SendBroadcast(aBuf, -1);
+	pSelf->SendBroadcast(pResult->GetString(0), -1);
 }
 
 void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)

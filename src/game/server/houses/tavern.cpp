@@ -9,9 +9,7 @@ CTavern::CTavern(CGameContext *pGameServer) : CHouse(pGameServer, HOUSE_TAVERN)
 
 const char *CTavern::GetWelcomeMessage(int ClientID)
 {
-	static char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), Localizable("Welcome to the tavern, %s! Press F4 to buy a grog."), Server()->ClientName(ClientID));
-	return aBuf;
+	return Localizable("Welcome to the tavern, %s! Press F4 to buy a grog.");
 }
 
 const char *CTavern::GetConfirmMessage(int ClientID)

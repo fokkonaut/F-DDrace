@@ -1,4 +1,4 @@
-// made by fokkonaut
+// original version has been created by noby
 
 #ifndef GAME_SERVER_WHOIS_H
 #define GAME_SERVER_WHOIS_H

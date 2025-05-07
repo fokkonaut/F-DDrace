@@ -400,33 +400,61 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 	return fread(buffer, 1, size, (FILE*)io);
 }
 
-void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+bool io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 {
-	unsigned char *buffer = (unsigned char *)malloc(1024);
-	unsigned len = 0;
-	unsigned cap = 1024;
-	unsigned read;
+	// Loading files larger than 1 GiB into memory is not supported.
+	constexpr int64_t MAX_FILE_SIZE = (int64_t)1024 * 1024 * 1024;
 
-	*result = 0;
-	*result_len = 0;
-
-	while((read = io_read(io, buffer + len, cap - len)) != 0)
+	int64_t real_len = io_length(io);
+	if(real_len > MAX_FILE_SIZE)
 	{
-		len += read;
-		if(len == cap)
+		*result = nullptr;
+		*result_len = 0;
+		return false;
+	}
+
+	int64_t len = real_len < 0 ? 1024 : real_len; // use default initial size if we couldn't get the length
+	char *buffer = (char *)malloc(len + 1);
+	int64_t read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
+	if(read < len)
+	{
+		buffer = (char *)realloc(buffer, read + 1);
+		len = read;
+	}
+	else if(read > len)
+	{
+		int64_t cap = 2 * read;
+		if(cap > MAX_FILE_SIZE)
 		{
-			cap *= 2;
-			buffer = (unsigned char *)realloc(buffer, cap);
+			free(buffer);
+			*result = nullptr;
+			*result_len = 0;
+			return false;
 		}
+		len = read;
+		buffer = (char *)realloc(buffer, cap);
+		while((read = io_read(io, buffer + len, cap - len)) != 0)
+		{
+			len += read;
+			if(len == cap)
+			{
+				cap *= 2;
+				if(cap > MAX_FILE_SIZE)
+				{
+					free(buffer);
+					*result = nullptr;
+					*result_len = 0;
+					return false;
+				}
+				buffer = (char *)realloc(buffer, cap);
+			}
+		}
+		buffer = (char *)realloc(buffer, len + 1);
 	}
-	if(len == cap)
-	{
-		buffer = (unsigned char *)realloc(buffer, cap + 1);
-	}
-	// ensure null termination
 	buffer[len] = 0;
 	*result = buffer;
 	*result_len = len;
+	return true;
 }
 
 char *io_read_all_str(IOHANDLE io)
@@ -434,7 +462,10 @@ char *io_read_all_str(IOHANDLE io)
 	void *buffer;
 	unsigned len;
 
-	io_read_all(io, &buffer, &len);
+	if(!io_read_all(io, &buffer, &len))
+	{
+		return nullptr;
+	}
 	if(mem_has_null(buffer, len))
 	{
 		free(buffer);
@@ -3377,6 +3408,24 @@ unsigned str_quickhash(const char *str)
 	unsigned hash = 5381;
 	for(; *str; str++)
 		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
+	return hash;
+}
+
+unsigned str_quickhash_raw(const char *str)
+{
+	unsigned hash = 5381;
+	for(; *str; str++)
+	{
+		if(*str == '\n')
+		{
+			hash = ((hash << 5) + hash) + '\\';
+			hash = ((hash << 5) + hash) + 'n';
+		}
+		else
+		{
+			hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
+		}
+	}
 	return hash;
 }
 

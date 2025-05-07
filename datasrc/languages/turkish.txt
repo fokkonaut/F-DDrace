@@ -1267,10 +1267,10 @@ Police is searching you because of illegal bonus use
 == '%s' aşırı grog tüketimi sonucu öldü (%.1f‰ / %.1f‰)
 
 You paid %d money to '%s' to reduce your jailtime by 5 minutes
-== '%s' oyuncusuna hapis sürenizi 5 dakika azaltmak için %d para ödediniz
+== "Hapis sürenizi 5 dakika azaltmak için %d para ödediniz, ödenen oyuncu: '%s'"
 
 You got %d money from '%s' to reduce his jailtime by 5 minutes
-== '%s' oyuncusundan hapis süresini 5 dakika azaltmak için %d para aldınız
+== "Hapis süresini 5 dakika azaltmak için %d para aldınız, alınan oyuncu: '%s'"
 
 '%s' has been caught by '%s' (%d minutes arrest)
 == '%s', '%s' tarafından yakalandı (%d dakika tutuklama)
@@ -1923,19 +1923,19 @@ Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
 == Mᴇᴠᴄᴜᴛ ᴅɪʟʟᴇʀ
 
 Rainbow will make your tee change the color very fast.
-== Gökkuşağı, tişörtünüzün rengini çok hızlı değiştirecektir.
+== Gökkuşağı, tee'nizin rengini çok hızlı değiştirecektir.
 
 Bloody will give your tee a permanent kill effect.
-== Kanlı, tişörtünüze kalıcı bir öldürme efekti verecektir.
+== Bloody, tee'nize kalıcı bir öldürme efekti verecektir.
 
 Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.
 == Polis memurları polis botundan yardım alır. Belirli polis rütbeleri hakkında daha fazla bilgi için lütfen '/police' yazın.
 
 Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. How it works: '/helptoggle'
-== Bu eşyayı kullanarak diğer oyunculardan çalıların arkasına saklanabilirsiniz. Hayaletiniz etkinleştirilirse plazma mermileri atabileceksiniz. Nasıl çalışır: '/helptoggle'
+== Bu eşyayı kullanarak çalıların arkasına saklanabilirsiniz. Hayaletiniz etkinleştirilirse plazma mermileri atabileceksiniz. Nasıl çalışır: '/helptoggle'
 
 If you have the room key you can enter the room. It's under the spawn and there is a money tile.
-== Oda anahtarınız varsa odaya girebilirsiniz. Doğuş noktasının altındadır ve orada bir para karosu vardır.
+== Oda anahtarınız varsa odaya girebilirsiniz. Doğuş noktasının hemen altında ve orada bir para alanı var.
 
 VIP Classic gives you some benefits, check '/vip'.
 == VIP Classic size bazı avantajlar sağlar, '/vip' kontrol edin.
@@ -1965,7 +1965,7 @@ With Portal Rifle you can create two portals where your cursor is, then teleport
 == Portal Tüfeği ile imlecinizin olduğu yerde iki portal oluşturabilir, ardından bunlar arasında ışınlanabilirsiniz.
 
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
-== İmlecinizle portal engelleyici çekiç ve bu cephaneyi oluşturun. Mevcut miktarınız için '/portal' bakın. Nasıl çalışır: '/helptoggle'
+== İmlecinizle portal engelleyici çekiç ve cephaneyi oluşturun. Mevcut miktarınız için '/portal' yazın. Nasıl çalışır: '/helptoggle'
 
 Welcome to the shop, %s! Press F4 to start shopping.
 == Mağazaya hoş geldiniz, %s! Alışverişe başlamak için F4'e basın.
@@ -1980,7 +1980,7 @@ You own this item until you die.
 == Bu eşyaya ölene kadar sahip olursunuz.
 
 You own this item until\nyou disconnect.
-== Bu eşyaya bağlantınız\nkesene kadar sahip olursunuz.
+== Bu eşyaya bağlantınız\nkesilene kadar sahip olursunuz.
 
 You own this item forever.
 == Bu eşyaya sonsuza dek sahip olursunuz.
@@ -2053,40 +2053,40 @@ Everything (%d)
 
 {durak-name}
 Waiting…
-== 
+== Bekleniyor…
 
 {durak-name}
 Players - %d/%d
-== 
+== Oyuncular - %d/%d
 
 {durak-name}
 Select attack
-== 
+== Atak seç
 
 {durak-name}
 Attack!
-== 
+== Atak!
 
 {durak-name}
 Defend
-== 
+== Savun
 
 {durak-name}
 Pass!
-== 
+== Geç!
 
 {durak-name}
 End move
-== 
+== Hamleyi bitir
 
 {durak-name}
 Take cards
-== 
+== Kartları al
 
 {durak-name}
 Passed…
-== 
+== Geçildi…
 
 {durak-name}
 Next move: %ds
-== 
+== Sıradaki: %ds

@@ -12,6 +12,7 @@
 #include <engine/shared/econ.h>
 #include <engine/shared/mapchecker.h>
 #include <engine/shared/netban.h>
+#include <engine/shared/http.h>
 #include "register.h"
 #include <engine/shared/fifo.h>
 
@@ -109,6 +110,7 @@ public:
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
+	IHttp *Http() { return &m_Http; }
 
 	enum
 	{
@@ -298,6 +300,7 @@ public:
 	CSnapshotBuilder m_SnapshotBuilder;
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
+	CHttp m_Http;
 	CEcon m_Econ;
 #if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
@@ -442,6 +445,7 @@ public:
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);
 	void SendMap(int ClientID);
 	void SendFakeMap(int ClientID);
+	void SendMapReload(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted);
@@ -471,7 +475,7 @@ public:
 	void SendRedirectSaveTeeAdd(int Port, const char *pHash) override;
 	void SendRedirectSaveTeeRemove(int Port, const char *pHash) override;
 	void SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash);
-	void SendPlayerCountUpdate(bool Shutdown = false);
+	void SendPlayerCountUpdate(bool Shutdown = false) override;
 
 	void PumpNetwork();
 

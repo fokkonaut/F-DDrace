@@ -12,11 +12,6 @@
 
 #include <engine/shared/protocol.h>
 
-static SECURITY_TOKEN ToSecurityToken(const unsigned char *pData)
-{
-	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
-}
-
 bool CNetServer::Open(NETADDR BindAddr, CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, CNetBan *pNetBan,
 	int MaxClients, int MaxClientsPerIP, NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient,
 	NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_CLIENTCANCLOSE pfnClientCanClose, void *pUser)
@@ -135,78 +130,61 @@ SECURITY_TOKEN CNetServer::GetSecurityToken(const NETADDR &Addr)
 	return SecurityToken;
 }
 
-bool CNetServer::GetSevendown(const NETADDR *pAddr, CNetPacketConstruct *pPacket, unsigned char *pBuffer)
-{
-	for(int i = 0; i < NET_MAX_CLIENTS; i++)
-	{
-		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-			continue;
-
-		if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), pAddr, true) == 0)
-			return m_aSlots[i].m_Connection.m_Sevendown;
-	}
-	
-	// connless packets use this now: *pSevendown = (pBuffer[0] & 0x3) != 1;
-	/*int Flags = pBuffer[0]>>4;
-	if (pPacket->m_Flags&2) Flags |= NET_PACKETFLAG_CONNLESS;
-	if (Flags&NET_PACKETFLAG_CONNLESS)
-	{
-		pPacket->m_Flags = Flags;
-		return true;
-	}
-
-	if (pPacket->m_Flags&NET_PACKETFLAG_CONNLESS && pBuffer[0] != 0xff)
-		return false;*/
-
-	return !(pPacket->m_Flags&1);
-}
-
 /*
 	TODO: chopp up this function into smaller working parts
 */
 int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown, int Socket)
 {
+	if (!m_aSocket[Socket])
+		return 0;
+
 	while(1)
 	{
 		// check for a chunk
 		if(m_RecvUnpacker.IsActive() && m_RecvUnpacker.FetchChunk(pChunk))
 			return 1;
-
+		
 		// TODO: empty the recvinfo
 		NETADDR Addr;
-		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, pSevendown, Socket, this);
+		unsigned char *pData;
+		int Bytes = net_udp_recv(m_aSocket[Socket], &Addr, &pData);
+
 		// no more packets for now
-		if(Result > 0)
-			break;
+ 		if(Bytes <= 0)
+ 			break;
 
-		if(!Result)
+		// check for bans
+		char aBuf[128];
+		int LastInfoQuery;
+		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf), &LastInfoQuery))
 		{
-			// check for bans
-			char aBuf[128];
-			int LastInfoQuery;
-			if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf), &LastInfoQuery))
+			// banned, reply with a message (5 second cooldown)
+			int Time = time_timestamp();
+			if(LastInfoQuery + 5 < Time)
 			{
-				// banned, reply with a message (5 second cooldown)
-				int Time = time_timestamp();
-				if(LastInfoQuery + 5 < Time)
+				if (Config()->m_SvDiscordURL[0])
 				{
-					if (Config()->m_SvDiscordURL[0])
-					{
-						char aTemp[128];
-						str_format(aTemp, sizeof(aTemp), " - Appeal: %s", Config()->m_SvDiscordURL);
-						str_append(aBuf, aTemp, sizeof(aBuf));
-					}
-
-					SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, Socket, NET_SECURITY_TOKEN_UNSUPPORTED);
+					char aTemp[128];
+					str_format(aTemp, sizeof(aTemp), " - Appeal: %s", Config()->m_SvDiscordURL);
+					str_append(aBuf, aTemp, sizeof(aBuf));
 				}
-				continue;
+
+				SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, aBuf, str_length(aBuf) + 1, *pSevendown, Socket, NET_SECURITY_TOKEN_UNSUPPORTED);
 			}
+			continue;
+		}
 
-			if (*pSevendown && !Config()->m_SvAllowSevendown)
-				continue;
+		// early unpack flags, to later unpack packet only once
+		if (UnpackFlagsRaw(pData, Bytes, &m_RecvUnpacker.m_Data))
+			continue;
 
-			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
+		if (m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
+		{
+			if(UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown) == 0)
 			{
+				if (*pSevendown && !Config()->m_SvAllowSevendown)
+					continue;
+
 				if (!*pSevendown && (SECURITY_TOKEN)m_RecvUnpacker.m_Data.m_Token != GetGlobalToken())
 				{
 					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
@@ -225,21 +203,33 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 					*pResponseToken = m_RecvUnpacker.m_Data.m_ResponseToken;
 				return 1;
 			}
-			else
+		}
+		else
+		{
+			int Slot = -1;
+			// try to find matching slot
+			for(int i = 0; i < NET_MAX_CLIENTS; i++)
 			{
-				int Slot = -1;
-				// try to find matching slot
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
-				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-						continue;
+				if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+					continue;
 
-					if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr, true) == 0)
-					{
-						Slot = i;
-						break;
-					}
+				if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr, true) == 0)
+				{
+					Slot = i;
+					break;
 				}
+			}
+
+			// Determine version and unpack packet once
+			if (Slot != -1)
+			{
+				*pSevendown = m_aSlots[Slot].m_Connection.m_Sevendown;
+			}
+
+			if (UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown) == 0)
+			{
+				if (*pSevendown && !Config()->m_SvAllowSevendown)
+					continue;
 
 				int ControlMsg = m_RecvUnpacker.m_Data.m_aChunkData[0];
 				bool Control = (m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL);

@@ -1226,6 +1226,12 @@ void CServer::SendMap(int ClientID)
 	m_aClients[ClientID].m_MapChunk = 0;
 }
 
+void CServer::SendMapReload(int ClientID)
+{
+	CMsgPacker Msg(NETMSG_MAP_RELOAD, true);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+}
+
 void CServer::SendConnectionReady(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CON_READY, true);
@@ -2729,7 +2735,7 @@ void CServer::InitInterfaces(CConfig *pConfig, IConsole *pConsole, IGameServer *
 	m_pMap = pMap;
 	m_pStorage = pStorage;
 	m_pAntibot = pAntibot;
-	HttpInit(m_pStorage);
+	Kernel()->RegisterInterface(static_cast<IHttp *>(&m_Http));
 }
 
 int CServer::Run()
@@ -2784,9 +2790,15 @@ int CServer::Run()
 		return -1;
 	}
 
+	if(!m_Http.Init(std::chrono::seconds{2}, Config()))
+	{
+		dbg_msg("server", "Failed to initialize the HTTP client.");
+		return -1;
+	}
+
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	m_pRegister = CreateRegister(m_pConfig, m_pConsole, pEngine, Config()->m_SvPort, m_NetServer.GetGlobalToken());
-	m_pRegisterTwo = CreateRegister(m_pConfig, m_pConsole, pEngine, Config()->m_SvPortTwo, m_NetServer.GetGlobalToken());
+	m_pRegister = CreateRegister(m_pConfig, m_pConsole, pEngine, &m_Http, Config()->m_SvPort, m_NetServer.GetGlobalToken());
+	m_pRegisterTwo = CreateRegister(m_pConfig, m_pConsole, pEngine, &m_Http, Config()->m_SvPortTwo, m_NetServer.GetGlobalToken());
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
@@ -2855,6 +2867,9 @@ int CServer::Run()
 					{
 						if(m_aClients[c].m_State <= CClient::STATE_AUTH)
 							continue;
+						
+						// Just send always, to take dummy with us upon map changes, specifically for the case of switching back and reloading stats
+						SendMapReload(c);
 
 						SendMap(c);
 						m_aClients[c].Reset();
@@ -4019,13 +4034,17 @@ int main(int argc, const char **argv) // ignore_convention
 	pConsole->Init();
 
 	pServer->InitInterfaces(pConfigManager->Values(), pConsole, pGameServer, pEngineMap, pStorage, pEngineAntibot);
+
+	// register all console commands
+	pServer->RegisterCommands();
+
 	if(!UseDefaultConfig)
 	{
-		// register all console commands
-		pServer->RegisterCommands();
-
 		// execute autoexec file
-		pConsole->ExecuteFile("autoexec.cfg");
+		if (!pConsole->ExecuteFile("autoexec.cfg"))
+		{
+			pConsole->ExecuteFile("autoexec_server.cfg");
+		}
 
 		// parse the command line arguments
 		if(argc > 1) // ignore_convention

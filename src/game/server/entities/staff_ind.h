@@ -1,3 +1,5 @@
+// original version has been created by ReiTw
+
 #ifndef GAME_SERVER_ENTITIES_SPECIAL_STAFF_IND_H
 #define GAME_SERVER_ENTITIES_SPECIAL_STAFF_IND_H
 

@@ -429,18 +429,22 @@ public:
 	{
 		for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
 		{
-			int p = Prev ? -1 : 1;
-			int NextIndex = (CurrentIndex + p*(i + 1)) % MAX_DURAK_PLAYERS;
+			int NextIndex = (CurrentIndex + (Prev ? -1 : 1)*(i + 1) + MAX_DURAK_PLAYERS) % MAX_DURAK_PLAYERS;
 			if (m_aSeats[NextIndex].m_Player.m_ClientID != -1 && m_aSeats[NextIndex].m_Player.m_Stake >= 0 && (!CheckHands || m_aSeats[NextIndex].m_Player.m_vHandCards.size()))
 				return NextIndex;
 		}
 		return -1;
 	}
 
+	bool NextMoveSoon(int Tick)
+	{
+		return m_NextMove && m_NextMove > Tick && m_NextMove < Tick + SERVER_TICK_SPEED * 5;
+	}
+
 	bool ProcessNextMove(int64 CurrentTick)
 	{
 		if (!m_NextMove)
-			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 45;
+			m_NextMove = CurrentTick + SERVER_TICK_SPEED * 60;
 		return m_NextMove <= CurrentTick;
 	}
 
@@ -585,11 +589,6 @@ public:
 		return true;
 	}
 
-	bool NextMoveSoon(int Tick)
-	{
-		return m_NextMove && m_NextMove > Tick && Tick + SERVER_TICK_SPEED * 5 >= m_NextMove;
-	}
-
 	bool CanProcessWin(int Seat)
 	{
 		return m_Running && m_aSeats[Seat].m_Player.m_Stake >= 0 && m_aSeats[Seat].m_Player.m_ClientID != m_DurakClientID;
@@ -647,7 +646,15 @@ public:
 
 		if (!NextMoveSoon(Tick))
 		{
+			// Reset timer to 60 sec
 			m_NextMove = 0;
+		}
+		else if (GetOpenAttacks().size() == 1)
+		{
+			// Also update timer if attacker waited 59 seconds to place first card.
+			// give defender the opportunity to defend, but only 30 sec, dont delay it even more
+			m_NextMove = -1;
+			m_NextMove = Tick + SERVER_TICK_SPEED * 30;
 		}
 		return Used;
 	}
@@ -726,11 +733,20 @@ public:
 	void RemoveCard(int Seat, CCard *pCard)
 	{
 		auto &vHand = m_aSeats[Seat].m_Player.m_vHandCards;
+		for (int i = 0; i < (int)vHand.size(); i++)
+		{
+			if (m_aSeats[Seat].m_Player.m_HoveredCard == i)
+			{
+				vHand[i].SetHovered(false);
+				m_aSeats[Seat].m_Player.m_HoveredCard = -1;
+				break;
+			}
+		}
+
 		vHand.erase(std::remove_if(vHand.begin(), vHand.end(),
 			[&](const CCard &c) { return c.m_Suit == pCard->m_Suit && c.m_Rank == pCard->m_Rank; }),
 			vHand.end());
 
-		m_aSeats[Seat].m_Player.m_HoveredCard = -1;
 		m_aSeats[Seat].m_Player.m_Tooltip = CCard::TOOLTIP_NONE;
 		if (m_Deck.IsEmpty() && m_aSeats[Seat].m_Player.m_vHandCards.empty() && std::find(m_vWinners.begin(), m_vWinners.end(), Seat) == m_vWinners.end())
 		{
@@ -775,6 +791,7 @@ class CDurak : public CMinigame
 	bool StartGame(int Game);
 	void EndGame(int Game);
 	void StartNextRound(int Game, bool SuccessfulDefense = false);
+	void SetPlaying(int Game, int Seat);
 	void UpdateHandcards(int Game, CDurakGame::SSeat *pSeat);
 	void TakeCardsFromTable(int Game);
 	void EndMove(int Game, CDurakGame::SSeat *pSeat, bool Force = false);
@@ -784,11 +801,11 @@ class CDurak : public CMinigame
 	void ProcessCardPlacement(int Game, CDurakGame::SSeat *pSeat, CCard *pFlyingPointToCard);
 	void SetTurnTooltip(int Game, int Tooltip);
 	void SetNextMoveSoon(int Game);
-	void ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos, bool ForceEnd = false);
+	void ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos);
 	bool HandleMoneyTransaction(int ClientID, int Amount, const char *pMsg);
 
 	template<typename... Args>
-	void SendChatToDeployedStakePlayers(int Game, int NotThisID, const char *pFormat, Args&&... args);
+	void ProposeNewStake(int Game, int NotThisID, const char *pFormat, Args&&... args);
 	template<typename... Args>
 	void SendChatToParticipants(int Game, const char *pFormat, Args&&... args);
 

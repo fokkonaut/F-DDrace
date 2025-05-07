@@ -1,3 +1,5 @@
+// originally made by Loic KASSEL (Rei/ReiTw), updated by fokkonaut
+
 #include <game/server/gamecontext.h>
 #include <game/server/gameworld.h>
 #include "lightninglaser.h"

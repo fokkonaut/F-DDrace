@@ -84,7 +84,7 @@ The reason why the 1vs1 minigame deserves it's own entry in this list is simple.
 * **Durák card game** <br>
 You can play Durák by mouse or via keyboarc controls (+left, +right, +jump, +showhookcoll) <br>
 	* **Requirements** <br>
-	`cl_show_direction 0; cl_nameplates_size 50; cl_nameplates_offset 30`
+	`cl_show_direction 0; cl_nameplates_size 50; cl_nameplates_offset 30; cl_show_others_alpha 40;`
 	* **Durák controls/rules** <br>
 	Round start: Initial attacker name will be displayed at top left of table.<br>
 	Attacker: You start, drag and drop a card of your choice on the middle table area. Or select a card using A/D, submit using SPACE or go back using HOOK-COLLISION. When you selected the card using SPACE, you can choose what you want to do with the card using A/D again and submit using SPACE again.

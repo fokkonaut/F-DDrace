@@ -1,4 +1,4 @@
-// made by fokkonaut
+// made by fokkonaut and Matq, somewhere around 2021 and in 2025
 
 #include "engine/server.h"
 #include "game/server/gamecontext.h"

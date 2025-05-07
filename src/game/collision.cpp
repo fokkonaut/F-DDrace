@@ -817,7 +817,7 @@ void CCollision::Dest()
 	if (m_pSwitchers)
 		delete[] m_pSwitchers;
 	if (m_apPlotSize)
-		delete[] m_apPlotSize;
+		free(m_apPlotSize);
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;

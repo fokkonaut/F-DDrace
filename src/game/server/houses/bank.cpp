@@ -11,9 +11,7 @@ CBank::CBank(CGameContext *pGameServer) : CHouse(pGameServer, HOUSE_BANK)
 
 const char *CBank::GetWelcomeMessage(int ClientID)
 {
-	static char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), Localizable("Welcome to the bank, %s! Press F4 to manage your bank account."), Server()->ClientName(ClientID));
-	return aBuf;
+	return Localizable("Welcome to the bank, %s! Press F4 to manage your bank account.");
 }
 
 const char *CBank::GetConfirmMessage(int ClientID)

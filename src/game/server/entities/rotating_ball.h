@@ -1,3 +1,5 @@
+// original version has been created by ReiTw
+
 #ifndef GAME_SERVER_ENTITIES_ROTATING_BALL_H
 #define GAME_SERVER_ENTITIES_ROTATING_BALL_H
 

@@ -9,7 +9,7 @@
 class CFlag : public CAdvancedEntity
 {
 private:
-	static const int ms_PhysSize = 14;
+	static const int ms_PhysSize = 16;
 
 	int m_Team;
 	bool m_AtStand;

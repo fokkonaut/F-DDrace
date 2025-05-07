@@ -1,3 +1,5 @@
+// original version has been created by ReiTw
+
 #include <game/server/gamecontext.h>
 #include "staff_ind.h"
 

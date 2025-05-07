@@ -255,7 +255,7 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
 		- Guarantees that result will contain zero-termination.
 		- The result must be freed after it has been used.
 */
-void io_read_all(IOHANDLE io, void **result, unsigned *result_len);
+bool io_read_all(IOHANDLE io, void **result, unsigned *result_len);
 
 /*
 	Function: io_read_all_str
@@ -1888,6 +1888,7 @@ float str_tofloat(const char *str);
 int str_isspace(char c);
 char str_uppercase(char c);
 unsigned str_quickhash(const char *str);
+unsigned str_quickhash_raw(const char *str);
 
 uint32_t fnv1a(const char *str);
 

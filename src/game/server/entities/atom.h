@@ -1,3 +1,5 @@
+// originally made by timakro
+
 #ifndef GAME_SERVER_ENTITIES_ATOM_H
 #define GAME_SERVER_ENTITIES_ATOM_H
 

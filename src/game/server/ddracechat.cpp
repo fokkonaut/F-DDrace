@@ -1947,7 +1947,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 				return;
 			}
 
-			if (pPlayer->GetCharacter()->m_LastMoneyDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
+			if (pPlayer->GetCharacter()->m_LastMoneyDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed() * pSelf->Config()->m_SvMoneyDropDelay)
 			{
 				pPlayer->GetCharacter()->DropMoney(Amount);
 				pPlayer->GetCharacter()->m_LastMoneyDrop = pSelf->Server()->Tick();
@@ -1958,6 +1958,9 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 
 	bool BankEnabled = pSelf->Config()->m_SvMoneyBankMode != 0;
 
+	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
+	for (int i = 4; i >= 0; i--)
+		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);
 	char aBuf[256];
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	str_format(aBuf, sizeof(aBuf), "%s [%lld]", BankEnabled ? pPlayer->Localize("Bank") : pPlayer->Localize("Wallet"), pPlayer->GetWalletOrBankDisplay());
@@ -1972,9 +1975,6 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 		str_format(aBuf, sizeof(aBuf), "EUR [%.2f]", pSelf->m_Accounts[pPlayer->GetAccID()].m_Euros);
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
-	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
-	for (int i = 0; i < 5; i++)
-		pSelf->SendChatTarget(pResult->m_ClientID, pSelf->m_Accounts[pPlayer->GetAccID()].m_aLastMoneyTransaction[i]);
 	pSelf->SendChatTarget(pResult->m_ClientID, "~~~~~~~~~~");
 	pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Drop money: '/money drop <amount>'"));
 }

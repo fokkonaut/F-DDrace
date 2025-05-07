@@ -177,27 +177,16 @@ void CMissile::HandleExplosions()
 	if (IsIgnited())
 	{
 		vec2 nearbyPos = m_Pos + vec2((float)(rand() % 151 - 75), (float)(rand() % 151 - 75));
-		GameServer()->CreateExplosion(nearbyPos,
-			m_Owner,
-			WEAPON_GRENADE,
-			m_Owner == -1,
-			m_DDTeam, m_TeamMask);
+		GameServer()->CreateExplosion(nearbyPos, m_Owner, WEAPON_GRENADE, m_Owner == -1, m_DDTeam, m_TeamMask);
 		GameServer()->CreateSound(nearbyPos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 	else
-	{ // Explode only once
+	{
+		// Explode only once
 		m_ExplosionsLeft = 0;
-		GameServer()->CreateExplosion(m_Pos,
-			m_Owner,
-			WEAPON_GRENADE,
-			m_Owner == -1,
-			m_DDTeam, m_TeamMask);
+		GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, m_Owner == -1, m_DDTeam, m_TeamMask);
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
-
-	// F-DDrace
-//    if (pTargetChr)
-//        pTargetChr->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
 
 	if (m_ExplosionsLeft == 0)
 		GameWorld()->DestroyEntity(this);

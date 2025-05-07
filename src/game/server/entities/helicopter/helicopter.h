@@ -1,5 +1,4 @@
-// made by fokkonaut
-//  AND MATQ 2021
+// made by fokkonaut and Matq, somewhere around 2021 and in 2025
 
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_H

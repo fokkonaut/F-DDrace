@@ -74,13 +74,15 @@ int CNetClient::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 
 		// TODO: empty the recvinfo
 		NETADDR Addr;
-		bool Sevendown;
-		int Result = UnpackPacket(&Addr, m_RecvUnpacker.m_aBuffer, &m_RecvUnpacker.m_Data, &Sevendown, 0);
-		// no more packets for now
-		if(Result > 0)
-			break;
+		unsigned char *pData;
+		int Bytes = net_udp_recv(m_aSocket[0], &Addr, &pData);
 
-		if(!Result)
+		// no more packets for now
+ 		if(Bytes <= 0)
+ 			break;
+
+		bool Sevendown = false;
+		if (UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, &Sevendown) == 0)
 		{
 			if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr, true) == 0)
 			{

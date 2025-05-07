@@ -102,9 +102,7 @@ bool CShop::PageValid(int Page)
 
 const char *CShop::GetWelcomeMessage(int ClientID)
 {
-	static char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), Localizable("Welcome to the shop, %s! Press F4 to start shopping."), Server()->ClientName(ClientID));
-	return aBuf;
+	return Localizable("Welcome to the shop, %s! Press F4 to start shopping.");
 }
 
 const char *CShop::GetConfirmMessage(int ClientID)

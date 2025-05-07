@@ -1,3 +1,5 @@
+// original version has been created by noby
+
 #include "whois.h"
 #include <game/server/gamecontext.h>
 #include <engine/shared/config.h>
