@@ -1340,7 +1340,8 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	{
 		int TurretType = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : 0;
 		float Scale = pResult->NumArguments() > 2 ? pResult->GetFloat(2) : 1.f;
-		pSelf->SpawnHelicopter(pChr->Team(), pChr->GetPos(), TurretType, Scale);
+		if (!pSelf->SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), TurretType, Scale))
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn a Helicopter here");
 	}
 }
 

@@ -84,10 +84,6 @@ void CMissile::ApplyAcceleration()
 				m_Vel = normalize(m_Vel) * 50.f;
 		}
 	}
-	else
-	{
-		m_Vel += vec2(0.f, 0.3f);
-	}
 
 	m_Pos += m_Vel;
 }

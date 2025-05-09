@@ -7,7 +7,7 @@
 
 void SBone::Snap(int SnappingClient)
 {
-	if (!m_pEntity || m_ID == -1)
+	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
 
 	auto parentPos = m_pEntity->GetPos();
@@ -43,7 +43,7 @@ void SBone::Snap(int SnappingClient)
 
 void STrail::Snap(int SnappingClient)
 {
-	if (!m_pEntity || m_ID == -1)
+	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
 
 	CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID, sizeof(CNetObj_Projectile)));
@@ -57,4 +57,22 @@ void STrail::Snap(int SnappingClient)
 	pObj->m_VelY = 0;
 	pObj->m_StartTick = Server()->Tick();
 	pObj->m_Type = WEAPON_HAMMER;
+}
+
+void SHeart::Snap(int SnappingClient)
+{
+	if (!m_Enabled || !m_pEntity || m_ID == -1)
+		return;
+
+	int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
+	CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_ID, Size));
+	if (!pPickup)
+		return;
+
+	auto parentPos = m_pEntity->GetPos();
+	pPickup->m_X = round_to_int(parentPos.x + m_Pos.x);
+	pPickup->m_Y = round_to_int(parentPos.y + m_Pos.y);
+	pPickup->m_Type = POWERUP_HEALTH;
+	if (Server()->IsSevendown(SnappingClient))
+		((int*)pPickup)[3] = 0;
 }

@@ -1144,7 +1144,13 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (pThisOnly && p != pThisOnly)
 					continue;
 
+				if (i == ENTTYPE_CHARACTER && ((CCharacter *)p)->m_pHelicopter)
+					continue;
+
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
+					continue;
+
+				if (i == ENTTYPE_HELICOPTER && ((CHelicopter *)p)->IsBuilding())
 					continue;
 
 				if (CollideWith != -1)
@@ -1207,6 +1213,8 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 			if (closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 			{
 				float Len = distance(p->m_Pos, IntersectPos);
+//				dbg_msg("findentities", "%f", ProximityRadius+Radius);
+//				this is the function that looks for the heli right
 				if(Len < ProximityRadius+Radius)
 				{
 					Len = distance(Pos0, IntersectPos);
