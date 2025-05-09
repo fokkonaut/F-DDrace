@@ -365,6 +365,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	Mask128 TeamMask = Mask128();
 	for (int i = 0; i < Num; i++)
 	{
+		vec2 Diff = apEnts[i]->GetPos() - Pos;
+		float l = length(Diff);
+
 		CCharacter *pChr = 0;
 		CAdvancedEntity *pEnt = 0;
 		bool IsCharacter = apEnts[i]->GetObjType() == CGameWorld::ENTTYPE_CHARACTER;
@@ -380,13 +383,16 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				if (((CFlag *)pEnt)->GetCarrier())
 					continue;
 			}
-			else
-				pChr = pEnt->GetOwner();
+			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			{
+				if (((CHelicopter *)pEnt)->IsBuilding())
+					continue;
+			}
+
+			pChr = pEnt->GetOwner();
 		}
 
-		vec2 Diff = apEnts[i]->GetPos() - Pos;
 		vec2 ForceDir(0, 1);
-		float l = length(Diff);
 		if (l)
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
@@ -419,6 +425,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			{
 				if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 					((CFlag *)pEnt)->SetAtStand(false);
+				else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+					((CHelicopter *)pEnt)->ExplosionDamage(Strength, Pos, Owner);
 
 				vec2 Temp = pEnt->GetVel() + Force;
 				pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
@@ -2868,11 +2876,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					
 					if (!InHouse)
 					{
-						if (pChr->m_pHelicopter) // temp explode button
+						if (pChr->m_pHelicopter)
 						{
-							pChr->m_pHelicopter->Explode();
+							pChr->m_pHelicopter->Dismount();
 						}
-						else
+						else if (!pChr->TryMountHelicopter())
 						{
 							pChr->DropFlag();
 						}
@@ -2900,11 +2908,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					if (!InHouse)
 					{
-						if (pChr->m_pHelicopter)
-						{
-							pChr->m_pHelicopter->Dismount();
-						}
-						else if (!pChr->TryMountHelicopter() && !pChr->DropGrog())
+						if (!pChr->DropGrog())
 						{
 							pChr->DropWeapon(pChr->GetActiveWeaponUnclamped(), false);
 						}
@@ -7733,31 +7737,25 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
 }
 
-void CGameContext::SpawnHelicopter(int Team, vec2 Pos, int TurretType, float Scale)
+bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int TurretType, float Scale, bool SpawnOnFloor)
 {
-	Pos.y -= 64.f;
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, Team, Pos, Scale);
+	vec2 ResultingHitbox = HELICOPTER_PHYSSIZE * Scale;
+	if (SpawnOnFloor)
+		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
 
-	CVehicleTurret* pTurret = nullptr;
-	switch (TurretType)
-	{
-		case TURRETTYPE_MINIGUN:
-		{
-			pTurret = new CMinigunTurret();
-		} break;
-		case TURRETTYPE_LAUNCHER:
-		{
-			pTurret = new CLauncherTurret();
-		} break;
+	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
+		return false;
 
-		case TURRETTYPE_NONE:
-		default:
-		{ } break;
-	}
-
+	CHelicopter *pHelicopter = new CHelicopter(&m_World, Spawner, Team, Pos, Scale, true);
+	CVehicleTurret *pTurret = nullptr;
+	if (TurretType == TURRETTYPE_MINIGUN)
+		pTurret = new CMinigunTurret();
+	else if (TurretType == TURRETTYPE_LAUNCHER)
+		pTurret = new CLauncherTurret();
 
 	if (!pHelicopter->AttachTurret(pTurret))
 		delete pTurret; // Failed to assign ownership
+	return true;
 }
 
 void CGameContext::UpdateHidePlayers(int UpdateID)
