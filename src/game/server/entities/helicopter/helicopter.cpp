@@ -513,8 +513,8 @@ void CHelicopter::DamageInFreeze()
 		{
 			auto TileIndex = GameServer()->Collision()->GetTileIndex(*i);
 			auto TileFIndex = GameServer()->Collision()->GetFTileIndex(*i);
-			if (((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE) && // In freeze tile
-				(!GetOwner() || GetOwner() && !GetOwner()->m_Super))) // No owner or owner with no super
+			if ((((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE)) && // In freeze tile
+				(!GetOwner() || (GetOwner() && !GetOwner()->m_Super)))) // No owner or owner with no super
 			{
 				TakeDamage(1, m_Pos, m_LastKnownOwner);
 				m_LastEnvironmentalDamage = Server()->Tick();
@@ -525,8 +525,8 @@ void CHelicopter::DamageInFreeze()
 	{
 		auto TileIndex = GameServer()->Collision()->GetTileIndex(CurrentIndex);
 		auto TileFIndex = GameServer()->Collision()->GetFTileIndex(CurrentIndex);
-		if (((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE) && // In freeze tile
-			(!GetOwner() || GetOwner() && !GetOwner()->m_Super))) // No owner or owner with no super
+		if ((((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE)) && // In freeze tile
+			(!GetOwner() || (GetOwner() && !GetOwner()->m_Super)))) // No owner or owner with no super
 		{
 			TakeDamage(1, m_Pos, m_LastKnownOwner);
 			m_LastEnvironmentalDamage = Server()->Tick();
@@ -678,9 +678,9 @@ void CHelicopter::Snap(int SnappingClient)
 		}
 	}
 	else if ((m_Owner == -1 || m_Owner == SnappingClient) && // Show hearts when no driver or only to driver
-		(m_ShowHeartsUntil && m_ShowHeartsUntil > Server()->Tick() || // Show until time specified (on mount, damage, etc.)
+		((m_ShowHeartsUntil && m_ShowHeartsUntil > Server()->Tick()) || // Show until time specified (on mount, damage, etc.)
 			m_Health != m_MaxHealth) && // Show while not full health
-		(!m_LastDamage || m_LastDamage && (m_LastDamage + Server()->TickSpeed() / 2 <= Server()->Tick() || // If been damaged too long ago, show normally
+		(!m_LastDamage || (m_LastDamage && (m_LastDamage + Server()->TickSpeed() / 2 <= Server()->Tick()) || // If been damaged too long ago, show normally
 			(m_LastDamage + Server()->TickSpeed() / 2 > Server()->Tick() && (Server()->Tick() / 4) % 2 == 0)))) // If been damaged recently, show flashing
 	{
 		// Draw hearts
