@@ -69,7 +69,7 @@ bool MovingCircleHitsMovingSegment_Analytical(
 }
 
 CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build)
-	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * clamp(HelicopterScale, 0.8f, 5.f))
+	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
 {
 	m_AllowVipPlus = false;
 	m_Elasticity = 0.f;
@@ -142,7 +142,7 @@ CHelicopter::~CHelicopter()
 void CHelicopter::Reset()
 {
 	Dismount();
-	GameWorld()->DestroyEntity(this);
+	CAdvancedEntity::Reset();
 }
 
 bool CHelicopter::IsRegenerating()
@@ -233,14 +233,16 @@ void CHelicopter::Explode()
 	Dismount();
 
 	// Freeze characters near explosion
-	CCharacter *aVictims[20];
-	int numFound = GameWorld()->FindEntities(m_Pos, GetProximityRadius(), (CEntity **)aVictims, 20, CGameWorld::ENTTYPE_CHARACTER, m_DDTeam);
+	CCharacter *aVictims[MAX_CLIENTS];
+	int numFound = GameWorld()->FindEntities(m_Pos, GetProximityRadius(), (CEntity **)aVictims, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER, m_DDTeam);
 	if (!numFound)
 		return;
 
 	for (int i = 0; i < numFound; i++)
 	{
 		CCharacter *pChar = aVictims[i];
+		pChar->m_FreezeTime = 0; // refreezing if exploded while tasered
+		pChar->m_FreezeTick = 0;
 		pChar->Freeze(3);
 	}
 }
@@ -281,11 +283,15 @@ void CHelicopter::ExplosionDamage(float Strength, vec2 Pos, int FromID)
 
 void CHelicopter::Tick()
 {
+	CAdvancedEntity::Tick();
+
+	if (m_LastKnownOwner >= 0 && !GameServer()->m_apPlayers[m_LastKnownOwner])
+		m_LastKnownOwner = -1;
+
 	BuildHelicopter();
 
 	if (!IsBuilding() && !IsExploding())
 	{
-		CAdvancedEntity::Tick();
 		HandleDropped();
 
 		if (GetOwner())
@@ -355,6 +361,30 @@ void CHelicopter::ApplyAcceleration()
 {
 	if (!m_EngineOn)
 		m_Accel = vec2(0.f, 0.f);
+
+	if (GetOwner())
+	{ // Hook acceleration
+		for (int Hooker : GetOwner()->Core()->m_AttachedPlayers)
+		{
+			CCharacter* pChr = GameServer()->GetPlayerChar(Hooker);
+			if (!pChr)
+				continue;
+
+			float Distance = distance(pChr->GetPos(), m_Pos);
+			vec2 Dir = normalize(pChr->GetPos() - m_Pos);
+
+			if (Distance > GetProximityRadius() + CCharacterCore::PHYS_SIZE)
+			{
+				float Accel = pChr->Tuning()->m_HookDragAccel * (Distance / pChr->Tuning()->m_HookLength);
+				float DragSpeed = pChr->Tuning()->m_HookDragSpeed;
+
+				vec2 Temp;
+				Temp.x = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.x, Accel * Dir.x * 0.025f);
+				Temp.y = SaturatedAdd(-DragSpeed, DragSpeed, m_Vel.y, Accel * Dir.y * 0.05f);
+				m_Vel = ClampVel(m_MoveRestrictions, Temp);
+			}
+		}
+	}
 
 	float strafeFactor = (m_Flipped == (m_Vel.x > 0.f)) ? 0.4f : 1.f; // Accelerate slower when moving backwards
 	m_Vel.x += m_Accel.x * 0.6f * strafeFactor;
@@ -437,7 +467,7 @@ void CHelicopter::HandleExplosions()
 //        pTargetChr->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
 
 	if (m_ExplosionsLeft == 0)
-		GameWorld()->DestroyEntity(this);
+		Reset();
 
 	m_ExplosionsLeft--;
 }
@@ -502,34 +532,11 @@ void CHelicopter::DamageInFreeze()
 	if (m_LastEnvironmentalDamage && m_LastEnvironmentalDamage + Server()->TickSpeed() > Server()->Tick())
 		return;
 
-	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
-
-	std::list<int> Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if (!Indices.empty())
+	if ((((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && // In freeze tile
+		(!GetOwner() || (GetOwner() && !GetOwner()->m_Super))))
 	{
-		for (std::list<int>::iterator i = Indices.begin(); i != Indices.end(); i++)
-		{
-			auto TileIndex = GameServer()->Collision()->GetTileIndex(*i);
-			auto TileFIndex = GameServer()->Collision()->GetFTileIndex(*i);
-			if ((((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE)) && // In freeze tile
-				(!GetOwner() || (GetOwner() && !GetOwner()->m_Super)))) // No owner or owner with no super
-			{
-				TakeDamage(1, m_Pos, m_LastKnownOwner);
-				m_LastEnvironmentalDamage = Server()->Tick();
-			}
-		}
-	}
-	else
-	{
-		auto TileIndex = GameServer()->Collision()->GetTileIndex(CurrentIndex);
-		auto TileFIndex = GameServer()->Collision()->GetFTileIndex(CurrentIndex);
-		if ((((TileIndex == TILE_FREEZE) || (TileFIndex == TILE_FREEZE)) && // In freeze tile
-			(!GetOwner() || (GetOwner() && !GetOwner()->m_Super)))) // No owner or owner with no super
-		{
-			TakeDamage(1, m_Pos, m_LastKnownOwner);
-			m_LastEnvironmentalDamage = Server()->Tick();
-		}
+		TakeDamage(2, m_Pos, m_LastKnownOwner);
+		m_LastEnvironmentalDamage = Server()->Tick();
 	}
 }
 

@@ -7,6 +7,8 @@
 #include "game/server/entities/advanced_entity.h"
 
 #define HELICOPTER_DEFAULT_SCALE 0.8f
+#define HELICOPTER_MIN_SCALE 0.8f
+#define HELICOPTER_MAX_SCALE 5.0f
 #define HELICOPTER_PHYSSIZE (vec2(80, 128) * HELICOPTER_DEFAULT_SCALE)
 
 class CHelicopter : public CAdvancedEntity

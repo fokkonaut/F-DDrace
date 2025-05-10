@@ -36,7 +36,6 @@ void SBone::Snap(int SnappingClient)
 		pObj->m_Y = round_to_int(parentPos.y + m_To.y);
 		pObj->m_FromX = round_to_int(parentPos.x + m_From.x);
 		pObj->m_FromY = round_to_int(parentPos.y + m_From.y);
-//		pObj->m_StartTick = Server()->Tick() - 1;
 		pObj->m_StartTick = Server()->Tick() - 4 + m_Thickness;
 	}
 }

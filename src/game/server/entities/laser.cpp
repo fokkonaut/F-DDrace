@@ -79,6 +79,13 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			}
 		}
 	}
+	else if (m_Type == WEAPON_LASER)
+	{
+		if (Config()->m_SvInteractiveDrops)
+		{
+			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+		}
+	}
 	CCharacter *pChr = 0;
 	CAdvancedEntity *pEnt = 0;
 	CEntity *pIntersected = 0;
@@ -96,7 +103,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		{
 			pChr = (CCharacter *)pIntersected;
 		}
-		else if (m_Type == WEAPON_SHOTGUN || m_Type == WEAPON_TASER)
+		else if (m_Type == WEAPON_SHOTGUN || m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)
 		{
 			pEnt = (CAdvancedEntity *)pIntersected;
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
@@ -157,6 +164,8 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		{
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 				((CFlag *)pEnt)->SetAtStand(false);
+			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+				Temp *= 0.5f;
 
 			pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
 			return true;
@@ -164,12 +173,12 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	}
 	else if (m_Type == WEAPON_LASER)
 	{
-		if (pChr->m_IsZombie)
+		if (IsCharacter && pChr->m_IsZombie)
 		{
 			vec2 Pos = At + normalize(At - From) * vec2(-32.f, -32.f);
 			GameServer()->CreateExplosion(Pos, m_Owner, WEAPON_LASER, true, pOwnerChar ? pOwnerChar->Team() : pChr->Team(), m_TeamMask);
 		}
-		else
+		else if (pChr)
 		{
 			pChr->m_GotLasered = true;
 			pChr->UnFreeze();

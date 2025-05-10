@@ -686,6 +686,9 @@ void CCharacter::FireWeapon()
 					}
 					else if (pEntity)
 					{
+						vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+						Temp = pEntity->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
+
 						if (pEntity->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 						{
 							if (((CFlag *)pEntity)->GetCarrier())
@@ -697,6 +700,7 @@ void CCharacter::FireWeapon()
 							if(pHelicopter->IsBuilding() || pHelicopter->IsExploding())
 								continue;
 
+							Temp *= 0.5f;
 							pHelicopter->TakeDamage((float)g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, EffectPos, m_pPlayer->GetCID());
 							if (length(pEnt->GetPos() - ProjStartPos) > 0.0f)
 							{
@@ -705,9 +709,7 @@ void CCharacter::FireWeapon()
 						}
 
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
-						vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-						Temp = pEntity->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
-						pEntity->SetVel(ClampVel(pEntity->GetOwner() ? pEntity->GetMoveRestrictions() : m_MoveRestrictions, Temp));
+						pEntity->SetVel(ClampVel(pEntity->GetMoveRestrictions(), Temp));
 						Hits++;
 					}
 				}

@@ -2056,52 +2056,6 @@ bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
 	return false;
 }
 
-//bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
-//{
-//	if(TestBox(Pos, Size))
-//		return true;
-//
-//	// multi sample the rest
-//	const int MsCountX = (int)(Size.x / ms_MinStaticPhysSize);
-//	const float MsGapX = Size.x / MsCountX;
-//	const int MsCountY = (int)(Size.y / ms_MinStaticPhysSize);
-//	const float MsGapY = Size.y / MsCountY;
-//
-//	if(!MsCountX && !MsCountY)
-//		return false;
-//
-//	Size *= 0.5;
-//
-//	// top
-//	for(int i = 0; i < MsCountX; i++)
-//	{
-//		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y-Size.y))
-//			return true;
-//	}
-//
-//	// bottom
-//	for(int i = 0; i < MsCountX; i++)
-//	{
-//		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y+Size.y))
-//			return true;
-//	}
-//
-//	// left
-//	for(int i = 0; i < MsCountY; i++)
-//	{
-//		if(CheckPoint(Pos.x-Size.x, Pos.y-Size.y + (i+1) * MsGapY))
-//			return true;
-//	}
-//
-//	// right
-//	for(int i = 0; i < MsCountY; i++)
-//	{
-//		if(CheckPoint(Pos.x+Size.x, Pos.y-Size.y + (i+1) * MsGapY))
-//			return true;
-//	}
-//	return false;
-//}
-
 void CCollision::MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity)
 {
 	// do the move

@@ -2876,14 +2876,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					
 					if (!InHouse)
 					{
-						if (pChr->m_pHelicopter)
-						{
-							pChr->m_pHelicopter->Dismount();
-						}
-						else if (!pChr->TryMountHelicopter())
-						{
-							pChr->DropFlag();
-						}
+						pChr->DropFlag();
 					}
 				}
 			}
@@ -2908,7 +2901,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					if (!InHouse)
 					{
-						if (!pChr->DropGrog())
+						if (pChr->m_pHelicopter)
+						{
+							pChr->m_pHelicopter->Dismount();
+						}
+						else if (!pChr->TryMountHelicopter() && !pChr->DropGrog())
 						{
 							pChr->DropWeapon(pChr->GetActiveWeaponUnclamped(), false);
 						}
@@ -7739,6 +7736,7 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 
 bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int TurretType, float Scale, bool SpawnOnFloor)
 {
+	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
 	vec2 ResultingHitbox = HELICOPTER_PHYSSIZE * Scale;
 	if (SpawnOnFloor)
 		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
