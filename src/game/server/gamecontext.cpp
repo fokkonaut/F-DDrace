@@ -387,6 +387,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			{
 				if (((CHelicopter *)pEnt)->IsBuilding())
 					continue;
+
+				l -= pEnt->GetProximityRadius();
 			}
 
 			pChr = pEnt->GetOwner();
