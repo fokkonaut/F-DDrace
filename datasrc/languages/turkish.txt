@@ -15,13 +15,13 @@ Usage
 == Kullanım
 
 Command is either unknown or you have given a blank command without any parameters.
-== Komut bilinmiyor ya da parametre kullanmadın
+== Komut bilinmiyor ya da parametre kullanmadın.
 
 You can't join the spectators while you are in survival
 == Hayatta kalma'da iken izleyiciye geçemezsin
 
 Timeout code has to be at least 8 characters long, make sure to use a safe code.
-== Zaman aşımı kodu en az 8 karakter uzunluğunda olmalı, güvenli bir kod kullandığından emin ol
+== Zaman aşımı kodu en az 8 karakter uzunluğunda olmalı, güvenli bir kod kullandığından emin ol.
 
 You will now see all tees on this server, no matter the distance
 == Artık mesafe farketmeksizin, sunucudaki tüm tee'leri göreceksin
@@ -33,25 +33,25 @@ Score Format
 == Skor formatı
 
 Use '/score <format>' to change the displayed score.
-== Skor formatını değiştirmek için '/score <format>' kullan
+== Skor formatını değiştirmek için '/score <format>' kullan.
 
 Accounts
 == Hesaplar
 
 Accounts are used to save your stats.
-== Hesaplar istatistiklerini kaydetmek için kullanılır
+== Hesaplar istatistiklerini kaydetmek için kullanılır.
 
 You can farm money and buy things in the shop, kill tees and get points.
-== Farm yaparak para kazanabilir ve marketten bir şeyler alabilir, tee'leri öldürüp puan kazanabilirsin
+== Farm yaparak para kazanabilir ve marketten bir şeyler alabilir, tee'leri öldürüp puan kazanabilirsin.
 
 These stats will be saved inside of your account.
-== Bu istatistikler hesabına kaydedilecek
+== Bu istatistikler hesabına kaydedilecek.
 
 You can create an account using '/register'.
-== '/register' ile bir hesap açabilirsin
+== '/register' ile bir hesap açabilirsin.
 
 Once you are logged in, you can use this command again to see information about your account.
-== Giriş yaptığında, bu komutu tekrar kullanıp hesabın ile ilgili bilgiyi görebilirsin
+== Giriş yaptığında, bu komutu tekrar kullanıp hesabın ile ilgili bilgiyi görebilirsin.
 
 Account Info
 == Hesap Bilgisi
@@ -64,7 +64,7 @@ Registered
 
 {/account}
 until
-== e kadar
+== kadar
 
 not bought
 == satın alınmadı
@@ -142,7 +142,7 @@ With VIP Classic you get an XP and money boost of '+2' per second, aswell as acc
 == VIP Klasik ile şu mokutlara erişim sağladığın müddetçe, saniyede '+2' XP ve Para desteği alırsın:
 
 VIP+ includes every feature of VIP Classic.
-== VIP+, VIP Klasik'teki tüm özellikleri içerir
+== VIP+, VIP Klasik'teki tüm özellikleri içerir.
 
 Additionally to that you can enter the VIP+ room to farm safely there, aswell as you gain access to the following commands:
 == Buna ek olarak, VIP+ odasına girerek güvenli bir şekilde farm yapabilir ve aşağıdaki komutlara erişebilirsin:
@@ -904,7 +904,7 @@ Police is searching you because of spawnblocking
 == Polis seni doğma noktası engellemesi nedeniyle arıyor
 
 [WARNING] Spawnblocking is illegal
-== [UYARI] Doğma noktası engellemek yasaktır
+== [UYARI] Spawn noktası bloklamak yasaktır
 
 Registration spam
 == Kayıt spamı
@@ -919,7 +919,7 @@ You have been banned from the account system for %d seconds (%s)
 == Hesap sisteminden %d saniye boyunca banlandınız (%s)
 
 You are banned from the account system for the next %d seconds.
-== Hesap sisteminden önümüzdeki %d saniye boyunca banlısınız
+== Hesap sisteminden önümüzdeki %d saniye boyunca banlısınız.
 
 This minigame is disabled
 == Bu mini oyun devre dışı
@@ -1033,7 +1033,7 @@ You got frozen by the clan protection.
 == Klan koruması tarafından donduruldunuz
 
 Remove your 'Chilli.*' clantag and reconnect, or set your skin body to 'greensward'.
-== 'Chilli.*' klan etiketinizi kaldırın ve yeniden bağlanın ya da tee'nizi 'greensward' olarak ayarlayın
+== 'Chilli.*' klan etiketinizi kaldırın ve yeniden bağlanın ya da tee'nizi 'greensward' olarak ayarlayın.
 
 You automatically left the minigame because you were afk for too long
 == Çok uzun süre AFK kaldığınız için mini oyundan otomatik olarak ayrıldınız
@@ -1129,7 +1129,7 @@ You have to be inside your plot to edit your plot
 == Plotunuzu düzenlemek için onun içinde olmalısınız
 
 You can't edit your plot while living the life of a gangster.
-== Gangster hayatı yaşarken plotunuzu düzenleyemezsiniz
+== Gangster hayatı yaşarken plotunuzu düzenleyemezsiniz.
 
 You are now editing your plot, switch to another weapon to exit the editor
 == Artık plotunuzu düzenliyorsunuz, editörden çıkmak için başka bir silaha geçin
@@ -1147,7 +1147,7 @@ Rainbow speed has been updated to %d
 == %s şu sürede tamamladı: %d dakika %5.2f saniye
 
 New record: %d minute(s) %5.2f second(s) better.
-== Yeni rekor: %d dakika %5.2f saniye daha iyi
+== Yeni rekor: %d dakika %5.2f saniye daha iyi.
 
 New record: %5.2f second(s) better.
 == Yeni rekor: %5.2f saniye daha iyi
@@ -1156,7 +1156,7 @@ You finished with your best time.
 == En iyi sürenle bitirdin
 
 %d minute(s) %5.2f second(s) worse, better luck next time.
-== %d dakika %5.2f saniye daha kötü, bir dahaki sefere 
+== %d dakika %5.2f saniye daha kötü, bir dahaki sefere.
 
 %5.2f second(s) worse, better luck next time.
 == %5.2f saniye daha kötü, bir dahaki sefere
@@ -1192,7 +1192,7 @@ You need to be logged in to use moneytiles.\nGet an account with '/register <nam
 == Para alanlarını kullanmak için giriş yapmalısınız.\n'/register <ad> <şifre> <şifre>' ile hesap oluşturun
 
 Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later.
-== Tebrikler, +%%20 taser kalkanı, mevcut: %%d. Daha sonra kontrol etmek için '/taser' kullanın
+== Tebrikler, +%%20 taser kalkanı, mevcut: %%d. Daha sonra kontrol etmek için '/taser' kullanın.
 
 Congratulations, double-xp has been activated for %d lifes
 == Tebrikler, %d hak için çift XP etkinleştirildi
@@ -1210,19 +1210,19 @@ This area is for admins only
 == Bu alan yalnızca yöneticiler içindir
 
 Seems like it's your birthday! You may pick up your present at any time.
-== Görünüşe göre doğum gününüz! Hediyenizi istediğiniz zaman alabilirsiniz
+== Görünüşe göre doğum gününüz! Hediyenizi istediğiniz zaman alabilirsiniz.
 
 This gift is only dedicated to humans.
-== Bu hediye yalnızca insanlar içindir
+== Bu hediye yalnızca insanlar içindir.
 
 You've picked up your present already! Come back next year.
-== Hediyenizi zaten aldınız! Gelecek yıl tekrar gelin
+== Hediyenizi zaten aldınız! Gelecek yıl tekrar gelin.
 
 Happy birthday! :) You have jetpack for 45 seconds
 == Doğum günün kutlu olsun! :) 45 saniyeliğine jetpack'in var
 
 Sorry, someting is missing to get the gift.
-== Üzgünüm, hediyeyi almak için bir şeyler eksik
+== Üzgünüm, hediyeyi almak için bir şeyler eksik.
 
 You need a key to enter this room, buy one in the shop
 == Bu odaya girmek için bir anahtara ihtiyacınız var, mağazadan satın alın
@@ -1279,13 +1279,13 @@ Grog testing results: %.1f‰ / %.1f‰
 == Grog test sonuçları: %.1f‰ / %.1f‰
 
 You were arrested for %d minutes by '%s'
-== '%s' tarafından %d dakika tutuklandınız
+== %d dakika tutuklandınız, tutuklayan kişi '%s'
 
 You already have the maximum of 50 meteors
 == Zaten en fazla 50 meteorunuz var
 
 Taser shield has been used, -5%%, new current: %d%%
-== Taser kalkanı kullanıldı, -%%5, yeni durum: %%d
+== Taser kalkanı kullanıldı, -5%%, yeni durum: %d%%
 
 Collected %lld money
 == %lld para toplandı
@@ -1321,7 +1321,7 @@ You don't have enough money on your bank account to withdraw this amount.
 == Bu miktarı çekmek için banka hesabınızda yeterli para yok.
 
 You withdrew %d money from your bank account to your wallet.
-== Banka hesabınızdan cüzdanınıza %d para çektiniz
+== Banka hesabınızdan cüzdanınıza %d para çektiniz.
 
 Bye! Come back if you need something.
 == Hoşça kal! Bir şeye ihtiyacın olursa tekrar gel.
@@ -1387,7 +1387,7 @@ The plot will expire on %s
 == Bu plotun süresi %s tarihinde dolacak
 
 You don't have enough money in your wallet to buy a grog.
-== Grog satın almak için cüzdanınızda yeterli para yok
+== Grog satın almak için cüzdanınızda yeterli para yok.
 
 You bought one grog
 == Bir grog satın aldınız
@@ -1441,28 +1441,28 @@ Choose a weapon with A/D\nToggle weapon usage by pressing SPACE\nPress SPACE on 
 == A/D ile silah seç\nSPACE ile silah kullanımını değiştir\nOnaylamak için kalbin üstünde SPACE'e bas
 
 Welcome to the Durák table, %s! This seat is taken already, please try another one.
-== Durák masasına hoş geldin, %s! Bu koltuk dolu, lütfen başka birini dene
+== Durák masasına hoş geldin, %s! Bu koltuk dolu, lütfen başka birini dene.
 
 Welcome to Durák, %s! You are first, please enter a stake in the chat.
-== Durák'a hoş geldin, %s! İlk sen oynuyorsun, lütfen sohbete bir bahis gir
+== Durák'a hoş geldin, %s! İlk sen oynuyorsun, lütfen sohbete bir bahis gir.
 
 Welcome to Durák, %s! You are second, please enter the current stake of '%lld' or propose a new one.
-== Durák'a hoş geldin, %s! İkinci oyuncusun, lütfen '%lld' olan mevcut bahsi gir ya da yeni bir bahis öner
+== Durák'a hoş geldin, %s! İkinci oyuncusun, lütfen '%lld' olan mevcut bahsi gir ya da yeni bir bahis öner.
 
 Welcome to Durák, %s! In order to participate, please enter the current stake of '%lld' in the chat.
-== Durák'a hoş geldin, %s! Katılmak için lütfen sohbete mevcut bahis olan '%lld' değerini yaz
+== Durák'a hoş geldin, %s! Katılmak için lütfen sohbete mevcut bahis olan '%lld' değerini yaz.
 
 Successfully set the stake for the current round to '%lld'.
-== Bu raund için bahis başarıyla '%lld' olarak ayarlandı
+== Bu raund için bahis '%lld' olarak başarıyla ayarlandı.
 
 Successfully deployed your stake.
-== Bahsiniz başarıyla yatırıldı
+== Bahsiniz başarıyla yatırıldı.
 
 '%s' proposed a new stake, please enter the current stake of '%lld' or propose a new one in the chat.
-== '%s' yeni bir bahis önerdi, lütfen '%lld' olan mevcut bahsi girin veya yeni bir bahis önerin
+== '%s' yeni bir bahis önerdi, lütfen '%lld' olan mevcut bahsi girin veya yeni bir bahis önerin.
 
 Successfully updated the stake for the current round to '%lld'.
-== Bu raund için bahis başarıyla '%lld' olarak güncellendi
+== Bu raund için bahis '%lld' olarak başarıyla güncellendi.
 
 You can't currently drop that much money due to your stake
 == Bahsiniz nedeniyle şu anda bu kadar para bırakamazsınız
@@ -1474,7 +1474,7 @@ You didn't deploy your stake in time, game started without you
 == Bahsi zamanında yatırmadınız, oyun siz olmadan başladı
 
 Your stake got collected: -%lld money.
-== Bahsiniz tahsil edildi: -%lld para
+== Bahsiniz tahsil edildi: -%lld para.
 
 '%s' is the Durák!
 == '%s' Durák oldu!
@@ -1498,10 +1498,10 @@ Congratulations, you are not the Durák!
 == Tebrikler, Durák olmadınız!
 
 Your stake got returned: +%lld money.
-== Bahsiniz iade edildi: +%lld para
+== Bahsiniz iade edildi: +%lld para.
 
 You got +%lld money from others leaving the game.
-== Oyundan ayrılanlardan +%lld para kazandınız
+== Oyundan ayrılanlardan +%lld para kazandınız.
 
 Change language to %s?
 == Dili %s olarak değiştir?
@@ -1534,13 +1534,13 @@ This team can't be locked
 == Bu takım kilitlenemez
 
 '%s' unlocked your team.
-== '%s' takımınızın kilidini açtı
+== '%s' takımınızın kilidini açtı.
 
 Team locking is disabled on this server
 == Bu sunucuda takım kilitleme devre dışı
 
 '%s' locked your team. After the race started killing will kill everyone in your team.
-== '%s' takımınızı kilitledi. Yarış başladıktan sonra öldürmek tüm takımınızı öldürür
+== '%s' takımınızı kilitledi. Yarış başladıktan sonra öldürmek tüm takımınızı öldürür.
 
 Invites are disabled
 == Davetler devre dışı
@@ -1552,10 +1552,10 @@ Can't invite this quickly
 == Bu kadar hızlı davet gönderemezsiniz
 
 '%s' invited you to team %d.
-== '%s' seni %d numaralı takıma davet etti
+== '%s' seni %d numaralı takıma davet etti.
 
 '%s' invited '%s' to your team.
-== '%s', '%s' oyuncusunu takımına davet etti
+== '%s', '%s' oyuncusunu takımına davet etti.
 
 You are running a vote please try again after the vote is done!
 == Bir oylama yapılıyor, lütfen oylama bittikten sonra tekrar deneyin!
@@ -1573,10 +1573,10 @@ You can't join teams in this minigame
 == Bu mini oyunda takımlara katılamazsınız
 
 This team is locked using /lock. Only members of the team can unlock it using /lock.
-== Bu takım /lock ile kilitlenmiş. Sadece takım üyeleri /lock komutuyla kilidini açabilir
+== Bu takım /lock ile kilitlenmiş. Sadece takım üyeleri /lock komutuyla kilidini açabilir.
 
 This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.
-== Bu takım /lock ile kilitlenmiş. Sadece takım üyeleri seni davet edebilir veya kilidi açabilir
+== Bu takım /lock ile kilitlenmiş. Sadece takım üyeleri seni davet edebilir veya kilidi açabilir.
 
 This team already has the maximum allowed size of %d players
 == Bu takım zaten izin verilen maksimum %d oyuncuya sahip
@@ -1603,10 +1603,10 @@ Discord server
 == %s, %s tarafından öldürüldü
 
 '%s' banned '%s' for %d seconds from voting.
-== '%s', '%s' oyuncusunu oylamalardan %d saniye boyunca men etti
+== '%s', '%s' oyuncusunu oylamalardan %d saniye boyunca men etti.
 
 '%s' unbanned '%s' from voting.
-== '%s', '%s' oyuncusunun oylama yasağını kaldırdı
+== '%s', '%s' oyuncusunun oylama yasağını kaldırdı.
 
 Use /pause first then you can kill
 == Önce /pause komutunu kullan, sonra öldürebilirsin
@@ -1633,43 +1633,43 @@ Listing all players:
 == Tüm oyuncular listeleniyor:
 
 You can only vote after logging in.
-== Sadece giriş yaptıktan sonra oylama yapabilirsiniz
+== Sadece giriş yaptıktan sonra oylama yapabilirsiniz.
 
 Wait for current vote to end before calling a new one.
-== Yeni bir oylama başlatmadan önce mevcut oylamanın bitmesini bekleyin
+== Yeni bir oylama başlatmadan önce mevcut oylamanın bitmesini bekleyin.
 
 You must wait %d seconds before making your first vote.
-== İlk oylamayı başlatmadan önce %d saniye beklemelisiniz
+== İlk oylamayı başlatmadan önce %d saniye beklemelisiniz.
 
 You must wait %d seconds before making another vote.
-== Yeni bir oylama başlatmak için %d saniye beklemelisiniz
+== Yeni bir oylama başlatmak için %d saniye beklemelisiniz.
 
 You are not permitted to vote for the next %d seconds.
-== Sonraki %d saniye boyunca oylama yapmanıza izin verilmiyor
+== Sonraki %d saniye boyunca oylama yapmanıza izin verilmiyor.
 
 There's a %d second delay between map-votes, please wait %d seconds.
-== Harita oylamaları arasında %d saniye gecikme vardır, lütfen %d saniye bekleyin
+== Harita oylamaları arasında %d saniye gecikme vardır, lütfen %d saniye bekleyin.
 
 %s has finished and didn't go through start yet, wait for him or join another team.
-== %s bitirdi ama başlangıçtan geçmedi, onu bekleyin ya da başka bir takıma katılın
+== %s bitirdi ama başlangıçtan geçmedi, onu bekleyin ya da başka bir takıma katılın.
 
 %s wants to start a new round, kill or walk to start.
-== %s yeni bir raund başlatmak istiyor, başlamak için öldür ya da yürü
+== %s yeni bir raund başlatmak istiyor, başlamak için öldür ya da yürü.
 
 Team %d started with these %d players:
 == Takım %d şu %d oyuncuyla başladı:
 
 Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.
-== Takımınız şu sürede bitirmiş olacaktı: %d dakika %5.2f saniye. Antrenman modu açık olduğundan sıralamanız sayılmadı
+== Takımınız şu sürede bitirmiş olacaktı: %d dakika %5.2f saniye. Antrenman modu açık olduğundan sıralamanız sayılmadı.
 
 %s joined team 0
 == %s, 0 numaralı takıma katıldı
 
 Everyone in your locked team was killed because '%s' killed.
-== '%s' öldürdüğü için kilitli takımınızdaki herkes öldü
+== '%s' öldürdüğü için kilitli takımınızdaki herkes öldü.
 
 Everyone in your locked team was killed because '%s' died.
-== '%s' öldüğü için kilitli takımınızdaki herkes öldü
+== '%s' öldüğü için kilitli takımınızdaki herkes öldü.
 
 Silent Farm
 == Sessiz Farm
@@ -1750,10 +1750,10 @@ Grog permille: %.1f‰ / %.1f‰
 == Grog oranı: %.1f‰ / %.1f‰
 
 You're not logged in.
-== Giriş yapmadınız
+== Giriş yapmadınız.
 
 Use '/login' to see more information about your account.
-== Hesabınızla ilgili daha fazla bilgi için '/login' yazın
+== Hesabınızla ilgili daha fazla bilgi için '/login' yazın.
 
 Rented until
 == Kiralandığı tarih
@@ -1968,7 +1968,7 @@ Create portal blockers hammer and this ammo with your cursor. See '/portal' for 
 == İmlecinizle portal engelleyici çekiç ve cephaneyi oluşturun. Mevcut miktarınız için '/portal' yazın. Nasıl çalışır: '/helptoggle'
 
 Welcome to the shop, %s! Press F4 to start shopping.
-== Mağazaya hoş geldiniz, %s! Alışverişe başlamak için F4'e basın.
+== Mağazaya hoş geldin, %s! Alışverişe başlamak için F4'e basın.
 
 Are you sure you want to buy this item?
 == Bu eşyayı satın almak istediğinizden emin misiniz?
@@ -1998,7 +1998,7 @@ You own this item for 5 days.
 == Bu eşyaya 5 gün boyunca sahip olursunuz.
 
 Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.
-== Mağazaya hoş geldiniz!\n\nSağa doğru ateş ederek bir sayfa ileri gider, sola doğru ateş ederek bir sayfa geri gidersiniz.
+== Mağazaya hoş geldin!\n\nSağa doğru ateş ederek bir sayfa ileri gider, sola doğru ateş ederek bir sayfa geri gidersiniz.
 
 for sale
 == satılık
@@ -2007,7 +2007,7 @@ discount
 == indirim
 
 Welcome to the tavern, %s! Press F4 to buy a grog.
-== Meyhaneye hoş geldiniz, %s! Bir grog satın almak için F4'e basın.
+== Meyhaneye hoş geldin, %s! Bir grog satın almak için F4'e basın.
 
 Are you sure you want to buy a grog?
 == Bir grog satın almak istediğinizden emin misiniz?
@@ -2016,13 +2016,13 @@ Press F3 to confirm your assignment.
 == Görevlendirmenizi onaylamak için F3'e basın.
 
 Welcome to the tavern!\n\nIf you would like to buy a grog for %d money, please press F3.
-== Meyhaneye hoş geldiniz!\n\nEğer %d para karşılığında bir grog satın almak isterseniz, lütfen F3'e basın.
+== Meyhaneye hoş geldin!\n\nEğer %d para karşılığında bir grog satın almak isterseniz, lütfen F3'e basın.
 
 If you want to buy an item, press F3
 == Bir eşya satın almak istiyorsanız, F3'e basın
 
 Welcome to the bank, %s! Press F4 to manage your bank account.
-== Bankaya hoş geldiniz, %s! Banka hesabınızı yönetmek için F4'e basın.
+== Bankaya hoş geldin, %s! Banka hesabınızı yönetmek için F4'e basın.
 
 Are you sure that you want to deposit %d money from your wallet to your bank account?
 == Cüzdanınızdan banka hesabınıza %d para yatırmak istediğinizden emin misiniz?
@@ -2037,10 +2037,10 @@ You cancelled the assignment.
 == İşlemi iptal ettiniz.
 
 Welcome to the bank!\n\nThis feature is currently disabled and your money is instantly saved.
-== Bankaya hoş geldiniz!\n\nBu özellik şu anda devre dışı ve paranız anında kaydediliyor.
+== Bankaya hoş geldin!\n\nBu özellik şu anda devre dışı ve paranız anında kaydediliyor.
 
 Welcome to the bank!\n\nPlease select your option:\nF3: Deposit (+)\nF4: Withdraw (-).\n\nOnce you selected an option, shoot to the right to go one step forward, and shoot left to go one step back.
-== Bankaya hoş geldiniz!\n\nLütfen seçeneğinizi seçin:\nF3: Para Yatırma (+)\nF4: Para Çekme (-).\n\nBir seçenek seçtikten sonra, bir adım ileri gitmek için sağa, bir adım geri gitmek için sola ateş edin.
+== Bankaya hoş geldin!\n\nLütfen seçeneğinizi seçin:\nF3: Para Yatırma (+)\nF4: Para Çekme (-).\n\nBir seçenek seçtikten sonra, bir adım ileri gitmek için sağa, bir adım geri gitmek için sola ateş edin.
 
 D E P O S I T
 == P A R A  Y A T I R M A
