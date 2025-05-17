@@ -1192,7 +1192,7 @@ You need to be logged in to use moneytiles.\nGet an account with '/register <nam
 == Para alanlarını kullanmak için giriş yapmalısınız.\n'/register <ad> <şifre> <şifre>' ile hesap oluşturun
 
 Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later.
-== Tebrikler, +%%20 taser kalkanı, mevcut: %%d. Daha sonra kontrol etmek için '/taser' kullanın.
+== Tebrikler, +20%% taser kalkanı, mevcut: %d%%. Daha sonra kontrol etmek için '/taser' kullanın.
 
 Congratulations, double-xp has been activated for %d lifes
 == Tebrikler, %d hak için çift XP etkinleştirildi
