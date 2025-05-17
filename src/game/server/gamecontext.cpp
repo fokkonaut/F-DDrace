@@ -365,6 +365,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	Mask128 TeamMask = Mask128();
 	for (int i = 0; i < Num; i++)
 	{
+		vec2 Diff = apEnts[i]->GetPos() - Pos;
+		float l = length(Diff);
+
 		CCharacter *pChr = 0;
 		CAdvancedEntity *pEnt = 0;
 		bool IsCharacter = apEnts[i]->GetObjType() == CGameWorld::ENTTYPE_CHARACTER;
@@ -380,13 +383,18 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				if (((CFlag *)pEnt)->GetCarrier())
 					continue;
 			}
-			else
-				pChr = pEnt->GetOwner();
+			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			{
+				if (((CHelicopter *)pEnt)->IsBuilding())
+					continue;
+
+				l -= pEnt->GetProximityRadius();
+			}
+
+			pChr = pEnt->GetOwner();
 		}
 
-		vec2 Diff = apEnts[i]->GetPos() - Pos;
 		vec2 ForceDir(0, 1);
-		float l = length(Diff);
 		if (l)
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
@@ -419,6 +427,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			{
 				if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 					((CFlag *)pEnt)->SetAtStand(false);
+				else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+					((CHelicopter *)pEnt)->ExplosionDamage(Strength, Pos, Owner);
 
 				vec2 Temp = pEnt->GetVel() + Force;
 				pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
@@ -598,6 +608,7 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 
 	// client id used to check against muted
 	int MuteChecked = ChatterClientID;
+	bool SlashMe = false;
 
 	char aBuf[512], aText[256];
 	if (Mode == CHAT_POLICE_CHANNEL)
@@ -638,6 +649,7 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		ChatterClientID = -1;
 		// if '/me' is used, still dont send the message when sender is muted
 		MuteChecked = SpamProtectionClientID;
+		SlashMe = true;
 	}
 	else
 	{
@@ -701,7 +713,7 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 					bool Send = (Server()->IsSevendown(i) && (Flags&CHAT_SEVENDOWN)) || (!Server()->IsSevendown(i) && (Flags&CHAT_SEVEN));
 					if (Send)
 					{
-						if (ChatterClientID == -1)
+						if (ChatterClientID == -1 && !SlashMe)
 						{
 							str_format_args(aText, sizeof(aText), m_apPlayers[i]->Localize(pText), pArgs, NumArgs);
 							Msg.m_pMessage = aText;
@@ -1790,7 +1802,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	}
 
 	int DummyID = Server()->GetDummy(ClientID);
-	if (DummyID != -1)
+	if (DummyID != -1 && m_apPlayers[DummyID])
 	{
 		// Always keep track of dummy language
 		m_apPlayers[ClientID]->SetLanguage(m_apPlayers[DummyID]->m_Language, true);
@@ -2866,14 +2878,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					
 					if (!InHouse)
 					{
-						if (pChr->m_pHelicopter) // temp explode button
-						{
-							pChr->m_pHelicopter->Explode();
-						}
-						else
-						{
-							pChr->DropFlag();
-						}
+						pChr->DropFlag();
 					}
 				}
 			}
@@ -7731,31 +7736,26 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
 }
 
-void CGameContext::SpawnHelicopter(int Team, vec2 Pos, int TurretType, float Scale)
+bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int TurretType, float Scale, bool SpawnOnFloor)
 {
-	Pos.y -= 64.f;
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, Team, Pos, Scale);
+	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
+	vec2 ResultingHitbox = HELICOPTER_PHYSSIZE * Scale;
+	if (SpawnOnFloor)
+		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
 
-	CVehicleTurret* pTurret = nullptr;
-	switch (TurretType)
-	{
-		case TURRETTYPE_MINIGUN:
-		{
-			pTurret = new CMinigunTurret();
-		} break;
-		case TURRETTYPE_LAUNCHER:
-		{
-			pTurret = new CLauncherTurret();
-		} break;
+	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
+		return false;
 
-		case TURRETTYPE_NONE:
-		default:
-		{ } break;
-	}
-
+	CHelicopter *pHelicopter = new CHelicopter(&m_World, Spawner, Team, Pos, Scale, true);
+	CVehicleTurret *pTurret = nullptr;
+	if (TurretType == TURRETTYPE_MINIGUN)
+		pTurret = new CMinigunTurret();
+	else if (TurretType == TURRETTYPE_LAUNCHER)
+		pTurret = new CLauncherTurret();
 
 	if (!pHelicopter->AttachTurret(pTurret))
 		delete pTurret; // Failed to assign ownership
+	return true;
 }
 
 void CGameContext::UpdateHidePlayers(int UpdateID)

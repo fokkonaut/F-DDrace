@@ -1226,6 +1226,12 @@ void CServer::SendMap(int ClientID)
 	m_aClients[ClientID].m_MapChunk = 0;
 }
 
+void CServer::SendMapReload(int ClientID)
+{
+	CMsgPacker Msg(NETMSG_MAP_RELOAD, true);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+}
+
 void CServer::SendConnectionReady(int ClientID)
 {
 	CMsgPacker Msg(NETMSG_CON_READY, true);
@@ -2861,6 +2867,9 @@ int CServer::Run()
 					{
 						if(m_aClients[c].m_State <= CClient::STATE_AUTH)
 							continue;
+						
+						// Just send always, to take dummy with us upon map changes, specifically for the case of switching back and reloading stats
+						SendMapReload(c);
 
 						SendMap(c);
 						m_aClients[c].Reset();

@@ -429,8 +429,7 @@ public:
 	{
 		for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
 		{
-			int p = Prev ? -1 : 1;
-			int NextIndex = (CurrentIndex + p*(i + 1)) % MAX_DURAK_PLAYERS;
+			int NextIndex = (CurrentIndex + (Prev ? -1 : 1)*(i + 1) + MAX_DURAK_PLAYERS) % MAX_DURAK_PLAYERS;
 			if (m_aSeats[NextIndex].m_Player.m_ClientID != -1 && m_aSeats[NextIndex].m_Player.m_Stake >= 0 && (!CheckHands || m_aSeats[NextIndex].m_Player.m_vHandCards.size()))
 				return NextIndex;
 		}
@@ -792,6 +791,7 @@ class CDurak : public CMinigame
 	bool StartGame(int Game);
 	void EndGame(int Game);
 	void StartNextRound(int Game, bool SuccessfulDefense = false);
+	void SetPlaying(int Game, int Seat);
 	void UpdateHandcards(int Game, CDurakGame::SSeat *pSeat);
 	void TakeCardsFromTable(int Game);
 	void EndMove(int Game, CDurakGame::SSeat *pSeat, bool Force = false);

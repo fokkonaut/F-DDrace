@@ -174,20 +174,23 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 			continue;
 		}
 
-		*pSevendown = true;
-		if(UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown) == 0)
+		// early unpack flags, to later unpack packet only once
+		if (UnpackFlagsRaw(pData, Bytes, &m_RecvUnpacker.m_Data))
+			continue;
+
+		if (m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 		{
-			if(m_RecvUnpacker.m_Data.m_Flags&NET_PACKETFLAG_CONNLESS)
+			if(UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown) == 0)
 			{
+				if (*pSevendown && !Config()->m_SvAllowSevendown)
+					continue;
+
 				if (!*pSevendown && (SECURITY_TOKEN)m_RecvUnpacker.m_Data.m_Token != GetGlobalToken())
 				{
 					int Accept = m_TokenManager.ProcessMessage(&Addr, &m_RecvUnpacker.m_Data, Socket);
 					if (Accept <= 0)
 						continue;
 				}
-
-				if (*pSevendown && !Config()->m_SvAllowSevendown)
-					continue;
 
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_ClientID = -1;
@@ -200,29 +203,31 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 					*pResponseToken = m_RecvUnpacker.m_Data.m_ResponseToken;
 				return 1;
 			}
-			else
+		}
+		else
+		{
+			int Slot = -1;
+			// try to find matching slot
+			for(int i = 0; i < NET_MAX_CLIENTS; i++)
 			{
-				int Slot = -1;
-				// try to find matching slot
-				for(int i = 0; i < NET_MAX_CLIENTS; i++)
+				if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
+					continue;
+
+				if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr, true) == 0)
 				{
-					if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-						continue;
-
-					if(net_addr_comp(m_aSlots[i].m_Connection.PeerAddress(), &Addr, true) == 0)
-					{
-						Slot = i;
-						break;
-					}
+					Slot = i;
+					break;
 				}
+			}
 
-				if (*pSevendown && Slot != -1 && !m_aSlots[Slot].m_Connection.m_Sevendown)
-				{
-					*pSevendown = false;
-					if (UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown))
-						continue;
-				}
+			// Determine version and unpack packet once
+			if (Slot != -1)
+			{
+				*pSevendown = m_aSlots[Slot].m_Connection.m_Sevendown;
+			}
 
+			if (UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, pSevendown) == 0)
+			{
 				if (*pSevendown && !Config()->m_SvAllowSevendown)
 					continue;
 

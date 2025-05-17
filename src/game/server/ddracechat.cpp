@@ -1947,7 +1947,7 @@ void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
 				return;
 			}
 
-			if (pPlayer->GetCharacter()->m_LastMoneyDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed())
+			if (pPlayer->GetCharacter()->m_LastMoneyDrop < pSelf->Server()->Tick() - pSelf->Server()->TickSpeed() * pSelf->Config()->m_SvMoneyDropDelay)
 			{
 				pPlayer->GetCharacter()->DropMoney(Amount);
 				pPlayer->GetCharacter()->m_LastMoneyDrop = pSelf->Server()->Tick();

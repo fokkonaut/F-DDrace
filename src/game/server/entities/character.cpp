@@ -686,16 +686,30 @@ void CCharacter::FireWeapon()
 					}
 					else if (pEntity)
 					{
+						vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+						Temp = pEntity->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
+
 						if (pEntity->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 						{
 							if (((CFlag *)pEntity)->GetCarrier())
 								continue; // carrier is getting hit
 						}
+						else if (pEntity->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+						{
+							CHelicopter *pHelicopter = (CHelicopter*)pEntity;
+							if(pHelicopter->IsBuilding() || pHelicopter->IsExploding())
+								continue;
+
+							Temp *= 0.5f;
+							pHelicopter->TakeDamage((float)g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, EffectPos, m_pPlayer->GetCID());
+							if (length(pEnt->GetPos() - ProjStartPos) > 0.0f)
+							{
+								EffectPos = pEnt->GetPos() - normalize(pEnt->GetPos() - ProjStartPos) * pEnt->GetProximityRadius() * 0.5f;
+							}
+						}
 
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
-						vec2 Temp = normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-						Temp = pEntity->GetVel() + (vec2(0.f, -1.0f) + Temp) * Tuning()->m_HammerStrength;
-						pEntity->SetVel(ClampVel(pEntity->GetOwner() ? pEntity->GetMoveRestrictions() : m_MoveRestrictions, Temp));
+						pEntity->SetVel(ClampVel(pEntity->GetMoveRestrictions(), Temp));
 						Hits++;
 					}
 				}
@@ -1740,7 +1754,10 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 					Server()->ClientName(m_pPlayer->GetCID()), Server()->ClientName(Killer), m_KillStreak);
 			}
 			pKiller->GiveXP(250, "for ending a killing spree");
-			GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
+			if (pKillerChar)
+			{
+				GameServer()->CreateFinishConfetti(pKillerChar->GetPos(), pKillerChar->TeamMask());
+			}
 		}
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
@@ -2015,7 +2032,7 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 
 bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 {
-	//int Id = m_pPlayer->GetCID();
+	int Id = m_pPlayer->GetCID();
 
 	// explicitly check for /showall in NetworkClippedLine, in case a client that doesnt support showdistance wants to see characters while zooming out
 	// only characters will be sent over large distances when showall is used, other entities are only snapped in a close range or
@@ -2024,7 +2041,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
 	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClientId, m_Pos, m_Core.m_HookPos, true);
 	bool AttachedHookInView = false;
-	/*if(PlayerAndHookNotInView)
+	if(PlayerAndHookNotInView)
 	{
 		for(const auto &AttachedPlayerId : m_Core.m_AttachedPlayers)
 		{
@@ -2038,7 +2055,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 				}
 			}
 		}
-	}*/
+	}
 	if(PlayerAndHookNotInView && !AttachedHookInView)
 	{
 		return false;
@@ -2451,7 +2468,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 				pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
 		}
 	}
-	
+
 	int Flag = SendDroppedFlagCooldown(SnappingClient);
 	if (Flag != -1)
 	{
@@ -2565,7 +2582,7 @@ void CCharacter::ApplyLockedTunings(bool SendTuningParams)
 	CTuningParams* pTunings = m_TuneZone > 0 ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
 	m_Core.m_Tuning = *GameServer()->ApplyLockedTunings(pTunings, m_LockedTunings);
 	if (SendTuningParams)
-		GameServer()->SendTuningParams(m_pPlayer->GetCID());
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 }
 
 CTuningParams *CCharacter::Tuning()
@@ -2857,7 +2874,7 @@ void CCharacter::HandleTiles(int Index)
 				bool IsPoliceFarmActive = GameWorld()->m_PoliceFarm.IsActive();
 				if (IsPoliceFarmActive && !m_LastPoliceFarmActive)
 					GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
-				
+
 				if (!IsPoliceFarmActive && (m_LastPoliceFarmActive || Server()->Tick() % Server()->TickSpeed() == 0))
 				{
 					GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Too many players on police tiles [%d/%d]"),
@@ -3807,7 +3824,7 @@ void CCharacter::HandleTiles(int Index)
 }
 
 void CCharacter::HandleTuneLayer()
-{	
+{
 	m_TuneZoneOld = m_TuneZone;
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	m_TuneZone = GameServer()->Collision()->IsTune(CurrentIndex);
@@ -4011,14 +4028,16 @@ bool CCharacter::Freeze(float Seconds)
 	if (m_FreezeTick < Server()->Tick() - Server()->TickSpeed() || Seconds == -1)
 	{
 		if (m_FreezeTick == 0 || m_FirstFreezeTick == 0)
+		{
 			m_FirstFreezeTick = Server()->Tick();
+
+			if (!Server()->IsSevendown(m_pPlayer->GetCID()) && Config()->m_SvFreezePrediction)
+			{
+				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			}
+		}
 		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * Server()->TickSpeed();
 		m_FreezeTick = Server()->Tick();
-
-		if (!Server()->IsSevendown(m_pPlayer->GetCID()) && Config()->m_SvFreezePrediction)
-		{
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-		}
 		return true;
 	}
 	return false;
@@ -4040,7 +4059,10 @@ bool CCharacter::UnFreeze()
 		m_FrozenLastTick = true;
 		m_FirstFreezeTick = 0;
 
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		if (!Server()->IsSevendown(m_pPlayer->GetCID()) && Config()->m_SvFreezePrediction)
+		{
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		}
 
 		if (!m_GotLasered && !GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))
 		{
@@ -4453,7 +4475,7 @@ void CCharacter::FDDraceTick()
 	// retract lightsaber
 	if (m_pLightsaber && (m_FreezeTime || GetActiveWeapon() != WEAPON_LIGHTSABER))
 		m_pLightsaber->Retract();
-	
+
 	// flag bonus
 	if (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)
 	{
@@ -4569,7 +4591,7 @@ void CCharacter::FDDraceTick()
 	{
 		m_HookExceededTick = 0;
 	}
-	
+
 	if (m_pPlayer->m_DoSeeOthersByVote && !IsIdle())
 	{
 		GameWorld()->ResetSeeOthers(m_pPlayer->GetCID());
@@ -5539,7 +5561,10 @@ void CCharacter::SetCheckpointList(std::vector< std::pair<int, int> > vCheckpoin
 
 bool CCharacter::TryMountHelicopter()
 {
-	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 48.f, CGameWorld::ENTTYPE_HELICOPTER, 0, true, Team());
+	if (m_FreezeTime)
+		return false;
+
+	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, 0, true, Team());
 	return pHelicopter && pHelicopter->Mount(m_pPlayer->GetCID());
 }
 
@@ -5638,7 +5663,7 @@ bool CCharacter::GrogTick()
 				{
 					m_NextGrogDirDelay = GetNextGrogActionTick();
 				}
-					
+
 				if (m_NextGrogDirDelay - Now < 0)
 				{
 					if (m_GrogDirDelayEnd && m_GrogDirDelayEnd < Server()->Tick())
@@ -5799,7 +5824,7 @@ bool CCharacter::SetZombieHuman(bool Zombie, bool GiveGun)
 		m_pPlayer->SaveDefEmote();
 		m_pPlayer->m_DefEmote = EMOTE_ANGRY;
 		m_pPlayer->m_DefEmoteReset = -1;
-		
+
 		CTeeInfo Info("cammo", 1, CGameControllerDDRace::ZombieBodyValue, CGameControllerDDRace::ZombieFeetValue);
 		Info.Translate(true);
 		m_pPlayer->m_CurrentInfo.m_TeeInfos = Info;
@@ -5878,7 +5903,7 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 		pTarget->GiveWeapon(WEAPON_HAMMER);
 		GiveWeapon(WEAPON_HAMMER, true);
 	}
-	
+
 	if (!m_EndlessHook && pTarget->m_EndlessHook)
 	{
 		m_EndlessHook = pTarget->m_EndlessHook;

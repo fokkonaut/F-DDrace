@@ -284,6 +284,25 @@ void CNetBase::SendPacket(const NETADDR *pAddr, CNetPacketConstruct *pPacket, bo
 	}
 }
 
+int CNetBase::UnpackFlagsRaw(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket)
+{
+	if(Size - NET_PACKETHEADERSIZE > NET_MAX_PAYLOAD)
+	{
+		if(Config()->m_Debug)
+			dbg_msg("network", "packet payload too big, size=%d", Size);
+		return -1;
+	}
+	if(Size < 3)
+	{
+		if(Config()->m_Debug)
+			dbg_msg("net", "packet too small, size=%d", Size);
+		return -1;
+	}
+
+	pPacket->m_Flags = (pBuffer[0]&0xfc)>>2;
+	return 0;
+}
+
 // TODO: rename this function
 int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool *pSevendown)
 {
@@ -295,14 +314,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		io_write(m_DataLogRecv, &Size, sizeof(Size));
 		io_write(m_DataLogRecv, pBuffer, Size);
 		io_flush(m_DataLogRecv);
-	}
-
-	// check the size
-	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
-	{
-		if(m_pConfig->m_Debug)
-			dbg_msg("network", "packet too small, size=%d", Size);
-		return -1;
 	}
 
 	// read the packet
@@ -360,6 +371,13 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		}
 
 		int HeaderSize = *pSevendown ? 3 : NET_PACKETHEADERSIZE;
+		if(Size < HeaderSize)
+		{
+			if(m_pConfig->m_Debug)
+				dbg_msg("net", "packet too small, size=%d", Size);
+			return -1;
+		}
+
 		if (*pSevendown)
 		{
 			pPacket->m_Token = NET_TOKEN_NONE;

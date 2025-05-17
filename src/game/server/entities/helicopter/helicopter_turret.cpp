@@ -40,7 +40,7 @@ void CVehicleTurret::AimTurret()
 	float targetAngle = (atan2f(aimFromTurret.y, aimFromTurret.x) / pi * 180.f);
 
 	float targetAngleClamped = clamp(targetAngle, m_Angle - m_AimingRange, m_Angle + m_AimingRange);
-	float correctionAngle = (targetAngleClamped - m_PivotAngle) * 0.1f; // Slow rotation
+	float correctionAngle = (targetAngleClamped - m_PivotAngle) * 0.15f; // Slow rotation
 
 	RotateTurret(correctionAngle);
 }
@@ -348,7 +348,7 @@ void CMinigunTurret::FireTurret()
 CMinigunTurret::CMinigunTurret()
 	: CVehicleTurret(TURRETTYPE_MINIGUN, NUM_BONES,
 		SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
-		vec2(4.f, 50.f), 15.f, 7)
+		vec2(4.f, 50.f), 35.f, 7)
 {
 	m_pHelicopter = nullptr;
 
@@ -499,7 +499,7 @@ void CLauncherTurret::FireTurret()
 CLauncherTurret::CLauncherTurret()
 	: CVehicleTurret(TURRETTYPE_LAUNCHER, NUM_BONES,
 					 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
-					 vec2(-10.f, 50.f), 15.f, 50)
+					 vec2(-10.f, 50.f), 35.f, 50)
 {
 	m_pHelicopter = nullptr;
 

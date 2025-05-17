@@ -817,7 +817,7 @@ void CCollision::Dest()
 	if (m_pSwitchers)
 		delete[] m_pSwitchers;
 	if (m_apPlotSize)
-		delete[] m_apPlotSize;
+		free(m_apPlotSize);
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -2025,44 +2025,34 @@ bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
 	if(TestBox(Pos, Size))
 		return true;
 
-	// multi sample the rest
-	const int MsCountX = (int)(Size.x / ms_MinStaticPhysSize);
-	const float MsGapX = Size.x / MsCountX;
-	const int MsCountY = (int)(Size.y / ms_MinStaticPhysSize);
-	const float MsGapY = Size.y / MsCountY;
+	vec2 HalfSize = Size * 0.5f;
 
-	if(!MsCountX && !MsCountY)
-		return false;
+	const int MsCountX = std::max(1, (int)ceil(Size.x / 32.0f));
+	const float MsGapX = Size.x / (float)MsCountX;
 
-	Size *= 0.5;
+	const int MsCountY = std::max(1, (int)ceil(Size.y / 32.0f));
+	const float MsGapY = Size.y / (float)MsCountY;
 
-	// top
-	for(int i = 0; i < MsCountX; i++)
+	// Top & Bottom edges
+	for(int i = 0; i <= MsCountX; i++)
 	{
-		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y-Size.y))
+		float x = Pos.x - HalfSize.x + i * MsGapX;
+		if(CheckPoint(x, Pos.y - HalfSize.y)) // top
+			return true;
+		if(CheckPoint(x, Pos.y + HalfSize.y)) // bottom
 			return true;
 	}
 
-	// bottom
-	for(int i = 0; i < MsCountX; i++)
+	// Left & Right edges
+	for(int i = 0; i <= MsCountY; i++)
 	{
-		if(CheckPoint(Pos.x-Size.x + (i+1) * MsGapX, Pos.y+Size.y))
+		float y = Pos.y - HalfSize.y + i * MsGapY;
+		if(CheckPoint(Pos.x - HalfSize.x, y)) // left
+			return true;
+		if(CheckPoint(Pos.x + HalfSize.x, y)) // right
 			return true;
 	}
 
-	// left
-	for(int i = 0; i < MsCountY; i++)
-	{
-		if(CheckPoint(Pos.x-Size.x, Pos.y-Size.y + (i+1) * MsGapY))
-			return true;
-	}
-
-	// right
-	for(int i = 0; i < MsCountY; i++)
-	{
-		if(CheckPoint(Pos.x+Size.x, Pos.y-Size.y + (i+1) * MsGapY))
-			return true;
-	}
 	return false;
 }
 

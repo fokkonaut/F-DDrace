@@ -2124,7 +2124,7 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 	if (pAccount->m_aLanguage[0] != '\0')
 	{
 		int DummyID = Server()->GetDummy(m_ClientID);
-		if (DummyID == -1 || GameServer()->m_apPlayers[DummyID]->GetAccID() < ACC_START)
+		if (DummyID == -1 || (GameServer()->m_apPlayers[DummyID] && GameServer()->m_apPlayers[DummyID]->GetAccID() < ACC_START))
 		{
 			// Only set language when other dummy is not logged in
 			SetLanguage(g_Localization.GetLanguage(pAccount->m_aLanguage));

@@ -83,7 +83,7 @@ void CCharacterCore::Reset()
 	m_HookTick = 0;
 	m_HookState = HOOK_IDLE;
 	SetHookedPlayer(-1);
-	//m_AttachedPlayers.clear();
+	m_AttachedPlayers.clear();
 	m_Jumped = 0;
 	m_JumpedTotal = 0;
 	m_Jumps = 2;
@@ -664,23 +664,20 @@ void CCharacterCore::SetHookedPlayer(int HookedPlayer)
 {
 	if(HookedPlayer != m_HookedPlayer)
 	{
-		if (HookedPlayer != HOOK_FLAG_RED && HookedPlayer != HOOK_FLAG_BLUE)
+		if(m_HookedPlayer != -1 && m_Id != -1 && m_pWorld && m_HookedPlayer != HOOK_FLAG_RED && m_HookedPlayer != HOOK_FLAG_BLUE)
 		{
-			if(m_HookedPlayer != -1 && m_Id != -1 && m_pWorld)
+			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
+			if(pCharCore)
 			{
-				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[m_HookedPlayer];
-				if(pCharCore)
-				{
-					//pCharCore->m_AttachedPlayers.erase(m_Id);
-				}
+				pCharCore->m_AttachedPlayers.erase(m_Id);
 			}
-			if(HookedPlayer != -1 && m_Id != -1 && m_pWorld)
+		}
+		if(HookedPlayer != -1 && m_Id != -1 && m_pWorld && HookedPlayer != HOOK_FLAG_RED && HookedPlayer != HOOK_FLAG_BLUE)
+		{
+			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[HookedPlayer];
+			if(pCharCore)
 			{
-				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[HookedPlayer];
-				if(pCharCore)
-				{
-					//pCharCore->m_AttachedPlayers.insert(m_Id);
-				}
+				pCharCore->m_AttachedPlayers.insert(m_Id);
 			}
 		}
 		m_HookedPlayer = HookedPlayer;

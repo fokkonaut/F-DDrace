@@ -445,6 +445,7 @@ public:
 	void SendMapData(int ClientID, int Chunk, bool FakeMap);
 	void SendMap(int ClientID);
 	void SendFakeMap(int ClientID);
+	void SendMapReload(int ClientID);
 	void SendConnectionReady(int ClientID);
 	void SendRconLine(int ClientID, const char *pLine);
 	static void SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted);
@@ -474,7 +475,7 @@ public:
 	void SendRedirectSaveTeeAdd(int Port, const char *pHash) override;
 	void SendRedirectSaveTeeRemove(int Port, const char *pHash) override;
 	void SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash);
-	void SendPlayerCountUpdate(bool Shutdown = false);
+	void SendPlayerCountUpdate(bool Shutdown = false) override;
 
 	void PumpNetwork();
 

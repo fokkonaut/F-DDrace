@@ -11,6 +11,12 @@ struct SBone
 {
 	CEntity *m_pEntity;
 	int m_ID;
+	vec2 m_InitFrom;
+	vec2 m_InitTo;
+	int m_InitColor;
+	int m_InitThickness;
+	bool m_Enabled;
+
 	vec2 m_From;
 	vec2 m_To;
 	int m_Color;
@@ -23,7 +29,7 @@ struct SBone
 		int Thickness = 5)
 		: SBone(pEntity, SnapID, vec2(FromX, FromY), vec2(ToX, ToY), Thickness) { }
 	SBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness = 5)
-		: m_pEntity(pEntity), m_ID(SnapID), m_From(From), m_To(To), m_Color(LASERTYPE_RIFLE), m_Thickness(Thickness) { }
+		: m_pEntity(pEntity), m_ID(SnapID), m_InitFrom(From), m_InitTo(To), m_InitColor(LASERTYPE_RIFLE), m_InitThickness(Thickness), m_Enabled(true), m_From(From), m_To(To), m_Color(LASERTYPE_RIFLE), m_Thickness(Thickness) { }
 
 	// Sense
 	IServer *Server() { return m_pEntity->Server(); }
@@ -53,6 +59,9 @@ struct SBone
 	}
 	void Scale(float factor)
 	{
+		// Only use case where init positions matter after scaling
+		m_InitFrom *= factor;
+		m_InitTo *= factor;
 		m_From *= factor;
 		m_To *= factor;
 	}
@@ -66,10 +75,29 @@ struct STrail
 	CEntity *m_pEntity;
 	int m_ID;
 	vec2 *m_pPos;
+	bool m_Enabled;
 
 public:
 	STrail() : m_pEntity(nullptr), m_ID(-1), m_pPos(nullptr) { };
-	STrail(CEntity *pEntity, int SnapID, vec2 *pPos) : m_pEntity(pEntity), m_ID(SnapID), m_pPos(pPos) { };
+	STrail(CEntity *pEntity, int SnapID, vec2 *pPos) : m_pEntity(pEntity), m_ID(SnapID), m_pPos(pPos), m_Enabled(true) { };
+
+	// Sense
+	IServer *Server() { return m_pEntity->Server(); }
+
+	// Ticking
+	void Snap(int SnappingClient);
+};
+
+struct SHeart
+{
+	CEntity *m_pEntity;
+	vec2 m_Pos;
+	int m_ID;
+	bool m_Enabled;
+
+public:
+	SHeart() : SHeart(nullptr, -1, vec2(0.f, 0.f)) { };
+	SHeart(CEntity *pEntity, int SnapID, vec2 Pos) : m_pEntity(pEntity), m_Pos(Pos), m_ID(SnapID), m_Enabled(true) { };
 
 	// Sense
 	IServer *Server() { return m_pEntity->Server(); }
