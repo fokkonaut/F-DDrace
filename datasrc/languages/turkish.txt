@@ -289,10 +289,10 @@ You can't pay nothing
 == Hiçbir şey ödeyemezsin
 
 You paid %lld money from your bank account to '%s'
-== Banka hesabından '%s' adlı oyuncuya %lld para ödedin
+== Banka hesabından %lld adlı oyuncuya '%s' para ödedin
 
 You got %lld money to your bank account from '%s'
-== '%s' adlı oyuncudan banka hesabına %lld para geldi
+== %lld adlı oyuncudan banka hesabına '%s' para geldi
 
 Invalid argument
 == Geçersiz argüman
