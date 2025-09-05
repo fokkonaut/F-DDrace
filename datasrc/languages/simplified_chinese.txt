@@ -1,2092 +1,2092 @@
 #
-# Author:
+# Author: Bamcane 2025/09/05
 #
 
 F-DDrace is a mod by fokkonaut
-== 
+== F-DDrace 是由 fokkonaut 制作的一个模组
 
 This mod is based on Teeworlds 0.7 and also incorporates features, ideas, and partial implementations
-== 
+== 此模组基于 Teeworlds 0.7，并整合了来自 DDNet++、DDNet 及其他社区项目的功能、想法和部分实现
 
 from DDNet++ by ChillerDragon, DDNet, and other community projects, aswell as many custom features!
-== 
+== 来自 ChillerDragon、DDNet 和其他社区项目的 DDNet++，以及许多自定义功能！
 
 If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:
-== 
+== 如果你想查看源码或进行贡献，请前往 GitHub 上的 F-DDrace 项目：
 
 For more info, say '/cmdlist' or '/credits'
-== 
+== 更多信息，请输入 '/cmdlist' 或 '/credits'
 
 /cmdlist will show a list of all chat commands
-== 
+== /cmdlist 将显示所有聊天命令列表
 
 /help + any command will show you the help for this command
-== 
+== /help + 任意命令将会显示该命令的帮助信息
 
 Example /help settings will display the help about /settings
-== 
+== 例如 /help settings 将会显示关于 /settings 的帮助信息
 
 Usage
-== 
+== 使用方法
 
 Command is either unknown or you have given a blank command without any parameters.
-== 
+== 命令未知或你输入了一个没有参数的空白命令。
 
 to check a server setting say /settings and setting's name, setting names are:
-== 
+== 要检查服务器设置，请输入 /settings 和设置名称，可用的设置名称有：
 
 You can't join the spectators while you are in survival
-== 
+== 在生存模式中你无法加入旁观者
 
 Timeout code has to be at least 8 characters long, make sure to use a safe code.
-== 
+== 超时代码至少需要 8 个字符，确保使用安全的代码。
 
 Teams are disabled
-== 
+== 队伍功能已禁用
 
 This team can't be locked
-== 
+== 此队伍无法被锁定
 
 '%s' unlocked your team.
-== 
+== '%s' 解锁了你的队伍。
 
 Team locking is disabled on this server
-== 
+== 本服务器禁止队伍锁定功能
 
 '%s' locked your team. After the race started killing will kill everyone in your team.
-== 
+== '%s' 锁定了你的队伍。比赛开始后，击杀将导致你队伍中的所有人死亡。
 
 Invites are disabled
-== 
+== 邀请功能已禁用
 
 Player not found
-== 
+== 玩家未找到
 
 Player already invited
-== 
+== 玩家已被邀请
 
 Can't invite this quickly
-== 
+== 无法这么快邀请
 
 '%s' invited you to team %d.
-== 
+== '%s' 邀请你加入队伍 %d。
 
 '%s' invited '%s' to your team.
-== 
+== '%s' 邀请 '%s' 加入你的队伍。
 
 You are running a vote please try again after the vote is done!
-== 
+== 你正在投票，请在投票结束后再试一次！
 
 You must join a team and play with somebody or else you can't play
-== 
+== 你必须加入一个队伍并和别人一起玩，否则你不能参与游戏
 
 You can't change teams while you are dead/a spectator.
-== 
+== 死亡或作为旁观者时无法更换队伍
 
 You can't change teams that fast!
-== 
+== 无法这么快更换队伍！
 
 You can't join teams in this minigame
-== 
+== 在此小游戏内无法加入队伍
 
 This team is locked using /lock. Only members of the team can unlock it using /lock.
-== 
+== 此队伍已被 /lock 锁定，只有队伍成员可以使用 /lock 解锁。
 
 This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.
-== 
+== 此队伍已被 /lock 锁定，只有队伍成员可以邀请你或使用 /lock 解锁。
 
 This team already has the maximum allowed size of %d players
-== 
+== 此队伍已达最大允许人数 %d
 
 %s joined team %d
-== 
+== %s 加入了队伍 %d
 
 You cannot join this team at this time
-== 
+== 当前无法加入此队伍
 
 You can't check your team while you are dead/a spectator.
-== 
+== 死亡或作为旁观者时无法查看你的队伍
 
 /me is disabled on this server
-== 
+== 本服务器禁用了 /me 命令
 
 You will now see all tees on this server, no matter the distance
-== 
+== 你现在可以看到服务器上所有玩家，无论距离远近
 
 You will no longer see all tees on this server
-== 
+== 你将不再看到服务器上的所有玩家
 
 Score Format
-== 
+== 计分格式
 
 Use '/score <format>' to change the displayed score.
-== 
+== 使用 '/score <format>' 来更改显示的分数格式。
 
 Accounts
-== 
+== 账户系统
 
 Accounts are used to save your stats.
-== 
+== 账户用于保存你的统计数据。
 
 You can farm money and buy things in the shop, kill tees and get points.
-== 
+== 你可以通过刷钱在商店购买物品，击杀其他玩家获取积分。
 
 These stats will be saved inside of your account.
-== 
+== 这些统计数据将保存在你的账户中。
 
 You can create an account using '/register'.
-== 
+== 你可以使用 '/register' 创建一个账户。
 
 Once you are logged in, you can use this command again to see information about your account.
-== 
+== 登录后，你可以再次使用此命令查看账户信息。
 
 Account Info
-== 
+== 账户信息
 
 Account Name
-== 
+== 账户名称
 
 Registered
-== 
+== 注册时间
 
 {/account}
 until
-== 
+== {/account} 直到
 
 not bought
-== 
+== 未购买
 
 Portal Rifle
-== 
+== 传送枪
 
 Contact
-== 
+== 联系方式
 
 E-Mail
-== 
+== 电子邮箱
 
 Stats
-== 
+== 统计数据
 
 Level
-== 
+== 等级
 
 (not logged in)
-== 
+== （未登录）
 
 Bank
-== 
+== 银行
 
 Wallet
-== 
+== 钱包
 
 Police
-== 
+== 警察系统
 
 Collectables
-== 
+== 收集品
 
 Taser battery
-== 
+== 电击电池
 
 Portal Battery
-== 
+== 传送电池
 
 Points
-== 
+== 积分
 
 Kills
-== 
+== 击杀数
 
 Deaths
-== 
+== 死亡数
 
 Games won
-== 
+== 游戏胜利次数
 
 Profit
-== 
+== 盈利
 
 Wins
-== 
+== 胜利数
 
 Toggle
-== 
+== 切换
 
 Spooky Ghost
-== 
+== 怪异幽灵
 
 Portal Blocker
-== 
+== 传送阻挡器
 
 Spooky ghost (gun) and portal blocker (hammer) can be enabled like the following:
-== 
+== 幽灵（枪）和传送阻挡器（锤子）可通过以下方式启用：
 
 Hold TAB (or other scoreboard key) and during that fire your weapon two times.
-== 
+== 按住 TAB（或其他记分板键）并在期间连续开火两次。
 
 With VIP Classic you get an XP and money boost of '+2' per second, aswell as access to the following commands:
-== 
+== VIP Classic 提供每秒 +2 经验值和金钱加成，同时获得以下命令权限：
 
 VIP+ includes every feature of VIP Classic.
-== 
+== VIP+ 包含 VIP Classic 的所有功能。
 
 Additionally to that you can enter the VIP+ room to farm safely there, aswell as you gain access to the following commands:
-== 
+== 此外，你可以进入 VIP+ 房间安全刷钱，并获得以下命令权限：
 
 Spawn Weapons
-== 
+== 出生武器
 
 You can buy spawn weapons in the shop.
-== 
+== 你可以在商店购买出生武器。
 
 You will have the bought weapon on spawn.
-== 
+== 你将在出生时拥有购买的武器。
 
 You can have max. 5 bullets per weapon.
-== 
+== 每种武器最多可持有 5 发子弹。
 
 Each bullet costs 600.000 money.
-== 
+== 每发子弹花费 600,000 钱。
 
 Your Spawn Weapons
-== 
+== 你的出生武器
 
 Spawn shotgun bullets
-== 
+== 出生散弹枪子弹
 
 Spawn grenade bullets
-== 
+== 出生手雷子弹
 
 Spawn rifle bullets
-== 
+== 出生步枪子弹
 
 Accounts are not supported on this server
-== 
+== 本服务器不支持账户系统
 
 The username is too long or too short
-== 
+== 用户名过长或过短
 
 Your username can only consist of letters and numbers
-== 
+== 用户名只能包含字母和数字
 
 The passwords need to be identical
-== 
+== 密码必须一致
 
 The password is too long or too short
-== 
+== 密码过长或过短
 
 Username already exists
-== 
+== 用户名已存在
 
 Successfully registered an account, you can login now
-== 
+== 成功注册账户，你现在可以登录了
 
 Set a security pin to avoid account stealing. For more info, say '/pin'
-== 
+== 设置安全码防止账户被盗。更多信息请输入 '/pin'
 
 You are not logged in
-== 
+== 你尚未登录
 
 You can't logout in a minigame
-== 
+== 在小游戏内无法登出
 
 You can't logout while being arrested
-== 
+== 被逮捕时无法登出
 
 You can't logout while being searched by the police
-== 
+== 被警察搜查时无法登出
 
 Kill logout is activated, kill within %d seconds to logout
-== 
+== 击杀登出已激活，需在 %d 秒内击杀以登出
 
 You are not verified, please enter your security pin using '/pin'
-== 
+== 你尚未验证，请使用 '/pin' 输入安全码
 
 Wrong password
-== 
+== 密码错误
 
 Successfully changed password
-== 
+== 成功修改密码
 
 You need to enter a way to contact you, for example: Discord, E-Mail, Skype, etc.
-== 
+== 你需要提供一种联系方式，例如：Discord、电子邮件、Skype 等。
 
 To see your current contact information, use '/account'
-== 
+== 查看当前联系信息，请使用 '/account'
 
 Example: '/contact Discord: fokkonaut'
-== 
+== 示例：'/contact Discord: fokkonaut'
 
 Successfully updated contact information, check '/account'
-== 
+== 成功更新联系信息，请检查 '/account'
 
 SECURITY PIN
-== 
+== 安全码
 
 You should set a security pin to avoid account stealing. The pin itself has to be a 4-digit long number code.
-== 
+== 应该设置安全码以防账户被盗。安全码必须是四位数字。
 
 This pin will be required to change your contact information or your password.
-== 
+== 此安全码用于更改联系信息或密码。
 
 If your account is not secured yet, you can set a pin with '/pin <new-pin>'.
-== 
+== 若你的账户还未设置安全码，可用 '/pin <新码>' 设置。
 
 If you want to change your pin, you first need to verify using '/pin <account-pin>'.
-== 
+== 如要更改安全码，首先需使用 '/pin <原码>' 进行验证。
 
 After verifying, you can set a new pin with '/pin <new-pin>'.
-== 
+== 验证通过后，可用 '/pin <新码>' 设置新安全码。
 
 You have to enter a 4-digit number
-== 
+== 必须输入四位数字
 
 Successfully set the security pin
-== 
+== 成功设置安全码
 
 Verification failed
-== 
+== 验证失败
 
 Verification successful
-== 
+== 验证成功
 
 Successfully changed the security pin
-== 
+== 成功修改安全码
 
 You have to be inside of a bank to pay money from your bank account to others
-== 
+== 必须在银行内才能从银行账户向他人转账
 
 You can't pay money that frequently
-== 
+== 无法频繁支付金钱
 
 That player doesn't exist
-== 
+== 该玩家不存在
 
 You can't pay money to yourself
-== 
+== 无法给自己转账
 
 That player is not logged in
-== 
+== 该玩家未登录
 
 You don't have enough money
-== 
+== 你没有足够的钱
 
 You can't pay nothing
-== 
+== 无法支付零钱
 
 You paid %lld money from your bank account to '%s'
-== 
+== 你从银行账户支付了 %lld 钱给 '%s'
 
 You got %lld money to your bank account from '%s'
-== 
+== 你从 '%s' 获得了 %lld 钱转入银行账户
 
 Invalid argument
-== 
+== 参数无效
 
 You can't drop nothing
-== 
+== 无法丢弃零钱
 
 You can't drop money bags over 100.000
-== 
+== 无法丢弃超过 100,000 的钱袋
 
 You don't have enough money in your wallet
-== 
+== 你钱包里没有足够的钱
 
 Drop money: '/money drop <amount>'
-== 
+== 丢弃金钱：'/money drop <数量>'
 
 You can't drop more than 100 portal batteries at the same time
-== 
+== 同时无法丢弃超过 100 个传送电池
 
 You don't have enough portal batteries
-== 
+== 你没有足够的传送电池
 
 You can collect portal batteries in the map, which lets you use the portal rifle.
-== 
+== 你可以在地图上收集传送电池，用来使用传送枪。
 
 The portal rifle can shoot two portals at cursor position, which tees, flags and weapons can use to travel between them.
-== 
+== 传送枪可在光标位置发射两个传送门，玩家、旗帜和武器可以通过它们传送。
 
 Your portal stats
-== 
+== 你的传送统计
 
 Drop portal battery: '/portal drop <amount>'
-== 
+== 丢弃传送电池：'/portal drop <数量>'
 
 You are not VIP
-== 
+== 你不是 VIP
 
 You don't have a room key
-== 
+== 你没有房间钥匙
 
 This player has a key already
-== 
+== 该玩家已有钥匙
 
 This player got invited already
-== 
+== 该玩家已被邀请
 
 '%s' invited you to the room
-== 
+== '%s' 邀请你进入房间
 
 You invited '%s' to the room
-== 
+== 你邀请 '%s' 进入房间
 
 You can't kick others without a key
-== 
+== 没有钥匙无法踢出他人
 
 You can't kick a player with a key
-== 
+== 无法踢出有钥匙的玩家
 
 This player is not invited
-== 
+== 该玩家未被邀请
 
 '%s' kicked you out of room
-== 
+== '%s' 将你踢出房间
 
 You kicked '%s' out of room
-== 
+== 你将 '%s' 踢出房间
 
 Teleporting to spawn is disabled
-== 
+== 回到出生点传送已禁用
 
 You can't use this command in minigames
-== 
+== 无法在小游戏内使用此命令
 
 You can't use this command while being arrested
-== 
+== 被逮捕时无法使用此命令
 
 You can't use this command while frozen
-== 
+== 冻结状态下无法使用此命令
 
 You lost 50.000 money for teleporting to spawn
-== 
+== 因传送回出生点失去 50,000 钱
 
 Plot subcommands
-== 
+== 地块子命令
 
 For detailed info, type '/plot help <command>'
-== 
+== 获取详细信息，请输入 '/plot help <command>'
 
 Hold SPACE while editing for more control infos
-== 
+== 编辑时按住空格键查看更多控制信息
 
 Clears all objects of your plot
-== 
+== 清除你的地块所有物件
 
 Starts an auction for your plot, everyone can buy it using the buy command
-== 
+== 开启你的地块拍卖，所有人可用 buy 命令购买
 
 Buys a plot if the given player is running a plot auction
-== 
+== 如果指定玩家正在进行地块拍卖，则购买其地块
 
 Lets you respawn at your plot
-== 
+== 允许你在你的地块重生
 
 Cancels the current running auction on your plot
-== 
+== 取消你地块的当前拍卖
 
 Swaps plot with given player
-== 
+== 与指定玩家交换地块
 
 Shows a list with all currently open plot auctions and swap offers
-== 
+== 显示所有当前开放的地块拍卖和交换请求
 
 This player doesn't exists
-== 
+== 该玩家不存在
 
 You can't buy your own plot
-== 
+== 无法购买自己的地块
 
 This player doesn't sell a plot
-== 
+== 该玩家未出售地块
 
 You already have a plot
-== 
+== 你已经拥有一块地
 
 The price you entered does not match the offer
-== 
+== 你输入的价格与报价不符
 
 Your IP address already owns one plot
-== 
+== 你的 IP 地址已经拥有一块地
 
 Plot %d has been bought by '%s'
-== 
+== 地块 %d 已被 '%s' 购买
 
 You bought plot %d from %s
-== 
+== 你从 %s 处购买了地块 %d
 
 %s bought your plot, the money is moved to your bank account
-== 
+== %s 购买了你的地块，钱已转至你的银行账户
 
 Plot list
-== 
+== 地块列表
 
 Buy from auction: '/plot buy <price> <playername>'
-== 
+== 从拍卖购买：'/plot buy <价格> <玩家名>'
 
 Swap with offer: '/plot swap <playername>'
-== 
+== 与请求交换：'/plot swap <玩家名>'
 
 List of all plot auctions and swap offers:
-== 
+== 所有地块拍卖和交换请求列表：
 
 There are currently no auctions or swap offers
-== 
+== 当前无拍卖或交换请求
 
 You need a plot to use this command
-== 
+== 使用此命令需要一块地
 
 You can't sell your plot when being wanted
-== 
+== 被通缉时无法出售地块
 
 You can only do auctions once a minute
-== 
+== 每分钟只能进行一次拍卖
 
 You already sell your plot
-== 
+== 你已在出售地块
 
 You need to enter a valid price
-== 
+== 必须输入有效价格
 
 '%s' started an auction on plot %d for %d money (plot expires on %s)
-== 
+== '%s' 在地块 %d 开始拍卖 %d 钱（地块将于 %s 过期）
 
 Use '/plot buy %d %s' to buy the plot
-== 
+== 使用 '/plot buy %d %s' 购买地块
 
 You can't swap plots when being wanted
-== 
+== 被通缉时无法交换地块
 
 You can't swap with yourself
-== 
+== 无法与自己交换地块
 
 This player doesn't own a plot
-== 
+== 该玩家未拥有地块
 
 You can only swap once a minute
-== 
+== 每分钟只能交换一次
 
 You swapped plots with '%s'
-== 
+== 你与 '%s' 交换了地块
 
 Offer to swap plots was sent to '%s'
-== 
+== 向 '%s' 发送了交换地块的请求
 
 '%s' has offered to swap plots with you, type '/plot swap %s' to swap
-== 
+== '%s' 请求与你交换地块，请输入 '/plot swap %s' 进行交换
 
 Page
-== 
+== 页面
 
 Police Info
-== 
+== 警察信息
 
 [POLICE %d]
-== 
+== [警察等级 %d]
 
 Level needed to buy
-== 
+== 购买所需等级
 
 Benefits:
-== 
+== 优势：
 
 - The police bot will help you
-== 
+== - 警察机器人会帮助你
 
 - taser license ('/taser')
-== 
+== - 电击枪许可证（'/taser'）
 
 - Officers can taser a plot door of a wanted player to deal damage and destroy it
-== 
+== - 警察可以电击通缉玩家的地块门造成伤害并摧毁它
 
 - Taser will destroy plot objects of a wanted player
-== 
+== - 电击枪会摧毁通缉玩家的地块物体
 
 [GENERAL INFORMATION]
-== 
+== [通用信息]
 
 Police ranks can be bought in shop.
-== 
+== 警察等级可以在商店购买。
 
 There are multiple police ranks, each cost 100.000 money.
-== 
+== 有多个警察等级，每个等级花费 100,000 钱。
 
 The policebot will help every police officer.
-== 
+== 警察机器人会帮助所有警察。
 
 Every police rank will give you more benefits.
-== 
+== 每个警察等级都会提供更多优势。
 
 Use '/police <page>' for information about other ranks
-== 
+== 使用 '/police <页码>' 查看其他等级的信息
 
 You can't mute yourself
-== 
+== 无法对自己禁言
 
 muted
-== 
+== 已禁言
 
 unmuted
-== 
+== 已解除禁言
 
 Map Designs
-== 
+== 地图设计
 
 If you have your dummy connected, you need to reconnect it after the design change so it can get back it's state.
-== 
+== 如果你连接了假人，设计变更后需要重新连接以恢复其状态。
 
 You can set one of the following designs by using '/design <name>':
-== 
+== 可通过 '/design <名称>' 设置以下设计之一：
 
 Invalid language
-== 
+== 无效语言
 
 Server Language
-== 
+== 服务器语言
 
 Current language
-== 
+== 当前语言
 
 You can set one of the following languages for server-side translation by using '/language <option>':
-== 
+== 可通过 '/language <选项>' 设置服务器端翻译的语言之一：
 
 This chat language is already selected
-== 
+== 当前聊天语言已选中
 
 Successfully updated chat language
-== 
+== 成功更新聊天语言
 
 Chat Language
-== 
+== 聊天语言
 
 You can set one of the following languages by using '/chatlanguage <option>':
-== 
+== 可通过 '/chatlanguage <选项>' 设置以下语言之一：
 
 Discord server
-== 
+== Discord 服务器
 
 This server does not have a linked Discord server
-== 
+== 本服务器未链接 Discord 服务器
 
 Minigames
-== 
+== 小游戏
 
 You can join any minigame using '/<minigame>'
-== 
+== 使用 '/<小游戏>' 可加入任意小游戏
 
 To leave a minigame, just type '/leave'
-== 
+== 离开小游戏只需输入 '/leave'
 
 Here is a list of all minigames:
-== 
+== 这是所有小游戏列表：
 
 Money
-== 
+== 金钱
 
 Spree
-== 
+== 连杀
 
 Durák Wins
-== 
+== Durák 胜利
 
 Durák Profit
-== 
+== Durák 盈利
 
 You need to be police level 2 to use this command
-== 
+== 需要警察等级 2 才能使用此命令
 
 This player is a police officer
-== 
+== 该玩家是警察
 
 This player is a police helper already
-== 
+== 该玩家已是警察助手
 
 '%s' added you to the police helpers
-== 
+== '%s' 将你添加为警察助手
 
 You added '%s' to the police helpers
-== 
+== 你将 '%s' 添加为警察助手
 
 This player is not a police helper
-== 
+== 该玩家不是警察助手
 
 '%s' removed you from the police helpers
-== 
+== '%s' 将你移出警察助手
 
 You removed '%s' from the police helpers
-== 
+== 你将 '%s' 移出警察助手
 
 WANTED
-== 
+== 通缉
 
 Listing all players that are wanted by the police:
-== 
+== 列出所有被警察通缉的玩家：
 
 1 wanted player
-== 
+== 1 名通缉玩家
 
 %d wanted players
-== 
+== %d 名通缉玩家
 
 There are no wanted players right now
-== 
+== 目前没有通缉玩家
 
 You don't have enough taser batteries
-== 
+== 你没有足够的电击电池
 
 Taser
-== 
+== 电击枪
 
 Police officers with level 3 or higher get a taser license.
-== 
+== 等级 3 或更高的警察可获得电击枪许可证。
 
 The taser is a rifle that freezes players for a short time.
-== 
+== 电击枪是一种使玩家短暂冻结的步枪。
 
 You can pick up the taser and taser batteries throughout the map.
-== 
+== 你可以在地图上拾取电击枪和电击电池。
 
 Your taser stats
-== 
+== 你的电击枪统计
 
 Taser level
-== 
+== 电击枪等级
 
 Price for the next level
-== 
+== 下一等级价格
 
 Freeze time: %.2f seconds
-== 
+== 冻结时间：%.2f 秒
 
 Taser shield
-== 
+== 电击盾牌
 
 Drop taser battery: '/taser drop <amount>'
-== 
+== 丢弃电击电池：'/taser drop <数量>'
 
 %s was killed by %s
-== 
+== %s 被 %s 击杀
 
 '%s' has been muted for %d seconds (%s)
-== 
+== '%s' 已被禁言 %d 秒 (%s)
 
 '%s' has been muted for %d seconds
-== 
+== '%s' 已被禁言 %d 秒
 
 '%s' banned '%s' for %d seconds from voting.
-== 
+== '%s' 禁止 '%s' %d 秒内投票。
 
 '%s' unbanned '%s' from voting.
-== 
+== '%s' 解除对 '%s' 的投票禁令。
 
 Your taser shield has been set to %d%%. Use '/taser' to check later.
-== 
+== 你的电击盾牌设定为 %d%%。使用 '/taser' 查看详情。
 
 You have been logged out by an admin
-== 
+== 你已被管理员登出
 
 You have been logged out due to account deactivation by an admin
-== 
+== 因账户被管理员停用而登出
 
 You are now in no-bonus area mode
-== 
+== 你现在处于无奖励区域模式
 
 You are no longer in no-bonus area mode
-== 
+== 你已退出无奖励区域模式
 
 You were arrested for %d seconds
-== 
+== 你被逮捕了 %d 秒
 
 You lost your plot
-== 
+== 你失去了你的地块
 
 You are now owner of plot %d
-== 
+== 你现在是地块 %d 的主人
 
 Objects
-== 
+== 物件
 
 Please enter the name for this preset into the chat
-== 
+== 请在聊天中输入此预设名称
 
 Please enter the name of the wanted preset into the chat
-== 
+== 请在聊天中输入想要的预设名称
 
 Couldn't save preset '%s', a preset with that name already exists
-== 
+== 无法保存预设 '%s'，该名称已存在
 
 Successfully saved preset '%s'
-== 
+== 成功保存预设 '%s'
 
 Couldn't load preset '%s'
-== 
+== 无法加载预设 '%s'
 
 Successfully loaded preset '%s'
-== 
+== 成功加载预设 '%s'
 
 Preset saving aborted
-== 
+== 预设保存已取消
 
 Preset loading aborted
-== 
+== 预设加载已取消
 
 Vote aborted
-== 
+== 投票已取消
 
 Vote passed
-== 
+== 投票通过
 
 Vote failed
-== 
+== 投票失败
 
 '%s' called vote to change server option '%s' (%s)
-== 
+== '%s' 发起投票更改服务器选项 '%s' (%s)
 
 Your plot is no longer subject to a search warrant and can no longer be destroyed
-== 
+== 你的地块不再受搜查令影响，也无法被摧毁
 
 '%s' entered and joined the game
-== 
+== '%s' 进入并加入了游戏
 
 '%s' entered and joined the spectators
-== 
+== '%s' 进入并加入了旁观者
 
 This server has an initial chat delay, you will need to wait %d seconds before talking.
-== 
+== 本服务器有初始聊天延迟，你需要等待 %d 秒后才能说话。
 
 '%s' rejoined current session
-== 
+== '%s' 重新加入当前会话
 
 [WARNING] You need to reconnect your dummy after the design change is done, so it can get back it's old state.
-== 
+== [警告] 设计变更完成后，你需要重新连接假人以恢复其状态。
 
 '%s' has left the game (%s)
-== 
+== '%s' 离开了游戏 (%s)
 
 '%s' has left the game
-== 
+== '%s' 离开了游戏
 
 You do not have an ongoing conversation. Whisper to someone to start one
-== 
+== 你没有正在进行的对话。私聊某人开启一个
 
 '%s' changed name to '%s'
-== 
+== '%s' 更名为 '%s'
 
 Following players can't receive your message because either you or they are in local chat mode:
-== 
+== 以下玩家无法收到你的消息，因为你自己或他们处于本地聊天模式：
 
 No reason given
-== 
+== 未给出原因
 
 '%s' isn't an option on this server
-== 
+== '%s' 不是本服务器的选项
 
 '%s' called vote to change server option '%s'
-== 
+== '%s' 发起投票更改服务器选项 '%s'
 
 There's a %d second wait time between kick votes for each player please wait %d second(s)
-== 
+== 每位玩家之间踢人投票有 %d 秒间隔，请等待 %d 秒
 
 Server does not allow voting to kick players
-== 
+== 服务器不允许投票踢人
 
 Kick voting requires %d players
-== 
+== 踢人投票需要 %d 名玩家
 
 You can't kick yourself
-== 
+== 无法踢自己
 
 You can't kick dummies
-== 
+== 无法踢假人
 
 You can't kick authorized players
-== 
+== 无法踢授权玩家
 
 '%s' called for vote to kick you
-== 
+== '%s' 发起投票踢你
 
 You can kick only your team member
-== 
+== 你只能踢你的队友
 
 '%s' called for vote to kick '%s' (%s)
-== 
+== '%s' 发起投票踢 '%s' (%s)
 
 Server does not allow voting to move players to spectators
-== 
+== 服务器不允许投票将玩家移至旁观者
 
 You can't move yourself
-== 
+== 无法移动自己
 
 You can't set dummies to spectator
-== 
+== 无法将假人设为旁观者
 
 You can only move your team member to spectators
-== 
+== 你只能将队友移至旁观者
 
 '%s' called for vote to pause '%s' for %d seconds (%s)
-== 
+== '%s' 发起投票暂停 '%s' %d 秒 (%s)
 
 '%s' called for vote to move '%s' to spectators (%s)
-== 
+== '%s' 发起投票将 '%s' 移至旁观者 (%s)
 
 You are now using the tee controller
-== 
+== 你现在使用的是 Tee 控制器
 
 You are no longer using the tee controller
-== 
+== 你不再使用 Tee 控制器
 
 Kill Protection enabled. If you really want to join the spectators, first type /kill
-== 
+== 击杀保护已启用。如你真想加入旁观者，请先输入 /kill
 
 Warning you have %lld money in your wallet! (see /money)
-== 
+== 警告：你的钱包中有 %lld 钱！（见 /money）
 
 Wallet kill Protection enabled. If you really want to join the spectators, first type /kill
-== 
+== 钱包击杀保护已启用。如你真想加入旁观者，请先输入 /kill
 
 You can't join the spectators while being searched by the police
-== 
+== 被警察搜查时无法加入旁观者
 
 Use /pause first then you can kill
-== 
+== 先使用 /pause 然后再击杀
 
 Only %d active players are allowed
-== 
+== 最多允许 %d 名活跃玩家
 
 You need to wait %d seconds before killing again due to escaping
-== 
+== 逃脱后需等待 %d 秒才能再次击杀
 
 Kill Protection enabled. If you really want to kill, type /kill
-== 
+== 击杀保护已启用。如你真想击杀，请输入 /kill
 
 Wallet kill Protection enabled. If you really want to kill, type /kill
-== 
+== 钱包击杀保护已启用。如你真想击杀，请输入 /kill
 
 All players were moved to the game
-== 
+== 所有玩家都被移至游戏中
 
 All players were moved to the spectators
-== 
+== 所有玩家都被移至旁观者
 
 Authorized player forced server option '%s' (%s)
-== 
+== 授权玩家强制更改服务器选项 '%s' (%s)
 
 '%s' was moved to spectator (%s)
-== 
+== '%s' 被移至旁观者 (%s)
 
 Local chat mode has been disabled, automatically entered public chat
-== 
+== 本地聊天模式已关闭，自动进入公共聊天
 
 Automatic wallet to bank due to bank disabling
-== 
+== 因银行禁用自动将钱包钱转入银行
 
 You are not permitted to talk for the next %d seconds.
-== 
+== 你接下来 %d 秒内不能说话。
 
 Listing players with "%s" in name:
-== 
+== 列出名字包含 "%s" 的玩家：
 
 Listing all players:
-== 
+== 列出所有玩家：
 
 You can only vote after logging in.
-== 
+== 登录后才能投票。
 
 Wait for current vote to end before calling a new one.
-== 
+== 在发起新投票前请等待当前投票结束。
 
 You must wait %d seconds before making your first vote.
-== 
+== 首次投票前需等待 %d 秒。
 
 You must wait %d seconds before making another vote.
-== 
+== 再次投票前需等待 %d 秒。
 
 You are not permitted to vote for the next %d seconds.
-== 
+== 接下来 %d 秒内无法投票。
 
 There's a %d second delay between map-votes, please wait %d seconds.
-== 
+== 地图投票之间有 %d 秒延迟，请等待 %d 秒。
 
 Your plot expired
-== 
+== 你的地块已过期
 
 The police have gained access to your plot in hopes of finding you
-== 
+== 警察已进入你的地块寻找你
 
 Plot %d Door Health [%d/%d]
-== 
+== 地块 %d 门血量 [%d/%d]
 
 You are already logged in
-== 
+== 你已经登录
 
 That account doesn't exist, please register first
-== 
+== 该账户不存在，请先注册
 
 This account is already logged in
-== 
+== 该账户已登录
 
 This account is already logged in on another server
-== 
+== 该账户已在另一服务器登录
 
 This account is disabled
-== 
+== 该账户已被禁用
 
 You were released from jail
-== 
+== 你已获释
 
 '%s' is spawnblocking. Catch him!
-== 
+== '%s' 正在出生点阻塞。抓住他！
 
 Police is searching you because of spawnblocking
-== 
+== 警察因出生点阻塞在搜查你
 
 [WARNING] Spawnblocking is illegal
-== 
+== [警告] 出生点阻塞是非法行为
 
 Registration spam
-== 
+== 注册垃圾信息
 
 Too many login fails
-== 
+== 登录失败次数过多
 
 Too many pin fails
-== 
+== 安全码失败次数过多
 
 You have been banned from the account system for %d seconds (%s)
-== 
+== 因账户系统违规被封禁 %d 秒 (%s)
 
 You are banned from the account system for the next %d seconds.
-== 
+== 你接下来 %d 秒内无法使用账户系统。
 
 This minigame is disabled
-== 
+== 此小游戏已禁用
 
 You are not in a minigame
-== 
+== 你不在小游戏内
 
 You are already in minigame '%s'
-== 
+== 你已在小游戏 '%s' 中
 
 This map has no Durák lobby, you have to find your way to the table yourself
-== 
+== 本地图没有 Durák 大厅，你需要自行前往桌子
 
 '%s' left the minigame '%s'
-== 
+== '%s' 离开了小游戏 '%s'
 
 '%s' joined the minigame '%s', use '/%s' to join aswell
-== 
+== '%s' 加入了小游戏 '%s'，使用 '/%s' 可加入
 
 Say '/leave' to join the normal area again
-== 
+== 输入 '/leave' 返回正常区域
 
 Type '/1vs1 <playername>' to start a fight with someone
-== 
+== 输入 '/1vs1 <玩家名>' 开始一场决斗
 
 For custom scorelimits or a kill-border use '/1vs1 <playername> <scorelimit> <killborder>'
-== 
+== 自定义分数限制或击杀边界使用 '/1vs1 <玩家名> <分数限制> <击杀边界>'
 
 You have to leave first in order to join another minigame
-== 
+== 若要加入其他小游戏，必须先离开当前的小游戏
 
 The winner is '%s'
-== 
+== 获胜者是 '%s'
 
 You are the winner
-== 
+== 你是获胜者
 
 '%s' would have timed out, but can use timeout protection now
-== 
+== '%s' 原本会超时，但现在可以使用超时保护
 
 You are arrested for %lld seconds
-== 
+== 你被逮捕了 %lld 秒
 
 Your life as a gangster is over, you are free now
-== 
+== 你的黑帮生涯结束了，现在你自由了
 
 Avoid policehammers for the next %lld seconds
-== 
+== 接下来 %lld 秒避免被警察锤
 
 Entered local chat
-== 
+== 进入本地聊天
 
 Entered public chat
-== 
+== 进入公共聊天
 
 '%s' joined the game
-== 
+== '%s' 加入了游戏
 
 '%s' joined the spectators
-== 
+== '%s' 加入了旁观者
 
 You have been afk for %d seconds now. Please note that you get kicked after not playing for %d seconds.
-== 
+== 你已离开 %d 秒。请注意，如果你不玩游戏超过 %d 秒会被踢出。
 
 You can't pause while you are controlled by someone else
-== 
+== 被他人控制时无法暂停
 
 You can't pause while you are selecting a tee to control
-== 
+== 选择控制对象时无法暂停
 
 (doubled xp)
-== 
+== （双倍经验）
 
 You are now level %d!
-== 
+== 你现在是等级 %d！
 
 Successfully logged in
-== 
+== 成功登录
 
 [WARNING] You did not set a contact, it can be used to recover your password or to get back the account after it got stolen.
-== 
+== [警告] 你尚未设置联系方式，可用于找回密码或在账户被盗后恢复。
 
 Set a contact with '/contact <option>' to hide this message and for a free XP reward.
-== 
+== 通过 '/contact <选项>' 设置联系方式隐藏此消息并获得免费 XP 奖励。
 
 [WARNING] You did not set security pin yet. Check '/pin' for more information.
-== 
+== [警告] 你尚未设置安全码。查看 '/pin' 获取更多信息。
 
 Your previously collected money got added to your account due to login
-== 
+== 你之前收集的钱已因登录添加到你的账户
 
 Successfully logged out
-== 
+== 成功登出
 
 Load recent design?
-== 
+== 加载最近的设计？
 
 Change language to %s?
-== 
+== 更改为 %s 语言？
 
 The plot auction by '%s' is cancelled
-== 
+== '%s' 的地块拍卖已取消
 
 Your plot swap offer got cancelled
-== 
+== 你的地块交换请求已取消
 
 [WARNING] Your %s expired
-== 
+== [警告] 你的 %s 已过期
 
 You got unfrozen by the clan protection.
-== 
+== 你被公会保护解冻。
 
 WARNING
-== 
+== 警告
 
 You got frozen by the clan protection.
-== 
+== 你被公会保护冻结。
 
 Remove your 'Chilli.*' clantag and reconnect, or set your skin body to 'greensward'.
-== 
+== 移除你的 'Chilli.*' 公会标签并重新连接，或设置皮肤身体为 'greensward'。
 
 You automatically left the minigame because you were afk for too long
-== 
+== 由于长时间离线，你自动离开了小游戏
 
 You automatically exited the plot editor because you were afk for too long
-== 
+== 由于长时间离线，你自动退出了地块编辑器
 
 You can't join a minigame while being searched by the police
-== 
+== 被警察搜查时无法加入小游戏
 
 You can't join a minigame while being arrested
-== 
+== 被逮捕时无法加入小游戏
 
 You can't join a minigame while being frozen
-== 
+== 冻结状态下无法加入小游戏
 
 Minigame request sent, please don't move for 5 seconds
-== 
+== 小游戏请求已发送，请不要移动 5 秒
 
 Your minigame request was cancelled because you are frozen
-== 
+== 由于你被冻结，小游戏请求已取消
 
 Your minigame request was cancelled because you moved
-== 
+== 由于你移动，小游戏请求已取消
 
 Please move within %d seconds or you will leave the minigame
-== 
+== 请在 %d 秒内移动，否则将离开小游戏
 
 Successfully changed language to %s
-== 
+== 成功更改为 %s 语言
 
 You have %dx double-xp life left
-== 
+== 你还剩 %dx 双倍经验生命
 
 You have no double-xp lifes anymore (last use)
-== 
+== 你已没有双倍经验生命（最后一次使用）
 
 You will not receive sounds from the server while farming on a moneytile
-== 
+== 在金钱地块刷钱时将不会收到服务器声音
 
 You will receive all sounds again
-== 
+== 你将重新收到所有声音
 
 You will no longer see drawings
-== 
+== 你将不再看到绘图
 
 You will now see drawings again
-== 
+== 你现在将再次看到绘图
 
 You will no longer see money broadcasts, jail and escape timer will be shown in vote menu instead
-== 
+== 你将不再看到金钱广播，监狱和逃脱计时器将在投票菜单中显示
 
 You will now see all broadcasts again
-== 
+== 你现在将再次看到所有广播
 
 Weapon indicator enabled
-== 
+== 武器指示器已启用
 
 Weapon indicator disabled
-== 
+== 武器指示器已禁用
 
 Your cursor will now zoom. WARNING: Does not work with dynamic camera if deadzone or follow factor are non-default.
-== 
+== 你的光标现在将放大。警告：如果限制区域和缩放不是默认值,动态镜头不会生效。
 
 You cursor will no longer be zoomed
-== 
+== 你的光标不再放大
 
 You don't have ninjajetpack, buy it in the shop
-== 
+== 你没有忍者喷气背包，请在商店购买
 
 Ninjajetpack enabled
-== 
+== 忍者喷气背包已启用
 
 Ninjajetpack disabled
-== 
+== 忍者喷气背包已禁用
 
 You will now respawn at your plot (TAB+kill to join at normal spawn)
-== 
+== 你现在将在你的地块重生（TAB+击杀回到普通出生点）
 
 You will no longer respawn at your plot (TAB+kill to join at plot spawn)
-== 
+== 你将不再在你的地块重生（TAB+击杀回到地块出生点）
 
 You will now resume from pause if your tee gets moved
-== 
+== 如果你的 Tee 被移动，你将从暂停中恢复
 
 You will no longer resume from pause if your tee gets moved
-== 
+== 如果你的 Tee 被移动，你将不再从暂停中恢复
 
 All objects of your plot have been removed
-== 
+== 你的地块所有物件已被清除
 
 You have to be alive to edit your plot
-== 
+== 必须活着才能编辑你的地块
 
 You have to be inside your plot to edit your plot
-== 
+== 必须在你的地块内部才能编辑地块
 
 You can't edit your plot while living the life of a gangster.
-== 
+== 生活在黑帮生活中无法编辑你的地块。
 
 You are now editing your plot, switch to another weapon to exit the editor
-== 
+== 你现在正在编辑你的地块，切换到其他武器可退出编辑器
 
 Changed displayed score to '%s'
-== 
+== 显示分数已更改为 '%s'
 
 You are not VIP+
-== 
+== 你不是 VIP+
 
 Rainbow speed has been updated to %d
-== 
+== 彩虹速度已更新为 %d
 
 %s has finished and didn't go through start yet, wait for him or join another team.
-== 
+== %s 已完成但尚未通过起点，请等待他或加入另一个队伍。
 
 %s wants to start a new round, kill or walk to start.
-== 
+== %s 想开始新的一轮，击杀或行走以启动。
 
 Team %d started with these %d players:
-== 
+== 队伍 %d 由这些 %d 玩家开始：
 
 Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.
-== 
+== 你的队伍本应在：%d 分钟 %5.2f 秒完成。由于你开启了练习模式，排名不计入。
 
 %s joined team 0
-== 
+== %s 加入了队伍 0
 
 %s finished in: %d minute(s) %5.2f second(s)
-== 
+== %s 完成时间为：%d 分钟 %5.2f 秒
 
 New record: %d minute(s) %5.2f second(s) better.
-== 
+== 新纪录：%d 分钟 %5.2f 秒更快。
 
 New record: %5.2f second(s) better.
-== 
+== 新纪录：%5.2f 秒更快。
 
 You finished with your best time.
-== 
+== 你以最佳时间完成。
 
 %d minute(s) %5.2f second(s) worse, better luck next time.
-== 
+== %d 分钟 %5.2f 秒更慢，下次好运。
 
 %5.2f second(s) worse, better luck next time.
-== 
+== %5.2f 秒更慢，下次好运。
 
 Everyone in your locked team was killed because '%s' killed.
-== 
+== 由于 '%s' 击杀，你锁定队伍的所有人都被杀死了。
 
 Everyone in your locked team was killed because '%s' died.
-== 
+== 由于 '%s' 死亡，你锁定队伍的所有人都被杀死了。
 
 {vote-header}
 Wᴀɴᴛᴇᴅ Pʟᴀʏᴇʀs
-== 
+== {vote-header} 通缉玩家
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Iɴғᴏ
-== 
+== {vote-header} 账户信息
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Sᴛᴀᴛs
-== 
+== {vote-header} 账户统计
 
 {vote-header}
 Pʟᴏᴛ
-== 
+== {vote-header} 地块
 
 Silent Farm
-== 
+== 安静刷钱
 
 Ninjajetpack
-== 
+== 忍者喷气背包
 
 Plot Spawn
-== 
+== 地块出生点
 
 Edit Plot
-== 
+== 编辑地块
 
 Clear Plot
-== 
+== 清除地块
 
 Rainbow
-== 
+== 彩虹
 
 Bloody
-== 
+== 血红
 
 Atom
-== 
+== 原子
 
 Trail
-== 
+== 轨迹
 
 Spread Gun
-== 
+== 散射枪
 
 Rainbow Hook
-== 
+== 彩虹钩爪
 
 Rotating Ball
-== 
+== 旋转球
 
 Epic Circle
-== 
+== 大圈
 
 Lovely
-== 
+== 可爱
 
 Rainbow Name
-== 
+== 彩虹名字
 
 Rainbow Speed
-== 
+== 彩虹速度
 
 Sparkle
-== 
+== 闪烁
 
 Hide Drawings
-== 
+== 隐藏绘图
 
 Weapon Indicator
-== 
+== 武器指示器
 
 Zoom Cursor
-== 
+== 缩放光标
 
 Resume Moved
-== 
+== 恢复移动
 
 Hide Broadcasts
-== 
+== 隐藏广播
 
 Local Chat
-== 
+== 本地聊天
 
 {vote-header}
 Vᴏᴛᴇs
-== 
+== {vote-header} 投票
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ
-== 
+== {vote-header} 账户
 
 {vote-header}
 Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs
-== 
+== {vote-header} 杂项
 
 {vote-header}
 Lᴀɴɢᴜᴀɢᴇs
-== 
+== {vote-header} 语言
 
 Please specify the page using the reason field
-== 
+== 请在理由栏中指定页面
 
 Please specify the rainbow speed using the reason field
-== 
+== 请在理由栏中指定彩虹速度
 
 No minigame
-== 
+== 无小游戏
 
 You are wanted by the police for %lld seconds
-== 
+== 你被警察通缉 %lld 秒
 
 Grog permille: %.1f‰ / %.1f‰
-== 
+== 酒精浓度：%.1f‰ / %.1f‰
 
 You're not logged in.
-== 
+== 你尚未登录。
 
 Use '/login' to see more information about your account.
-== 
+== 使用 '/login' 查看账户更多信息。
 
 {vote-header}
 Cᴏʟʟᴇᴄᴛᴀʙʟᴇs
-== 
+== {vote-header} 收集品
 
 Rented until
-== 
+== 租赁到期
 
 Door Health
-== 
+== 门血量
 
 Destroy Seconds
-== 
+== 摧毁秒数
 
 {vote-header}
 Oᴘᴛɪᴏɴs
-== 
+== {vote-header} 选项
 
 {vote-header}
 Dᴇsɪɢɴs
-== 
+== {vote-header} 设计
 
 {vote-header}
 Mɪɴɪɢᴀᴍᴇs
-== 
+== {vote-header} 小游戏
 
 {vote-header}
 Sᴄᴏʀᴇ Mᴏᴅᴇ
-== 
+== {vote-header} 计分模式
 
 {vote-header}
 Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
-== 
+== {vote-header} 可用语言
 
 You can't close your door because the police destroyed it
-== 
+== 你无法关闭你的门，因为警察已摧毁它
 
 %s is on a killing spree with %d blocks
-== 
+== %s 正在连杀，击破了 %d 个方块
 
 %s is on a killing spree with %d kills
-== 
+== %s 正在连杀，击杀了 %d 次
 
 %s's blocking spree was ended by %s (%d blocks)
-== 
+== %s 的阻断连杀被 %s 结束（击破 %d 个方块）
 
 %s's blocking spree was ended by %s (%d kills)
-== 
+== %s 的阻断连杀被 %s 结束（击杀了 %d 次）
 
 You lost, you can wait for another round or leave the lobby using '/leave'
-== 
+== 你输了，你可以等待下一轮或使用 '/leave' 离开大厅
 
 You have to be in a team with other tees to start
-== 
+== 你必须和其他 Tee 在同一队伍才能开始
 
 Too many players on police tiles [%d/%d]
-== 
+== 警察地块上有太多玩家 [%d/%d]
 
 You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'
-== 
+== 你需要登录才能使用金钱地块。\n通过 '/register <用户名> <密码> <确认密码>' 获取账户
 
 Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later.
-== 
+== 恭喜，电击盾增加 20%%，当前为 %d%%。使用 '/taser' 查看详情。
 
 Congratulations, double-xp has been activated for %d lifes
-== 
+== 恭喜，双倍经验已激活 %d 次生命
 
 '%s' finished the special race!
-== 
+== '%s' 完成了特殊赛！
 
 You can't hit others
-== 
+== 你无法击中他人
 
 You can hit others
-== 
+== 你可以击中他人
 
 You can't collide with others
-== 
+== 你无法与他人碰撞
 
 You can collide with others
-== 
+== 你可以与他人碰撞
 
 You can't hook others
-== 
+== 你无法钩住他人
 
 You can hook others
-== 
+== 你可以钩住他人
 
 You got +1 jump and can jump %d times now
-== 
+== 你获得了 +1 跳跃，现在可以跳跃 %d 次
 
 This area is for helpers only
-== 
+== 此区域仅限助手使用
 
 This area is for moderators only
-== 
+== 此区域仅限管理员使用
 
 This area is for admins only
-== 
+== 此区域仅限管理员使用
 
 Seems like it's your birthday! You may pick up your present at any time.
-== 
+== 看起来今天是你的生日！你可以随时领取礼物。
 
 This gift is only dedicated to humans.
-== 
+== 此礼物仅限人类。
 
 You've picked up your present already! Come back next year.
-== 
+== 你已经领取过礼物了！明年再来吧。
 
 Happy birthday! :) You have jetpack for 45 seconds
-== 
+== 生日快乐！:) 你有喷气背包 45 秒
 
 Sorry, someting is missing to get the gift.
-== 
+== 抱歉，缺少某些东西来领取礼物。
 
 Your team was unlocked by an unlock team tile
-== 
+== 你的队伍被解锁团队砖块解锁了
 
 You are now in a solo part
-== 
+== 你现在处于单人环节
 
 You are now out of the solo part
-== 
+== 你已离开单人环节
 
 Teleport gun enabled
-== 
+== 传送枪已启用
 
 Teleport gun disabled
-== 
+== 传送枪已禁用
 
 Teleport grenade enabled
-== 
+== 传送手雷已启用
 
 Teleport grenade disabled
-== 
+== 传送手雷已禁用
 
 Teleport laser enabled
-== 
+== 传送激光已启用
 
 Teleport laser disabled
-== 
+== 传送激光已禁用
 
 You need a key to enter this room, buy one in the shop
-== 
+== 你需要钥匙才能进入这个房间，在商店购买一个
 
 This area is for VIP+ only, buy it in the shop
-== 
+== 此区域仅限 VIP+ 使用，在商店购买
 
 You can hammer hit others
-== 
+== 你可以用锤子击中他人
 
 You can't hammer hit others
-== 
+== 你无法用锤子击中他人
 
 You can shoot others with shotgun
-== 
+== 你可以用散弹枪射击他人
 
 You can't shoot others with shotgun
-== 
+== 你无法用散弹枪射击他人
 
 You can shoot others with grenade
-== 
+== 你可以用手雷射击他人
 
 You can't shoot others with grenade
-== 
+== 你无法用手雷射击他人
 
 You can shoot others with rifle
-== 
+== 你可以用步枪射击他人
 
 You can't shoot others with rifle
-== 
+== 你无法用步枪射击他人
 
 Please join a team before you start
-== 
+== 请在开始前加入一个队伍
 
 Your jetpack is now disabled
-== 
+== 你的喷气背包现在已禁用
 
 '%s' has exceeded his legal drinking limit. Catch him!
-== 
+== '%s' 超过了合法饮酒限量。抓住他！
 
 Police is searching you because you have exceeded your legal drinking limit
-== 
+== 警察因为你超过了合法饮酒限量在搜查你
 
 You can not hold more than %d grogs at once
-== 
+== 你不能同时持有超过 %d 杯酒
 
 Weapon
-== 
+== 武器
 
 '%s' is using bonus illegally. Catch him!
-== 
+== '%s' 非法使用奖励。抓住他！
 
 Police is searching you because of illegal bonus use
-== 
+== 警察因非法使用奖励在搜查你
 
 [WARNING] Using bonus in no-bonus area is illegal
-== 
+== [警告] 在无奖励区域使用奖励是非法的
 
 [WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely
-== 
+== [警告] 你需要在 30 秒内用你的假人进入这个传送器以安全传送
 
 [WARNING] Your dummy has to be alive in order to get moved safely
-== 
+== [警告] 你的假人必须存活才能安全传送
 
 '%s' has been moved to another map
-== 
+== '%s' 被传送到了另一张地图
 
 '%s' died as a result of excessive grog consumption (%.1f‰ / %.1f‰)
-== 
+== '%s' 因过度饮酒死亡 (%.1f‰ / %.1f‰)
 
 You paid %d money to '%s' to reduce your jailtime by 5 minutes
-== 
+== 你支付 %d 钱给 '%s' 减少 5 分钟监禁时间
 
 You got %d money from '%s' to reduce his jailtime by 5 minutes
-== 
+== 你从 '%s' 获得 %d 钱减少 5 分钟监禁时间
 
 '%s' has been caught by '%s' (%d minutes arrest)
-== 
+== '%s' 被 '%s' 抓捕（%d 分钟逮捕）
 
 Grog testing results: %.1f‰ / %.1f‰
-== 
+== 酒精检测结果：%.1f‰ / %.1f‰
 
 You were arrested for %d minutes by '%s'
-== 
+== 你被 '%s' 逮捕了 %d 分钟
 
 For more info, say '/helptoggle'
-== 
+== 更多信息，请输入 '/helptoggle'
 
 You already have the maximum of 50 meteors
-== 
+== 你已拥有最大 50 个流星
 
 You only have your ground jump now
-== 
+== 你现在只有地面跳跃
 
 You can jump 1 time
-== 
+== 你可以跳跃 1 次
 
 You can jump %d times
-== 
+== 你可以跳跃 %d 次
 
 Taser shield has been used, -5%%, new current: %d%%
-== 
+== 电击盾已使用，-5%%，当前为 %d%%
 
 Collected %lld money
-== 
+== 收集了 %lld 钱
 
 battery
-== 
+== 电池
 
 portal rifle
-== 
+== 传送枪
 
 seconds
-== 
+== 秒
 
 minutes
-== 
+== 分钟
 
 This %s will respawn in %d %s
-== 
+== 这个 %s 将在 %d %s 后重生
 
 This %s got picked up %d %s ago
-== 
+== 这个 %s 被拾取 %d %s 前
 
 Welcome to the bank, %s! Press F4 to manage your bank account.
-== 
+== 欢迎来到银行，%s！按下 F4 管理你的银行账户。
 
 Are you sure that you want to deposit %d money from your wallet to your bank account?
-== 
+== 你确定要从钱包转入 %d 钱到银行账户吗？
 
 Are you sure that you want to withdraw %d money from your bank account to your wallet?
-== 
+== 你确定要从银行账户取出 %d 钱到钱包吗？
 
 You can't use the bank without an account. Check '/account'.
-== 
+== 你没有账户无法使用银行。查看 '/account'。
 
 You cancelled the assignment.
-== 
+== 你取消了操作。
 
 You need to select an amount to deposit or withdraw.
-== 
+== 你需要选择存款或取款金额。
 
 You don't have enough money in your wallet to deposit this amount.
-== 
+== 你的钱包没有足够的钱进行此存款。
 
 You deposited %d money from your wallet to your bank account.
-== 
+== 你从钱包存入 %d 钱到银行账户。
 
 You don't have enough money on your bank account to withdraw this amount.
-== 
+== 你的银行账户没有足够的钱进行此取款。
 
 You withdrew %d money from your bank account to your wallet.
-== 
+== 你从银行账户取出 %d 钱到钱包。
 
 Welcome to the bank!\n\nThis feature is currently disabled and your money is instantly saved.
-== 
+== 欢迎来到银行！\n\n此功能目前禁用，你的钱会即时保存。
 
 Welcome to the bank!\n\nPlease select your option:\nF3: Deposit (+)\nF4: Withdraw (-).\n\nOnce you selected an option, shoot to the right to go one step forward, and shoot left to go one step back.
-== 
+== 欢迎来到银行！\n\n请选择你的操作：\nF3: 存款 (+)\nF4: 取款 (-)。\n\n选择后，向右射击前进一步，向左射击后退一步。
 
 Press F3 to confirm your assignment.
-== 
+== 按 F3 确认你的操作。
 
 D E P O S I T
-== 
+== 存 款
 
 W I T H D R A W
-== 
+== 取 款
 
 Everything (%d)
-== 
+== 全部 (%d)
 
 ~ S H O P ~
-== 
+== ~ 商 店 ~
 
 ~ P L O T - S H O P ~
-== 
+== ~ 地 块 商 店 ~
 
 ~ B A N K ~
-== 
+== ~ 银 行 ~
 
 ~ T A V E R N ~
-== 
+== ~ 酒 馆 ~
 
 Bye! Come back if you need something.
-== 
+== 再见！需要时回来哦。
 
 Rainbow will make your tee change the color very fast.
-== 
+== 彩虹会使你的 Tee 颜色快速变化。
 
 Bloody will give your tee a permanent kill effect.
-== 
+== 血红会给你的 Tee 永久击杀效果。
 
 Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.
-== 
+== 警察可以从警察机器人那里得到帮助。关于具体警察等级的更多信息，请输入 '/police'。
 
 Using this item you can hide from other players behind bushes. If your ghost is activated you will be able to shoot plasma projectiles. How it works: '/helptoggle'
-== 
+== 使用此物品可以躲在灌木后避开其他玩家。如果你的幽灵激活，你可以发射等离子弹。工作原理：'/helptoggle'
 
 If you have the room key you can enter the room. It's under the spawn and there is a money tile.
-== 
+== 如果你有房间钥匙就可以进入房间。它在出生点下方且有一个金钱地块。
 
 VIP Classic gives you some benefits, check '/vip'.
-== 
+== VIP Classic 给你一些好处，请查看 '/vip'。
 
 VIP+ gives you even more benefits than VIP Classic, check '/vip'.
-== 
+== VIP+ 给你的好处比 VIP Classic 更多，请查看 '/vip'。
 
 You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== 
+== 如果你重生，你会拥有散弹枪。有关出生武器的更多信息，请输入 '/spawnweapons'。
 
 You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== 
+== 如果你重生，你会拥有手雷。有关出生武器的更多信息，请输入 '/spawnweapons'。
 
 You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== 
+== 如果你重生，你会拥有步枪。有关出生武器的更多信息，请输入 '/spawnweapons'。
 
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
-== 
+== 它会使你的喷气背包枪变成忍者。使用 '/ninjajetpack' 切换。
 
 Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
-== 
+== 电击枪是一种使玩家冻结的步枪。关于电击枪和你的电击枪统计数据，请访问 '/taser'。
 
 Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
-== 
+== 使用电击枪需要电击电池。最大弹药量为 100。请访问 '/taser'。
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.
-== 
+== 使用传送枪可在光标位置创建两个传送门，然后在它们之间传送。
 
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
-== 
+== 使用传送阻挡器锤子和这些弹药在光标位置创建传送阻挡器。查看 '/portal' 了解当前数量。工作原理：'/helptoggle'
 
 Welcome to the shop, %s! Press F4 to start shopping.
-== 
+== 欢迎来到商店，%s！按下 F4 开始购物。
 
 Are you sure you want to buy this item?
-== 
+== 你确定要购买这个物品吗？
 
 You canceled the purchase.
-== 
+== 你取消了购买。
 
 You own this item until you die.
-== 
+== 你拥有此物品直到死亡。
 
 You own this item until\nyou disconnect.
-== 
+== 你拥有此物品直到断开连接。
 
 You own this item forever.
-== 
+== 你永久拥有此物品。
 
 You own this item for 30 days.
-== 
+== 你拥有此物品 30 天。
 
 You own this item for 20 days.
-== 
+== 你拥有此物品 20 天。
 
 You own this item for 7 days.
-== 
+== 你拥有此物品 7 天。
 
 You own this item for 5 days.
-== 
+== 你拥有此物品 5 天。
 
 Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.
-== 
+== 欢迎来到商店！\n\n向右射击前进一页，向左射击返回一页。
 
 for sale
-== 
+== 出售
 
 discount
-== 
+== 折扣
 
 If you want to buy an item, press F3
-== 
+== 如果你想购买物品，按 F3
 
 Invalid item
-== 
+== 无效物品
 
 You already have the highest police rank
-== 
+== 你已经是最高警察等级
 
 You already have the maximum amount of bullets
-== 
+== 你已拥有最大子弹数量
 
 You already have the maximum taser level
-== 
+== 你已拥有最大电击枪等级
 
 You already have a fully filled taser battery
-== 
+== 你已拥有充满的电击电池
 
 You already have the %s
-== 
+== 你已拥有 %s
 
 You already have %s
-== 
+== 你已拥有 %s
 
 You need to be police level 3 or higher to get a taser license
-== 
+== 需要警察等级 3 或更高才能获得电击枪许可证
 
 You can not buy this VIP level while owning another one
-== 
+== 你拥有另一个 VIP 等级时无法购买此 VIP 等级
 
 You can not buy bloody while specific cosmetics are activated
-== 
+== 启用特定外观时无法购买血红
 
 This plot is already sold to someone else
-== 
+== 此地块已被卖给其他人
 
 You already own that plot
-== 
+== 你已拥有该地块
 
 You already own another plot
-== 
+== 你已拥有另一块地
 
 Your level is too low, you need to be level %d to buy %s
-== 
+== 你的等级太低，需要等级 %d 才能购买 %s
 
 Taser battery purchase failed
-== 
+== 电击电池购买失败
 
 You bought %s %s
-== 
+== 你购买了 %s %s
 
 until death
-== 
+== 至死亡
 
 until disconnect
-== 
+== 至断开连接
 
 Check '/account' for more information about the expiration date
-== 
+== 查看 '/account' 了解过期日期更多信息
 
 The plot will expire on %s
-== 
+== 地块将在 %s 过期
 
 Welcome to the tavern, %s! Press F4 to buy a grog.
-== 
+== 欢迎来到酒馆，%s！按下 F4 购买一杯酒。
 
 Are you sure you want to buy a grog?
-== 
+== 你确定要买一杯酒吗？
 
 You don't have enough money in your wallet to buy a grog.
-== 
+== 你钱包里没有足够的钱买一杯酒。
 
 You bought one grog
-== 
+== 你买了一杯酒
 
 Welcome to the tavern!\n\nIf you would like to buy a grog for %d money, please press F3.
-== 
+== 欢迎来到酒馆！\n\n如果你想花 %d 钱买一杯酒，请按 F3。
 
 You can't fight against yourself
-== 
+== 无法与自己战斗
 
 Invalid participant
-== 
+== 无效参与者
 
 Leave the current fight in order to join another one
-== 
+== 离开当前战斗以加入另一个
 
 Too many 1vs1 arenas, try again later
-== 
+== 1vs1 竞技场太多，请稍后再试
 
 You successfully created a new global arena
-== 
+== 成功创建新的全球竞技场
 
 You invited '%s' to a fight
-== 
+== 你邀请 '%s' 参加战斗
 
 You have been invited to a fight by '%s', type '/1vs1 %s' to join
-== 
+== 你被 '%s' 邀请参加战斗，请输入 '/1vs1 %s' 加入
 
 Join the 1vs1 lobby using '/1vs1' before you accept the fight
-== 
+== 在接受战斗前，请使用 '/1vs1' 加入 1vs1 大厅
 
 You have accepted the invite by '%s'
-== 
+== 你接受了 '%s' 的邀请
 
 '%s' has accepted your invite
-== 
+== '%s' 接受了你的邀请
 
 '%s' won a 1vs1 round against '%s'! Final scores: %d - %d
-== 
+== '%s' 在 1vs1 中击败 '%s'！最终比分：%d - %d
 
 '%s' left a 1vs1 round against '%s'! Current scores: %d - %d
-== 
+== '%s' 离开了 1vs1 对战 '%s'！当前比分：%d - %d
 
 Select your favourite part of the map\nZoom in or out to change the size\nPlace arena by pressing SPACE
-== 
+== 选择你喜欢的地图部分\n缩放以改变大小\n按空格放置竞技场
 
 Set first spawn positions by pressing SPACE
-== 
+== 按空格设置第一个出生点
 
 Set second spawn positions by pressing SPACE
-== 
+== 按空格设置第二个出生点
 
 Choose a weapon with A/D\nToggle weapon usage by pressing SPACE\nPress SPACE on the heart to confirm
-== 
+== 使用 A/D 选择武器\n按空格切换武器使用\n在心形上按空格确认
 
 Welcome to the Durák table, %s! This seat is taken already, please try another one.
-== 
+== 欢迎来到 Durák 桌子，%s！这张椅子已被占用，请尝试另一张。
 
 Welcome to Durák, %s! You are first, please enter a stake in the chat.
-== 
+== 欢迎来到 Durák，%s！你是第一位，请在聊天中输入赌注。
 
 Welcome to Durák, %s! You are second, please enter the current stake of '%lld' or propose a new one.
-== 
+== 欢迎来到 Durák，%s！你是第二位，请输入当前赌注 '%lld' 或提出新的赌注。
 
 Welcome to Durák, %s! In order to participate, please enter the current stake of '%lld' in the chat.
-== 
+== 欢迎来到 Durák，%s！为了参与，请在聊天中输入当前赌注 '%lld'。
 
 Successfully set the stake for the current round to '%lld'.
-== 
+== 成功将本轮赌注设置为 '%lld'。
 
 Successfully deployed your stake.
-== 
+== 成功部署你的赌注。
 
 '%s' proposed a new stake, please enter the current stake of '%lld' or propose a new one in the chat.
-== 
+== '%s' 提出了新的赌注，请输入当前赌注 '%lld' 或在聊天中提出新赌注。
 
 Successfully updated the stake for the current round to '%lld'.
-== 
+== 成功将本轮赌注更新为 '%lld'。
 
 You can't currently drop that much money due to your stake
-== 
+== 因为你有赌注，无法丢弃这么多钱
 
 Couldn't start game, no empty team found
-== 
+== 无法开始游戏，未找到空队
 
 You didn't deploy your stake in time, game started without you
-== 
+== 你未及时部署赌注，游戏在你缺席的情况下开始
 
 Your stake got collected: -%lld money.
-== 
+== 你的赌注被收取：-%lld 钱。
 
 {durak-name}
 Waiting…
-== 
+== {durak-name} 等待中…
 
 {durak-name}
 Players - %d/%d
-== 
+== {durak-name} 玩家 - %d/%d
 
 {durak-name}
 Select attack
-== 
+== {durak-name} 选择攻击
 
 {durak-name}
 Attack!
-== 
+== {durak-name} 攻击！
 
 {durak-name}
 Defend
-== 
+== {durak-name} 防守
 
 {durak-name}
 Pass!
-== 
+== {durak-name} 跳过！
 
 {durak-name}
 End move
-== 
+== {durak-name} 结束回合
 
 {durak-name}
 Take cards
-== 
+== {durak-name} 拿牌
 
 {durak-name}
 Passed…
-== 
+== {durak-name} 跳过了…
 
 {durak-name}
 Next move: %ds
-== 
+== {durak-name} 下一回合：%ds
 
 '%s' is the Durák!
-== 
+== '%s' 是 Durák！
 
 '%s' successfully defended
-== 
+== '%s' 成功防守
 
 '%s' took too long and was skipped
-== 
+== '%s' 超时被跳过
 
 '%s' couldn't defend all attacks and takes all cards
-== 
+== '%s' 无法防御所有攻击，拿走所有牌
 
 '%s' won the game! (#%d)
-== 
+== '%s' 赢得游戏！(#%d)
 
 '%s' won the game!
-== 
+== '%s' 赢得游戏！
 
 Congratulations, you are not the Durák!
-== 
+== 恭喜，你不是 Durák！
 
 Your stake got returned: +%lld money.
-== 
+== 你的赌注返还：+%lld 钱。
 
 You got +%lld money from others leaving the game.
-== 
+== 你从其他玩家离开游戏中获得 +%lld 钱。
