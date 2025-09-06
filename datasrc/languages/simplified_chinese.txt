@@ -6,10 +6,10 @@ F-DDrace is a mod by fokkonaut
 == F-DDrace 是由 fokkonaut 制作的一个模组
 
 This mod is based on Teeworlds 0.7 and also incorporates features, ideas, and partial implementations
-== 此模组基于 Teeworlds 0.7，并整合了来自 DDNet++、DDNet 及其他社区项目的功能、想法和部分实现
+== 此模组基于 Teeworlds 0.7，并整合了来自 DDNet++、DDNet 及其他社区项目的功能、想法和部分
 
 from DDNet++ by ChillerDragon, DDNet, and other community projects, aswell as many custom features!
-== 来自 ChillerDragon、DDNet 和其他社区项目的 DDNet++，以及许多自定义功能！
+== 来自 ChillerDragon、DDNet 和其他社区项目的 DDNet++，以及许多自定义功能的实现！
 
 If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:
 == 如果你想查看源码或进行贡献，请前往 GitHub 上的 F-DDrace 项目：
@@ -151,7 +151,7 @@ Registered
 
 {/account}
 until
-== {/account} 直到
+== 直到
 
 not bought
 == 未购买
@@ -259,7 +259,7 @@ Spawn grenade bullets
 == 出生手雷子弹
 
 Spawn rifle bullets
-== 出生步枪子弹
+== 出生激光枪子弹
 
 Accounts are not supported on this server
 == 本服务器不支持账户系统
@@ -376,10 +376,10 @@ You can't pay nothing
 == 无法支付零钱
 
 You paid %lld money from your bank account to '%s'
-== 你从银行账户支付了 %lld 钱给 '%s'
+== 你从银行账户支付了 %lld元 给 '%s'
 
 You got %lld money to your bank account from '%s'
-== 你从 '%s' 获得了 %lld 钱转入银行账户
+== 你获得了 %lld元 从 '%s' 转入银行账户
 
 Invalid argument
 == 参数无效
@@ -388,7 +388,7 @@ You can't drop nothing
 == 无法丢弃零钱
 
 You can't drop money bags over 100.000
-== 无法丢弃超过 100,000 的钱袋
+== 无法丢弃超过 100,000元 的钱袋
 
 You don't have enough money in your wallet
 == 你钱包里没有足够的钱
@@ -460,7 +460,7 @@ You can't use this command while frozen
 == 冻结状态下无法使用此命令
 
 You lost 50.000 money for teleporting to spawn
-== 因传送回出生点失去 50,000 钱
+== 因传送回出生点失去 50,000元
 
 Plot subcommands
 == 地块子命令
@@ -514,7 +514,7 @@ Plot %d has been bought by '%s'
 == 地块 %d 已被 '%s' 购买
 
 You bought plot %d from %s
-== 你从 %s 处购买了地块 %d
+== 你购买了地块 %d 从 %s 
 
 %s bought your plot, the money is moved to your bank account
 == %s 购买了你的地块，钱已转至你的银行账户
@@ -550,7 +550,7 @@ You need to enter a valid price
 == 必须输入有效价格
 
 '%s' started an auction on plot %d for %d money (plot expires on %s)
-== '%s' 在地块 %d 开始拍卖 %d 钱（地块将于 %s 过期）
+== '%s' 开始拍卖地块%s以%d元的价格（地块将于 %s 过期）
 
 Use '/plot buy %d %s' to buy the plot
 == 使用 '/plot buy %d %s' 购买地块
@@ -610,7 +610,7 @@ Police ranks can be bought in shop.
 == 警察等级可以在商店购买。
 
 There are multiple police ranks, each cost 100.000 money.
-== 有多个警察等级，每个等级花费 100,000 钱。
+== 有多个警察等级，每个等级花费 100,000元。
 
 The policebot will help every police officer.
 == 警察机器人会帮助所有警察。
@@ -634,7 +634,7 @@ Map Designs
 == 地图设计
 
 If you have your dummy connected, you need to reconnect it after the design change so it can get back it's state.
-== 如果你连接了假人，设计变更后需要重新连接以恢复其状态。
+== 如果你连接了分身，变更地图设计后需要重新连接以恢复其状态。
 
 You can set one of the following designs by using '/design <name>':
 == 可通过 '/design <名称>' 设置以下设计之一：
@@ -742,7 +742,7 @@ Police officers with level 3 or higher get a taser license.
 == 等级 3 或更高的警察可获得电击枪许可证。
 
 The taser is a rifle that freezes players for a short time.
-== 电击枪是一种使玩家短暂冻结的步枪。
+== 电击枪是一种使玩家短暂冻结的激光枪。
 
 You can pick up the taser and taser batteries throughout the map.
 == 你可以在地图上拾取电击枪和电击电池。
@@ -859,7 +859,7 @@ This server has an initial chat delay, you will need to wait %d seconds before t
 == '%s' 重新加入当前会话
 
 [WARNING] You need to reconnect your dummy after the design change is done, so it can get back it's old state.
-== [警告] 设计变更完成后，你需要重新连接假人以恢复其状态。
+== [警告] 地图设计变更完成后，你需要重新连接分身以恢复其状态。
 
 '%s' has left the game (%s)
 == '%s' 离开了游戏 (%s)
@@ -898,7 +898,7 @@ You can't kick yourself
 == 无法踢自己
 
 You can't kick dummies
-== 无法踢假人
+== 无法踢分身
 
 You can't kick authorized players
 == 无法踢授权玩家
@@ -919,7 +919,7 @@ You can't move yourself
 == 无法移动自己
 
 You can't set dummies to spectator
-== 无法将假人设为旁观者
+== 无法将分身设为旁观者
 
 You can only move your team member to spectators
 == 你只能将队友移至旁观者
@@ -940,7 +940,7 @@ Kill Protection enabled. If you really want to join the spectators, first type /
 == 击杀保护已启用。如你真想加入旁观者，请先输入 /kill
 
 Warning you have %lld money in your wallet! (see /money)
-== 警告：你的钱包中有 %lld 钱！（见 /money）
+== 警告：你的钱包中有 %lld元！（见 /money）
 
 Wallet kill Protection enabled. If you really want to join the spectators, first type /kill
 == 钱包击杀保护已启用。如你真想加入旁观者，请先输入 /kill
@@ -1246,13 +1246,13 @@ You cursor will no longer be zoomed
 == 你的光标不再放大
 
 You don't have ninjajetpack, buy it in the shop
-== 你没有忍者喷气背包，请在商店购买
+== 你没有忍者jetpack，请在商店购买
 
 Ninjajetpack enabled
-== 忍者喷气背包已启用
+== 忍者jetpack已启用
 
 Ninjajetpack disabled
-== 忍者喷气背包已禁用
+== 忍者jetpack已禁用
 
 You will now respawn at your plot (TAB+kill to join at normal spawn)
 == 你现在将在你的地块重生（TAB+击杀回到普通出生点）
@@ -1331,25 +1331,25 @@ Everyone in your locked team was killed because '%s' died.
 
 {vote-header}
 Wᴀɴᴛᴇᴅ Pʟᴀʏᴇʀs
-== {vote-header} 通缉玩家
+== 通缉玩家
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Iɴғᴏ
-== {vote-header} 账户信息
+== 账户信息
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ Sᴛᴀᴛs
-== {vote-header} 账户统计
+== 账户统计
 
 {vote-header}
 Pʟᴏᴛ
-== {vote-header} 地块
+== 地块
 
 Silent Farm
 == 安静刷钱
 
 Ninjajetpack
-== 忍者喷气背包
+== 忍者jetpack
 
 Plot Spawn
 == 地块出生点
@@ -1416,19 +1416,19 @@ Local Chat
 
 {vote-header}
 Vᴏᴛᴇs
-== {vote-header} 投票
+== 投票
 
 {vote-header}
 Aᴄᴄᴏᴜɴᴛ
-== {vote-header} 账户
+== 账户
 
 {vote-header}
 Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs
-== {vote-header} 杂项
+== 杂项
 
 {vote-header}
 Lᴀɴɢᴜᴀɢᴇs
-== {vote-header} 语言
+== 语言
 
 Please specify the page using the reason field
 == 请在理由栏中指定页面
@@ -1453,7 +1453,7 @@ Use '/login' to see more information about your account.
 
 {vote-header}
 Cᴏʟʟᴇᴄᴛᴀʙʟᴇs
-== {vote-header} 收集品
+== 收藏
 
 Rented until
 == 租赁到期
@@ -1466,23 +1466,23 @@ Destroy Seconds
 
 {vote-header}
 Oᴘᴛɪᴏɴs
-== {vote-header} 选项
+== 选项
 
 {vote-header}
 Dᴇsɪɢɴs
-== {vote-header} 设计
+== 设计
 
 {vote-header}
 Mɪɴɪɢᴀᴍᴇs
-== {vote-header} 小游戏
+== 小游戏
 
 {vote-header}
 Sᴄᴏʀᴇ Mᴏᴅᴇ
-== {vote-header} 计分模式
+== 计分模式
 
 {vote-header}
 Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
-== {vote-header} 可用语言
+== 可用语言
 
 You can't close your door because the police destroyed it
 == 你无法关闭你的门，因为警察已摧毁它
@@ -1560,7 +1560,7 @@ You've picked up your present already! Come back next year.
 == 你已经领取过礼物了！明年再来吧。
 
 Happy birthday! :) You have jetpack for 45 seconds
-== 生日快乐！:) 你有喷气背包 45 秒
+== 生日快乐！:) 你有jetpack 45 秒
 
 Sorry, someting is missing to get the gift.
 == 抱歉，缺少某些东西来领取礼物。
@@ -1617,16 +1617,16 @@ You can't shoot others with grenade
 == 你无法用手雷射击他人
 
 You can shoot others with rifle
-== 你可以用步枪射击他人
+== 你可以用激光枪射击他人
 
 You can't shoot others with rifle
-== 你无法用步枪射击他人
+== 你无法用激光枪射击他人
 
 Please join a team before you start
 == 请在开始前加入一个队伍
 
 Your jetpack is now disabled
-== 你的喷气背包现在已禁用
+== 你的jetpack现在已禁用
 
 '%s' has exceeded his legal drinking limit. Catch him!
 == '%s' 超过了合法饮酒限量。抓住他！
@@ -1650,10 +1650,10 @@ Police is searching you because of illegal bonus use
 == [警告] 在无奖励区域使用奖励是非法的
 
 [WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely
-== [警告] 你需要在 30 秒内用你的假人进入这个传送器以安全传送
+== [警告] 你需要在 30 秒内用你的分身进入这个传送器以安全传送
 
 [WARNING] Your dummy has to be alive in order to get moved safely
-== [警告] 你的假人必须存活才能安全传送
+== [警告] 你的分身必须存活才能安全传送
 
 '%s' has been moved to another map
 == '%s' 被传送到了另一张地图
@@ -1662,10 +1662,10 @@ Police is searching you because of illegal bonus use
 == '%s' 因过度饮酒死亡 (%.1f‰ / %.1f‰)
 
 You paid %d money to '%s' to reduce your jailtime by 5 minutes
-== 你支付 %d 钱给 '%s' 减少 5 分钟监禁时间
+== 你支付 %d元 给 '%s' 减少5分钟监禁时间
 
 You got %d money from '%s' to reduce his jailtime by 5 minutes
-== 你从 '%s' 获得 %d 钱减少 5 分钟监禁时间
+== 你获得 %d元 从 '%s' 以让其减少5分钟监禁时间
 
 '%s' has been caught by '%s' (%d minutes arrest)
 == '%s' 被 '%s' 抓捕（%d 分钟逮捕）
@@ -1674,7 +1674,7 @@ Grog testing results: %.1f‰ / %.1f‰
 == 酒精检测结果：%.1f‰ / %.1f‰
 
 You were arrested for %d minutes by '%s'
-== 你被 '%s' 逮捕了 %d 分钟
+== 你被逮捕 %d 分钟由于'%s'
 
 For more info, say '/helptoggle'
 == 更多信息，请输入 '/helptoggle'
@@ -1806,13 +1806,13 @@ You will have grenade if you respawn. For more information about spawn weapons, 
 == 如果你重生，你会拥有手雷。有关出生武器的更多信息，请输入 '/spawnweapons'。
 
 You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== 如果你重生，你会拥有步枪。有关出生武器的更多信息，请输入 '/spawnweapons'。
+== 如果你重生，你会拥有激光枪。有关出生武器的更多信息，请输入 '/spawnweapons'。
 
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
-== 它会使你的喷气背包枪变成忍者。使用 '/ninjajetpack' 切换。
+== 它会使你的jetpack枪变成忍者。使用 '/ninjajetpack' 切换。
 
 Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
-== 电击枪是一种使玩家冻结的步枪。关于电击枪和你的电击枪统计数据，请访问 '/taser'。
+== 电击枪是一种使玩家冻结的激光枪。关于电击枪和你的电击枪统计数据，请访问 '/taser'。
 
 Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
 == 使用电击枪需要电击电池。最大弹药量为 100。请访问 '/taser'。
@@ -2026,43 +2026,43 @@ Your stake got collected: -%lld money.
 
 {durak-name}
 Waiting…
-== {durak-name} 等待中…
+== 等待中…
 
 {durak-name}
 Players - %d/%d
-== {durak-name} 玩家 - %d/%d
+== 玩家 - %d/%d
 
 {durak-name}
 Select attack
-== {durak-name} 选择攻击
+== 选择攻击
 
 {durak-name}
 Attack!
-== {durak-name} 攻击！
+== 攻击！
 
 {durak-name}
 Defend
-== {durak-name} 防守
+== 防守
 
 {durak-name}
 Pass!
-== {durak-name} 跳过！
+== 跳过！
 
 {durak-name}
 End move
-== {durak-name} 结束回合
+== 结束回合
 
 {durak-name}
 Take cards
-== {durak-name} 拿牌
+== 拿牌
 
 {durak-name}
 Passed…
-== {durak-name} 跳过了…
+== 跳过了…
 
 {durak-name}
 Next move: %ds
-== {durak-name} 下一回合：%ds
+== 下一回合：%ds
 
 '%s' is the Durák!
 == '%s' 是 Durák！
