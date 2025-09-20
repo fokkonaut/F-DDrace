@@ -1,6 +1,5 @@
-import sys
-
 GlobalIdCounter = 0
+
 def GetID():
 	global GlobalIdCounter
 	GlobalIdCounter += 1
@@ -38,7 +37,7 @@ class BaseType:
 	def Identifyer(self): return "x"+str(self._id)
 	def TargetName(self): return self._target_name
 	def TypeName(self): return self._type_name
-	def ID(self): return self._id;
+	def ID(self): return self._id
 
 	def EmitDeclaration(self, name):
 		return ["%s %s;"%(self.TypeName(), FormatName(self.TypeName(), name))]
@@ -66,10 +65,10 @@ class Struct(BaseType):
 			m += [MemberType(name, self.__dict__[name])]
 		try:
 			m.sort(key = sorter)
-		except:
+		except Exception as e:
 			for v in m:
 				print(v.name, v.var)
-			sys.exit(-1)
+			raise RuntimeError("Failed to sort members in Struct") from e
 		return m
 
 	def EmitTypeDeclaration(self, name):
@@ -77,7 +76,7 @@ class Struct(BaseType):
 		lines += ["struct " + self.TypeName()]
 		lines += ["{"]
 		for member in self.Members():
-			lines += ["\t"+l for l in member.var.EmitDeclaration(member.name)]
+			lines += ["\t"+line for line in member.var.EmitDeclaration(member.name)]
 		lines += ["};"]
 		return lines
 
@@ -101,7 +100,7 @@ class Array(BaseType):
 		self.items = []
 	def Add(self, instance):
 		if instance.TypeName() != self.type.TypeName():
-			error("bah")
+			raise TypeError(f"Expected type '{self.type.TypeName()}', got '{instance.TypeName()}'")
 		self.items += [instance]
 	def EmitDeclaration(self, name):
 		return ["int m_Num%s;"%(FixCasing(name)),
@@ -183,15 +182,15 @@ class SampleHandle(BaseType):
 # helper functions
 
 def EmitTypeDeclaration(root):
-	for l in root().EmitTypeDeclaration(""):
-		print(l)
+	for line in root().EmitTypeDeclaration(""):
+		print(line)
 
 def EmitDefinition(root, name):
-	for l in root.EmitPreDefinition(name):
-		print(l)
+	for line in root.EmitPreDefinition(name):
+		print(line)
 	print("%s %s = " % (root.TypeName(), name))
-	for l in root.EmitDefinition(name):
-		print(l)
+	for line in root.EmitDefinition(name):
+		print(line)
 	print(";")
 
 # Network stuff after this
@@ -211,11 +210,11 @@ class Flags:
 
 class NetObject:
 	def __init__(self, name, variables, ex=None, fixup=True):
-		l = name.split(":")
-		self.name = l[0]
+		name_splited = name.split(":")
+		self.name = name_splited[0]
 		self.base = ""
-		if len(l) > 1:
-			self.base = l[1]
+		if len(name_splited) > 1:
+			self.base = name_splited[1]
 		self.base_struct_name = "CNetObj_%s" % self.base
 		self.struct_name = "CNetObj_%s" % self.name
 		self.enum_name = "NETOBJTYPE_%s" % self.name.upper()

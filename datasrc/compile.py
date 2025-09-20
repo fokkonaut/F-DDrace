@@ -1,7 +1,11 @@
 import sys
-from datatypes import *
 import content
 import network
+
+from datatypes import (
+	EmitDefinition,
+	EmitTypeDeclaration
+)
 
 def create_enum_table(names, num):
 	lines = []
@@ -46,12 +50,18 @@ gen_client_content_source = False
 gen_server_content_header = False
 gen_server_content_source = False
 
-if "network_header" in sys.argv: gen_network_header = True
-if "network_source" in sys.argv: gen_network_source = True
-if "client_content_header" in sys.argv: gen_client_content_header = True
-if "client_content_source" in sys.argv: gen_client_content_source = True
-if "server_content_header" in sys.argv: gen_server_content_header = True
-if "server_content_source" in sys.argv: gen_server_content_source = True
+if "network_header" in sys.argv: 
+    gen_network_header = True
+if "network_source" in sys.argv: 
+    gen_network_source = True
+if "client_content_header" in sys.argv: 
+    gen_client_content_header = True
+if "client_content_source" in sys.argv: 
+    gen_client_content_source = True
+if "server_content_header" in sys.argv: 
+    gen_server_content_header = True
+if "server_content_source" in sys.argv: 
+    gen_server_content_source = True
 
 if gen_client_content_header:
 	print("#ifndef CLIENT_CONTENT_HEADER")
@@ -101,24 +111,31 @@ if gen_network_header:
 	print(network.RawHeader)
 
 	for e in network.Enums:
-		for l in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): print(l)
+		for line in create_enum_table(["%s_%s"%(e.name, v) for v in e.values], 'NUM_%sS'%e.name): 
+			print(line)
 		print("")
 
 	for e in network.Flags:
-		for l in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]): print(l)
+		for line in create_flags_table(["%s_%s" % (e.name, v) for v in e.values]):
+			print(line)
 		print("")
 
 	non_extended = [o for o in network.Objects if o.ex is None]
 	extended = [o for o in network.Objects if o.ex is not None]
-	for l in create_enum_table(["NETOBJTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETOBJTYPES"): print(l)
-	for l in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"): print(l)
+	for line in create_enum_table(["NETOBJTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETOBJTYPES"):
+		print(line)
+	for line in create_enum_table(["__NETOBJTYPE_UUID_HELPER=OFFSET_GAME_UUID-1"]+[o.enum_name for o in extended], "OFFSET_NETMSGTYPE_UUID"): 
+		print(line)
 	print("")
 
 	non_extended = [o for o in network.Messages if o.ex is None]
 	extended = [o for o in network.Messages if o.ex is not None]
-	for l in create_enum_table(["NETMSGTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETMSGTYPES"): print(l)
+	for line in create_enum_table(["NETMSGTYPE_EX"]+[o.enum_name for o in non_extended], "NUM_NETMSGTYPES"):
+		print(line)
 	print("")
-	for l in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"]+[o.enum_name for o in extended], "END_NETMSGTYPE_UUID"): print(l)
+ 
+	for line in create_enum_table(["__NETMSGTYPE_UUID_HELPER=OFFSET_NETMSGTYPE_UUID-1"]+[o.enum_name for o in extended], "END_NETMSGTYPE_UUID"):
+		print(line)
 	print("")
 
 	for item in network.Objects + network.Messages:
@@ -247,8 +264,8 @@ if gen_network_source:
 	lines += ['']
 
 
-	for l in lines:
-		print(l)
+	for line in lines:
+		print(line)
 
 	if 0:
 		for item in network.Objects:
@@ -370,8 +387,8 @@ if gen_network_source:
 			lines += ['\tpManager->RegisterName(%s, "%s");' % (item.enum_name, item.ex)]
 	lines += ['}']
 
-	for l in lines:
-		print(l)
+	for line in lines:
+		print(line)
 
 if gen_client_content_header or gen_server_content_header:
 	print("#endif")

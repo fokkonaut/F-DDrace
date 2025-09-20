@@ -1,4 +1,13 @@
-from datatypes import *
+from datatypes import (
+	Struct,
+	String,
+	Array,
+	Int,
+	Float,
+	Pointer,
+	SampleHandle,
+	TextureHandle
+)
 
 class Sound(Struct):
 	def __init__(self, filename=""):
@@ -93,9 +102,12 @@ class WeaponSpec(Struct):
 		# dig out sprites if we have a container
 		if container:
 			for sprite in container.sprites.items:
-				if sprite.name.value == "weapon_"+name+"_body": self.sprite_body.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_cursor": self.sprite_cursor.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_proj": self.sprite_proj.Set(sprite)
+				if sprite.name.value == "weapon_"+name+"_body": 
+					self.sprite_body.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_cursor": 
+					self.sprite_cursor.Set(sprite)
+				elif sprite.name.value == "weapon_"+name+"_proj": 
+					self.sprite_proj.Set(sprite)
 				elif "weapon_"+name+"_muzzle" in sprite.name.value:
 					self.sprite_muzzles.Add(Pointer(Sprite, sprite))
 
