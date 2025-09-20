@@ -1,5 +1,5 @@
 #
-# Author: claude.ai & fokkonaut
+# Author: claude.ai & fokkonaut (Translation fixed by IMDelewer)
 #
 
 /cmdlist will show a list of all chat commands
@@ -196,7 +196,7 @@ Successfully registered an account, you can login now
 == Аккаунт успешно зарегистрирован, теперь вы можете войти в систему
 
 Set a security pin to avoid account stealing. For more info, say '/pin'
-== Установите защитный PIN-код, чтобы избежать кражи аккаунта. Для получения дополнительной информации введите '/pin'
+== Установите защитный ПИН-код, чтобы избежать кражи аккаунта. Для получения дополнительной информации введите '/pin'
 
 You are not logged in
 == Вы не авторизованы
@@ -214,7 +214,7 @@ Kill logout is activated, kill within %d seconds to logout
 == Активирован выход через убийство, убейте в течение %d секунд, чтобы выйти
 
 You are not verified, please enter your security pin using '/pin'
-== Вы не подтверждены, пожалуйста, введите ваш защитный PIN-код, используя '/pin'
+== Вы не подтверждены, пожалуйста, введите ваш защитный ПИН-код, используя '/pin'
 
 Wrong password
 == Неверный пароль
@@ -235,28 +235,28 @@ Successfully updated contact information, check '/account'
 == Контактная информация успешно обновлена, проверьте '/account'
 
 SECURITY PIN
-== ЗАЩИТНЫЙ PIN-КОД
+== ЗАЩИТНЫЙ ПИН-КОД
 
 You should set a security pin to avoid account stealing. The pin itself has to be a 4-digit long number code.
-== Вам следует установить защитный PIN-код, чтобы избежать кражи аккаунта. PIN-код должен быть 4-значным числом.
+== Вам следует установить защитный ПИН-код, чтобы избежать кражи аккаунта. ПИН-код должен быть 4-значным числом.
 
 This pin will be required to change your contact information or your password.
-== Этот PIN-код потребуется для изменения вашей контактной информации или пароля.
+== Этот ПИН-код потребуется для изменения вашей контактной информации или пароля.
 
 If your account is not secured yet, you can set a pin with '/pin <new-pin>'.
-== Если ваш аккаунт еще не защищен, вы можете установить PIN-код с помощью '/pin <новый-пин>'.
+== Если ваш аккаунт еще не защищен, вы можете установить ПИН-код с помощью '/pin <новый-пин>'.
 
 If you want to change your pin, you first need to verify using '/pin <account-pin>'.
-== Если вы хотите изменить PIN-код, сначала вам нужно подтвердить с помощью '/pin <текущий-пин>'.
+== Если вы хотите изменить ПИН-код, сначала вам нужно подтвердить с помощью '/pin <текущий-пин>'.
 
 After verifying, you can set a new pin with '/pin <new-pin>'.
-== После подтверждения вы можете установить новый PIN-код с помощью '/pin <новый-пин>'.
+== После подтверждения вы можете установить новый ПИН-код с помощью '/pin <новый-пин>'.
 
 You have to enter a 4-digit number
 == Вы должны ввести 4-значное число
 
 Successfully set the security pin
-== Защитный PIN-код успешно установлен
+== Защитный ПИН-код успешно установлен
 
 Verification failed
 == Проверка не удалась
@@ -265,7 +265,7 @@ Verification successful
 == Проверка успешна
 
 Successfully changed the security pin
-== Защитный PIN-код успешно изменен
+== Защитный ПИН-код успешно изменен
 
 You have to be inside of a bank to pay money from your bank account to others
 == Вы должны находиться в банке, чтобы переводить деньги с вашего банковского счета другим
@@ -508,13 +508,13 @@ Benefits:
 == - Полицейский бот поможет вам
 
 - taser license ('/taser')
-== - лицензия на тазер ('/taser')
+== - лицензия на электрошокер ('/taser')
 
 - Officers can taser a plot door of a wanted player to deal damage and destroy it
-== - Офицеры могут тазером повредить и уничтожить дверь участка разыскиваемого игрока
+== - Офицеры могут электрошокером повредить и уничтожить дверь участка разыскиваемого игрока
 
 - Taser will destroy plot objects of a wanted player
-== - Тазер уничтожит объекты участка разыскиваемого игрока
+== - Электрошокер уничтожит объекты участка разыскиваемого игрока
 
 [GENERAL INFORMATION]
 == [ОБЩАЯ ИНФОРМАЦИЯ]
@@ -646,25 +646,25 @@ There are no wanted players right now
 == Сейчас нет разыскиваемых игроков
 
 You don't have enough taser batteries
-== У вас недостаточно батарей для тазера
+== У вас недостаточно батарей для электрошокера
 
 Taser
-== Тазер
+== Электрошокер
 
 Police officers with level 3 or higher get a taser license.
-== Офицеры полиции с уровнем 3 или выше получают лицензию на тазер.
+== Офицеры полиции с уровнем 3 или выше получают лицензию на электрошокер.
 
 The taser is a rifle that freezes players for a short time.
-== Тазер - это винтовка, которая замораживает игроков на короткое время.
+== Электрошокер - это винтовка, которая замораживает игроков на короткое время.
 
 You can pick up the taser and taser batteries throughout the map.
-== Вы можете подобрать тазер и батареи для тазера по всей карте.
+== Вы можете подобрать электрошокер и батареи для электрошокера по всей карте.
 
 Your taser stats
-== Ваша статистика тазера
+== Ваша статистика электрошокера
 
 Taser level
-== Уровень тазера
+== Уровень электрошокера
 
 Price for the next level
 == Цена за следующий уровень
@@ -673,10 +673,10 @@ Freeze time: %.2f seconds
 == Время заморозки: %.2f секунд
 
 Taser shield
-== Щит тазера
+== Щит электрошокера
 
 Drop taser battery: '/taser drop <amount>'
-== Выбросить батарею тазера: '/taser drop <количество>'
+== Выбросить батарею электрошокера: '/taser drop <количество>'
 
 '%s' has been muted for %d seconds (%s)
 == '%s' был заглушен на %d секунд (%s)
@@ -685,7 +685,7 @@ Drop taser battery: '/taser drop <amount>'
 == '%s' был заглушен на %d секунд
 
 Your taser shield has been set to %d%%. Use '/taser' to check later.
-== Ваш щит тазера был установлен на %d%%. Используйте '/taser' для проверки позже.
+== Ваш щит электрошокера был установлен на %d%%. Используйте '/taser' для проверки позже.
 
 You have been logged out by an admin
 == Вы были выведены из системы администратором
@@ -1192,7 +1192,7 @@ You need to be logged in to use moneytiles.\nGet an account with '/register <nam
 == Вы должны быть авторизованы, чтобы использовать денежные плитки.\nПолучите аккаунт с помощью '/register <имя> <пароль> <пароль>'
 
 Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later.
-== Поздравляем, +20%% защиты от тазера, текущая: %d%%. Используйте '/taser' для проверки позже.
+== Поздравляем, +20%% защиты от электрошокера, текущая: %d%%. Используйте '/taser' для проверки позже.
 
 Congratulations, double-xp has been activated for %d lifes
 == Поздравляем, двойной опыт активирован на %d жизней
@@ -1285,7 +1285,7 @@ You already have the maximum of 50 meteors
 == У вас уже максимальное количество метеоритов - 50
 
 Taser shield has been used, -5%%, new current: %d%%
-== Защита от тазера использована, -5%%, новое текущее значение: %d%%
+== Защита от электрошокера использована, -5%%, новое текущее значение: %d%%
 
 Collected %lld money
 == Собрано %lld денег
@@ -1336,10 +1336,10 @@ You already have the maximum amount of bullets
 == У вас уже максимальное количество пуль
 
 You already have the maximum taser level
-== У вас уже максимальный уровень тазера
+== У вас уже максимальный уровень электрошокера
 
 You already have a fully filled taser battery
-== У вас уже полностью заряженная батарея тазера
+== У вас уже полностью заряженная батарея электрошокера
 
 You already have the %s
 == У вас уже есть %s
@@ -1348,7 +1348,7 @@ You already have %s
 == У вас уже есть %s
 
 You need to be police level 3 or higher to get a taser license
-== Вам нужен полицейский уровень 3 или выше, чтобы получить лицензию на тазер
+== Вам нужен полицейский уровень 3 или выше, чтобы получить лицензию на электрошокер
 
 You can not buy this VIP level while owning another one
 == Вы не можете купить этот уровень VIP, владея другим
@@ -1369,7 +1369,7 @@ Your level is too low, you need to be level %d to buy %s
 == Ваш уровень слишком низкий, вам нужен уровень %d, чтобы купить %s
 
 Taser battery purchase failed
-== Покупка батареи тазера не удалась
+== Покупка батареи электрошокера не удалась
 
 You bought %s %s
 == Вы купили %s %s
@@ -1923,10 +1923,10 @@ Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
 == Доступные языки
 
 Rainbow will make your tee change the color very fast.
-== Радуга заставит ваш тройник очень быстро менять цвет.
+== Радуга заставит вашего персонажа очень быстро менять цвет.
 
 Bloody will give your tee a permanent kill effect.
-== Кровавый придаст вашему тройнику постоянный эффект убийства.
+== Кровавый эффект придаст вашему персонажу постоянный эффект убийства.
 
 Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.
 == Офицеры полиции получают помощь от полицейского бота. Для получения дополнительной информации о конкретных полицейских званиях, пожалуйста, введите '/police'.
@@ -1959,7 +1959,7 @@ Taser is a rifle that freezes a player. For more information about the taser and
 == Электрошокер — это винтовка, которая замораживает игрока. Для получения дополнительной информации об электрошокере и ваших статистиках электрошокера, посетите '/taser'.
 
 Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
-== Для использования электрошокера требуется батарея. Максимальное количество боеприпасов — 100. Посетите '/taser'.
+== Для использования электрошокера требуется батарея. Максимальное количество зарядов — 100. Посетите '/taser'.
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.
 == С Портальной Винтовкой вы можете создать два портала там, где находится ваш курсор, а затем телепортироваться между ними.
