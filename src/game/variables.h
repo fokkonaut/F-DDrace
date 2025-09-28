@@ -217,6 +217,9 @@ MACRO_CONFIG_INT(SvMaxWeaponDrops, sv_max_weapon_drops, 5, 0, 10, CFGFLAG_SERVER
 MACRO_CONFIG_INT(SvMaxPickupDrops, sv_max_pickup_drops, 500, 0, 600, CFGFLAG_SERVER, "Maximum amount of dropped hearts and shields", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvInteractiveDrops, sv_interactive_drops, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether dropped weapons, flags, money interact with shotgun and explosions", AUTHED_ADMIN)
 
+// helicopter
+MACRO_CONFIG_INT(SvHeliRespawnTime, sv_heli_respawn_time, 60, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Delay in seconds for a tile-placed helicopter to (re)spawn", AUTHED_ADMIN)
+
 // vanilla
 MACRO_CONFIG_INT(SvVanillaModeStart, sv_vanilla_mode_start, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to set the players mode to vanilla on spawn or ddrace", AUTHED_ADMIN)
 

@@ -260,6 +260,7 @@ enum
 	TILE_SWITCH_PLOT_TOTELE = 194, // totele plot position, // plot size; delay=0: small, delay=1: big
 	TILE_SWITCH_REDIRECT_SERVER_FROM = 195, // from tp for server redirection
 	TILE_SWITCH_REDIRECT_SERVER_TO = 196,
+	TILE_SWITCH_HELICOPTER_SPAWN = 219,
 	TILE_SWITCHTOGGLE = 28, // for draw editor placed buttons for plot draw doors, also supported as mappable tiles
 	TILE_TELE_INOUT_EVIL = 94, // also supported as mappable tiles
 	TILE_TELE_INOUT = 95, // also supported as mappable tiles

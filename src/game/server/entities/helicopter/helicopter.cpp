@@ -68,12 +68,21 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	return distSq <= radius * radius;
 }
 
-CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build)
+CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build, bool PlacedByTile, int TurretType)
 	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
 {
 	m_AllowVipPlus = false;
 	m_Elasticity = 0.f;
 	m_DDTeam = Team;
+
+	m_PlacedByTile = PlacedByTile;
+	m_NextSpawnTick = 0;
+	m_InitialPosition = Pos;
+	m_InitialTurretType = TurretType;
+
+	m_SpawnTick = -1;
+	if (PlacedByTile)
+		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
 
 	m_InputDirection = 0;
 	m_MaxHealth = 60.f;
@@ -143,6 +152,15 @@ void CHelicopter::Reset()
 {
 	Dismount();
 	CAdvancedEntity::Reset();
+
+	TryRespawnNewHelicopter();
+}
+
+bool CHelicopter::TryRespawnNewHelicopter()
+{
+	if (!m_PlacedByTile)
+		return false;
+	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, m_InitialTurretType, 1.f, false, true);
 }
 
 bool CHelicopter::IsRegenerating()
@@ -249,7 +267,7 @@ void CHelicopter::Explode()
 
 void CHelicopter::TakeDamage(float Damage, vec2 HitPos, int FromID)
 {
-	if (IsBuilding() || IsExploding())
+	if (IsBuilding() || IsExploding() || IsSpawning())
 		return;
 
 	m_Health -= Damage;
@@ -262,7 +280,7 @@ void CHelicopter::TakeDamage(float Damage, vec2 HitPos, int FromID)
 
 void CHelicopter::ExplosionDamage(float Strength, vec2 Pos, int FromID)
 {
-	if (IsBuilding() || IsExploding()) // like this check only prevents changing mHealth
+	if (IsBuilding() || IsExploding() || IsSpawning()) // like this check only prevents changing mHealth
 		return;
 
 	// gamecontext.cpp : createxplosion
@@ -287,6 +305,17 @@ void CHelicopter::Tick()
 
 	if (m_LastKnownOwner >= 0 && !GameServer()->m_apPlayers[m_LastKnownOwner])
 		m_LastKnownOwner = -1;
+
+	if (IsSpawning())
+	{
+		if(Server()->Tick() > m_SpawnTick)
+		{
+			// respawn
+			m_SpawnTick = -1;
+			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, m_TeamMask);
+		}
+		return;
+	}
 
 	BuildHelicopter();
 
@@ -661,7 +690,7 @@ void CHelicopter::SetAngle(float Angle)
 
 void CHelicopter::Snap(int SnappingClient)
 {
-	if (IsExploding())
+	if (IsExploding() || IsSpawning())
 		return;
 
 	if (NetworkClipped(SnappingClient) || !CmaskIsSet(m_TeamMask, SnappingClient))
