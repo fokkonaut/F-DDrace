@@ -14,6 +14,9 @@ from DDNet++ by ChillerDragon, DDNet, and other community projects, aswell as ma
 If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:
 == 
 
+English translation by the developers
+== 
+
 For more info, say '/cmdlist' or '/credits'
 == 
 

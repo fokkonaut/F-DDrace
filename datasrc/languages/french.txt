@@ -1,6 +1,5 @@
-#
-# Author: claude.ai & fokkonaut
-#
+English translation by the developers
+== Traduction française de l'IA
 
 /cmdlist will show a list of all chat commands
 == /cmdlist affichera une liste de toutes les commandes de chat

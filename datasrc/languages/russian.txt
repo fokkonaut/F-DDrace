@@ -1,6 +1,5 @@
-#
-# Author: claude.ai & fokkonaut
-#
+English translation by the developers
+== Русский перевод ИИ
 
 /cmdlist will show a list of all chat commands
 == /cmdlist покажет список всех чат-команд

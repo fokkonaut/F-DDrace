@@ -1,6 +1,5 @@
-#
-# Author: Bamcane 2025/09/05
-#
+English translation by the developers
+== 中文翻译的 Bamcane
 
 F-DDrace is a mod by fokkonaut
 == F-DDrace 是由 fokkonaut 制作的一个模组

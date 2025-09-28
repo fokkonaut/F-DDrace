@@ -1,6 +1,5 @@
-#
-# Author: TimePause, krystek357/pentalis
-#
+English translation by the developers
+== Polskie tłumaczenie TimePaus, krystek357/pentalis
 
 /cmdlist will show a list of all chat commands
 == /cmdlist pokaże Ci listę wszystkich komend

@@ -29,6 +29,7 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->Localize("If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:"));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
 		"https://github.com/fokkonaut/F-DDrace");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits", pPlayer->Localize("English translation by the developers"));
 }
 
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
@@ -2686,6 +2687,7 @@ void CGameContext::ConLanguage(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Current language"), g_Localization.GetLanguageString(pPlayer->m_Language));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+	pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("English translation by the developers"));
 	pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("You can set one of the following languages for server-side translation by using '/language <option>':"));
 	pSelf->SendChatTarget(pResult->m_ClientID, g_Localization.ListAvailable());
 }

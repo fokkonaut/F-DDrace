@@ -1,6 +1,5 @@
-#
-# Author: German translation by fokkonaut
-#
+English translation by the developers
+== Deutsche Übersetzung von fokkonaut
 
 /cmdlist will show a list of all chat commands
 == /cmdlist zeigt eine Liste aller Chat-Befehle

@@ -1,6 +1,5 @@
-#
-# Author: WarHammer
-#
+English translation by the developers
+== Türkçe çevirinin WarHammer
 
 /cmdlist will show a list of all chat commands
 == /cmdlist tüm sohbet komutlarını gösterir
