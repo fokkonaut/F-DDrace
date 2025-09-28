@@ -68,21 +68,24 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	return distSq <= radius * radius;
 }
 
-CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build, bool PlacedByTile, int TurretType)
+CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build, int Number, int DelayTurretType)
 	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
 {
 	m_AllowVipPlus = false;
 	m_Elasticity = 0.f;
 	m_DDTeam = Team;
 
-	m_PlacedByTile = PlacedByTile;
+	m_Number = Number;
+	m_DelayTurretType = DelayTurretType;
 	m_NextSpawnTick = 0;
 	m_InitialPosition = Pos;
-	m_InitialTurretType = TurretType;
 
 	m_SpawnTick = -1;
-	if (PlacedByTile)
+	if (PlacedByTile())
+	{
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
+		m_Layer = LAYER_SWITCH; // unused rn, but for completeness
+	}
 
 	m_InputDirection = 0;
 	m_MaxHealth = 60.f;
@@ -158,9 +161,9 @@ void CHelicopter::Reset()
 
 bool CHelicopter::TryRespawnNewHelicopter()
 {
-	if (!m_PlacedByTile)
+	if (!PlacedByTile())
 		return false;
-	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, m_InitialTurretType, 1.f, false, true);
+	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, m_DelayTurretType, 1.f, false, m_Number);
 }
 
 bool CHelicopter::IsRegenerating()
@@ -306,8 +309,14 @@ void CHelicopter::Tick()
 	if (m_LastKnownOwner >= 0 && !GameServer()->m_apPlayers[m_LastKnownOwner])
 		m_LastKnownOwner = -1;
 
-	if (IsSpawning())
+	if (PlacedByTile() && IsSpawning())
 	{
+		CCollision::SSwitchers *pSwitcher = m_Number > 0 ? &GameServer()->Collision()->m_pSwitchers[m_Number] : 0;
+		if (pSwitcher && !pSwitcher->m_Status[0]) // always use team 0, we dont have management for other teams right now for tile-based helis
+		{
+			m_SpawnTick++;
+		}
+
 		if(Server()->Tick() > m_SpawnTick)
 		{
 			// respawn

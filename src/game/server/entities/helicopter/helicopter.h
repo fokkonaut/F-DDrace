@@ -63,10 +63,9 @@ private:
 
 	// Tile respawn
 	bool TryRespawnNewHelicopter();
-	bool m_PlacedByTile;
+	int m_DelayTurretType;
 	int64 m_NextSpawnTick;
 	vec2 m_InitialPosition;
-	int m_InitialTurretType;
 	int m_SpawnTick;
 
 	int m_ExplosionsLeft;
@@ -102,7 +101,7 @@ private:
 	void SortBones();
 
 public:
-	CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool Build = false, bool PlacedByTile = false, int TurretType = TURRETTYPE_NONE);
+	CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool Build = false, int Number = -1, int DelayTurretType = -1);
 	virtual ~CHelicopter();
 
 	// Sense
@@ -114,6 +113,7 @@ public:
 	bool IsRegenerating();
 
 	bool IsSpawning() { return m_SpawnTick > -1; }
+	bool PlacedByTile() { return m_Number >= 0 && m_DelayTurretType >= TURRETTYPE_NONE; }
 
 	// Manipulating
 	bool AttachTurret(CVehicleTurret *helicopterTurret);
