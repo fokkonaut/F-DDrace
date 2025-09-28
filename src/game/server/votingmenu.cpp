@@ -1223,3 +1223,4 @@ bool CVotingMenu::DoLineCollapse(int Page, int *pNumOptions, const char *pDescri
 #undef ADDLINE
 #undef ADDLINE_PREFIX
 #undef ADDLINE_COLLAPSE
+#undef ADDLINE_IMPL
