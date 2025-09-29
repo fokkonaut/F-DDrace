@@ -127,11 +127,16 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	DDraceInit();
-	if (!m_pPlayer->LoadMinigameTee())
+	if (!m_pPlayer->LoadMinigameTee() && !m_pPlayer->IsMinigame())
 	{
-		if (m_pPlayer->m_DoubleXpLifesLeft && !m_pPlayer->IsMinigame())
+		if (m_pPlayer->m_DoubleXpLifesLeft)
 		{
 			m_pPlayer->UpdateDoubleXpLifes();
+		}
+		
+		if (GameServer()->Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime)
+		{
+			SetZombieHuman(true);
 		}
 	}
 
