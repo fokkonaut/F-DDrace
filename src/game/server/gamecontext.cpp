@@ -2464,7 +2464,20 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				// m_apPlayers[ClientID] can be NULL, if the player used a
 				// timeout code and replaced another client.
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+				int Len = -1;
+				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "login ", 6) == 0) Len = 6;
+				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "register ", 9) == 0) Len = 9;
+				if (str_comp_nocase_num(pMsg->m_pMessage + 1, "changepassword ", 15) == 0) Len = 15;
+				if (Len != -1)
+				{
+					char aCmd[32];
+					str_copy(aCmd, pMsg->m_pMessage, Len + 1);
+					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, aCmd);
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+				}
 				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
 
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
