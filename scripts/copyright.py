@@ -1,8 +1,14 @@
-import os, sys
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])) + "/..")
+from os import (
+    chdir, path, 
+    sep, walk
+)
+
+from sys import argv
+
+chdir(path.dirname(path.realpath(argv[0])) + "/..")
 
 notice = [b"/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */\n", b"/* If you are missing that file, acquire a complete release at teeworlds.com.                */\n"]
-exclude = ["src%sengine%sexternal" % (os.sep, os.sep), "src%sosxlaunch" % os.sep]
+exclude = ["src%sengine%sexternal" % (sep, sep), "src%sosxlaunch" % sep]
 updated_files = 0
 
 def fix_copyright_notice(filename):
@@ -40,16 +46,16 @@ def fix_copyright_notice(filename):
 	updated_files += 1
 
 skip = False
-for root, dirs, files in os.walk("src"):
+for root, dirs, files in walk("src"):
 	for excluding in exclude:
 		if root[:len(excluding)] == excluding:
 			skip = True
 			break
-	if skip == True:
+	if skip:
 		skip = False
 		continue
 	for name in files:
-		filename = os.path.join(root, name)
+		filename = path.join(root, name)
 
 		if filename[-2:] != ".c" and filename[-4:] != ".cpp" and filename[-2:] != ".h":
 			continue

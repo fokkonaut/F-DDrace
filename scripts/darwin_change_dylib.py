@@ -1,27 +1,27 @@
 from collections import namedtuple
-import os
-import re
-import shlex
-import subprocess
+from os import devnull
+from re import compile, escape
+from shlex import quote
+from subprocess import check_call, check_output
 
 Config = namedtuple('Config', 'install_name_tool otool verbose')
 
 def dylib_regex(name):
-	return re.compile(r'\S*{}\S*'.format(re.escape(name)))
+	return compile(r'\S*{}\S*'.format(escape(name)))
 
 class ChangeDylib:
 	def __init__(self, config):
 		self.config = config
 	def _check_call(self, process_args, *args, **kwargs):
 		if self.config.verbose >= 1:
-			print("EXECUTING {}".format(" ".join(shlex.quote(x) for x in process_args)))
+			print("EXECUTING {}".format(" ".join(quote(x) for x in process_args)))
 		if not (self.config.verbose >= 2 and "stdout" not in kwargs):
-			kwargs["stdout"] = open(os.devnull, 'wb')
-		return subprocess.check_call(process_args, *args, **kwargs)
+			kwargs["stdout"] = open(devnull, 'wb')
+		return check_call(process_args, *args, **kwargs)
 	def _check_output(self, process_args, *args, **kwargs):
 		if self.config.verbose >= 1:
-			print("EXECUTING {} FOR OUTPUT".format(" ".join(shlex.quote(x) for x in process_args)))
-		return subprocess.check_output(process_args, *args, **kwargs)
+			print("EXECUTING {} FOR OUTPUT".format(" ".join(quote(x) for x in process_args)))
+		return check_output(process_args, *args, **kwargs)
 	def _install_name_tool(self, *args):
 		return self._check_call((self.config.install_name_tool,) + args)
 	def _otool(self, *args):
@@ -30,7 +30,7 @@ class ChangeDylib:
 	def change(self, filename, from_, to):
 		lines = self._otool("-L", filename).decode().splitlines()
 		regex = dylib_regex(from_)
-		matches = sum([regex.findall(l) for l in lines], [])
+		matches = sum([regex.findall(line) for line in lines], [])
 		if len(matches) != 1:
 			if matches:
 				raise ValueError("More than one match found for {}: {}".format(from_, matches))

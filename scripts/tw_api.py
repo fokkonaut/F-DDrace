@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
 from socket import socket, AF_INET, SOCK_DGRAM
-import sys
-import threading
-import time
-
-import random
+from threading import Thread
+from asyncio import sleep
+from random import randrange
 
 NUM_MASTERSERVERS = 4
 MASTERSERVER_PORT = 8283
@@ -79,44 +77,44 @@ def header_connless(token_srv, token_cl):
 
 # CVariableInt::Unpack from src/engine/shared/compression.cpp
 def unpack_int(b):
-	l = list(b[:5])
+	pack = list(b[:5])
 	i = 0
-	Sign = (l[i]>>6)&1
-	res = l[i] & 0x3F
+	Sign = (pack[i]>>6)&1
+	res = pack[i] & 0x3F
 
 	for _ in (0,):
-		if not (l[i]&0x80):
+		if not (pack[i]&0x80):
 			break
 		i+=1
-		res |= (l[i]&(0x7F))<<(6)
+		res |= (pack[i]&(0x7F))<<(6)
 
-		if not (l[i]&0x80):
+		if not (pack[i]&0x80):
 			break
 		i+=1
-		res |= (l[i]&(0x7F))<<(6+7)
+		res |= (pack[i]&(0x7F))<<(6+7)
 
-		if not (l[i]&0x80):
+		if not (pack[i]&0x80):
 			break
 		i+=1
-		res |= (l[i]&(0x7F))<<(6+7+7)
+		res |= (pack[i]&(0x7F))<<(6+7+7)
 
-		if not (l[i]&0x80):
+		if not (pack[i]&0x80):
 			break
 		i+=1
-		res |= (l[i]&(0x7F))<<(6+7+7+7)
+		res |= (pack[i]&(0x7F))<<(6+7+7+7)
 
 	i += 1
 	res ^= -Sign
 	return res, b[i:]
 
 
-class Server_Info(threading.Thread):
+class Server_Info(Thread):
 
 	def __init__(self, address):
 		self.address = address
 		self.info = None
 		self.finished = False
-		threading.Thread.__init__(self, target = self.run)
+		super().__init__(self, target = self.run)
 
 	def  __str__(self):
 		return str(self.info)
@@ -137,7 +135,7 @@ def get_server_info(address):
 		
 		# function definition
 		def send_token(sock, address, timeout=TIMEOUT):
-			token = random.randrange(0x100000000)
+			token = randrange(0x100000000)
 
 			# Token request
 			sock.sendto(pack_control_msg_with_token(-1,token),address)
@@ -171,7 +169,7 @@ def get_server_info(address):
 			sock.sendto(header_connless(token_srv, token_cl) + PACKET_GETINFO + b'\x00', address)
 			sock.settimeout(timeout)
 			if isinstance(sleep_secs, int):
-				time.sleep(sleep_secs)
+				sleep(sleep_secs)
 			data, _ = sock.recvfrom(BUFFER_SIZE)
 			
 			head = 	header_connless(token_cl, token_srv) + PACKET_INFO + b'\x00'
@@ -241,7 +239,7 @@ def get_server_info(address):
 		return server_info
 	except AssertionError as e:
 		print(*e.args)
-	except OSError as e: # Timeout
+	except OSError: # Timeout
 		#print('> Server %s did not answer' % (address,))
 		pass
 	except ValueError as e:
@@ -256,13 +254,13 @@ def get_server_info(address):
 	return None
 
 
-class Master_Server_Info(threading.Thread):
+class Master_Server_Info(Thread):
 
 	def __init__(self, address):
 		self.address = address
 		self.servers = []
 		self.finished = False
-		threading.Thread.__init__(self, target = self.run)
+		super().__init__(self, target = self.run)
 
 	def run(self):
 		self.servers = get_list(self.address)
@@ -277,7 +275,7 @@ def get_list(address):
 		sock = socket(AF_INET, SOCK_DGRAM)
 		sock.settimeout(TIMEOUT)
 
-		token = random.randrange(0x100000000)
+		token = randrange(0x100000000)
 
 		# Token request
 		sock.sendto(pack_control_msg_with_token(-1,token),address)
@@ -312,7 +310,7 @@ def get_list(address):
 		print(*e.args)
 	except OSError as e: # Timeout
 		if not answer:
-			print('> Master %s did not answer' % (address,))
+			print(f"> Master {address} did not answer: {e}")
 	except Exception as e:
 		# import traceback
 		# traceback.print_exc()
@@ -336,7 +334,7 @@ if __name__ == '__main__':
 	while len(master_servers) != 0:
 		master_servers[0].join()
 
-		if master_servers[0].finished == True:
+		if master_servers[0].finished:
 			if master_servers[0].servers:
 				servers.update(master_servers[0].servers)
 			del master_servers[0]
@@ -358,8 +356,8 @@ if __name__ == '__main__':
 
 	while len(servers_info) != 0:
 		servers_info[0].join()
-		
-		if servers_info[0].finished == True:
+
+		if servers_info[0].finished:
 			if servers_info[0].info:
 				server_info = servers_info[0].info
 				# check num/max validity

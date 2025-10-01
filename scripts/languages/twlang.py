@@ -1,6 +1,6 @@
-import functools
-import os
-import re
+from functools import lru_cache
+from os import walk, path
+from re import findall
 from collections import OrderedDict
 
 class LanguageDecodeError(Exception):
@@ -56,19 +56,19 @@ def decode(fileobj, elements_per_key):
 
 def check_file(path):
 	with open(path, encoding="utf-8") as fileobj:
-		matches = re.findall(r"(Localize|Localizable)\s*\(\s*\"((?:(?:\\\")|[^\"])+)\"\s*(?:,\s*(?:\"((?:(?:\\\")|[^\"])+)\"|([a-zA-Z_][a-zA-Z0-9_]*)))?\s*\)", fileobj.read())
+		matches = findall(r"(Localize|Localizable)\s*\(\s*\"((?:(?:\\\")|[^\"])+)\"\s*(?:,\s*(?:\"((?:(?:\\\")|[^\"])+)\"|([a-zA-Z_][a-zA-Z0-9_]*)))?\s*\)", fileobj.read())
 	return matches
 
 
-@functools.lru_cache(None)
-def check_folder(path):
+@lru_cache(None)
+def check_folder(file_path):
 	englishlist = OrderedDict()
-	for path2, dirs, files in os.walk(path):
+	for path2, dirs, files in walk(file_path):
 		dirs.sort()
 		for f in sorted(files):
 			if not any(f.endswith(x) for x in [".cpp", ".c", ".h"]):
 				continue
-			for sentence in check_file(os.path.join(path2, f)):
+			for sentence in check_file(path.join(path2, f)):
 				key = (sentence[1:][0].replace("\\\"", "\""), sentence[1:][1].replace("\\\"", "\""))
 				englishlist[key] = None
 	return englishlist

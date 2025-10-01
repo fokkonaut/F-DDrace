@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-import os
-import sys
+from os import chdir, path
+from sys import argv
 
-import twlang
+from twlang import translations, localizes
 
 def copy_fix(infile, delete_unused, append_missing, delete_empty):
 	with open(infile, encoding="utf-8") as f:
 		content = f.readlines()
 		if content and not content[-1].endswith("\n"):
 			content[-1] += "\n"
-	trans = twlang.translations(infile)
+	trans = translations(infile)
 	if delete_unused or append_missing:
-		local = twlang.localizes()
+		local = localizes()
 	else:
 		local = []
 	supported = []
@@ -39,11 +39,11 @@ def copy_fix(infile, delete_unused, append_missing, delete_empty):
 	return "".join(content)
 
 def main(argv):
-	os.chdir(os.path.dirname(__file__) + "/../..")
+	chdir(path.dirname(__file__) + "/../..")
 
 	if len(argv) < 3:
 		print("usage: python copy_fix.py <infile> <outfile> [--delete-unused] [--append-missing] [--delete-empty]")
-		sys.exit()
+		raise SystemExit(1)
 	infile = argv[1]
 	outfile = argv[2]
 	args = argv[3:]
@@ -58,8 +58,7 @@ def main(argv):
 		elif arg == "--delete-empty":
 			delete_empty = True
 		else:
-			print("No such argument '"+arg+"'.")
-			sys.exit()
+			raise ValueError(f"No such argument '{arg}'.")
 
 	content = copy_fix(infile, delete_unused, append_missing, delete_empty)
 
@@ -68,4 +67,4 @@ def main(argv):
 	print("Successfully created '" + outfile + "'.")
 
 if __name__ == '__main__':
-	main(sys.argv)
+	main(argv)

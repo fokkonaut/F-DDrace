@@ -1,7 +1,7 @@
 from __future__ import with_statement
-import struct
-import sys
-import re
+from struct import pack
+from sys import argv
+from re import sub
 
 def convert(input, output):
     with open(input, "r") as in_file:
@@ -12,9 +12,10 @@ def convert(input, output):
                 for part in parts:
                     key, value = part.split('=')
 
+                    # Try to convert value to int, else keep as string
                     try:
                         dic[key] = int(value)
-                    except:
+                    except ValueError:
                         dic[key] = value
 
                 return dic
@@ -47,7 +48,7 @@ def convert(input, output):
                 return type, dic
 
             def write_int16(val):
-                out_file.write(struct.pack('<h', val))
+                out_file.write(pack('<h', val))
 
             def write_info(dic):
                 write_int16(dic["size"])
@@ -132,17 +133,17 @@ def convert(input, output):
                 else:
                     write_default_kerning()
 
-if len(sys.argv) >= 2:
-    print "converting..."
+if len(argv) >= 2:
+    print ("converting...")
 
-    filenames = sys.argv[1:]
+    filenames = argv[1:]
     for filename in filenames:
         input = filename
-        output = re.sub("fnt$", "tfnt", input)
-            
-        print "input: %s, output: %s" % (input, output)
+        output = sub("fnt$", "tfnt", input)
+
+        print (f"input: {input}, output: {output}")
         convert(input, output)
-    print "done!"
+    print ("done!")
 else:
-    print "font converter! converts .fnt files to teeworlds .tfnt"
-    print "usage: font_converter <input>"
+    print ("font converter! converts .fnt files to teeworlds .tfnt")
+    print ("usage: font_converter <input>")

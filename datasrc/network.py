@@ -1,4 +1,14 @@
-from datatypes import *
+from datatypes import (
+	NetBool,
+	NetArray,
+ 	NetEnum, Enum,
+ 	NetFlag, Flags,
+ 	NetObject, NetObjectEx,
+ 	NetIntAny, NetIntRange,
+	NetMessage, NetMessageEx,
+	NetStringStrict, NetString,
+	NetTick, NetEvent, NetEventEx
+)
 
 Powerups = Enum("POWERUP", ["HEALTH", "ARMOR", "WEAPON", "NINJA", "BATTERY"])
 Pickups = Enum("PICKUP", ["HEALTH", "ARMOR", "GRENADE", "SHOTGUN", "LASER", "NINJA", "GUN", "HAMMER"])

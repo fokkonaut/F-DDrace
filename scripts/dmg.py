@@ -1,20 +1,24 @@
 from collections import namedtuple
-import os
-import shlex
-import subprocess
-import tempfile
+from os import devnull, stat, walk, remove, path
+from shlex import quote
+from subprocess import check_call
+from tempfile import NamedTemporaryFile
+
+def mktemp(prefix='', suffix=''):  # It is better to use NamedTemporaryFile from the tempfile module because mktemp is considered deprecated and insecure
+	with NamedTemporaryFile(prefix=prefix, suffix=suffix, delete=False) as f:
+		return f.name
 
 ConfigDmgtools = namedtuple('Config', 'dmg hfsplus newfs_hfs verbose')
 ConfigHdiutil = namedtuple('Config', 'hdiutil verbose')
 
-def chunks(l, n):
+def chunks(lst, n):
 	"""
-	Yield successive n-sized chunks from l.
+	Yield successive n-sized chunks from lst.
 	
 	From https://stackoverflow.com/a/312464.
 	"""
-	for i in range(0, len(l), n):
-		yield l[i:i + n]
+	for i in range(0, len(lst), n):
+		yield lst[i:i + n]
 
 class Dmg:
 	def __init__(self, config):
@@ -22,10 +26,10 @@ class Dmg:
 
 	def _check_call(self, process_args, *args, **kwargs):
 		if self.config.verbose >= 1:
-			print("EXECUTING {}".format(" ".join(shlex.quote(x) for x in process_args)))
+			print("EXECUTING {}".format(" ".join(quote(x) for x in process_args)))
 		if not (self.config.verbose >= 2 and "stdout" not in kwargs):
-			kwargs["stdout"] = open(os.devnull, 'wb')
-		subprocess.check_call(process_args, *args, **kwargs)
+			kwargs["stdout"] = open(devnull, 'wb')
+		check_call(process_args, *args, **kwargs)
 
 class Dmgtools(Dmg):
 	def _mkfs_hfs(self, *args):
@@ -52,9 +56,9 @@ class Dmgtools(Dmg):
 		self._dmg('build', hfs, dmg)
 
 	def create(self, dmg, volume_name, directory, symlinks):
-		input_size = sum(os.stat(os.path.join(path, f)).st_size for path, dirs, files in os.walk(directory) for f in files)
+		input_size = sum(stat(path.join(path, f)).st_size for path, dirs, files in walk(directory) for f in files)
 		output_size = max(input_size * 2, 1024**2)
-		hfs = tempfile.mktemp(prefix=dmg + '.', suffix='.hfs')
+		hfs = mktemp(prefix=dmg + '.', suffix='.hfs')
 		self._create_hfs(hfs, volume_name, output_size)
 		self._add(hfs, directory)
 		for target, link_name in symlinks:
@@ -62,7 +66,7 @@ class Dmgtools(Dmg):
 		self._finish(hfs, dmg)
 		if self.config.verbose >= 1:
 			print("REMOVING {}".format(hfs))
-		os.remove(hfs)
+		remove(hfs)
 
 class Hdiutil(Dmg):
 	def _hdiutil(self, *args):
@@ -71,8 +75,8 @@ class Hdiutil(Dmg):
 	def create(self, dmg, volume_name, directory, symlinks):
 		if symlinks:
 			raise NotImplementedError("symlinks are not yet implemented")
-		if os.path.exists(volume_name + '.dmg'):
-			os.remove(volume_name + '.dmg')
+		if path.exists(volume_name + '.dmg'):
+			remove(volume_name + '.dmg')
 		self._hdiutil('create', '-volname', volume_name, '-srcdir', directory, dmg)
 
 def main():

@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-import os
-import sys
-import twlang
+from os import chdir, path
+from sys import argv
 
-os.chdir(os.path.dirname(__file__) + "/../..")
+from twlang import languages, localizes, translations
 
-if len(sys.argv) > 1:
-	langs = sys.argv[1:]
+chdir(path.dirname(__file__) + "/../..")
+
+if len(argv) > 1:
+	langs = argv[1:]
 else:
-	langs = twlang.languages()
-local = twlang.localizes()
+	langs = languages()
+local = localizes()
 table = []
 for lang in langs:
-	trans = twlang.translations(lang)
+	trans = translations(lang)
 	empty = 0
 	supported = 0
 	unused = 0
@@ -26,7 +27,7 @@ for lang in langs:
 				unused += 1
 	table.append([lang, len(trans), empty, len(local)-supported, unused])
 
-table.sort(key=lambda l: l[3])
+table.sort(key=lambda row: row[3])
 table = [["filename", "total", "empty", "missing", "unused"]] + table
 s = [[str(e) for e in row] for row in table]
 lens = [max(map(len, col)) for col in zip(*s)]

@@ -1,13 +1,13 @@
-import json
-import polib
-import os
-import re
-import time
-import sys
+from json import load
+from polib import POEntry, POFile # type: ignore
+from os import chdir, walk, listdir, path, sep
+from re import compile
+from time import strftime
+from sys import argv
 
 from collections import defaultdict
 
-os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])) + "/..")
+chdir(path.dirname(path.realpath(argv[0])) + "/..")
 
 format = "{0:40} {1:8} {2:8} {3:8}".format
 SOURCE_EXTS = [".c", ".cpp", ".h"]
@@ -20,7 +20,7 @@ JSON_KEY_CTXT="context"
 JSON_KEY_OR="or"
 JSON_KEY_TR="tr"
 
-SOURCE_LOCALIZE_RE=re.compile(br'Localize\("(?P<str>([^"\\]|\\.)*)"(, ?"(?P<ctxt>([^"\\]|\\.)*)")?\)')
+SOURCE_LOCALIZE_RE=compile(br'Localize\("(?P<str>([^"\\]|\\.)*)"(, ?"(?P<ctxt>([^"\\]|\\.)*)")?\)')
 
 def parse_source():
 	l10n = defaultdict(lambda: [])
@@ -33,14 +33,14 @@ def parse_source():
 				ctxt = ctxt.decode()
 			l10n[(str_, ctxt)].append((filename, lineno))
 
-	for root, dirs, files in os.walk("src"):
+	for root, dirs, files in walk("src"):
 		for name in files:
-			filename = os.path.join(root, name)
+			filename = path.join(root, name)
 			
-			if os.sep + "external" + os.sep in filename:
+			if sep + "external" + sep in filename:
 				continue
 
-			if os.path.splitext(filename)[1] in SOURCE_EXTS:
+			if path.splitext(filename)[1] in SOURCE_EXTS:
 				# HACK: Open source as binary file.
 				# Necessary some of teeworlds source files
 				# aren't utf-8 yet for some reason
@@ -53,17 +53,17 @@ def parse_source():
 	return l10n
 
 def load_languagefile(filename):
-	return json.load(open(filename), strict=False) # accept \t tabs
+	return load(open(filename), strict=False) # accept \t tabs
 
 def write_languagefile(outputfilename, l10n_src, old_l10n_data):
 	outputfilename += '.po'
 
-	po = polib.POFile()
+	po = POFile()
 	po.metadata = {
 		'Project-Id-Version': 'teeworlds-0.7_dev',
 		'Report-Msgid-Bugs-To': 'translation@teeworlds.com',
-		'POT-Creation-Date': time.strftime("%Y-%m-%d %H:%M%z"),
-		'PO-Revision-Date': time.strftime("%Y-%m-%d %H:%M%z"),
+		'POT-Creation-Date': strftime("%Y-%m-%d %H:%M%z"),
+		'PO-Revision-Date': strftime("%Y-%m-%d %H:%M%z"),
 		'Language-Team': 'Teeworlds Translations <translation@teeworlds.com>',
 		'MIME-Version': '1.0',
 		'Content-Type': 'text/plain; charset=utf-8',
@@ -85,12 +85,10 @@ def write_languagefile(outputfilename, l10n_src, old_l10n_data):
 		})
 
 	all_items = set(translations) | set(l10n_src)
-	tsl_items = set(translations) & set(l10n_src)
 	old_items = set(translations) - set(l10n_src)
-	new_items = set(l10n_src) - set(translations)
 
 	for msg, ctxt in all_items:
-		po.append(polib.POEntry(
+		po.append(POEntry(
 			msgid=msg,
 			msgctxt=ctxt,
 			msgstr=translations.get((msg, ctxt), ""),
@@ -102,11 +100,11 @@ def write_languagefile(outputfilename, l10n_src, old_l10n_data):
 if __name__ == '__main__':
 	l10n_src = parse_source()
 
-	po = polib.POFile()
+	po = POFile()
 	po.metadata = {
 		'Project-Id-Version': 'teeworlds-0.7_dev',
 		'Report-Msgid-Bugs-To': 'translation@teeworlds.com',
-		'POT-Creation-Date': time.strftime("%Y-%m-%d %H:%M%z"),
+		'POT-Creation-Date': strftime("%Y-%m-%d %H:%M%z"),
 		'PO-Revision-Date': 'YEAR-MO-DA HO:MI+ZONE',
 		'Language-Team': 'Teeworlds Translations <translation@teeworlds.com>',
 		'MIME-Version': '1.0',
@@ -117,15 +115,15 @@ if __name__ == '__main__':
 		commenttxt = ctxt
 		if(commenttxt):
 			commenttxt = 'Context: '+commenttxt
-		po.append(polib.POEntry(msgid=msg, msgstr="", occurrences=occurrences, msgctxt=ctxt, comment=commenttxt))
+		po.append(POEntry(msgid=msg, msgstr="", occurrences=occurrences, msgctxt=ctxt, comment=commenttxt))
 	po.save('datasrc/languages/base.pot')
 
-	for filename in os.listdir("datasrc/languages"):
+	for filename in listdir("datasrc/languages"):
 		try:
-			if (os.path.splitext(filename)[1] == ".json"
+			if (path.splitext(filename)[1] == ".json"
 					and filename != "index.json"):
 				filename = "datasrc/languages/" + filename
 				write_languagefile(filename, l10n_src, load_languagefile(filename))
 		except Exception as e:
-			print("Failed on {0}, re-raising for traceback".format(filename))
+			print(f"Failed on {filename}, re-raising for traceback: {e}")
 			raise

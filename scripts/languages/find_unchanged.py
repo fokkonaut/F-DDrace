@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-import os
-import sys
-import twlang
+from os import chdir, path
+from sys import argv
 
-os.chdir(os.path.dirname(__file__) + "/../..")
+from twlang import translations
 
-if len(sys.argv) < 2:
-	print("usage: python find_unchanged.py <file>")
-	sys.exit()
-infile = sys.argv[1]
+chdir(path.dirname(__file__) + "/../..")
 
-trans = twlang.translations(infile)
+if len(argv) < 2:
+	raise ValueError("usage: python find_unchanged.py <file>")
+infile = argv[1]
+
+trans = translations(infile)
 for tran, (_, expr, _) in trans.items():
 	if tran == expr:
 		print(tran)

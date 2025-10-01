@@ -1,8 +1,6 @@
-import os
-
+from os import listdir, path
 
 PATH = "../src/"
-
 
 def check_file(filename):
 	file = open(filename)
@@ -15,18 +13,16 @@ def check_file(filename):
 		if line[:7] == "#ifndef":
 			hg = "#ifndef " + ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
 			if line[:-1] != hg:
-				print "Wrong header guard in " + filename
+				print(f"Wrong header guard in {filename}")
 		else:
-			print "Missing header guard in " + filename
+			print(f"Missing header guard in {filename}")
 		break
 	file.close()
 
-
-
 def check_dir(dir):
-	list = os.listdir(dir)
+	list = listdir(dir)
 	for file in list:
-		if os.path.isdir(dir+file):
+		if path.isdir(dir+file):
 			if file != "external" and file != "generated":
 				check_dir(dir+file+"/")
 		elif file[-2:] == ".h" and file != "keynames.h":

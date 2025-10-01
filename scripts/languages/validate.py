@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import os
-import sys
-import re
-import twlang
+from os import chdir, path
+from sys import argv
+from re import findall, X
 
-os.chdir(os.path.dirname(__file__) + "/../..")
+from twlang import languages, localizes, translations
+
+chdir(path.dirname(__file__) + "/../..")
 
 # Taken from https://stackoverflow.com/questions/30011379/how-can-i-parse-a-c-format-string-in-python
 cfmt = '''
@@ -28,21 +29,21 @@ def print_validation_error(error, filename, error_line):
 	global total_errors
 	total_errors += 1
 
-if len(sys.argv) > 1:
-	languages = sys.argv[1:]
+if len(argv) > 1:
+	languages = argv[1:]
 else:
-	languages = twlang.languages()
-local = twlang.localizes()
+	languages = languages()
+local = localizes()
 
 for language in languages:
-	translations = twlang.translations(language)
+	translations = translations(language)
 
 	for (english, _), (line, translated, _) in translations.items():
 		if not translated:
 			continue
 
 		# Validate c format strings. Strings that move the formatters are not validated.
-		if re.findall(cfmt, english, flags=re.X) != re.findall(cfmt, translated, flags=re.X) and not "1$" in translated:
+		if findall(cfmt, english, flags=X) != findall(cfmt, translated, flags=X) and "1$" not in translated:
 			print_validation_error("Non-matching formatting", language, line)
 
 		# Check for elipisis
@@ -50,5 +51,5 @@ for language in languages:
 			print_validation_error("Usage of ... instead of the … character", language, line)
 
 if total_errors:
-	print(f"Found {total_errors} {'error' if total_errors == 1 else 'errors'} ")
-	sys.exit(1)
+	error_word = "error" if total_errors == 1 else "errors"
+	raise ValueError(f"Found {total_errors} {error_word}")

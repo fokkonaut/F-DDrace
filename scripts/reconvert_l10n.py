@@ -1,6 +1,6 @@
-import polib
-import json
-import sys
+from polib import pofile # type: ignore
+from json import load, dump
+from sys import argv
 
 JSON_KEY_TRANSL="translated strings"
 JSON_KEY_AUTHOR="authors"
@@ -11,7 +11,7 @@ JSON_KEY_CO="context"
 
 def reconvert(filename, json_filename):
 	"""Converts a l10n file.po into a file.json, keeping author info from a previous file.json if possible"""
-	po = polib.pofile(open(filename, encoding='utf-8').read())
+	po = pofile(open(filename, encoding='utf-8').read())
 	translations = []
 
 	for entry in po:
@@ -24,7 +24,7 @@ def reconvert(filename, json_filename):
 			translations.append(t_entry)
 
 	try:
-		previous_l10n = json.load(open(json_filename, encoding='utf-8'), strict=False)
+		previous_l10n = load(open(json_filename, encoding='utf-8'), strict=False)
 		
 		# remove tabs from data
 		authors = previous_l10n[JSON_KEY_AUTHOR]
@@ -38,7 +38,7 @@ def reconvert(filename, json_filename):
 		result = {JSON_KEY_AUTHOR: "", JSON_KEY_TRANSL: translations}
 		print(" failed to open " + json_filename + ", skipping author info")
 
-	json.dump(
+	dump(
 		result,
 		open(json_filename, 'w', encoding='utf-8'),
 		ensure_ascii=False,
@@ -49,7 +49,7 @@ def reconvert(filename, json_filename):
 
 def normalize(filename):
 	"""Normalizes a l10n file.po for better version controlling"""
-	po = polib.pofile(open(filename).read())
+	po = pofile(open(filename).read())
 	entries = list(sorted(sorted(po, key=lambda x: x.msgctxt or ""), key=lambda x: x.msgid))
 	po.clear()
 	for entry in entries:
@@ -65,7 +65,7 @@ def decrement_indent(filename):
 
 if __name__ == '__main__':
 	"""Normalizes then converts a l10n file.po into a file.json, keeping author info from a previous file.json if possible"""
-	for filename in sys.argv[1:]:
+	for filename in argv[1:]:
 		assert(len(filename)>len(".po"))
 		json_filename = filename[:-3]+".json"
 		normalize(filename)

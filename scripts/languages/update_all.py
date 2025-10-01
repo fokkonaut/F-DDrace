@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import os
+from os import chdir, path
 from copy_fix import copy_fix
-import twlang
 
-os.chdir(os.path.dirname(__file__) + "/../..")
+from twlang import languages
 
-for lang in twlang.languages():
+chdir(path.dirname(__file__) + "/../..")
+
+for lang in languages():
 	content = copy_fix(lang, delete_unused=True, append_missing=True, delete_empty=False)
 	with open(lang, "w", encoding="utf-8") as f:
 		f.write(content)

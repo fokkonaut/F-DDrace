@@ -1,179 +1,187 @@
-from datatypes import *
+from datatypes import (
+     Pointer, Float, Int,
+     String, Array, Struct,
+       SampleHandle, TextureHandle
+)
 
 class Sound(Struct):
-	def __init__(self, filename=""):
-		Struct.__init__(self, "CDataSound")
-		self.id = SampleHandle()
-		self.filename = String(filename)
+    def __init__(self, filename=""):
+        self.id = SampleHandle()
+        self.filename = String(filename)
+        super().__init__("CDataSound")
 
 class SoundSet(Struct):
-	def __init__(self, name="", files=[]):
-		Struct.__init__(self, "CDataSoundset")
-		self.name = String(name)
-		self.sounds = Array(Sound())
-		self.last = Int(-1)
-		for name in files:
-			self.sounds.Add(Sound(name))
+    def __init__(self, name="", files=[]):
+        self.name = String(name)
+        self.sounds = Array(Sound())
+        self.last = Int(-1)
+        for name in files:
+            self.sounds.Add(Sound(name))
+        super().__init__("CDataSoundset")
 
 class Image(Struct):
-	def __init__(self, name="", filename="", linear_mapping=0):
-		Struct.__init__(self, "CDataImage")
-		self.name = String(name)
-		self.filename = String(filename)
-		self.flag = Int(linear_mapping)
-		self.id = TextureHandle()
+    def __init__(self, name="", filename="", linear_mapping=0):
+        self.name = String(name)
+        self.filename = String(filename)
+        self.flag = Int(linear_mapping)
+        self.id = TextureHandle()
+        super().__init__("CDataImage")
 
 class SpriteSet(Struct):
-	def __init__(self, name="", image=None, gridx=0, gridy=0):
-		Struct.__init__(self, "CDataSpriteset")
-		self.image = Pointer(Image, image) # TODO
-		self.gridx = Int(gridx)
-		self.gridy = Int(gridy)
+    def __init__(self, name="", image=None, gridx=0, gridy=0):
+        self.image = Pointer(Image, image) # TODO
+        self.gridx = Int(gridx)
+        self.gridy = Int(gridy)
+        super().__init__("CDataSpriteset")
 
 class Sprite(Struct):
-	def __init__(self, name="", Set=None, x=0, y=0, w=0, h=0):
-		Struct.__init__(self, "CDataSprite")
-		self.name = String(name)
-		self.set = Pointer(SpriteSet, Set) # TODO
-		self.x = Int(x)
-		self.y = Int(y)
-		self.w = Int(w)
-		self.h = Int(h)
+    def __init__(self, name="", Set=None, x=0, y=0, w=0, h=0):
+        self.name = String(name)
+        self.set = Pointer(SpriteSet, Set) # TODO
+        self.x = Int(x)
+        self.y = Int(y)
+        self.w = Int(w)
+        self.h = Int(h)
+        super().__init__("CDataSprite")
 
 class Pickup(Struct):
-	def __init__(self, name="", respawntime=15, spawndelay=0):
-		Struct.__init__(self, "CDataPickupspec")
-		self.name = String(name)
-		self.respawntime = Int(respawntime)
-		self.spawndelay = Int(spawndelay)
+    def __init__(self, name="", respawntime=15, spawndelay=0):
+        self.name = String(name)
+        self.respawntime = Int(respawntime)
+        self.spawndelay = Int(spawndelay)
+        super().__init__("CDataPickupspec")
 
 class AnimKeyframe(Struct):
-	def __init__(self, time=0, x=0, y=0, angle=0):
-		Struct.__init__(self, "CAnimKeyframe")
-		self.time = Float(time)
-		self.x = Float(x)
-		self.y = Float(y)
-		self.angle = Float(angle)
+    def __init__(self, time=0, x=0, y=0, angle=0):
+        self.time = Float(time)
+        self.x = Float(x)
+        self.y = Float(y)
+        self.angle = Float(angle)
+        super().__init__("CAnimKeyframe")
 
 class AnimSequence(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CAnimSequence")
-		self.frames = Array(AnimKeyframe())
+    def __init__(self):
+        self.frames = Array(AnimKeyframe())
+        super().__init__("CAnimSequence")
 
 class Animation(Struct):
-	def __init__(self, name=""):
-		Struct.__init__(self, "CAnimation")
-		self.name = String(name)
-		self.body = AnimSequence()
-		self.back_foot = AnimSequence()
-		self.front_foot = AnimSequence()
-		self.attach = AnimSequence()
+    def __init__(self, name=""):
+        self.name = String(name)
+        self.body = AnimSequence()
+        self.back_foot = AnimSequence()
+        self.front_foot = AnimSequence()
+        self.attach = AnimSequence()
+        super().__init__("CAnimation")
 
 class WeaponSpec(Struct):
-	def __init__(self, container=None, name=""):
-		Struct.__init__(self, "CDataWeaponspec")
-		self.name = String(name)
-		self.sprite_body = Pointer(Sprite, Sprite())
-		self.sprite_cursor = Pointer(Sprite, Sprite())
-		self.sprite_proj = Pointer(Sprite, Sprite())
-		self.sprite_muzzles = Array(Pointer(Sprite, Sprite()))
-		self.visual_size = Int(96)
+    def __init__(self, container=None, name=""):
+        self.name = String(name)
+        self.sprite_body = Pointer(Sprite, Sprite())
+        self.sprite_cursor = Pointer(Sprite, Sprite())
+        self.sprite_proj = Pointer(Sprite, Sprite())
+        self.sprite_muzzles = Array(Pointer(Sprite, Sprite()))
+        self.visual_size = Int(96)
 
-		self.firedelay = Int(500)
-		self.maxammo = Int(10)
-		self.ammoregentime = Int(0)
-		self.damage = Int(1)
+        self.firedelay = Int(500)
+        self.maxammo = Int(10)
+        self.ammoregentime = Int(0)
+        self.damage = Int(1)
 
-		self.offsetx = Float(0)
-		self.offsety = Float(0)
-		self.muzzleoffsetx = Float(0)
-		self.muzzleoffsety = Float(0)
-		self.muzzleduration = Float(5)
+        self.offsetx = Float(0)
+        self.offsety = Float(0)
+        self.muzzleoffsetx = Float(0)
+        self.muzzleoffsety = Float(0)
+        self.muzzleduration = Float(5)
 
-		# dig out sprites if we have a container
-		if container:
-			for sprite in container.sprites.items:
-				if sprite.name.value == "weapon_"+name+"_body": self.sprite_body.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_cursor": self.sprite_cursor.Set(sprite)
-				elif sprite.name.value == "weapon_"+name+"_proj": self.sprite_proj.Set(sprite)
-				elif "weapon_"+name+"_muzzle" in sprite.name.value:
-					self.sprite_muzzles.Add(Pointer(Sprite, sprite))
+        # dig out sprites if we have a container
+        if container:
+            for sprite in container.sprites.items:
+                if sprite.name.value == "weapon_"+name+"_body": 
+                    self.sprite_body.Set(sprite)
+                elif sprite.name.value == "weapon_"+name+"_cursor": 
+                    self.sprite_cursor.Set(sprite)
+                elif sprite.name.value == "weapon_"+name+"_proj": 
+                    self.sprite_proj.Set(sprite)
+                elif "weapon_"+name+"_muzzle" in sprite.name.value:
+                    self.sprite_muzzles.Add(Pointer(Sprite, sprite))
+                    
+        super().__init__("CDataWeaponspec")
 
 class Weapon_Hammer(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecHammer")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        super().__init__("CDataWeaponspecHammer")
 
 class Weapon_Gun(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecGun")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
-		self.curvature = Float(1.25)
-		self.speed = Float(2200)
-		self.lifetime = Float(2.0)
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        self.curvature = Float(1.25)
+        self.speed = Float(2200)
+        self.lifetime = Float(2.0)
+        super().__init__("CDataWeaponspecGun")
 
 class Weapon_Shotgun(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecShotgun")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
-		self.curvature = Float(1.25)
-		self.speed = Float(2200)
-		self.speeddiff = Float(0.8)
-		self.lifetime = Float(0.25)
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        self.curvature = Float(1.25)
+        self.speed = Float(2200)
+        self.speeddiff = Float(0.8)
+        self.lifetime = Float(0.25)
+        super().__init__("CDataWeaponspecShotgun")
 
 class Weapon_Grenade(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecGrenade")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
-		self.curvature = Float(7.0)
-		self.speed = Float(1000)
-		self.lifetime = Float(2.0)
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        self.curvature = Float(7.0)
+        self.speed = Float(1000)
+        self.lifetime = Float(2.0)
+        super().__init__("CDataWeaponspecGrenade")
 
 class Weapon_Laser(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecLaser")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
-		self.reach = Float(800.0)
-		self.bounce_delay = Int(150)
-		self.bounce_num = Int(1)
-		self.bounce_cost = Float(0)
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        self.reach = Float(800.0)
+        self.bounce_delay = Int(150)
+        self.bounce_num = Int(1)
+        self.bounce_cost = Float(0)
+        super().__init__("CDataWeaponspecLaser")
 
 class Weapon_Ninja(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecNinja")
-		self.base = Pointer(WeaponSpec, WeaponSpec())
-		self.duration = Int(15000)
-		self.movetime = Int(200)
-		self.velocity = Int(50)
+    def __init__(self):
+        self.base = Pointer(WeaponSpec, WeaponSpec())
+        self.duration = Int(15000)
+        self.movetime = Int(200)
+        self.velocity = Int(50)
+        super().__init__("CDataWeaponspecNinja")
 
 class Weapons(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataWeaponspecs")
-		self.hammer = Weapon_Hammer()
-		self.gun = Weapon_Gun()
-		self.shotgun = Weapon_Shotgun()
-		self.grenade = Weapon_Grenade()
-		self.laser = Weapon_Laser()
-		self.ninja = Weapon_Ninja()
-		self.id = Array(WeaponSpec())
+    def __init__(self):
+        self.hammer = Weapon_Hammer()
+        self.gun = Weapon_Gun()
+        self.shotgun = Weapon_Shotgun()
+        self.grenade = Weapon_Grenade()
+        self.laser = Weapon_Laser()
+        self.ninja = Weapon_Ninja()
+        self.id = Array(WeaponSpec())
+        super().__init__("CDataWeaponspecs")
 
 class Explosion(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataExplosion")
-		self.radius = Float(135)
-		self.max_force = Float(12)
+    def __init__(self):
+        self.radius = Float(135)
+        self.max_force = Float(12)
+        super().__init__("CDataExplosion")
 
 class DataContainer(Struct):
-	def __init__(self):
-		Struct.__init__(self, "CDataContainer")
-		self.sounds = Array(SoundSet())
-		self.images = Array(Image())
-		self.pickups = Array(Pickup())
-		self.spritesets = Array(SpriteSet())
-		self.sprites = Array(Sprite())
-		self.animations = Array(Animation())
-		self.weapons = Weapons()
-		self.explosion = Explosion()
+    def __init__(self):
+        self.sounds = Array(SoundSet())
+        self.images = Array(Image())
+        self.pickups = Array(Pickup())
+        self.spritesets = Array(SpriteSet())
+        self.sprites = Array(Sprite())
+        self.animations = Array(Animation())
+        self.weapons = Weapons()
+        self.explosion = Explosion()
+        super().__init__("CDataContainer")
 
 def FileList(format, num):
 	return [format%(x+1) for x in range(0,num)]
