@@ -35,6 +35,7 @@ teeworlds_srv*
 testrunner
 uuid*
 versionsrv*
+libantibot.so
 
 # IDE project files
 .cproject
