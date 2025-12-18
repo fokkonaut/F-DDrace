@@ -15,7 +15,10 @@ CPlayerCounter::CPlayerCounter(CGameWorld *pGameWorld, vec2 Pos, int Port)
 
 CPlayerCounter::~CPlayerCounter()
 {
-	GameWorld()->DestroyEntity(m_pLaserText);
+	if (m_pLaserText)
+	{
+		GameWorld()->DestroyEntity(m_pLaserText);
+	}
 }
 
 void CPlayerCounter::OnUpdate(int Port, int PlayerCount)
