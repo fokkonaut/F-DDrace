@@ -599,7 +599,7 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 
 	bool ShowEuros = GameServer()->Config()->m_SvEuroMode || pAccount->m_Euros > 0;
 	bool ShowPortalDate = GameServer()->Config()->m_SvPortalRifleShop || pAccount->m_PortalRifle;
-	if (DoLineCollapse(Page, pNumOptions, pPlayer->Localize(COLLAPSE_HEADER_ACC_INFO, "vote-header"), m_aClients[ClientID].m_ShowAccountInfo, 5 + (int)ShowEuros + (int)ShowPortalDate))
+	if (DoLineCollapse(Page, pNumOptions, pPlayer->Localize(COLLAPSE_HEADER_ACC_INFO, "vote-header"), m_aClients[ClientID].m_ShowAccountInfo, 6 + (int)ShowEuros + (int)ShowPortalDate))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Account Name"), pAccount->m_Username);
 		DoLineText(Page, pNumOptions, aBuf);
@@ -645,6 +645,26 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 			str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Portal Rifle"), pPlayer->Localize("not bought"));
 			DoLineText(Page, pNumOptions, aBuf);
 		}
+
+		bool DailyRewardAvailable = true;
+		if (pAccount->m_LastLoginDate != 0)
+		{
+			time_t Now;
+			time(&Now);
+			struct tm NowDate = *localtime(&Now);
+			struct tm LastDailyDate = *localtime(&pAccount->m_LastLoginDate);
+			DailyRewardAvailable = NowDate.tm_year != LastDailyDate.tm_year || NowDate.tm_yday != LastDailyDate.tm_yday;
+		}
+		const char *pDailyStatus = DailyRewardAvailable ? "доступна" : "получена сегодня";
+		if (pAccount->m_LastLoginDate != 0)
+		{
+			str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s (последнее получение: %s)", pDailyStatus, GameServer()->GetDate(pAccount->m_LastLoginDate, false));
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s", pDailyStatus);
+		}
+		DoLineText(Page, pNumOptions, aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Contact"), pAccount->m_aContact);
 		DoLineText(Page, pNumOptions, aBuf);

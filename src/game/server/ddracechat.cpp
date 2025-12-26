@@ -1332,6 +1332,26 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 
+	bool DailyRewardAvailable = true;
+	if (pAccount->m_LastLoginDate != 0)
+	{
+		time_t Now;
+		time(&Now);
+		struct tm NowDate = *localtime(&Now);
+		struct tm LastDailyDate = *localtime(&pAccount->m_LastLoginDate);
+		DailyRewardAvailable = NowDate.tm_year != LastDailyDate.tm_year || NowDate.tm_yday != LastDailyDate.tm_yday;
+	}
+	const char *pDailyStatus = DailyRewardAvailable ? "доступна" : "получена сегодня";
+	if (pAccount->m_LastLoginDate != 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s (последнее получение: %s)", pDailyStatus, pSelf->GetDate(pAccount->m_LastLoginDate, false));
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s", pDailyStatus);
+	}
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+
 	str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Contact"), pAccount->m_aContact);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("E-Mail"), pAccount->m_aEmail);
