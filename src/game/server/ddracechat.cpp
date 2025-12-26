@@ -1883,9 +1883,15 @@ void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[ID];
+	int Reward = pSelf->Config()->m_SvDailyRewardMoney;
+	if (Reward <= 0)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Daily reward is disabled"));
+		return;
+	}
+
 	time_t Now;
 	time(&Now);
-
 	if (pAccount->m_LastDailyRewardDate > 0)
 	{
 		struct tm NowDate = *localtime(&Now);
@@ -1897,13 +1903,12 @@ void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
 		}
 	}
 
-	const int DailyReward = 1000;
-	pPlayer->WalletTransaction(DailyReward, "daily reward");
+	pPlayer->WalletTransaction(Reward, "daily reward");
 	pAccount->m_LastDailyRewardDate = Now;
 	pSelf->WriteAccountStats(ID);
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Вы получили ежедневную награду: %d монет"), DailyReward);
+	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Вы получили ежедневную награду: %d монет"), Reward);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
@@ -1978,39 +1983,6 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 
 	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You got %lld money to your bank account from '%s'"), Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
-}
-
-void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
-{
-	CGameContext* pSelf = (CGameContext*)pUserData;
-	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if (!pPlayer)
-		return;
-
-	if (!pSelf->Config()->m_SvAccounts)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Accounts are not supported on this server"));
-		return;
-	}
-
-	if (pPlayer->GetAccID() < ACC_START)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("You are not logged in"));
-		return;
-	}
-
-	int Reward = pSelf->Config()->m_SvDailyRewardMoney;
-	if (Reward <= 0)
-	{
-		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Daily reward is disabled"));
-		return;
-	}
-
-	pPlayer->WalletTransaction(Reward, "daily reward");
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You received %d money as a daily reward"), Reward);
-	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
 void CGameContext::ConMoney(IConsole::IResult* pResult, void* pUserData)
