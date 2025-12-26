@@ -6079,6 +6079,7 @@ int CGameContext::AddAccount()
 	Account.m_DurakWins = 0;
 	Account.m_DurakProfit = 0;
 	Account.m_aLanguage[0] = '\0';
+	Account.m_LastDailyRewardDate = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -6093,7 +6094,8 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
-		getline(AccFile, data);
+		if (!getline(AccFile, data))
+			data.clear();
 		const char *pData = data.c_str();
 		SetAccVar(ID, i, pData);
 	}
@@ -6176,6 +6178,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_DURAK_WINS:				m_Accounts[ID].m_DurakWins = atoi(pData); break;
 	case ACC_DURAK_PROFIT:				m_Accounts[ID].m_DurakProfit = atoll(pData); break;
 	case ACC_LANGUAGE:					str_copy(m_Accounts[ID].m_aLanguage, pData, sizeof(m_Accounts[ID].m_aLanguage)); break;
+	case ACC_LAST_DAILY_REWARD_DATE:	m_Accounts[ID].m_LastDailyRewardDate = atoll(pData); break;
 	}
 }
 
@@ -6238,6 +6241,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_DURAK_WINS:				return "durak_wins";
 	case ACC_DURAK_PROFIT:				return "durak_profit";
 	case ACC_LANGUAGE:					return "language";
+	case ACC_LAST_DAILY_REWARD_DATE:	return "last_daily_reward_date";
 	}
 	return "Unknown";
 }
@@ -6304,6 +6308,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_DURAK_WINS:				str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_DurakWins); break;
 	case ACC_DURAK_PROFIT:				str_format(aBuf, sizeof(aBuf), "%lld", m_Accounts[ID].m_DurakProfit); break;
 	case ACC_LANGUAGE:					str_copy(aBuf, m_Accounts[ID].m_aLanguage, sizeof(aBuf)); break;
+	case ACC_LAST_DAILY_REWARD_DATE:	str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastDailyRewardDate); break;
 	}
 	return aBuf;
 }
