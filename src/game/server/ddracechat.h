@@ -62,6 +62,7 @@ CHAT_COMMAND("spawnweapons", "", CFGFLAG_CHAT, ConSpawnWeaponsInfo, this, "Shows
 CHAT_COMMAND("register", "s[name] s[password] s[password]", CFGFLAG_CHAT, ConRegister, this, "Register an account", AUTHED_NO)
 CHAT_COMMAND("login", "s[name] s[password]", CFGFLAG_CHAT, ConLogin, this, "Log into an account", AUTHED_NO)
 CHAT_COMMAND("logout", "", CFGFLAG_CHAT, ConLogout, this, "Log out of an account", AUTHED_NO)
+CHAT_COMMAND("daily", "", CFGFLAG_CHAT, ConDailyReward, this, "Claim daily reward", AUTHED_NO)
 CHAT_COMMAND("changepassword", "s[old-pw] s[new-pw] s[new-pw]", CFGFLAG_CHAT, ConChangePassword, this, "Changes account password", AUTHED_NO)
 CHAT_COMMAND("contact", "?r[option]", CFGFLAG_CHAT, ConContact, this, "Sets contact information for your account", AUTHED_NO)
 CHAT_COMMAND("pin", "?s[pin]", CFGFLAG_CHAT, ConPin, this, "Sets a new security pin for your account", AUTHED_NO)

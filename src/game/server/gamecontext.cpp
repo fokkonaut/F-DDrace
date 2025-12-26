@@ -6070,6 +6070,7 @@ int CGameContext::AddAccount()
 	Account.m_aSecurityPin[0] = '\0';
 	Account.m_RegisterDate = 0;
 	Account.m_LastLoginDate = 0;
+	Account.m_LastDailyRewardDate = 0;
 	Account.m_Flags = 0;
 	Account.m_aEmail[0] = '\0';
 	Account.m_aDesign[0] = '\0';
@@ -6169,6 +6170,7 @@ void CGameContext::SetAccVar(int ID, int VariableID, const char *pData)
 	case ACC_SECURITY_PIN:				str_copy(m_Accounts[ID].m_aSecurityPin, pData, sizeof(m_Accounts[ID].m_aSecurityPin)); break;
 	case ACC_REGISTER_DATE:				m_Accounts[ID].m_RegisterDate = atoll(pData); break;
 	case ACC_LAST_LOGIN_DATE:			m_Accounts[ID].m_LastLoginDate = atoll(pData); break;
+	case ACC_LAST_DAILY_REWARD_DATE:	m_Accounts[ID].m_LastDailyRewardDate = atoll(pData); break;
 	case ACC_FLAGS:						m_Accounts[ID].m_Flags = atoi(pData); break;
 	case ACC_EMAIL:						str_copy(m_Accounts[ID].m_aEmail, pData, sizeof(m_Accounts[ID].m_aEmail)); break;
 	case ACC_DESIGN:					str_copy(m_Accounts[ID].m_aDesign, pData, sizeof(m_Accounts[ID].m_aDesign)); break;
@@ -6232,6 +6234,7 @@ const char *CGameContext::GetAccVarName(int VariableID)
 	case ACC_SECURITY_PIN:				return "security_pin";
 	case ACC_REGISTER_DATE:				return "register_date";
 	case ACC_LAST_LOGIN_DATE:			return "last_login_date";
+	case ACC_LAST_DAILY_REWARD_DATE:	return "last_daily_reward_date";
 	case ACC_FLAGS:						return "flags";
 	case ACC_EMAIL:						return "email";
 	case ACC_DESIGN:					return "design";
@@ -6299,6 +6302,7 @@ const char *CGameContext::GetAccVarValue(int ID, int VariableID)
 	case ACC_SECURITY_PIN:				str_copy(aBuf, m_Accounts[ID].m_aSecurityPin, sizeof(aBuf)); break;
 	case ACC_REGISTER_DATE:				str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_RegisterDate); break;
 	case ACC_LAST_LOGIN_DATE:			str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastLoginDate); break;
+	case ACC_LAST_DAILY_REWARD_DATE:	str_format(aBuf, sizeof(aBuf), "%lld", (int64)m_Accounts[ID].m_LastDailyRewardDate); break;
 	case ACC_FLAGS:						str_format(aBuf, sizeof(aBuf), "%d", m_Accounts[ID].m_Flags); break;
 	case ACC_EMAIL:						str_copy(aBuf, m_Accounts[ID].m_aEmail, sizeof(aBuf)); break;
 	case ACC_DESIGN:					str_copy(aBuf, m_Accounts[ID].m_aDesign, sizeof(aBuf)); break;

@@ -606,6 +606,7 @@ public:
 		char m_aSecurityPin[5];
 		time_t m_RegisterDate;
 		time_t m_LastLoginDate;
+		time_t m_LastDailyRewardDate;
 		int m_Flags;
 		char m_aEmail[128];
 		char m_aDesign[256];
@@ -669,6 +670,7 @@ public:
 		ACC_SECURITY_PIN,
 		ACC_REGISTER_DATE,
 		ACC_LAST_LOGIN_DATE,
+		ACC_LAST_DAILY_REWARD_DATE,
 		ACC_FLAGS,
 		ACC_EMAIL,
 		ACC_DESIGN,
@@ -962,6 +964,7 @@ private:
 	static void ConChangePassword(IConsole::IResult* pResult, void* pUserData);
 	static void ConContact(IConsole::IResult* pResult, void* pUserData);
 	static void ConPin(IConsole::IResult* pResult, void* pUserData);
+	static void ConDailyReward(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConPayMoney(IConsole::IResult* pResult, void* pUserData);
 	static void ConMoney(IConsole::IResult* pResult, void* pUserData);

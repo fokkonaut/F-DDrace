@@ -8,6 +8,7 @@
 #include <game/version.h>
 #include <game/server/entities/character.h>
 #include <stdio.h>
+#include <time.h>
 #include "score.h"
 #include <engine/server/server.h>
 
@@ -1839,6 +1840,51 @@ void CGameContext::ConPin(IConsole::IResult* pResult, void* pUserData)
 		str_copy(pPlayer->m_aSecurityPin, pNewPin, sizeof(pPlayer->m_aSecurityPin));
 		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Successfully changed the security pin"));
 	}
+}
+
+void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	CPlayer* pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (!pPlayer)
+		return;
+
+	if (!pSelf->Config()->m_SvAccounts)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Accounts are not supported on this server"));
+		return;
+	}
+
+	int ID = pPlayer->GetAccID();
+	if (ID < ACC_START)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("You are not logged in"));
+		return;
+	}
+
+	CGameContext::AccountInfo *pAccount = &pSelf->m_Accounts[ID];
+	time_t Now;
+	time(&Now);
+
+	if (pAccount->m_LastDailyRewardDate > 0)
+	{
+		struct tm NowDate = *localtime(&Now);
+		struct tm LastDate = *localtime(&pAccount->m_LastDailyRewardDate);
+		if (NowDate.tm_year == LastDate.tm_year && NowDate.tm_yday == LastDate.tm_yday)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Награда уже получена сегодня"));
+			return;
+		}
+	}
+
+	const int DailyReward = 1000;
+	pPlayer->WalletTransaction(DailyReward, "daily reward");
+	pAccount->m_LastDailyRewardDate = Now;
+	pSelf->WriteAccountStats(ID);
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Вы получили ежедневную награду: %d монет"), DailyReward);
+	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
 void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
