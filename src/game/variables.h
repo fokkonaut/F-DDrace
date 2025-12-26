@@ -175,6 +175,7 @@ MACRO_CONFIG_STR(SvMoneyHistoryFilePath, sv_money_history_file_path, 128, "money
 MACRO_CONFIG_INT(SvMoneyBankMode, sv_money_bank_mode, 1, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Bank mode (0=no bank; bank=wallet, 1=normal bank, 2=instant deposit from farm)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMoneyFarmTeam, sv_money_farm_team, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether a player can farm money on a money tile while being in a ddrace team", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMoneyDropDelay, sv_money_drop_delay, 1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a player has to wait to drop money again", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDailyRewardMoney, sv_daily_reward_money, 1000, 0, 1000000000, CFGFLAG_SERVER, "Daily reward amount (money)", AUTHED_ADMIN)
 
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 3, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 6 hours", AUTHED_ADMIN)
