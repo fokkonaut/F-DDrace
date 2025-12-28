@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== پاداش روزانه غیرفعال است
+
+Daily reward has already been claimed today
+== پاداش روزانه امروز قبلاً دریافت شده است
+
+You received the daily reward: %d money
+== پاداش روزانه را دریافت کردید: %d پول
+
+Daily reward
+== پاداش روزانه
+
+last claim
+== آخرین دریافت
+
+claimed today
+== امروز دریافت شد
+
+available
+== در دسترس

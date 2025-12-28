@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Штодзённая ўзнагарода адключана
+
+Daily reward has already been claimed today
+== Штодзённая ўзнагарода ўжо атрымана сёння
+
+You received the daily reward: %d money
+== Вы атрымалі штодзённую ўзнагароду: %d грошай
+
+Daily reward
+== Штодзённая ўзнагарода
+
+last claim
+== апошняе атрыманне
+
+claimed today
+== атрымана сёння
+
+available
+== даступна

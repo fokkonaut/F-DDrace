@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== 每日獎勵已停用
+
+Daily reward has already been claimed today
+== 今日已領取每日獎勵
+
+You received the daily reward: %d money
+== 你獲得了每日獎勵：%d 金幣
+
+Daily reward
+== 每日獎勵
+
+last claim
+== 上次領取
+
+claimed today
+== 今日已領取
+
+available
+== 可領取

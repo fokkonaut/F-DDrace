@@ -2136,3 +2136,24 @@ Passed…
 {durak-name}
 Next move: %ds
 == Następne: %ds
+
+Daily reward is disabled
+== Dzienne nagrody są wyłączone
+
+Daily reward has already been claimed today
+== Dzienne nagrody zostały już dziś odebrane
+
+You received the daily reward: %d money
+== Otrzymałeś dzienną nagrodę: %d pieniędzy
+
+Daily reward
+== Dzienna nagroda
+
+last claim
+== ostatnie odebranie
+
+claimed today
+== odebrana dzisiaj
+
+available
+== dostępna

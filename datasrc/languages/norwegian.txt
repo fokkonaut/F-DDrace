@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Daglig belønning er deaktivert
+
+Daily reward has already been claimed today
+== Daglig belønning er allerede hentet i dag
+
+You received the daily reward: %d money
+== Du mottok den daglige belønningen: %d penger
+
+Daily reward
+== Daglig belønning
+
+last claim
+== siste henting
+
+claimed today
+== hentet i dag
+
+available
+== tilgjengelig
