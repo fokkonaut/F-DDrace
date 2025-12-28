@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Дневна награда је онемогућена
-
-Daily reward has already been claimed today
-== Дневна награда је већ преузета данас
-
-You received the daily reward: %d money
-== Добили сте дневну награду: %d новца
-
-Daily reward
-== Дневна награда
-
-last claim
-== последње преузимање
-
-claimed today
-== преузето данас
-
 available
 == доступно

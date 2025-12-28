@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Päivittäinen palkinto on poistettu käytöstä
-
-Daily reward has already been claimed today
-== Päivittäinen palkinto on jo lunastettu tänään
-
-You received the daily reward: %d money
-== Sait päivittäisen palkinnon: %d rahaa
-
-Daily reward
-== Päivittäinen palkinto
-
-last claim
-== viimeinen lunastus
-
-claimed today
-== lunastettu tänään
-
 available
 == saatavilla

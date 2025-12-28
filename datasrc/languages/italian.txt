@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== La ricompensa giornaliera è disattivata
-
-Daily reward has already been claimed today
-== La ricompensa giornaliera è già stata riscossa oggi
-
-You received the daily reward: %d money
-== Hai ricevuto la ricompensa giornaliera: %d denaro
-
-Daily reward
-== Ricompensa giornaliera
-
-last claim
-== ultimo riscatto
-
-claimed today
-== riscossa oggi
-
 available
 == disponibile

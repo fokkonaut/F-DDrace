@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== 일일 보상이 비활성화되었습니다
-
-Daily reward has already been claimed today
-== 일일 보상은 오늘 이미 받았습니다
-
-You received the daily reward: %d money
-== 일일 보상을 받았습니다: %d 머니
-
-Daily reward
-== 일일 보상
-
-last claim
-== 마지막 수령
-
-claimed today
-== 오늘 수령함
-
 available
 == 사용 가능

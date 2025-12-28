@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== A recompensa diaria está desactivada
-
-Daily reward has already been claimed today
-== A recompensa diaria xa foi reclamada hoxe
-
-You received the daily reward: %d money
-== Recibiches a recompensa diaria: %d cartos
-
-Daily reward
-== Recompensa diaria
-
-last claim
-== última reclamación
-
-claimed today
-== reclamada hoxe
-
 available
 == dispoñible

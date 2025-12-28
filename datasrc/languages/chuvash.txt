@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Daily reward is disabled
-
-Daily reward has already been claimed today
-== Daily reward has already been claimed today
-
-You received the daily reward: %d money
-== You received the daily reward: %d money
-
-Daily reward
-== Daily reward
-
-last claim
-== last claim
-
-claimed today
-== claimed today
-
 available
 == available

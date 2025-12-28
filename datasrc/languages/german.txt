@@ -2090,23 +2090,5 @@ Passed…
 Next move: %ds
 == Weiter in: %ds
 
-Daily reward is disabled
-== Die tägliche Belohnung ist deaktiviert
-
-Daily reward has already been claimed today
-== Die tägliche Belohnung wurde heute bereits abgeholt
-
-You received the daily reward: %d money
-== Du hast die tägliche Belohnung erhalten: %d Geld
-
-Daily reward
-== Tägliche Belohnung
-
-last claim
-== letzte Abholung
-
-claimed today
-== heute abgeholt
-
 available
 == verfügbar

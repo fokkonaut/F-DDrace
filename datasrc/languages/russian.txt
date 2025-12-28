@@ -2090,23 +2090,5 @@ Passed…
 Next move: %ds
 == Ход: %ds
 
-Daily reward is disabled
-== Ежедневная награда отключена
-
-Daily reward has already been claimed today
-== Ежедневная награда уже получена сегодня
-
-You received the daily reward: %d money
-== Вы получили ежедневную награду: %d денег
-
-Daily reward
-== Ежедневная награда
-
-last claim
-== последнее получение
-
-claimed today
-== получено сегодня
-
 available
 == доступно
