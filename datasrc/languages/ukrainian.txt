@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Щоденна нагорода вимкнена
-
-Daily reward has already been claimed today
-== Щоденна нагорода вже отримана сьогодні
-
-You received the daily reward: %d money
-== Ви отримали щоденну нагороду: %d грошей
-
-Daily reward
-== Щоденна нагорода
-
-last claim
-== останнє отримання
-
-claimed today
-== отримано сьогодні
-
 available
 == доступно

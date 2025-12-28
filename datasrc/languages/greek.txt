@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Η ημερήσια ανταμοιβή είναι απενεργοποιημένη
-
-Daily reward has already been claimed today
-== Η ημερήσια ανταμοιβή έχει ήδη ληφθεί σήμερα
-
-You received the daily reward: %d money
-== Λάβατε την ημερήσια ανταμοιβή: %d χρήματα
-
-Daily reward
-== Ημερήσια ανταμοιβή
-
-last claim
-== τελευταία λήψη
-
-claimed today
-== ληφθεί σήμερα
-
 available
 == διαθέσιμη

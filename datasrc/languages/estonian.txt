@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== Igapäevane preemia on keelatud
-
-Daily reward has already been claimed today
-== Igapäevane preemia on täna juba kätte saadud
-
-You received the daily reward: %d money
-== Sa said igapäevase preemia: %d raha
-
-Daily reward
-== Igapäevane preemia
-
-last claim
-== viimane kättesaamine
-
-claimed today
-== täna kätte saadud
-
 available
 == saadaval

@@ -2090,23 +2090,5 @@ Passed…
 Next move: %ds
 == Prochain: %ds
 
-Daily reward is disabled
-== La récompense quotidienne est désactivée
-
-Daily reward has already been claimed today
-== La récompense quotidienne a déjà été réclamée aujourd'hui
-
-You received the daily reward: %d money
-== Vous avez reçu la récompense quotidienne : %d d'argent
-
-Daily reward
-== Récompense quotidienne
-
-last claim
-== dernière réclamation
-
-claimed today
-== réclamée aujourd'hui
-
 available
 == disponible

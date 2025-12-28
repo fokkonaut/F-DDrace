@@ -2094,23 +2094,5 @@ Your stake got returned: +%lld money.
 You got +%lld money from others leaving the game.
 == 
 
-Daily reward is disabled
-== 毎日の報酬は無効です
-
-Daily reward has already been claimed today
-== 毎日の報酬は本日すでに受け取り済みです
-
-You received the daily reward: %d money
-== 毎日の報酬を受け取りました: %d マネー
-
-Daily reward
-== 毎日の報酬
-
-last claim
-== 最終受け取り
-
-claimed today
-== 本日受け取り済み
-
 available
 == 利用可能
