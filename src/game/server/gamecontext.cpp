@@ -6080,7 +6080,6 @@ int CGameContext::AddAccount()
 	Account.m_DurakWins = 0;
 	Account.m_DurakProfit = 0;
 	Account.m_aLanguage[0] = '\0';
-	Account.m_LastDailyRewardDate = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -6095,6 +6094,7 @@ void CGameContext::ReadAccountStats(int ID, const char *pName)
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
+		// Older account files may not have all variables, so treat missing lines as empty values.
 		if (!getline(AccFile, data))
 			data.clear();
 		const char *pData = data.c_str();
@@ -6617,6 +6617,39 @@ const char *CGameContext::GetDate(time_t Time, bool ShowTime)
 	}
 
 	return aBuf;
+}
+
+bool CGameContext::IsSameCalendarDay(time_t First, time_t Second)
+{
+	struct tm FirstDate = *localtime(&First);
+	struct tm SecondDate = *localtime(&Second);
+	return FirstDate.tm_year == SecondDate.tm_year && FirstDate.tm_yday == SecondDate.tm_yday;
+}
+
+bool CGameContext::HasClaimedDailyRewardToday(const AccountInfo *pAccount) const
+{
+	if (!pAccount || pAccount->m_LastDailyRewardDate == 0)
+		return false;
+
+	time_t Now;
+	time(&Now);
+	return IsSameCalendarDay(Now, pAccount->m_LastDailyRewardDate);
+}
+
+void CGameContext::FormatDailyRewardStatus(CPlayer *pPlayer, const AccountInfo *pAccount, char *pBuf, int BufSize) const
+{
+	if (!pPlayer || !pAccount || !pBuf || BufSize <= 0)
+		return;
+
+	const char *pDailyStatus = HasClaimedDailyRewardToday(pAccount) ? pPlayer->Localize("claimed today") : pPlayer->Localize("available");
+	if (pAccount->m_LastDailyRewardDate != 0)
+	{
+		str_format(pBuf, BufSize, "%s: %s (%s: %s)", pPlayer->Localize("Daily reward"), pDailyStatus, pPlayer->Localize("last claim"), GetDate(pAccount->m_LastDailyRewardDate, false));
+	}
+	else
+	{
+		str_format(pBuf, BufSize, "%s: %s", pPlayer->Localize("Daily reward"), pDailyStatus);
+	}
 }
 
 void CGameContext::WriteDonationFile(int Type, float Amount, int ID, const char *pDescription)

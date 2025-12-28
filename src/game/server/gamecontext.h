@@ -618,6 +618,9 @@ public:
 		time_t m_LastDailyRewardDate;
 	};
 	std::vector<AccountInfo> m_Accounts;
+	static bool IsSameCalendarDay(time_t First, time_t Second);
+	bool HasClaimedDailyRewardToday(const AccountInfo *pAccount) const;
+	void FormatDailyRewardStatus(CPlayer *pPlayer, const AccountInfo *pAccount, char *pBuf, int BufSize) const;
 
 	// make sure these are in the same order as the variables above
 	// if you add another variable make sure to change the ACC_CURRENT_VERSION in this file

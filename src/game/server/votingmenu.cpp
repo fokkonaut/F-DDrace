@@ -646,24 +646,7 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 			DoLineText(Page, pNumOptions, aBuf);
 		}
 
-		bool DailyRewardAvailable = true;
-		if (pAccount->m_LastLoginDate != 0)
-		{
-			time_t Now;
-			time(&Now);
-			struct tm NowDate = *localtime(&Now);
-			struct tm LastDailyDate = *localtime(&pAccount->m_LastLoginDate);
-			DailyRewardAvailable = NowDate.tm_year != LastDailyDate.tm_year || NowDate.tm_yday != LastDailyDate.tm_yday;
-		}
-		const char *pDailyStatus = DailyRewardAvailable ? "доступна" : "получена сегодня";
-		if (pAccount->m_LastLoginDate != 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s (последнее получение: %s)", pDailyStatus, GameServer()->GetDate(pAccount->m_LastLoginDate, false));
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s", pDailyStatus);
-		}
+		GameServer()->FormatDailyRewardStatus(pPlayer, pAccount, aBuf, sizeof(aBuf));
 		DoLineText(Page, pNumOptions, aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Contact"), pAccount->m_aContact);

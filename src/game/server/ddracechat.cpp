@@ -1332,24 +1332,7 @@ void CGameContext::ConAccount(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 	}
 
-	bool DailyRewardAvailable = true;
-	if (pAccount->m_LastLoginDate != 0)
-	{
-		time_t Now;
-		time(&Now);
-		struct tm NowDate = *localtime(&Now);
-		struct tm LastDailyDate = *localtime(&pAccount->m_LastLoginDate);
-		DailyRewardAvailable = NowDate.tm_year != LastDailyDate.tm_year || NowDate.tm_yday != LastDailyDate.tm_yday;
-	}
-	const char *pDailyStatus = DailyRewardAvailable ? "доступна" : "получена сегодня";
-	if (pAccount->m_LastLoginDate != 0)
-	{
-		str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s (последнее получение: %s)", pDailyStatus, pSelf->GetDate(pAccount->m_LastLoginDate, false));
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "Ежедневная награда: %s", pDailyStatus);
-	}
+	pSelf->FormatDailyRewardStatus(pPlayer, pAccount, aBuf, sizeof(aBuf));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Contact"), pAccount->m_aContact);
@@ -1892,15 +1875,10 @@ void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
 
 	time_t Now;
 	time(&Now);
-	if (pAccount->m_LastDailyRewardDate > 0)
+	if (pSelf->HasClaimedDailyRewardToday(pAccount))
 	{
-		struct tm NowDate = *localtime(&Now);
-		struct tm LastDate = *localtime(&pAccount->m_LastDailyRewardDate);
-		if (NowDate.tm_year == LastDate.tm_year && NowDate.tm_yday == LastDate.tm_yday)
-		{
-			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Награда уже получена сегодня"));
-			return;
-		}
+		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Daily reward has already been claimed today"));
+		return;
 	}
 
 	pPlayer->WalletTransaction(Reward, "daily reward");
@@ -1908,7 +1886,7 @@ void CGameContext::ConDailyReward(IConsole::IResult* pResult, void* pUserData)
 	pSelf->WriteAccountStats(ID);
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Вы получили ежедневную награду: %d монет"), Reward);
+	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You received the daily reward: %d money"), Reward);
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 }
 
