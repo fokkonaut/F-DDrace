@@ -68,7 +68,6 @@ CHAT_COMMAND("contact", "?r[option]", CFGFLAG_CHAT, ConContact, this, "Sets cont
 CHAT_COMMAND("pin", "?s[pin]", CFGFLAG_CHAT, ConPin, this, "Sets a new security pin for your account", AUTHED_NO)
 
 CHAT_COMMAND("pay", "i[amount] r[name]", CFGFLAG_CHAT, ConPayMoney, this, "Pays i money to player r", AUTHED_NO)
-CHAT_COMMAND("dailyreward", "", CFGFLAG_CHAT, ConDailyReward, this, "Daily reward", AUTHED_NO)
 CHAT_COMMAND("money", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConMoney, this, "Shows your current balance and last transactions, or drops i amount", AUTHED_NO)
 CHAT_COMMAND("portal", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConPortal, this, "Shows your current portal battery amount, or drops i amount", AUTHED_NO)
 CHAT_COMMAND("taser", "?s['drop'] ?i[amount]", CFGFLAG_CHAT, ConTaserInfo, this, "Shows your current taser stats, or drops i amount", AUTHED_NO)
