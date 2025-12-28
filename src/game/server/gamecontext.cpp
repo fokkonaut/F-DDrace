@@ -6078,7 +6078,6 @@ int CGameContext::AddAccount()
 	Account.m_aSecurityPin[0] = '\0';
 	Account.m_RegisterDate = 0;
 	Account.m_LastLoginDate = 0;
-	Account.m_LastDailyRewardDate = 0;
 	Account.m_Flags = 0;
 	Account.m_aEmail[0] = '\0';
 	Account.m_aDesign[0] = '\0';
@@ -6088,6 +6087,7 @@ int CGameContext::AddAccount()
 	Account.m_DurakWins = 0;
 	Account.m_DurakProfit = 0;
 	Account.m_aLanguage[0] = '\0';
+	Account.m_LastDailyRewardDate = 0;
 
 	m_Accounts.push_back(Account);
 	return m_Accounts.size()-1;
@@ -6631,7 +6631,7 @@ bool CGameContext::IsSameCalendarDay(time_t First, time_t Second)
 {
 	struct tm FirstDate = *localtime(&First);
 	struct tm SecondDate = *localtime(&Second);
-	return FirstDate.tm_year == SecondDate.tm_year && FirstDate.tm_yday == SecondDate.tm_yday;
+	return FirstDate.tm_year == SecondDate.tm_year && FirstDate.tm_mon == SecondDate.tm_mon && FirstDate.tm_mday == SecondDate.tm_mday;
 }
 
 bool CGameContext::HasClaimedDailyRewardToday(const AccountInfo *pAccount) const
