@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Denní odměna je vypnuta
+
+Daily reward has already been claimed today
+== Denní odměna už byla dnes vyzvednuta
+
+You received the daily reward: %d money
+== Obdrželi jste denní odměnu: %d peněz
+
+Daily reward
+== Denní odměna
+
+last claim
+== poslední vyzvednutí
+
+claimed today
+== vyzvednuto dnes
+
+available
+== dostupné

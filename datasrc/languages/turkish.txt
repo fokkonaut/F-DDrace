@@ -2089,3 +2089,24 @@ Passed…
 {durak-name}
 Next move: %ds
 == Sıradaki: %ds
+
+Daily reward is disabled
+== Günlük ödül devre dışı
+
+Daily reward has already been claimed today
+== Günlük ödül bugün zaten alındı
+
+You received the daily reward: %d money
+== Günlük ödülü aldın: %d para
+
+Daily reward
+== Günlük ödül
+
+last claim
+== son alma
+
+claimed today
+== bugün alındı
+
+available
+== mevcut

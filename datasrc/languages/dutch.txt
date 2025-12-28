@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Dagelijkse beloning is uitgeschakeld
+
+Daily reward has already been claimed today
+== Dagelijkse beloning is vandaag al geclaimd
+
+You received the daily reward: %d money
+== Je hebt de dagelijkse beloning ontvangen: %d geld
+
+Daily reward
+== Dagelijkse beloning
+
+last claim
+== laatste claim
+
+claimed today
+== vandaag geclaimd
+
+available
+== beschikbaar

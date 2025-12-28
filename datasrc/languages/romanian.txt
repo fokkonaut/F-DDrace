@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Recompensa zilnică este dezactivată
+
+Daily reward has already been claimed today
+== Recompensa zilnică a fost deja revendicată astăzi
+
+You received the daily reward: %d money
+== Ai primit recompensa zilnică: %d bani
+
+Daily reward
+== Recompensa zilnică
+
+last claim
+== ultima revendicare
+
+claimed today
+== revendicată astăzi
+
+available
+== disponibilă

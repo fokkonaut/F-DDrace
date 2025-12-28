@@ -2093,3 +2093,24 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
+
+Daily reward is disabled
+== Күнүмдүк сыйлык өчүрүлгөн
+
+Daily reward has already been claimed today
+== Күнүмдүк сыйлык бүгүн эле алынган
+
+You received the daily reward: %d money
+== Күнүмдүк сыйлыкты алдыңыз: %d акча
+
+Daily reward
+== Күнүмдүк сыйлык
+
+last claim
+== акыркы алуу
+
+claimed today
+== бүгүн алынган
+
+available
+== жеткиликтүү
