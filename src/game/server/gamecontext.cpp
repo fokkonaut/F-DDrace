@@ -6598,7 +6598,7 @@ std::vector<CGameContext::SSavedDesignEntry> CGameContext::GetDesignList(int ID)
 	return vDesigns;
 }
 
-const char *CGameContext::GetDate(time_t Time, bool ShowTime)
+const char *CGameContext::GetDate(time_t Time, bool ShowTime) const
 {
 	if (Time < 0)
 		return "";
