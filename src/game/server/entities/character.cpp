@@ -183,7 +183,13 @@ void CCharacter::SetSolo(bool Solo)
 	m_Solo = Solo;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
 	if (m_Solo)
+	{
 		DropFlag(0);
+		if (Config()->m_SvFlagHooking == 2 && (m_Core.m_HookedPlayer == HOOK_FLAG_BLUE || m_Core.m_HookedPlayer == HOOK_FLAG_RED))
+		{
+			ReleaseHook(false);
+		}
+	}
 }
 
 bool CCharacter::IsGrounded(bool CheckDoor)

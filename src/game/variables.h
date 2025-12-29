@@ -192,7 +192,7 @@ MACRO_CONFIG_INT(SvShutdownAutoReconnect, sv_shutdown_auto_reconnect, 0, 0, 2, C
 
 // flags
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 2, 0, 2, CFGFLAG_SERVER, "Flag sounds on drop/pickup/respawn (0=off, 1=public sounds, 2=respawn public rest local)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 2, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable (1=allow hook, 2=allow, but disallow hooking from solo tees)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFlagRespawnDropped, sv_flag_respawn_dropped, 90, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a dropped flag resets", AUTHED_ADMIN)
 
 // dummy
