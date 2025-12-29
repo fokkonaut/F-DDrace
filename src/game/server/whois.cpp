@@ -23,11 +23,11 @@ void CWhoIs::Init(CGameContext *pGameServer)
 	m_pGameServer = pGameServer;
 
 	num_nms = num_ips = 0;
-	if (!(ipplayers = (struct player *)calloc(sizeof(struct player), GameServer()->Config()->m_SvWhoIsIPEntries))) {
+	if (!(ipplayers = (struct player *)calloc(GameServer()->Config()->m_SvWhoIsIPEntries, sizeof(struct player)))) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt allocate list");
 		return;
 	}
-	if (!(nmplayers = (struct player *)calloc(sizeof(struct player), GameServer()->Config()->m_SvWhoIsIPEntries))) {
+	if (!(nmplayers = (struct player *)calloc(GameServer()->Config()->m_SvWhoIsIPEntries, sizeof(struct player)))) {
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "whois", "init_ips: couldnt allocate list");
 		return;
 	}
