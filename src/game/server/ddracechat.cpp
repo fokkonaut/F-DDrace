@@ -93,7 +93,7 @@ void CGameContext::ConHelp(IConsole::IResult *pResult, void *pUserData)
 			}
 
 			if (pCmdInfo->m_pHelp)
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", pPlayer->Localize(pCmdInfo->m_pHelp));
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "help", pCmdInfo->m_pHelp);
 		}
 		else
 			pSelf->Console()->Print(
