@@ -208,7 +208,7 @@ void CLightningLaser::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Laser **apObjs = (CNetObj_Laser **)calloc(sizeof(CNetObj_Laser *), m_Count);
+		CNetObj_Laser **apObjs = (CNetObj_Laser **)calloc(m_Count, sizeof(CNetObj_Laser *));
 		for(int i = Start - 1; i >= 0; i--)
 		{
 			apObjs[i] = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aIDs[i], sizeof(CNetObj_Laser)));
