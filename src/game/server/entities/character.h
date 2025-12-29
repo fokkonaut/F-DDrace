@@ -107,7 +107,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
-	bool IsSolo() { return m_Solo; }
+	bool IsSolo() const { return m_Solo; }
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
 
