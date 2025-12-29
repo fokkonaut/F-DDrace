@@ -251,6 +251,9 @@ void CFlag::Snap(int SnappingClient)
 		return;
 
 	CPlayer* pPlayer = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CCharacter *pSnappingChar = SnappingClient >= 0 ? GameServer()->GetPlayerChar(SnappingClient) : 0;
+	if (pSnappingChar && pSnappingChar->IsSolo())
+		return;
 	if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->IsPaused() && GameServer()->Arenas()->FightStarted(SnappingClient))
 		return;
 
