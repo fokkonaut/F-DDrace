@@ -2137,5 +2137,3 @@ Passed…
 Next move: %ds
 == Następne: %ds
 
-available
-== dostępna

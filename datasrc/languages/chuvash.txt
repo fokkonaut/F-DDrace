@@ -2093,6 +2093,3 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 
-
-available
-== available

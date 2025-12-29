@@ -2090,5 +2090,3 @@ Passed…
 Next move: %ds
 == Weiter in: %ds
 
-available
-== verfügbar

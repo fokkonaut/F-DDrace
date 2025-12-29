@@ -2089,6 +2089,3 @@ Passed…
 {durak-name}
 Next move: %ds
 == Prochain: %ds
-
-available
-== disponible
