@@ -588,7 +588,6 @@ void CPlayer::Snap(int SnappingClient)
 
 	CPlayer *pSnapping = GameServer()->m_apPlayers[SnappingClient];
 	const CCharacter *pSnappingChar = (SnappingClient >= 0 && pSnapping) ? pSnapping->GetCharacter() : nullptr;
-	const bool SnappingSolo = pSnappingChar && pSnappingChar->IsSolo();
 
 	int Latency = 0;
 	{
