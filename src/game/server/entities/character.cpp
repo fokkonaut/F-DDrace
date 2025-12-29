@@ -183,7 +183,15 @@ void CCharacter::SetSolo(bool Solo)
 	m_Solo = Solo;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
 	if (m_Solo)
+	{
 		DropFlag(0);
+		if (m_Core.HookedPlayer() == HOOK_FLAG_RED || m_Core.HookedPlayer() == HOOK_FLAG_BLUE)
+		{
+			m_Core.SetHookedPlayer(-1);
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_HookPos = m_Core.m_Pos;
+		}
+	}
 }
 
 bool CCharacter::IsGrounded(bool CheckDoor)
@@ -1486,7 +1494,14 @@ void CCharacter::Tick()
 	for (int i = 0; i < 2; i++)
 	{
 		CFlag* F = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[i];
-		if (F) m_Core.SetFlagInfo(i, F->GetPos(), F->IsAtStand(), F->GetVel(), F->GetCarrier());
+		if (!F)
+			continue;
+		if (m_Solo)
+		{
+			m_Core.SetFlagInfo(i, vec2(0.0f, 0.0f), false, vec2(0.0f, 0.0f), true);
+			continue;
+		}
+		m_Core.SetFlagInfo(i, F->GetPos(), F->IsAtStand(), F->GetVel(), F->GetCarrier());
 	}
 
 	// We don't want to reset the hooktick to 0, because we need it in order to detect hook duration for no-bonus punishment

@@ -587,6 +587,8 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	CPlayer *pSnapping = GameServer()->m_apPlayers[SnappingClient];
+	const CCharacter *pSnappingChar = (SnappingClient >= 0 && pSnapping) ? pSnapping->GetCharacter() : nullptr;
+	const bool SnappingSolo = pSnappingChar && pSnappingChar->IsSolo();
 
 	int Latency = 0;
 	{
@@ -908,6 +910,8 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
+	const bool SnappingSolo = GetCharacter() && GetCharacter()->IsSolo();
+
 	// see others in spec
 	int SeeOthersID = GameServer()->m_World.GetSeeOthersID(m_ClientID);
 
@@ -965,7 +969,7 @@ void CPlayer::FakeSnap()
 
 	// flags
 	// Don't send flags when 0.6 client is in menu, so they don't show up in friends tab or voting menu
-	if (!GameServer()->FlagsUsed() || (m_PlayerFlags&PLAYERFLAG_IN_MENU))
+	if (SnappingSolo || !GameServer()->FlagsUsed() || (m_PlayerFlags&PLAYERFLAG_IN_MENU))
 		return;
 
 	for (int i = 0; i < 2; i++)
