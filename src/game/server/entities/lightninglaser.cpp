@@ -18,8 +18,8 @@ CLightningLaser::CLightningLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Directio
 	m_Count = max(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserCount);
 	m_Length = max(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserLength);
 
-	m_aIDs = (int *)calloc(sizeof(int), m_Count);
-	m_aaPositions = (vec2 **)calloc(sizeof(vec2 *), m_Count);
+	m_aIDs = (int *)calloc(m_Count, sizeof(int));
+	m_aaPositions = (vec2 **)calloc(m_Count, sizeof(vec2 *));
 	for (int i = 0; i < m_Count; i++)
 		m_aaPositions[i] = (vec2 *)calloc(POS_COUNT, sizeof(vec2));
 	
@@ -188,7 +188,7 @@ void CLightningLaser::Snap(int SnappingClient)
 
 	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
 	{
-		CNetObj_DDNetLaser **apObjs = (CNetObj_DDNetLaser **)calloc(sizeof(CNetObj_DDNetLaser *), m_Count);
+		CNetObj_DDNetLaser **apObjs = (CNetObj_DDNetLaser **)calloc(m_Count, sizeof(CNetObj_DDNetLaser *));
 		for(int i = Start - 1; i >= 0; i--)
 		{
 			apObjs[i] = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_aIDs[i], sizeof(CNetObj_DDNetLaser)));
