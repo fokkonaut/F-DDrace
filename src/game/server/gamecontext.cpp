@@ -969,7 +969,6 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 
 void CGameContext::SendChatCommand(const CCommandManager::CCommand *pCommand, int ClientID)
 {
-	const char *pHelpText = pCommand->m_aHelpText;
 	if (ClientID == -1)
 	{
 		for (int i = 0; i < MAX_CLIENTS; i++)
@@ -977,26 +976,19 @@ void CGameContext::SendChatCommand(const CCommandManager::CCommand *pCommand, in
 		return;
 	}
 
-	if (ClientID >= 0)
-	{
-		CPlayer *pPlayer = m_apPlayers[ClientID];
-		if (pPlayer)
-			pHelpText = pPlayer->Localize(pCommand->m_aHelpText);
-	}
-
 	if (Server()->IsSevendown(ClientID))
 	{
 		CNetMsg_Sv_CommandInfoEx Msg;
 		Msg.m_pName = pCommand->m_aName;
 		Msg.m_pArgsFormat = pCommand->m_aArgsFormat;
-		Msg.m_pHelpText = pHelpText;
+		Msg.m_pHelpText = pCommand->m_aHelpText;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
 	else
 	{
 		CNetMsg_Sv_CommandInfo Msg;
 		Msg.m_Name = pCommand->m_aName;
-		Msg.m_HelpText = pHelpText;
+		Msg.m_HelpText = pCommand->m_aHelpText;
 		Msg.m_ArgsFormat = pCommand->m_aArgsFormat;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
