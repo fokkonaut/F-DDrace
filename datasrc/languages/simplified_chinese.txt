@@ -2089,4 +2089,3 @@ Your stake got returned: +%lld money.
 
 You got +%lld money from others leaving the game.
 == 你从其他玩家离开游戏中获得 +%lld 钱。
-

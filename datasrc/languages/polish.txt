@@ -2136,4 +2136,3 @@ Passed…
 {durak-name}
 Next move: %ds
 == Następne: %ds
-
