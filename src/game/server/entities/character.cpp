@@ -3417,8 +3417,9 @@ void CCharacter::HandleTiles(int Index)
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				bool DummiesAsPlayers = (!pPlayer->m_IsDummy && !pPlayer->IsDummy()) || Config()->m_Sv
-				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && )
+				bool NoServerBot = !pPlayer->m_IsDummy && !pPlayer->IsDummy();
+				bool AllowDummy = NoServerBot || Config()->m_SvIncreaseHumanCapBots;
+				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && AllowDummy)
 				{
 					Players++;
 
