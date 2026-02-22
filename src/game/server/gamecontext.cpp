@@ -1255,13 +1255,6 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
 			Tunings.m_Gravity = 0.f;
-
-		// AntiPing
-		if (pChr->GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
-		{
-			const int AntiPingReloadTimer = 1000000;
-			Tunings.m_GunFireDelay = Tunings.m_ShotgunFireDelay = Tunings.m_LaserFireDelay = Tunings.m_GrenadeFireDelay = AntiPingReloadTimer;
-		}
 	}
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
