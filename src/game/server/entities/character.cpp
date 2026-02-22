@@ -2436,11 +2436,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 
 	pCharacter->m_AttackTick = m_AttackTick;
-	// AntiPing
-	if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
-	{
-		m_AttackTick = Server()->Tick();
-	}
 
 	// change eyes and use ninja graphic if player is freeze
 	if (m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
