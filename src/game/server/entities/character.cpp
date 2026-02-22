@@ -367,6 +367,10 @@ void CCharacter::DoWeaponSwitch()
 	if ((GetActiveWeapon() >= NUM_VANILLA_WEAPONS && GetLastWeapon() < NUM_VANILLA_WEAPONS) || (GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS))
 	{
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		if (GetActiveWeapon() < NUM_VANILLA_WEAPONS)
+		{
+			m_AttackTick = Server()->Tick() - Server()->TickSpeed() * 1000;
+		}
 	}
 }
 
