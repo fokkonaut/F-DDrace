@@ -643,6 +643,8 @@ public:
 	bool IsInSafeArea();
 	void SetInGame(bool Set);
 
+	bool TryInitializeSpawnWeapons(bool Spawn = false);
+
 	// broadcast and ddrace hud
 	bool ShowAmmoHud();
 	int NumDDraceHudRows();

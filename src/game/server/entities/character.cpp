@@ -135,7 +135,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			m_pPlayer->UpdateDoubleXpLifes();
 		}
 		
-		if (GameServer()->Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime)
+		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime)
 		{
 			SetZombieHuman(true);
 		}
@@ -2610,6 +2610,35 @@ void CCharacter::SetInGame(bool Set)
 	Teams()->m_Core.SetInGame(m_pPlayer->GetCID(), Set);
 }
 
+bool CCharacter::TryInitializeSpawnWeapons(bool Spawn)
+{
+	if ((Spawn && Config()->m_SvSpawnAsZombie) || m_InitializedSpawnWeapons)
+		return false;
+	if (m_pPlayer->IsMinigame() || m_pPlayer->m_JailTime)
+		return false;
+
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	if (Config()->m_SvSpawnWeapons)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (pAccount->m_SpawnWeapon[i])
+			{
+				m_aSpawnWeaponActive[i] = true;
+				GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, pAccount->m_SpawnWeapon[i]);
+			}
+		}
+	}
+
+	if (pAccount->m_PortalRifle)
+	{
+		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
+	}
+		
+	m_InitializedSpawnWeapons = true;
+	return true;
+}
+
 void CCharacter::ApplyLockedTunings(bool SendTuningParams)
 {
 	CTuningParams* pTunings = m_TuneZone > 0 ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
@@ -3388,15 +3417,14 @@ void CCharacter::HandleTiles(int Index)
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+				bool DummiesAsPlayers = (!pPlayer->m_IsDummy && !pPlayer->IsDummy()) || Config()->m_Sv
+				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && )
 				{
 					Players++;
 
 					CCharacter *pCharacter = pPlayer->GetCharacter();
-					// Some balancing, afk zombies should not count to the cap
-					// Count server dummies to players, but not to humans.
-					// that way we get a little more players to the player cap which can be benefical especially with low player counts
-					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_Afk && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
+					// Some balancing, afk should not count to the cap
+					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_Afk)
 					{
 						Humans++;
 					}
@@ -3413,6 +3441,8 @@ void CCharacter::HandleTiles(int Index)
 		if (TransformHuman)
 		{
 			SetZombieHuman(false);
+			// Try to add spawn weapons delayed due to spawn as zombie
+			TryInitializeSpawnWeapons();
 		}
 	}
 
@@ -4321,29 +4351,11 @@ void CCharacter::FDDraceInit()
 	m_InitializedSpawnWeapons = false;
 	for (int i = 0; i < 3; i++)
 		m_aSpawnWeaponActive[i] = false;
-
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-	if (!m_pPlayer->IsMinigame() && !m_pPlayer->m_JailTime)
-	{
-		if (Config()->m_SvSpawnWeapons)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				if (pAccount->m_SpawnWeapon[i])
-				{
-					m_aSpawnWeaponActive[i] = true;
-					GiveWeapon(i == 0 ? WEAPON_SHOTGUN : i == 1 ? WEAPON_GRENADE : WEAPON_LASER, false, pAccount->m_SpawnWeapon[i]);
-				}
-			}
-			m_InitializedSpawnWeapons = true;
-		}
-
-		if (pAccount->m_PortalRifle)
-			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
-	}
+	TryInitializeSpawnWeapons(true);
 
 	int64 Now = Server()->Tick();
 
+	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 	if (pAccount->m_VIP == VIP_PLUS)
 		m_Core.m_MoveRestrictionExtra.m_VipPlus = true;
 	m_VipPlusAntiSpamTick = Now;
