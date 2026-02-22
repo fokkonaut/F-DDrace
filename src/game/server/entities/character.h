@@ -63,6 +63,7 @@ enum Extra
 enum Backup
 {
 	BACKUP_SPOOKY_GHOST,
+	BACKUP_INGAME,
 	NUM_BACKUPS
 };
 
@@ -625,6 +626,22 @@ public:
 	bool SetZombieHuman(bool Zombie, bool GiveGun = true);
 	bool TryHumanTransformation(CCharacter *pTarget);
 	void SetBirthdayJetpack(bool Set);
+	bool SetSafeArea(bool Enter, bool Silent = false);
+	int64 m_LastSetInGame;
+	struct SInGameSave
+	{
+		bool NonEmpty()
+		{
+			return m_IsZombie || m_EndlessHook || m_InfiniteJumps || m_Jumps != 2;
+		}
+		bool m_IsZombie = false;
+		bool m_EndlessHook = false;
+		bool m_InfiniteJumps = false;
+		int m_Jumps = 2;
+
+	} m_SavedInGame;
+	bool IsInSafeArea();
+	void SetInGame(bool Set);
 
 	// broadcast and ddrace hud
 	bool ShowAmmoHud();

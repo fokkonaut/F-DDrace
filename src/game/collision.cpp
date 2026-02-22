@@ -1955,6 +1955,42 @@ int CCollision::IntersectLineNoBonus(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, 
 	return 0;
 }
 
+int CCollision::IntersectLineSafeArea(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool Enter)
+{
+	float d = distance(Pos0, Pos1);
+	vec2 Last = Pos0;
+
+	for (float f = 0; f < d; f++)
+	{
+		float a = f / d;
+		vec2 Pos = mix(Pos0, Pos1, a);
+		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
+		int Index = GetIndex(Nx, Ny);
+		int FIndex = GetFIndex(Nx, Ny);
+		bool IsSafeArea = Index == (Enter ? TILE_INGAME_OFF : TILE_INGAME_ON);
+		bool FIsSafeArea = FIndex == (Enter ? TILE_INGAME_OFF : TILE_INGAME_ON);
+		if (IsSafeArea || FIsSafeArea)
+		{
+			if (pOutCollision)
+				* pOutCollision = Pos;
+			if (pOutBeforeCollision)
+				* pOutBeforeCollision = Last;
+			if (FIsSafeArea)
+				return FIndex;
+			if (IsSafeArea)
+				return Index;
+			return 0;
+		}
+		Last = Pos;
+	}
+	if (pOutCollision)
+		* pOutCollision = Pos1;
+	if (pOutBeforeCollision)
+		* pOutBeforeCollision = Pos1;
+	return 0;
+}
+
 int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Team, bool PlotDoorOnly, bool ClosedOnly)
 {
 	if (!m_pDoor || (PlotDoorOnly && !m_NumPlots))

@@ -10,13 +10,14 @@
 #include <engine/shared/config.h>
 #include <algorithm>
 
-CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor, bool InNoBonusArea)
+CPortal::CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor, bool InNoBonusArea, bool InSafeArea)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PORTAL, Pos)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;
 	m_ThroughPlotDoor = ThroughPlotDoor;
 	m_InNoBonusArea = InNoBonusArea;
+	m_InSafeArea = InSafeArea;
 	m_StartTick = Server()->Tick();
 	m_pLinkedPortal = 0;
 	m_LinkedTick = 0;
@@ -185,6 +186,7 @@ void CPortal::EntitiesEnter()
 
 				// Players shouldn't be able to avoid the no bonus tile, also when going out, they should leave the area when a portal is on the other side
 				pChr->OnNoBonusArea(m_pLinkedPortal->m_InNoBonusArea);
+				pChr->SetSafeArea(m_pLinkedPortal->m_InSafeArea);
 
 				if (m_pLinkedPortal->m_ThroughPlotDoor >= PLOT_START)
 				{

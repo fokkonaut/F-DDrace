@@ -14,6 +14,7 @@ class CTeamsCore
 	int m_Team[MAX_CLIENTS];
 	bool m_IsSolo[MAX_CLIENTS];
 	bool m_IsPassive[MAX_CLIENTS];
+	bool m_InGame[MAX_CLIENTS];
 public:
 	CTeamsCore(void);
 
@@ -38,6 +39,9 @@ public:
 
 	void SetPassive(int ClientID, bool Value) { m_IsPassive[ClientID] = Value; }
 	bool GetPassive(int ClientID) { return m_IsPassive[ClientID]; }
+
+	void SetInGame(int ClientID, bool Value) { m_InGame[ClientID] = Value; }
+	bool GetInGame(int ClientID) { return m_InGame[ClientID]; }
 };
 
 #endif

@@ -23,13 +23,14 @@ class CPortal : public CEntity
 	int m_Owner;
 	int m_ThroughPlotDoor; // for flags
 	bool m_InNoBonusArea;
+	bool m_InSafeArea;
 	int m_aID[NUM_PORTAL_IDS];
 
 	std::vector<CEntity*> m_vTeleported;
 	void EntitiesEnter();
 
 public:
-	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor = 0, bool InNoBonusArea = false);
+	CPortal(CGameWorld *pGameWorld, vec2 Pos, int Owner, int ThroughPlotDoor = 0, bool InNoBonusArea = false, bool InSafeArea = false);
 	virtual ~CPortal();
 
 	virtual void Reset();

@@ -173,6 +173,7 @@ private:
 	int m_IsDoubleXp;
 	std::vector< std::pair<int, int> > m_vCheckpoints;
 	int m_BirthdayGiftTicksLeft;
+	int m_InSafeArea;
 
 	// core
 	int m_MoveRestrictionExtraRoomKey;

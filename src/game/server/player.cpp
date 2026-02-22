@@ -2542,11 +2542,15 @@ void CPlayer::ResetSkin(bool Unforce)
 	{
 		SetSkin(m_ForcedSkin, true);
 	}
-	else if (!m_DisableCustomColorsTick)
+	else
 	{
-		// dont send skin updates if its not needed
-		if (mem_comp(&m_CurrentInfo.m_TeeInfos, &m_TeeInfos, sizeof(CTeeInfo)) != 0)
-			GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
+		CGameControllerDDRace *pController = (CGameControllerDDRace*)GameServer()->m_pController;
+		if (!m_DisableCustomColorsTick || !pController->m_Teams.m_Core.GetInGame(m_ClientID))
+		{
+			// dont send skin updates if its not needed
+			if (mem_comp(&m_CurrentInfo.m_TeeInfos, &m_TeeInfos, sizeof(CTeeInfo)) != 0)
+				GameServer()->SendSkinChange(m_TeeInfos, m_ClientID, -1);
+		}
 	}
 }
 
@@ -2667,6 +2671,11 @@ void CPlayer::SaveMinigameTee()
 	{
 		m_pCharacter->OnNoBonusArea(false, true);
 		m_pCharacter->m_NoBonusContext.m_InArea = true;
+	}
+	if (m_pCharacter->IsInSafeArea())
+	{
+		m_pCharacter->SetSafeArea(false, true);
+		m_pCharacter->SetInGame(false);
 	}
 	m_MinigameTee.Save(m_pCharacter);
 	m_SavedMinigameTee = true;

@@ -127,6 +127,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	Teams()->OnCharacterSpawn(GetPlayer()->GetCID());
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	DDraceInit();
+
 	if (!m_pPlayer->LoadMinigameTee() && !m_pPlayer->IsMinigame())
 	{
 		if (m_pPlayer->m_DoubleXpLifesLeft)
@@ -293,6 +294,10 @@ void CCharacter::HandleNinja()
 		if (GameServer()->Collision()->IntersectLineNoBonus(m_Pos, m_Core.m_Pos, 0, 0, !m_NoBonusContext.m_InArea))
 		{
 			OnNoBonusArea(!m_NoBonusContext.m_InArea);
+		}
+		if (GameServer()->Collision()->IntersectLineSafeArea(m_Pos, m_Core.m_Pos, 0, 0, !IsInSafeArea()))
+		{
+			SetSafeArea(!IsInSafeArea());
 		}
 
 		// reset velocity so the client doesn't predict stuff
@@ -1024,7 +1029,12 @@ void CCharacter::FireWeapon()
 						if (NoBonusTile != 0)
 							IsPortalInNoBonusArea = NoBonusTile == TILE_NO_BONUS_AREA; // else TILE_NO_BONUS_AREA_LEAVE
 
-						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), PlotDoorNumber, IsPortalInNoBonusArea);
+						bool IsPortalInSafeArea = IsInSafeArea();
+						int SafeAreaTile = GameServer()->Collision()->IntersectLineSafeArea(m_Pos, PortalPos, 0, 0, !IsInSafeArea());
+						if (SafeAreaTile != 0)
+							IsPortalInSafeArea = SafeAreaTile == TILE_INGAME_OFF; // else TILE_INGAME_ON
+
+						m_pPlayer->m_pPortal[i] = new CPortal(GameWorld(), PortalPos, m_pPlayer->GetCID(), PlotDoorNumber, IsPortalInNoBonusArea, IsPortalInSafeArea);
 						if (i == PORTAL_SECOND)
 						{
 							m_pPlayer->m_pPortal[PORTAL_FIRST]->SetLinkedPortal(m_pPlayer->m_pPortal[PORTAL_SECOND]);
@@ -1259,10 +1269,10 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	if (m_IsZombie && Weapon != WEAPON_HAMMER && !Remove)
 		return;
 
-	for (int i = 0; i < NUM_BACKUPS; i++)
+	if (m_pPlayer->m_SpookyGhost)
 	{
-		m_aWeaponsBackupGot[Weapon][i] = !Remove;
-		m_aWeaponsBackup[Weapon][i] = Ammo;
+		m_aWeaponsBackupGot[Weapon][BACKUP_SPOOKY_GHOST] = !Remove;
+		m_aWeaponsBackup[Weapon][BACKUP_SPOOKY_GHOST] = Ammo;
 	}
 
 	if (Weapon == WEAPON_PORTAL_RIFLE && !PortalRifleByAcc)
@@ -1898,6 +1908,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		Passive(false, -1, true);
 	UnsetSpookyGhost();
 	SetZombieHuman(false);
+	SetInGame(false);
 
 	// unset skin specific stuff
 	m_pPlayer->ResetSkin();
@@ -2030,8 +2041,9 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 		&& !CanCollide(pSnapPlayer->GetSpectatorID(), false) && !pSnapPlayer->m_ShowOthers)
 		return false;
 
+	bool SafeArea = IsInSafeArea() || (pSnapChar && pSnapChar->IsInSafeArea());
 	if (pSnapPlayer->GetTeam() != TEAM_SPECTATORS && !pSnapPlayer->IsPaused() && pSnapChar && !pSnapChar->m_Super
-		&& !CanCollide(SnappingClient, false) && !pSnapPlayer->m_ShowOthers)
+		&& !CanCollide(SnappingClient, false) && !pSnapPlayer->m_ShowOthers && !SafeArea)
 		return false;
 
 	if ((pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()) && pSnapPlayer->GetSpecMode() == SPEC_FREEVIEW
@@ -2305,7 +2317,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_IN_FREEZE;
 	if(Teams()->IsPractice(Team()))
 		Flags |= CHARACTERFLAG_PRACTICE_MODE;
-	if(Teams()->TeamLocked(Team()) || m_NoBonusContext.m_SavedBonus.NonEmpty())
+	if(Teams()->TeamLocked(Team()) || m_NoBonusContext.m_SavedBonus.NonEmpty() || m_SavedInGame.NonEmpty())
 		Flags |= CHARACTERFLAG_LOCK_MODE;
 	//if(Teams()->TeamLocked(Team()))
 	//	Flags |= CHARACTERFLAG_TEAM0_MODE;
@@ -2588,6 +2600,16 @@ CGameTeams* CCharacter::Teams()
 	return &((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams;
 }
 
+bool CCharacter::IsInSafeArea()
+{
+	return !Teams()->m_Core.GetInGame(m_pPlayer->GetCID());
+}
+
+void CCharacter::SetInGame(bool Set)
+{
+	Teams()->m_Core.SetInGame(m_pPlayer->GetCID(), Set);
+}
+
 void CCharacter::ApplyLockedTunings(bool SendTuningParams)
 {
 	CTuningParams* pTunings = m_TuneZone > 0 ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
@@ -2813,7 +2835,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; ++i)
 				{
-					m_aWeapons[i].m_Got = false;
+					SetWeaponGot(i, false);
 					if (GetActiveWeapon() == i)
 						SetActiveWeapon(WEAPON_GUN);
 				}
@@ -3340,6 +3362,11 @@ void CCharacter::HandleTiles(int Index)
 		}
 	}
 
+	if ((m_TileIndex == TILE_INGAME_OFF) || (m_TileFIndex == TILE_INGAME_OFF))
+		SetSafeArea(true);
+	else if ((m_TileIndex == TILE_INGAME_ON) || (m_TileFIndex == TILE_INGAME_ON))
+		SetSafeArea(false);
+
 	bool Zombie = (m_TileIndex == TILE_TRANSFORM_ZOMBIE || m_TileFIndex == TILE_TRANSFORM_ZOMBIE) && HasFlag() == -1;
 	bool DoTransformation = Zombie || (m_TileIndex == TILE_TRANSFORM_HUMAN || m_TileFIndex == TILE_TRANSFORM_HUMAN);
 	if (DoTransformation)
@@ -3693,7 +3720,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 				if (i != WEAPON_NINJA)
-					m_aWeapons[i].m_Got = false;
+					SetWeaponGot(i, false);
 		}
 		return;
 	}
@@ -3733,7 +3760,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				for(int i=WEAPON_SHOTGUN;i<NUM_WEAPONS;i++)
 					if (i != WEAPON_NINJA)
-						m_aWeapons[i].m_Got = false;
+						SetWeaponGot(i, false);
 			}
 		}
 		return;
@@ -3864,6 +3891,8 @@ void CCharacter::HandleTuneLayer()
 		// send zone enter msg
 		SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]);
 	}
+
+	
 }
 
 void CCharacter::SendTuneMsg(const char *pMessage)
@@ -4224,6 +4253,16 @@ void CCharacter::FDDraceInit()
 	m_DoorHammer = false;
 	m_pHelicopter = 0;
 
+	for (int i = 0; i < NUM_BACKUPS; i++)
+	{
+		m_WeaponsBackupped[i] = false;
+		for (int w = 0; w < NUM_WEAPONS; w++)
+		{
+			m_aWeaponsBackup[w][i] = false;
+			m_aWeaponsBackupGot[w][i] = 0;
+		}
+	}
+
 	m_AlwaysTeleWeapon = Config()->m_SvAlwaysTeleWeapon;
 
 	m_pPlayer->m_Gamemode = (Config()->m_SvVanillaModeStart || m_pPlayer->m_Gamemode == GAMEMODE_VANILLA) ? GAMEMODE_VANILLA : GAMEMODE_DDRACE;
@@ -4357,6 +4396,9 @@ void CCharacter::FDDraceInit()
 	m_vCheckpoints.clear();
 	m_LockedTunings.clear();
 	m_LastLockedTunings.clear();
+
+	m_LastSetInGame = 0;
+	SetInGame(true);
 
 	m_pDummyHandle = 0;
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
@@ -4912,7 +4954,7 @@ void CCharacter::DropFlag(int Dir)
 bool CCharacter::CanDropWeapon(int Type)
 {
 	// Dissallow weapon drop while jetpack 45sec
-	if (m_BirthdayGiftEndTick)
+	if (m_BirthdayGiftEndTick || IsInSafeArea())
 		return false;
 	// Do not drop spawnweapons
 	int W = GetSpawnWeaponIndex(Type);
@@ -5949,6 +5991,59 @@ void CCharacter::SetBirthdayJetpack(bool Set)
 
 	m_Jetpack = Set;
 	GameServer()->m_pController->UpdateGameInfo(m_pPlayer->GetCID());
+}
+
+bool CCharacter::SetSafeArea(bool Enter, bool Silent)
+{
+	bool InSafeArea = IsInSafeArea();
+	if ((!Enter && !InSafeArea) || (Enter && InSafeArea) || m_LastSetInGame == Server()->Tick())
+		return false;
+
+	m_LastSetInGame = Server()->Tick();
+
+	int Flag = HasFlag();
+	if (Flag != -1)
+	{
+		CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag];
+		pFlag->Reset();
+	}
+
+	SetInGame(!Enter);
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		Teams()->SendTeamsState(i);
+
+	m_DeepFreeze = false;
+	UnFreeze();
+
+	if (Enter)
+	{
+		BackupWeapons(BACKUP_INGAME);
+		GiveWeapon(WEAPON_HAMMER);
+		GiveWeapon(WEAPON_GUN);
+		for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+			GiveWeapon(i, true);
+		m_SavedInGame.m_EndlessHook = m_EndlessHook;
+		m_SavedInGame.m_InfiniteJumps = m_SuperJump;
+		m_SavedInGame.m_Jumps = m_Core.m_Jumps;
+		m_SavedInGame.m_IsZombie = m_IsZombie;
+		EndlessHook(false, -1, Silent);
+		InfiniteJumps(false, -1, Silent);
+		SetJumps(2, Silent);
+		SetZombieHuman(false);
+	}
+	else
+	{
+		SetZombieHuman(m_SavedInGame.m_IsZombie);
+		LoadWeaponBackup(BACKUP_INGAME);
+		EndlessHook(m_SavedInGame.m_EndlessHook || m_EndlessHook, -1, Silent);
+		InfiniteJumps(m_SavedInGame.m_InfiniteJumps || m_SuperJump, -1, Silent);
+		SetJumps(max(m_SavedInGame.m_Jumps, m_Core.m_Jumps), Silent);
+		m_SavedInGame.m_IsZombie = false;
+		m_SavedInGame.m_EndlessHook = false;
+		m_SavedInGame.m_InfiniteJumps = false;
+		m_SavedInGame.m_Jumps = 2;
+	}
+	return true;
 }
 
 void CCharacter::SetTeeControlCursor()

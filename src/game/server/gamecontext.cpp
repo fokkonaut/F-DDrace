@@ -6796,6 +6796,15 @@ int CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 		}
 	}
 
+	if (pChr->IsInSafeArea())
+	{
+		pChr->SetSafeArea(false);
+		if (!(Flags & SAVE_REDIRECT))
+		{
+			pChr->SetInGame(false);
+		}
+	}
+
 	if (Flags & SAVE_REDIRECT)
 	{
 		// reset solo so it cant be taken to another map

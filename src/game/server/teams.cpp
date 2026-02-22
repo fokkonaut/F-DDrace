@@ -506,6 +506,19 @@ void CGameTeams::SendTeamsState(int ClientID)
 			}
 		}
 
+		// in game / save area
+		int ID = i;
+		bool Translated = false;
+		if (Server()->ReverseTranslate(ID, ClientID))
+		{
+			Translated = true;
+			if (!m_Core.GetInGame(ID))
+			{
+				Msg.AddInt(63);
+				continue;
+			}
+		}
+
 		// Rainbow name
 		int Color = m_pGameContext->m_RainbowName.GetColor(ClientID, i);
 		if (Color != -1)
@@ -526,8 +539,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 		// Else -> Normal teams
 		int Team = 0;
-		int ID = i;
-		if (Server()->ReverseTranslate(ID, ClientID))
+		if (Translated)
 		{
 			Team = m_Core.Team(ID);
 			if (Team == TEAM_SUPER)
