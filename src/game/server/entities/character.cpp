@@ -137,7 +137,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		
 		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime)
 		{
-			SetZombieHuman(true);
+			if (!m_pPlayer->m_IsDummy || Config()->m_SvSpawnAsZombie == 2)
+			{
+				SetZombieHuman(true);
+			}
 		}
 	}
 
