@@ -3367,7 +3367,7 @@ void CCharacter::HandleTiles(int Index)
 	else if ((m_TileIndex == TILE_INGAME_ON) || (m_TileFIndex == TILE_INGAME_ON))
 		SetSafeArea(false);
 
-	bool Zombie = (m_TileIndex == TILE_TRANSFORM_ZOMBIE || m_TileFIndex == TILE_TRANSFORM_ZOMBIE) && HasFlag() == -1;
+	bool Zombie = (m_TileIndex == TILE_TRANSFORM_ZOMBIE || m_TileFIndex == TILE_TRANSFORM_ZOMBIE) && (!Config()->m_SvImmunityFlag || HasFlag() != TEAM_BLUE);
 	bool DoTransformation = Zombie || (m_TileIndex == TILE_TRANSFORM_HUMAN || m_TileFIndex == TILE_TRANSFORM_HUMAN);
 	if (DoTransformation)
 	{
@@ -5911,6 +5911,9 @@ bool CCharacter::SetZombieHuman(bool Zombie, bool GiveGun)
 bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 {
 	if (!m_IsZombie || !pTarget || !pTarget->m_Alive || pTarget->m_IsZombie)
+		return false;
+
+	if (Config()->m_SvImmunityFlag && pTarget->HasFlag() == TEAM_BLUE)
 		return false;
 
 	SetZombieHuman(false, false);

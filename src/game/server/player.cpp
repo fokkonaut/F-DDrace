@@ -258,6 +258,8 @@ void CPlayer::Reset()
 	m_LockSpecPosUntil = 0;
 	m_Permille = 0;
 	m_Language = g_Localization.GetLanguage(GameServer()->Config()->m_SvDefaultLanguage);
+
+	m_GotImmunityFlagMessage = false;
 }
 
 void CPlayer::Tick()

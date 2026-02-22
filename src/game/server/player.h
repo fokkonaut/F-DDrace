@@ -400,6 +400,8 @@ public:
 	bool m_HideFromSpecCount;
 	char m_aDelayedJoinMsg[128];
 
+	bool m_GotImmunityFlagMessage;
+
 	// Language
 	const char *Localize(const char *pText, const char *pContext = ""); // Never change this function name
 	void SetLanguage(int Language, bool Silent = false, bool UpdateDummy = true);

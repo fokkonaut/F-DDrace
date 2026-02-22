@@ -136,11 +136,53 @@ void CFlag::Drop(int Dir)
 
 void CFlag::Grab(int NewCarrier)
 {
+	// Set here already for processing immunity flag
+	m_Carrier = NewCarrier;
+
+	if (m_Team == TEAM_BLUE && Config()->m_SvImmunityFlag)
+	{
+		if (m_AtStand || !GetCarrier()->GetPlayer()->m_GotImmunityFlagMessage)
+		{
+			GameServer()->SendChatTarget(NewCarrier, "Congratulations, you got the immunity flag.");
+			GameServer()->SendChatTarget(NewCarrier, "The blue flag defends against infection.");
+			GameServer()->SendChatTarget(NewCarrier, "You can drop it by pressing F3.");
+			GetCarrier()->GetPlayer()->m_GotImmunityFlagMessage = true;
+		}
+
+		const int z = Config()->m_SvImmunityFlagTele;
+		CGameControllerDDRace *pController = (CGameControllerDDRace*)GameServer()->m_pController;
+		if (m_AtStand && z != 0 && pController->m_TeleOuts[z - 1].size() && !GetCarrier()->m_Super)
+		{
+			int Num = pController->m_TeleOuts[z - 1].size();
+			vec2 NewPos = pController->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
+			GetCarrier()->ForceSetPos(NewPos);
+			GetCarrier()->Core()->m_Vel = vec2(0, 0);
+
+			if (!Config()->m_SvTeleportHoldHook)
+			{
+				GetCarrier()->Core()->SetHookedPlayer(-1);
+				GetCarrier()->Core()->m_HookState = HOOK_RETRACTED;
+				GetCarrier()->Core()->m_HookPos = GetCarrier()->GetPos();
+			}
+			if (Config()->m_SvTeleportLoseWeapons)
+			{
+				for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
+					if (i != WEAPON_NINJA)
+						GetCarrier()->SetWeaponGot(i, false);
+			}
+		}
+
+		if (GetCarrier()->m_IsZombie)
+		{
+			GetCarrier()->SetZombieHuman(false);
+			GameServer()->CreateDeath(m_Pos, NewCarrier);
+		}
+	}
+
 	PlaySound(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 	if (m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
-	m_Carrier = NewCarrier;
 	GetCarrier()->m_FirstFreezeTick = 0;
 	GameServer()->UnsetTelekinesis(this);
 	UpdateSpectators(m_Carrier);

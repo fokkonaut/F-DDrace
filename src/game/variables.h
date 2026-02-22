@@ -194,6 +194,8 @@ MACRO_CONFIG_INT(SvShutdownAutoReconnect, sv_shutdown_auto_reconnect, 0, 0, 2, C
 MACRO_CONFIG_INT(SvFlagSounds, sv_flag_sounds, 2, 0, 2, CFGFLAG_SERVER, "Flag sounds on drop/pickup/respawn (0=off, 1=public sounds, 2=respawn public rest local)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFlagHooking, sv_flag_hooking, 2, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether flags are hookable (1=allow hook, 2=allow, but disallow hooking from solo tees)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFlagRespawnDropped, sv_flag_respawn_dropped, 90, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a dropped flag resets", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvImmunityFlag, sv_immunity_flag, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether the blue flag makes you immune to zombiefication", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvImmunityFlagTele, sv_immunity_flag_tele, 0, 0, 256, CFGFLAG_SERVER|CFGFLAG_GAME, "Teleporter number to tele to when grabbing blue flag from stand", AUTHED_ADMIN)
 
 // dummy
 MACRO_CONFIG_INT(SvHideDummies, sv_hide_dummies, 0, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from scoreboard", AUTHED_ADMIN)
