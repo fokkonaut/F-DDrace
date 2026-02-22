@@ -3373,7 +3373,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		SetZombieHuman(Zombie);
 	}
-	
+
 	if ((m_TileIndex == TILE_TRANSFORM_HUMAN_TRIAL || m_TileFIndex == TILE_TRANSFORM_HUMAN_TRIAL) && m_IsZombie && !IsInSafeArea())
 	{
 		bool TransformHuman = true;
@@ -3388,11 +3388,16 @@ void CCharacter::HandleTiles(int Index)
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_Afk && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
+				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
 				{
-					Players++;
 					CCharacter *pCharacter = pPlayer->GetCharacter();
-					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea())
+					// Some balancing, afk zombies should not count to the cap
+					if (pPlayer->m_Afk && pCharacter && pCharacter->m_IsZombie)
+						continue;
+
+					Players++;
+					// Count server dummies to players, but not to humans. that way we get a little more players to the player cap which can be benefical especially with low player counts
+					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
 					{
 						Humans++;
 					}
