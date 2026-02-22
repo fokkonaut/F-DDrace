@@ -632,11 +632,12 @@ public:
 	{
 		bool NonEmpty()
 		{
-			return m_IsZombie || m_EndlessHook || m_InfiniteJumps || m_Jumps != 2;
+			return m_IsZombie || m_EndlessHook || m_InfiniteJumps || m_Jetpack || m_Jumps != 2;
 		}
 		bool m_IsZombie = false;
 		bool m_EndlessHook = false;
 		bool m_InfiniteJumps = false;
+		bool m_Jetpack = false;
 		int m_Jumps = 2;
 
 	} m_SavedInGame;

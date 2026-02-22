@@ -6082,10 +6082,12 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 			GiveWeapon(i, true);
 		m_SavedInGame.m_EndlessHook = m_EndlessHook;
 		m_SavedInGame.m_InfiniteJumps = m_SuperJump;
+		m_SavedInGame.m_Jetpack = m_Jetpack;
 		m_SavedInGame.m_Jumps = m_Core.m_Jumps;
 		m_SavedInGame.m_IsZombie = m_IsZombie;
 		EndlessHook(false, -1, Silent);
 		InfiniteJumps(false, -1, Silent);
+		Jetpack(false, -1, Silent);
 		SetJumps(2, Silent);
 		SetZombieHuman(false);
 	}
@@ -6095,11 +6097,13 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 		LoadWeaponBackup(BACKUP_INGAME);
 		EndlessHook(m_SavedInGame.m_EndlessHook || m_EndlessHook, -1, Silent);
 		InfiniteJumps(m_SavedInGame.m_InfiniteJumps || m_SuperJump, -1, Silent);
+		Jetpack(m_SavedInGame.m_Jetpack || m_Jetpack, -1, Silent);
 		SetJumps(max(m_SavedInGame.m_Jumps, m_Core.m_Jumps), Silent);
-		m_SavedInGame.m_IsZombie = false;
 		m_SavedInGame.m_EndlessHook = false;
 		m_SavedInGame.m_InfiniteJumps = false;
+		m_SavedInGame.m_Jetpack = false;
 		m_SavedInGame.m_Jumps = 2;
+		m_SavedInGame.m_IsZombie = false;
 	}
 	return true;
 }
