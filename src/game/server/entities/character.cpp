@@ -3427,7 +3427,7 @@ void CCharacter::HandleTiles(int Index)
 
 					CCharacter *pCharacter = pPlayer->GetCharacter();
 					// Some balancing, afk should not count to the cap
-					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_Afk && !ServerDummy)
+					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->IsMinigame() && !pPlayer->m_Afk && !ServerDummy)
 					{
 						Humans++;
 					}
