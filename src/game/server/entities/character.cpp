@@ -3373,6 +3373,44 @@ void CCharacter::HandleTiles(int Index)
 	{
 		SetZombieHuman(Zombie);
 	}
+	
+	if ((m_TileIndex == TILE_TRANSFORM_HUMAN_TRIAL || m_TileFIndex == TILE_TRANSFORM_HUMAN_TRIAL) && m_IsZombie && !IsInSafeArea())
+	{
+		bool TransformHuman = true;
+		if (m_pPlayer->m_LastHumanTryTick + Server()->TickSpeed() * 2 >= Server()->Tick())
+		{
+			TransformHuman = false;
+		}
+		else
+		{
+			int Players = 0;
+			int Humans = 0;
+			for (int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_Afk && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
+				{
+					Players++;
+					CCharacter *pCharacter = pPlayer->GetCharacter();
+					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea())
+					{
+						Humans++;
+					}
+				}
+			}
+			if (Players > 1 && (Players >> 1) <= Humans)
+			{
+				m_pPlayer->m_LastHumanTryTick = Server()->Tick();
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Humans limit reached.");
+				TransformHuman = false;
+			}
+		}
+
+		if (TransformHuman)
+		{
+			SetZombieHuman(false);
+		}
+	}
 
 	// update this AFTER you are done using this var above
 	m_LastIndexTile = m_TileIndex;

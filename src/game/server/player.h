@@ -401,6 +401,7 @@ public:
 	char m_aDelayedJoinMsg[128];
 
 	bool m_GotImmunityFlagMessage;
+	int64 m_LastHumanTryTick;
 
 	// Language
 	const char *Localize(const char *pText, const char *pContext = ""); // Never change this function name

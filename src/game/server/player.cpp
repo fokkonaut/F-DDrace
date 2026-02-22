@@ -260,6 +260,7 @@ void CPlayer::Reset()
 	m_Language = g_Localization.GetLanguage(GameServer()->Config()->m_SvDefaultLanguage);
 
 	m_GotImmunityFlagMessage = false;
+	m_LastHumanTryTick = 0;
 }
 
 void CPlayer::Tick()
