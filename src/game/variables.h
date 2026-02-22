@@ -391,7 +391,7 @@ MACRO_CONFIG_INT(SvLanguageSuggestion, sv_language_suggestion, 1, 0, 1, CFGFLAG_
 MACRO_CONFIG_STR(SvCountriesFilePath, sv_countries_file_path, 128, "data", CFGFLAG_SERVER, "The path where the server searches the for the countries file (relative to binary)", AUTHED_ADMIN)
 
 // zombie
-MACRO_CONFIG_INT(SvSpawnAsZombie, sv_spawn_as_zombie, 0, 0, 1, CFGFLAG_SERVER, "Whether player respawn as zombie by default", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSpawnAsZombie, sv_spawn_as_zombie, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether player respawn as zombie by default", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
