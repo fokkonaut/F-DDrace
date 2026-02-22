@@ -2481,7 +2481,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 				Ammo = (Seconds*10/max(Config()->m_SvPortalRifleDelay, 1));
 			}
 		}
-		pCharacter->m_AmmoCount = clamp(Ammo, 0, 10);
+		pCharacter->m_AmmoCount = clamp(Ammo, -1, 10);
 
 		if (!Server()->IsSevendown(SnappingClient))
 		{
@@ -2489,6 +2489,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 				pCharacter->m_AmmoCount = m_FreezeTick + Config()->m_SvFreezeDelay * Server()->TickSpeed();
 			else if(GetActiveWeapon() == WEAPON_NINJA)
 				pCharacter->m_AmmoCount = m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
+			else
+				pCharacter->m_AmmoCount = clamp(Ammo, 0, 10);
 		}
 	}
 
