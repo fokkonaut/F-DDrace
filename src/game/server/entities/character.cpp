@@ -371,6 +371,10 @@ void CCharacter::DoWeaponSwitch()
 		{
 			m_AttackTick = Server()->Tick() - Server()->TickSpeed() * 1000;
 		}
+		else
+		{
+			m_AttackTick = Server()->Tick() - Server()->TickSpeed() * 100;
+		}
 	}
 }
 
