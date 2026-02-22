@@ -1072,6 +1072,8 @@ private:
 	static void ConForceTransformHuman(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetDoubleXpLifes(IConsole::IResult* pResult, void* pUserData);
 	static void ConSetTaserShield(IConsole::IResult* pResult, void* pUserData);
+	static void ConSetSafeArea(IConsole::IResult* pResult, void* pUserData);
+	static void ConUnsetSafeArea(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConConnectDummy(IConsole::IResult* pResult, void* pUserData);
 	static void ConDisconnectDummy(IConsole::IResult* pResult, void* pUserData);

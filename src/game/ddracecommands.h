@@ -172,6 +172,8 @@ CONSOLE_COMMAND("force_transform_zombie", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST,
 CONSOLE_COMMAND("force_transform_human", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConForceTransformHuman, this, "Forces transformation to human for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("set_double_xp_lifes", "v[id] i[amount]", CFGFLAG_SERVER|CMDFLAG_TEST, ConSetDoubleXpLifes, this, "Sets double xp lifes for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("set_taser_shield", "v[id] i[percentage]", CFGFLAG_SERVER|CMDFLAG_TEST, ConSetTaserShield, this, "Sets taser shield percentage for player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("set_safe_area", "?v[id]", CFGFLAG_SERVER, ConSetSafeArea, this, "Sets player v safe area state", AUTHED_ADMIN)
+CONSOLE_COMMAND("unset_safe_area", "?v[id]", CFGFLAG_SERVER, ConUnsetSafeArea, this, "Unsets player v safe area state", AUTHED_ADMIN)
 
 //client information
 CONSOLE_COMMAND("player_name", "v[id] ?r[name]", CFGFLAG_SERVER, ConPlayerName, this, "Sets name of player v", AUTHED_ADMIN)

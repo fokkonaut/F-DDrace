@@ -2060,6 +2060,24 @@ void CGameContext::ConUnsetNoBonusArea(IConsole::IResult* pResult, void* pUserDa
 		pSelf->SendChatTarget(Victim, pChr->GetPlayer()->Localize("You are no longer in no-bonus area mode"));
 }
 
+void CGameContext::ConSetSafeArea(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr && pChr->SetSafeArea(true))
+		pSelf->SendChatTarget(Victim, pChr->GetPlayer()->Localize("You are now in a safe area"));
+}
+
+void CGameContext::ConUnsetSafeArea(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext* pSelf = (CGameContext*)pUserData;
+	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
+	if (pChr && pChr->SetSafeArea(false))
+		pSelf->SendChatTarget(Victim, pChr->GetPlayer()->Localize("You are no longer in a safe area"));
+}
+
 void CGameContext::ConRedirectPort(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
