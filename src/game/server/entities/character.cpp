@@ -3390,14 +3390,13 @@ void CCharacter::HandleTiles(int Index)
 				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
 				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
 				{
+					Players++;
+
 					CCharacter *pCharacter = pPlayer->GetCharacter();
 					// Some balancing, afk zombies should not count to the cap
-					if (pPlayer->m_Afk && pCharacter && pCharacter->m_IsZombie)
-						continue;
-
-					Players++;
-					// Count server dummies to players, but not to humans. that way we get a little more players to the player cap which can be benefical especially with low player counts
-					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
+					// Count server dummies to players, but not to humans.
+					// that way we get a little more players to the player cap which can be benefical especially with low player counts
+					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->m_Afk && !pPlayer->m_IsDummy && !pPlayer->IsDummy())
 					{
 						Humans++;
 					}
