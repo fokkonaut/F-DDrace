@@ -6001,13 +6001,6 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 
 	m_LastSetInGame = Server()->Tick();
 
-	int Flag = HasFlag();
-	if (Flag != -1)
-	{
-		CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag];
-		pFlag->Reset();
-	}
-
 	SetInGame(!Enter);
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		Teams()->SendTeamsState(i);
@@ -6017,6 +6010,13 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 
 	if (Enter)
 	{
+		int Flag = HasFlag();
+		if (Flag != -1)
+		{
+			CFlag *pFlag = ((CGameControllerDDRace*)GameServer()->m_pController)->m_apFlags[Flag];
+			pFlag->Reset();
+		}
+
 		BackupWeapons(BACKUP_INGAME);
 		GiveWeapon(WEAPON_HAMMER);
 		GiveWeapon(WEAPON_GUN);
