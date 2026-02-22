@@ -362,20 +362,6 @@ void CCharacter::DoWeaponSwitch()
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
-
-	// AntiPing
-	if ((GetActiveWeapon() >= NUM_VANILLA_WEAPONS && GetLastWeapon() < NUM_VANILLA_WEAPONS) || (GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS))
-	{
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-		if (GetActiveWeapon() < NUM_VANILLA_WEAPONS)
-		{
-			m_AttackTick = Server()->Tick() - Server()->TickSpeed() * 1000;
-		}
-		else
-		{
-			m_AttackTick = Server()->Tick() - Server()->TickSpeed() * 100;
-		}
-	}
 }
 
 void CCharacter::HandleWeaponSwitch()
@@ -2450,6 +2436,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 
 	pCharacter->m_AttackTick = m_AttackTick;
+	// AntiPing
+	if (GetActiveWeapon() >= NUM_VANILLA_WEAPONS)
+	{
+		m_AttackTick = Server()->Tick();
+	}
 
 	// change eyes and use ninja graphic if player is freeze
 	if (m_DeepFreeze || m_FreezeTime > 0 || m_FreezeTime == -1)
