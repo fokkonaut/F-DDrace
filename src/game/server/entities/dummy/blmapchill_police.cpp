@@ -29,8 +29,6 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_HasReachedCinemaEntrance = false;
 
 	m_LastStuckCheckPos = vec2(0, 0);
-
-	m_pCharacter->SetZombieHuman(false);
 }
 
 bool CDummyBlmapChillPolice::CheckStuck()

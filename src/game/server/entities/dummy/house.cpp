@@ -11,7 +11,6 @@ CDummyHouse::CDummyHouse(CCharacter *pChr, int Mode)
 	if (Mode == DUMMYMODE_TAVERN_DUMMY)
 	{
 		m_pCharacter->Passive(true, -1, true);
-		m_pCharacter->SetZombieHuman(false);
 	}
 }
 

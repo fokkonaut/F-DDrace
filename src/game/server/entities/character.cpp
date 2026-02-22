@@ -135,7 +135,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			m_pPlayer->UpdateDoubleXpLifes();
 		}
 		
-		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime)
+		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime && m_pPlayer->GetDummyMode() != DUMMYMODE_TAVERN_DUMMY)
 		{
 			SetZombieHuman(true);
 		}
