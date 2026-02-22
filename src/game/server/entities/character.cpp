@@ -1908,7 +1908,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		Passive(false, -1, true);
 	UnsetSpookyGhost();
 	SetZombieHuman(false);
-	SetInGame(false);
+	SetSafeArea(false, true);
 
 	// unset skin specific stuff
 	m_pPlayer->ResetSkin();
