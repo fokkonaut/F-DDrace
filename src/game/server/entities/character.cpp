@@ -362,6 +362,12 @@ void CCharacter::DoWeaponSwitch()
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
+
+	// AntiPing
+	if ((GetActiveWeapon() >= NUM_VANILLA_WEAPONS && GetLastWeapon() < NUM_VANILLA_WEAPONS) || (GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS))
+	{
+		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+	}
 }
 
 void CCharacter::HandleWeaponSwitch()
