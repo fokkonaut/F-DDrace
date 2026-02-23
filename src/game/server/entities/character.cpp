@@ -6169,7 +6169,7 @@ void CCharacter::WeaponMoneyReward(int Weapon)
 
 void CCharacter::Jetpack(bool Set, int FromID, bool Silent)
 {
-	if (m_IsZombie || m_Jetpack == Set)
+	if ((m_IsZombie && Set) || m_Jetpack == Set)
 		return;
 	SetBirthdayJetpack(false);
 	m_Jetpack = Set;
