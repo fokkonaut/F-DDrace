@@ -1,0 +1,13 @@
+// Following tiles are missing from entities as they overlap with tiles from other layers
+// or like switchtoggle and teleinout that are usually only used from plot editor. 
+// Not that important for now, just a little inconvenient.
+TILE_SWITCH_PLOT = 192,
+TILE_SWITCH_PLOT_DOOR = 193,
+TILE_SWITCH_PLOT_TOTELE = 194,
+TILE_SWITCH_REDIRECT_SERVER_FROM = 195,
+TILE_SWITCH_REDIRECT_SERVER_TO = 196,
+
+TILE_SWITCHTOGGLE = 28,
+TILE_TELE_INOUT = 93,
+TILE_TELE_INOUT_EVIL = 94,
+
