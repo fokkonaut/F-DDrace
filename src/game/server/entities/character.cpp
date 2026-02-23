@@ -6041,6 +6041,9 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 
 void CCharacter::SetBirthdayJetpack(bool Set)
 {
+	if (!Set && !m_BirthdayGiftEndTick)
+		return;
+
 	if (Set)
 	{
 		SetWeapon(WEAPON_GUN);
@@ -6084,6 +6087,8 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 		GiveWeapon(WEAPON_GUN);
 		for (int i = WEAPON_SHOTGUN; i < NUM_WEAPONS; i++)
 			GiveWeapon(i, true);
+		// Reset gifted jetpack, otherwise we get infinite jetpack after leaving safe area
+		SetBirthdayJetpack(false);
 		m_SavedInGame.m_EndlessHook = m_EndlessHook;
 		m_SavedInGame.m_InfiniteJumps = m_SuperJump;
 		m_SavedInGame.m_Jetpack = m_Jetpack;
