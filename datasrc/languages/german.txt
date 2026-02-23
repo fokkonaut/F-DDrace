@@ -2091,7 +2091,7 @@ Next move: %ds
 == Weiter in: %ds
 
 You are now in a safe area
-== 
+== Du bist nun in einem sicheren Bereich
 
 You are no longer in a safe area
-== 
+== Du bist nicht mehr in einem sicheren Bereich
