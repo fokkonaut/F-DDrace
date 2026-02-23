@@ -2089,3 +2089,9 @@ Passed…
 {durak-name}
 Next move: %ds
 == Weiter in: %ds
+
+You are now in a safe area
+== 
+
+You are no longer in a safe area
+== 

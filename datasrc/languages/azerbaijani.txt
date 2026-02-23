@@ -798,6 +798,12 @@ You are now in no-bonus area mode
 You are no longer in no-bonus area mode
 == 
 
+You are now in a safe area
+== 
+
+You are no longer in a safe area
+== 
+
 You were arrested for %d seconds
 == 
 
