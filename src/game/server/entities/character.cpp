@@ -293,11 +293,17 @@ void CCharacter::HandleNinja()
 		// Don't skip no-bonus tile with ninja
 		if (GameServer()->Collision()->IntersectLineNoBonus(m_Pos, m_Core.m_Pos, 0, 0, !m_NoBonusContext.m_InArea))
 		{
-			OnNoBonusArea(!m_NoBonusContext.m_InArea);
+			if (m_LastNoBonusTick < Server()->Tick())
+			{
+				OnNoBonusArea(!m_NoBonusContext.m_InArea);
+			}
 		}
 		if (GameServer()->Collision()->IntersectLineSafeArea(m_Pos, m_Core.m_Pos, 0, 0, !IsInSafeArea()))
 		{
-			SetSafeArea(!IsInSafeArea());
+			if (m_LastSetInGame < Server()->Tick())
+			{
+				SetSafeArea(!IsInSafeArea());
+			}
 		}
 
 		// reset velocity so the client doesn't predict stuff
@@ -5451,7 +5457,8 @@ void CCharacter::IncreaseNoBonusScore(int Summand)
 bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 {
 	// We check whether it got set this tick already, because that can happen when someone tries to skip the tile using ninja.
-	if ((Enter && m_NoBonusContext.m_InArea) || (!Enter && !m_NoBonusContext.m_InArea) || m_LastNoBonusTick == Server()->Tick())
+	// We check in handleninja directly now
+	if ((Enter && m_NoBonusContext.m_InArea) || (!Enter && !m_NoBonusContext.m_InArea))
 		return false;
 
 	m_NoBonusContext.m_InArea = !m_NoBonusContext.m_InArea;
@@ -6024,7 +6031,7 @@ void CCharacter::SetBirthdayJetpack(bool Set)
 bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 {
 	bool InSafeArea = IsInSafeArea();
-	if ((!Enter && !InSafeArea) || (Enter && InSafeArea) || m_LastSetInGame == Server()->Tick())
+	if ((Enter && InSafeArea) || (!Enter && !InSafeArea))
 		return false;
 
 	m_LastSetInGame = Server()->Tick();
