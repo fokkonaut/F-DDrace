@@ -42,7 +42,7 @@ public:
 	int GetDropTick() { return m_DropTick; }
 	int GetTeam() { return m_Team; }
 
-	void Grab(int NewCarrier);
+	void Grab(int NewCarrier, bool PreventTeleport = false);
 	void Drop(int Dir = 0);
 
 	CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos);

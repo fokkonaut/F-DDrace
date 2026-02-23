@@ -134,7 +134,7 @@ void CFlag::Drop(int Dir)
 	UpdateSpectators(-1);
 }
 
-void CFlag::Grab(int NewCarrier)
+void CFlag::Grab(int NewCarrier, bool PreventTeleport)
 {
 	// Set here already for processing immunity flag
 	m_Carrier = NewCarrier;
@@ -151,7 +151,7 @@ void CFlag::Grab(int NewCarrier)
 
 		const int z = Config()->m_SvImmunityFlagTele;
 		CGameControllerDDRace *pController = (CGameControllerDDRace*)GameServer()->m_pController;
-		if (m_AtStand && z != 0 && pController->m_TeleOuts[z - 1].size() && !GetCarrier()->m_Super)
+		if (m_AtStand && z != 0 && pController->m_TeleOuts[z - 1].size() && !GetCarrier()->m_Super && !PreventTeleport)
 		{
 			int Num = pController->m_TeleOuts[z - 1].size();
 			vec2 NewPos = pController->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];

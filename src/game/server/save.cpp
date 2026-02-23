@@ -395,7 +395,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 			CGameControllerDDRace *pController = ((CGameControllerDDRace *)pChr->GameServer()->m_pController);
 			CFlag *pFlag = pController->m_apFlags[m_CarriedFlag];
 			if (pFlag && !pFlag->GetCarrier())
-				pController->ForceFlagOwner(pChr->GetPlayer()->GetCID(), m_CarriedFlag);
+				pController->ForceFlagOwner(pChr->GetPlayer()->GetCID(), m_CarriedFlag, true);
 		}
 		pChr->m_CollectedPortalRifle = m_CollectedPortalRifle;
 		pChr->Lovely(m_Lovely, -1, true);

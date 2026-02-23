@@ -245,7 +245,7 @@ void CGameControllerDDRace::ChangeFlagOwner(CCharacter *pOldCarrier, CCharacter 
 	}
 }
 
-void CGameControllerDDRace::ForceFlagOwner(int ClientID, int Team)
+void CGameControllerDDRace::ForceFlagOwner(int ClientID, int Team, bool PreventTeleport)
 {
 	CFlag *F = m_apFlags[Team];
 	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
