@@ -1019,6 +1019,7 @@ set(EXPECTED_DATA
   maps/ctf5_fngores.map
   maps/ddpp_survival.map
   maps/fly_shy_cry.map
+  maps-fddrace/blWorld.map
   particles.png
   race_flag.png
   skins/beaver.json
@@ -1226,6 +1227,12 @@ set(COPY_FILES
   ${SDL2_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
+
+########################################################################
+# MERGE datasrc/maps-fddrace INTO data/maps
+########################################################################
+
+file(COPY ${PROJECT_SOURCE_DIR}/datasrc/maps-fddrace/ DESTINATION ${PROJECT_BINARY_DIR}/data/maps)
 
 ########################################################################
 # CODE GENERATION
