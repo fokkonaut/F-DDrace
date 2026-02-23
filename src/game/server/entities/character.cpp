@@ -2573,9 +2573,9 @@ void CCharacter::PostSnap()
 
 // DDRace
 
-bool CCharacter::CanCollide(int ClientID, bool CheckPassive)
+bool CCharacter::CanCollide(int ClientID, bool CheckPassive, bool CheckInGame)
 {
-	return Teams()->m_Core.CanCollide(GetPlayer()->GetCID(), ClientID, CheckPassive);
+	return Teams()->m_Core.CanCollide(GetPlayer()->GetCID(), ClientID, CheckPassive, CheckInGame);
 }
 bool CCharacter::SameTeam(int ClientID)
 {

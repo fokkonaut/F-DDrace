@@ -173,7 +173,7 @@ void CPortal::EntitiesEnter()
 			{
 				CCharacter *pChr = (CCharacter *)apEnts[i];
 
-				if (!pAffectedChr->CanCollide(m_Owner, false))
+				if (!pAffectedChr->CanCollide(m_Owner, false, false))
 					continue;
 
 				pChr->ReleaseHook();

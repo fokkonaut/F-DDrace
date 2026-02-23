@@ -316,7 +316,7 @@ public:
 	int Team();
 	Mask128 TeamMask(bool SevendownOnly = false);
 	Mask128 TeamMaskExceptSelf(bool SevendownOnly = false);
-	bool CanCollide(int ClientID, bool CheckPassive = true);
+	bool CanCollide(int ClientID, bool CheckPassive = true, bool CheckInGame = true);
 	bool SameTeam(int ClientID);
 	bool m_Super;
 	bool m_SuperJump;
