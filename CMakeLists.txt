@@ -976,6 +976,7 @@ set(EXPECTED_DATA
   mapres/winter_mountains.png
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
+  maps-fddrace/blWorld.map
   maps/BlmapChill.map
   maps/BlmapChill_versions/BlmapChill_v0004.map
   maps/BlmapChill_versions/BlmapChill_v0052.map
@@ -1019,7 +1020,6 @@ set(EXPECTED_DATA
   maps/ctf5_fngores.map
   maps/ddpp_survival.map
   maps/fly_shy_cry.map
-  maps-fddrace/blWorld.map
   particles.png
   race_flag.png
   skins/beaver.json
