@@ -217,7 +217,8 @@ void CPickupDrop::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient))
 		return;
 
-	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	if (pSnapChar && !CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
 	vec2 SnapPos = m_Pos;
@@ -234,7 +235,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 
 	int PickupFlags = 0;
-	if ((m_PickupDelay > 0 && SnappingClient == m_Owner) || !m_DDraceMode)
+	if ((m_PickupDelay > 0 && SnappingClient == m_Owner) || !m_DDraceMode || (pSnapChar && pSnapChar->m_IsZombie && m_Weapon != WEAPON_HAMMER))
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);

@@ -420,9 +420,13 @@ void CPickup::Snap(int SnappingClient)
 		SnapPos = m_Snap.m_Pos;
 	}
 
+	int PickupFlags = 0;
+	if (pChr && pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER)
+		PickupFlags = PICKUPFLAG_NO_PREDICT;
+
 	int aExtraIds[4] = { m_ID2, 0, 0, 0 };
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		SnapPos, m_Type, m_Subtype, m_Number, m_Flags, 0, aExtraIds);
+		SnapPos, m_Type, m_Subtype, m_Number, m_Flags|PickupFlags, 0, aExtraIds);
 }
 
 void CPickup::Move()
