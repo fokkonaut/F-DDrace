@@ -2111,7 +2111,6 @@ void CCharacter::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
-	Config()->m_SvTestingCommands = 1;
 
 	// Draw cursor
 	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;

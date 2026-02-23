@@ -234,7 +234,7 @@ void CPickupDrop::Snap(int SnappingClient)
 	}
 
 	int PickupFlags = 0;
-	if (m_PickupDelay > 0 && SnappingClient == m_Owner)
+	if ((m_PickupDelay > 0 && SnappingClient == m_Owner) || !m_DDraceMode)
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
