@@ -23,6 +23,7 @@ CProjectile::CProjectile
 	bool Explosive,
 	float Force,
 	int SoundImpact,
+	vec2 InitDir,
 	int Layer,
 	int Number,
 	bool Spooky
@@ -48,6 +49,7 @@ CProjectile::CProjectile
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Freeze = Freeze;
+	m_InitDir = InitDir;
 
 	// F-DDrace
 	m_Spooky = Spooky;
@@ -342,13 +344,24 @@ void CProjectile::Snap(int SnappingClient)
 	if (!CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
-	CNetObj_DDNetProjectile DDNetProjectile;
-	if(SnappingClient != -1 && GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_PROJECTILE && FillExtraInfo(&DDNetProjectile, SnappingClient))
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CNetObj_DDRaceProjectile DDRaceProjectile;
+
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && IsDefaultTuning())
 	{
-		CNetObj_DDNetProjectile *pProj = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
+		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
+		if(!pDDNetProjectile)
+		{
+			return;
+		}
+		FillExtraInfo(pDDNetProjectile, SnappingClient);
+	}
+	else if(SnappingClient != -1 && SnappingClientVersion >= VERSION_DDNET_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile, SnappingClient))
+	{
+		CNetObj_DDRaceProjectile *pProj = static_cast<CNetObj_DDRaceProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDRACEPROJECTILE, GetID(), sizeof(CNetObj_DDRaceProjectile)));
 		if(!pProj)
 			return;
-		mem_copy(pProj, &DDNetProjectile, sizeof(DDNetProjectile));
+		mem_copy(pProj, &DDRaceProjectile, sizeof(DDRaceProjectile));
 	}
 	else
 	{
@@ -366,7 +379,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient)
+bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient)
 {
 	if (!m_DefaultTuning)
 		return false;
@@ -387,15 +400,15 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 	int Data = 0;
 	Data |= (abs(Owner) & 255) << 0;
 	if(Owner < 0)
-		Data |= PROJECTILEFLAG_NO_OWNER;
+		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info
-	Data |= PROJECTILEFLAG_IS_DDNET;
-	// PROJECTILEFLAG_BOUNCE_HORIZONTAL, PROJECTILEFLAG_BOUNCE_VERTICAL
+	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
+	// LEGACYPROJECTILEFLAG_BOUNCE_HORIZONTAL, LEGACYPROJECTILEFLAG_BOUNCE_VERTICAL
 	Data |= (m_Bouncing & 3) << 10;
 	if(m_Explosive)
-		Data |= PROJECTILEFLAG_EXPLOSIVE;
+		Data |= LEGACYPROJECTILEFLAG_EXPLOSIVE;
 	if(m_Freeze)
-		Data |= PROJECTILEFLAG_FREEZE;
+		Data |= LEGACYPROJECTILEFLAG_FREEZE;
 
 	pProj->m_X = (int)(m_Pos.x * 100.0f);
 	pProj->m_Y = (int)(m_Pos.y * 100.0f);
@@ -404,6 +417,52 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
 	return true;
+}
+
+void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient)
+{
+	int Flags = 0;
+	if(m_Bouncing & 1)
+	{
+		Flags |= PROJECTILEFLAG_BOUNCE_HORIZONTAL;
+	}
+	if(m_Bouncing & 2)
+	{
+		Flags |= PROJECTILEFLAG_BOUNCE_VERTICAL;
+	}
+	if(m_Explosive)
+	{
+		Flags |= PROJECTILEFLAG_EXPLOSIVE;
+	}
+	if(m_Freeze)
+	{
+		Flags |= PROJECTILEFLAG_FREEZE;
+	}
+
+	if(m_Owner < 0)
+	{
+		pProj->m_VelX = round_to_int(m_Direction.x * 1e6f);
+		pProj->m_VelY = round_to_int(m_Direction.y * 1e6f);
+	}
+	else
+	{
+		pProj->m_VelX = round_to_int(m_InitDir.x);
+		pProj->m_VelY = round_to_int(m_InitDir.y);
+		Flags |= PROJECTILEFLAG_NORMALIZE_VEL;
+	}
+
+	int Owner = m_Owner;
+	if (!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
+	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
+	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
+	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
+	pProj->m_StartTick = m_StartTick;
+	pProj->m_Owner = Owner;
+	pProj->m_Flags = Flags;
+	pProj->m_SwitchNumber = m_Number;
+	pProj->m_TuneZone = m_TuneZone;
 }
 
 void CProjectile::TickDeferred()

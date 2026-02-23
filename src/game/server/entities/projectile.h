@@ -18,6 +18,7 @@ public:
 		bool Explosive,
 		float Force,
 		int SoundImpact,
+		vec2 InitDir,
 		int Layer = 0,
 		int Number = 0,
 		bool Spooky = false
@@ -49,6 +50,7 @@ private:
 	int m_TuneZone;
 	float m_Curvature;
 	float m_Speed;
+	vec2 m_InitDir;
 
 	bool m_Spooky;
 
@@ -68,7 +70,8 @@ private:
 public:
 
 	void SetBouncing(int Value);
-	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
+	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);
+	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
 	vec2 m_CurPos;
 };
 

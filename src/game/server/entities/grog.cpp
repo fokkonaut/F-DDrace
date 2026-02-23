@@ -228,35 +228,8 @@ void CGrog::Snap(int SnappingClient)
 		if (IsLiquid)
 			PosTo.y += m_NumSips * 8.f;
 
-		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
-		{
-			CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_aLines[i].m_ID, sizeof(CNetObj_DDNetLaser)));
-			if(!pObj)
-				return;
-
-			int Owner = m_Owner;
-			if (!Server()->Translate(Owner, SnappingClient))
-				Owner = -1;
-
-			pObj->m_ToX = round_to_int(PosTo.x);
-			pObj->m_ToY = round_to_int(PosTo.y);
-			pObj->m_FromX = round_to_int(PosFrom.x);
-			pObj->m_FromY = round_to_int(PosFrom.y);
-			pObj->m_StartTick = StartTick;
-			pObj->m_Owner = Owner;
-			pObj->m_Type = IsLiquid ? LASERTYPE_SHOTGUN : LASERTYPE_FREEZE;
-		}
-		else
-		{
-			CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aLines[i].m_ID, sizeof(CNetObj_Laser)));
-			if(!pObj)
-				return;
-
-			pObj->m_X = round_to_int(PosTo.x);
-			pObj->m_Y = round_to_int(PosTo.y);
-			pObj->m_FromX = round_to_int(PosFrom.x);
-			pObj->m_FromY = round_to_int(PosFrom.y);
-			pObj->m_StartTick = StartTick;
-		}
+		int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), m_aLines[i].m_ID,
+			PosTo, PosFrom, StartTick, m_Owner, IsLiquid ? LASERTYPE_SHOTGUN : LASERTYPE_FREEZE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 }

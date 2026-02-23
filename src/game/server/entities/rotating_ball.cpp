@@ -73,15 +73,9 @@ void CRotatingBall::Snap(int SnappingClient)
 	if (!CmaskIsSet(m_TeamMask, SnappingClient) || (pOwner && pOwner->IsPaused()))
 		return;
 
-	CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if(!pLaser)
-		return;
-
-	pLaser->m_X = round_to_int(m_LaserPos.x);
-	pLaser->m_Y = round_to_int(m_LaserPos.y);
-	pLaser->m_FromX = round_to_int(m_LaserPos.x);
-	pLaser->m_FromY = round_to_int(m_LaserPos.y);
-	pLaser->m_StartTick = Server()->Tick();
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+	GameServer()->SnapLaserObject(Context, GetID(), m_LaserPos, m_LaserPos, Server()->Tick(), -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_ID2, sizeof(CNetObj_Projectile)));
 	if(!pProj)

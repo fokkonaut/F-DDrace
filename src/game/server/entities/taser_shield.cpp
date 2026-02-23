@@ -92,24 +92,13 @@ void CTaserShield::Snap(int SnappingClient)
 	if (!CmaskIsSet(m_TeamMask, SnappingClient) || (pOwner && pOwner->IsPaused()))
 		return;
 
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+
 	for (int i = 0; i < MAX_SHIELDS; i++)
 	{
 		if (m_aShieldData[i].m_Lifespan == -1)
 			continue;
-
-		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aShieldData[i].m_ID, Size));
-		if (!pP)
-			return;
-
-		pP->m_X = round_to_int(m_aShieldData[i].m_Pos.x);
-		pP->m_Y = round_to_int(m_aShieldData[i].m_Pos.y);
-		if (Server()->IsSevendown(SnappingClient))
-		{
-			pP->m_Type = POWERUP_ARMOR;
-			((int*)pP)[3] = 0;
-		}
-		else
-			pP->m_Type = POWERUP_ARMOR;
+		GameServer()->SnapPickupObject(Context, m_aShieldData[i].m_ID, m_aShieldData[i].m_Pos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }

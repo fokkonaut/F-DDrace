@@ -257,20 +257,14 @@ void CPortal::Snap(int SnappingClient)
 	int Radius = Config()->m_SvPortalRadius;
 	float AngleStep = 2.0f * pi / NUM_SIDE;
 
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+
 	for(int i = 0; i < NUM_SIDE; i++)
 	{
 		vec2 PartPosStart = m_Pos + vec2(Radius * cos(AngleStep*i), Radius * sin(AngleStep*i));
 		vec2 PartPosEnd = m_Pos + vec2(Radius * cos(AngleStep*(i+1)), Radius * sin(AngleStep*(i+1)));
-		
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[i], sizeof(CNetObj_Laser)));
-		if(!pObj)
-			return;
-
-		pObj->m_X = (int)PartPosStart.x;
-		pObj->m_Y = (int)PartPosStart.y;
-		pObj->m_FromX = (int)PartPosEnd.x;
-		pObj->m_FromY = (int)PartPosEnd.y;
-		pObj->m_StartTick = Server()->Tick();
+		GameServer()->SnapLaserObject(Context, m_aID[i], PartPosStart, PartPosEnd, Server()->Tick(), -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 
 	if (!m_pLinkedPortal)

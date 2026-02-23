@@ -127,19 +127,13 @@ void CLightsaber::Snap(int SnappingClient)
 	if (m_pOwner && m_pOwner->IsPaused())
 		return;
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if (!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_To.x;
-	pObj->m_FromY = (int)m_To.y;
-
 	int StartTick = m_EvalTick;
 	if (StartTick < Server()->Tick() - 2)
 		StartTick = Server()->Tick() - 2;
 	else if (StartTick > Server()->Tick())
 		StartTick = Server()->Tick();
-	pObj->m_StartTick = StartTick;
+
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
+		m_Pos, m_To, StartTick, m_Owner, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 }

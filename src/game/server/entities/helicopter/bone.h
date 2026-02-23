@@ -101,6 +101,7 @@ public:
 
 	// Sense
 	IServer *Server() { return m_pEntity->Server(); }
+	CGameContext *GameServer() { return m_pEntity->GameServer(); }
 
 	// Ticking
 	void Snap(int SnappingClient);

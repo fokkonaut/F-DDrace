@@ -434,7 +434,8 @@ void CCharacter::FireWeapon()
 	}
 
 	DoWeaponSwitch();
-	vec2 TempDirection = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
+	vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
+	vec2 TempDirection = normalize(MouseTarget);
 
 	bool FullAuto = false;
 	if
@@ -775,6 +776,7 @@ void CCharacter::FireWeapon()
 							false,//Explosive
 							0,//Force
 							-1,//SoundImpact
+							MouseTarget,
 							0,
 							0,
 							m_pPlayer->m_SpookyGhost
@@ -804,7 +806,7 @@ void CCharacter::FireWeapon()
 							ProjStartPos,
 							vec2(cosf(a), sinf(a)) * Speed,
 							(int)(Server()->TickSpeed() * Tuning()->m_ShotgunLifetime),
-							false, false, 0, -1, 0, 0, false);
+							false, false, 0, -1, vec2(cosf(a), sinf(a)) * Speed, 0, 0, false);
 					}
 				}
 				else
@@ -832,6 +834,7 @@ void CCharacter::FireWeapon()
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
+					MouseTarget,
 					0,//Layer
 					0,//Number
 					false//Spooky
@@ -1069,6 +1072,7 @@ void CCharacter::FireWeapon()
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
+					MouseTarget,
 					0,
 					0,
 					m_pPlayer->m_SpookyGhost
@@ -1095,7 +1099,8 @@ void CCharacter::FireWeapon()
 						false,//Freeze
 						i < 3,//Explosive
 						0,//Force
-						i == 0 ? SOUND_GRENADE_EXPLODE : -1//SoundImpact
+						i == 0 ? SOUND_GRENADE_EXPLODE : -1,//SoundImpact
+						MouseTarget
 					);
 				}
 
@@ -2104,104 +2109,39 @@ void CCharacter::Snap(int SnappingClient)
 		if (!Server()->GetAuthedState(SnappingClient) || Server()->Tick() % 200 == 0)
 			return;
 
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+	Config()->m_SvTestingCommands = 1;
+
 	// Draw cursor
 	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 	if (pSnap && (pSnap->m_ViewCursorID == -1 || pSnap->m_ViewCursorID == m_pPlayer->GetCID()))
 	{
-		CNetObj_Laser *pCursor = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_ViewCursorSnapID, sizeof(CNetObj_Laser)));
-		if (!pCursor)
-			return;
-
 		vec2 CursorPos = pSnap->m_ViewCursorZoomed ? m_CursorPosZoomed : m_CursorPos;
-		pCursor->m_X = round_to_int(CursorPos.x);
-		pCursor->m_Y = round_to_int(CursorPos.y);
-		pCursor->m_FromX = round_to_int(m_Pos.x);
-		pCursor->m_FromY = round_to_int(m_Pos.y);
-		pCursor->m_StartTick = Server()->Tick() - 5;
+		GameServer()->SnapLaserObject(Context, m_ViewCursorSnapID, CursorPos, m_Pos, Server()->Tick() - 5, m_pPlayer->GetCID(), LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 
 	if (m_IsPortalBlocker)
 	{
-		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
-		{
-			CNetObj_DDNetLaser *pInd = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_PortalBlockerIndSnapID, sizeof(CNetObj_DDNetLaser)));
-			if(!pInd)
-				return;
-
-			pInd->m_ToX = round_to_int(m_Pos.x);
-			pInd->m_ToY = round_to_int(m_Pos.y - 80);
-			pInd->m_FromX = round_to_int(m_Pos.x);
-			pInd->m_FromY = round_to_int(m_Pos.y - 80);
-			pInd->m_StartTick = Server()->Tick();
-			pInd->m_Owner = m_pPlayer->GetCID();
-			pInd->m_Type = LASERTYPE_SHOTGUN;
-		}
-		else
-		{
-			CNetObj_Laser *pInd = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_PortalBlockerIndSnapID, sizeof(CNetObj_Laser)));
-			if (!pInd)
-				return;
-
-			pInd->m_X = round_to_int(m_Pos.x);
-			pInd->m_Y = round_to_int(m_Pos.y - 80);
-			pInd->m_FromX = round_to_int(m_Pos.x);
-			pInd->m_FromY = round_to_int(m_Pos.y - 80);
-			pInd->m_StartTick = Server()->Tick();
-		}
+		vec2 IndPos = vec2(m_Pos.x, m_Pos.y - 80.f);
+		GameServer()->SnapLaserObject(Context, m_PortalBlockerIndSnapID, IndPos, IndPos, Server()->Tick(), m_pPlayer->GetCID(), LASERTYPE_SHOTGUN, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 
 	if (m_Passive && !GameServer()->Durak()->InDurakGame(m_pPlayer->GetCID()))
 	{
-		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_PassiveSnapID, Size));
-		if (!pP)
-			return;
-
-		pP->m_X = round_to_int(m_Pos.x);
-		pP->m_Y = round_to_int(m_Pos.y - 50.f);
-		if (Server()->IsSevendown(SnappingClient))
-		{
-			int Subtype = 0;
-			pP->m_Type = POWERUP_ARMOR;
-			((int*)pP)[3] = Subtype;
-		}
-		else
-			pP->m_Type = PICKUP_ARMOR;
+		vec2 IndPos = vec2(m_Pos.x, m_Pos.y - 50.f);
+		GameServer()->SnapPickupObject(Context, m_PassiveSnapID, IndPos, POWERUP_ARMOR, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 
 	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
 	int ID = m_pPlayer->GetCID();
 	if (SnappingClient > -1 && !Server()->Translate(ID, SnappingClient))
 	{
-		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-		CNetObj_Pickup* pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aUntranslatedID[EUntranslatedMap::ID_WEAPON], Size));
-		if (!pPickup)
-			return;
-
-		int Subtype = GameServer()->GetWeaponType(GetActiveWeapon());
-		int Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : POWERUP_WEAPON;
-
-		pPickup->m_X = round_to_int(m_Pos.x);
-		pPickup->m_Y = round_to_int(m_Pos.y);
-		if (Server()->IsSevendown(SnappingClient))
-		{
-			pPickup->m_Type = Type;
-			((int*)pPickup)[3] = Subtype;
-		}
-		else
-			pPickup->m_Type = GameServer()->GetPickupType(Type, Subtype);
+		GameServer()->SnapPickupObject(Context, m_aUntranslatedID[EUntranslatedMap::ID_WEAPON], m_Pos, POWERUP_WEAPON, GetActiveWeapon(), -1, PICKUPFLAG_NO_PREDICT);
 
 		if (m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
 		{
-			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedID[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
-			if (!pLaser)
-				return;
-
-			pLaser->m_X = round_to_int(m_Core.m_HookPos.x);
-			pLaser->m_Y = round_to_int(m_Core.m_HookPos.y);
-			pLaser->m_FromX = round_to_int(m_Pos.x);
-			pLaser->m_FromY = round_to_int(m_Pos.y);
-			pLaser->m_StartTick = Server()->Tick() - 3;
+			GameServer()->SnapLaserObject(Context, m_aUntranslatedID[EUntranslatedMap::ID_HOOK], m_Core.m_HookPos, m_Pos, Server()->Tick() - 3, m_pPlayer->GetCID(), LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 		}
 		return;
 	}
@@ -5418,7 +5358,8 @@ int CCharacter::HasFlag()
 
 bool CCharacter::SendExtendedEntity(CEntity *pEntity)
 {
-	return GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) >= VERSION_DDNET_SWITCH
+	int ClientVersion = GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID());
+	return ClientVersion >= VERSION_DDNET_SWITCH && ClientVersion < VERSION_DDNET_ENTITY_NETOBJS
 		&& !m_pPlayer->IsPaused() && m_pPlayer->GetTeam() != TEAM_SPECTATORS && !pEntity->NetworkClipped(m_pPlayer->GetCID(), false, true)
 		&& (pEntity->m_PlotID < PLOT_START || pEntity->m_PlotID == GetCurrentTilePlotID() || pEntity->IsPlotDoor());
 }

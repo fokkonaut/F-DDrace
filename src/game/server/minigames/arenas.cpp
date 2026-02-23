@@ -779,18 +779,13 @@ void CArenas::Snap(int SnappingClient)
 
 	CFight *pFight = &m_aFights[Fight];
 
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+
 	for (int i = 0; i < 4; i++)
 	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_IDs.m_aBorder[i], sizeof(CNetObj_Laser)));
-		if (!pObj)
-			return;
-
 		int To = i == POINT_BOTTOM_LEFT ? POINT_TOP_LEFT : i+1;
-		pObj->m_X = round_to_int(pFight->m_aCorners[i].x);
-		pObj->m_Y = round_to_int(pFight->m_aCorners[i].y);
-		pObj->m_FromX = round_to_int(pFight->m_aCorners[To].x);
-		pObj->m_FromY = round_to_int(pFight->m_aCorners[To].y);
-		pObj->m_StartTick = Server()->Tick();
+		GameServer()->SnapLaserObject(Context, m_IDs.m_aBorder[i], pFight->m_aCorners[i], pFight->m_aCorners[To], Server()->Tick(), -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 
 	if (!IsConfiguring(SnappingClient))
@@ -800,15 +795,7 @@ void CArenas::Snap(int SnappingClient)
 	{
 		if (pFight->m_aSpawns[i] != vec2(-1, -1))
 		{
-			CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_IDs.m_aSpawn[i], sizeof(CNetObj_Laser)));
-			if (!pObj)
-				return;
-
-			pObj->m_X = round_to_int(pFight->m_aSpawns[i].x);
-			pObj->m_Y = round_to_int(pFight->m_aSpawns[i].y);
-			pObj->m_FromX = round_to_int(pFight->m_aSpawns[i].x);
-			pObj->m_FromY = round_to_int(pFight->m_aSpawns[i].y);
-			pObj->m_StartTick = Server()->Tick();
+			GameServer()->SnapLaserObject(Context, m_IDs.m_aSpawn[i], pFight->m_aSpawns[i], pFight->m_aSpawns[i], Server()->Tick(), -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 		}
 	}
 
@@ -819,22 +806,9 @@ void CArenas::Snap(int SnappingClient)
 	vec2 aBox[4] = { vec2(Pos.x-64, Pos.y-32), vec2(Pos.x+64, Pos.y-32), vec2(Pos.x+64, Pos.y+32), vec2(Pos.x-64, Pos.y+32) };
 	for (int i = 0; i < 4; i++)
 	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_IDs.m_aWeaponBox[i], sizeof(CNetObj_Laser)));
-		if (!pObj)
-			return;
-
 		int To = i == POINT_BOTTOM_LEFT ? POINT_TOP_LEFT : i+1;
-		pObj->m_X = round_to_int(aBox[i].x);
-		pObj->m_Y = round_to_int(aBox[i].y);
-		pObj->m_FromX = round_to_int(aBox[To].x);
-		pObj->m_FromY = round_to_int(aBox[To].y);
-		pObj->m_StartTick = Server()->Tick()-2;
+		GameServer()->SnapLaserObject(Context, m_IDs.m_aWeaponBox[i], aBox[i], aBox[To], Server()->Tick()-2, -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
-
-	int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-	CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_IDs.m_SelectedWeapon, Size));
-	if (!pPickup)
-		return;
 
 	int Type = POWERUP_WEAPON;
 	int Subtype = 0;
@@ -847,15 +821,7 @@ void CArenas::Snap(int SnappingClient)
 	case 3: Subtype = WEAPON_LASER; break;
 	}
 
-	pPickup->m_X = round_to_int(Pos.x);
-	pPickup->m_Y = round_to_int(Pos.y);
-	if (Server()->IsSevendown(SnappingClient))
-	{
-		pPickup->m_Type = Type;
-		((int*)pPickup)[3] = Subtype;
-	}
-	else
-		pPickup->m_Type = GameServer()->GetPickupType(Type, Subtype);
+	GameServer()->SnapPickupObject(Context, m_IDs.m_SelectedWeapon, Pos, Type, Subtype, -1, PICKUPFLAG_NO_PREDICT);
 
 	// activated
 	if (((Subtype == WEAPON_HAMMER && Type == POWERUP_WEAPON) && pFight->m_Weapons.m_Hammer)
@@ -863,19 +829,8 @@ void CArenas::Snap(int SnappingClient)
 		|| (Subtype == WEAPON_GRENADE && pFight->m_Weapons.m_Grenade)
 		|| (Subtype == WEAPON_LASER && pFight->m_Weapons.m_Laser))
 	{
-		CNetObj_Pickup *pShield = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_IDs.m_WeaponActivated, Size));
-		if (!pShield)
-			return;
-
-		pShield->m_X = round_to_int(Pos.x);
-		pShield->m_Y = round_to_int(Pos.y - 64);
-		if (Server()->IsSevendown(SnappingClient))
-		{
-			pShield->m_Type = POWERUP_ARMOR;
-			((int*)pShield)[3] = 0;
-		}
-		else
-			pShield->m_Type = PICKUP_ARMOR;
+		vec2 IndPos = vec2(Pos.x, Pos.y - 64.f);
+		GameServer()->SnapPickupObject(Context, m_IDs.m_WeaponActivated, IndPos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }
 

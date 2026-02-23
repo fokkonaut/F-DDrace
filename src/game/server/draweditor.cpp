@@ -311,7 +311,9 @@ void CDrawEditor::Snap()
 	if (!Active() || m_Category != CAT_TRANSFORM || m_Transform.m_State == TRANSFORM_STATE_RUNNING || m_Setting == TRANSFORM_LOAD_PRESET)
 		return;
 
-	GameServer()->SnapSelectedArea(&m_Transform.m_Area);
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(GetCID());
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(GetCID()), GetCID());
+	GameServer()->SnapSelectedArea(&m_Transform.m_Area, Context);
 }
 
 void CDrawEditor::OnPlayerFire()
@@ -553,10 +555,10 @@ void CDrawEditor::HandleInput()
 				if (m_Setting == LASERWALL_COLOR)
 				{
 					m_Laser.m_Color += m_Input.m_Direction;
-					if (m_Laser.m_Color >= NUM_LASERTYPES)
+					if (m_Laser.m_Color >= LASERTYPE_DRAGGER)
 						m_Laser.m_Color = 0;
 					else if (m_Laser.m_Color < 0)
-						m_Laser.m_Color = NUM_LASERTYPES-1;
+						m_Laser.m_Color = LASERTYPE_DRAGGER-1;
 					((CDoor *)m_pPreview)->SetColor(m_Laser.m_Color);
 				}
 			}

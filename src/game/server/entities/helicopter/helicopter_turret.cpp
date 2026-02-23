@@ -85,7 +85,7 @@ void CVehicleTurret::FireTurret()
 		projectileDirection,
 		Server()->TickSpeed() * 2,
 		false, false,
-		0.f, -1);
+		0.f, -1, projectileDirection);
 }
 
 vec2 CVehicleTurret::GetTurretDirection()
@@ -337,7 +337,7 @@ void CMinigunTurret::FireTurret()
 		projectileDirection,
 		Server()->TickSpeed() * 2,
 		false, true,
-		0.f, SOUND_GRENADE_EXPLODE);
+		0.f, SOUND_GRENADE_EXPLODE, projectileDirection);
 	GameServer()->CreateSound(startingPos, SOUND_GRENADE_FIRE, m_pHelicopter->GetOwner()->TeamMask());
 //	GameServer()->CreateSound(startingPos, SOUND_GUN_FIRE, m_pHelicopter->GetOwner()->TeamMask());
 

@@ -203,6 +203,9 @@ void CLightningLaser::Snap(int SnappingClient)
 			apObjs[i]->m_StartTick = Server()->Tick() + m_StartTick;
 			apObjs[i]->m_Owner = m_Owner;
 			apObjs[i]->m_Type = LASERTYPE_FREEZE;
+			apObjs[i]->m_Subtype = -1;
+			apObjs[i]->m_SwitchNumber = -1;
+			apObjs[i]->m_Flags = 0;
 		}
 		free(apObjs);
 	}

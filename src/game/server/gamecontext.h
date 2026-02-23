@@ -131,6 +131,23 @@ class CRandomMapResult;
 class CMapVoteResult;
 struct CAntibotData;
 
+struct CSnapContext
+{
+	CSnapContext(int Version, bool Sevendown, int ClientId) :
+		m_ClientVersion(Version), m_Sevendown(Sevendown), m_ClientId(ClientId)
+	{
+	}
+
+	int GetClientVersion() const { return m_ClientVersion; }
+	bool IsSevendown() const { return m_Sevendown; }
+	bool ClientId() const { return m_ClientId; }
+
+private:
+	int m_ClientVersion;
+	bool m_Sevendown;
+	int m_ClientId;
+};
+
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
@@ -298,6 +315,10 @@ public:
 	void CreateDeath(vec2 Pos, int Who, Mask128 Mask = Mask128());
 	void CreateFinishConfetti(vec2 Pos, Mask128 Mask = Mask128());
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
+
+	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1, int Flags = 0) const;
+	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags, int Special, int aExtraIds[4]) const;
+	bool SnapPickupObject(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const;
 
 	enum
 	{
@@ -714,9 +735,9 @@ public:
 	void SendMotd(const char* pMsg, int ClientID);
 
 	const char* GetWeaponName(int Weapon);
-	int GetWeaponType(int Weapon);
-	int GetProjectileType(int Weapon);
-	int GetPickupType(int Type, int Subtype);
+	int GetWeaponType(int Weapon) const;
+	int GetProjectileType(int Weapon) const;
+	int GetPickupType(int Type, int Subtype) const;
 
 	const char *GetScoreModeName(int ScoreMode);
 	const char *GetScoreModeCommand(int ScoreMode);
@@ -764,7 +785,7 @@ public:
 	const char *FormatURL(const char *pURL);
 	const char *GetAvatarURL(int ClientID);
 
-	void SnapSelectedArea(CSelectedArea *pSelectedArea);
+	void SnapSelectedArea(CSelectedArea *pSelectedArea, const CSnapContext &Context);
 
 	void SendModLogMessage(int ClientID, const char *pMsg) override;
 

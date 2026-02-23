@@ -139,6 +139,8 @@ public:
 	void StartRound();
 	int GetStartTeam(int NotThisID);
 
+	int TileFlagsToPickupFlags(int TileFlags) const;
+
 	virtual void RegisterChatCommands(CCommandManager *pManager);
 	//static void Com_Example(IConsole::IResult *pResult, void *pContext);
 

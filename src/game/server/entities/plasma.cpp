@@ -114,30 +114,8 @@ void CPlasma::Snap(int SnappingClient)
 		&& SnapPlayer->m_SpecTeam)
 		return;
 
-	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
-	{
-		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
-		if(!pObj)
-			return;
-
-		pObj->m_ToX = round_to_int(m_Pos.x);
-		pObj->m_ToY = round_to_int(m_Pos.y);
-		pObj->m_FromX = round_to_int(m_Pos.x);
-		pObj->m_FromY = round_to_int(m_Pos.y);
-		pObj->m_StartTick = m_EvalTick;
-		pObj->m_Owner = -1;
-		pObj->m_Type = m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
-	}
-	else
-	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-		if(!pObj)
-			return;
-
-		pObj->m_X = round_to_int(m_Pos.x);
-		pObj->m_Y = round_to_int(m_Pos.y);
-		pObj->m_FromX = round_to_int(m_Pos.x);
-		pObj->m_FromY = round_to_int(m_Pos.y);
-		pObj->m_StartTick = m_EvalTick;
-	}
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	int Subtype = (m_Explosive ? 1 : 0) | (m_Freeze ? 2 : 0);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
+		m_Pos, m_Pos, m_EvalTick, -1, LASERTYPE_PLASMA, Subtype, m_Number);
 }

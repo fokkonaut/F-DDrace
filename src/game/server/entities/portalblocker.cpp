@@ -153,35 +153,8 @@ void CPortalBlocker::Snap(int SnappingClient)
 			To = m_StartPos;
 		}
 
-		if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
-		{
-			CNetObj_DDNetLaser *pLaser = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, m_aID[i], sizeof(CNetObj_DDNetLaser)));
-			if(!pLaser)
-				return;
-
-			int Owner = m_Owner;
-			if (!Server()->Translate(Owner, SnappingClient))
-				Owner = -1;
-
-			pLaser->m_ToX = round_to_int(To.x);
-			pLaser->m_ToY = round_to_int(To.y);
-			pLaser->m_FromX = round_to_int(From.x);
-			pLaser->m_FromY = round_to_int(From.y);
-			pLaser->m_StartTick = Server()->Tick() - 3;
-			pLaser->m_Owner = Owner;
-			pLaser->m_Type = LASERTYPE_SHOTGUN;
-		}
-		else
-		{
-			CNetObj_Laser *pButton = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aID[i], sizeof(CNetObj_Laser)));
-			if (!pButton)
-				return;
-
-			pButton->m_X = round_to_int(To.x);
-			pButton->m_Y = round_to_int(To.y);
-			pButton->m_FromX = round_to_int(From.x);
-			pButton->m_FromY = round_to_int(From.y);
-			pButton->m_StartTick = Server()->Tick() - 3;
-		}
+		int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), m_aID[i],
+			To, From, Server()->Tick() - 3, m_Owner, LASERTYPE_SHOTGUN, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 }

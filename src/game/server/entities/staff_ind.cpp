@@ -63,31 +63,11 @@ void CStaffInd::Snap(int SnappingClient)
 	if (!CmaskIsSet(m_TeamMask, SnappingClient) || (pOwner && pOwner->IsPaused()))
 		return;
 
-	int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-	CNetObj_Pickup *pArmor = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_aID[ARMOR], Size));
-	if (!pArmor)
-		return;
-
-	pArmor->m_X = round_to_int(m_aPos[ARMOR].x);
-	pArmor->m_Y = round_to_int(m_aPos[ARMOR].y);
-	if (Server()->IsSevendown(SnappingClient))
-	{
-		pArmor->m_Type = POWERUP_ARMOR;
-		((int*)pArmor)[3] = 0;
-	}
-	else
-		pArmor->m_Type = POWERUP_ARMOR;
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+	
+	GameServer()->SnapPickupObject(Context, m_aID[ARMOR], m_aPos[ARMOR], POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
 
 	// m_ID is created before m_aID is created, means that id is lower and we can simply use it to make the ball behind
-	CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_BallFirst ? m_aID[BALL_FRONT] : m_aID[BALL], sizeof(CNetObj_Laser)));
-	if(!pLaser)
-		return;
-
-	pLaser->m_X = round_to_int(m_aPos[BALL].x);
-	pLaser->m_Y = round_to_int(m_aPos[BALL].y);
-	pLaser->m_FromX = round_to_int(m_aPos[BALL].x);
-	pLaser->m_FromY = round_to_int(m_aPos[BALL].y);
-	pLaser->m_StartTick = Server()->Tick();
+	GameServer()->SnapLaserObject(Context, m_BallFirst ? m_aID[BALL_FRONT] : m_aID[BALL], m_aPos[BALL], m_aPos[BALL], Server()->Tick(), m_Owner, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 }
-
-

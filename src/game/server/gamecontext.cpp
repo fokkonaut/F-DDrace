@@ -7558,7 +7558,7 @@ void CGameContext::CalcScreenParams(float Aspect, float Zoom, float *w, float *h
 	*h *= Zoom;
 }
 
-void CGameContext::SnapSelectedArea(CSelectedArea *pSelectedArea)
+void CGameContext::SnapSelectedArea(CSelectedArea *pSelectedArea, const CSnapContext &Context)
 {
 	vec2 TopLeft = pSelectedArea->TopLeft();
 	vec2 BottomRight = pSelectedArea->BottomRight();
@@ -7566,17 +7566,172 @@ void CGameContext::SnapSelectedArea(CSelectedArea *pSelectedArea)
 
 	for (int i = 0; i < 4; i++)
 	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, pSelectedArea->m_aID[i], sizeof(CNetObj_Laser)));
-		if (!pObj)
-			return;
-
 		int To = i == 3 ? 0 : i+1;
-		pObj->m_X = round_to_int(aPoints[i].x);
-		pObj->m_Y = round_to_int(aPoints[i].y);
-		pObj->m_FromX = round_to_int(aPoints[To].x);
-		pObj->m_FromY = round_to_int(aPoints[To].y);
-		pObj->m_StartTick = Server()->Tick() - 2;
+		SnapLaserObject(Context, pSelectedArea->m_aID[i], aPoints[i], aPoints[To], Server()->Tick() - 2, Context.ClientId(), LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
+}
+
+bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber, int Flags) const
+{
+	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
+	{
+		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, SnapId, sizeof(CNetObj_DDNetLaser)));
+		if(!pObj)
+			return false;
+
+		int TranslatedOwner = Owner;
+		if (!Server()->Translate(TranslatedOwner, Context.ClientId()))
+			TranslatedOwner = -1;
+
+		pObj->m_ToX = round_to_int(To.x);
+		pObj->m_ToY = round_to_int(To.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
+		pObj->m_StartTick = StartTick;
+		pObj->m_Owner = TranslatedOwner;
+		pObj->m_Type = LaserType;
+		pObj->m_Subtype = Subtype;
+		pObj->m_SwitchNumber = SwitchNumber;
+		pObj->m_Flags = Flags;
+	}
+	else
+	{
+		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, SnapId, sizeof(CNetObj_Laser)));
+		if(!pObj)
+			return false;
+
+		pObj->m_X = round_to_int(To.x);
+		pObj->m_Y = round_to_int(To.y);
+		pObj->m_FromX = round_to_int(From.x);
+		pObj->m_FromY = round_to_int(From.y);
+		pObj->m_StartTick = StartTick;
+	}
+
+	return true;
+}
+
+bool CGameContext::SnapPickupObject(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags) const
+{
+	if (!Context.IsSevendown() || Context.GetClientVersion() < VERSION_DDNET_ENTITY_NETOBJS)
+	{
+		int Size = Context.IsSevendown() ? 4*4 : sizeof(CNetObj_Pickup);
+		CNetObj_Pickup* pP = static_cast<CNetObj_Pickup*>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, SnapId, Size));
+		if (!pP)
+			return false;
+
+		pP->m_X = round_to_int(Pos.x);
+		pP->m_Y = round_to_int(Pos.y);
+		if (Context.IsSevendown())
+		{
+			int RealSubtype = GetWeaponType(SubType);
+			pP->m_Type = RealSubtype == WEAPON_NINJA ? POWERUP_NINJA : Type;
+			((int*)pP)[3] = RealSubtype;
+		}
+		else
+			pP->m_Type = GetPickupType(Type, SubType);
+	}
+	else
+	{
+		CNetObj_DDNetPickup *pPickup = static_cast<CNetObj_DDNetPickup*>(Server()->SnapNewItem(NETOBJTYPE_DDNETPICKUP, SnapId, sizeof(CNetObj_DDNetPickup)));
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = round_to_int(Pos.x);
+		pPickup->m_Y = round_to_int(Pos.y);
+		int RealSubtype = GetWeaponType(SubType);
+		pPickup->m_Subtype = RealSubtype;
+		pPickup->m_Type = RealSubtype == WEAPON_NINJA ? POWERUP_NINJA : Type;
+		pPickup->m_SwitchNumber = SwitchNumber;
+		pPickup->m_Flags = Flags;
+	}
+
+	return true;
+}
+
+bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags, int Special, int aExtraIds[4]) const
+{
+	if (Type == POWERUP_BATTERY)
+	{
+		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, SnapId, sizeof(CNetObj_Projectile)));
+		if (!pProj)
+			return false;
+
+		pProj->m_X = round_to_int(Pos.x);
+		pProj->m_Y = round_to_int(Pos.y);
+
+		pProj->m_VelX = 0;
+		pProj->m_VelY = 0;
+		pProj->m_StartTick = 0;
+		pProj->m_Type = WEAPON_LASER;
+	}
+	else
+	{
+		SnapPickupObject(Context, SnapId, Pos, Type, SubType, SwitchNumber, Flags);
+	}
+
+	bool Gun = (SubType == WEAPON_GUN && (Special&SPECIAL_JETPACK || Special&SPECIAL_TELEWEAPON)) || SubType == WEAPON_PROJECTILE_RIFLE || (SubType == WEAPON_HAMMER && Special&SPECIAL_DOORHAMMER);
+	bool Plasma = SubType == WEAPON_PLASMA_RIFLE || SubType == WEAPON_LIGHTSABER || SubType == WEAPON_PORTAL_RIFLE || SubType == WEAPON_TELE_RIFLE
+		|| SubType == WEAPON_LIGHTNING_LASER || (SubType == WEAPON_LASER && Special&SPECIAL_TELEWEAPON) || (SubType == WEAPON_TASER && Type == POWERUP_WEAPON);
+	bool Heart = SubType == WEAPON_HEART_GUN;
+	bool Grenade = SubType == WEAPON_STRAIGHT_GRENADE || SubType == WEAPON_BALL_GRENADE || (SubType == WEAPON_GRENADE && Special&SPECIAL_TELEWEAPON);
+
+	int ExtraBulletOffset = 30;
+	int SpreadOffset = -20;
+	if (Special&SPECIAL_SPREADWEAPON && (Gun || Plasma || Heart || Grenade))
+		ExtraBulletOffset = 50;
+
+	if (Special&SPECIAL_SPREADWEAPON)
+	{
+		for (int i = 1; i < 4; i++)
+		{
+			CNetObj_Projectile* pSpreadIndicator = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[i], sizeof(CNetObj_Projectile)));
+			if (!pSpreadIndicator)
+				return false;
+
+			pSpreadIndicator->m_X = round_to_int(Pos.x + SpreadOffset);
+			pSpreadIndicator->m_Y = round_to_int(Pos.y - 30);
+			pSpreadIndicator->m_Type = WEAPON_SHOTGUN;
+			pSpreadIndicator->m_StartTick = 0;
+
+			SpreadOffset += 20;
+		}
+	}
+
+	if (Gun)
+	{
+		CNetObj_Projectile* pShotgunBullet = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[0], sizeof(CNetObj_Projectile)));
+		if (!pShotgunBullet)
+			return false;
+
+		pShotgunBullet->m_X = round_to_int(Pos.x);
+		pShotgunBullet->m_Y = round_to_int(Pos.y - ExtraBulletOffset);
+		pShotgunBullet->m_Type = WEAPON_SHOTGUN;
+		pShotgunBullet->m_StartTick = 0;
+	}
+	else if (Plasma)
+	{
+		vec2 LaserPos = vec2(Pos.x, Pos.y - ExtraBulletOffset);
+		int LaserType = (SubType == WEAPON_TASER || SubType == WEAPON_LIGHTNING_LASER) ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
+		SnapLaserObject(Context, aExtraIds[0], LaserPos, LaserPos, Server()->Tick(), -1, LaserType, -1, -1, LASERFLAG_NO_PREDICT);
+	}
+	else if (Heart)
+	{
+		vec2 HeartPos = vec2(Pos.x, Pos.y - ExtraBulletOffset);
+		SnapPickupObject(Context, aExtraIds[0], HeartPos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
+	}
+	else if (Grenade)
+	{
+		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[0], sizeof(CNetObj_Projectile)));
+		if (!pProj)
+			return false;
+
+		pProj->m_X = round_to_int(Pos.x);
+		pProj->m_Y = round_to_int(Pos.y - ExtraBulletOffset);
+		pProj->m_StartTick = Server()->Tick() - 2;
+		pProj->m_Type = WEAPON_GRENADE;
+	}
+
+	return true;
 }
 
 void CGameContext::ConnectDummy(int DummyMode, vec2 Pos)
@@ -7910,7 +8065,7 @@ const char *CGameContext::GetWeaponName(int Weapon)
 	return "Unknown";
 }
 
-int CGameContext::GetWeaponType(int Weapon)
+int CGameContext::GetWeaponType(int Weapon) const
 {
 	switch (Weapon)
 	{
@@ -7942,7 +8097,7 @@ int CGameContext::GetWeaponType(int Weapon)
 	return Weapon;
 }
 
-int CGameContext::GetProjectileType(int Weapon)
+int CGameContext::GetProjectileType(int Weapon) const
 {
 	switch (Weapon)
 	{
@@ -7956,7 +8111,7 @@ int CGameContext::GetProjectileType(int Weapon)
 	return Weapon;
 }
 
-int CGameContext::GetPickupType(int Type, int Subtype)
+int CGameContext::GetPickupType(int Type, int Subtype) const
 {
 	if (Type == POWERUP_BATTERY)
 		return PICKUP_LASER;

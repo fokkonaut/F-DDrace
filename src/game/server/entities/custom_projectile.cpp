@@ -161,29 +161,14 @@ void CCustomProjectile::Snap(int SnappingClient)
 	if (!CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
 	if (m_Type == WEAPON_PLASMA_RIFLE || m_Type == WEAPON_GUN)
 	{
-		CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-		if (!pLaser)
-			return;
-
-		pLaser->m_X = (int)m_Pos.x;
-		pLaser->m_Y = (int)m_Pos.y;
-		pLaser->m_FromX = (int)m_Pos.x;
-		pLaser->m_FromY = (int)m_Pos.y;
-		pLaser->m_StartTick = m_EvalTick;
+		GameServer()->SnapLaserObject(Context, GetID(), m_Pos, m_Pos, m_EvalTick, m_Owner, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 	else if (m_Type == WEAPON_HEART_GUN)
 	{
-		int Size = Server()->IsSevendown(SnappingClient) ? 4*4 : sizeof(CNetObj_Pickup);
-		CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));
-		if (!pPickup)
-			return;
-
-		pPickup->m_X = (int)m_Pos.x;
-		pPickup->m_Y = (int)m_Pos.y;
-		pPickup->m_Type = POWERUP_HEALTH;
-		if (Server()->IsSevendown(SnappingClient))
-			((int*)pPickup)[3] = 0;
+		GameServer()->SnapPickupObject(Context, GetID(), m_Pos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }

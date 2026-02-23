@@ -459,17 +459,12 @@ void CLaserText::Snap(int SnappingClient)
 
 	if (GameServer()->GetPlayerChar(SnappingClient) && !CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
-	
-	for(int i = 0; i < m_CharNum; ++i){
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_Chars[i]->getID(), sizeof(CNetObj_Laser)));
-		if(!pObj)
-			return;
 
-		pObj->m_X = m_Chars[i]->GetPos().x;
-		pObj->m_Y = m_Chars[i]->GetPos().y;
-		pObj->m_FromX = m_Chars[i]->m_Frompos.x;
-		pObj->m_FromY = m_Chars[i]->m_Frompos.y;
-		pObj->m_StartTick = Server()->Tick();		
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+	for(int i = 0; i < m_CharNum; ++i)
+	{
+		GameServer()->SnapLaserObject(Context, m_Chars[i]->getID(), m_Chars[i]->GetPos(), m_Chars[i]->m_Frompos, Server()->Tick(), m_Owner, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 }
 

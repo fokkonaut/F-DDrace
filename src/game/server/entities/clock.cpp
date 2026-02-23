@@ -67,21 +67,16 @@ int CClock::GetSnapID(int Hand)
 
 void CClock::Snap(int SnappingClient)
 {
+	if (NetworkClipped(SnappingClient, m_Pos))
+		return;
+
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
+
 	// send hands in swapped order to have the second hand over the minute and hour hand
 	for (int i = 2; i > -1; i--)
 	{
-		if (NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_Hand[i].m_To))
-			return;
-
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetSnapID(i), sizeof(CNetObj_Laser)));
-		if (!pObj)
-			return;
-
-		pObj->m_X = (int)m_Pos.x;
-		pObj->m_Y = (int)m_Pos.y;
-		pObj->m_FromX = (int)m_Hand[i].m_To.x;
-		pObj->m_FromY = (int)m_Hand[i].m_To.y;
 		// the second hand is the thinnest, and the hour hand is the thickest
-		pObj->m_StartTick = Server()->Tick()-4+i;
+		GameServer()->SnapLaserObject(Context, GetSnapID(i), m_Pos, m_Hand[i].m_To, Server()->Tick()-4+i, -1, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 }

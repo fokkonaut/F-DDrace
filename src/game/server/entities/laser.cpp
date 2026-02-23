@@ -432,34 +432,8 @@ void CLaser::Snap(int SnappingClient)
 	if (!CmaskIsSet(TeamMask, SnappingClient))
 		return;
 
-	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
-	{
-		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
-		if(!pObj)
-			return;
-
-		int Owner = m_Owner;
-		if (!Server()->Translate(Owner, SnappingClient))
-			Owner = -1;
-
-		pObj->m_ToX = round_to_int(m_Pos.x);
-		pObj->m_ToY = round_to_int(m_Pos.y);
-		pObj->m_FromX = round_to_int(m_From.x);
-		pObj->m_FromY = round_to_int(m_From.y);
-		pObj->m_StartTick = m_EvalTick;
-		pObj->m_Owner = Owner;
-		pObj->m_Type = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : m_Type == WEAPON_TASER ? LASERTYPE_FREEZE : -1;
-	}
-	else
-	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-		if(!pObj)
-			return;
-
-		pObj->m_X = round_to_int(m_Pos.x);
-		pObj->m_Y = round_to_int(m_Pos.y);
-		pObj->m_FromX = round_to_int(m_From.x);
-		pObj->m_FromY = round_to_int(m_From.y);
-		pObj->m_StartTick = m_EvalTick;
-	}
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : m_Type == WEAPON_TASER ? LASERTYPE_FREEZE : -1;
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
+		m_Pos, m_From, m_EvalTick, m_Owner, LaserType, 0, m_Number);
 }

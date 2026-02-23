@@ -295,12 +295,13 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
 			Pos, //Pos
-			vec2(sin(Deg), cos(Deg)), //Dir
+			vec2(std::sin(Deg), std::cos(Deg)), //Dir
 			-2, //Span
 			true, //Freeze
 			true, //Explosive
 			0, //Force
 			(Config()->m_SvShotgunBulletSound)?SOUND_GRENADE_EXPLODE:-1,//SoundImpact
+			vec2(std::sin(Deg), std::cos(Deg)),
 			Layer,
 			Number
 			);
@@ -324,12 +325,13 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
 			Pos, //Pos
-			vec2(sin(Deg), cos(Deg)), //Dir
+			vec2(std::sin(Deg), std::cos(Deg)), //Dir
 			-2, //Span
 			true, //Freeze
 			false, //Explosive
 			0,
 			SOUND_GRENADE_EXPLODE,
+			vec2(std::sin(Deg), std::cos(Deg)),
 			Layer,
 			Number
 			);
@@ -524,7 +526,8 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 	if(Type != -1)
 	{
-		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number);
+		int PickupFlags = TileFlagsToPickupFlags(Flags);
+		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number, -1, true, PickupFlags);
 		return true;
 	}
 
@@ -922,6 +925,17 @@ int IGameController::GetStartTeam(int NotThisID)
 	return TEAM_SPECTATORS;
 }
 
+int IGameController::TileFlagsToPickupFlags(int TileFlags) const
+{
+	int PickupFlags = 0;
+	if(TileFlags & TILEFLAG_VFLIP)
+		PickupFlags |= PICKUPFLAG_XFLIP;
+	if(TileFlags & TILEFLAG_HFLIP)
+		PickupFlags |= PICKUPFLAG_YFLIP;
+	if(TileFlags & TILEFLAG_ROTATE)
+		PickupFlags |= PICKUPFLAG_ROTATE;
+	return PickupFlags;
+}
 
 void IGameController::RegisterChatCommands(CCommandManager *pManager)
 {
