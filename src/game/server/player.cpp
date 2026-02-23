@@ -1474,10 +1474,11 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 
 	if (DoChatMsg)
 	{
+		dbg_msg("hi", "hi");
 		if (Team == TEAM_RED)
-			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CFGFLAG_CHAT, Localizable("'%s' joined the game"), Server()->ClientName(m_ClientID));
+			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("'%s' joined the game"), Server()->ClientName(m_ClientID));
 		else
-			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CFGFLAG_CHAT, Localizable("'%s' joined the spectators"), Server()->ClientName(m_ClientID));
+			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("'%s' joined the spectators"), Server()->ClientName(m_ClientID));
 	}
 }
 
