@@ -1898,6 +1898,29 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		m_pPlayer->m_ShowName = true;
 		m_pPlayer->m_SurvivalDieTick = Server()->Tick();
 	}
+	
+	if (!m_IsZombie)
+	{
+		int FirstAttachedId = -1;
+		for(const auto &AttachedPlayerId : m_Core.m_AttachedPlayers)
+		{
+			const CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerId);
+			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == m_pPlayer->GetCID() && pOtherPlayer->m_IsZombie)
+			{
+				if (FirstAttachedId == -1 || (pOtherPlayer->m_Core.m_HookTick != 0 && pOtherPlayer->m_Core.m_HookTick > GameServer()->GetPlayerChar(FirstAttachedId)->m_Core.m_HookTick))
+				{
+					FirstAttachedId = AttachedPlayerId;
+				}
+			}
+		}
+
+		// give our human to first zombie that hooked us while we killed
+		if (FirstAttachedId != -1)
+		{
+			GameServer()->GetPlayerChar(FirstAttachedId)->TryHumanTransformation(this);
+			GameServer()->CreateExplosion(m_Pos, m_pPlayer->GetCID(), WEAPON_GRENADE, true, Team(), TeamMask());
+		}
+	}
 
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
