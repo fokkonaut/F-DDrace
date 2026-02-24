@@ -250,6 +250,10 @@ public:
 	CEventHandler m_Events;
 	class CPlayer *m_apPlayers[MAX_CLIENTS];
 
+	// keep last input to always apply when none is sent
+	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
+	bool m_aPlayerHasInput[MAX_CLIENTS];
+
 	class IGameController *m_pController;
 	CGameWorld m_World;
 	CCommandManager m_CommandManager;

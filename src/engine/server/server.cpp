@@ -3073,10 +3073,22 @@ int CServer::Run()
 			while(Now > TickStartTime(m_CurrentGameTick+1))
 			{
 				for(int c = 0; c < MAX_CLIENTS; c++)
-					if(m_aClients[c].m_State == CClient::STATE_INGAME)
-						for(int i = 0; i < 200; i++)
-							if(m_aClients[c].m_aInputs[i].m_GameTick == Tick() + 1)
-								GameServer()->OnClientPredictedEarlyInput(c, m_aClients[c].m_aInputs[i].m_aData);
+				{
+					if(m_aClients[c].m_State != CClient::STATE_INGAME)
+						continue;
+					bool ClientHadInput = false;
+					for(auto &Input : m_aClients[c].m_aInputs)
+					{
+						if(Input.m_GameTick == Tick() + 1)
+						{
+							GameServer()->OnClientPredictedEarlyInput(c, Input.m_aData);
+							ClientHadInput = true;
+							break;
+						}
+					}
+					if(!ClientHadInput)
+						GameServer()->OnClientPredictedEarlyInput(c, nullptr);
+				}
 
 				m_CurrentGameTick++;
 				NewTicks = true;

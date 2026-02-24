@@ -69,6 +69,9 @@ void CGameContext::Construct(int Resetting)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_apPlayers[i] = 0;
 
+	mem_zero(&m_aLastPlayerInput, sizeof(m_aLastPlayerInput));
+	std::fill(std::begin(m_aPlayerHasInput), std::end(m_aPlayerHasInput), false);
+
 	m_pController = 0;
 	m_VoteCloseTime = 0;
 	m_VoteCancelTime = 0;
@@ -1636,6 +1639,19 @@ void CGameContext::OnClientDirectInput(int ClientID, void *pInput)
 
 void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 {
+	CNetObj_PlayerInput *pApplyInput = static_cast<CNetObj_PlayerInput *>(pInput);
+
+	if(pApplyInput == nullptr)
+	{
+		// early return if no input at all has been sent by a player
+		if(!m_aPlayerHasInput[ClientID])
+		{
+			return;
+		}
+		// set to last sent input when no new input has been sent
+		pApplyInput = &m_aLastPlayerInput[ClientID];
+	}
+
 	if(!m_World.m_Paused)
 	{
 		int NumFailures = m_NetObjHandler.NumObjFailures();
@@ -1649,14 +1665,38 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 			}
 		}
 		else
-			m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
+		{
+			m_apPlayers[ClientID]->OnPredictedInput(pApplyInput);
+		}
 	}
 }
 
 void CGameContext::OnClientPredictedEarlyInput(int ClientID, void *pInput)
 {
+	CNetObj_PlayerInput *pApplyInput = static_cast<CNetObj_PlayerInput *>(pInput);
+
+	if(pApplyInput == nullptr)
+	{
+		// early return if no input at all has been sent by a player
+		if(!m_aPlayerHasInput[ClientID])
+		{
+			return;
+		}
+		// set to last sent input when no new input has been sent
+		pApplyInput = &m_aLastPlayerInput[ClientID];
+	}
+	else
+	{
+		// Store input in this function and not in `OnClientPredictedInput`,
+		// because this function is called on all inputs, while
+		// `OnClientPredictedInput` is only called on the first input of each
+		// tick.
+		mem_copy(&m_aLastPlayerInput[ClientID], pApplyInput, sizeof(m_aLastPlayerInput[ClientID]));
+		m_aPlayerHasInput[ClientID] = true;
+	}
+
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientID]->OnPredictedEarlyInput((CNetObj_PlayerInput *)pInput);
+		m_apPlayers[ClientID]->OnPredictedEarlyInput(pApplyInput);
 }
 
 struct CVoteOptionServer *CGameContext::GetVoteOption(int Index)
@@ -1812,6 +1852,9 @@ void CGameContext::OnClientEnter(int ClientID)
 		if (OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
 	}
+
+	mem_zero(&m_aLastPlayerInput[ClientID], sizeof(m_aLastPlayerInput[ClientID]));
+	m_aPlayerHasInput[ClientID] = false;
 
 	SendChatTarget(ClientID, "F-DDrace Mod. Version: " GAME_VERSION ", by fokkonaut");
 	SendChatTarget(ClientID, "for more information, please say '/info'");
