@@ -2183,6 +2183,8 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		m_ResumeMoved = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEBROADCASTS)
 		m_HideBroadcasts = true;
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_ANTIPING)
+		m_AntiPing = true;
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
 
@@ -2240,6 +2242,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_RESUMEMOVED;
 	if (m_HideBroadcasts)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEBROADCASTS;
+	if (m_AntiPing)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_ANTIPING;
 	pAccount->m_VoteMenuFlags = GameServer()->m_VotingMenu.GetFlags(m_ClientID);
 
 	GameServer()->UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
@@ -2887,6 +2891,18 @@ void CPlayer::SetHideBroadcasts(bool Set)
 	}
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("You will now see all broadcasts again"));
+}
+
+void CPlayer::SetAntiPing(bool Set)
+{
+	if (m_AntiPing == Set)
+		return;
+	m_AntiPing = Set;
+	if (Set)
+		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing enabled (may cause unwanted side-effects)"));
+	else
+		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing disabled"));
+	GameServer()->SendTuningParams(m_ClientID, m_pCharacter ? m_pCharacter->m_TuneZone : m_TuneZone);
 }
 
 void CPlayer::SetWeaponIndicator(bool Set)

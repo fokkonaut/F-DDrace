@@ -263,7 +263,7 @@ MACRO_CONFIG_INT(SvPlotDoorHealth, sv_plot_door_health, 30, 0, 1000, CFGFLAG_SER
 
 // taser battery
 MACRO_CONFIG_INT(SvTaserBatteryRespawnTime, sv_taser_battery_respawn_time, 10, 1, 60, CFGFLAG_SERVER, "Time in minutes a taser battery respawns after pickup", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvTaserStrengthDefault, sv_taser_strength_default, 0, 0, 10, CFGFLAG_SERVER, "Default taser strength for when a player is not logged in", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvTaserStrengthDefault, sv_taser_strength_default, 1, 0, 10, CFGFLAG_SERVER, "Default taser strength for when a player is not logged in", AUTHED_ADMIN)
 
 // spawn weapons
 MACRO_CONFIG_INT(SvSpawnWeapons, sv_spawn_weapons, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether account spawn weapons will be given on spawn", AUTHED_ADMIN)

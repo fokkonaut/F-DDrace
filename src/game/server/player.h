@@ -520,8 +520,13 @@ public:
 	int64 m_VoteQuestionEndTick;
 	int64 m_LastVoteStatusUpdateTick;
 
+	// AntiPing
+	void SetAntiPing(bool Set);
+	bool AntiPing() { return m_AntiPing; }
+
 private:
 	int64 m_WalletMoney;
+	bool m_AntiPing;
 };
 
 #endif

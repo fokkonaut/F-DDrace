@@ -2516,6 +2516,13 @@ void CGameContext::ConHideBroadcasts(IConsole::IResult *pResult, void *pUserData
 	if (pPlayer) pPlayer->SetHideBroadcasts(pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->m_HideBroadcasts);
 }
 
+void CGameContext::ConAntiPing(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (pPlayer) pPlayer->SetAntiPing(pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->AntiPing());
+}
+
 void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

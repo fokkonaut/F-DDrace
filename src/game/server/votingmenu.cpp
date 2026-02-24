@@ -50,6 +50,7 @@ static const char *MISC_ZOOMCURSOR = Localizable("Zoom Cursor");
 static const char *MISC_RESUMEMOVED = Localizable("Resume Moved");
 static const char *MISC_HIDEBROADCASTS = Localizable("Hide Broadcasts");
 static const char *MISC_LOCALCHAT = Localizable("Local Chat");
+static const char *MISC_ANTIPING = Localizable("AntiPing");
 
 void CVotingMenu::Init(CGameContext *pGameServer)
 {
@@ -439,6 +440,11 @@ bool CVotingMenu::OnMessageSuccess(int ClientID, const char *pDesc, const char *
 			pPlayer->JoinChat(!pPlayer->m_LocalChat);
 			return true;
 		}
+		if (IsOption(pDesc, MISC_ANTIPING))
+		{
+			pPlayer->SetAntiPing(!pPlayer->AntiPing());
+			return true;
+		}
 
 		for (int i = -1; i < CServer::NUM_MAP_DESIGNS; i++)
 		{
@@ -790,6 +796,7 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 	{
 		DoLineToggleOption(Page, pNumOptions, MISC_LOCALCHAT, pPlayer->m_LocalChat);
 	}
+	DoLineToggleOption(Page, pNumOptions, MISC_ANTIPING, pPlayer->AntiPing());
 
 	std::vector<const char *> vpDesigns;
 	for (int i = -1; i < CServer::NUM_MAP_DESIGNS; i++)
@@ -911,6 +918,8 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 			Flags |= PREVFLAG_MISC_RESUMEMOVED;
 		if (pPlayer->m_HideBroadcasts)
 			Flags |= PREVFLAG_MISC_HIDEBROADCASTS;
+		if (pPlayer->AntiPing())
+			Flags |= PREVFLAG_MISC_ANTIPING;
 		pStats->m_Minigame = pPlayer->m_Minigame;
 		pStats->m_ScoreMode = pPlayer->m_ScoreMode;
 	}

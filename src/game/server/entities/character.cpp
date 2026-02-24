@@ -368,6 +368,22 @@ void CCharacter::DoWeaponSwitch()
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
+
+	// AntiPing
+	if (m_pPlayer->AntiPing())
+	{
+		bool SwitchToNormal = GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS;
+		bool SwitchToExtra = GetActiveWeapon() >= NUM_VANILLA_WEAPONS;
+		if (SwitchToNormal || SwitchToExtra)
+		{
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER || GetLastWeapon() == WEAPON_TELEKINESIS
+				|| GetLastWeapon() == WEAPON_DRAW_EDITOR))
+			{
+				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
+			}
+		}
+	}
 }
 
 void CCharacter::HandleWeaponSwitch()
@@ -2240,7 +2256,8 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		if (m_aWeapons[i].m_Got)
 			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
 
-	bool Helicopter = SnappingClient == m_pPlayer->GetCID() && m_pHelicopter;
+	bool Local = SnappingClient == m_pPlayer->GetCID();
+	bool Helicopter = Local && m_pHelicopter;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
 	if(m_Super)
@@ -2269,7 +2286,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_HasTeleLaser && m_aWeapons[WEAPON_LASER].m_Got)
 		Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(aGotWeapon[WEAPON_HAMMER])
+	if(aGotWeapon[WEAPON_HAMMER] && (!Local || !m_pPlayer->AntiPing() || GetActiveWeapon() != WEAPON_HAMMER || !m_AntiPingHideHammerTicks))
 		Flags |= CHARACTERFLAG_WEAPON_HAMMER;
 	if(aGotWeapon[WEAPON_GUN])
 		Flags |= CHARACTERFLAG_WEAPON_GUN;
@@ -2279,7 +2296,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_WEAPON_GRENADE;
 	if(aGotWeapon[WEAPON_LASER])
 		Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(aGotWeapon[WEAPON_NINJA])
+	if(aGotWeapon[WEAPON_NINJA] && (!Local || !m_pPlayer->AntiPing() || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA))
 		Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	//if(m_Core.m_LiveFrozen)
 	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
@@ -2354,7 +2371,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	bool RainbowNameAffected = SnappingClient == m_pPlayer->GetCID() && GameServer()->m_RainbowName.IsAffected(SnappingClient);
 	int Events = m_TriggeredEvents;
 	// jump is used for flying up, annoying air jump effect otherwise
-	if (SnappingClient == m_pPlayer->GetCID() && (m_pHelicopter || m_Snake.Active() || RainbowNameAffected))
+	bool Local = SnappingClient == m_pPlayer->GetCID();
+	if (Local && (m_pHelicopter || m_Snake.Active() || RainbowNameAffected))
 	{
 		pCharacter->m_Jumped |= 2;
 		Events |= COREEVENTFLAG_AIR_JUMP;
@@ -2403,6 +2421,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	if (pCharacter->m_Weapon == -1 && GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_TEE_NO_WEAPON)
 	{
 		pCharacter->m_Weapon = m_NumGrogsHolding ? WEAPON_HAMMER : WEAPON_GUN;
+	}
+
+	if (Local && m_pPlayer->AntiPing() && pCharacter->m_Weapon == WEAPON_HAMMER && m_AntiPingHideHammerTicks)
+	{
+		pCharacter->m_Weapon = -1;
 	}
 
 	pCharacter->m_AttackTick = m_AttackTick;
@@ -4429,6 +4452,8 @@ void CCharacter::FDDraceInit()
 	m_LastSetInGame = 0;
 	SetInGame(true);
 
+	m_AntiPingHideHammerTicks = 0;
+
 	m_pDummyHandle = 0;
 	CreateDummyHandle(m_pPlayer->GetDummyMode());
 }
@@ -4684,6 +4709,11 @@ void CCharacter::FDDraceTick()
 	{
 		SetBirthdayJetpack(false);
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Your jetpack is now disabled"));
+	}
+
+	if (m_AntiPingHideHammerTicks > 0)
+	{
+		m_AntiPingHideHammerTicks--;
 	}
 
 	// update

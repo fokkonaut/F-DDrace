@@ -707,6 +707,11 @@ public:
 	CNetObj_PlayerInput *LatestInput() { return &m_LatestInput; };
 	int GetReloadTimer() { return m_ReloadTimer; }
 
+	// AntiPing
+	// https://github.com/ddnet/ddnet/blob/bca9a344dd257c62dc337d7e199213b43c15dde2/src/game/client/prediction/entities/character.cpp#L1501
+	// Dont show hammer as activeweapon
+	int m_AntiPingHideHammerTicks;
+
 	// Handles dummymode stuff
 	void CreateDummyHandle(int Dummymode);
 	CDummyBase *m_pDummyHandle;

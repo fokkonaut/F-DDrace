@@ -92,6 +92,7 @@ CHAT_COMMAND("language", "?s[lang-code]", CFGFLAG_CHAT, ConLanguage, this, "Chan
 CHAT_COMMAND("discord", "", CFGFLAG_CHAT, ConDiscord, this, "Sends Discord invite link", AUTHED_NO)
 CHAT_COMMAND("shrug", "", CFGFLAG_CHAT, ConShrug, this, "¯\\_(ツ)_/¯", AUTHED_NO)
 CHAT_COMMAND("hidebroadcasts", "?i['0'|'1']", CFGFLAG_CHAT, ConHideBroadcasts, this, "Whether to hide money, jail, escape broadcasts and show them in vote menu instead", AUTHED_NO)
+CHAT_COMMAND("antiping", "?i['0'|'1']", CFGFLAG_CHAT, ConAntiPing, this, "Whether the server will try aggressively to predict custom features such as weapons (may cause unwanted side-effects)", AUTHED_NO)
 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)

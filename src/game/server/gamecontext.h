@@ -105,7 +105,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 15,
+	ACC_CURRENT_VERSION = 16,
 
 	// vip
 	VIP_CLASSIC = 1,
@@ -716,6 +716,7 @@ public:
 		ACCFLAG_HIDEDRAWINGS = 1<<3,
 		ACCFLAG_RESUMEMOVED = 1<<4,
 		ACCFLAG_HIDEBROADCASTS = 1<<5,
+		ACCFLAG_ANTIPING = 1<<6,
 	};
 
 	// money drops
@@ -1045,6 +1046,7 @@ private:
 	static void ConPlot(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideDrawings(IConsole::IResult* pResult, void* pUserData);
 	static void ConHideBroadcasts(IConsole::IResult* pResult, void* pUserData);
+	static void ConAntiPing(IConsole::IResult* pResult, void* pUserData);
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);

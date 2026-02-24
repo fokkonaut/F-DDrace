@@ -1318,6 +1318,45 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
 			Tunings.m_Gravity = 0.f;
+
+		// AntiPing
+		if (pChr->GetPlayer()->AntiPing())
+		{
+			const int PreventReloadTimer = 1000000;
+			int ActiveWeapon = pChr->GetActiveWeapon();
+			int WeaponType = GetWeaponType(ActiveWeapon);
+			if (ActiveWeapon != WEAPON_LASER && WeaponType == WEAPON_LASER)
+			{
+				Tunings.m_LaserReach = 0.f;
+
+				if (ActiveWeapon == WEAPON_TASER)
+					Tunings.m_LaserFireDelay = Tunings.m_TaserFireDelay;
+				else if (ActiveWeapon == WEAPON_PORTAL_RIFLE)
+					Tunings.m_LaserFireDelay = Tunings.m_PortalRifleFireDelay;
+				else if (ActiveWeapon == WEAPON_PLASMA_RIFLE)
+					Tunings.m_LaserFireDelay = Tunings.m_PlasmaRifleFireDelay;
+				else if (ActiveWeapon == WEAPON_PROJECTILE_RIFLE)
+					Tunings.m_LaserFireDelay = Tunings.m_ProjectileRifleFireDelay;
+				else if (ActiveWeapon == WEAPON_TELE_RIFLE)
+					Tunings.m_LaserFireDelay = Tunings.m_TeleRifleFireDelay;
+				else if (ActiveWeapon == WEAPON_LIGHTNING_LASER)
+					Tunings.m_LaserFireDelay = Tunings.m_LightningLaserFireDelay;
+			}
+			else if (ActiveWeapon == WEAPON_STRAIGHT_GRENADE)
+				Tunings.m_GrenadeFireDelay = Tunings.m_StraightGrenadeFireDelay;
+			else if (ActiveWeapon == WEAPON_BALL_GRENADE)
+				Tunings.m_GrenadeFireDelay = Tunings.m_BallGrenadeFireDelay;
+			else if (ActiveWeapon == WEAPON_HEART_GUN)
+				Tunings.m_GunFireDelay = Tunings.m_HeartGunFireDelay;
+			else if (ActiveWeapon == WEAPON_LIGHTSABER)
+				Tunings.m_GunFireDelay = PreventReloadTimer;
+			else if (ActiveWeapon == WEAPON_TELEKINESIS || ActiveWeapon == WEAPON_DRAW_EDITOR)
+			{
+				Tunings.m_NinjaFireDelay = PreventReloadTimer;
+				// The way everything works the client might mispredict a grenade or gun proj or a laser even though we are on ninja. prevent that
+				Tunings.m_GunFireDelay = Tunings.m_ShotgunFireDelay = Tunings.m_GrenadeFireDelay = Tunings.m_LaserFireDelay = PreventReloadTimer;
+			}
+		}
 	}
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
