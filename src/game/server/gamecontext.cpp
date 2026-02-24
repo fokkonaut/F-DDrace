@@ -837,6 +837,24 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 	return true;
 }
 
+static void UnescapeNewlines(char *pBuf)
+{
+	int i, j;
+	for(i = 0, j = 0; pBuf[i]; i++, j++)
+	{
+		if(pBuf[i] == '\\' && pBuf[i + 1] == 'n')
+		{
+			pBuf[j] = '\n';
+			i++;
+		}
+		else if(i != j)
+		{
+			pBuf[j] = pBuf[i];
+		}
+	}
+	pBuf[j] = '\0';
+}
+
 void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImportant, CFormatArg *pArgs, int NumArgs)
 {
 	if (ClientID == -1)
@@ -860,20 +878,7 @@ void CGameContext::SendBroadcast(const char* pText, int ClientID, bool IsImporta
 	// This is done clientside in 0.7, but DDNet clients only parse aBuf[i] == '\n'
 	if (Server()->IsSevendown(ClientID))
 	{
-		int i, j;
-		for(i = 0, j = 0; aBuf[i]; i++, j++)
-		{
-			if(aBuf[i] == '\\' && aBuf[i + 1] == 'n')
-			{
-				aBuf[j] = '\n';
-				i++;
-			}
-			else if(i != j)
-			{
-				aBuf[j] = aBuf[i];
-			}
-		}
-		aBuf[j] = '\0';
+		UnescapeNewlines(aBuf);
 	}
 
 	Msg.m_pMessage = aBuf;
@@ -914,6 +919,61 @@ void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
 		CNetMsg_Sv_WeaponPickup Msg;
 		Msg.m_Weapon = Weapon;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	}
+}
+
+void CGameContext::SendServerAlert(const char *pMessage)
+{
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		if(!m_apPlayers[ClientId])
+		{
+			continue;
+		}
+
+		if(GetClientDDNetVersion(ClientId) >= VERSION_DDNET_IMPORTANT_ALERT)
+		{
+			CNetMsg_Sv_ServerAlert Msg;
+			Msg.m_pMessage = pMessage;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		}
+		else
+		{
+			char aBroadcastText[1024 + 32];
+			str_copy(aBroadcastText, "SERVER ALERT\n\n");
+			str_append(aBroadcastText, pMessage, sizeof(aBroadcastText));
+			SendBroadcast(aBroadcastText, ClientId, true);
+		}
+	}
+
+	// Record server alert to demos exactly once
+	// TODO: Workaround https://github.com/ddnet/ddnet/issues/11144 by using client ID 0,
+	//       otherwise the message is recorded multiple times.
+	CNetMsg_Sv_ServerAlert Msg;
+	Msg.m_pMessage = pMessage;
+	Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, 0);
+}
+
+void CGameContext::SendModeratorAlert(const char *pMessage, int ToClientId)
+{
+	dbg_assert(ToClientId >= 0 && ToClientId < MAX_CLIENTS, "SendImportantAlert ToClientId invalid");
+	dbg_assert(m_apPlayers[ToClientId] != nullptr, "Client not online");
+
+	if(GetClientDDNetVersion(ToClientId) >= VERSION_DDNET_IMPORTANT_ALERT)
+	{
+		CNetMsg_Sv_ModeratorAlert Msg;
+		Msg.m_pMessage = pMessage;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ToClientId);
+	}
+	else
+	{
+		char aBroadcastText[1024 + 32];
+		str_copy(aBroadcastText, "MODERATOR ALERT\n\n");
+		str_append(aBroadcastText, pMessage, sizeof(aBroadcastText));
+		SendBroadcast(aBroadcastText, ToClientId, true);
+		char aLogMsg[128];
+		str_format(aLogMsg, sizeof(aLogMsg), "Notice: player uses an old client version and may not see moderator alerts: %s (ID %d)", Server()->ClientName(ToClientId), ToClientId);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "moderator_alert", aLogMsg);
 	}
 }
 
@@ -3649,6 +3709,37 @@ void CGameContext::ConBroadcast(IConsole::IResult* pResult, void* pUserData)
 	pSelf->SendBroadcast(pResult->GetString(0), -1);
 }
 
+void CGameContext::ConServerAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendServerAlert(aBuf);
+}
+
+void CGameContext::ConModAlert(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	const int Victim = pResult->GetVictim();
+	if(Victim < 0 || Victim >= MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	{
+		char aLogMsg[128];
+		str_format(aLogMsg, sizeof(aLogMsg), "Client ID not found: %d", Victim);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "moderator_alert", aLogMsg);
+		return;
+	}
+
+	char aBuf[1024];
+	str_copy(aBuf, pResult->GetString(1), sizeof(aBuf));
+	UnescapeNewlines(aBuf);
+
+	pSelf->SendModeratorAlert(aBuf, Victim);
+}
+
 void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
@@ -4039,6 +4130,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("pausegame", "?i[on/off]", CFGFLAG_SERVER|CFGFLAG_STORE, ConPause, this, "Pause/unpause game", AUTHED_ADMIN);
 	Console()->Register("change_map", "?r[map]", CFGFLAG_SERVER|CFGFLAG_STORE, ConChangeMap, this, "Change map", AUTHED_ADMIN);
 	Console()->Register("restart", "?i[seconds]", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "Restart in x seconds (0 = abort)", AUTHED_ADMIN);
+	Console()->Register("server_alert", "r[message]", CFGFLAG_SERVER, ConServerAlert, this, "Send a server alert message to all players", AUTHED_ADMIN);
+	Console()->Register("mod_alert", "v[id] r[message]", CFGFLAG_SERVER, ConModAlert, this, "Send a moderator alert message to player", AUTHED_MOD);
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat", AUTHED_MOD);
 	Console()->Register("broadcast", "r[message]", CFGFLAG_SERVER, ConBroadcast, this, "Broadcast message", AUTHED_MOD);
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team", AUTHED_ADMIN);

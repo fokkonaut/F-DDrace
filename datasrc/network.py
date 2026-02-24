@@ -720,4 +720,12 @@ Messages = [
 		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
 		NetTick("m_IntendedTick"),
 	]),
+
+	NetMessageEx("Sv_ServerAlert", "server-alert@netmsg.ddnet.org", [
+		NetString("m_pMessage"),
+	]),
+
+	NetMessageEx("Sv_ModeratorAlert", "moderator-alert@netmsg.ddnet.org", [
+		NetString("m_pMessage"),
+	]),
 ]

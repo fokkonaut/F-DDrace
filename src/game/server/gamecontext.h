@@ -188,6 +188,8 @@ class CGameContext : public IGameServer
 	static void ConSwitchOpen(IConsole::IResult* pResult, void* pUserData);
 	static void ConPause(IConsole::IResult* pResult, void* pUserData);	static void ConChangeMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConRestart(IConsole::IResult *pResult, void *pUserData);
+	static void ConServerAlert(IConsole::IResult *pResult, void *pUserData);
+	static void ConModAlert(IConsole::IResult *pResult, void *pUserData);
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
@@ -365,6 +367,9 @@ public:
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendSettings(int ClientID);
 	void SendSkinChange(CTeeInfo TeeInfos, int ClientID, int TargetID);
+
+	void SendServerAlert(const char *pMessage);
+	void SendModeratorAlert(const char *pMessage, int ToClientId);
 
 	// DDRace
 	void SendTeamChange(int ClientID, int Team, bool Silent, int CooldownTick, int ToClientID);
