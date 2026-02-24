@@ -832,7 +832,7 @@ void CPlayer::Snap(int SnappingClient)
 
 			if(pSpecPlayer->m_EnableSpectatorCount && SpectatingClient == m_ClientID && SnappingClient != -1 && m_Team != TEAM_SPECTATORS && !m_Paused)
 			{
-				CNetObj_SpectatorCount *pSpectatorCount = Server()->SnapNewItem<CNetObj_SpectatorCount>(0);
+				CNetObj_SpectatorCount *pSpectatorCount = static_cast<CNetObj_SpectatorCount *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORCOUNT, 0, sizeof(CNetObj_SpectatorCount)));
 				if(!pSpectatorCount)
 					return;
 
