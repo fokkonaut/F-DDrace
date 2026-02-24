@@ -187,7 +187,11 @@ void CDoor::Snap(int SnappingClient)
 		StartTick = Server()->Tick() - 4 + m_Thickness;
 	}
 
+	int LaserFlags = 0;
+	if (!m_Collision)
+		LaserFlags = LASERFLAG_NO_PREDICT;
+
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		m_Pos, From, StartTick, -1, m_Color, 0, m_Number);
+		m_Pos, From, StartTick, -1, m_Color, 0, m_Number, LaserFlags);
 }
