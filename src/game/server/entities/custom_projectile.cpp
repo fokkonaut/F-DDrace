@@ -169,6 +169,6 @@ void CCustomProjectile::Snap(int SnappingClient)
 	}
 	else if (m_Type == WEAPON_HEART_GUN)
 	{
-		GameServer()->SnapPickupObject(Context, GetID(), m_Pos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
+		GameServer()->SnapPickupObject(Context, GetID(), m_Pos, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }

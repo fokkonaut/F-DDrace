@@ -99,6 +99,6 @@ void CTaserShield::Snap(int SnappingClient)
 	{
 		if (m_aShieldData[i].m_Lifespan == -1)
 			continue;
-		GameServer()->SnapPickupObject(Context, m_aShieldData[i].m_ID, m_aShieldData[i].m_Pos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
+		GameServer()->SnapPickupObject(Context, m_aShieldData[i].m_ID, m_aShieldData[i].m_Pos, POWERUP_ARMOR, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }

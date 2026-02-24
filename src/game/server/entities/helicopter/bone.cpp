@@ -43,5 +43,5 @@ void SHeart::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	auto parentPos = m_pEntity->GetPos();
 	GameServer()->SnapPickupObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), m_ID,
-		parentPos + m_Pos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
+		parentPos + m_Pos, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
 }

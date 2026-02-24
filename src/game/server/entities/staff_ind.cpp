@@ -66,7 +66,7 @@ void CStaffInd::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
 	
-	GameServer()->SnapPickupObject(Context, m_aID[ARMOR], m_aPos[ARMOR], POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
+	GameServer()->SnapPickupObject(Context, m_aID[ARMOR], m_aPos[ARMOR], POWERUP_ARMOR, 0, -1, PICKUPFLAG_NO_PREDICT);
 
 	// m_ID is created before m_aID is created, means that id is lower and we can simply use it to make the ball behind
 	GameServer()->SnapLaserObject(Context, m_BallFirst ? m_aID[BALL_FRONT] : m_aID[BALL], m_aPos[BALL], m_aPos[BALL], Server()->Tick(), m_Owner, LASERTYPE_RIFLE, -1, -1, LASERFLAG_NO_PREDICT);

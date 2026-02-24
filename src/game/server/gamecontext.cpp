@@ -7756,7 +7756,7 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 	else if (Heart)
 	{
 		vec2 HeartPos = vec2(Pos.x, Pos.y - ExtraBulletOffset);
-		SnapPickupObject(Context, aExtraIds[0], HeartPos, POWERUP_HEALTH, -1, -1, PICKUPFLAG_NO_PREDICT);
+		SnapPickupObject(Context, aExtraIds[0], HeartPos, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 	else if (Grenade)
 	{

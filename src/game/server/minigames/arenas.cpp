@@ -830,7 +830,7 @@ void CArenas::Snap(int SnappingClient)
 		|| (Subtype == WEAPON_LASER && pFight->m_Weapons.m_Laser))
 	{
 		vec2 IndPos = vec2(Pos.x, Pos.y - 64.f);
-		GameServer()->SnapPickupObject(Context, m_IDs.m_WeaponActivated, IndPos, POWERUP_ARMOR, -1, -1, PICKUPFLAG_NO_PREDICT);
+		GameServer()->SnapPickupObject(Context, m_IDs.m_WeaponActivated, IndPos, POWERUP_ARMOR, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 }
 
