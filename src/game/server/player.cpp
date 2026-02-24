@@ -106,6 +106,7 @@ void CPlayer::Reset()
 
 	m_ShowOthers = GameServer()->Config()->m_SvShowOthersDefault;
 	m_ShowAll = GameServer()->Config()->m_SvShowAllDefault;
+	m_EnableSpectatorCount = true;
 	m_ShowDistance = vec2(1200, 800);
 	m_SpecTeam = false;
 	m_NinjaJetpack = false;
@@ -829,12 +830,16 @@ void CPlayer::Snap(int SnappingClient)
 			pDDNetSpectatorInfo->m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
 			pDDNetSpectatorInfo->m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
 
-			if(SpectatingClient == m_ClientID && SnappingClient != -1 && m_Team != TEAM_SPECTATORS && !m_Paused)
+			if(pSpecPlayer->m_EnableSpectatorCount && SpectatingClient == m_ClientID && SnappingClient != -1 && m_Team != TEAM_SPECTATORS && !m_Paused)
 			{
+				CNetObj_SpectatorCount *pSpectatorCount = Server()->SnapNewItem<CNetObj_SpectatorCount>(0);
+				if(!pSpectatorCount)
+					return;
+
 				int SpectatorCount = 0;
 				for(auto &pPlayer : GameServer()->m_apPlayers)
 				{
-					if(!pPlayer || pPlayer->m_ClientID == m_ClientID || pPlayer->m_Afk || pPlayer->m_HideFromSpecCount ||
+					if(!pPlayer || !pPlayer->m_EnableSpectatorCount || pPlayer->m_ClientID == m_ClientID || pPlayer->m_Afk || pPlayer->m_HideFromSpecCount ||
 						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
 					{
 						continue;
@@ -854,6 +859,7 @@ void CPlayer::Snap(int SnappingClient)
 					}
 				}
 				pDDNetSpectatorInfo->m_SpectatorCount = SpectatorCount;
+				pSpectatorCount->m_NumSpectators = SpectatorCount;
 			}
 		}
 	}

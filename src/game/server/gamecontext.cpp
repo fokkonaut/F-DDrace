@@ -3260,6 +3260,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_CameraInfo *pMsg = (CNetMsg_Cl_CameraInfo *)pRawMsg;
 			pPlayer->m_CameraInfo.Write(pMsg);
 		}
+		else if (MsgID == NETMSGTYPE_CL_ENABLESPECTATORCOUNT)
+		{
+			CNetMsg_Cl_EnableSpectatorCount *pMsg = (CNetMsg_Cl_EnableSpectatorCount *)pRawMsg;
+			pPlayer->m_EnableSpectatorCount = pMsg->m_Enable;
+		}
 	}
 	else
 	{

@@ -198,6 +198,7 @@ public:
 	int64 m_Last_KickVote;
 	bool m_ShowOthers;
 	bool m_ShowAll;
+	bool m_EnableSpectatorCount;
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;

@@ -444,6 +444,10 @@ Objects = [
 		NetIntRange("m_FollowFactor", 0, 'max_int'),
 		NetIntRange("m_SpectatorCount", 0, 'MAX_CLIENTS-1'),
 	]),
+
+	NetObjectEx("SpectatorCount", "spectator-count@netobj.ddnet.org", [
+		NetIntRange("m_NumSpectators", 0, 'max_int'),
+	]),
 ]
 
 Messages = [
@@ -694,5 +698,9 @@ Messages = [
 
 	NetMessageEx("Sv_CommandInfoRemoveEx", "commandinfo-remove@netmsg.ddnet.org", [
 			NetStringStrict("m_pName")
+	]),
+
+	NetMessageEx("Cl_EnableSpectatorCount", "enable-spectator-count@netmsg.ddnet.org", [
+		NetBool("m_Enable"),
 	]),
 ]
