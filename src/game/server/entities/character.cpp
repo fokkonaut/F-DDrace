@@ -177,6 +177,22 @@ void CCharacter::SetWeapon(int W)
 
 	if(GetActiveWeapon() < 0 || GetActiveWeapon() >= NUM_WEAPONS)
 		SetActiveWeapon(WEAPON_GUN);
+
+	// AntiPing
+	if (m_pPlayer->AntiPing())
+	{
+		bool SwitchToNormal = GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS;
+		bool SwitchToExtra = GetActiveWeapon() >= NUM_VANILLA_WEAPONS;
+		if (SwitchToNormal || SwitchToExtra)
+		{
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER || GetLastWeapon() == WEAPON_TELEKINESIS
+				|| GetLastWeapon() == WEAPON_DRAW_EDITOR))
+			{
+				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
+			}
+		}
+	}
 }
 
 void CCharacter::SetSolo(bool Solo)
@@ -368,22 +384,6 @@ void CCharacter::DoWeaponSwitch()
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
-
-	// AntiPing
-	if (m_pPlayer->AntiPing())
-	{
-		bool SwitchToNormal = GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS;
-		bool SwitchToExtra = GetActiveWeapon() >= NUM_VANILLA_WEAPONS;
-		if (SwitchToNormal || SwitchToExtra)
-		{
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER || GetLastWeapon() == WEAPON_TELEKINESIS
-				|| GetLastWeapon() == WEAPON_DRAW_EDITOR))
-			{
-				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
-			}
-		}
-	}
 }
 
 void CCharacter::HandleWeaponSwitch()
