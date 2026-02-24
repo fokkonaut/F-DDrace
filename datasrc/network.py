@@ -728,4 +728,8 @@ Messages = [
 	NetMessageEx("Sv_ModeratorAlert", "moderator-alert@netmsg.ddnet.org", [
 		NetString("m_pMessage"),
 	]),
+
+	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
+		NetTick("m_WaitUntil")
+	]),
 ]
