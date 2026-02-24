@@ -703,4 +703,21 @@ Messages = [
 	NetMessageEx("Cl_EnableSpectatorCount", "enable-spectator-count@netmsg.ddnet.org", [
 		NetBool("m_Enable"),
 	]),
+
+	NetMessageEx("Sv_PreInput", "preinput@netmsg.ddnet.org", [
+		NetIntAny("m_Direction"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+
+		NetIntAny("m_Jump"),
+		NetIntAny("m_Fire"),
+		NetIntAny("m_Hook"),
+		
+		NetIntAny("m_WantedWeapon"),
+		NetIntAny("m_NextWeapon"),
+		NetIntAny("m_PrevWeapon"),
+
+		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
+		NetTick("m_IntendedTick"),
+	]),
 ]

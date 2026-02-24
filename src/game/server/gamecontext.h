@@ -413,6 +413,8 @@ public:
 	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
 	void OnClientRejoin(int ClientID) override;
 
+	void PreInputClients(int ClientId, bool *pClients) override;
+
 	void OnClientEngineJoin(int ClientID) override;
 	void OnClientEngineDrop(int ClientID, const char *pReason) override;
 
