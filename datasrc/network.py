@@ -313,6 +313,7 @@ Objects = [
 		# New data fields for improved target accuracy
 		NetIntAny("m_TargetX"),
 		NetIntAny("m_TargetY"),
+		NetIntRange("m_TuneZoneOverride", 'TuneZone::OVERRIDE_NONE', 'TuneZone::NUM-1', default='TuneZone::OVERRIDE_NONE'),
 	], fixup=False),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [

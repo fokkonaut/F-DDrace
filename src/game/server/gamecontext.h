@@ -122,11 +122,6 @@ enum
 };
 
 
-enum
-{
-	NUM_TUNEZONES = 256
-};
-
 class CRandomMapResult;
 class CMapVoteResult;
 struct CAntibotData;
@@ -159,8 +154,8 @@ class CGameContext : public IGameServer
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
-	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	LOCKED_TUNES m_vLockedTuning[NUM_TUNEZONES];
+	CTuningParams m_aTuningList[TuneZone::NUM];
+	LOCKED_TUNES m_vLockedTuning[TuneZone::NUM];
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -289,9 +284,9 @@ public:
 	int m_VoteClientID;
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
-	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
-	char m_aaTuneLockMsg[NUM_TUNEZONES][256];
+	char m_aaZoneEnterMsg[TuneZone::NUM][256]; // 0 is used for switching from or to area without tunings
+	char m_aaZoneLeaveMsg[TuneZone::NUM][256];
+	char m_aaTuneLockMsg[TuneZone::NUM][256];
 
 	char m_aDeleteTempfile[128];
 	void DeleteTempfile();

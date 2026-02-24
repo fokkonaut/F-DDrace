@@ -2221,6 +2221,8 @@ void CCharacter::SnapDDNetCharacter(int SnappingClient, int ID)
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+	// OVERRIDE_NONE is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
+	pDDNetCharacter->m_TuneZoneOverride = TuneZone::OVERRIDE_NONE;
 }
 
 int CCharacter::GetDDNetCharacterNinjaActivationTick()

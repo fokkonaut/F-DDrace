@@ -139,6 +139,12 @@ enum
 	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 };
 
+namespace TuneZone
+{
+	inline constexpr int OVERRIDE_NONE = -1;
+	inline constexpr int NUM = 256;
+};
+
 enum Scoreformat
 {
 	SCORE_TIME = 0,
