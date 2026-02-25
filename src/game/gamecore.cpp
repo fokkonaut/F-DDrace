@@ -298,7 +298,7 @@ void CCharacterCore::Tick(bool UseInput)
 				}
 			}
 
-			if (m_pCollision->m_pConfig->m_SvFlagHooking && !m_FightStarted &&
+			if (m_pCollision->m_pConfig->m_SvFlagHooking && !m_FightStarted && m_Id != -1 && m_pTeams->GetInGame(m_Id) &&
 				(m_pCollision->m_pConfig->m_SvFlagHooking != 2 || (m_Id != -1 && !m_pTeams->GetSolo(m_Id))))
 			{
 				for (int i = 0; i < 2; i++)

@@ -233,7 +233,7 @@ void CFlag::Tick()
 				continue;
 
 			// Disallow taking flag with passive or solo, also drop it when one of this gets activated while holding a flag
-			if (pChr->m_Passive || pChr->IsSolo())
+			if (pChr->m_Passive || pChr->IsSolo() || pChr->IsInSafeArea())
 				continue;
 
 			// Disallow flag pickup from other than team 0. should stay fun probably
