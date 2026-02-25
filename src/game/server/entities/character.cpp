@@ -4686,7 +4686,7 @@ void CCharacter::FDDraceTick()
 	}
 	else if (m_Bloody || GetPowerHooked() == BLOODY)
 	{
-		if (Server()->Tick() % 6 == 0)
+		if (Server()->Tick() % 7 == 0)
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 	}
 
