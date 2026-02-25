@@ -2425,7 +2425,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if (Local && m_pPlayer->AntiPing() && pCharacter->m_Weapon == WEAPON_HAMMER && m_AntiPingHideHammerTicks)
 	{
-		pCharacter->m_Weapon = -1;
+		pCharacter->m_Weapon = -1; // or WEAPON_GUN maybe?
 	}
 
 	pCharacter->m_AttackTick = m_AttackTick;
