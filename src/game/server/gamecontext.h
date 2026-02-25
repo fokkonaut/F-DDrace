@@ -745,6 +745,7 @@ public:
 	int GetWeaponType(int Weapon) const;
 	int GetProjectileType(int Weapon) const;
 	int GetPickupType(int Type, int Subtype) const;
+	bool IsValidSpreadWeapon(int Type);
 
 	const char *GetScoreModeName(int ScoreMode);
 	const char *GetScoreModeCommand(int ScoreMode);

@@ -337,7 +337,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			);
 		pBullet->SetBouncing(2 - (Dir % 2));
 	}
-
+	
 	if(Index == ENTITY_ARMOR_1)
 		Type = POWERUP_ARMOR;
 	else if(Index == ENTITY_HEALTH_1)
@@ -526,8 +526,20 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 
 	if(Type != -1)
 	{
+		int Special = 0;
+		int Delay = GameServer()->Collision()->GetSwitchDelay(GameServer()->Collision()->GetMapIndex(Pos));
+		if (Layer == LAYER_SWITCH && Number == 0 && Delay > 0)
+		{
+			if (SubType == WEAPON_HAMMER)
+				Special |= SPECIAL_DOORHAMMER;
+			else if (SubType == WEAPON_NINJA)
+				Special |= SPECIAL_SCROLLNINJA;
+			else if (GameServer()->IsValidSpreadWeapon(SubType))
+				Special |= SPECIAL_SPREADWEAPON;
+		}
+
 		int PickupFlags = TileFlagsToPickupFlags(Flags);
-		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number, -1, true, PickupFlags);
+		new CPickup(&GameServer()->m_World, Pos, Type, SubType, Layer, Number, -1, true, PickupFlags, Special);
 		return true;
 	}
 

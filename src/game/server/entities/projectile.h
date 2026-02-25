@@ -57,6 +57,7 @@ private:
 	bool IsDefaultTuning();
 	bool m_DefaultTuning;
 	bool m_DDrace;
+	bool m_IsSpreadWeapon;
 	vec2 m_LastResetPos;
 	int m_LastResetTick;
 	bool m_CalculatedVel;

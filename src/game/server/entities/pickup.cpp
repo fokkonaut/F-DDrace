@@ -11,7 +11,7 @@
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 
-CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner, bool Collision, int Flags)
+CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int Layer, int Number, int Owner, bool Collision, int Flags, int Special)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, Pos, PickupPhysSize, Collision)
 {
 	m_Type = Type;
@@ -20,6 +20,7 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 	m_Layer = Layer;
 	m_Number = Number;
 	m_Flags = Flags;
+	m_Special = Special;
 
 	m_Owner = Owner;
 	
@@ -35,13 +36,17 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 
 	Reset();
 
-	m_ID2 = Server()->SnapNewID();
+	for (int i = 0; i < 4; i++)
+		if (i == 0 || (m_Special&SPECIAL_SPREADWEAPON))
+			m_aID[i] = Server()->SnapNewID();
 	GameWorld()->InsertEntity(this);
 }
 
 CPickup::~CPickup()
 {
-	Server()->SnapFreeID(m_ID2);
+	for (int i = 0; i < 4; i++)
+		if (i == 0 || (m_Special&SPECIAL_SPREADWEAPON))
+			Server()->SnapFreeID(m_aID[i]);
 }
 
 void CPickup::Reset(bool Destroy)
@@ -217,7 +222,7 @@ void CPickup::Tick()
 					break;
 
 				case POWERUP_WEAPON:
-					if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+					if (m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1 || m_Special != 0))
 					{
 						if ((pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Subtype) != WEAPON_GUN) || (pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER))
 							break;
@@ -234,6 +239,11 @@ void CPickup::Tick()
 						else if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_DDRACE)
 							pChr->GiveWeapon(m_Subtype);
 						else break;
+
+						if (m_Special&SPECIAL_SPREADWEAPON)
+							pChr->SpreadWeapon(m_Subtype);
+						if (m_Special&SPECIAL_DOORHAMMER)
+							pChr->DoorHammer();
 
 						Picked = true;
 
@@ -257,6 +267,12 @@ void CPickup::Tick()
 				{
 					if (pChr->GetPlayer()->m_SpookyGhost || pChr->m_IsZombie)
 						break;
+
+					if (m_Special&SPECIAL_SCROLLNINJA)
+					{
+						pChr->ScrollNinja();
+						break;
+					}
 
 					// activate ninja on target player
 					pChr->GiveNinja();
@@ -424,9 +440,8 @@ void CPickup::Snap(int SnappingClient)
 	if (pChr && pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER)
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
-	int aExtraIds[4] = { m_ID2, 0, 0, 0 };
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		SnapPos, m_Type, m_Subtype, m_Number, m_Flags|PickupFlags, 0, aExtraIds);
+		SnapPos, m_Type, m_Subtype, m_Number, m_Flags|PickupFlags, m_Special, m_aID);
 }
 
 void CPickup::Move()

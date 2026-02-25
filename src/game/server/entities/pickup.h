@@ -10,7 +10,8 @@ const int PickupPhysSize = 14;
 class CPickup : public CEntity
 {
 public:
-	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1, bool Collision = true, int Flags = 0);
+	CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType = 0, int Layer = 0, int Number = 0, int Owner = -1,
+		bool Collision = true, int Flags = 0, int Special = 0);
 
 	virtual ~CPickup();
 
@@ -30,13 +31,14 @@ private:
 	int m_SpawnTick;
 	int m_PickupTick;
 	int m_Flags;
+	int m_Special;
 
 	// F-DDrace
 	Mask128 m_TeamMask;
 	int m_Owner;
 	void Move();
 	vec2 m_Core;
-	int m_ID2;
+	int m_aID[4];
 	int64 m_aLastRespawnMsg[MAX_CLIENTS];
 
 	struct

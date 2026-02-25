@@ -8360,6 +8360,12 @@ int CGameContext::GetPickupType(int Type, int Subtype) const
 	return Subtype;
 }
 
+bool CGameContext::IsValidSpreadWeapon(int Type)
+{
+	return !(Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_PORTAL_RIFLE
+		|| Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_LIGHTNING_LASER);
+}
+
 void CGameContext::SendExtraMessage(int Extra, int ToID, bool Set, int FromID, bool Silent, int Special)
 {
 	if (Silent)

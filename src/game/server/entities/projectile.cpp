@@ -59,6 +59,7 @@ CProjectile::CProjectile
 	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
 	DetermineTuning();
 	m_DefaultTuning = IsDefaultTuning() && m_DDrace;
+	m_IsSpreadWeapon = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->m_aSpreadWeapon[m_Type];
 
 	m_TeamMask = Mask128();
 	m_LastResetPos = Pos;
@@ -347,7 +348,7 @@ void CProjectile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CNetObj_DDRaceProjectile DDRaceProjectile;
 
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && IsDefaultTuning())
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && m_DefaultTuning && !m_IsSpreadWeapon)
 	{
 		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
 		if(!pDDNetProjectile)

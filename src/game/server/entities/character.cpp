@@ -6349,6 +6349,8 @@ void CCharacter::StrongBloody(bool Set, int FromID, bool Silent)
 
 void CCharacter::ScrollNinja(bool Set, int FromID, bool Silent)
 {
+	if (m_ScrollNinja == Set)
+		return;
 	m_ScrollNinja = Set;
 	if (Set)
 		GiveNinja();
@@ -6383,8 +6385,9 @@ void CCharacter::InfiniteJumps(bool Set, int FromID, bool Silent)
 
 void CCharacter::SpreadWeapon(int Type, bool Set, int FromID, bool Silent)
 {
-	if (Type == WEAPON_HAMMER || Type == WEAPON_NINJA || Type == WEAPON_TELEKINESIS || Type == WEAPON_LIGHTSABER || Type == WEAPON_PORTAL_RIFLE
-		|| Type == WEAPON_DRAW_EDITOR || Type == WEAPON_TELE_RIFLE || Type == WEAPON_LIGHTNING_LASER)
+	if (!GameServer()->IsValidSpreadWeapon(Type))
+		return;
+	if (m_aSpreadWeapon[Type] == Set)
 		return;
 	m_aSpreadWeapon[Type] = Set;
 	GameServer()->SendExtraMessage(SPREAD_WEAPON, m_pPlayer->GetCID(), Set, FromID, Silent, Type);
@@ -6434,6 +6437,8 @@ void CCharacter::AlwaysTeleWeapon(bool Set, int FromID, bool Silent)
 
 void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
 {
+	if (m_DoorHammer == Set)
+		return;
 	m_DoorHammer = Set;
 	GameServer()->SendExtraMessage(DOOR_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
