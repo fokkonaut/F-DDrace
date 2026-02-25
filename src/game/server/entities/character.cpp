@@ -3749,6 +3749,23 @@ void CCharacter::HandleTiles(int Index)
 		int Delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 		GameServer()->Durak()->OnCharacterSeat(m_pPlayer->GetCID(), SwitchNumber, Delay-1);
 	}
+	else if (GameServer()->Collision()->IsSwitch(MapIndex) == TILE_SWITCH_HOOKPOWER)
+	{
+		int SwitchHookPower = GameServer()->Collision()->GetSwitchDelay(MapIndex);
+		// Map switch delay to hookpower
+		for (int i = 0; i < NUM_EXTRAS; i++)
+		{
+			if (GameServer()->IsValidHookPower(i))
+			{
+				if (SwitchHookPower	== 0)
+				{
+					HookPower(i);
+					break;
+				}
+				SwitchHookPower--;
+			}
+		}
+	}
 
 	if (GameServer()->Collision()->IsSwitch(MapIndex) != TILE_PENALTY)
 	{
@@ -6361,7 +6378,7 @@ void CCharacter::ScrollNinja(bool Set, int FromID, bool Silent)
 
 void CCharacter::HookPower(int Extra, int FromID, bool Silent)
 {
-	if (m_HookPower == HOOK_NORMAL && Extra == HOOK_NORMAL)
+	if (m_HookPower == Extra)
 		return;
 	m_HookPower = Extra;
 	GameServer()->SendExtraMessage(HOOK_POWER, m_pPlayer->GetCID(), true, FromID, Silent, Extra);
