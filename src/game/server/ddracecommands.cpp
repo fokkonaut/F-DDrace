@@ -1134,7 +1134,7 @@ void CGameContext::ConForceFlagOwner(IConsole::IResult *pResult, void *pUserData
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : pResult->m_ClientID;
-	((CGameControllerDDRace*)pSelf->m_pController)->ForceFlagOwner(Victim, pResult->GetInteger(0));
+	((CGameControllerDDRace*)pSelf->m_pController)->ForceFlagOwner(Victim, pResult->GetInteger(0), true);
 }
 
 void CGameContext::ConSayBy(IConsole::IResult* pResult, void* pUserData)
