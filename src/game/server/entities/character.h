@@ -281,6 +281,7 @@ private:
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
+	int CheckMaskableTile(int TileIndex, bool CurrentState);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDraceInit();

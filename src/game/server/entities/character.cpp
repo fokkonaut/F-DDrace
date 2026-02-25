@@ -3202,32 +3202,68 @@ void CCharacter::HandleTiles(int Index)
 			Jetpack(!m_Jetpack);
 	}
 
-	//rainbow toggle
-	if ((m_TileIndex == TILE_RAINBOW) || (m_TileFIndex == TILE_RAINBOW))
+	// tell the user about mask tiles with missing feature tile
+	int aMaskableTiles[] = { TILE_SPARKLE, TILE_LOVELY, TILE_EPICCIRCLE, TILE_ROTATINGBALL,
+						TILE_RAINBOWNAME, TILE_RAINBOW, TILE_ATOM, TILE_TRAIL,
+						TILE_SPOOKY_GHOST, TILE_PASSIVE, TILE_BLOODY };
+	size_t NumMaskTiles = std::size(aMaskableTiles);
+
+	if (((m_TileIndex == TILE_TOGGLE_MASK_ON || m_TileFIndex == TILE_TOGGLE_MASK_ON) && m_LastIndexTile != TILE_TOGGLE_MASK_ON && m_LastIndexFrontTile != TILE_TOGGLE_MASK_ON) ||
+		((m_TileIndex == TILE_TOGGLE_MASK_OFF || m_TileFIndex == TILE_TOGGLE_MASK_OFF) && m_LastIndexTile != TILE_TOGGLE_MASK_OFF && m_LastIndexFrontTile != TILE_TOGGLE_MASK_OFF))
 	{
-		if ((m_LastIndexTile != TILE_RAINBOW) && (m_LastIndexFrontTile != TILE_RAINBOW))
-			Rainbow(!(m_Rainbow || m_pPlayer->m_InfRainbow));
+		bool Found = false;
+		for (int &Tile : aMaskableTiles)
+			if (m_TileIndex == Tile || m_TileFIndex == Tile)
+				Found = true;
+		if (!Found)
+		{
+			char aBuf[256] = "[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: ";
+			char aTile[8];
+			for (size_t i = 0; i < NumMaskTiles; i++)
+			{
+				str_format(aTile, sizeof(aTile), "%d%s", aMaskableTiles[i], i != NumMaskTiles-1 ? ", " : "");
+				str_append(aBuf, aTile, sizeof(aBuf));
+			}
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		}
 	}
 
-	//atom toggle
-	if ((m_TileIndex == TILE_ATOM) || (m_TileFIndex == TILE_ATOM))
+	// maskable toggle tiles
+	for (int &Tile : aMaskableTiles)
 	{
-		if ((m_LastIndexTile != TILE_ATOM) && (m_LastIndexFrontTile != TILE_ATOM))
-			Atom(!m_Atom);
-	}
+		bool CurrentState =
+			Tile == TILE_SPARKLE ? m_pPlayer->m_Sparkle :
+			Tile == TILE_LOVELY ? m_Lovely :
+			Tile == TILE_EPICCIRCLE ? m_EpicCircle :
+			Tile == TILE_ROTATINGBALL ? m_RotatingBall :
+			Tile == TILE_RAINBOWNAME ? m_pPlayer->m_RainbowName :
+			Tile == TILE_RAINBOW ? (m_Rainbow || m_pPlayer->m_InfRainbow) :
+			Tile == TILE_ATOM ? m_Atom :
+			Tile == TILE_TRAIL ? m_Trail :
+			Tile == TILE_SPOOKY_GHOST ? m_pPlayer->m_HasSpookyGhost :
+			Tile == TILE_PASSIVE ? m_Passive :
+			Tile == TILE_BLOODY ? (m_Bloody || m_StrongBloody) : false;
 
-	//trail toggle
-	if ((m_TileIndex == TILE_TRAIL) || (m_TileFIndex == TILE_TRAIL))
-	{
-		if ((m_LastIndexTile != TILE_TRAIL) && (m_LastIndexFrontTile != TILE_TRAIL))
-			Trail(!m_Trail);
-	}
+		int TileMaskState = CheckMaskableTile(Tile, CurrentState);
+		if ((int)CurrentState == TileMaskState)
+			continue;
 
-	//spooky ghost toggle
-	if ((m_TileIndex == TILE_SPOOKY_GHOST) || (m_TileFIndex == TILE_SPOOKY_GHOST))
-	{
-		if ((m_LastIndexTile != TILE_SPOOKY_GHOST) && (m_LastIndexFrontTile != TILE_SPOOKY_GHOST))
-			SpookyGhost(!m_pPlayer->m_HasSpookyGhost);
+		if (Tile == TILE_SPARKLE) Sparkle(TileMaskState);
+		else if (Tile == TILE_LOVELY) Lovely(TileMaskState);
+		else if (Tile == TILE_EPICCIRCLE) EpicCircle(TileMaskState);
+		else if (Tile == TILE_ROTATINGBALL) RotatingBall(TileMaskState);
+		else if (Tile == TILE_RAINBOWNAME) RainbowName(TileMaskState);
+		else if (Tile == TILE_RAINBOW) Rainbow(TileMaskState);
+		else if (Tile == TILE_ATOM) Atom(TileMaskState);
+		else if (Tile == TILE_TRAIL) Trail(TileMaskState);
+		else if (Tile == TILE_SPOOKY_GHOST) SpookyGhost(TileMaskState);
+		else if (Tile == TILE_PASSIVE)
+		{
+			// simply don't deactivate passive when we hit a tile after being redirected
+			if (m_PassiveEndTick) m_PassiveEndTick = 0;
+			else Passive(TileMaskState);
+		}
+		else if (Tile == TILE_BLOODY) Bloody(TileMaskState);
 	}
 
 	//add meteor
@@ -3244,23 +3280,6 @@ void CCharacter::HandleTiles(int Index)
 			Meteor(false);
 	}
 
-	//passive toggle
-	if ((m_TileIndex == TILE_PASSIVE) || (m_TileFIndex == TILE_PASSIVE))
-	{
-		if ((m_LastIndexTile != TILE_PASSIVE) && (m_LastIndexFrontTile != TILE_PASSIVE))
-		{
-			if (m_PassiveEndTick)
-			{
-				// simply don't deactivate passive when we hit a tile after being redirected
-				m_PassiveEndTick = 0;
-			}
-			else
-			{
-				Passive(!m_Passive);
-			}
-		}
-	}
-
 	//vanilla mode
 	if ((m_TileIndex == TILE_VANILLA_MODE) || (m_TileFIndex == TILE_VANILLA_MODE))
 	{
@@ -3273,13 +3292,6 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if ((m_LastIndexTile != TILE_DDRACE_MODE) && (m_LastIndexFrontTile != TILE_DDRACE_MODE))
 			DDraceMode();
-	}
-
-	//bloody toggle
-	if ((m_TileIndex == TILE_BLOODY) || (m_TileFIndex == TILE_BLOODY))
-	{
-		if ((m_LastIndexTile != TILE_BLOODY) && (m_LastIndexFrontTile != TILE_BLOODY))
-			Bloody(!(m_Bloody || m_StrongBloody));
 	}
 
 	//add jump
@@ -3929,6 +3941,20 @@ void CCharacter::HandleTiles(int Index)
 		}
 		return;
 	}
+}
+
+int CCharacter::CheckMaskableTile(int TileIndex, bool CurrentState)
+{
+	bool MaskOn = m_TileIndex == TILE_TOGGLE_MASK_ON || m_TileFIndex == TILE_TOGGLE_MASK_ON;
+	bool MaskOff = m_TileIndex == TILE_TOGGLE_MASK_OFF || m_TileFIndex == TILE_TOGGLE_MASK_OFF;
+	bool LastMaskOn = m_LastIndexTile == TILE_TOGGLE_MASK_ON || m_LastIndexFrontTile == TILE_TOGGLE_MASK_ON;
+	bool LastMaskOff = m_LastIndexTile == TILE_TOGGLE_MASK_OFF || m_LastIndexFrontTile == TILE_TOGGLE_MASK_OFF;
+	bool LastMaskChanged = MaskOn != LastMaskOn || MaskOff != LastMaskOff;
+	bool IsTile = m_TileIndex == TileIndex || m_TileFIndex == TileIndex;
+	bool IsNotLastTile = m_LastIndexTile != TileIndex && m_LastIndexFrontTile != TileIndex;
+	if (IsTile && (IsNotLastTile || LastMaskChanged))
+		return MaskOn ? true : MaskOff ? false : !CurrentState;
+	return CurrentState;
 }
 
 void CCharacter::HandleTuneLayer()
