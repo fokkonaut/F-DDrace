@@ -2243,7 +2243,7 @@ void CCharacter::SnapDDNetCharacter(int SnappingClient, int ID)
 
 int CCharacter::GetDDNetCharacterNinjaActivationTick()
 {
-	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;;
+	bool NinjaBarFull = m_DrawEditor.Active() || (GetActiveWeapon() == WEAPON_NINJA && m_ScrollNinja) || GetActiveWeapon() == WEAPON_TELEKINESIS;
 	return NinjaBarFull ? Server()->Tick() : m_Ninja.m_ActivationTick;
 }
 

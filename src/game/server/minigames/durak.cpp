@@ -470,7 +470,7 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 		else if (pSeat->m_Player.m_Tooltip == CCard::TOOLTIP_SELECT_ATTACK)
 		{
 			std::vector<int> vOpenAttackIndices = pGame->GetOpenAttacks();
-			int NumOpenAttacks = vOpenAttackIndices.size();;
+			int NumOpenAttacks = vOpenAttackIndices.size();
 			if (NumOpenAttacks > 0)
 			{
 				int CurIndex = -1;
