@@ -3202,6 +3202,24 @@ void CCharacter::HandleTiles(int Index)
 			Jetpack(!m_Jetpack);
 	}
 
+	bool RequiredSwitchTile = false;
+	RequiredSwitchTile = RequiredSwitchTile ||
+			((m_TileIndex == TILE_SWITCH_HELICOPTER_SPAWN || m_TileFIndex == TILE_SWITCH_HELICOPTER_SPAWN) &&
+			m_LastIndexTile != TILE_SWITCH_HELICOPTER_SPAWN && m_LastIndexFrontTile != TILE_SWITCH_HELICOPTER_SPAWN);
+	RequiredSwitchTile = RequiredSwitchTile ||
+			((m_TileIndex == TILE_SWITCH_HOOKPOWER || m_TileFIndex == TILE_SWITCH_HOOKPOWER) &&
+			m_LastIndexTile != TILE_SWITCH_HOOKPOWER && m_LastIndexFrontTile != TILE_SWITCH_HOOKPOWER);
+	RequiredSwitchTile = RequiredSwitchTile ||
+			((m_TileIndex == TILE_DURAK_SEAT || m_TileFIndex == TILE_DURAK_SEAT) &&
+			m_LastIndexTile != TILE_DURAK_SEAT && m_LastIndexFrontTile != TILE_DURAK_SEAT);
+	RequiredSwitchTile = RequiredSwitchTile ||
+			((m_TileIndex == TILE_DURAK_TABLE || m_TileFIndex == TILE_DURAK_TABLE) &&
+			m_LastIndexTile != TILE_DURAK_TABLE && m_LastIndexFrontTile != TILE_DURAK_TABLE);
+	if (RequiredSwitchTile)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "[WARNING] Place this tile from switch layer");
+	}
+
 	// tell the user about mask tiles with missing feature tile
 	int aMaskableTiles[] = { TILE_SPARKLE, TILE_LOVELY, TILE_EPICCIRCLE, TILE_ROTATINGBALL,
 						TILE_RAINBOWNAME, TILE_RAINBOW, TILE_ATOM, TILE_TRAIL,
