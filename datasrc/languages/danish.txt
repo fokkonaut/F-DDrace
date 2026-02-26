@@ -1242,6 +1242,12 @@ You will no longer see money broadcasts, jail and escape timer will be shown in 
 You will now see all broadcasts again
 == 
 
+AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
+== 
+
+AntiPing disabled
+== 
+
 Weapon indicator enabled
 == 
 
@@ -1423,6 +1429,9 @@ Hide Broadcasts
 Local Chat
 == 
 
+AntiPing Weapons (only for 'cl_antiping 1')
+== 
+
 {vote-header}
 Vᴏᴛᴇs
 == 
@@ -1547,6 +1556,12 @@ You can't hook others
 You can hook others
 == 
 
+[WARNING] Place this tile from switch layer
+== 
+
+[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: 
+== 
+
 You got +1 jump and can jump %d times now
 == 
 
@@ -1572,6 +1587,9 @@ Happy birthday! :) You have jetpack for 45 seconds
 == 
 
 Sorry, someting is missing to get the gift.
+== 
+
+Humans limit reached.
 == 
 
 Your team was unlocked by an unlock team tile

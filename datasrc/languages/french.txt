@@ -2095,3 +2095,21 @@ You are now in a safe area
 
 You are no longer in a safe area
 == 
+
+AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
+== 
+
+AntiPing disabled
+== 
+
+AntiPing Weapons (only for 'cl_antiping 1')
+== 
+
+[WARNING] Place this tile from switch layer
+== 
+
+[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: 
+== 
+
+Humans limit reached.
+== 
