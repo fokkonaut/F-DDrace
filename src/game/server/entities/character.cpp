@@ -3471,17 +3471,19 @@ void CCharacter::HandleTiles(int Index)
 			for (int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+				if (pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_Afk)
 				{
+					CCharacter *pCharacter = pPlayer->GetCharacter();
+					if (!pCharacter || pCharacter->IsInSafeArea() || pPlayer->IsMinigame())
+						continue;
+						
 					bool ServerDummy = pPlayer->m_IsDummy || pPlayer->IsDummy();
 					if (!ServerDummy || Config()->m_SvIncreaseHumanCapBots)
 					{
 						Players++;
 					}
-
-					CCharacter *pCharacter = pPlayer->GetCharacter();
-					// Some balancing, afk should not count to the cap
-					if (pCharacter && !pCharacter->m_IsZombie && !pCharacter->IsInSafeArea() && !pPlayer->IsMinigame() && !pPlayer->m_Afk && !ServerDummy)
+					
+					if (!pCharacter->m_IsZombie && !ServerDummy)
 					{
 						Humans++;
 					}
