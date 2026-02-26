@@ -77,7 +77,7 @@ Pull requests and suggestions welcome!
 
 ## Tile Documentation & Entities
 
-Custom F-DDrace editor entities are available for [all layers separated](https://github.com/fokkonaut/F-DDrace/tree/F-DDrace/F-DDrace%20Entities/editor-all-layers) (best mapping experience) or as [legacy combined game layer](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/F-DDrace%20Entities/F-DDrace_editor.png), aswell as the ingame [overlay entities version](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/F-DDrace%20Entities/f-ddrace.png).
+Custom F-DDrace editor entities are available for [all layers separated](https://github.com/fokkonaut/F-DDrace/tree/F-DDrace/F-DDrace_Entities/editor-all-layers) (best mapping experience) or as [legacy combined game layer](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/F-DDrace_Entities/F-DDrace_editor.png), aswell as the ingame [overlay entities version](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/F-DDrace_Entities/f-ddrace.png).
 
 Most custom tile can be used and tested directly from Game and Front layer (or Switch layer for some tiles, like weapons). However there are some tiles and combinations that require more attention and are explained below:
 
