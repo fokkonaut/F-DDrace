@@ -2088,16 +2088,15 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
 
 	if ((pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()) && pSnapPlayer->GetSpectatorID() != -1
-		&& !CanCollide(pSnapPlayer->GetSpectatorID(), false) && !pSnapPlayer->m_ShowOthers)
+		&& !CanCollide(pSnapPlayer->GetSpectatorID(), false, false) && !pSnapPlayer->m_ShowOthers)
 		return false;
-
-	bool SafeArea = IsInSafeArea() || (pSnapChar && pSnapChar->IsInSafeArea());
+		
 	if (pSnapPlayer->GetTeam() != TEAM_SPECTATORS && !pSnapPlayer->IsPaused() && pSnapChar && !pSnapChar->m_Super
-		&& !CanCollide(SnappingClient, false) && !pSnapPlayer->m_ShowOthers && !SafeArea)
+		&& !CanCollide(SnappingClient, false, false) && !pSnapPlayer->m_ShowOthers)
 		return false;
 
 	if ((pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()) && pSnapPlayer->GetSpecMode() == SPEC_FREEVIEW
-		&& !CanCollide(SnappingClient, false) && pSnapPlayer->m_SpecTeam)
+		&& !CanCollide(SnappingClient, false, false) && pSnapPlayer->m_SpecTeam)
 		return false;
 
 	return true;
