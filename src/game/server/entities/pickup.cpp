@@ -437,7 +437,9 @@ void CPickup::Snap(int SnappingClient)
 	}
 
 	int PickupFlags = 0;
-	if (pChr && pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER)
+	bool IsZombie = pChr && pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER;
+	bool IsVanilla = pChr && pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR);
+	if (IsZombie || IsVanilla)
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
