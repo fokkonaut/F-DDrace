@@ -96,25 +96,37 @@ Most custom tile can be used and tested directly from Game and Front layer (or S
 
 ## Map Settings
 
-Following config options can be used from "Server settings" field in the editor. To check their values, see the linked code files above or try them ingame. If you want to add other options to your map, place them in autoexec.cfg file or create an issue or pull request explaining your usecase. It will probably make sense to allow more configs to be executed from the map.
+Following config options can be used from "Server settings" field in the editor. To check their values, see the linked code files above or try them ingame. If you want to add other options to your map, place them in autoexec.cfg file or create an issue or pull request explaining your usecase.
 
 | Config |
 | ------ |
 | `tune_lock` and `tune_lock_enter` |
+| `sv_exp_msg_color_text` (0.7) |
+| `sv_exp_msg_color_symbol` (0.7) |
+| `sv_exp_msg_color_value` (0.7) |
+| `sv_kill_logout` |
 | `sv_police_farm_limit` |
 | `sv_money_bank_mode` |
 | `sv_money_farm_team` |
 | `sv_money_drop_delay` |
+| `sv_flag_sounds` |
 | `sv_flag_hooking` |
 | `sv_flag_respawn_dropped` |
 | `sv_immunity_flag` |
 | `sv_immunity_flag_tele` |
+| `sv_hide_dummies` |
+| `sv_default_dummies` |
 | `sv_v3_offset_x` |
 | `sv_v3_offset_y` |
+| `sv_dummy_bot_skin` (0.7) |
+| `sv_dummy_blocking` |
+| `sv_weapon_indicator_default` |
 | `sv_allow_empty_inventory` |
 | `sv_drop_weapons` |
 | `sv_drops_on_death` |
 | `sv_destroy_drops_on_leave` |
+| `sv_max_weapon_drops` |
+| `sv_max_pickup_drops` |
 | `sv_interactive_drops` |
 | `sv_heli_respawn_time` |
 | `sv_vanilla_mode_start` |
@@ -122,11 +134,22 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_survival_lobby_countdown` |
 | `sv_survival_round_time` |
 | `sv_survival_deathmatch_time` |
+| `sv_portal_rifle_delay` |
+| `sv_portal_radius` |
+| `sv_portal_detonation_linked` |
+| `sv_portal_detonation` |
+| `sv_portal_max_distance` |
 | `sv_portal_rifle_ammo` |
+| `sv_portal_rifle_respawn_time` |
+| `sv_portal_through_door` |
+| `sv_portal_blocker_detonation` |
+| `sv_portal_blocker_max_length` |
 | `sv_max_objects_plot_small` |
 | `sv_max_objects_plot_big` |
 | `sv_max_objects_free_draw` |
+| `sv_police_taser_plot_raid` |
 | `sv_plot_door_health` |
+| `sv_taser_battery_respawn_time` |
 | `sv_spawn_weapons` |
 | `sv_slash_spawn` |
 | `sv_spawn_block_protection` |
@@ -134,13 +157,25 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_spawnarea_low_y` |
 | `sv_spawnarea_high_x` |
 | `sv_spawnarea_high_y` |
+| `sv_redirect_server_tile_ports` |
+| `sv_weak_hook` |
+| `sv_stoppers_passthrough` |
+| `sv_shotgun_bug` |
+| `sv_default_score_mode` |
+| `sv_allow_bonus_score_mode` |
+| `sv_no_bonus_max_jumps` |
+| `sv_bonus_score_treshold` |
+| `sv_bonus_score_decrease` |
 | `sv_spawn_as_zombie` |
 | `sv_increase_human_cap_bots` |
+| `sv_hide_minigame_players` |
+| `sv_rainbow_speed_default` |
+| `sv_old_jetpack_sound` |
 | `sv_block_points_delay` |
 | `sv_always_tele_weapon` |
+| `sv_touched_kills` |
 | `sv_tele_rifle_allow_blocks` |
-| `sv_increase_human_cap_bots` |
-| `sv_increase_human_cap_bots` |
+| `sv_minigame_afk_auto_leave` |
 
 ## Credits
 
