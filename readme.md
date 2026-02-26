@@ -75,6 +75,25 @@ These files contain the complete and up-to-date documentation for everything.
 Source code is in [`src/`](https://github.com/fokkonaut/F-DDrace/tree/F-DDrace/src) and [`scripts/`](https://github.com/fokkonaut/F-DDrace/tree/F-DDrace/scripts).
 Pull requests and suggestions welcome!
 
+## Tile Documentation
+
+Most custom tile can be used and tested directly from Game and Front layer (or Switch layer for some tiles, like weapons). However there are some tiles and combinations that require more attention and are explained below:
+
+| Index | Tile | Layer | Description |
+| ----- | ---- | ----- | ----------- |
+| 100, 101, 102, 103, 130, 145, 146, 147, 148, 151, 154 | Maskable toggle tiles | Game, Front | These tiles (e.g. rainbow or passive) can be placed as toggle tiles but are maskable |
+| 166, 167 | Toggle mask ON and OFF | Game, Front | Place a toggle mask tile on any of the above toggle tiles to make them work as ON/OFF tile only |
+| 131 | Hookpower | Switch | Delay=Hookpower: 0=off, 1=rainbow, 2=atom, 3=trail, 4=bloody |
+| 180, 181 | Durák table and seats | Switch | ID=matching (e.g. 1 for all), Seat Delay=1-6 (for each seat) |
+| 192 | Plot inside | Switch | ID=Plot number, Delay=0 |
+| 193 | Plot door | Switch | ID=Plot number, Delay=0: Works like index 240 (Door) and has to be combined with length tile, Delay>0: Laser length, works like index 210-212 |
+| 194 | Plot spawn and option | Switch | ID=Plot number, Delay=Plot size: 0=small, 1=big |
+| 195, 196 | Redirect FROM and TO teleport | Switch | FROM and TO teleporters but for redirect, ID to port mapping: `sv_redirect_server_tile_ports 1:8304,2:8303` |
+| 199, 200, 202, 241, 243, 244, 245, 249, 250, 252 | Most weapons | Switch | ID=0, Delay=1: Give spread weapon variant |
+| 201 | Scroll Ninja | Switch | ID=0, Delay=1: Give scroll ninja |
+| 242 | Door Hammer | Switch | ID=0, Delay=1: Give door hammmer, ability to open doors by hitting them |
+| 219 | Helicopter | Switch | Delay=Variant: 0=standard, 1=minigun, 2=missile, spawning can be delayed by disabling switch with same ID |
+
 ## Credits
 
 - **Lead Developer:** [fokkonaut](https://github.com/fokkonaut)
