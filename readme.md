@@ -81,6 +81,7 @@ Most custom tile can be used and tested directly from Game and Front layer (or S
 
 | Index | Tile | Layer | Description |
 | ----- | ---- | ----- | ----------- |
+| 69, 70 | Tune Lock, Tune Lock Reset | Tune | Lock a tune parameter per player, stackable with tune zones |
 | 100, 101, 102, 103, 130, 145, 146, 147, 148, 151, 154 | Maskable toggle tiles | Game, Front | These tiles (e.g. rainbow or passive) can be placed as toggle tiles but are maskable |
 | 166, 167 | Toggle mask ON and OFF | Game, Front | Place a toggle mask tile on any of the above toggle tiles to make them work as ON/OFF tile only |
 | 131 | Hookpower | Switch | Delay=Hookpower: 0=off, 1=rainbow, 2=atom, 3=trail, 4=bloody |
