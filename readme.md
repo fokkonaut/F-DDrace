@@ -94,6 +94,54 @@ Most custom tile can be used and tested directly from Game and Front layer (or S
 | 242 | Door Hammer | Switch | ID=0, Delay=1: Give door hammmer, ability to open doors by hitting them |
 | 219 | Helicopter | Switch | Delay=Variant: 0=standard, 1=minigun, 2=missile, spawning can be delayed by disabling switch with same ID |
 
+## Map Settings
+
+Following config options can be used from "Server settings" field in the editor. To check their values, see the linked code files above or try them ingame. If you want to add other options to your map, place them in autoexec.cfg file or create an issue or pull request explaining your usecase. It will probably make sense to allow more configs to be executed from the map.
+
+| Config |
+| ------ |
+| `tune_lock` and `tune_lock_enter` |
+| `sv_police_farm_limit` |
+| `sv_money_bank_mode` |
+| `sv_money_farm_team` |
+| `sv_money_drop_delay` |
+| `sv_flag_hooking` |
+| `sv_flag_respawn_dropped` |
+| `sv_immunity_flag` |
+| `sv_immunity_flag_tele` |
+| `sv_v3_offset_x` |
+| `sv_v3_offset_y` |
+| `sv_allow_empty_inventory` |
+| `sv_drop_weapons` |
+| `sv_drops_on_death` |
+| `sv_destroy_drops_on_leave` |
+| `sv_interactive_drops` |
+| `sv_heli_respawn_time` |
+| `sv_vanilla_mode_start` |
+| `sv_survival_min_players` |
+| `sv_survival_lobby_countdown` |
+| `sv_survival_round_time` |
+| `sv_survival_deathmatch_time` |
+| `sv_portal_rifle_ammo` |
+| `sv_max_objects_plot_small` |
+| `sv_max_objects_plot_big` |
+| `sv_max_objects_free_draw` |
+| `sv_plot_door_health` |
+| `sv_spawn_weapons` |
+| `sv_slash_spawn` |
+| `sv_spawn_block_protection` |
+| `sv_spawnarea_low_x` |
+| `sv_spawnarea_low_y` |
+| `sv_spawnarea_high_x` |
+| `sv_spawnarea_high_y` |
+| `sv_spawn_as_zombie` |
+| `sv_increase_human_cap_bots` |
+| `sv_block_points_delay` |
+| `sv_always_tele_weapon` |
+| `sv_tele_rifle_allow_blocks` |
+| `sv_increase_human_cap_bots` |
+| `sv_increase_human_cap_bots` |
+
 ## Credits
 
 - **Lead Developer:** [fokkonaut](https://github.com/fokkonaut)
