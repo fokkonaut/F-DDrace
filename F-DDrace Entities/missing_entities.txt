@@ -1,7 +1,0 @@
-// Following tiles are missing from entities as they overlap with tiles from other layers
-TILE_SWITCH_PLOT = 192,
-TILE_SWITCH_PLOT_DOOR = 193,
-TILE_SWITCH_PLOT_TOTELE = 194,
-TILE_SWITCH_REDIRECT_SERVER_FROM = 195,
-TILE_SWITCH_REDIRECT_SERVER_TO = 196,
-
