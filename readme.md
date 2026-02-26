@@ -84,6 +84,7 @@ Most custom tile can be used and tested directly from Game and Front layer (or S
 | 69, 70 | Tune Lock, Tune Lock Reset | Tune | Lock a tune parameter per player, stackable with tune zones |
 | 100, 101, 102, 103, 130, 145, 146, 147, 148, 151, 154 | Maskable toggle tiles | Game, Front | These tiles (e.g. rainbow or passive) can be placed as toggle tiles but are maskable |
 | 166, 167 | Toggle mask ON and OFF | Game, Front | Place a toggle mask tile on any of the above toggle tiles to make them work as ON/OFF tile only |
+| 134+114 | Force human+gift | Game+Front | Place force human transformation tile on Game layer and money-xp bomb tile on Front layer, gifts 5000 xp on successful transformation |
 | 131 | Hookpower | Switch | Delay=Hookpower: 0=off, 1=rainbow, 2=atom, 3=trail, 4=bloody |
 | 180, 181 | Durák table and seats | Switch | ID=matching (e.g. 1 for all), Seat Delay=1-6 (for each seat) |
 | 192 | Plot inside | Switch | ID=Plot number, Delay=0 |
