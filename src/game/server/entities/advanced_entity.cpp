@@ -90,66 +90,88 @@ bool CAdvancedEntity::IsGrounded(bool GroundVel, bool AirVel)
 
 void CAdvancedEntity::HandleDropped()
 {
+	CTuningParams *pTuning = m_TuneZone ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
+
 	//Gravity
 	if (m_Gravity)
 	{
-		if (!m_TuneZone)
-			m_Vel.y += GameServer()->Tuning()->m_Gravity;
-		else
-			m_Vel.y += GameServer()->TuningList()[m_TuneZone].m_Gravity;
+		m_Vel.y += pTuning->m_Gravity;
 	}
 
 	//Speedups
 	if (GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos)))
 	{
 		vec2 Direction, MaxVel, TempVel = m_Vel;
-		int Force, MaxSpeed = 0;
-		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos), &Direction, &Force, &MaxSpeed);
-		if (Force == 255 && MaxSpeed)
+		int Force, Type, MaxSpeed = 0;
+		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos), &Direction, &Force, &MaxSpeed, &Type);
+
+		if(Type == TILE_SPEED_BOOST_OLD)
 		{
-			m_Vel = Direction * (MaxSpeed / 5);
-		}
-		else
-		{
-			if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-			if (MaxSpeed > 0)
+			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+			if (Force == 255 && MaxSpeed)
 			{
-				if (Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
-				else if (Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
-				else if (Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
-				else
-					SpeederAngle = asin(-1.0f);
-
-				if (SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
-
-				if (TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
-				else if (TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
-				else if (TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
-				else
-					TeeAngle = asin(-1.0f);
-
-				if (TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
-
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
-
-				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-					TempVel += Direction * Force;
-				else if (abs((int)SpeedLeft) > Force)
-					TempVel += Direction * -Force;
-				else
-					TempVel += Direction * SpeedLeft;
+				m_Vel = Direction * (MaxSpeed / 5);
 			}
+			else
+			{
+				if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
+				if (MaxSpeed > 0)
+				{
+					if (Direction.x > 0.0000001f)
+						SpeederAngle = -atan(Direction.y / Direction.x);
+					else if (Direction.x < 0.0000001f)
+						SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+					else if (Direction.y > 0.0000001f)
+						SpeederAngle = asin(1.0f);
+					else
+						SpeederAngle = asin(-1.0f);
+
+					if (SpeederAngle < 0)
+						SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+
+					if (TempVel.x > 0.0000001f)
+						TeeAngle = -atan(TempVel.y / TempVel.x);
+					else if (TempVel.x < 0.0000001f)
+						TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+					else if (TempVel.y > 0.0000001f)
+						TeeAngle = asin(1.0f);
+					else
+						TeeAngle = asin(-1.0f);
+
+					if (TeeAngle < 0)
+						TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+
+					TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+
+					DiffAngle = SpeederAngle - TeeAngle;
+					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+					if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+						TempVel += Direction * Force;
+					else if (abs((int)SpeedLeft) > Force)
+						TempVel += Direction * -Force;
+					else
+						TempVel += Direction * SpeedLeft;
+				}
+				else
+					TempVel += Direction * Force;
+
+				m_Vel = TempVel;
+			}
+		}
+		else if(Type == TILE_SPEED_BOOST)
+		{
+			constexpr float MaxSpeedScale = 5.0f;
+			if(MaxSpeed == 0)
+			{
+				float MaxRampSpeed = pTuning->m_VelrampRange / (50 * log(max((float)pTuning->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = max(MaxRampSpeed, pTuning->m_VelrampStart / 50) * MaxSpeedScale;
+			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
 				TempVel += Direction * Force;
 

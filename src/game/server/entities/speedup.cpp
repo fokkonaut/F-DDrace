@@ -58,7 +58,7 @@ void CSpeedup::ResetCollision(bool Remove)
 		MaxSpeed = 0;
 		m_Collision = false;
 	}
-	GameServer()->Collision()->SetSpeedup(m_Pos, Angle, Force, MaxSpeed);
+	GameServer()->Collision()->SetSpeedup(m_Pos, Angle, Force, MaxSpeed, TILE_SPEED_BOOST_OLD);
 }
 
 void CSpeedup::Rotate(int Angle)

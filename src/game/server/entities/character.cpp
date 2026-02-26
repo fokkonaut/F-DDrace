@@ -2720,54 +2720,77 @@ void CCharacter::HandleSkippableTiles(int Index)
 	// handle speedup tiles
 	if (GameServer()->Collision()->IsSpeedup(Index))
 	{
-		vec2 Direction, MaxVel, TempVel = m_Core.m_Vel;
-		int Force, MaxSpeed = 0;
-		float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
-		GameServer()->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
-		if (Force == 255 && MaxSpeed)
+		vec2 Direction, TempVel = m_Core.m_Vel;
+		int Force, Type, MaxSpeed = 0;
+		GameServer()->Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
+
+		if(Type == TILE_SPEED_BOOST_OLD)
 		{
-			m_Core.m_Vel = Direction * (MaxSpeed / 5);
-		}
-		else
-		{
-			if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
-			if (MaxSpeed > 0)
+			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
+			if (Force == 255 && MaxSpeed)
 			{
-				if (Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
-				else if (Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
-				else if (Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
-				else
-					SpeederAngle = asin(-1.0f);
-
-				if (SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
-
-				if (TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
-				else if (TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
-				else if (TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
-				else
-					TeeAngle = asin(-1.0f);
-
-				if (TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
-
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
-
-				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
-					TempVel += Direction * Force;
-				else if (abs((int)SpeedLeft) > Force)
-					TempVel += Direction * -Force;
-				else
-					TempVel += Direction * SpeedLeft;
+				m_Core.m_Vel = Direction * (MaxSpeed / 5);
 			}
+			else
+			{
+				if (MaxSpeed > 0 && MaxSpeed < 5) MaxSpeed = 5;
+				if (MaxSpeed > 0)
+				{
+					if (Direction.x > 0.0000001f)
+						SpeederAngle = -atan(Direction.y / Direction.x);
+					else if (Direction.x < 0.0000001f)
+						SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+					else if (Direction.y > 0.0000001f)
+						SpeederAngle = asin(1.0f);
+					else
+						SpeederAngle = asin(-1.0f);
+
+					if (SpeederAngle < 0)
+						SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+
+					if (TempVel.x > 0.0000001f)
+						TeeAngle = -atan(TempVel.y / TempVel.x);
+					else if (TempVel.x < 0.0000001f)
+						TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+					else if (TempVel.y > 0.0000001f)
+						TeeAngle = asin(1.0f);
+					else
+						TeeAngle = asin(-1.0f);
+
+					if (TeeAngle < 0)
+						TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+
+					TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+
+					DiffAngle = SpeederAngle - TeeAngle;
+					SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
+					if (abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+						TempVel += Direction * Force;
+					else if (abs((int)SpeedLeft) > Force)
+						TempVel += Direction * -Force;
+					else
+						TempVel += Direction * SpeedLeft;
+				}
+				else
+					TempVel += Direction * Force;
+
+				m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
+			}
+		}
+		else if(Type == TILE_SPEED_BOOST)
+		{
+			constexpr float MaxSpeedScale = 5.0f;
+			if(MaxSpeed == 0)
+			{
+				float MaxRampSpeed = Tuning()->m_VelrampRange / (50 * log(max((float)Tuning()->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = max(MaxRampSpeed, Tuning()->m_VelrampStart / 50) * MaxSpeedScale;
+			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
 				TempVel += Direction * Force;
 

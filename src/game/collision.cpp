@@ -1019,12 +1019,13 @@ int CCollision::IsTuneLock(int Index) const
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2* Dir, int* Force, int* MaxSpeed)
+void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed, int *pType)
 {
 	if (Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
 	*Force = m_pSpeedup[Index].m_Force;
+	*pType = m_pSpeedup[Index].m_Type;
 	*Dir = vec2(cos(Angle), sin(Angle));
 	if (MaxSpeed)
 		* MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
@@ -1650,7 +1651,7 @@ int CCollision::GetFTileRaw(int x, int y)
 	return GetFTileIndex(GetPureMapIndex(x, y));
 }
 
-void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed)
+void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed, int Type)
 {
 	if (!m_pSpeedup)
 		return;
@@ -1662,7 +1663,7 @@ void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed)
 	m_pSpeedup[Index].m_Angle = Angle;
 	m_pSpeedup[Index].m_Force = Force;
 	m_pSpeedup[Index].m_MaxSpeed = MaxSpeed;
-	m_pSpeedup[Index].m_Type = Force ? TILE_BOOST : 0;
+	m_pSpeedup[Index].m_Type = Force ? Type : 0;
 }
 
 void CCollision::SetTeleporter(vec2 Pos, int Type, int Number)
