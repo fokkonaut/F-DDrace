@@ -3246,7 +3246,7 @@ void CCharacter::HandleTiles(int Index)
 			m_LastIndexTile != TILE_DURAK_TABLE && m_LastIndexFrontTile != TILE_DURAK_TABLE);
 	if (RequiredSwitchTile)
 	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "[WARNING] Place this tile from switch layer");
+		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("[WARNING] Place this tile from switch layer"));
 	}
 
 	// tell the user about mask tiles with missing feature tile
@@ -3264,7 +3264,8 @@ void CCharacter::HandleTiles(int Index)
 				Found = true;
 		if (!Found)
 		{
-			char aBuf[256] = "[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: ";
+			char aBuf[256];
+			str_copy(aBuf, m_pPlayer->Localize("[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: "), sizeof(aBuf));
 			char aTile[8];
 			for (size_t i = 0; i < NumMaskTiles; i++)
 			{
@@ -3492,7 +3493,7 @@ void CCharacter::HandleTiles(int Index)
 			if (Players > 1 && (Players >> 1) <= Humans)
 			{
 				m_pPlayer->m_LastHumanTryTick = Server()->Tick();
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Humans limit reached.");
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Humans limit reached."));
 				TransformHuman = false;
 			}
 		}
