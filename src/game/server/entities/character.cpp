@@ -2250,13 +2250,20 @@ int CCharacter::GetDDNetCharacterNinjaActivationTick()
 int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 {
 	int Flags = 0;
-
-	bool aGotWeapon[NUM_VANILLA_WEAPONS] = { false };
-	for (int i = 0; i < NUM_WEAPONS; i++)
-		if (m_aWeapons[i].m_Got)
-			aGotWeapon[GameServer()->GetWeaponType(i)] = true;
-
 	bool Local = SnappingClient == m_pPlayer->GetCID();
+	bool aGotWeapon[NUM_VANILLA_WEAPONS] = { false };
+
+	if (Local && m_pPlayer->AntiPing() && m_BirthdayGiftEndTick)
+	{
+		aGotWeapon[WEAPON_GUN] = true;
+	}
+	else
+	{
+		for (int i = 0; i < NUM_WEAPONS; i++)
+			if (m_aWeapons[i].m_Got)
+				aGotWeapon[GameServer()->GetWeaponType(i)] = true;
+	}
+
 	bool Helicopter = Local && m_pHelicopter;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
