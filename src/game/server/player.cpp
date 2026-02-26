@@ -2899,7 +2899,7 @@ void CPlayer::SetAntiPing(bool Set)
 		return;
 	m_AntiPing = Set;
 	if (Set)
-		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing enabled (use with cl_antiping 1, may cause unwanted side-effects)"));
+		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)"));
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing disabled"));
 	GameServer()->SendTuningParams(m_ClientID, m_pCharacter ? m_pCharacter->m_TuneZone : m_TuneZone);

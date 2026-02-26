@@ -50,7 +50,7 @@ static const char *MISC_ZOOMCURSOR = Localizable("Zoom Cursor");
 static const char *MISC_RESUMEMOVED = Localizable("Resume Moved");
 static const char *MISC_HIDEBROADCASTS = Localizable("Hide Broadcasts");
 static const char *MISC_LOCALCHAT = Localizable("Local Chat");
-static const char *MISC_ANTIPING = Localizable("AntiPing Weapons (use with cl_antiping 1)");
+static const char *MISC_ANTIPING = Localizable("AntiPing Weapons (only for 'cl_antiping 1')");
 
 void CVotingMenu::Init(CGameContext *pGameServer)
 {
