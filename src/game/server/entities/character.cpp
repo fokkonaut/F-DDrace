@@ -3084,24 +3084,30 @@ void CCharacter::HandleTiles(int Index)
 		// taser shield
 		if (m_TileIndex == TILE_TASER_SHIELD_PLUS || m_TileFIndex == TILE_TASER_SHIELD_PLUS)
 		{
-			m_pPlayer->m_TaserShield = min(m_pPlayer->m_TaserShield + 20, 100);
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later."), m_pPlayer->m_TaserShield);
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			if ((m_LastIndexTile != TILE_TASER_SHIELD_PLUS) && (m_LastIndexFrontTile != TILE_TASER_SHIELD_PLUS))
+			{
+				m_pPlayer->m_TaserShield = min(m_pPlayer->m_TaserShield + 20, 100);
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later."), m_pPlayer->m_TaserShield);
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+			}
 		}
 
 		// double-xp for +2 lifes
 		if (m_TileIndex == TILE_ADD_2X_XP_TWO_LIFES || m_TileFIndex == TILE_ADD_2X_XP_TWO_LIFES)
 		{
-			bool FirstlyAdded = m_pPlayer->m_DoubleXpLifesLeft == 0;
-			m_pPlayer->m_DoubleXpLifesLeft = min(m_pPlayer->m_DoubleXpLifesLeft + 2, 99);
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, double-xp has been activated for %d lifes"), m_pPlayer->m_DoubleXpLifesLeft);
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-			if (FirstlyAdded)
+			if ((m_LastIndexTile != TILE_ADD_2X_XP_TWO_LIFES) && (m_LastIndexFrontTile != TILE_ADD_2X_XP_TWO_LIFES))
 			{
-				// first enable, use one life.
-				m_pPlayer->UpdateDoubleXpLifes();
+				bool FirstlyAdded = m_pPlayer->m_DoubleXpLifesLeft == 0;
+				m_pPlayer->m_DoubleXpLifesLeft = min(m_pPlayer->m_DoubleXpLifesLeft + 2, 99);
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, double-xp has been activated for %d lifes"), m_pPlayer->m_DoubleXpLifesLeft);
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+				if (FirstlyAdded)
+				{
+					// first enable, use one life.
+					m_pPlayer->UpdateDoubleXpLifes();
+				}
 			}
 		}
 
