@@ -570,7 +570,15 @@ void CCharacterCore::Move(bool BugStoppersPassthrough)
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(m_pfnSwitchActive, m_pSwitchActiveUser, &NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE), m_Tuning.m_Elasticity, !BugStoppersPassthrough, m_MoveRestrictionExtra);
+	bool Grounded = false;
+	m_pCollision->MoveBox(m_pfnSwitchActive, m_pSwitchActiveUser, &NewPos, &m_Vel, vec2(PHYS_SIZE, PHYS_SIZE),
+			vec2(m_Tuning.m_GroundElasticityX, m_Tuning.m_GroundElasticityY), !BugStoppersPassthrough, m_MoveRestrictionExtra, &Grounded);
+
+	if(Grounded)
+	{
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
 
 	m_Colliding = 0;
 	if (m_Vel.x < 0.001f && m_Vel.x > -0.001f)

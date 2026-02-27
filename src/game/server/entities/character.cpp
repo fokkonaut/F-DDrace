@@ -304,7 +304,8 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f, false, m_Core.m_MoveRestrictionExtra);
+		vec2 GroundElasticity = vec2(Tuning()->m_GroundElasticityX, Tuning()->m_GroundElasticityY);
+		GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity, false, m_Core.m_MoveRestrictionExtra);
 
 		// Don't skip no-bonus tile with ninja
 		if (GameServer()->Collision()->IntersectLineNoBonus(m_Pos, m_Core.m_Pos, 0, 0, !m_NoBonusContext.m_InArea))
@@ -1222,7 +1223,7 @@ float CCharacter::GetFireDelay(int Weapon)
 {
 	int Tune = OLD_TUNES + Weapon;
 	if (Weapon >= NUM_VANILLA_WEAPONS)
-		Tune++; // the hammer hit fire delay got inserted inbetween, so we have to go one entry further
+		Tune += 3; // the hammer hit fire delay and elasticity x/y got inserted inbetween, so we have to skip them
 
 	float FireDelay;
 	Tuning()->Get(Tune, &FireDelay);

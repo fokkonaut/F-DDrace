@@ -72,7 +72,7 @@ CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos
 	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
 {
 	m_AllowVipPlus = false;
-	m_Elasticity = 0.f;
+	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
 
 	m_Number = Number;

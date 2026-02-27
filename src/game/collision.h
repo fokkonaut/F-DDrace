@@ -103,8 +103,8 @@ public:
 		}
 	};
 
-	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra());
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra())
+	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra(), bool *pGrounded = nullptr);
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra())
 	{
 		MoveBox(0, 0, pInoutPos, pInoutVel, Size, Elasticity, CheckStopper, Extra);
 	}
@@ -254,7 +254,7 @@ public:
 	// Boxbig
 	const float ms_MinStaticPhysSize = 30; // actually the smallest object right now is a map tile (32 x 32)
 	bool TestBoxBig(vec2 Pos, vec2 Size);
-	void MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
+	void MoveBoxBig(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity);
 	bool IsBoxGrounded(vec2 Pos, vec2 Size);
 
 	// speedups

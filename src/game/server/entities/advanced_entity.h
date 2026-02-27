@@ -51,7 +51,7 @@ protected:
 	bool m_Gravity;
 	bool m_GroundVel;
 	bool m_AirVel;
-	float m_Elasticity;
+	vec2 m_Elasticity;
 	bool m_AllowVipPlus;
 
 	static bool IsSwitchActiveCb(int Number, void* pUser);

@@ -62,7 +62,10 @@ MACRO_TUNING_PARAM(LaserFireDelay, laser_fire_delay, 800, "Delay of firing laser
 MACRO_TUNING_PARAM(NinjaFireDelay, ninja_fire_delay, 800, "Delay of firing ninja")
 MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of hammering (when hitting another tee)")
 
-#define NUM_DDNET_TUNES 44
+MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
+MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+#define NUM_DDNET_TUNES 46
 
 // when adding a new tune here, make sure to update CCharacter::GetFireDelay(int)
 
@@ -99,6 +102,5 @@ MACRO_TUNING_PARAM(MoneyMaxFlySpeed, money_max_fly_speed, 3, "Fly speed for foll
 MACRO_TUNING_PARAM(LightningLaserCount, lightning_laser_count, 7, "Number of lasers used for the lightning laser (min: 1)")
 MACRO_TUNING_PARAM(LightningLaserLength, lightning_laser_length, 70, "Length of lasers used for the lightning laser (min: 1)")
 
-MACRO_TUNING_PARAM(Elasticity, elasticity, 0, "Elasticity, bouncing off of blocks")
 MACRO_TUNING_PARAM(NumSpreadShots, num_spread_shots, 3, "Number of shots for the spread weapons")
 #endif

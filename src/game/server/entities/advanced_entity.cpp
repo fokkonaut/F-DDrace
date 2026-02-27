@@ -21,7 +21,7 @@ CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, 
 	m_AirVel = true;
 	m_AllowVipPlus = true;
 	m_CheckGameLayerClipped = true;
-	m_Elasticity = 0.5f;
+	m_Elasticity = vec2(0.5f, 0.5f);
 	m_LastInOutTeleporter = 0;
 }
 
