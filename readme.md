@@ -18,7 +18,7 @@ F-DDrace is an "open world" game type where you can do whatever you want - chat,
 
 **Shop system:** Buy cosmetics, upgrades and more with farmed money. Shop is integrated into the map.
 
-**Custom votes menu:** The callvote menu has 3 categories: Votes, Account, Miscellaneous. Switch between them effortlessly and interact with toggle options, value options via reason, and collapse elements. You can combine elements or add prefixes like bullet points.
+**Custom votes menu:** The callvote menu has 4 categories: Votes, Account, Miscellaneous, Languages. Switch between them effortlessly and interact with toggle options, value options via reason, and collapse elements. You can combine elements or add prefixes like bullet points.
 
 **Plot system & innovative editor:** One of F-DDrace's biggest features. Rent your own plot and design it with the self-made ingame plot editor. The editor lets you place pickups (hearts, shields, weapons), create laser walls (fully customizable color, length, angle, thickness, collision), build laser doors with matching toggle buttons, add speedups (configurable angle, force, max speed), and set up teleporters (multiple modes: In/Out, From, To, Weapon From, Hook From, with evil mode for red/blue teleporters). Advanced transformation tools let you select whole areas to move, copy, erase, or save for later loading.
 
