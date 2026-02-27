@@ -95,7 +95,7 @@ Most custom tiles can be used and tested directly from Game and Front layer (or 
 | 192 | Plot inside | Switch | ID=Plot number, Delay=0 |
 | 193 | Plot door | Switch | ID=Plot number, Delay=0: Works like index 240 (Door) and has to be combined with length tile, Delay>0: Laser length, works like index 210-212 |
 | 194 | Plot spawn and option | Switch | ID=Plot number, Delay=Plot size: 0=small, 1=big |
-| 195, 196 | Redirect FROM and TO teleport | Switch | FROM and TO teleporters but for redirect, ID to port mapping: `sv_redirect_server_tile_ports 1:8304,2:8303` |
+| 195, 196 | Redirect FROM and TO teleport | Switch | FROM and TO teleporters but for redirect, ID to port mapping: `sv_redirect_server_tile_ports 1:8304,2:8303`, TO: Delay=1: Playercounter display |
 | 199, 200, 202, 241, 243, 244, 245, 249, 250, 252 | Most weapons | Switch | ID=0, Delay=1: Give spread weapon variant |
 | 201 | Scroll Ninja | Switch | ID=0, Delay=1: Give scroll ninja |
 | 242 | Door Hammer | Switch | ID=0, Delay=1: Give door hammmer, ability to open doors by hitting them |
