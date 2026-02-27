@@ -82,7 +82,7 @@ Pull requests and suggestions welcome!
 - **Ingame overlay entities:** [f-ddrace.png](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/F-DDrace_Entities/f-ddrace.png)
 - **All map tile names:** [`src/game/mapitems.h`](https://github.com/fokkonaut/F-DDrace/blob/F-DDrace/src/game/mapitems.h)
 
-Most custom tiles can be used and tested directly from Game and Front layer (or Switch layer for some tiles, like weapons). However there are some tiles and combinations that require more attention and are explained below:
+Most custom tiles can be used and tested directly from Game and Front layer (or Switch layer for some tiles, like weapons). However there are some tiles and combinations that require more attention and are explained below (use `CTRL+I` in editor for indices):
 
 | Index | Tile | Layer | Description |
 | ----- | ---- | ----- | ----------- |
