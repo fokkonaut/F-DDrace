@@ -415,7 +415,7 @@ void CPickup::Snap(int SnappingClient)
 		pEntData->m_Layer = m_Layer;
 		pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
 	}
-	else if (SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
+	else if (SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS || m_Type == POWERUP_BATTERY)
 	{
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if (pChr && pChr->IsAlive() && (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) && (!Tick))
