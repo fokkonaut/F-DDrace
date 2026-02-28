@@ -392,7 +392,7 @@ MACRO_CONFIG_STR(SvCountriesFilePath, sv_countries_file_path, 128, "data", CFGFL
 
 // zombie
 MACRO_CONFIG_INT(SvSpawnAsZombie, sv_spawn_as_zombie, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether player respawn as zombie by default", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvIncreaseHumanCapBots, sv_increase_human_cap_bots, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether server-side bots are counted (0=not counted, 1=counted as players, but not humans!)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvIncreaseHumanCapBots, sv_increase_human_cap_bots, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether server-side bots are counted (0=not counted, 1=counted as players, but not humans!)", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
