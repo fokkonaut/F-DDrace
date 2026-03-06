@@ -463,6 +463,10 @@ public:
 	void SendMapListEntryRem(const CMapListEntry *pMapListEntry, int ClientID);
 	void UpdateClientMapListEntries();
 
+	// ddnet
+	void SendMaplistGroupStart(int ClientId);
+	void SendMaplistGroupEnd(int ClientId);
+
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	bool m_ServerInfoNeedsUpdate;

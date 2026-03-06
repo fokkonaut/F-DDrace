@@ -1351,6 +1351,14 @@ void CServer::UpdateClientRconCommands()
 
 void CServer::SendMapListEntryAdd(const CMapListEntry *pMapListEntry, int ClientID)
 {
+	if (m_aClients[ClientID].m_Sevendown)
+	{
+		CMsgPacker Msg(NETMSG_MAPLIST_ADD, true);
+		Msg.AddString(pMapListEntry->m_aName, 256);
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		return;
+	}
+
 	CMsgPacker Msg(NETMSG_MAPLIST_ENTRY_ADD, true);
 	Msg.AddString(pMapListEntry->m_aName, 256);
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
@@ -1363,6 +1371,24 @@ void CServer::SendMapListEntryRem(const CMapListEntry *pMapListEntry, int Client
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
+void CServer::SendMaplistGroupStart(int ClientId)
+{
+	if (!m_aClients[ClientId].m_Sevendown)
+		return;
+
+	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_START, true);
+	Msg.AddInt(m_NumMapEntries);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
+
+void CServer::SendMaplistGroupEnd(int ClientId)
+{
+	if (!m_aClients[ClientId].m_Sevendown)
+		return;
+
+	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_END, true);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
 
 void CServer::UpdateClientMapListEntries()
 {
@@ -1374,6 +1400,9 @@ void CServer::UpdateClientMapListEntries()
 			{
 				SendMapListEntryAdd(m_aClients[ClientID].m_pMapListEntryToSend, ClientID);
 				m_aClients[ClientID].m_pMapListEntryToSend = m_aClients[ClientID].m_pMapListEntryToSend->m_pNext;
+
+				if (!m_aClients[ClientID].m_pMapListEntryToSend)
+					SendMaplistGroupEnd(ClientID);
 			}
 		}
 	}
@@ -1923,8 +1952,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						}
 
 						// TODO: Check if we want to send all maps to all rcon clients
-						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION && !m_aClients[ClientID].m_Sevendown)
+						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION || m_aClients[ClientID].m_Sevendown)
+						{
+							SendMaplistGroupStart(ClientID);
 							m_aClients[ClientID].m_pMapListEntryToSend = m_pFirstMapEntry;
+						}
 
 						char aBuf[256];
 						const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
