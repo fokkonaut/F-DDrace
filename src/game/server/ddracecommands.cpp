@@ -1846,6 +1846,13 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
+	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, logged in on another port");
+		pSelf->FreeAccount(ID);
+		return;
+	}
+
 	float Euros = pResult->GetFloat(1);
 	char aBuf[256];
 	pSelf->m_Accounts[ID].m_Euros += Euros;
