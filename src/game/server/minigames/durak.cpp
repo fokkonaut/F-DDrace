@@ -772,7 +772,7 @@ bool CDurak::StartGame(int Game)
 	if (LastDurakIndex != -1)
 	{
 		// Get previous player of LastDurakIndex, so that LastDurakIndex ends up getting attacked.
-		pGame->m_InitialAttackerIndex = pGame->GetNextPlayer(LastDurakIndex, false, true);
+		pGame->m_InitialAttackerIndex = pGame->GetNextPlayer(LastDurakIndex, true);
 		m_vLastDuraks.erase(DurakIt);
 	}
 	pGame->DealHandCards();

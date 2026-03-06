@@ -425,12 +425,12 @@ public:
 		});
 	}
 
-	int GetNextPlayer(int CurrentIndex, bool CheckHands = false, bool Prev = false)
+	int GetNextPlayer(int CurrentIndex, bool Prev = false)
 	{
 		for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
 		{
 			int NextIndex = (CurrentIndex + (Prev ? -1 : 1)*(i + 1) + MAX_DURAK_PLAYERS) % MAX_DURAK_PLAYERS;
-			if (m_aSeats[NextIndex].m_Player.m_ClientID != -1 && m_aSeats[NextIndex].m_Player.m_Stake >= 0 && (!CheckHands || m_aSeats[NextIndex].m_Player.m_vHandCards.size()))
+			if (m_aSeats[NextIndex].m_Player.m_ClientID != -1 && m_aSeats[NextIndex].m_Player.m_Stake >= 0)
 				return NextIndex;
 		}
 		return -1;
@@ -711,20 +711,9 @@ public:
 		for (int i = 0; i < MAX_DURAK_ATTACKS; i++)
 		{
 			if (!m_Attacks[i].m_Offense.Valid())
-			{
-				int NewDefender = -1;
-				for (int i = 0; i < MAX_DURAK_PLAYERS; i++)
-				{
-					int NextIndex = (m_DefenderIndex + (i + 1) + MAX_DURAK_PLAYERS) % MAX_DURAK_PLAYERS;
-					if (m_aSeats[NextIndex].m_Player.m_ClientID != -1 && m_aSeats[NextIndex].m_Player.m_Stake >= 0 &&
-						(int)m_aSeats[NextIndex].m_Player.m_vHandCards.size() >= NumAttacks + 1)
-					{
-						NewDefender = NextIndex;
-						break;
-					}
-				}
-
-				if (NewDefender == -1)
+			{	
+				int NewDefender = GetNextPlayer(m_DefenderIndex);
+				if (NewDefender == -1 || (int)m_aSeats[NewDefender].m_Player.m_vHandCards.size() < NumAttacks + 1)
 					return -1;
 
 				m_Attacks[i].m_Offense.m_Suit = pCard->m_Suit;
