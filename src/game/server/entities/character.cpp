@@ -6021,7 +6021,7 @@ bool CCharacter::TryCatchingWanted(int TargetCID, vec2 EffectPos)
 	return true;
 }
 
-bool CCharacter::SetZombieHuman(bool Zombie, bool GiveGun)
+bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID)
 {
 	if (m_IsZombie == Zombie)
 		return false;
@@ -6039,29 +6039,46 @@ bool CCharacter::SetZombieHuman(bool Zombie, bool GiveGun)
 		m_pPlayer->m_DefEmote = EMOTE_ANGRY;
 		m_pPlayer->m_DefEmoteReset = -1;
 
+		if (HitHumanID == -1)
+		{
+			CNetMsg_Sv_KillMsg Msg;
+			Msg.m_Killer = m_pPlayer->GetCID();
+			Msg.m_Victim = m_pPlayer->GetCID();
+			Msg.m_Weapon = WEAPON_WORLD;
+			Msg.m_ModeSpecial = HasFlag() != -1 ? 1 : 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+		}
+
 		CTeeInfo Info("cammo", 1, CGameControllerDDRace::ZombieBodyValue, CGameControllerDDRace::ZombieFeetValue);
 		Info.Translate(true);
 		m_pPlayer->m_CurrentInfo.m_TeeInfos = Info;
 		GameServer()->SendSkinChange(Info, m_pPlayer->GetCID(), -1);
 		GameServer()->CreatePlayerSpawn(m_Pos, TeamMask());
 
-		CNetMsg_Sv_KillMsg Msg;
-		Msg.m_Killer = m_pPlayer->GetCID();
-		Msg.m_Victim = m_pPlayer->GetCID();
-		Msg.m_Weapon = WEAPON_WORLD;
-		Msg.m_ModeSpecial = HasFlag() != -1 ? 1 : 0;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-
 		m_pPlayer->SetClan("Zombie");
 	}
 	else
 	{
+		if (HitHumanID != -1)
+		{
+			CNetMsg_Sv_KillMsg Msg;
+			Msg.m_Killer = m_pPlayer->GetCID();
+			Msg.m_Victim = HitHumanID;
+			Msg.m_Weapon = WEAPON_HAMMER;
+			int ModeSpecial = 0;
+			if (HasFlag() != -1) ModeSpecial |= 2;
+			if (GameServer()->GetPlayerChar(HitHumanID)->HasFlag() != -1) ModeSpecial |= 1;
+			Msg.m_ModeSpecial = ModeSpecial;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+		}
+
 		m_pPlayer->m_DisableCustomColorsTick = 0;
 		m_pPlayer->ResetSkin();
 		m_pPlayer->LoadDefEmote();
 		m_pPlayer->m_DefEmoteReset = -1;
 		m_pPlayer->SetClan(Server()->ClientClan(m_pPlayer->GetCID()));
-		if (GiveGun)
+		// dont give gun if the guy we stole human from didnt have gun
+		if (HitHumanID == -1)
 		{
 			GiveWeapon(WEAPON_GUN);
 		}
@@ -6077,7 +6094,8 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 	if (Config()->m_SvImmunityFlag && pTarget->HasFlag() == TEAM_BLUE)
 		return false;
 
-	SetZombieHuman(false, false);
+	int HitHumanID = pTarget->GetPlayer()->GetCID();
+	SetZombieHuman(false, HitHumanID);
 	for (int i = 0; i < NUM_WEAPONS; i++)
 	{
 		if (pTarget->CanDropWeapon(i))
@@ -6133,7 +6151,7 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 	}
 
 	// transform other guy to zombie
-	pTarget->SetZombieHuman(true);
+	pTarget->SetZombieHuman(true, HitHumanID);
 	// Freeze before droploot, so that wallet get's dropped :)
 	pTarget->Freeze(3);
 	pTarget->DropLoot(WEAPON_ZOMBIE_HIT);

@@ -624,7 +624,7 @@ public:
 	int64 m_BirthdayGiftEndTick;
 	int64 m_LastBirthdayMsg;
 	bool m_IsZombie;
-	bool SetZombieHuman(bool Zombie, bool GiveGun = true);
+	bool SetZombieHuman(bool Zombie, int HitHumanID = -1);
 	bool TryHumanTransformation(CCharacter *pTarget);
 	void SetBirthdayJetpack(bool Set);
 	bool SetSafeArea(bool Enter, bool Silent = false);
