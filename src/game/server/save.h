@@ -32,6 +32,7 @@ enum
 	SAVE_IDENTITY = 1<<2, // saves the identity of a player aswell as logs him back in when this save gets loaded
 	SAVE_JAIL = 1<<3, // only saves and loads escape and jail time of a player
 	SAVE_REDIRECT = 1<<4, // saves tee to redirect folder so other server can load it and adjust the position to the TO tile, requires SAVE_IDENTITY
+	SAVE_SHUTDOWN = 1<<5,
 };
 
 class CSaveTee

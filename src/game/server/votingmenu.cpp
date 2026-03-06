@@ -52,6 +52,7 @@ static const char *MISC_HIDEBROADCASTS = Localizable("Hide Broadcasts");
 static const char *MISC_LOCALCHAT = Localizable("Local Chat");
 static const char *MISC_ANTIPING = Localizable("AntiPing weapons (only for 'cl_antiping 1')");
 static const char *MISC_HIGHBANDWIDTH = Localizable("High Bandwidth mode");
+static const char *MISC_SAVEPLAYERSESSION = Localizable("Save player session");
 
 void CVotingMenu::Init(CGameContext *pGameServer)
 {
@@ -449,6 +450,11 @@ bool CVotingMenu::OnMessageSuccess(int ClientID, const char *pDesc, const char *
 		if (IsOption(pDesc, MISC_HIGHBANDWIDTH))
 		{
 			pPlayer->SetHighBandwidth(!Server()->GetHighBandwidth(ClientID));
+			return true;
+		}
+		if (IsOption(pDesc, MISC_SAVEPLAYERSESSION))
+		{
+			pPlayer->SetSavePlayerDisconnect(!pPlayer->m_SavePlayerDisconnect);
 			return true;
 		}
 
@@ -852,6 +858,10 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 	DoLineTextSubheader(Page, pNumOptions, pPlayer->Localize("Tᴇᴄʜɴɪᴄᴀʟ", "vote-header"));
 	DoLineToggleOption(Page, pNumOptions, MISC_ANTIPING, pPlayer->AntiPing());
 	DoLineToggleOption(Page, pNumOptions, MISC_HIGHBANDWIDTH, Server()->GetHighBandwidth(ClientID));
+	if (GameServer()->Config()->m_SvDisconnectSaveTees || pPlayer->m_SavePlayerDisconnect)
+	{
+		DoLineToggleOption(Page, pNumOptions, MISC_SAVEPLAYERSESSION, pPlayer->m_SavePlayerDisconnect);
+	}
 }
 
 void CVotingMenu::DoPageLanguages(int ClientID, int *pNumOptions)
@@ -932,6 +942,8 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 			Flags |= PREVFLAG_MISC_ANTIPING;
 		if (Server()->GetHighBandwidth(ClientID))
 			Flags |= PREVFLAG_MISC_HIGHBANDWIDTH;
+		if (pPlayer->m_SavePlayerDisconnect)
+			Flags |= PREVFLAG_MISC_SAVEPLAYERSESSION;
 		pStats->m_Minigame = pPlayer->m_Minigame;
 		pStats->m_ScoreMode = pPlayer->m_ScoreMode;
 	}

@@ -501,6 +501,10 @@ public:
 	bool m_CheckedSavePlayer;
 	bool m_LoadedSavedPlayer;
 
+	// save disconnect
+	bool m_SavePlayerDisconnect;
+	void SetSavePlayerDisconnect(bool Set);
+
 	// redirect tile
 	int64 m_LastRedirectTryTick;
 

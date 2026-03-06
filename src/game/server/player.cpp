@@ -264,6 +264,7 @@ void CPlayer::Reset()
 	m_LastHumanTryTick = 0;
 
 	Server()->SetHighBandwidth(m_ClientID, GameServer()->Config()->m_SvHighBandwidth);
+	m_SavePlayerDisconnect = false;
 }
 
 void CPlayer::Tick()
@@ -1093,12 +1094,20 @@ bool CPlayer::JoinChat(bool Local)
 
 void CPlayer::OnDisconnect()
 {
-	if (m_JailTime || m_EscapeTime)
-		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
-
 	// Make sure to call this before the character dies because on disconnect it should drop the money even when frozen
 	if (GameServer()->Config()->m_SvDropsOnDeath && m_pCharacter)
+	{
 		m_pCharacter->DropMoney(GetWalletMoney());
+	}
+
+	if (m_JailTime || m_EscapeTime)
+	{
+		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
+	}
+	else if (m_SavePlayerDisconnect)
+	{
+		GameServer()->SaveCharacter(m_ClientID, 0, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
+	}
 
 	KillCharacter();
 
@@ -2189,6 +2198,8 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		m_AntiPing = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIGHBANDWIDTH)
 		Server()->SetHighBandwidth(m_ClientID, true);
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT && GameServer()->Config()->m_SvDisconnectSaveTees)
+		m_SavePlayerDisconnect = true;
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
 
@@ -2250,6 +2261,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_ANTIPING;
 	if (Server()->GetHighBandwidth(m_ClientID))
 		pAccount->m_Flags |= CGameContext::ACCFLAG_HIGHBANDWIDTH;
+	if (m_SavePlayerDisconnect)
+		pAccount->m_Flags |= CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT;
 	pAccount->m_VoteMenuFlags = GameServer()->m_VotingMenu.GetFlags(m_ClientID);
 
 	GameServer()->UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
@@ -2920,6 +2933,17 @@ void CPlayer::SetHighBandwidth(bool Value)
 		GameServer()->SendChatTarget(m_ClientID, Localize("High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)"));
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("High Bandwidth mode disabled"));
+}
+
+void CPlayer::SetSavePlayerDisconnect(bool Set)
+{
+	if (m_SavePlayerDisconnect == Set || (Set && !GameServer()->Config()->m_SvDisconnectSaveTees))
+		return;
+	m_SavePlayerDisconnect = Set;
+	if (Set)
+		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player session on disconnect enabled"));
+	else
+		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player session on disconnect disabled"));
 }
 
 void CPlayer::SetWeaponIndicator(bool Set)

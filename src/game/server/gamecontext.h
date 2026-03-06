@@ -105,7 +105,7 @@ enum
 	MAX_PASSWORD_LENGTH = 128,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 17,
+	ACC_CURRENT_VERSION = 18,
 
 	// vip
 	VIP_CLASSIC = 1,
@@ -718,6 +718,7 @@ public:
 		ACCFLAG_HIDEBROADCASTS = 1<<5,
 		ACCFLAG_ANTIPING = 1<<6,
 		ACCFLAG_HIGHBANDWIDTH = 1<<7,
+		ACCFLAG_SAVEPLAYERDISCONNECT = 1<<8,
 	};
 
 	// money drops
