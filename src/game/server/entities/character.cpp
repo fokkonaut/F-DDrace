@@ -1223,7 +1223,7 @@ float CCharacter::GetFireDelay(int Weapon)
 {
 	int Tune = OLD_TUNES + Weapon;
 	if (Weapon >= NUM_VANILLA_WEAPONS)
-		Tune += 3; // the hammer hit fire delay and elasticity x/y got inserted inbetween, so we have to skip them
+		Tune += NUM_DDNET_TUNES - OLD_TUNES - NUM_VANILLA_WEAPONS; // the hammer hit fire delay and elasticity x/y got inserted inbetween, so we have to skip them
 
 	float FireDelay;
 	Tuning()->Get(Tune, &FireDelay);
