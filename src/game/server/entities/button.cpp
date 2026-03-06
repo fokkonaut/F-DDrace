@@ -73,7 +73,7 @@ void CButton::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		m_Pos, m_Pos, 0, -1, LASERTYPE_DOOR, -1, m_Number, LASERFLAG_NO_PREDICT);
+		m_Pos, m_Pos, 0, -1, LASERTYPE_RIFLE, -1, m_Number, LASERFLAG_NO_PREDICT);
 
 	if (!Status)
 		return;
@@ -85,6 +85,6 @@ void CButton::Snap(int SnappingClient)
 		vec2 Pos = m_Pos + m_aSides[i].m_Pos;
 		vec2 From = m_Pos + m_aSides[To].m_Pos;
 		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), m_aSides[i].m_ID,
-			Pos, From, Server()->Tick(), -1, LASERTYPE_DOOR, -1, m_Number, LASERFLAG_NO_PREDICT);
+			Pos, From, Server()->Tick(), -1, LASERTYPE_RIFLE, -1, m_Number, LASERFLAG_NO_PREDICT);
 	}
 }
