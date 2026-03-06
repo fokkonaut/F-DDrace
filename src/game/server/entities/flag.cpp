@@ -143,9 +143,9 @@ void CFlag::Grab(int NewCarrier, bool PreventTeleport)
 	{
 		if (m_AtStand || !GetCarrier()->GetPlayer()->m_GotImmunityFlagMessage)
 		{
-			GameServer()->SendChatTarget(NewCarrier, "Congratulations, you got the immunity flag.");
-			GameServer()->SendChatTarget(NewCarrier, "The blue flag defends against infection.");
-			GameServer()->SendChatTarget(NewCarrier, "You can drop it by pressing F3.");
+			GameServer()->SendChatTarget(NewCarrier, GetCarrier()->GetPlayer()->Localize("Congratulations, you got the immunity flag."));
+			GameServer()->SendChatTarget(NewCarrier, GetCarrier()->GetPlayer()->Localize("The blue flag defends against infection."));
+			GameServer()->SendChatTarget(NewCarrier, GetCarrier()->GetPlayer()->Localize("You can drop it by pressing F3."));
 			GetCarrier()->GetPlayer()->m_GotImmunityFlagMessage = true;
 		}
 
