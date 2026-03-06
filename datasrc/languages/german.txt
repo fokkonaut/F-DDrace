@@ -2137,13 +2137,13 @@ You can drop it by pressing F3.
 == Du kannst sie fallen lassen indem du F3 drückst.
 
 Saving player sessions is currently disabled by an admin
-== 
+== Sitzungs-Speicherung ist zur Zeit durch einen Admin deaktiviert
 
 Saving player session on disconnect enabled
-== 
+== Sitzungs-Speicherung beim Trennen aktiviert
 
 Saving player session on disconnect disabled
-== 
+== Sitzungs-Speicherung beim Trennen deaktiviert
 
 Save player session
-== 
+== Sitzungs-Speicherung
