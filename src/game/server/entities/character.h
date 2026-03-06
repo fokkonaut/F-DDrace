@@ -640,6 +640,7 @@ public:
 		bool m_InfiniteJumps = false;
 		bool m_Jetpack = false;
 		int m_Jumps = 2;
+		bool m_aSpawnWeaponActive[3] = { 0, 0, 0 };
 
 	} m_SavedInGame;
 	bool IsInSafeArea();

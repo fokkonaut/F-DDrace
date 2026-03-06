@@ -6039,6 +6039,7 @@ bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID)
 		m_pPlayer->m_DefEmote = EMOTE_ANGRY;
 		m_pPlayer->m_DefEmoteReset = -1;
 
+		// no duplicate entry, other guy already sent the correct message
 		if (HitHumanID == -1)
 		{
 			CNetMsg_Sv_KillMsg Msg;
@@ -6202,6 +6203,7 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 			pFlag->Reset();
 		}
 
+		mem_copy(m_SavedInGame.m_aSpawnWeaponActive, m_aSpawnWeaponActive, sizeof(m_SavedInGame.m_aSpawnWeaponActive));
 		BackupWeapons(BACKUP_INGAME);
 		GiveWeapon(WEAPON_HAMMER);
 		GiveWeapon(WEAPON_GUN);
@@ -6223,6 +6225,7 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 	else
 	{
 		SetZombieHuman(m_SavedInGame.m_IsZombie);
+		mem_copy(m_aSpawnWeaponActive, m_SavedInGame.m_aSpawnWeaponActive, sizeof(m_aSpawnWeaponActive));
 		LoadWeaponBackup(BACKUP_INGAME);
 		EndlessHook(m_SavedInGame.m_EndlessHook || m_EndlessHook, -1, Silent);
 		InfiniteJumps(m_SavedInGame.m_InfiniteJumps || m_SuperJump, -1, Silent);
@@ -6233,6 +6236,7 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 		m_SavedInGame.m_Jetpack = false;
 		m_SavedInGame.m_Jumps = 2;
 		m_SavedInGame.m_IsZombie = false;
+		mem_zero(m_SavedInGame.m_aSpawnWeaponActive, sizeof(m_SavedInGame.m_aSpawnWeaponActive));
 	}
 	return true;
 }
