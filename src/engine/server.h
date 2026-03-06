@@ -79,6 +79,9 @@ public:
 	virtual const char *GetMapDesignName(int Design) = 0;
 	virtual void LoadMapDesigns() = 0;
 
+	virtual void SetHighBandwidth(int ClientID, bool Value) = 0;
+	virtual bool GetHighBandwidth(int ClientID) = 0;
+
 	virtual void PrintBotLookup() = 0;
 	virtual void CountryLookup(int ClientID) = 0;
 	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode) = 0;

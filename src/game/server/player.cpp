@@ -262,6 +262,8 @@ void CPlayer::Reset()
 
 	m_GotImmunityFlagMessage = false;
 	m_LastHumanTryTick = 0;
+
+	Server()->SetHighBandwidth(m_ClientID, GameServer()->Config()->m_SvHighBandwidth);
 }
 
 void CPlayer::Tick()
@@ -2185,6 +2187,8 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		m_HideBroadcasts = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_ANTIPING)
 		m_AntiPing = true;
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIGHBANDWIDTH)
+		Server()->SetHighBandwidth(m_ClientID, true);
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
 
@@ -2244,6 +2248,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEBROADCASTS;
 	if (m_AntiPing)
 		pAccount->m_Flags |= CGameContext::ACCFLAG_ANTIPING;
+	if (Server()->GetHighBandwidth(m_ClientID))
+		pAccount->m_Flags |= CGameContext::ACCFLAG_HIGHBANDWIDTH;
 	pAccount->m_VoteMenuFlags = GameServer()->m_VotingMenu.GetFlags(m_ClientID);
 
 	GameServer()->UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
@@ -2903,6 +2909,17 @@ void CPlayer::SetAntiPing(bool Set)
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing disabled"));
 	GameServer()->SendTuningParams(m_ClientID, m_pCharacter ? m_pCharacter->m_TuneZone : m_TuneZone);
+}
+
+void CPlayer::SetHighBandwidth(bool Value)
+{
+	if (Server()->GetHighBandwidth(m_ClientID) == Value)
+		return;
+	Server()->SetHighBandwidth(m_ClientID, Value);
+	if (Value)
+		GameServer()->SendChatTarget(m_ClientID, Localize("High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)"));
+	else
+		GameServer()->SendChatTarget(m_ClientID, Localize("High Bandwidth mode disabled"));
 }
 
 void CPlayer::SetWeaponIndicator(bool Set)

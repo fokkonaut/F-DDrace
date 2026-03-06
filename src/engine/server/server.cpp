@@ -344,6 +344,7 @@ void CServer::CClient::ResetContent()
 
 	m_Rejoining = false;
 	m_RedirectDropTime = 0;
+	m_HighBandwidth = false;
 	m_Version = 0x0000;
 }
 
@@ -902,6 +903,10 @@ void CServer::DoSnapshot()
 	// create snapshots for all clients
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		// high bandwidth on a per player basis
+		if (!m_aClients[i].m_HighBandwidth && (Tick()%2) != 0)
+			continue;
+
 		// client must be ingame to receive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME || m_aClients[i].m_DesignChange || m_aClients[i].m_Rejoining)
 			continue;
@@ -3069,7 +3074,7 @@ int CServer::Run()
 
 			int64 Now = time_get();
 			bool NewTicks = false;
-			bool ShouldSnap = false;
+			//bool ShouldSnap = false;
 			while(Now > TickStartTime(m_CurrentGameTick+1))
 			{
 				for(int c = 0; c < MAX_CLIENTS; c++)
@@ -3092,8 +3097,8 @@ int CServer::Run()
 
 				m_CurrentGameTick++;
 				NewTicks = true;
-				if((m_CurrentGameTick%2) == 0)
-					ShouldSnap = true;
+				//if((m_CurrentGameTick%2) == 0)
+				//	ShouldSnap = true;
 
 				// apply new input
 				for(int c = 0; c < MAX_CLIENTS; c++)
@@ -3116,8 +3121,8 @@ int CServer::Run()
 			// snap game
 			if(NewTicks)
 			{
-				if(Config()->m_SvHighBandwidth || ShouldSnap)
-					DoSnapshot();
+				//if(Config()->m_SvHighBandwidth || ShouldSnap)
+				DoSnapshot();
 
 				UpdateClientRconCommands();
 				UpdateClientMapListEntries();

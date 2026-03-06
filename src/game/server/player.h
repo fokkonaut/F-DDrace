@@ -524,6 +524,8 @@ public:
 	void SetAntiPing(bool Set);
 	bool AntiPing() { return m_AntiPing; }
 
+	void SetHighBandwidth(bool Value);
+
 private:
 	int64 m_WalletMoney;
 	bool m_AntiPing;

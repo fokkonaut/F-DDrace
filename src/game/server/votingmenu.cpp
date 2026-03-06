@@ -50,7 +50,8 @@ static const char *MISC_ZOOMCURSOR = Localizable("Zoom Cursor");
 static const char *MISC_RESUMEMOVED = Localizable("Resume Moved");
 static const char *MISC_HIDEBROADCASTS = Localizable("Hide Broadcasts");
 static const char *MISC_LOCALCHAT = Localizable("Local Chat");
-static const char *MISC_ANTIPING = Localizable("AntiPing Weapons (only for 'cl_antiping 1')");
+static const char *MISC_ANTIPING = Localizable("AntiPing weapons (only for 'cl_antiping 1')");
+static const char *MISC_HIGHBANDWIDTH = Localizable("High Bandwidth mode");
 
 void CVotingMenu::Init(CGameContext *pGameServer)
 {
@@ -445,6 +446,11 @@ bool CVotingMenu::OnMessageSuccess(int ClientID, const char *pDesc, const char *
 			pPlayer->SetAntiPing(!pPlayer->AntiPing());
 			return true;
 		}
+		if (IsOption(pDesc, MISC_HIGHBANDWIDTH))
+		{
+			pPlayer->SetHighBandwidth(!Server()->GetHighBandwidth(ClientID));
+			return true;
+		}
 
 		for (int i = -1; i < CServer::NUM_MAP_DESIGNS; i++)
 		{
@@ -796,7 +802,6 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 	{
 		DoLineToggleOption(Page, pNumOptions, MISC_LOCALCHAT, pPlayer->m_LocalChat);
 	}
-	DoLineToggleOption(Page, pNumOptions, MISC_ANTIPING, pPlayer->AntiPing());
 
 	std::vector<const char *> vpDesigns;
 	for (int i = -1; i < CServer::NUM_MAP_DESIGNS; i++)
@@ -842,6 +847,11 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 		bool CurScoreMode = i == pPlayer->m_ScoreMode;
 		DoLineToggleOption(Page, pNumOptions, GameServer()->GetScoreModeName(i), CurScoreMode);
 	}
+
+	DoLineSeperator(Page, pNumOptions);
+	DoLineTextSubheader(Page, pNumOptions, pPlayer->Localize("Tᴇᴄʜɴɪᴄᴀʟ", "vote-header"));
+	DoLineToggleOption(Page, pNumOptions, MISC_ANTIPING, pPlayer->AntiPing());
+	DoLineToggleOption(Page, pNumOptions, MISC_HIGHBANDWIDTH, Server()->GetHighBandwidth(ClientID));
 }
 
 void CVotingMenu::DoPageLanguages(int ClientID, int *pNumOptions)
@@ -920,6 +930,8 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 			Flags |= PREVFLAG_MISC_HIDEBROADCASTS;
 		if (pPlayer->AntiPing())
 			Flags |= PREVFLAG_MISC_ANTIPING;
+		if (Server()->GetHighBandwidth(ClientID))
+			Flags |= PREVFLAG_MISC_HIGHBANDWIDTH;
 		pStats->m_Minigame = pPlayer->m_Minigame;
 		pStats->m_ScoreMode = pPlayer->m_ScoreMode;
 	}

@@ -294,6 +294,8 @@ public:
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
 		int64_t m_RedirectDropTime;
+
+		bool m_HighBandwidth;
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -559,6 +561,9 @@ public:
 	void GetClientAddr(int ClientID, NETADDR* pAddr) override;
 	const char* GetAnnouncementLine(char const* FileName) override;
 	unsigned m_AnnouncementLastLine;
+
+	void SetHighBandwidth(int ClientID, bool Value) override { m_aClients[ClientID].m_HighBandwidth = Value; }
+	bool GetHighBandwidth(int ClientID) override { return m_aClients[ClientID].m_HighBandwidth; }
 
 	bool IsBrowserScoreFix();
 
