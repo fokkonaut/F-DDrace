@@ -1051,6 +1051,7 @@ private:
 	static void ConHideBroadcasts(IConsole::IResult* pResult, void* pUserData);
 	static void ConAntiPing(IConsole::IResult* pResult, void* pUserData);
 	static void ConHighBandwidth(IConsole::IResult* pResult, void* pUserData);
+	static void ConSaveSession(IConsole::IResult* pResult, void* pUserData);
 
 	//rcon
 	static void ConFreezeHammer(IConsole::IResult* pResult, void* pUserData);

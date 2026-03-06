@@ -2530,6 +2530,13 @@ void CGameContext::ConHighBandwidth(IConsole::IResult *pResult, void *pUserData)
 	if (pPlayer) pPlayer->SetHighBandwidth(pResult->NumArguments() ? pResult->GetInteger(0) : !pSelf->Server()->GetHighBandwidth(pResult->m_ClientID));
 }
 
+void CGameContext::ConSaveSession(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (pPlayer) pPlayer->SetSavePlayerDisconnect(pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->m_SavePlayerDisconnect);
+}
+
 void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

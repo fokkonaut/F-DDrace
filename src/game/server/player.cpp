@@ -2937,8 +2937,15 @@ void CPlayer::SetHighBandwidth(bool Value)
 
 void CPlayer::SetSavePlayerDisconnect(bool Set)
 {
-	if (m_SavePlayerDisconnect == Set || (Set && !GameServer()->Config()->m_SvDisconnectSaveTees))
+	if (m_SavePlayerDisconnect == Set)
 		return;
+
+	if (Set && !GameServer()->Config()->m_SvDisconnectSaveTees)
+	{
+		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player sessions is currently disabled by an admin"));
+		return;
+	}
+
 	m_SavePlayerDisconnect = Set;
 	if (Set)
 		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player session on disconnect enabled"));
