@@ -3790,7 +3790,7 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		}
 
-		int Port = GameServer()->GetRediretListPort(SwitchNumber);
+		int Port = GameServer()->GetRedirectListPort(SwitchNumber);
 		if (!TrySafelyRedirectClient(Port))
 			LoadRedirectTile(Port);
 		return;
@@ -5735,7 +5735,7 @@ void CCharacter::AddCheckpointList(int Port, int Checkpoint)
 {
 	for (unsigned int i = 0; i < m_vCheckpoints.size(); i++)
 	{
-		int PortMatch = GameServer()->GetRediretListPort(m_vCheckpoints[i].first);
+		int PortMatch = GameServer()->GetRedirectListPort(m_vCheckpoints[i].first);
 		if (PortMatch == Port)
 		{
 			m_vCheckpoints[i].second = Checkpoint;
@@ -5743,7 +5743,7 @@ void CCharacter::AddCheckpointList(int Port, int Checkpoint)
 		}
 	}
 
-	int SwitchNumber = GameServer()->GetRediretListSwitch(Port);
+	int SwitchNumber = GameServer()->GetRedirectListSwitch(Port);
 	if (SwitchNumber > 0)
 	{
 		std::pair<int, int> Pair;
@@ -5764,7 +5764,7 @@ void CCharacter::SetCheckpointList(std::vector< std::pair<int, int> > vCheckpoin
 
 	for (unsigned int i = 0; i < m_vCheckpoints.size(); i++)
 	{
-		int PortMatch = GameServer()->GetRediretListPort(m_vCheckpoints[i].first);
+		int PortMatch = GameServer()->GetRedirectListPort(m_vCheckpoints[i].first);
 		if (PortMatch == Config()->m_SvPort)
 		{
 			m_TeleCheckpoint = m_vCheckpoints[i].second;

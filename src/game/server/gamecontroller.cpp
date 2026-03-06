@@ -252,7 +252,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		}
 		else
 		{
-			int Port = GameServer()->GetRediretListPort(Number);
+			int Port = GameServer()->GetRedirectListPort(Number);
 			if (Port > 0)
 			{
 				new CPlayerCounter(&GameServer()->m_World, Pos, Port);

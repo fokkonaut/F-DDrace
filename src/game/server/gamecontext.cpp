@@ -7228,7 +7228,7 @@ void CGameContext::SendPlayerCountUpdate(bool Shutdown)
 	Server()->SendPlayerCountUpdate(Shutdown);
 }
 
-int CGameContext::GetRediretListPort(int WantedSwitchNumber)
+int CGameContext::GetRedirectListPort(int WantedSwitchNumber)
 {
 	const char *pList = Config()->m_SvRedirectServerTilePorts;
 	char aBuf[16];
@@ -7244,7 +7244,7 @@ int CGameContext::GetRediretListPort(int WantedSwitchNumber)
 	return 0;
 }
 
-int CGameContext::GetRediretListSwitch(int WantedPort)
+int CGameContext::GetRedirectListSwitch(int WantedPort)
 {
 	const char *pList = Config()->m_SvRedirectServerTilePorts;
 	char aBuf[16];

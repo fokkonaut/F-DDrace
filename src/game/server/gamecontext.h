@@ -873,8 +873,8 @@ public:
 	void OnRedirectSaveTeeAdd(const char *pHash) override;
 	void OnRedirectSaveTeeRemove(const char *pHash) override;
 	int GetIdentityIndexByHash(const char *pHash);
-	int GetRediretListPort(int WantedSwitchNumber);
-	int GetRediretListSwitch(int WantedPort);
+	int GetRedirectListPort(int WantedSwitchNumber);
+	int GetRedirectListSwitch(int WantedPort);
 
 	void OnPlayerCountUpdate(int Port, int PlayerCount) override;
 	void SendPlayerCountUpdate(bool Shutdown = false);
