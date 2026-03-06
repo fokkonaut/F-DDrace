@@ -2102,7 +2102,20 @@ AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
 AntiPing disabled
 == 
 
-AntiPing Weapons (only for 'cl_antiping 1')
+High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
+== 
+
+High Bandwidth mode disabled
+== 
+
+AntiPing weapons (only for 'cl_antiping 1')
+== 
+
+High Bandwidth mode
+== 
+
+{vote-header}
+Tᴇᴄʜɴɪᴄᴀʟ
 == 
 
 [WARNING] Place this tile from switch layer
@@ -2112,4 +2125,13 @@ AntiPing Weapons (only for 'cl_antiping 1')
 == 
 
 Humans limit reached.
+== 
+
+Congratulations, you got the immunity flag.
+== 
+
+The blue flag defends against infection.
+== 
+
+You can drop it by pressing F3.
 == 

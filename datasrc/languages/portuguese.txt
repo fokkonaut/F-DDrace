@@ -1248,6 +1248,12 @@ AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
 AntiPing disabled
 == 
 
+High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
+== 
+
+High Bandwidth mode disabled
+== 
+
 Weapon indicator enabled
 == 
 
@@ -1429,7 +1435,10 @@ Hide Broadcasts
 Local Chat
 == 
 
-AntiPing Weapons (only for 'cl_antiping 1')
+AntiPing weapons (only for 'cl_antiping 1')
+== 
+
+High Bandwidth mode
 == 
 
 {vote-header}
@@ -1496,6 +1505,10 @@ Mɪɴɪɢᴀᴍᴇs
 
 {vote-header}
 Sᴄᴏʀᴇ Mᴏᴅᴇ
+== 
+
+{vote-header}
+Tᴇᴄʜɴɪᴄᴀʟ
 == 
 
 {vote-header}
@@ -1716,6 +1729,15 @@ You can jump 1 time
 == 
 
 You can jump %d times
+== 
+
+Congratulations, you got the immunity flag.
+== 
+
+The blue flag defends against infection.
+== 
+
+You can drop it by pressing F3.
 == 
 
 Taser shield has been used, -5%%, new current: %d%%
