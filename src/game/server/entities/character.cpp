@@ -1503,7 +1503,7 @@ void CCharacter::UpdateMovementTick(CNetObj_PlayerInput *pNewInput)
 		return;
 
 	// Don't update when dummy copy is activated or dummy control has been used
-	if (Server()->DummyControlOrCopyMoves(m_pPlayer->GetCID()))
+	if (Server()->DummyControlOrCopyMoves(m_pPlayer->GetCID()) && !Config()->m_SvDummyControlCopyUpdateMovement)
 		return;
 
 	m_pPlayer->m_LastMovementTick = Server()->Tick();

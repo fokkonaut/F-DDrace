@@ -395,6 +395,11 @@ MACRO_CONFIG_STR(SvCountriesFilePath, sv_countries_file_path, 128, "data", CFGFL
 MACRO_CONFIG_INT(SvSpawnAsZombie, sv_spawn_as_zombie, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether player respawn as zombie by default", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvIncreaseHumanCapBots, sv_increase_human_cap_bots, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether server-side bots are counted (0=not counted, 1=counted as players, but not humans!)", AUTHED_ADMIN)
 
+// dummy and 1vs1
+MACRO_CONFIG_INT(SvAllowDummy, sv_allow_dummy, 1, 0, 1, CFGFLAG_SERVER, "Whether clients can connect their dummy to the server", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDummyControlCopyUpdateMovement, sv_dummy_control_copy_update_movement, 1, 0, 1, CFGFLAG_SERVER, "Whether dummy control and copy moves will update movement (0=might cause bugs with minigame auto leave)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Minigame auto leave when afk for x seconds (0=off)", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowNameSpec, sv_rainbowname_spec, 0, 0, 1, CFGFLAG_SERVER, "Whether rainbowname is processed while paused or spectating (annoying in +spectate)", AUTHED_ADMIN)
@@ -411,6 +416,4 @@ MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 10
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "bans.cfg", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAllowDummy, sv_allow_dummy, 1, 0, 1, CFGFLAG_SERVER, "Whether clients can connect their dummy to the server", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Minigame auto leave when afk for x seconds (0=off)", AUTHED_ADMIN)
 #endif
