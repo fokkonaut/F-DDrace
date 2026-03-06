@@ -1352,9 +1352,10 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				Tunings.m_GunFireDelay = PreventReloadTimer;
 			else if (ActiveWeapon == WEAPON_TELEKINESIS || ActiveWeapon == WEAPON_DRAW_EDITOR)
 			{
-				Tunings.m_NinjaFireDelay = PreventReloadTimer;
+				//Tunings.m_NinjaFireDelay = PreventReloadTimer; // Avoided by not sending CHARACTERFLAG_WEAPON_NINJA at all
 				// The way everything works the client might mispredict a grenade or gun proj or a laser even though we are on ninja. prevent that
-				Tunings.m_GunFireDelay = Tunings.m_ShotgunFireDelay = Tunings.m_GrenadeFireDelay = Tunings.m_LaserFireDelay = PreventReloadTimer;
+				//Tunings.m_GunFireDelay = Tunings.m_ShotgunFireDelay = Tunings.m_GrenadeFireDelay = Tunings.m_LaserFireDelay = PreventReloadTimer;
+				Tunings.m_LaserReach = 0.f;
 			}
 		}
 	}

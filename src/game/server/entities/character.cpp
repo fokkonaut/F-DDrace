@@ -186,9 +186,10 @@ void CCharacter::SetWeapon(int W)
 		if (SwitchToNormal || SwitchToExtra)
 		{
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER || GetLastWeapon() == WEAPON_TELEKINESIS
-				|| GetLastWeapon() == WEAPON_DRAW_EDITOR))
+			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER/* || GetLastWeapon() == WEAPON_TELEKINESIS
+				|| GetLastWeapon() == WEAPON_DRAW_EDITOR*/))
 			{
+				// Unfix PreventReloadTimer
 				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
 			}
 		}
@@ -2303,7 +2304,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_WEAPON_GRENADE;
 	if(aGotWeapon[WEAPON_LASER])
 		Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(aGotWeapon[WEAPON_NINJA] && (!Local || !m_pPlayer->AntiPing() || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA))
+	if(aGotWeapon[WEAPON_NINJA] && (!Local || !m_pPlayer->AntiPing()/* || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA*/))
 		Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	//if(m_Core.m_LiveFrozen)
 	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
