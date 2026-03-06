@@ -5007,7 +5007,7 @@ void CCharacter::IncreasePermille(int Permille)
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Police is searching you because you have exceeded your legal drinking limit"));
 	}
 
-	if (m_pPlayer->m_Permille <= Config()->m_SvGrogMinPermilleLimit)
+	if (m_pPlayer->m_Permille <= Config()->m_SvGrogPermillePassiveLimit)
 	{
 		// 10 minutes passive, if you dont drink in this time, ur gonna have a ratio of 2/3, cuz 1 drink = passive + 0.3, so 15 min to decrease 0.3, but 10 min passive
 		UpdatePassiveEndTick(Server()->Tick() + Server()->TickSpeed() * 60 * 10);
