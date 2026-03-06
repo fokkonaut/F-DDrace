@@ -2097,41 +2097,41 @@ You are no longer in a safe area
 == Du bist nicht mehr in einem sicheren Bereich
 
 AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
-== 
+== AntiPing aktiviert (nur mit 'cl_antiping 1' nutzen, ansonsten möglicherweise Fehler)
 
 AntiPing disabled
-== 
+== AntiPing deaktiviert
 
 High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
-== 
+== Hohe Bandbreite Modus aktiviert (volle 50 Snapshots statt 25 pro Sekunde)
 
 High Bandwidth mode disabled
-== 
+== Hohe Bandbreite Modus deaktiviert
 
 AntiPing weapons (only for 'cl_antiping 1')
-== 
+== AntiPing Waffen (nur mit 'cl_antiping 1')
 
 High Bandwidth mode
-== 
+== Hohe Bandbreite Modus 
 
 {vote-header}
 Tᴇᴄʜɴɪᴄᴀʟ
-== 
+== Tᴇᴄʜɴɪsᴄʜᴇs
 
 [WARNING] Place this tile from switch layer
-== 
+== [WARNUNG] Platziere dieses Feld vom Switch Layer
 
 [WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: 
-== 
+== [WARNUNG] Leeres Toggle Mask Feld. Platziere ebenfalls eine der folgenden Felder vom Game/Front Layer:
 
 Humans limit reached.
-== 
+== Humans Limit erreicht.
 
 Congratulations, you got the immunity flag.
-== 
+== Glückwunsch, du hast die Immunity Flag aufgesammelt.
 
 The blue flag defends against infection.
-== 
+== Die blaue Flagge beschützt dich vor Infektionen.
 
 You can drop it by pressing F3.
-== 
+== Du kannst sie fallen lassen indem du F3 drückst.
