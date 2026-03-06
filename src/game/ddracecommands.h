@@ -95,7 +95,7 @@ CONSOLE_COMMAND("dummymode", "?v[id] ?i[dummymode]", CFGFLAG_SERVER, ConDummymod
 CONSOLE_COMMAND("connectdefaultdummies", "", CFGFLAG_SERVER, ConConnectDefaultDummies, this, "Connects default dummies", AUTHED_ADMIN)
 
 //tune lock player
-CONSOLE_COMMAND("tune_lock_pl", "v[id] s[tuning] i[value]", CFGFLAG_SERVER, ConTuneLockPlayer, this, "Tune for lock a variable to value for player v", AUTHED_ADMIN)
+CONSOLE_COMMAND("tune_lock_pl", "v[id] s[tuning] ?i[value]", CFGFLAG_SERVER, ConTuneLockPlayer, this, "Tune for lock a variable to value for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("tune_lock_pl_reset", "v[id] ?s[tuning]", CFGFLAG_SERVER, ConTuneLockPlayerReset, this, "Reset all locked tuning variables to defaults for player v (specific or all)", AUTHED_ADMIN)
 CONSOLE_COMMAND("tune_lock_pl_dump", "v[id]", CFGFLAG_SERVER, ConTuneLockPlayerDump, this, "Dump lock tuning for player v", AUTHED_ADMIN)
 

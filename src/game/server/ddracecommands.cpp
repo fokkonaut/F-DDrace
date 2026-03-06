@@ -1569,8 +1569,23 @@ void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData
 		return;
 
 	const char *pParam = pResult->GetString(1);
-	float Value = pResult->GetFloat(2);
+	if (pResult->NumArguments() == 2)
+	{
+		float Value;
+		if (pChr->Tuning()->Get(pParam, &Value))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Value: %.2f", Value);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		}
+		return;
+	}
 
+	float Value = pResult->GetFloat(2);
 	CLockedTune LockedTune(pParam, Value);
 	if (!pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune))
 		return;
