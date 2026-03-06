@@ -455,6 +455,11 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 	pChr->GetPlayer()->m_EscapeTime = m_EscapeTime;
 	if (m_JailTime) // keep this last, character is killed here
 		pChr->GameServer()->JailPlayer(pChr->GetPlayer()->GetCID(), m_JailTime/pChr->Server()->TickSpeed());
+
+	if (m_Flags&SAVE_DISCONNECT)
+	{
+		pChr->Freeze(pChr->Config()->m_SvDisconnectSaveTeesFreeze);
+	}
 }
 
 char* CSaveTee::GetString()

@@ -1106,7 +1106,7 @@ void CPlayer::OnDisconnect()
 	}
 	else if (m_SavePlayerDisconnect)
 	{
-		GameServer()->SaveCharacter(m_ClientID, 0, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
+		GameServer()->SaveCharacter(m_ClientID, SAVE_DISCONNECT, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
 	}
 
 	KillCharacter();
