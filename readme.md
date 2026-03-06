@@ -44,7 +44,7 @@ F-DDrace uses the same build system as DDNet. For detailed building instructions
 
 - **Dependencies:** [Linux/macOS](https://github.com/ddnet/ddnet/blob/master/README.md#dependencies-on-linux--macos)
 - **Building on Linux/macOS:** [Instructions](https://github.com/ddnet/ddnet/blob/master/README.md#building-on-linux-and-macos)  
-- **Building on Windows:** [Instructions](https://github.com/ddnet/ddnet/blob/master/README.md#building-on-windows-with-visual-studio)
+- **Building on Windows:** [Instructions](https://github.com/ddnet/ddnet/blob/master/README.md#building-on-windows-with-the-visual-studio-ide)
 
 ## Common Chat Commands
 
