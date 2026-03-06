@@ -2155,10 +2155,22 @@ High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
 High Bandwidth mode disabled
 == 
 
+Saving player sessions is currently disabled by an admin
+== 
+
+Saving player session on disconnect enabled
+== 
+
+Saving player session on disconnect disabled
+== 
+
 AntiPing weapons (only for 'cl_antiping 1')
 == 
 
 High Bandwidth mode
+== 
+
+Save player session
 == 
 
 {vote-header}

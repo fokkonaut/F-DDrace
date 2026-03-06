@@ -2135,3 +2135,15 @@ The blue flag defends against infection.
 
 You can drop it by pressing F3.
 == Du kannst sie fallen lassen indem du F3 drückst.
+
+Saving player sessions is currently disabled by an admin
+== 
+
+Saving player session on disconnect enabled
+== 
+
+Saving player session on disconnect disabled
+== 
+
+Save player session
+== 
