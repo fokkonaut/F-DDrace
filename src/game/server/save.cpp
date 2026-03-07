@@ -458,7 +458,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 
 	if (m_Flags&SAVE_DISCONNECT)
 	{
-		pChr->Freeze(pChr->Config()->m_SvDisconnectSaveTeesFreeze);
+		pChr->Freeze(pChr->Config()->m_SvDisconnectSaveTeeFreeze);
 	}
 }
 
