@@ -187,7 +187,7 @@ MACRO_CONFIG_STR(SvSavedTeesFilePath, sv_saved_tees_file_path, 128, "savedtees",
 MACRO_CONFIG_INT(SvShutdownSaveTeeExpire, sv_shutdown_save_tee_expire, 8, 1, 24*7, CFGFLAG_SERVER, "How many hours until a shutdown save expires", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvJailSaveTeeExpire, sv_jail_save_tee_expire, 24, 1, 24*7, CFGFLAG_SERVER, "How many hours until a jail save expires", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDisconnectSaveTees, sv_disconnect_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before disconnect to load them again (0=disabled, 1=allow manual activation)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDisconnectSaveTeeExpire, sv_disconnect_save_tee_expire, 4, 1, 24, CFGFLAG_SERVER, "How many hours until a disconnect save expires", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDisconnectSaveTeeExpire, sv_disconnect_save_tee_expire, 2, 1, 24, CFGFLAG_SERVER, "How many hours until a disconnect save expires", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDisconnectSaveTeeFreeze, sv_disconnect_save_tee_freeze, 5, 0, 60, CFGFLAG_SERVER, "Time in seconds a player loading a disconnect save tee gets frozen", AUTHED_ADMIN)
 
 // shutdown auto reconnect
