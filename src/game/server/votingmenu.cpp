@@ -858,7 +858,7 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 	DoLineTextSubheader(Page, pNumOptions, pPlayer->Localize("Tᴇᴄʜɴɪᴄᴀʟ", "vote-header"));
 	DoLineToggleOption(Page, pNumOptions, MISC_ANTIPING, pPlayer->AntiPing());
 	DoLineToggleOption(Page, pNumOptions, MISC_HIGHBANDWIDTH, Server()->GetHighBandwidth(ClientID));
-	if (GameServer()->Config()->m_SvDisconnectSaveTees || pPlayer->m_SavePlayerDisconnect)
+	if (GameServer()->Config()->m_SvDisconnectSaveTees)
 	{
 		DoLineToggleOption(Page, pNumOptions, MISC_SAVEPLAYERSESSION, pPlayer->m_SavePlayerDisconnect);
 	}

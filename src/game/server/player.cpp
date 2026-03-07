@@ -1104,7 +1104,7 @@ void CPlayer::OnDisconnect()
 	{
 		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
 	}
-	else if (m_SavePlayerDisconnect)
+	else if (m_SavePlayerDisconnect && GameServer()->Config()->m_SvDisconnectSaveTees)
 	{
 		GameServer()->SaveCharacter(m_ClientID, SAVE_DISCONNECT, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
 	}
@@ -2198,7 +2198,7 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		m_AntiPing = true;
 	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIGHBANDWIDTH)
 		Server()->SetHighBandwidth(m_ClientID, true);
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT && GameServer()->Config()->m_SvDisconnectSaveTees)
+	if (pAccount->m_Flags&CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT)
 		m_SavePlayerDisconnect = true;
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
