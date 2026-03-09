@@ -2304,7 +2304,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_WEAPON_GRENADE;
 	if(aGotWeapon[WEAPON_LASER])
 		Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(aGotWeapon[WEAPON_NINJA] && (!Local || !m_pPlayer->AntiPing()/* || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA*/))
+	if(aGotWeapon[WEAPON_NINJA] && (!Local || !m_pPlayer->AntiPing() || GetActiveWeapon() == WEAPON_NINJA/* || GameServer()->GetWeaponType(GetActiveWeapon()) == WEAPON_NINJA*/))
 		Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	//if(m_Core.m_LiveFrozen)
 	//	Flags |= CHARACTERFLAG_NO_MOVEMENTS;
