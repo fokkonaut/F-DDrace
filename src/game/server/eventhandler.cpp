@@ -50,7 +50,7 @@ void CEventHandler::Snap(int SnappingClient)
 		{
 			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
 			vec2 EventPos = vec2(ev->m_X, ev->m_Y);
-			if(SnappingClient == -1 || distance(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, EventPos) < 1500.0f)
+			if(!NetworkClipped(GameServer(), SnappingClient, EventPos))
 			{
 				if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD || m_aTypes[i] == NETEVENTTYPE_HAMMERHIT || m_aTypes[i] == NETEVENTTYPE_SPAWN)
 				{

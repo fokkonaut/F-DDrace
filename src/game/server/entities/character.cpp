@@ -607,40 +607,44 @@ void CCharacter::FireWeapon()
 					break;
 				}
 
-				// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
-				CDoor *apDoors[12];
-				int NumDoors = GameWorld()->IntersectDoorsUniqueNumbers(ProjStartPos, GetProximityRadius() * 0.75f, apDoors, 12);
-				for (int i = 0; i < NumDoors; i++)
+				int OwnPlotID = GameServer()->GetPlotID(m_pPlayer->GetAccID());
+				if (OwnPlotID >= PLOT_START || m_DoorHammer)
 				{
-					CDoor *pDoor = apDoors[i];
-
-					// number 0 can't be opened and also functions as plot walls that can't be opened
-					// plotid -1: map objects
-					// plotid > 0: plot doors
-					bool IsPlotDrawDoor = GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number);
-					bool CanHammerPlotDoor = pDoor->m_PlotID == GameServer()->GetPlotID(m_pPlayer->GetAccID()) && GameServer()->Collision()->IsPlotDoor(pDoor->m_Number);
-					if (pDoor->m_Number == 0 || (!m_DoorHammer && (pDoor->m_PlotID == -1 || IsPlotDrawDoor || !CanHammerPlotDoor)))
-						continue;
-
-					if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
+					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
+					CDoor *apDoors[12];
+					int NumDoors = GameWorld()->IntersectDoorsUniqueNumbers(ProjStartPos, GetProximityRadius() * 0.75f, apDoors, 12);
+					for (int i = 0; i < NumDoors; i++)
 					{
-						bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
-						if (pDoor->m_PlotID > 0 && !IsPlotDrawDoor)
+						CDoor *pDoor = apDoors[i];
+
+						// number 0 can't be opened and also functions as plot walls that can't be opened
+						// plotid -1: map objects
+						// plotid > 0: plot doors
+						bool IsPlotDrawDoor = GameServer()->Collision()->IsPlotDrawDoor(pDoor->m_Number);
+						bool CanHammerPlotDoor = pDoor->m_PlotID == OwnPlotID && GameServer()->Collision()->IsPlotDoor(pDoor->m_Number);
+						if (pDoor->m_Number == 0 || (!m_DoorHammer && (pDoor->m_PlotID == -1 || IsPlotDrawDoor || !CanHammerPlotDoor)))
+							continue;
+
+						if (Team() != TEAM_SUPER && GameServer()->Collision()->m_pSwitchers)
 						{
-							if (!Status && GameServer()->PlotDoorDestroyed(pDoor->m_PlotID))
+							bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
+							if (pDoor->m_PlotID > 0 && !IsPlotDrawDoor)
 							{
-								GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You can't close your door because the police destroyed it"));
+								if (!Status && GameServer()->PlotDoorDestroyed(pDoor->m_PlotID))
+								{
+									GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You can't close your door because the police destroyed it"));
+								}
+								else
+								{
+									GameServer()->SetPlotDoorStatus(pDoor->m_PlotID, !Status);
+								}
 							}
 							else
 							{
-								GameServer()->SetPlotDoorStatus(pDoor->m_PlotID, !Status);
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = !Status;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
+								GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = Status ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
 							}
-						}
-						else
-						{
-							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()] = !Status;
-							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_EndTick[Team()] = 0;
-							GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Type[Team()] = Status ? TILE_SWITCHCLOSE : TILE_SWITCHOPEN;
 						}
 					}
 				}
