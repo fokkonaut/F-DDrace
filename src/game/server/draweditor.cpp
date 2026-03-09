@@ -67,7 +67,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	int CursorPlotID = GetCursorPlotID();
 	int Type = m_Entity;
 	int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
-	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER || m_Category == CAT_TILEPLACE || m_Category == CAT_TILEPLACE;
+	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER || m_Category == CAT_TILEPLACE;
 
 	if (pEntity)
 	{
