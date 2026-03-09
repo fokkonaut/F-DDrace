@@ -3430,8 +3430,11 @@ void CCharacter::HandleTiles(int Index)
 
 	if ((m_TileIndex == TILE_BIRTHDAY_ENABLE) || (m_TileFIndex == TILE_BIRTHDAY_ENABLE))
 	{
-		m_pPlayer->m_IsBirthdayGift = true;
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Seems like it's your birthday! You may pick up your present at any time."));
+		if ((m_LastIndexTile != TILE_BIRTHDAY_ENABLE) && (m_LastIndexFrontTile != TILE_BIRTHDAY_ENABLE))
+		{
+			m_pPlayer->m_IsBirthdayGift = true;
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Seems like it's your birthday! You may pick up your present at any time."));
+		}
 	}
 	else if ((m_TileIndex == TILE_BIRTHDAY_JETPACK_RECV || m_TileFIndex == TILE_BIRTHDAY_JETPACK_RECV) && m_LastBirthdayMsg + Server()->TickSpeed() < Server()->Tick())
 	{
