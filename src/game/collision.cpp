@@ -1464,8 +1464,11 @@ void CCollision::SetCollisionAt(float x, float y, int id)
 {
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+	if (Index < 0)
+		return;
 
-	m_pTiles[Ny * m_Width + Nx].m_Index = id;
+	m_pTiles[Index].m_Index = id;
 }
 
 void CCollision::SetFCollisionAt(float x, float y, int id)
@@ -1475,8 +1478,11 @@ void CCollision::SetFCollisionAt(float x, float y, int id)
 
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+	if (Index < 0)
+		return;
 
-	m_pFront[Ny * m_Width + Nx].m_Index = id;
+	m_pFront[Index].m_Index = id;
 }
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int* Ox, int* Oy)
