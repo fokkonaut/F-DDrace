@@ -114,6 +114,7 @@ public:
 
 	void Dest();
 	void SetCollisionAt(float x, float y, int id);
+	void SetFCollisionAt(float x, float y, int id);
 	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Number = -1);
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision);

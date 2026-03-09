@@ -47,7 +47,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 
 	bool CheckPlotTaserDestroy = false;
 	bool PlotDoorOnly = true;
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 	if (m_Type == WEAPON_SHOTGUN)
 	{
 		if (Config()->m_SvInteractiveDrops)
@@ -72,7 +72,8 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			}
 			if (pAccount->m_PoliceLevel >= 5)
 			{
-				Types |= (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
+				Types |= (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
+					(1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
 				CheckPlotTaserDestroy = true;
 				// Allow only tasering the door with police 4. police 5 can also destroy objects ON the plot
 				PlotDoorOnly = false;

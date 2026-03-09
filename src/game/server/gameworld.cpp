@@ -1065,11 +1065,11 @@ int CGameWorld::GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, i
 	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetHouseDummy(Type);
 }
 
-CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith, bool CheckPassive, bool CheckDrivers)
+CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith, bool CheckPassive, bool CheckDrivers)
 {
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		if (!(Types&1<<i))
+		if (!(Types&(1ULL<<i)))
 			continue;
 
 		if (i == ENTTYPE_CHARACTER)
@@ -1089,13 +1089,13 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEnti
 	return 0;
 }
 
-int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types, int Team)
+int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team)
 {
 	int Num = 0;
 
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		if (!(Types&1<<i))
+		if (!(Types&(1ULL<<i)))
 			continue;
 
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
@@ -1122,7 +1122,7 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 	return Num;
 }
 
-CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int Types, CCharacter *pThisOnly, bool CheckPlotTaserDestroy, bool PlotDoorOnly, bool CheckDrivers)
+CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int64 Types, CCharacter *pThisOnly, bool CheckPlotTaserDestroy, bool PlotDoorOnly, bool CheckDrivers)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -1131,14 +1131,14 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 	int Team = CollideWith == -1 ? 0 : GameServer()->GetDDRaceTeam(CollideWith);
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		if (!(Types&1<<i))
+		if (!(Types&(1ULL<<i)))
 			continue;
 
 		CEntity *p = FindFirst(i);
 		for(; p; p = p->TypeNext())
  		{
 			float ProximityRadius = p->m_ProximityRadius;
-			bool EntTypeDestroyable = i == ENTTYPE_DOOR || i == ENTTYPE_PICKUP || i == ENTTYPE_BUTTON || i == ENTTYPE_SPEEDUP || i == ENTTYPE_TELEPORTER;
+			bool EntTypeDestroyable = i == ENTTYPE_DOOR || i == ENTTYPE_PICKUP || i == ENTTYPE_BUTTON || i == ENTTYPE_SPEEDUP || i == ENTTYPE_TELEPORTER || i == ENTTYPE_DRAWTILE;
 			if ((CheckPlotTaserDestroy && !EntTypeDestroyable) || !CheckPlotTaserDestroy)
 			{
 				if(p == pNotThis)

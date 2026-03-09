@@ -4,6 +4,7 @@
 #include <game/server/entities/button.h>
 #include <game/server/entities/speedup.h>
 #include <game/server/entities/teleporter.h>
+#include <game/server/entities/drawtile.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
@@ -35,6 +36,8 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
 	m_Transform.m_Angle = 0;
 	m_Transform.m_Area.Init(GameServer());
+	m_TilePlace.m_Index = TILE_RAINBOW;
+	m_TilePlace.m_EnterIndex = false;
 	
 	m_Setting = -1;
 	m_RoundPos = true;
@@ -64,7 +67,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	int CursorPlotID = GetCursorPlotID();
 	int Type = m_Entity;
 	int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
-	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER;
+	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER || m_Category == CAT_TILEPLACE || m_Category == CAT_TILEPLACE;
 
 	if (pEntity)
 	{
@@ -72,7 +75,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		CursorPlotID = GameServer()->GetTilePlotID(Pos);
 		Type = pEntity->GetObjType();
 		Number = pEntity->m_Number;
-		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER;
+		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER || Type == CGameWorld::ENTTYPE_DRAWTILE;
 		Remove = false;
 	}
 
@@ -109,6 +112,15 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 
 			if (!TransformPreview)
 				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
+		}
+		else if (Type == CGameWorld::ENTTYPE_DRAWTILE)
+		{
+			if (!TransformPreview)
+			{
+				int TileIndex = GameServer()->Collision()->GetTileIndex(Index);
+				int TileFIndex = GameServer()->Collision()->GetFTileIndex(Index);
+				ValidTile = ValidTile && (TileIndex == TILE_AIR || TileFIndex == TILE_AIR) && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
+			}
 		}
 	}
 
@@ -275,7 +287,7 @@ void CDrawEditor::Tick()
 				vec2 Pos = m_Pos + m_Transform.m_vPreview[i].m_Offset;
 				CEntity *pEntity = m_Transform.m_vPreview[i].m_pEnt;
 				if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON
-					|| (pEntity->GetObjType() == CGameWorld::ENTTYPE_DOOR && GameServer()->Collision()->IsPlotDrawDoor(pEntity->m_Number)))
+					|| (pEntity->GetObjType() == CGameWorld::ENTTYPE_DOOR && GameServer()->Collision()->IsPlotDrawDoor(pEntity->m_Number)) || pEntity->GetObjType() == CGameWorld::ENTTYPE_DRAWTILE)
 					Pos = GameServer()->RoundPos(Pos);
 				m_Transform.m_vPreview[i].m_pEnt->SetPos(Pos);
 			}
@@ -438,6 +450,15 @@ void CDrawEditor::OnPlayerFire()
 		m_Transform.m_State++;
 		return;
 	}
+	else if (m_Category == CAT_TILEPLACE)
+	{
+		if (m_Setting == TILEPLACE_ENTER_INDEX)
+		{
+			m_TilePlace.m_EnterIndex = true;
+			GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("Please enter the tile index into the chat (0-255)"));
+			return;
+		}
+	}
 
 	// dont process placement while we are erasing, to avoid placing things in the wall when position can only be rounded(bcs its not with erase)
 	if (m_Erasing || m_pCharacter->m_FreezeTime || !CanPlace())
@@ -513,7 +534,8 @@ void CDrawEditor::HandleInput()
 			{
 				m_Erasing = true;
 
-				int Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER);
+				int64 Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
+					(1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
 				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
 
 				if (CanRemove(pEntity) && RemoveEntity(pEntity))
@@ -625,6 +647,17 @@ void CDrawEditor::HandleInput()
 					m_Teleporter.m_Evil = !m_Teleporter.m_Evil;
 				}
 			}
+			else if (m_Category == CAT_TILEPLACE)
+			{
+				if (m_Setting == TILEPLACE_INDEX)
+				{
+					m_TilePlace.m_Index += m_Input.m_Direction;
+					if (m_TilePlace.m_Index >= NUM_INDICES)
+						m_TilePlace.m_Index = TILE_AIR+1;
+					else if (m_TilePlace.m_Index <= TILE_AIR)
+						m_TilePlace.m_Index = NUM_INDICES-1;
+				}
+			}
 			SendWindow();
 		}
 		else if (!m_Selecting)
@@ -704,6 +737,11 @@ void CDrawEditor::SetCategory(int Category)
 		m_RoundPos = true;
 		// no need to reset m_Transform stuff, because we call StopTransform() anyways
 	}
+	else if (Category == CAT_TILEPLACE)
+	{
+		m_Entity = CGameWorld::ENTTYPE_DRAWTILE;
+		m_RoundPos = true;
+	}
 
 	// done in SetPickup()
 	if (Category != CAT_PICKUPS)
@@ -726,7 +764,17 @@ void CDrawEditor::SetSetting(int Setting)
 		int LastSetting = m_Setting;
 		m_Setting = Setting;
 		if (m_Category == CAT_TRANSFORM && (m_Setting == TRANSFORM_LOAD_PRESET || LastSetting == TRANSFORM_LOAD_PRESET))
+		{
 			StopTransform();
+		}
+		else if (m_Category == CAT_TILEPLACE && (LastSetting == TILEPLACE_ENTER_INDEX))
+		{
+			if (m_TilePlace.m_EnterIndex)
+			{
+				GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("Entering index aborted"));
+				m_TilePlace.m_EnterIndex = false;
+			}
+		}
 	}
 }
 
@@ -753,6 +801,8 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 		int Number = !Preview ? GameServer()->Collision()->GetSwitchByPlotTeleporter(CurrentPlotID(), m_Teleporter.m_Number) : 0;
 		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, GetTeleporterType(), Number, !Preview);
 	}
+	case CGameWorld::ENTTYPE_DRAWTILE:
+		return new CDrawTile(m_pCharacter->GameWorld(), m_Pos, m_TilePlace.m_Index, !Preview);
 	}
 	return 0;
 }
@@ -772,6 +822,8 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 		pEntity = new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_TELEPORTER:
 		pEntity = new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
+	case CGameWorld::ENTTYPE_DRAWTILE:
+		pEntity = new CDrawTile(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDrawTile *)pTemplate)->GetIndex(), !Preview && pTemplate->m_InitialCollision); break;
 	}
 
 	// update initialcollision in case we have a preview right now it it was set to false in the constructor
@@ -788,7 +840,7 @@ void CDrawEditor::SendWindow()
 		"     Menu controls:\n\n"
 		"Change category: hook left/right\n"
 		"Move up/down: shoot left/right\n", sizeof(aMsg));
-	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER)
+	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER || m_Category == CAT_TILEPLACE)
 		str_append(aMsg, "Change setting: A/D\n", sizeof(aMsg));
 	if (m_Category == CAT_LASERDOORS || m_Category == CAT_TELEPORTER)
 		str_append(aMsg, "First free number: kill\n", sizeof(aMsg));
@@ -810,7 +862,7 @@ void CDrawEditor::SendWindow()
 	}
 	if (m_Category == CAT_TRANSFORM)
 		str_append(aMsg, "Flip selection: kill\n", sizeof(aMsg));
-	else if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
+	else if (m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TILEPLACE)
 		str_append(aMsg, "Toggle position rounding: kill\n", sizeof(aMsg));
 
 	if (IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TRANSFORM)
@@ -878,6 +930,13 @@ void CDrawEditor::SendWindow()
 			str_append(aMsg, FormatSetting("Load preset", TRANSFORM_LOAD_PRESET), sizeof(aMsg));
 		}
 	}
+	else if (m_Category == CAT_TILEPLACE)
+	{
+		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Index: %d", m_TilePlace.m_Index);
+		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_INDEX), sizeof(aMsg));
+		str_append(aMsg, FormatSetting("Enter Index", TILEPLACE_ENTER_INDEX), sizeof(aMsg));
+	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
 }
@@ -926,6 +985,7 @@ const char *CDrawEditor::GetCategory(int Category)
 	case CAT_SPEEDUPS: return "Speedups";
 	case CAT_TELEPORTER: return "Teleporters";
 	case CAT_TRANSFORM: return "Transformation";
+	case CAT_TILEPLACE: return "Tile Placing";
 	default: return "Unknown";
 	}
 }
@@ -940,6 +1000,7 @@ const char *CDrawEditor::GetCategoryListName(int Category)
 	case CAT_SPEEDUPS: return "speedups";
 	case CAT_TELEPORTER: return "teleporters";
 	case CAT_TRANSFORM: return "transform";
+	case CAT_TILEPLACE: return "tile";
 	default: return "";
 	}
 }
@@ -954,6 +1015,7 @@ int CDrawEditor::GetNumSettings()
 	case CAT_SPEEDUPS: return NUM_SPEEDUP_SETTINGS;
 	case CAT_TELEPORTER: return NUM_TELEPORTERS_SETTINGS;
 	case CAT_TRANSFORM: return Server()->GetAuthedState(GetCID()) < GameServer()->Config()->m_SvEditorPresetLevel ? NUM_TRANSFORM_NON_ADMIN : NUM_TRANSFORM_SETTINGS;
+	case CAT_TILEPLACE: return NUM_TILEPLACE_SETTINGS;
 	default: return 0;
 	}
 }
@@ -1041,7 +1103,7 @@ void CDrawEditor::OnPlayerKill()
 			}
 		}
 	}
-	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER)
+	else if (m_Category != CAT_LASERDOORS && m_Category != CAT_SPEEDUPS && m_Category != CAT_TELEPORTER && m_Category != CAT_TILEPLACE)
 	{
 		m_RoundPos = !m_RoundPos;
 	}
@@ -1235,6 +1297,30 @@ bool CDrawEditor::OnSnapPreview(CEntity *pEntity)
 	return (pEntity->m_BrushCID != -1 && (pEntity->m_BrushCID != GetCID() || m_Erasing || !CanPlace(false, pEntity, true))) || (pEntity->m_TransformCID == GetCID() && m_Category == CAT_TRANSFORM && m_Setting == TRANSFORM_MOVE);
 }
 
+bool CDrawEditor::OnChatMessage(const char *pMessage)
+{
+	return TryEnterPresetName(pMessage) || TryEnterIndex(pMessage);
+}
+
+bool CDrawEditor::TryEnterIndex(const char *pIndex)
+{
+	if (m_Category != CAT_TILEPLACE || !m_TilePlace.m_EnterIndex)
+		return false;
+
+	int Index = str_toint(pIndex);
+	if (str_is_number(pIndex) != 0 || Index <= TILE_AIR || Index >= NUM_INDICES)
+	{
+		GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("The entered value is not a valid number"));
+		m_TilePlace.m_EnterIndex = false;
+		return true;
+	}
+
+	m_TilePlace.m_Index = Index;
+	m_TilePlace.m_EnterIndex = false;
+	m_Setting = TILEPLACE_INDEX;
+	return true;
+}
+
 bool CDrawEditor::TryEnterPresetName(const char *pName)
 {
 	if (m_Category == CAT_TRANSFORM && m_Transform.m_State == TRANSFORM_STATE_RUNNING)
@@ -1341,7 +1427,7 @@ bool CDrawEditor::SafelyDestroyDrawEntity(CEntity *pEntity)
 
 	// We want to remove the collision instantly so that transform move can place objects on the same posititon
 	// we dont need to do it for plot draw doors, because they are handled as doors and can have multiple on the same position anyways
-	if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON)
+	if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON || pEntity->GetObjType() == CGameWorld::ENTTYPE_DRAWTILE)
 		pEntity->ResetCollision(true);
 	GameServer()->m_World.DestroyEntity(pEntity);
 	return true;

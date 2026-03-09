@@ -25,6 +25,7 @@
 #include "entities/button.h"
 #include "entities/teleporter.h"
 #include "entities/playercounter.h"
+#include "entities/drawtile.h"
 #include "gamemodes/DDRace.h"
 #include "teeinfo.h"
 #include "gamecontext.h"
@@ -2549,7 +2550,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if (!Command)
 			{
 				if (Durak()->TryEnterBetStake(ClientID, pMsg->m_pMessage) ||
-					(pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DrawEditor.TryEnterPresetName(pMsg->m_pMessage)))
+					(pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_DrawEditor.OnChatMessage(pMsg->m_pMessage)))
 				return;
 			}
 
@@ -5574,6 +5575,13 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 			*pFile << aEntry;
 			break;
 		}
+		case CGameWorld::ENTTYPE_DRAWTILE:
+		{
+			CDrawTile *pDrawTile = (CDrawTile *)pEntity;
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d,", CGameWorld::ENTTYPE_DRAWTILE, Pos.x/32.f, Pos.y/32.f, pDrawTile->GetIndex());
+			*pFile << aEntry;
+			break;
+		}
 	}
 }
 
@@ -5710,6 +5718,16 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 					}
 
 					vEntities.push_back(new CTeleporter(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Type, NewNumber));
+				}
+				break;
+			}
+			case CGameWorld::ENTTYPE_DRAWTILE:
+			{
+				int Index = -1;
+				sscanf(pData, "%d:%f/%f:%d", &EntityType, &Pos.x, &Pos.y, &Index);
+				if (Index > TILE_AIR)
+				{
+					vEntities.push_back(new CDrawTile(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Index));
 				}
 				break;
 			}

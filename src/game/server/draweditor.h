@@ -66,6 +66,11 @@ class CDrawEditor
 		TRANSFORM_STATE_CONFIRM,
 		TRANSFORM_STATE_RUNNING,
 
+		// Tile
+		TILEPLACE_INDEX = 0,
+		TILEPLACE_ENTER_INDEX,
+		NUM_TILEPLACE_SETTINGS,
+
 		// Categories
 		CAT_UNINITIALIZED = -1,
 		CAT_PICKUPS,
@@ -74,6 +79,7 @@ class CDrawEditor
 		CAT_SPEEDUPS,
 		CAT_TELEPORTER,
 		CAT_TRANSFORM,
+		CAT_TILEPLACE,
 		NUM_DRAW_CATEGORIES,
 	};
 
@@ -195,6 +201,12 @@ class CDrawEditor
 		std::vector<SSelectedEnt> m_vPreview;
 		std::vector<CEntity *> m_vSelected;
 	} m_Transform;
+	
+	struct
+	{
+		int m_Index;
+		bool m_EnterIndex;
+	} m_TilePlace;
 
 	// preview
 	void SetPreview();
@@ -219,6 +231,8 @@ public:
 	// used in snap functions of available entities to draw, returns true if the SnappingClient is not able to see the preview
 	bool OnSnapPreview(CEntity *pEntity);
 	bool TryEnterPresetName(const char *pName);
+	bool TryEnterIndex(const char *pIndex);
+	bool OnChatMessage(const char *pMessage);
 
 	bool SafelyDestroyDrawEntity(CEntity *pEntity);
 };

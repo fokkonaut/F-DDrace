@@ -255,7 +255,7 @@ MACRO_CONFIG_INT(SvMaxObjectsPlotBig, sv_max_objects_plot_big, 150, 0, 500, CFGF
 MACRO_CONFIG_INT(SvMaxObjectsFreeDraw, sv_max_objects_free_draw, 5000, 0, 5000, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum amount of objects that can be placed in free draw", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvLightSpeedups, sv_light_speedups, 1, 0, 1, CFGFLAG_SERVER, "Whether draw editor speedups use light mode (heavy mode not recommended)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvLightTeleporters, sv_light_teleporters, 1, 0, 1, CFGFLAG_SERVER, "Whether draw editor teleporters use light mode (heavy mode not recommended)", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvPlotEditorCategories, sv_plot_editor_categories, 128, "pickups,walls,doors,speedups,teleporters,transform", CFGFLAG_SERVER, "Comma separated list (pickups,walls,doors,speedups,teleporters,transform)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvPlotEditorCategories, sv_plot_editor_categories, 128, "pickups,walls,doors,speedups,teleporters,transform", CFGFLAG_SERVER, "Comma separated list (pickups,walls,doors,speedups,teleporters,transform,tile)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEditorPresetLevel, sv_editor_preset_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to use the draw editor preset save/load feature", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClearFreeDrawLevel, sv_clear_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to clear free draw area (clearplot 0)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEditorMaxDistance, sv_editor_max_distance, 750, 0, 99999, CFGFLAG_SERVER, "Maximum distance to place something with draw editor", AUTHED_ADMIN)

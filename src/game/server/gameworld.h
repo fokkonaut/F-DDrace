@@ -73,8 +73,9 @@ public:
 		ENTTYPE_LIGHTNING_LASER,
 		ENTTYPE_GROG,
 		ENTTYPE_TASER_SHIELD,
-		ENTTYPE_PLAYER_COUNTER,
 		ENTTYPE_MISSILE,
+		ENTTYPE_PLAYER_COUNTER,
+		ENTTYPE_DRAWTILE,
 
 		NUM_ENTTYPES
 	};
@@ -313,9 +314,9 @@ public:
 	int GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith = -1);
 
 	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
-	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckDrivers = true);
-	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Types, int Team = -1);
-	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int Types,
+	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckDrivers = true);
+	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team = -1);
+	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int64 Types,
 		class CCharacter *pThisOnly = 0, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
 	bool IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1);
 	int IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDoors, int Max);
