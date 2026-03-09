@@ -397,6 +397,7 @@ MACRO_CONFIG_STR(SvCountriesFilePath, sv_countries_file_path, 128, "data", CFGFL
 // zombie
 MACRO_CONFIG_INT(SvSpawnAsZombie, sv_spawn_as_zombie, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether player respawn as zombie by default", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvIncreaseHumanCapBots, sv_increase_human_cap_bots, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether server-side bots are counted (0=not counted, 1=counted as players, but not humans!)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHumanLimitPercent, SvHumanLimitPercent, 50, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Humans limit in percent for trial tile", AUTHED_ADMIN)
 
 // dummy and 1vs1
 MACRO_CONFIG_INT(SvAllowDummy, sv_allow_dummy, 1, 0, 1, CFGFLAG_SERVER, "Whether clients can connect their dummy to the server", AUTHED_ADMIN)

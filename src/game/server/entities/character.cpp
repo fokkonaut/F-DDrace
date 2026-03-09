@@ -3498,7 +3498,9 @@ void CCharacter::HandleTiles(int Index)
 					}
 				}
 			}
-			if (Players > 1 && (Players >> 1) <= Humans)
+
+			int HumanLimit = (Players * Config()->m_SvHumanLimitPercent) / 100;
+			if (Players > 1 && HumanLimit <= Humans)
 			{
 				m_pPlayer->m_LastHumanTryTick = Server()->Tick();
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("Humans limit reached."));
