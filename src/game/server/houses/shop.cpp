@@ -34,7 +34,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		AddItem("Ninjajetpack", 21, 10000, TIME_FOREVER, Localizable("It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'."));
 		AddItem("Taser", 30, -1, TIME_FOREVER, Localizable("Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'."));
 		AddItem("Taser battery", 30, 100000, TIME_FOREVER, Localizable("Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'."), false, 10);
-		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 500000, TIME_20_DAYS, Localizable("With Portal Rifle you can create two portals where your cursor is, then teleport between them."), EuroMode);
+		AddItem("Portal Rifle", EuroMode ? 1 : 45, EuroMode ? 10 : 1000000, TIME_20_DAYS, Localizable("With Portal Rifle you can create two portals where your cursor is, then teleport between them."), EuroMode);
 		AddItem("Portal Blocker", 20, 10000, TIME_FOREVER, Localizable("Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'"), false, 10);
 
 		static char aaBuf[NUM_POLICE_LEVELS][32];
