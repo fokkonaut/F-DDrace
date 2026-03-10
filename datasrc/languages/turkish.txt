@@ -1365,7 +1365,7 @@ You already own another plot
 == Zaten başka bir plota sahipsiniz
 
 Your level is too low, you need to be level %d to buy %s
-== Seviyeniz çok düşük, %s satın almak için %d seviye olmalısınız
+== Seviyeniz çok düşük, %d satın almak için %s seviye olmalısınız
 
 Taser battery purchase failed
 == Taser batarya satın alımı başarısız
