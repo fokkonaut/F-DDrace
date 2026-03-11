@@ -69,6 +69,7 @@ class CDrawEditor
 		// Tile
 		TILEPLACE_INDEX = 0,
 		TILEPLACE_ENTER_INDEX,
+		TILEPLACE_COLOR,
 		NUM_TILEPLACE_SETTINGS,
 
 		// Categories
@@ -120,7 +121,7 @@ class CDrawEditor
 	int GetNumSpeedups(int PlotID);
 	int GetNumTeleporters(int PlotID);
 
-	const char *GetLaserColor();
+	const char *GetLaserColor(int LaserType);
 
 	bool IsCategoryAllowed(int Category);
 	const char *GetCategoryListName(int Category);
@@ -206,6 +207,7 @@ class CDrawEditor
 	{
 		int m_Index;
 		bool m_EnterIndex;
+		int m_Color;
 	} m_TilePlace;
 
 	// preview

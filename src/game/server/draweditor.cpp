@@ -657,6 +657,15 @@ void CDrawEditor::HandleInput()
 					else if (m_TilePlace.m_Index <= TILE_AIR)
 						m_TilePlace.m_Index = NUM_INDICES-1;
 				}
+				else if (m_Setting == TILEPLACE_COLOR)
+				{
+					m_TilePlace.m_Color += m_Input.m_Direction;
+					if (m_TilePlace.m_Color >= LASERTYPE_DRAGGER)
+						m_TilePlace.m_Color = 0;
+					else if (m_TilePlace.m_Color < 0)
+						m_TilePlace.m_Color = LASERTYPE_DRAGGER-1;
+					((CDrawTile *)m_pPreview)->SetColor(m_TilePlace.m_Color);
+				}
 			}
 			SendWindow();
 		}
@@ -741,6 +750,7 @@ void CDrawEditor::SetCategory(int Category)
 	{
 		m_Entity = CGameWorld::ENTTYPE_DRAWTILE;
 		m_RoundPos = true;
+		m_TilePlace.m_Color = LASERTYPE_RIFLE;
 	}
 
 	// done in SetPickup()
@@ -802,7 +812,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, GetTeleporterType(), Number, !Preview);
 	}
 	case CGameWorld::ENTTYPE_DRAWTILE:
-		return new CDrawTile(m_pCharacter->GameWorld(), m_Pos, m_TilePlace.m_Index, !Preview);
+		return new CDrawTile(m_pCharacter->GameWorld(), m_Pos, m_TilePlace.m_Index, m_TilePlace.m_Color, !Preview);
 	}
 	return 0;
 }
@@ -889,7 +899,7 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting(aBuf, LASERWALL_COLLISION), sizeof(aMsg));
 		str_format(aBuf, sizeof(aBuf), "Thickness: %d/%d", m_Laser.m_Thickness+1, s_MaxThickness+1);
 		str_append(aMsg, FormatSetting(aBuf, LASERWALL_THICKNESS), sizeof(aMsg));
-		str_format(aBuf, sizeof(aBuf), "Color: %s", GetLaserColor());
+		str_format(aBuf, sizeof(aBuf), "Color: %s", GetLaserColor(m_Laser.m_Color));
 		str_append(aMsg, FormatSetting(aBuf, LASERWALL_COLOR), sizeof(aMsg));
 	}
 	else if (m_Category == CAT_LASERDOORS)
@@ -936,6 +946,8 @@ void CDrawEditor::SendWindow()
 		str_format(aBuf, sizeof(aBuf), "Index: %d", m_TilePlace.m_Index);
 		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_INDEX), sizeof(aMsg));
 		str_append(aMsg, FormatSetting("Enter Index", TILEPLACE_ENTER_INDEX), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Color: %s", GetLaserColor(m_TilePlace.m_Color));
+		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_COLOR), sizeof(aMsg));
 	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
@@ -963,9 +975,9 @@ const char *CDrawEditor::GetPickup(int Pickup)
 	}
 }
 
-const char *CDrawEditor::GetLaserColor()
+const char *CDrawEditor::GetLaserColor(int LaserType)
 {
-	switch (m_Laser.m_Color)
+	switch (LaserType)
 	{
 	case LASERTYPE_RIFLE: return "Rifle";
 	case LASERTYPE_SHOTGUN: return "Shotgun";

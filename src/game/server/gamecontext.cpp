@@ -5578,7 +5578,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_DRAWTILE:
 		{
 			CDrawTile *pDrawTile = (CDrawTile *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d,", CGameWorld::ENTTYPE_DRAWTILE, Pos.x/32.f, Pos.y/32.f, pDrawTile->GetIndex());
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_DRAWTILE, Pos.x/32.f, Pos.y/32.f, pDrawTile->GetIndex(), pDrawTile->GetColor());
 			*pFile << aEntry;
 			break;
 		}
@@ -5724,10 +5724,11 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 			case CGameWorld::ENTTYPE_DRAWTILE:
 			{
 				int Index = -1;
-				sscanf(pData, "%d:%f/%f:%d", &EntityType, &Pos.x, &Pos.y, &Index);
+				int Color = LASERTYPE_RIFLE;
+				sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Index, &Color);
 				if (Index > TILE_AIR)
 				{
-					vEntities.push_back(new CDrawTile(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Index));
+					vEntities.push_back(new CDrawTile(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Index, Color));
 				}
 				break;
 			}

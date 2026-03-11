@@ -5,10 +5,11 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "drawtile.h"
 
-CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, bool Collision)
+CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAWTILE, Pos, 16.f, Collision)
 {
 	m_Index = Index;
+	m_Color = Color;
 
 	for (int i = 0; i < NUM_SIDES; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -79,6 +80,6 @@ void CDrawTile::Snap(int SnappingClient)
 
 		vec2 Pos = m_Pos + aCorners[i];
 		vec2 From = m_Pos + aCorners[To];
-		GameServer()->SnapLaserObject(Context, m_aID[i], Pos, From, Server()->Tick(), -1, LASERTYPE_RIFLE, -1, m_Number, LASERFLAG_NO_PREDICT);
+		GameServer()->SnapLaserObject(Context, m_aID[i], Pos, From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
 	}
 }
