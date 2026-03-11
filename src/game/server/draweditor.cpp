@@ -840,7 +840,7 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 	case CGameWorld::ENTTYPE_TELEPORTER:
 		pEntity = new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_DRAWTILE:
-		pEntity = new CDrawTile(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDrawTile *)pTemplate)->GetIndex(), !Preview && pTemplate->m_InitialCollision); break;
+		pEntity = new CDrawTile(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDrawTile *)pTemplate)->GetIndex(), ((CDrawTile *)pTemplate)->GetColor(), !Preview && pTemplate->m_InitialCollision); break;
 	}
 
 	// update initialcollision in case we have a preview right now it it was set to false in the constructor
