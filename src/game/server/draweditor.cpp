@@ -38,6 +38,7 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Transform.m_Area.Init(GameServer());
 	m_TilePlace.m_Index = TILE_RAINBOW;
 	m_TilePlace.m_EnterIndex = false;
+	m_TilePlace.m_Color = LASERTYPE_RIFLE;
 	
 	m_Setting = -1;
 	m_RoundPos = true;
@@ -88,6 +89,12 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	}
 
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
+	if (Remove && Type == CGameWorld::ENTTYPE_DRAWTILE)
+	{
+		// TilePlace can place and remove solid blocks so we can check for an entity while on a solid block
+		ValidTile = true;
+	}
+
 	if (!Remove)
 	{
 		int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
@@ -536,7 +543,8 @@ void CDrawEditor::HandleInput()
 
 				int64 Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
 					(1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
-				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, 16.f, Types, m_pPreview, GetCID());
+				float Radius = m_Category == CAT_TILEPLACE ? 8.f : 16.f; 
+				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, Radius, Types, m_pPreview, GetCID());
 
 				if (CanRemove(pEntity) && RemoveEntity(pEntity))
 				{
@@ -750,7 +758,6 @@ void CDrawEditor::SetCategory(int Category)
 	{
 		m_Entity = CGameWorld::ENTTYPE_DRAWTILE;
 		m_RoundPos = true;
-		m_TilePlace.m_Color = LASERTYPE_RIFLE;
 	}
 
 	// done in SetPickup()
