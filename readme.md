@@ -175,6 +175,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_bonus_score_decrease` |
 | `sv_spawn_as_zombie` |
 | `sv_increase_human_cap_bots` |
+| `sv_human_limit_percent` |
 | `sv_hide_minigame_players` |
 | `sv_rainbow_speed_default` |
 | `sv_old_jetpack_sound` |
