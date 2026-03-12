@@ -59,9 +59,19 @@ void CDrawTile::ResetCollision(bool Remove)
 bool CDrawTile::HasSameIndexNeighborAt(vec2 Pos)
 {
 	int MapIndex = GameServer()->Collision()->GetPureMapIndex(Pos);
-	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-	int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-	return TileIndex == m_Index || TileFIndex == m_Index;
+
+	// only check for real tiles, not when moving or copying, only rely on drawtile entity info for that
+	if (m_BrushCID == -1)
+	{
+		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+		if (TileIndex != m_Index && TileFIndex != m_Index)
+			return false;
+	}
+
+	// dont try to connect to map tiles, only connect to already placed tiles or when moving an area together
+	return GameServer()->HasDrawTile(MapIndex, m_BrushCID, m_Index);
 }
 
 static vec2 s_aNeighborOffsets[CDrawTile::NUM_SIDES] = {
@@ -73,8 +83,6 @@ static vec2 s_aNeighborOffsets[CDrawTile::NUM_SIDES] = {
 
 bool CDrawTile::HasSameIndexNeighbor(int Side)
 {
-	if (m_BrushCID != -1)
-		return false;
 	vec2 NeighborPos = m_Pos + s_aNeighborOffsets[Side];
 	return HasSameIndexNeighborAt(NeighborPos);
 }
@@ -86,9 +94,6 @@ bool CDrawTile::HasEdge(vec2 Pos, int Side)
 
 bool CDrawTile::IsResponsibleForEdge(int Side)
 {
-	if (m_BrushCID != -1)
-		return true;
-
 	vec2 aScanDirs[4] = {
 		vec2(-32, 0), // left
 		vec2(0, -32), // top
@@ -155,36 +160,32 @@ void CDrawTile::Snap(int SnappingClient)
 
 		vec2 Pos = m_Pos + aCorners[StartCorner];
 		vec2 From = m_Pos + aCorners[EndCorner];
-
-		// only if placed and not a brush
-		if (m_BrushCID == -1)
-		{
-			// adjust start corner if its an inside corner
-			if (HasInsideCornerAt(m_Pos, StartCorner))
-				Pos -= normalize(From - Pos) * ExtendBy;
-				
-			vec2 aDirections[4] = {
-				vec2(32, 0), // top
-				vec2(0, 32), // right
-				vec2(-32, 0), // bottom
-				vec2(0, -32) // left
-			};
-
-			vec2 CheckPos = m_Pos;
-			while (true)
-			{
-				vec2 NextPos = CheckPos + aDirections[i];
-				if (!HasSameIndexNeighborAt(NextPos) || !HasEdge(NextPos, i))
-					break;
-
-				From += aDirections[i];
-				CheckPos = NextPos;
-			}
+		
+		// adjust start corner if its an inside corner
+		if (HasInsideCornerAt(m_Pos, StartCorner))
+			Pos -= normalize(From - Pos) * ExtendBy;
 			
-			// adjust end corner if the last extended tile has an inside corner
-			if (HasInsideCornerAt(CheckPos, EndCorner))
-				From += normalize(aDirections[i]) * ExtendBy;
+		vec2 aDirections[4] = {
+			vec2(32, 0), // top
+			vec2(0, 32), // right
+			vec2(-32, 0), // bottom
+			vec2(0, -32) // left
+		};
+
+		vec2 CheckPos = m_Pos;
+		while (true)
+		{
+			vec2 NextPos = CheckPos + aDirections[i];
+			if (!HasSameIndexNeighborAt(NextPos) || !HasEdge(NextPos, i))
+				break;
+
+			From += aDirections[i];
+			CheckPos = NextPos;
 		}
+		
+		// adjust end corner if the last extended tile has an inside corner
+		if (HasInsideCornerAt(CheckPos, EndCorner))
+			From += normalize(aDirections[i]) * ExtendBy;
 
 		GameServer()->SnapLaserObject(Context, m_aID[i], Pos, From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
 	}

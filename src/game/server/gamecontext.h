@@ -16,6 +16,7 @@
 #include "entities/pickup_drop.h"
 #include "entities/money.h"
 #include "entities/lasertext.h"
+#include "entities/drawtile.h"
 #include "houses/house.h"
 #include "minigames/minigame.h"
 #include "minigames/arenas.h"
@@ -530,6 +531,8 @@ public:
 	bool PlotCanBeRaided(int PlotID);
 	bool PlotDoorDestroyed(int PlotID);
 	bool OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, vec2 Pos);
+
+	CDrawTile *HasDrawTile(int MapIndex, int BrushCID = -1, int Index = -1);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);

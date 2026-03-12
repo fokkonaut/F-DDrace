@@ -5967,6 +5967,15 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 	}
 }
 
+CDrawTile *CGameContext::HasDrawTile(int MapIndex, int BrushCID, int Index)
+{
+	vec2 Pos = RoundPos(Collision()->GetPos(MapIndex));
+	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0, false);
+	if (pDrawTile && ((BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) && (Index == -1 || pDrawTile->GetIndex() == Index)))
+		return pDrawTile;
+	return 0;
+}
+
 bool CGameContext::IsPlotEmpty(int PlotID)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)

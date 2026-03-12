@@ -35,6 +35,7 @@ public:
 	virtual ~CDrawTile();
 	virtual void ResetCollision(bool Remove = false);
 	virtual void Snap(int SnappingClient);
+	void SetIndex(int Index) { m_Index = Index; }
 	int GetIndex() { return m_Index; }
 	void SetColor(int Lasertype) { m_Color = Lasertype; }
 	int GetColor() { return m_Color; }

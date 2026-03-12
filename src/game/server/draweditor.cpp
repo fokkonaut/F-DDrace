@@ -89,15 +89,20 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	}
 
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
-	if (Remove && Type == CGameWorld::ENTTYPE_DRAWTILE)
+	int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
+
+	if (Type == CGameWorld::ENTTYPE_DRAWTILE)
 	{
-		// TilePlace can place and remove solid blocks so we can check for an entity while on a solid block
-		ValidTile = true;
+		// check if its a drawtile, can be moved/replaced
+		if (Remove || GameServer()->HasDrawTile(Index))
+		{
+			// TilePlace can place and remove solid blocks so we can check for an entity while on a solid block
+			ValidTile = true;
+		}
 	}
 
 	if (!Remove)
 	{
-		int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
 		if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 		{
 			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
@@ -664,6 +669,7 @@ void CDrawEditor::HandleInput()
 						m_TilePlace.m_Index = TILE_AIR+1;
 					else if (m_TilePlace.m_Index <= TILE_AIR)
 						m_TilePlace.m_Index = NUM_INDICES-1;
+					((CDrawTile *)m_pPreview)->SetIndex(m_TilePlace.m_Index);
 				}
 				else if (m_Setting == TILEPLACE_COLOR)
 				{
@@ -1337,6 +1343,7 @@ bool CDrawEditor::TryEnterIndex(const char *pIndex)
 	m_TilePlace.m_Index = Index;
 	m_TilePlace.m_EnterIndex = false;
 	m_Setting = TILEPLACE_INDEX;
+	((CDrawTile *)m_pPreview)->SetIndex(m_TilePlace.m_Index);
 	return true;
 }
 
