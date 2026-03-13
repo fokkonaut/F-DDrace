@@ -47,7 +47,7 @@ bool CSnake::SetActive(bool Active)
 		GameServer()->UnsetTelekinesis(m_pCharacter);
 		m_pCharacter->GetPlayer()->StopPlotEditing();
 		if (m_pCharacter->m_pHelicopter)
-			m_pCharacter->m_pHelicopter->Dismount();
+			m_pCharacter->m_pHelicopter->Dismount(m_pCharacter->GetPlayer()->GetCID());
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void CSnake::AddNewTees()
 			GameServer()->UnsetTelekinesis(pChr);
 			pChr->GetPlayer()->StopPlotEditing();
 			if (pChr->m_pHelicopter)
-				pChr->m_pHelicopter->Dismount();
+				pChr->m_pHelicopter->Dismount(i);
 		}
 	}
 }

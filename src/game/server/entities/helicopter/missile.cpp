@@ -101,9 +101,31 @@ void CMissile::HandleCollisions()
 	if (m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
+	//
 	CCharacter *pTargetChr = nullptr;
-	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
-		pTargetChr = GameWorld()->IntersectCharacter(m_PrevPos, collisionPos, 6.0f, collisionPos, pOwnerChar, m_Owner);
+	CAdvancedEntity *pTargetEntity = nullptr;
+
+	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	if (Config()->m_SvInteractiveDrops)
+		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
+	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, pOwnerChar, m_Owner, Types);
+
+	if (pEnt)
+	{
+		if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+		{
+			pTargetChr = (CCharacter *)pEnt;
+		}
+		else if (pEnt->IsAdvancedEntity())
+		{
+			pTargetEntity = (CHelicopter *)pEnt;
+			pTargetChr = pTargetEntity->GetOwner();
+		}
+	}
+	//
+
+	// if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
+		// pTargetChr = GameWorld()->IntersectCharacter(m_PrevPos, collisionPos, 6.0f, collisionPos, pOwnerChar, m_Owner);
 
 	if (m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -115,7 +137,7 @@ void CMissile::HandleCollisions()
 		!pTargetChr->CanCollide(m_Owner))
 		IsWeaponCollide = true;
 
-	if ((pTargetChr || Collide || GameLayerClipped(m_Pos)) && !IsWeaponCollide)
+	if ((pTargetChr || pTargetEntity || Collide || GameLayerClipped(m_Pos)) && !IsWeaponCollide)
 	{
 		m_Pos = collisionPos;
 		TriggerExplosions();

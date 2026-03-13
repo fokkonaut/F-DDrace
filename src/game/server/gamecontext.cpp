@@ -3096,7 +3096,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					{
 						if (pChr->m_pHelicopter)
 						{
-							pChr->m_pHelicopter->Dismount();
+							pChr->m_pHelicopter->Dismount(ClientID);
 						}
 						else if (!pChr->TryMountHelicopter() && !pChr->DropGrog())
 						{
@@ -7103,7 +7103,7 @@ int CGameContext::SaveCharacter(int ClientID, int Flags, float Hours)
 		// Reset, so CPlayer::OnDisconnect() will not create a disconnect savetee when we have this already.
 		m_apPlayers[ClientID]->m_SavePlayerDisconnect = false;
 	}
-	
+
 	// return index of newly added identity
 	return m_vSavedIdentities.size() - 1;
 }
@@ -8168,7 +8168,7 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
 }
 
-bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int TurretType, float Scale, bool SpawnOnFloor, int Number)
+bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale, bool SpawnOnFloor, int Number)
 {
 	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
 	vec2 ResultingHitbox = HELICOPTER_PHYSSIZE * Scale;
@@ -8178,7 +8178,7 @@ bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int TurretTy
 	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
 		return false;
 
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, Spawner, Team, Pos, Scale, true, Number, TurretType);
+	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, true, Number, TurretType);
 	CVehicleTurret *pTurret = nullptr;
 	if (TurretType == TURRETTYPE_MINIGUN)
 		pTurret = new CMinigunTurret();

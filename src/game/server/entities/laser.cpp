@@ -184,6 +184,13 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			pChr->m_GotLasered = true;
 			pChr->UnFreeze();
 		}
+
+		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+		{
+			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
+			pHelicopter->Heal(1.0f);
+			return true;
+		}
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
@@ -229,7 +236,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
 		{
 			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
-			pHelicopter->TakeDamage((float)(m_TaserStrength + 1) / 1.5f, At, pOwnerChar ? pOwnerChar->GetPlayer()->GetCID() : -1);
+			pHelicopter->TakeDamage((float)(m_TaserStrength), At, pOwnerChar ? pOwnerChar->GetPlayer()->GetCID() : -1);
 			return true;
 		}
 	}
