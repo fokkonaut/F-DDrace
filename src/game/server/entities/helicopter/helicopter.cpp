@@ -907,7 +907,7 @@ void CHelicopter::Snap(int SnappingClient)
 	}
 
 	// Draw helicopter
-	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped);
+	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped, (int)((1.0f - (float)m_Health / (float)m_MaxHealth) * 10));
 
 	// Draw guns
 	if (m_pTurret)
