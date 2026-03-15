@@ -1531,6 +1531,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/helicopter/bone.h
   entities/helicopter/helicopter.cpp
   entities/helicopter/helicopter.h
+  entities/helicopter/helicopter_models.cpp
+  entities/helicopter/helicopter_models.h
   entities/helicopter/helicopter_turret.cpp
   entities/helicopter/helicopter_turret.h
   entities/helicopter/missile.cpp

@@ -268,6 +268,7 @@ void CCharacter::HandleJetpack()
 	}
 }
 
+
 void CCharacter::HandleNinja()
 {
 	if(GetActiveWeapon() != WEAPON_NINJA)
@@ -329,19 +330,25 @@ void CCharacter::HandleNinja()
 
 		// check if we Hit anything along the way
 		{
-			CCharacter *aEnts[MAX_CLIENTS];
+			CEntity *aEnts[MAX_CLIENTS];
 			vec2 Dir = m_Pos - OldPos;
 			float Radius = GetProximityRadius() * 2.0f;
 			vec2 Center = OldPos + Dir * 0.5f;
-			int Num = GameWorld()->FindEntities(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+
+			int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+			if (Config()->m_SvInteractiveDrops)
+				Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+			int Num = GameWorld()->FindEntitiesTypes(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, Types);
 
 			for (int i = 0; i < Num; ++i)
 			{
 				if (aEnts[i] == this)
 					continue;
 
+				bool IsCharacter = aEnts[i]->GetObjType() == CGameWorld::ENTTYPE_CHARACTER;
+
 				// check that we can collide with the other player
-				if (!CanCollide(aEnts[i]->m_pPlayer->GetCID()))
+				if (IsCharacter && !CanCollide(((CCharacter *)aEnts[i])->m_pPlayer->GetCID()))
 					continue;
 
 				// make sure we haven't Hit this object before
@@ -355,16 +362,27 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// check so we are sufficiently close
-				if (distance(aEnts[i]->m_Pos, m_Pos) > (GetProximityRadius() * 2.0f))
+				if (distance(aEnts[i]->GetPos(), m_Pos) > GetProximityRadius() + aEnts[i]->GetProximityRadius())
 					continue;
 
 				// Hit a player, give him damage and stuffs...
-				GameServer()->CreateSound(aEnts[i]->m_Pos, SOUND_NINJA_HIT, TeamMask());
+				GameServer()->CreateSound(aEnts[i]->GetPos(), SOUND_NINJA_HIT, TeamMask());
 				// set his velocity to fast upward (for now)
-				if(m_NumObjectsHit < 10)
+				if (m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
 
-				aEnts[i]->TakeDamage(vec2(0, -10.0f), m_Ninja.m_ActivationDir*-1, g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
+				if (IsCharacter)
+				{
+					((CCharacter *)aEnts[i])->TakeDamage(vec2(0, -10.0f), m_Ninja.m_ActivationDir * -1, g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
+				}
+				else if (aEnts[i]->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+				{
+					CHelicopter* pHelicopter = (CHelicopter *)aEnts[i];
+					if (pHelicopter->IsBuilding())
+						continue;
+
+					pHelicopter->TakeDamage((float)g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, Center, m_pPlayer->GetCID());
+				}
 			}
 		}
 	}
@@ -1414,7 +1432,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	}
 	else if (m_pHelicopter)
 	{
-		m_pHelicopter->OnInput(pNewInput);
+		m_pHelicopter->OnInput(pNewInput, this);
 		ResetInput |= 1;
 	}
 	else if (m_GrogBalancePosX != GROG_BALANCE_POS_UNSET)
@@ -1971,7 +1989,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 	// dismount helicopter
 	if (m_pHelicopter)
-		m_pHelicopter->Dismount();
+		m_pHelicopter->Dismount(m_pPlayer->GetCID());
 
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
@@ -4431,7 +4449,8 @@ void CCharacter::FDDraceInit()
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_DoorHammer = false;
-	m_pHelicopter = 0;
+	m_pHelicopter = nullptr;
+	m_HelicopterSeat = -1;
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{

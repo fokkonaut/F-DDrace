@@ -4,11 +4,18 @@
 #include "game/server/gamecontext.h"
 #include "helicopter.h"
 #include "generated/server_data.h"
+#include "helicopter_models.h"
+#include "engine/server.h"
+#include "helicopter.h"
 
 bool MovingCircleHitsMovingSegment_Analytical(
-	vec2 circleLast, vec2 circleNow, float radius,
-	vec2 lineLastA, vec2 lineNowA,
-	vec2 lineLastB, vec2 lineNowB)
+	vec2 circleLast,
+	vec2 circleNow,
+	float radius,
+	vec2 lineLastA,
+	vec2 lineNowA,
+	vec2 lineLastB,
+	vec2 lineNowB)
 {
 	// Step 1: Relative motion
 	vec2 circleVel = circleNow - circleLast;
@@ -49,7 +56,7 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	// Get point on circle path at time t
 	vec2 circlePosAtT = C0 + relVel * t;
 
-	// Find closest point on segment
+	// Find the closest point on segment
 	float segmentLenSq = dot(d, d);
 	if (segmentLenSq != 0.0f)
 	{
@@ -68,9 +75,31 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	return distSq <= radius * radius;
 }
 
-CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float HelicopterScale, bool Build, int Number, int DelayTurretType)
+IServer *Server();
+
+SHelicopterMeta aHelicopterMetadata[NUM_HELICOPTER_TYPES] = {
+	{ "Helicopter", 60.0f, 4, vec2(0.75f, 0.6f), { vec2(0.f, 0.f) }, 1 },
+	{ "Attack Helicopter", 250.0f, 6, vec2(1.1f, 1.1f), { vec2(0.0f, 0.0f), vec2(40.0f, 8.0f) }, 2 }
+};
+
+CHelicopter::CHelicopter(
+	CGameWorld *pGameWorld,
+	int HelicopterType,
+	int Spawner,
+	int Team,
+	vec2 Pos,
+	float HelicopterScale,
+	bool Build,
+	int Number,
+	int DelayTurretType
+)
 	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
 {
+	m_HelicopterType = HelicopterType;
+	for (int i = 0; i < NUM_MAX_SEATS; i++)
+		m_aPassengers[i] = -1;
+	m_NumPassengers = 0;
+
 	m_AllowVipPlus = false;
 	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
@@ -90,6 +119,10 @@ CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos
 	m_InputDirection = 0;
 	m_MaxHealth = 60.f;
 	m_Health = m_MaxHealth;
+	m_NumHearts = 0;
+	m_BaseAccel = vec2(0.5f, 0.5f);
+	m_pName = "Helicopter";
+	m_NumSeats = 0;
 	m_EngineOn = false;
 
 	m_Scale = 1.f;
@@ -97,11 +130,11 @@ CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos
 	m_Angle = 0.f;
 	m_Accel = vec2(0.f, 0.f);
 
+	m_pModel = nullptr;
 	m_pTurret = nullptr;
 
-	memset(m_aFlungCharacters, 0, sizeof(m_aFlungCharacters));
-	m_BackPropellerRadius = 25.f;
-	m_TopPropellerRadius = 100.f;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_aFlungCharacters[i] = -1;
 
 	m_ExplosionsLeft = -1;
 
@@ -114,16 +147,12 @@ CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos
 
 	m_Build = Build;
 	m_BuildHeight = 0.f;
-	m_BuildTop = 0.f;
-	m_BuildBottom = 0.f;
-	m_BuildTotalHeight = 0.f;
 
-	InitBody();
-	InitPropellers();
-	GetFullPropellerPositions(m_LastTopPropellerA, m_LastTopPropellerB);
+	SetClassAtributes(HelicopterType, true);
+	InitModel();
+	m_pModel->UpdateLastPropellerPositions(); // Thop
 
-	InitBuild();
-	InitHearts();
+	UpdateHeartsIndicator();
 
 	// Order matters
 	if (Build)
@@ -139,21 +168,20 @@ CHelicopter::CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos
 
 CHelicopter::~CHelicopter()
 {
-	for (int i = 0; i < NUM_BONES; i++)
-		Server()->SnapFreeID(m_aBones[i].m_ID);
-	for (int i = 0; i < NUM_TRAILS; i++)
-		Server()->SnapFreeID(m_aTrails[i].m_ID);
-	for (int i = 0; i < NUM_HEARTS; i++)
+	delete m_pModel; // Also deletes laser and particle ids
+
+	for (int i = 0; i < m_NumHearts; i++)
 		Server()->SnapFreeID(m_aHearts[i].m_ID);
 	for (int i = 0; i < NUM_BUILD_IDS; i++)
 		if (m_aBuildIDs[i] != -1) // should only pass if deleted while crafting a helicopter
 			Server()->SnapFreeID(m_aBuildIDs[i]);
+
 	DestroyTurret();
 }
 
 void CHelicopter::Reset()
 {
-	Dismount();
+	Dismount(-1);
 	CAdvancedEntity::Reset();
 
 	TryRespawnNewHelicopter();
@@ -168,7 +196,68 @@ bool CHelicopter::TryRespawnNewHelicopter()
 
 bool CHelicopter::IsRegenerating()
 {
-	return m_Health != m_MaxHealth && m_LastDamage && m_LastDamage + Server()->TickSpeed() * 10 < Server()->Tick();
+	return m_Health != m_MaxHealth && m_LastDamage && m_LastDamage + Server()->TickSpeed() * 60 < Server()->Tick();
+}
+
+CCharacter *CHelicopter::GetDriver()
+{
+	int driverID = m_aPassengers[0];
+	if (driverID != -1)
+		return GameServer()->GetPlayerChar(driverID);
+	return nullptr;
+}
+
+CCharacter *CHelicopter::GetGunner()
+{
+	if (m_NumSeats == 1 && m_aPassengers[0] != -1)
+		return GameServer()->GetPlayerChar(m_aPassengers[0]);
+	if (m_NumSeats >= 2 && m_aPassengers[1] != -1)
+		return GameServer()->GetPlayerChar(m_aPassengers[1]);
+	return nullptr;
+}
+
+void CHelicopter::SetNumHeartsIndicator(int NumHearts)
+{
+	int CurrentHearts = m_NumHearts;
+	int DeltaHearts = NumHearts - CurrentHearts;
+
+	if (DeltaHearts > 0)
+	{
+		for (int i = CurrentHearts; i < NumHearts; i++)
+			m_aHearts[i] = SHeart(this, Server()->SnapNewID(), vec2(0.f, 0.f));
+	}
+	else if (DeltaHearts < 0)
+	{
+		for (int i = CurrentHearts - 1; i >= NumHearts; i--) // when going from 10 to 8 hearts, remove indexes 9 8
+		{
+			Server()->SnapFreeID(m_aHearts[i].m_ID);
+			m_aHearts[i].m_ID = -1;
+		}
+	}
+
+	m_NumHearts = NumHearts;
+
+	if (DeltaHearts != 0)
+		UpdateHeartsIndicator();
+}
+
+void CHelicopter::SetClassAtributes(int HelicopterType, bool SetFullHealth)
+{
+	if (HelicopterType < 0 || HelicopterType >= NUM_HELICOPTER_TYPES)
+		return; // invalid class
+
+	SHelicopterMeta& metadata = aHelicopterMetadata[HelicopterType];
+	m_pName = metadata.m_pName;
+	m_MaxHealth = metadata.m_BaseHealth;
+	// m_NumHearts = metadata.m_NumHeartsIndicator;
+	SetNumHeartsIndicator(metadata.m_NumHeartsIndicator);
+	m_BaseAccel = metadata.m_BaseAccel;
+
+	memcpy(m_aSeats, metadata.m_aSeats, sizeof(m_aSeats));
+	m_NumSeats = metadata.m_NumSeats;
+
+	if (SetFullHealth)
+		m_Health = m_MaxHealth;
 }
 
 bool CHelicopter::AttachTurret(CVehicleTurret *helicopterTurret)
@@ -227,31 +316,19 @@ void CHelicopter::ApplyScale(float HelicopterScale)
 	// Experimental
 	m_Scale *= HelicopterScale;
 
-//	m_Size *= HelicopterScale; // done in CHelicopter() : m_Size()
-	m_BackPropellerRadius *= HelicopterScale;
-	m_TopPropellerRadius *= HelicopterScale;
-	for (SBone& Bone : m_aBones)
-		Bone.Scale(HelicopterScale);
-
-	m_BuildTop *= HelicopterScale;
-	m_BuildBottom *= HelicopterScale;
-	m_BuildLeft *= HelicopterScale;
-	m_BuildRight *= HelicopterScale;
-
-	m_BuildTotalWidth *= HelicopterScale;
-	m_BuildTotalHeight *= HelicopterScale;
-
+	//	m_Size *= HelicopterScale; // done in CHelicopter() : m_Size()
+	m_pModel->ApplyScale(HelicopterScale);
 	m_BuildHeight *= HelicopterScale;
 	//
 
-	UpdateHearts();
+	UpdateHeartsIndicator();
 }
 
 void CHelicopter::Explode()
 {
-	m_ExplosionsLeft = 6;
+	m_ExplosionsLeft = (m_HelicopterType == HELICOPTER_APACHE) ? 12 : 6;
 
-	Dismount();
+	Dismount(-1);
 
 	// Freeze characters near explosion
 	CCharacter *aVictims[MAX_CLIENTS];
@@ -262,6 +339,9 @@ void CHelicopter::Explode()
 	for (int i = 0; i < numFound; i++)
 	{
 		CCharacter *pChar = aVictims[i];
+		if (pChar->GetNinjaCurrentMoveTime())
+			continue; // Ninjas get freeze immunity while slashing during an explosion
+
 		pChar->m_FreezeTime = 0; // refreezing if exploded while tasered
 		pChar->m_FreezeTick = 0;
 		pChar->Freeze(3);
@@ -302,6 +382,11 @@ void CHelicopter::ExplosionDamage(float Strength, vec2 Pos, int FromID)
 	GameServer()->CreateDeath(m_Pos, FromID);
 }
 
+void CHelicopter::Heal(float Health)
+{
+	m_Health = min(m_Health + Health, m_MaxHealth);
+}
+
 void CHelicopter::Tick()
 {
 	CAdvancedEntity::Tick();
@@ -332,26 +417,16 @@ void CHelicopter::Tick()
 	{
 		HandleDropped();
 
-		if (GetOwner())
-		{
-			GetOwner()->ForceSetPos(m_Pos);
-			GetOwner()->Core()->m_Vel = vec2(0, 0);
-
-			m_Gravity = GetOwner()->m_FreezeTime;
-			m_GroundVel = GetOwner()->m_FreezeTime || m_Accel.x == 0.f; // when on floor and not moving
-
-			if (GetOwner()->m_DeepFreeze)
-				Dismount();
-		}
+		HandleSeats();
 
 		FlingTeesInPropellersPath();
 		ApplyAcceleration();
-		SpinPropellers();
+		HandlePropellers();
 
 		DamageInWall(); // just in case
 		DamageInFreeze();
 
-		UpdateHearts();
+		UpdateHeartsIndicator();
 		RegenerateHelicopter();
 		UpdateVisualDamage();
 
@@ -368,31 +443,41 @@ void CHelicopter::Tick()
 	HandleExplosions();
 
 	m_PrevPos = m_Pos;
-	GetFullPropellerPositions(m_LastTopPropellerA, m_LastTopPropellerB);
+	m_pModel->UpdateLastPropellerPositions();
 }
 
-void CHelicopter::OnInput(CNetObj_PlayerInput *pNewInput)
+void CHelicopter::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController)
 {
-	// Movement controls
-	if (!GetOwner() || GetOwner()->m_FreezeTime)
-	{
-		m_Accel = vec2(0.f, 0.f);
+	if (!pController)
 		return;
+
+	bool isDriver = (pController->m_HelicopterSeat == 0);
+	bool isGunner = (pController->m_HelicopterSeat == 1 || m_NumSeats == 1);
+
+	// Movement controls
+	if (isDriver)
+	{
+		if (pController->m_FreezeTime)
+		{
+			m_Accel = vec2(0.f, 0.f);
+		}
+		else
+		{
+			m_InputDirection = pNewInput->m_Direction;
+			m_Accel.x = (float)pNewInput->m_Direction;
+
+			bool Rise = pNewInput->m_Jump;
+			bool Sink = pNewInput->m_Hook;
+			if (Rise == Sink)
+				m_Accel.y = 0.f;
+			else
+				m_Accel.y = Rise ? -1 : 1;
+		}
 	}
 
-	m_InputDirection = pNewInput->m_Direction;
-	m_Accel.x = (float)pNewInput->m_Direction;
-
-	bool Rise = pNewInput->m_Jump;
-	bool Sink = pNewInput->m_Hook;
-	if (Rise == Sink)
-		m_Accel.y = 0.f;
-	else
-		m_Accel.y = Rise ? -1 : 1;
-
 	// Weapon controls
-	if (m_pTurret)
-		m_pTurret->OnInput(pNewInput);
+	if (isGunner && m_pTurret)
+		m_pTurret->OnInput(pNewInput, pController);
 }
 
 void CHelicopter::ApplyAcceleration()
@@ -400,16 +485,23 @@ void CHelicopter::ApplyAcceleration()
 	if (!m_EngineOn)
 		m_Accel = vec2(0.f, 0.f);
 
-	if (GetOwner())
-	{ // Hook acceleration
-		for (int Hooker : GetOwner()->Core()->m_AttachedPlayers)
+	for (int i = 0; i < m_NumSeats; i++)
+	{
+		int passengerCID = m_aPassengers[i];
+		if (passengerCID == -1)
+			continue;
+
+		CCharacter *pPassenger = GameServer()->GetPlayerChar(passengerCID);
+
+		// Hook acceleration applied to vehicle
+		for (int HookerCID : pPassenger->Core()->m_AttachedPlayers)
 		{
-			CCharacter* pChr = GameServer()->GetPlayerChar(Hooker);
+			CCharacter *pChr = GameServer()->GetPlayerChar(HookerCID);
 			if (!pChr)
 				continue;
 
-			float Distance = distance(pChr->GetPos(), m_Pos);
-			vec2 Dir = normalize(pChr->GetPos() - m_Pos);
+			float Distance = distance(pChr->GetPos(), pPassenger->GetPos());
+			vec2 Dir = normalize(pChr->GetPos() - pPassenger->GetPos());
 
 			if (Distance > GetProximityRadius() + CCharacterCore::PHYS_SIZE)
 			{
@@ -425,15 +517,14 @@ void CHelicopter::ApplyAcceleration()
 	}
 
 	float strafeFactor = (m_Flipped == (m_Vel.x > 0.f)) ? 0.4f : 1.f; // Accelerate slower when moving backwards
-	m_Vel.x += m_Accel.x * 0.6f * strafeFactor;
-	m_Vel.y += m_Accel.y * 0.75f;
+	m_Vel.x += m_BaseAccel.x * m_Accel.x * strafeFactor;
+	m_Vel.y += m_BaseAccel.y * m_Accel.y;
 	m_Vel.y *= 0.95f;
 
 	// Prevent flipping when not going the opposite direction OR when shooting the opposite direction
 	if (((m_InputDirection == -1 && !m_Flipped && m_Vel.x < 0.f) ||
-		(m_InputDirection == 1 && m_Flipped && m_Vel.x > 0.f)) &&
-		(!m_pTurret || !m_pTurret->m_Shooting ||
-			(m_Flipped != (m_pTurret->m_AimPosition.x < 0.f))))
+			(m_InputDirection == 1 && m_Flipped && m_Vel.x > 0.f)) &&
+		(!m_pTurret || !m_pTurret->m_Shooting || (m_Flipped != (m_pTurret->m_TargetPosition.x < 0))))
 		Flip();
 
 	SetAngle(m_Vel.x);
@@ -441,45 +532,63 @@ void CHelicopter::ApplyAcceleration()
 
 void CHelicopter::FlingTeesInPropellersPath()
 {
-	if (!m_EngineOn || !GetOwner()) // Eh i th
+	// be careful teleporting helicopter, update last propeller data
+	if (!m_EngineOn || !GetDriver())
 		return;
 
-	CCharacter *aPossibleCollisions[10];
-	int numFound = GameWorld()->FindEntities(m_Pos, m_TopPropellerRadius + 200.f, (CEntity **)aPossibleCollisions, 10, CGameWorld::ENTTYPE_CHARACTER, m_DDTeam);
-	if (!numFound)
-		return;
-
-	for (int i = 0; i < numFound; i++)
+	SPropeller *aPropellers = m_pModel->Propellers();
+	for (int j = 0; j < m_pModel->m_NumPropellers; j++)
 	{
-		CCharacter *pChar = aPossibleCollisions[i];
-		if (pChar == GetOwner())
-			continue;
+		CCharacter *aPossibleCollisions[10];
+		int numFound = GameWorld()->FindEntities(m_Pos + aPropellers[j].GetCenter(),
+		                                         aPropellers[j].m_Radius + 200.f,
+		                                         (CEntity **)aPossibleCollisions, 10, CGameWorld::ENTTYPE_CHARACTER, m_DDTeam);
+		if (!numFound)
+			return;
 
-		int cID = pChar->GetPlayer()->GetCID();
-		if (Server()->Tick() - m_aFlungCharacters[cID] <= 10)
-			continue;
-
-		vec2 propellerPosA, propellerPosB;
-		GetFullPropellerPositions(propellerPosA, propellerPosB);
-		bool collisionDetected = MovingCircleHitsMovingSegment_Analytical(
-			pChar->m_PrevPos - m_Pos, pChar->GetPos() - m_Pos,
-			pChar->GetProximityRadius(),
-			m_LastTopPropellerA, propellerPosA,
-			m_LastTopPropellerB, propellerPosB);
-		if (collisionDetected)
+		for (int i = 0; i < numFound; i++)
 		{
-			m_aFlungCharacters[cID] = Server()->Tick();
-			FlingTee(pChar);
+			CCharacter *pChar = aPossibleCollisions[i];
+			if (pChar->m_pHelicopter == this)
+				continue;
+
+			int cID = pChar->GetPlayer()->GetCID();
+			if (Server()->Tick() - m_aFlungCharacters[cID] <= 10)
+				continue;
+
+			vec2 PosA, PosB;
+			aPropellers[j].GetFullPropellerPositions(PosA, PosB);
+			bool collisionDetected = MovingCircleHitsMovingSegment_Analytical(
+				pChar->m_PrevPos - m_Pos, pChar->GetPos() - m_Pos,
+				pChar->GetProximityRadius(),
+				aPropellers[j].m_LastA, PosA,
+				aPropellers[j].m_LastB, PosB);
+			if (collisionDetected)
+			{
+				m_aFlungCharacters[cID] = Server()->Tick();
+				FlingTee(pChar);
+			}
+		}
+	}
+}
+
+void CHelicopter::InitModel()
+{
+	switch (m_HelicopterType)
+	{
+		case HELICOPTER_DEFAULT:
+		{
+			m_pModel = new SHelicopterModel(this);
+			break;
+		}
+		case HELICOPTER_APACHE:
+		{
+			m_pModel = new SHelicopterApacheModel(this);
+			break;
 		}
 	}
 
-}
-
-void CHelicopter::GetFullPropellerPositions(vec2& outPosA, vec2& outPosB)
-{
-	vec2 bladeSpan = normalize(TopPropeller()[0].m_To - TopPropeller()[0].m_From) * m_TopPropellerRadius;
-	outPosA = TopPropeller()[0].m_To + bladeSpan;
-	outPosB = TopPropeller()[1].m_To - bladeSpan;
+	m_pModel->PostConstruction();
 }
 
 void CHelicopter::HandleExplosions()
@@ -493,16 +602,16 @@ void CHelicopter::HandleExplosions()
 	{
 		vec2 nearbyPos = m_Pos + vec2((float)(rand() % Diameter - Radius), (float)(rand() % Diameter - Radius));
 		GameServer()->CreateExplosion(nearbyPos,
-									  m_Owner,
-									  WEAPON_GRENADE,
-									  m_Owner == -1,
-									  m_DDTeam, m_TeamMask);
+		                              m_Owner,
+		                              WEAPON_GRENADE,
+		                              m_Owner == -1,
+		                              m_DDTeam, m_TeamMask);
 		GameServer()->CreateSound(nearbyPos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 
 	// F-DDrace
-//    if (pTargetChr)
-//        pTargetChr->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
+	//    if (pTargetChr)
+	//        pTargetChr->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
 
 	if (m_ExplosionsLeft == 0)
 		Reset();
@@ -510,24 +619,27 @@ void CHelicopter::HandleExplosions()
 	m_ExplosionsLeft--;
 }
 
-void CHelicopter::InitHearts()
-{
-	for (int i = 0; i < NUM_HEARTS; i++)
-		m_aHearts[i] = SHeart(this, Server()->SnapNewID(), vec2(0.f, 0.f));
+// void CHelicopter::InitHearts()
+// {
+// 	for (int i = 0; i < m_NumHearts; i++)
+// 		m_aHearts[i] = SHeart(this, Server()->SnapNewID(), vec2(0.f, 0.f));
+//
+// 	UpdateHearts();
+// }
 
-	UpdateHearts();
-}
-
-void CHelicopter::UpdateHearts()
+void CHelicopter::UpdateHeartsIndicator()
 {
-	float HealthPercentage = m_Health / m_MaxHealth; // Health 0.0 to 1.0
-	float HeartsPrecise = NUM_HEARTS * HealthPercentage; // Hearts like 3.7
-	int HeartsFull = floor(HeartsPrecise); // Hearts like 3
+	if (m_pModel == nullptr)
+		return;
+
+	float HealthPercentage = m_Health / m_MaxHealth; // Health 0..1
+	float HeartsPrecise = (float)m_NumHearts * HealthPercentage; // Hearts like 3.7
+	int HeartsFull = floor(HeartsPrecise); // Hearts like 3.0
 	int ShowNumHearts = ceil(HeartsPrecise); // How many are shown, including fraction heart (3 + 0.7 = 4)
 
-	float CurrentHeart = HeartsPrecise - (float)HeartsFull; // Last heart 0.0 to 1.0, example 0.7
+	float CurrentHeart = HeartsPrecise - (float)HeartsFull; // Last heart 0..1, example 0.7
 	bool FlashingHalfHeart = CurrentHeart > 0.0f && CurrentHeart <= 0.5f; // Flash or not, if last heart below half
-	for (int i = 0; i < NUM_HEARTS; i++)
+	for (int i = 0; i < m_NumHearts; i++)
 	{
 		if (i < ShowNumHearts - FlashingHalfHeart) //
 			m_aHearts[i].m_Enabled = true;
@@ -538,7 +650,7 @@ void CHelicopter::UpdateHearts()
 	}
 
 	float Gap = 40.f;
-	float HeartsY = m_BuildTop - 30.f;
+	float HeartsY = m_pModel->m_BoundTop - 30.f;
 	float HeartsX = -(float)(ShowNumHearts - 1) / 2.f * Gap;
 	for (int i = 0; i < ShowNumHearts; i++)
 	{
@@ -553,16 +665,16 @@ void CHelicopter::RegenerateHelicopter()
 	if (!IsRegenerating())
 		return;
 
-	m_Health += 0.02f;
-	if (m_Health > m_MaxHealth)
-		m_Health = m_MaxHealth;
+	m_Health = min(m_Health + 0.01f, m_MaxHealth);
 }
 
 void CHelicopter::UpdateVisualDamage()
 {
 	float HealthPercentage = 1.f - m_Health / m_MaxHealth;
-	for (int i = 0; i < NUM_BONES; i++)
-		m_aBones[i].m_Thickness = m_aBones[i].m_InitThickness - (int)(sinf(Server()->Tick() / 4 + i) * HealthPercentage * (float)m_aBones[i].m_InitThickness);
+
+	SBone *aBones = m_pModel->Bones();
+	for (int i = 0; i < m_pModel->m_NumBones; i++)
+		aBones[i].m_Thickness = aBones[i].m_InitThickness - (int)(sinf(Server()->Tick() / 4 + i) * HealthPercentage * (float)aBones[i].m_InitThickness);
 }
 
 void CHelicopter::DamageInFreeze()
@@ -590,16 +702,54 @@ void CHelicopter::DamageInWall()
 
 void CHelicopter::SendBroadcastIndicator()
 {
-	if (!GetOwner() || (Server()->Tick() - m_BroadcastingTick) % Server()->TickSpeed() != 0)
+	if (m_NumPassengers == 0 || (Server()->Tick() - m_BroadcastingTick) % Server()->TickSpeed() != 0)
 		return;
 
 	char aMsg[128];
 	const char *RegenerationText = IsRegenerating() ? " +1regen" : "";
-	str_format(aMsg, sizeof(aMsg), "> Helicopter <\nHealth [%d]%s", (int)m_Health, RegenerationText);
-	GetOwner()->SendBroadcastHud(aMsg);
+	str_format(aMsg, sizeof(aMsg), "> %s <\nHealth [%d]%s\nSeats %i/%i", m_pName, (int)m_Health, RegenerationText, m_NumPassengers, m_NumSeats);
+
+	for (int i = 0; i < m_NumSeats; i++)
+	{
+		int passengerCID = m_aPassengers[i];
+		if (passengerCID == -1)
+			continue;
+
+		CCharacter *pPassenger = GameServer()->GetPlayerChar(passengerCID);
+		pPassenger->SendBroadcastHud(aMsg);
+	}
 }
 
-void CHelicopter::SpinPropellers()
+void CHelicopter::HandleSeats()
+{
+	for (int i = 0; i < m_NumSeats; i++)
+	{
+		int passengerCID = m_aPassengers[i];
+		if (passengerCID == -1)
+			continue;
+
+		CCharacter *pCharacter = GameServer()->GetPlayerChar(passengerCID);
+		bool isDriver = (i == 0);
+
+		vec2 relativeSeatPos = m_aSeats[i];
+		relativeSeatPos.x *= (m_Flipped ? -1.0f : 1.0f);
+
+		vec2 seatPos = m_Pos + relativeSeatPos;
+		pCharacter->ForceSetPos(seatPos);
+		pCharacter->Core()->m_Vel = vec2(0, 0);
+
+		if (pCharacter->m_DeepFreeze)
+			Dismount(passengerCID);
+
+		if (isDriver)
+		{
+			m_Gravity = (pCharacter->m_FreezeTime > 0);
+			m_GroundVel = (pCharacter->m_FreezeTime || m_Accel.x == 0.f); // forgot what is ground vel
+		}
+	}
+}
+
+void CHelicopter::HandlePropellers()
 {
 	if (!m_EngineOn || Server()->Tick() % 2 != 0)
 		return;
@@ -611,23 +761,12 @@ void CHelicopter::SpinPropellers()
 		return;
 	}
 
-	for (int i = 0; i < NUM_BONES_PROPELLERS_BACK; i++)
-		BackPropeller()[i].m_From = rotate_around_point(BackPropeller()[i].m_From, BackPropeller()[i].m_To, 50.f / pi);
-
-	float Len = m_TopPropellerRadius;
-	float curLen = clamp((float)sin(Server()->Tick() / 5) * Len, -Len, Len);
-	vec2 Diff = TopPropeller()[0].m_From - TopPropeller()[0].m_To;
-	Diff = normalize(Diff) * curLen;
-	for (int i = 0; i < NUM_BONES_PROPELLERS_TOP; i++)
-	{
-		TopPropeller()[i].m_From = TopPropeller()[i].m_To + Diff;
-		Diff *= -1;
-	}
+	m_pModel->SpinPropellers(); //
 }
 
 bool CHelicopter::Mount(int ClientID)
 {
-	if (m_Owner != -1 || IsExploding() || IsBuilding())
+	if (ClientID < 0 || ClientID > MAX_CLIENTS || m_NumPassengers >= m_NumSeats || IsExploding() || IsBuilding()) // used to check m_Owner != -1 (aka driver)
 		return false;
 
 	// scale specific mount condition
@@ -635,66 +774,98 @@ bool CHelicopter::Mount(int ClientID)
 	if (distance(pCharacter->GetPos(), m_Pos) > pCharacter->GetProximityRadius() + GetProximityRadius())
 		return false;
 
-	m_ShowHeartsUntil = Server()->Tick() + Server()->TickSpeed() * 3;
-	m_EngineOn = true;
-	m_Gravity = false;
-	m_GroundVel = false;
-	m_Owner = ClientID;
-	m_LastKnownOwner = ClientID;
-	if (GetOwner())
+	bool isDriver = false;
+	for (int i = 0; i < m_NumSeats; i++)
 	{
-		GetOwner()->m_pHelicopter = this;
-		GetOwner()->SetWeapon(-1);
-		GameServer()->SendTuningParams(m_Owner, GetOwner()->m_TuneZone);
+		// Slot is taken
+		if (m_aPassengers[i] != -1)
+			continue;
 
-		m_BroadcastingTick = Server()->Tick() + 1; // Start updating broadcast next tick
+		isDriver = (i == 0);
+		m_aPassengers[i] = ClientID;
+		pCharacter->m_HelicopterSeat = i;
+		m_NumPassengers++;
+		break;
 	}
+
+	if (isDriver)
+	{
+		m_Owner = ClientID;
+		m_LastKnownOwner = ClientID;
+		m_EngineOn = true;
+		m_Gravity = false;
+		m_GroundVel = false;
+	}
+
+	m_ShowHeartsUntil = Server()->Tick() + Server()->TickSpeed() * 3;
+	pCharacter->m_pHelicopter = this;
+	pCharacter->SetWeapon(-1);
+	GameServer()->SendTuningParams(m_Owner, pCharacter->m_TuneZone);
+	m_BroadcastingTick = Server()->Tick() + 1; // Start updating broadcast next tick
+
 	return true;
 }
 
-void CHelicopter::Dismount()
+void CHelicopter::Dismount(int ClientID)
 {
-	if (m_Owner == -1)
-		return;
-
-	m_Gravity = true;
-	m_GroundVel = true;
-	m_Accel.y = 0;
-	if (GetOwner())
+	for (int i = 0; i < m_NumSeats; i++)
 	{
-		GetOwner()->m_pHelicopter = nullptr;
-		GetOwner()->SetWeapon(GetOwner()->GetLastWeapon());
-		GameServer()->SendTuningParams(m_Owner, GetOwner()->m_TuneZone);
-		GetOwner()->SendBroadcastHud(""); // ?
+		int passengerCID = m_aPassengers[i];
+		if (passengerCID == -1)
+			continue;
+
+		bool isDriver = (i == 0);
+		if (ClientID == -1 || passengerCID == ClientID)
+		{
+			CCharacter *pCharacter = GameServer()->GetPlayerChar(passengerCID);
+			if (isDriver)
+			{
+				m_Gravity = true;
+				m_GroundVel = true;
+				m_Accel.y = 0;
+				m_Owner = -1;
+			}
+
+			if (pCharacter)
+			{
+				pCharacter->m_pHelicopter = nullptr;
+				pCharacter->SetWeapon(pCharacter->GetLastWeapon());
+				GameServer()->SendTuningParams(m_Owner, pCharacter->m_TuneZone);
+				pCharacter->SendBroadcastHud(""); // ?
+			}
+
+			m_aPassengers[i] = -1;
+			m_NumPassengers--;
+
+			// Dismount only one player
+			if (ClientID != -1)
+				break;
+		}
 	}
-	m_Owner = -1;
 }
 
 void CHelicopter::Flip()
 {
 	m_Flipped = !m_Flipped;
-	m_Angle *= -1.f;
-	for (int i = 0; i < NUM_BONES; i++)
-		m_aBones[i].Flip();
+	// m_Angle *= -1.f;
+	// m_pModel->Flip();
 
-	if (m_pTurret)
-		m_pTurret->SetFlipped(m_Flipped);
+	// if (m_pTurret)
+	// 	m_pTurret->SetFlipped(m_Flipped);
 }
 
-void CHelicopter::Rotate(float Angle)
+void CHelicopter::SetRotation(float NewRotation)
 {
-	m_Angle += Angle;
-	for (int i = 0; i < NUM_BONES; i++)
-		m_aBones[i].Rotate(Angle);
+	m_Angle = NewRotation;
+	m_pModel->SetRotation(NewRotation * (m_Flipped ? -1.0f : 1.0f));
 
 	if (m_pTurret)
-		m_pTurret->Rotate(Angle);
+		m_pTurret->SetRotation(NewRotation, m_pTurret->GetTurretRotation());
 }
 
 void CHelicopter::SetAngle(float Angle)
 {
-	Rotate(-m_Angle);
-	Rotate(Angle);
+	SetRotation(Angle);
 }
 
 void CHelicopter::Snap(int SnappingClient)
@@ -705,6 +876,9 @@ void CHelicopter::Snap(int SnappingClient)
 	if (NetworkClipped(SnappingClient) || !CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
+	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
+	// auto tick = Server()->Tick();
+
 	if (IsBuilding())
 	{
 		for (int i = 0; i < NUM_BUILD_IDS; i++)
@@ -713,7 +887,7 @@ void CHelicopter::Snap(int SnappingClient)
 			if (!pObj)
 				continue;
 
-			pObj->m_X = round_to_int(m_Pos.x + m_BuildLeft + rand() % (int)m_BuildTotalWidth);
+			pObj->m_X = round_to_int(m_Pos.x + m_pModel->m_BoundLeft + rand() % (int)m_pModel->m_TotalWidth);
 			pObj->m_Y = round_to_int(m_Pos.y + m_BuildHeight);
 			pObj->m_VelX = 0;
 			pObj->m_VelY = 0;
@@ -721,110 +895,33 @@ void CHelicopter::Snap(int SnappingClient)
 			pObj->m_Type = WEAPON_HAMMER;
 		}
 	}
-	else if ((m_Owner == -1 || m_Owner == SnappingClient) && // Show hearts when no driver or only to driver
+	else if ((m_NumPassengers == 0 || (pChar && pChar->m_pHelicopter == this)) && // Show hearts when no passengers or only to passengers
 		((m_ShowHeartsUntil && m_ShowHeartsUntil > Server()->Tick()) || // Show until time specified (on mount, damage, etc.)
 			m_Health != m_MaxHealth) && // Show while not full health
 		(!m_LastDamage || ((m_LastDamage && (m_LastDamage + Server()->TickSpeed() / 2 <= Server()->Tick())) || // If been damaged too long ago, show normally
 			(m_LastDamage + Server()->TickSpeed() / 2 > Server()->Tick() && (Server()->Tick() / 4) % 2 == 0)))) // If been damaged recently, show flashing
 	{
 		// Draw hearts
-		for (int i = 0; i < NUM_HEARTS; i++)
+		for (int i = 0; i < m_NumHearts; i++)
 			m_aHearts[i].Snap(SnappingClient);
 	}
 
-	// Draw body
-	for (SBone& Bone : m_aBones)
-		Bone.Snap(SnappingClient);
-
-	// Draw back particles
-	if (GetOwner() || !IsGrounded())
-		for (STrail& m_aTrail : m_aTrails)
-			m_aTrail.Snap(SnappingClient);
+	// Draw helicopter
+	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped, (int)((1.0f - (float)m_Health / (float)m_MaxHealth) * 10));
 
 	// Draw guns
 	if (m_pTurret)
-		m_pTurret->Snap(SnappingClient);
-}
-
-void CHelicopter::InitBuild()
-{ // Hearts uses the values from this function
-	bool NotFirst = false;
-	float Lowest = 0.f;
-	float Highest = 0.f;
-	float Leftest = 0.f;
-	float Rightest = 0.f;
-	for (int i = 0; i < NUM_BONES; i++)
-	{ // Flipped comparison signs, lowest means higher Y
-		// y
-		if (!NotFirst || m_aBones[i].m_From.y > Lowest)
-		{
-			NotFirst = true;
-			Lowest = m_aBones[i].m_From.y;
-		}
-		if (!NotFirst || m_aBones[i].m_To.y > Lowest)
-		{
-			NotFirst = true;
-			Lowest = m_aBones[i].m_To.y;
-		}
-
-		if (!NotFirst || m_aBones[i].m_From.y < Highest)
-		{
-			NotFirst = true;
-			Highest = m_aBones[i].m_From.y;
-		}
-		if (!NotFirst || m_aBones[i].m_To.y < Highest)
-		{
-			NotFirst = true;
-			Highest = m_aBones[i].m_To.y;
-		}
-		// x
-		if (!NotFirst || m_aBones[i].m_From.x < Leftest)
-		{
-			NotFirst = true;
-			Leftest = m_aBones[i].m_From.x;
-		}
-		if (!NotFirst || m_aBones[i].m_To.x < Leftest)
-		{
-			NotFirst = true;
-			Leftest = m_aBones[i].m_To.x;
-		}
-
-		if (!NotFirst || m_aBones[i].m_From.x > Rightest)
-		{
-			NotFirst = true;
-			Rightest = m_aBones[i].m_From.x;
-		}
-		if (!NotFirst || m_aBones[i].m_To.x > Rightest)
-		{
-			NotFirst = true;
-			Rightest = m_aBones[i].m_To.x;
-		}
-	}
-
-	m_BuildTop = Highest;
-	m_BuildBottom = Lowest;
-	m_BuildLeft = Leftest;
-	m_BuildRight = Rightest;
-
-	m_BuildTotalHeight = Lowest - Highest;
-	m_BuildTotalWidth = Rightest - Leftest;
-
-	m_BuildHeight = Lowest; // Build animation y
+		m_pTurret->Snap(SnappingClient, m_Flipped);
 }
 
 void CHelicopter::InitUnbuilt()
-{ // Only use in constructor
+{
+	// Only use in constructor
 	for (int i = 0; i < NUM_BUILD_IDS; i++)
 		m_aBuildIDs[i] = Server()->SnapNewID();
 
-	for (int i = 0; i < NUM_BONES; i++)
-	{
-		m_aBones[i].m_Enabled = false;
-		m_aBones[i].m_Thickness = 0;
-		m_aBones[i].m_Color = LASERTYPE_FREEZE;
-	}
-	for (int i = 0; i < NUM_TRAILS; i++)
-		m_aTrails[i].m_Enabled = false;
+	m_BuildHeight = m_pModel->m_BoundBottom;
+	m_pModel->InitBuildAnimation();
 }
 
 void CHelicopter::BuildHelicopter()
@@ -833,36 +930,37 @@ void CHelicopter::BuildHelicopter()
 		return;
 
 	m_BuildHeight -= 0.5f;
-	for (int i = 0; i < NUM_BONES; i++)
+	SBone *aBones = m_pModel->Bones();
+	for (int i = 0; i < m_pModel->m_NumBones; i++)
 	{
-		const SBone& Bone = m_aBones[i];
+		const SBone& Bone = aBones[i];
 		vec2 From = Bone.m_InitFrom;
 		vec2 To = Bone.m_InitTo;
 
 		bool FromUnder = From.y > m_BuildHeight;
 		bool ToUnder = To.y > m_BuildHeight;
 
-		m_aBones[i].m_Enabled = FromUnder || ToUnder;
+		aBones[i].m_Enabled = FromUnder || ToUnder;
 
-		if (m_aBones[i].m_Enabled)
+		if (aBones[i].m_Enabled)
 		{
 			float FullLength = distance(Bone.m_InitFrom, Bone.m_InitTo);
-			float VisibleLength = distance(m_aBones[i].m_From, m_aBones[i].m_To);
+			float VisibleLength = distance(aBones[i].m_From, aBones[i].m_To);
 			float Fraction = FullLength > 0.0f ? clamp(VisibleLength / FullLength, 0.0f, 1.0f) : 0.0f;
-			m_aBones[i].m_Thickness = round_to_int(-3 + Fraction * ((float)Bone.m_InitThickness + 3.f));
+			aBones[i].m_Thickness = round_to_int(-3 + Fraction * ((float)Bone.m_InitThickness + 3.f));
 
 			if (!FromUnder && !ToUnder)
 			{
 				// Both points are above the build height — fully hidden
-				m_aBones[i].m_Enabled = false;
+				aBones[i].m_Enabled = false;
 			}
 			else if (FromUnder && ToUnder)
 			{
 				// Both points are below — keep the full original line
-				m_aBones[i].m_From = From;
-				m_aBones[i].m_To = To;
+				aBones[i].m_From = From;
+				aBones[i].m_To = To;
 			}
-			else if (FromUnder && !ToUnder)
+			else if (FromUnder) // && !ToUnder)
 			{
 				// From is under, To is above — keep From, clip To
 				float t = (m_BuildHeight - From.y) / (To.y - From.y);
@@ -870,10 +968,10 @@ void CHelicopter::BuildHelicopter()
 					From.x + (To.x - From.x) * t,
 					m_BuildHeight
 				};
-				m_aBones[i].m_From = From;
-				m_aBones[i].m_To = Intersect;
+				aBones[i].m_From = From;
+				aBones[i].m_To = Intersect;
 			}
-			else if (!FromUnder && ToUnder)
+			else // if (!FromUnder && ToUnder)
 			{
 				// To is under, From is above — keep To, clip From
 				float t = (m_BuildHeight - To.y) / (From.y - To.y);
@@ -881,17 +979,19 @@ void CHelicopter::BuildHelicopter()
 					To.x + (From.x - To.x) * t,
 					m_BuildHeight
 				};
-				m_aBones[i].m_From = Intersect;
-				m_aBones[i].m_To = To;
+				aBones[i].m_From = Intersect;
+				aBones[i].m_To = To;
 			}
 		}
 	}
 
-	for (int i = 0; i < NUM_TRAILS; i++)
-		m_aTrails[i].m_Enabled = m_aTrails[i].m_pPos->y > m_BuildHeight;
+	STrail *aTrails = m_pModel->Trails();
+	for (int i = 0; i < m_pModel->m_NumTrails; i++)
+		aTrails[i].m_Enabled = aTrails[i].m_pPos->y > m_BuildHeight;
 
-	if (m_BuildHeight < m_BuildTop)
-	{ // Finished building, no more animation required
+	if (m_BuildHeight < m_pModel->m_BoundTop)
+	{
+		// Finished building, no more animation required
 		m_Build = false;
 		for (int i = 0; i < NUM_BUILD_IDS; i++)
 		{
@@ -899,80 +999,37 @@ void CHelicopter::BuildHelicopter()
 			m_aBuildIDs[i] = -1;
 		}
 
-		for (int i = 0; i < NUM_BONES; i++)
-			m_aBones[i].m_Color = m_aBones[i].m_InitColor;
+		for (int i = 0; i < m_pModel->m_NumBones; i++)
+			aBones[i].m_Color = aBones[i].m_InitColor;
 	}
 }
 
 void CHelicopter::SortBones()
-{ // meant for adding turret later, not specifically at initialization
-	int numBones = NUM_BONES;
-	if (m_pTurret)
-		numBones += m_pTurret->GetNumBones();
+{
+	// meant for adding turret later, not specifically at initialization
+	SBone *aBones = m_pModel->Bones();
+	int NumBonesModel = m_pModel->m_NumBones;
+
+	int NumBonesTotal = NumBonesModel + (m_pTurret ? m_pTurret->GetNumBones() : 0);
 
 	// Get current IDs
-	int *apIDs = new int[numBones];
-	for (int i = 0; i < NUM_BONES; i++)
-		apIDs[i] = m_aBones[i].m_ID;
+	int *apIDs = new int[NumBonesTotal];
+	for (int i = 0; i < NumBonesModel; i++)
+		apIDs[i] = aBones[i].m_ID;
 	if (m_pTurret)
 		for (int i = 0; i < m_pTurret->GetNumBones(); i++)
-			apIDs[NUM_BONES + i] = m_pTurret->Bones()[i].m_ID;
+			apIDs[NumBonesModel + i] = m_pTurret->Bones()[i].m_ID;
 
 	// Sort IDs
-	std::sort(apIDs, apIDs + numBones);
+	std::sort(apIDs, apIDs + NumBonesTotal);
 
 	// Update sorted IDs (low -> high | ascending)
-	for (int i = 0; i < NUM_BONES; i++)
-		m_aBones[i].m_ID = apIDs[i];
+	for (int i = 0; i < NumBonesModel; i++)
+		aBones[i].m_ID = apIDs[i];
 	if (m_pTurret)
 		for (int i = 0; i < m_pTurret->GetNumBones(); i++)
-			m_pTurret->Bones()[i].m_ID = apIDs[NUM_BONES + i];
+			m_pTurret->Bones()[i].m_ID = apIDs[NumBonesModel + i];
 	delete[] apIDs;
-}
-
-void CHelicopter::InitBody()
-{
-	SBone aBones[NUM_BONES_BODY] = {
-		// Base
-		SBone(this, Server()->SnapNewID(), 70, 45, 50, 60, 4),
-		SBone(this, Server()->SnapNewID(), -55, 60, 50, 60, 4),
-		SBone(this, Server()->SnapNewID(), -25, 40, -30, 60, 3),
-		SBone(this, Server()->SnapNewID(), 25, 40, 30, 60, 3),
-		SBone(this, Server()->SnapNewID(), 0, -40, 0, -60, 4),
-		// Top propeller rotor
-		SBone(this, Server()->SnapNewID(), 35, 40, -35, 40, 3),
-		// Body
-		SBone(this, Server()->SnapNewID(), 60, 10, 35, 40, 4),
-		SBone(this, Server()->SnapNewID(), 25, -40, 60, 10, 4),
-		SBone(this, Server()->SnapNewID(), -35, -40, 25, -40, 4),
-		SBone(this, Server()->SnapNewID(), -45, 0, -35, -40, 4),
-		SBone(this, Server()->SnapNewID(), -100, 0, -45, 0, 4),
-		// Tail
-		SBone(this, Server()->SnapNewID(), -120, -30, -100, 0, 4),
-		SBone(this, Server()->SnapNewID(), -105, 20, -120, -30, 4),
-		SBone(this, Server()->SnapNewID(), -35, 40, -105, 20, 4),
-	};
-	mem_copy(Body(), aBones, sizeof(SBone) * NUM_BONES_BODY);
-}
-
-void CHelicopter::InitPropellers()
-{
-	float Radius = m_TopPropellerRadius;
-	for (int i = 0; i < NUM_BONES_PROPELLERS_TOP; i++)
-	{
-		TopPropeller()[i] = SBone(this, Server()->SnapNewID(), vec2(Radius, -60.f), vec2(0, -60.f), 3);
-		TopPropeller()[i].m_InitColor = LASERTYPE_DOOR;
-		TopPropeller()[i].m_Color = LASERTYPE_DOOR;
-		Radius *= -1;
-	}
-
-	Radius = m_BackPropellerRadius;
-	for (int i = 0; i < NUM_BONES_PROPELLERS_BACK; i++)
-	{
-		BackPropeller()[i] = SBone(this, Server()->SnapNewID(), vec2(-110.f + Radius, -10.f), vec2(-110.f, -10.f), 3);
-		Radius *= -1;
-		m_aTrails[i] = STrail(this, Server()->SnapNewID(), &BackPropeller()[i].m_From);
-	}
 }
 
 void CHelicopter::ResetAndTurnOff()
@@ -980,12 +1037,5 @@ void CHelicopter::ResetAndTurnOff()
 	// Dismounted & grounded
 	m_EngineOn = false;
 
-	// Reset propellers to full length
-	float Radius = m_TopPropellerRadius;
-	vec2 Direction = normalize(TopPropeller()[0].m_From - TopPropeller()[0].m_To);
-	for (int i = 0; i < NUM_BONES_PROPELLERS_TOP; i++)
-	{
-		TopPropeller()[i].m_From = TopPropeller()[i].m_To + Direction * Radius;
-		Radius *= -1;
-	}
+	m_pModel->ResetPropellers(); // Thop
 }

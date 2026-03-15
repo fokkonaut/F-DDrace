@@ -3,6 +3,7 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_H
 
+#include "helicopter_models.h"
 #include "helicopter_turret.h"
 #include "game/server/entities/advanced_entity.h"
 
@@ -11,39 +12,60 @@
 #define HELICOPTER_MAX_SCALE 5.0f
 #define HELICOPTER_PHYSSIZE (vec2(80, 128) * HELICOPTER_DEFAULT_SCALE)
 
+enum
+{
+	HELICOPTER_DEFAULT,
+	HELICOPTER_APACHE,
+	NUM_HELICOPTER_TYPES,
+
+	NUM_MAX_SEATS = 2,
+};
+
+struct SHelicopterMeta
+{
+	const char *m_pName;
+	float m_BaseHealth;
+	int m_NumHeartsIndicator;
+	vec2 m_BaseAccel;
+
+	vec2 m_aSeats[NUM_MAX_SEATS];
+	int m_NumSeats;
+};
+extern SHelicopterMeta aHelicopterMetadata[NUM_HELICOPTER_TYPES];
+
 class CHelicopter : public CAdvancedEntity
 {
 private:
 	enum
 	{
-		NUM_BONES_BODY = 14,
-		NUM_BONES_PROPELLERS_TOP = 2,
-		NUM_BONES_PROPELLERS_BACK = 2,
-		NUM_BONES_PROPELLERS = NUM_BONES_PROPELLERS_TOP + NUM_BONES_PROPELLERS_BACK,
-		NUM_BONES = NUM_BONES_BODY + NUM_BONES_PROPELLERS,
-		NUM_TRAILS = 2,
-		NUM_HEARTS = 4,
-
+		MAX_HEARTS = 6,
 		NUM_BUILD_IDS = 3, // sparkles/particles
-		NUM_HELICOPTER_IDS = NUM_BONES + NUM_TRAILS + NUM_HEARTS + NUM_BUILD_IDS,
 	};
+
+	int m_HelicopterType;
+	int m_aPassengers[NUM_MAX_SEATS];
+	int m_NumPassengers;
 
 	int m_InputDirection;
 	float m_MaxHealth;
 	float m_Health;
+	int m_NumHearts;
+	vec2 m_BaseAccel;
+	const char *m_pName;
+	vec2 m_aSeats[NUM_MAX_SEATS];
+	int m_NumSeats;
 	bool m_EngineOn;
+	void HandleSeats();
 
 	float m_Scale;
-	void InitBody();
-	void InitPropellers();
-	void SpinPropellers();
+	void HandlePropellers();
 	void ResetAndTurnOff();
 
 	bool m_Flipped;
 	void Flip();
 
 	float m_Angle;
-	void Rotate(float Angle);
+	void SetRotation(float NewRotation);
 	void SetAngle(float Angle);
 
 	void ApplyAcceleration();
@@ -52,13 +74,9 @@ private:
 	int m_aFlungCharacters[MAX_CLIENTS];
 	void FlingTeesInPropellersPath();
 
-	float m_BackPropellerRadius;
-	float m_TopPropellerRadius;
-	vec2 m_LastTopPropellerA, m_LastTopPropellerB;
-	void GetFullPropellerPositions(vec2& outPosA, vec2& outPosB);
+	IHelicopterModel *m_pModel;
+	void InitModel();
 
-	STrail m_aTrails[NUM_TRAILS];
-	SBone m_aBones[NUM_BONES];
 	CVehicleTurret *m_pTurret;
 
 	// Tile respawn
@@ -71,13 +89,13 @@ private:
 	int m_ExplosionsLeft;
 	void HandleExplosions();
 
-	SHeart m_aHearts[NUM_HEARTS];
+	SHeart m_aHearts[MAX_HEARTS];
 	int64 m_ShowHeartsUntil;
 	int64 m_LastDamage;
 	int64 m_LastEnvironmentalDamage;
 	int m_LastKnownOwner;
-	void InitHearts();
-	void UpdateHearts();
+	// void InitHearts();
+	void UpdateHeartsIndicator();
 	void RegenerateHelicopter();
 	void UpdateVisualDamage();
 	void DamageInFreeze();
@@ -89,49 +107,59 @@ private:
 	bool m_Build;
 	float m_BuildHeight;
 	int m_aBuildIDs[NUM_BUILD_IDS];
-	float m_BuildBottom, m_BuildTop, m_BuildLeft, m_BuildRight;
-	float m_BuildTotalHeight, m_BuildTotalWidth;
-	void InitBuild();
 	void InitUnbuilt();
 	void BuildHelicopter();
 
-	SBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	SBone *TopPropeller() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS_TOP
-	SBone *BackPropeller() { return &m_aBones[NUM_BONES_BODY + NUM_BONES_PROPELLERS_TOP]; } // size: NUM_BONES_PROPELLERS_BACK
 	void SortBones();
 
 public:
-	CHelicopter(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool Build = false, int Number = -1, int DelayTurretType = -1);
+	CHelicopter(
+		CGameWorld *pGameWorld,
+		int HelicopterType,
+		int Spawner,
+		int Team,
+		vec2 Pos,
+		float Scale = 1.f,
+		bool Build = false,
+		int Number = -1,
+		int DelayTurretType = -1
+	);
 	virtual ~CHelicopter();
 
 	// Sense
+	int GetHelicopterType() { return m_HelicopterType; }
 	float GetScale() { return m_Scale; }
 	bool IsFlipped() { return m_Flipped; }
 	float Angle() { return m_Angle; }
 	bool IsExploding() { return m_ExplosionsLeft > -1; }
 	bool IsBuilding() { return m_Build; }
 	bool IsRegenerating();
+	CCharacter *GetDriver();
+	CCharacter *GetGunner();
 
 	bool IsSpawning() { return m_SpawnTick > -1; }
 	bool PlacedByTile() { return m_Number >= 0 && m_DelayTurretType >= TURRETTYPE_NONE; }
 
 	// Manipulating
-	bool AttachTurret(CVehicleTurret *helicopterTurret);
+	void SetNumHeartsIndicator(int NumHearts);
+	void SetClassAtributes(int HelicopterType, bool SetFullHealth);
+	bool AttachTurret(CVehicleTurret *pTurret);
 	void DestroyTurret();
 	void FlingTee(CCharacter *pChar);
 	void ApplyScale(float HelicopterScale);
 	void Explode();
 	void TakeDamage(float Damage, vec2 HitPos, int FromID);
 	void ExplosionDamage(float Strength, vec2 Pos, int FromID);
+	void Heal(float Health);
 
-	// Ticking
+	// Ticking & Events
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void Reset() override;
 
 	bool Mount(int ClientID);
-	void Dismount();
-	void OnInput(CNetObj_PlayerInput *pNewInput);
+	void Dismount(int ClientID); // -1 for all
+	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
 };
 
 #endif // GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_H

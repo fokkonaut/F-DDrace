@@ -400,6 +400,7 @@ public:
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Ninja.m_ActivationDir = ActivationDir; };
 	void SetNinjaActivationTick(int ActivationTick) { m_Ninja.m_ActivationTick = ActivationTick; };
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Ninja.m_CurrentMoveTime = CurrentMoveTime; };
+	int GetNinjaCurrentMoveTime() { return m_Ninja.m_CurrentMoveTime; };
 	void SetAlive(bool Alive) { m_Alive = Alive; }
 
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
@@ -541,6 +542,7 @@ public:
 
 	// helicopter
 	CHelicopter *m_pHelicopter;
+	int m_HelicopterSeat;
 	bool TryMountHelicopter();
 
 	int GetCurrentTilePlotID(bool CheckDoor = false);
