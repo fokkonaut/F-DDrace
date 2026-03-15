@@ -751,7 +751,12 @@ void CGameWorld::Tick()
 				m_PoliceFarm.m_NumPoliceTilePlayers++;
 			}
 		}
-		m_PoliceFarm.m_MaxPoliceTilePlayers = Config()->m_SvPoliceFarmLimit ? clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16) : 0;
+
+		const int Limit = Config()->m_SvPoliceFarmLimit;
+		if (Limit == 0)
+			m_PoliceFarm.m_MaxPoliceTilePlayers = 0;
+		else
+			m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
 
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )

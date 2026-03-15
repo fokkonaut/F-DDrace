@@ -164,7 +164,7 @@ MACRO_CONFIG_STR(SvPlotFilePath, sv_plot_file_path, 128, "data/plots", CFGFLAG_S
 MACRO_CONFIG_INT(SvKillLogout, sv_kill_logout, 3, 0, 60, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a tee can kill after trying to logout (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEuroMode, sv_euro_mode, 0, 0, 1, CFGFLAG_SERVER, "Whether euro mode is enabled", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEuroDiscountPercentage, sv_euro_discount_percentage, 0, 0, 100, CFGFLAG_SERVER, "Euro discount percentage for shop (requires reload)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPoliceFarmLimit, sv_police_farm_limit, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether police farm tiles are limited to a dynamic number of players (disables silentfarm on police)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPoliceFarmLimit, sv_police_farm_limit, 0, -1, MAX_CLIENTS, CFGFLAG_SERVER|CFGFLAG_GAME, "Police farm tiles limited (0=off, -1=dynamic number of players, >0=fixed playercount) (disables silentfarm on police)", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvExpMsgColorText, sv_exp_msg_color_text, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Text color for the experience broadcast", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvExpMsgColorSymbol, sv_exp_msg_color_symbol, 4, "999", CFGFLAG_SERVER|CFGFLAG_GAME, "Symbol color for the experience broadcast", AUTHED_ADMIN)
