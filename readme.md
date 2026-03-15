@@ -135,6 +135,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_max_weapon_drops` |
 | `sv_max_pickup_drops` |
 | `sv_interactive_drops` |
+| `sv_drops_pickup_delay` |
 | `sv_heli_respawn_time` |
 | `sv_vanilla_mode_start` |
 | `sv_survival_min_players` |
