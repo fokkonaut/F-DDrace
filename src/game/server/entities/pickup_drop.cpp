@@ -19,7 +19,7 @@ CPickupDrop::CPickupDrop(CGameWorld *pGameWorld, vec2 Pos, int Type, int Owner, 
 	m_Special = Special;
 	m_Bullets = Bullets;
 	m_Vel = vec2(5*Direction, -5);
-	m_PickupDelay = Server()->TickSpeed() * 2;
+	m_PickupDelay = Server()->TickSpeed() * (Config()->m_SvDropsPickupDelay / 1000.f);
 	m_DDraceMode = GameServer()->m_apPlayers[Owner]->m_Gamemode == GAMEMODE_DDRACE;
 
 	m_Snap.m_Pos = m_Pos;

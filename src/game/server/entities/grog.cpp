@@ -107,7 +107,7 @@ bool CGrog::Drop(float Dir, bool OnDeath)
 
 	// Remove after 5 min of being dropped
 	m_Lifetime = Server()->TickSpeed() * 300;
-	m_PickupDelay = Server()->TickSpeed() * 2;
+	m_PickupDelay = Server()->TickSpeed() * (Config()->m_SvDropsPickupDelay / 1000.f);
 	Dir = Dir == -3 ? 2.5f*GetOwner()->GetAimDir() : Dir;
 	m_Vel = vec2(Dir, -4);
 	DecreaseNumGrogsHolding();

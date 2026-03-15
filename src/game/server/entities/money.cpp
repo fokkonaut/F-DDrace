@@ -52,10 +52,10 @@ void CMoney::Tick()
 	m_Gravity = true;
 
 	CCharacter *pClosest = 0;
-	bool TwoSecondsPassed = SecondsPassed(2);
-	if (!m_GlobalPickupDelay || TwoSecondsPassed)
+	bool PickupDelayOver = SecondsPassed(Config()->m_SvDropsPickupDelay / 1000.f);
+	if (!m_GlobalPickupDelay || PickupDelayOver)
 	{
-		pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, TwoSecondsPassed ? 0 : GetOwner(), -1, false, true, false, m_DDTeam);
+		pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, PickupDelayOver ? 0 : GetOwner(), -1, false, true, false, m_DDTeam);
 		if (pClosest)
 		{
 			if (distance(m_Pos, pClosest->GetPos()) < GetRadius() + pClosest->GetProximityRadius())
