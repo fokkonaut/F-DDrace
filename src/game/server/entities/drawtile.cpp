@@ -12,7 +12,9 @@ CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, boo
 	m_Color = Color;
 
 	for (int i = 0; i < NUM_SIDES; i++)
-		m_aID[i] = Server()->SnapNewID();
+		m_aSides[i].m_ID = Server()->SnapNewID();
+
+	ProcessAndCacheEdges();
 
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
@@ -22,7 +24,7 @@ CDrawTile::~CDrawTile()
 {
 	ResetCollision(true);
 	for (int i = 0; i < NUM_SIDES; i++)
-		Server()->SnapFreeID(m_aID[i]);
+		Server()->SnapFreeID(m_aSides[i].m_ID);
 }
 
 void CDrawTile::ResetCollision(bool Remove)
@@ -54,6 +56,26 @@ void CDrawTile::ResetCollision(bool Remove)
 		GameServer()->Collision()->SetCollisionAt(m_Pos.x, m_Pos.y, Index);
 	else if (m_Layer == LAYER_FRONT)
 		GameServer()->Collision()->SetFCollisionAt(m_Pos.x, m_Pos.y, Index);
+
+	// Update other tiles
+	CDrawTile *pDrawTile = (CDrawTile *)GameWorld()->FindFirst(CGameWorld::ENTTYPE_DRAWTILE);
+	for (; pDrawTile; pDrawTile = (CDrawTile *)pDrawTile->TypeNext())
+		if (pDrawTile->GetIndex() == m_Index)
+			pDrawTile->ProcessAndCacheEdges();
+}
+
+void CDrawTile::SetPos(vec2 Pos)
+{
+	CEntity::SetPos(Pos);
+	// specifically for draweditor preview position updating
+	ProcessAndCacheEdges();
+}
+
+void CDrawTile::ProcessAndCacheEdges()
+{
+	m_HasCachedValues = false;
+	for (int i = 0; i < NUM_SIDES; i++)
+		m_aSides[i].m_Active = false;
 }
 
 bool CDrawTile::HasSameIndexNeighborAt(vec2 Pos)
@@ -71,7 +93,7 @@ bool CDrawTile::HasSameIndexNeighborAt(vec2 Pos)
 	}
 
 	// dont try to connect to map tiles, only connect to already placed tiles or when moving an area together
-	return GameServer()->HasDrawTile(MapIndex, m_BrushCID, m_Index);
+	return GameServer()->HasDrawTile(MapIndex, m_Index, m_BrushCID);
 }
 
 static vec2 s_aNeighborOffsets[CDrawTile::NUM_SIDES] = {
@@ -131,9 +153,6 @@ bool CDrawTile::HasInsideCornerAt(vec2 TilePos, int CornerIndex)
 
 void CDrawTile::Snap(int SnappingClient)
 {
-	if (NetworkClipped(SnappingClient))
-		return;
-
 	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 	if (pChr && pChr->m_DrawEditor.OnSnapPreview(this))
 		return;
@@ -141,13 +160,28 @@ void CDrawTile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
 
-	const int CornerOffset = 12;
+	if (m_HasCachedValues)
+	{
+		for (int i = 0; i < NUM_SIDES; i++)
+			if (m_aSides[i].m_Active && !NetworkClippedLine(SnappingClient, m_aSides[i].m_To, m_aSides[i].m_From))
+				GameServer()->SnapLaserObject(Context, m_aSides[i].m_ID, m_aSides[i].m_To, m_aSides[i].m_From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
+		return;
+	}
+
+	const int CornerOffset = 10;
 	const int ExtendBy = ((32 / 2) - CornerOffset) * 2;
 	vec2 aCorners[4] = {
 		vec2(-CornerOffset, -CornerOffset),
 		vec2(CornerOffset, -CornerOffset),
 		vec2(CornerOffset, CornerOffset),
 		vec2(-CornerOffset, CornerOffset),
+	};
+
+	vec2 aDirections[4] = {
+		vec2(32, 0), // top
+		vec2(0, 32), // right
+		vec2(-32, 0), // bottom
+		vec2(0, -32) // left
 	};
 
 	for (int i = 0; i < NUM_SIDES; i++)
@@ -164,13 +198,6 @@ void CDrawTile::Snap(int SnappingClient)
 		// adjust start corner if its an inside corner
 		if (HasInsideCornerAt(m_Pos, StartCorner))
 			Pos -= normalize(From - Pos) * ExtendBy;
-			
-		vec2 aDirections[4] = {
-			vec2(32, 0), // top
-			vec2(0, 32), // right
-			vec2(-32, 0), // bottom
-			vec2(0, -32) // left
-		};
 
 		vec2 CheckPos = m_Pos;
 		while (true)
@@ -187,6 +214,11 @@ void CDrawTile::Snap(int SnappingClient)
 		if (HasInsideCornerAt(CheckPos, EndCorner))
 			From += normalize(aDirections[i]) * ExtendBy;
 
-		GameServer()->SnapLaserObject(Context, m_aID[i], Pos, From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
+		m_aSides[i].m_To = Pos;
+		m_aSides[i].m_From = From;
+		m_aSides[i].m_Active = true;
+		GameServer()->SnapLaserObject(Context, m_aSides[i].m_ID, Pos, From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
 	}
+
+	m_HasCachedValues = true;
 }

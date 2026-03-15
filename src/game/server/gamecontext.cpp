@@ -5967,7 +5967,7 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 	}
 }
 
-CDrawTile *CGameContext::HasDrawTile(int MapIndex, int BrushCID, int Index)
+CDrawTile *CGameContext::HasDrawTile(int MapIndex, int Index, int BrushCID)
 {
 	vec2 Pos = RoundPos(Collision()->GetPos(MapIndex));
 	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0, false);

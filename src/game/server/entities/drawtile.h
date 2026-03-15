@@ -19,9 +19,18 @@ public:
 
 private:
 
-	int m_aID[NUM_SIDES];
+	struct SLaserEdge
+	{
+		int m_ID;
+		bool m_Active;
+		vec2 m_To;
+		vec2 m_From;
+	} m_aSides[NUM_SIDES];
+
 	int m_Index;
 	int m_Color;
+
+	bool m_HasCachedValues;
 
 	bool HasSameIndexNeighbor(int Side);
 	bool HasEdge(vec2 Pos, int Side);
@@ -39,6 +48,9 @@ public:
 	int GetIndex() { return m_Index; }
 	void SetColor(int Lasertype) { m_Color = Lasertype; }
 	int GetColor() { return m_Color; }
+
+	void SetPos(vec2 Pos) override;
+	void ProcessAndCacheEdges();
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAWTILE_H

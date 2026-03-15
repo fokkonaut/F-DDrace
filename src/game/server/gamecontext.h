@@ -532,7 +532,7 @@ public:
 	bool PlotDoorDestroyed(int PlotID);
 	bool OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, vec2 Pos);
 
-	CDrawTile *HasDrawTile(int MapIndex, int BrushCID = -1, int Index = -1);
+	CDrawTile *HasDrawTile(int MapIndex, int Index = -1, int BrushCID = -1);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);
