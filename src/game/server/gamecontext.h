@@ -104,6 +104,8 @@ enum
 	NUM_POLICE_LEVELS = 5,
 	MAX_TASER_BATTERY = 100,
 	MAX_PASSWORD_LENGTH = 128,
+	MIN_USERNAME_LENGTH = 3,
+	MAX_USERNAME_LENGTH = 20,
 
 	// update this one with every acc change you do
 	ACC_CURRENT_VERSION = 18,

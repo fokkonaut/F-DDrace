@@ -1557,7 +1557,7 @@ void CGameContext::ConRegister(IConsole::IResult * pResult, void * pUserData)
 	str_copy(aPassword, pResult->GetString(1), sizeof(aPassword));
 	str_copy(aPassword2, pResult->GetString(2), sizeof(aPassword2));
 
-	if (str_length(aUsername) > 20 || str_length(aUsername) < 3)
+	if (str_length(aUsername) > MAX_USERNAME_LENGTH || str_length(aUsername) < MIN_USERNAME_LENGTH)
 	{
 		pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("The username is too long or too short"));
 		return;

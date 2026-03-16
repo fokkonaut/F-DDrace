@@ -406,3 +406,33 @@ void CDummyBase::DebugColor(int DebugColor)
 
 	GameServer()->SendSkinChange(Info, m_pPlayer->GetCID(), -1);
 }
+
+bool CDummyBase::Login(const char *pName)
+{
+	// Try to read into that account
+	int ID = GameServer()->AddAccount();
+	GameServer()->ReadAccountStats(ID, pName);
+	// copy it's username field
+	char aFoundUsername[32];
+	str_copy(aFoundUsername, GameServer()->m_Accounts[ID].m_Username, sizeof(aFoundUsername));
+	// free temporary
+	GameServer()->FreeAccount(ID);
+
+	// Register if username does not exist
+	if (str_comp_nocase(aFoundUsername, pName) != 0)
+	{
+		char aRandomPassword[32];
+		secure_random_password(aRandomPassword, sizeof(aRandomPassword), 30);
+
+		ID = GameServer()->AddAccount();
+		GameServer()->SetPassword(ID, aRandomPassword);
+		str_copy(GameServer()->m_Accounts[ID].m_Username, pName, sizeof(GameServer()->m_Accounts[ID].m_Username));
+		str_copy(GameServer()->m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(m_pPlayer->GetCID()), sizeof(GameServer()->m_Accounts[ID].m_aLastPlayerName));
+		time_t Now;
+		time(&Now);
+		GameServer()->m_Accounts[ID].m_RegisterDate = Now;
+		GameServer()->Logout(ID); // write
+	}
+	
+	return GameServer()->Login(m_pPlayer->GetCID(), pName, "", false);
+}

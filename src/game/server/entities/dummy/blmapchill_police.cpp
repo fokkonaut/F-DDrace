@@ -29,6 +29,9 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_HasReachedCinemaEntrance = false;
 
 	m_LastStuckCheckPos = vec2(0, 0);
+
+	// flappy account
+	Login("BlmapChillPolice");
 }
 
 bool CDummyBlmapChillPolice::CheckStuck()

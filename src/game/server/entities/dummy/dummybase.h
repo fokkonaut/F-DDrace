@@ -139,6 +139,8 @@ protected:
 	*/
 	void LeftThroughFreeze();
 
+	bool Login(const char *pName);
+
 	// Debug
 	enum SkinColor
 	{
