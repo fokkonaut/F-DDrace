@@ -206,8 +206,6 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		else if (pChr)
 		{
 			LaserHitCharacter(pChr);
-			// pChr->m_GotLasered = true;
-			// pChr->UnFreeze();
 		}
 		else if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
 		{
@@ -255,21 +253,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 
 		if (pChr)
 		{
-			TaserHitCharacter(pChr); //
-			// int RandomPercentage = random(0, 100);
-			// if (pChr->GetPlayer()->m_TaserShield > 0 && pChr->GetPlayer()->m_TaserShield >= RandomPercentage)
-			// {
-			// 	pChr->GetPlayer()->m_TaserShield = max(pChr->GetPlayer()->m_TaserShield - 5, 0);
-			// 	new CTaserShield(GameWorld(), pChr->GetPos(), pChr->GetPlayer()->GetCID());
-			// 	char aBuf[64];
-			// 	str_format(aBuf, sizeof(aBuf), pChr->GetPlayer()->Localize("Taser shield has been used, -5%%, new current: %d%%"), pChr->GetPlayer()->m_TaserShield);
-			// 	GameServer()->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
-			// }
-			// else
-			// {
-			// 	pChr->Freeze(m_TaserStrength / 10.f);
-			// 	pChr->m_GotLasered = true;
-			// }
+			TaserHitCharacter(pChr);
 		}
 	 	else if (IsPlotTaser)
 		{
