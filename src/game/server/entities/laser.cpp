@@ -214,7 +214,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 				if (passengerCID == -1)
 					continue;
 
-				CCharacter* pPassenger = GameServer()->GetPlayerChar(i);
+				CCharacter* pPassenger = GameServer()->GetPlayerChar(passengerCID);
 				if (!pPassenger)
 					continue;
 
