@@ -26,8 +26,9 @@ struct SBounds
 	}
 };
 
-struct SBone
+class CBone
 {
+public:
 	CEntity *m_pEntity;
 	int m_ID;
 	vec2 m_InitFrom;
@@ -41,7 +42,7 @@ struct SBone
 	int m_Color;
 	int m_Thickness;
 
-	SBone(
+	CBone(
 		CEntity *pEntity = nullptr,
 		int SnapID = -1,
 		float FromX = 0,
@@ -51,7 +52,7 @@ struct SBone
 		int Thickness = 5,
 		int Color = LASERTYPE_RIFLE
 	);
-	SBone(
+	CBone(
 		CEntity *pEntity,
 		int SnapID,
 		vec2 From,
@@ -78,16 +79,17 @@ struct SBone
 	void Snap(int SnappingClient, bool Flipped = false, float VertexSnapping = 0.0f, bool RainbowMode = false);
 };
 
-struct STrail
+class CTrailNode
 {
+public:
 	CEntity *m_pEntity;
 	int m_ID;
 	vec2 *m_pPos;
 	bool m_Enabled;
 
 public:
-	STrail();
-	STrail(CEntity *pEntity, int SnapID, vec2 *pPos);
+	CTrailNode();
+	CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos);
 
 	// Getting
 	IServer *Server() { return m_pEntity->Server(); }
@@ -96,8 +98,9 @@ public:
 	void Snap(int SnappingClient, bool Flipped = false, float VertexSnapping = 0.0f);
 };
 
-struct SPickup // commonly heart or armor
+class CPickupNode // commonly heart or armor
 {
+public:
 	CEntity *m_pEntity;
 	vec2 m_Pos;
 	int m_ID;
@@ -105,8 +108,8 @@ struct SPickup // commonly heart or armor
 	bool m_Enabled;
 
 public:
-	SPickup();
-	SPickup(CEntity *pEntity, int SnapID, int PickupType, vec2 Pos);
+	CPickupNode();
+	CPickupNode(CEntity *pEntity, int SnapID, int PickupType, vec2 Pos);
 
 	// Getting
 	IServer *Server() { return m_pEntity->Server(); }

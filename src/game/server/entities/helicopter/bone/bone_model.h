@@ -12,10 +12,10 @@ class IBoneModel
 protected:
 	CEntity *m_pEntity;
 
-	SBone *m_aBones;
+	CBone *m_aBones;
 	int m_NumBones;
 
-	STrail *m_aTrails;
+	CTrailNode *m_aTrails;
 	int m_NumTrails;
 
 	SBounds m_Bounds;
@@ -31,8 +31,8 @@ public:
 
 	// Getting
 	CEntity *Entity() { return m_pEntity; }
-	SBone *Bones() { return m_aBones; } // size: m_NumBones
-	STrail *Trails() { return m_aTrails; } // size: m_NumTrails
+	CBone *Bones() { return m_aBones; } // size: m_NumBones
+	CTrailNode *Trails() { return m_aTrails; } // size: m_NumTrails
 	int NumBones() { return m_NumBones; }
 	int NumTrails() { return m_NumTrails; }
 	const SBounds& GetCachedBounds() { return m_Bounds; }

@@ -98,11 +98,11 @@ private:
 	int m_ExplosionsLeft;
 	void HandleExplosions();
 
-	SPickup m_aHeartsIndicator[MAX_HEARTS];
+	CPickupNode m_aHeartsIndicator[MAX_HEARTS];
 	int m_NumHeartsIndicator;
-	SPickup m_aArmorIndicator[MAX_ARMOR];
+	CPickupNode m_aArmorIndicator[MAX_ARMOR];
 	int m_NumArmorIndicator;
-	void SetNumIndicator(SPickup *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType);
+	void SetNumIndicator(CPickupNode *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType);
 
 	int64 m_ShowHealthbarUntil;
 	int64 m_LastDamage;

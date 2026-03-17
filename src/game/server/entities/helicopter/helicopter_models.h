@@ -17,8 +17,8 @@ enum
 struct SPropeller
 {
 	int m_PropellerType;
-	SBone *m_pBoneA;
-	SBone *m_pBoneB;
+	CBone *m_pBoneA;
+	CBone *m_pBoneB;
 	vec2 m_Pivot;
 	float m_Radius;
 	float m_Rotation;
@@ -31,7 +31,7 @@ public:
 	SPropeller() : SPropeller(PROPELLER_HORIZONTAL, nullptr, nullptr, vec2(0, 0), 25.0f, pi / 50)
 	{
 	}
-	SPropeller(int PropellerType, SBone *pBoneA, SBone *pBoneB, vec2 Pivot, float Radius, float Speed)
+	SPropeller(int PropellerType, CBone *pBoneA, CBone *pBoneB, vec2 Pivot, float Radius, float Speed)
 	{
 		m_PropellerType = PropellerType;
 		m_pBoneA = pBoneA;
@@ -198,8 +198,8 @@ private:
 	void InitPropellers() override;
 	void InitModel() override;
 
-	SBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	SBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
+	CBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
+	CBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
 
 public:
 	SHelicopterModel(CEntity *pEntity);
@@ -224,8 +224,8 @@ private:
 	void InitPropellers() override;
 	void InitModel() override;
 
-	SBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	SBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
+	CBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
+	CBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
 
 public:
 	SHelicopterApacheModel(CEntity *pEntity);

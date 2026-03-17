@@ -100,7 +100,7 @@ vec2 CVehicleTurret::GetTurretDirection()
 CVehicleTurret::CVehicleTurret(
 	int TurretType,
 	int NumBones,
-	const SBone& TurretBone,
+	const CBone& TurretBone,
 	const vec2& Pivot,
 	float AimingRange,
 	int ShootingCooldown
@@ -108,7 +108,7 @@ CVehicleTurret::CVehicleTurret(
 {
 	m_TurretType = TurretType;
 	m_pHelicopter = nullptr;
-	m_apBones = new SBone[NumBones];
+	m_apBones = new CBone[NumBones];
 	m_NumBones = NumBones;
 
 	// Unsure
@@ -328,7 +328,7 @@ void CMinigunTurret::FireTurret()
 
 CMinigunTurret::CMinigunTurret()
 	: CVehicleTurret(TURRETTYPE_MINIGUN, NUM_BONES,
-	                 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
+	                 CBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
 	                 vec2(4.f, 50.f), 35.f, 7)
 {
 	m_pHelicopter = nullptr;
@@ -488,7 +488,7 @@ void CLauncherTurret::FireTurret()
 
 CLauncherTurret::CLauncherTurret()
 	: CVehicleTurret(TURRETTYPE_LAUNCHER, NUM_BONES,
-	                 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
+	                 CBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
 	                 vec2(-10.f, 50.f), 35.f, 50)
 {
 	m_pHelicopter = nullptr;

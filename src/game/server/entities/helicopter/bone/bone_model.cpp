@@ -22,10 +22,10 @@ IBoneModel::IBoneModel(CEntity *pEntity, int NumBones, int NumTrails)
 {
 	m_pEntity = pEntity;
 
-	m_aBones = new SBone[NumBones];
+	m_aBones = new CBone[NumBones];
 	m_NumBones = NumBones;
 
-	m_aTrails = new STrail[NumTrails];
+	m_aTrails = new CTrailNode[NumTrails];
 	m_NumTrails = NumTrails;
 
 	m_Bounds = { 0, 0, 0, 0 };

@@ -235,7 +235,7 @@ int CHelicopter::GetNextAvailableSeat(int AfterIndex)
 	return -1;
 }
 
-void CHelicopter::SetNumIndicator(SPickup *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType)
+void CHelicopter::SetNumIndicator(CPickupNode *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType)
 {
 	NewNumPickups = std::min(NewNumPickups, MaxPickups);
 
@@ -245,7 +245,7 @@ void CHelicopter::SetNumIndicator(SPickup *aPickups, int& NumPickups, int NewNum
 	if (DeltaPickups > 0)
 	{
 		for (int i = CurrentPickups; i < NewNumPickups; i++)
-			aPickups[i] = SPickup(this, Server()->SnapNewID(), PowerupType, vec2(0.f, 0.f));
+			aPickups[i] = CPickupNode(this, Server()->SnapNewID(), PowerupType, vec2(0.f, 0.f));
 	}
 	else if (DeltaPickups < 0)
 	{
@@ -742,7 +742,7 @@ void CHelicopter::UpdateVisualDamage()
 {
 	float HealthPercentage = 1.f - m_Health / m_MaxHealth;
 
-	SBone *aBones = m_pModel->Bones();
+	CBone *aBones = m_pModel->Bones();
 	for (int i = 0; i < m_pModel->NumBones(); i++)
 		aBones[i].m_Thickness = aBones[i].m_InitThickness - (int)(sinf(Server()->Tick() / 4 + i) * HealthPercentage * (float)aBones[i].m_InitThickness);
 }
@@ -1042,10 +1042,10 @@ void CHelicopter::BuildHelicopter()
 	float currentHeight = ModelBounds.m_Bottom - m_pModel->GetTotalSize().y * builtProgress;
 	m_Build.m_CachedHeight = currentHeight;
 
-	SBone *aBones = m_pModel->Bones();
+	CBone *aBones = m_pModel->Bones();
 	for (int i = 0; i < m_pModel->NumBones(); i++)
 	{
-		const SBone& Bone = aBones[i];
+		const CBone& Bone = aBones[i];
 		vec2 From = Bone.m_InitFrom;
 		vec2 To = Bone.m_InitTo;
 
@@ -1097,7 +1097,7 @@ void CHelicopter::BuildHelicopter()
 		}
 	}
 
-	STrail *aTrails = m_pModel->Trails();
+	CTrailNode *aTrails = m_pModel->Trails();
 	for (int i = 0; i < m_pModel->NumTrails(); i++)
 		aTrails[i].m_Enabled = aTrails[i].m_pPos->y > currentHeight;
 
@@ -1135,10 +1135,10 @@ bool CHelicopter::ShouldFlashDamagedHearts()
 void CHelicopter::SortBones()
 {
 	// meant for adding turret on top of helicopter, might add more stuff later
-	SBone *aModel = m_pModel->Bones();
+	CBone *aModel = m_pModel->Bones();
 	int NumModel = m_pModel->NumBones();
 
-	SBone *aTurret = nullptr;
+	CBone *aTurret = nullptr;
 	int NumTurret = 0;
 	if (m_pTurret)
 	{

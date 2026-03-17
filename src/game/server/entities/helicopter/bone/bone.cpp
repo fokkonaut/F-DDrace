@@ -5,7 +5,7 @@
 #include "bone.h"
 #include "../../../gamecontext.h"
 
-SBone::SBone(
+CBone::CBone(
 	CEntity *pEntity,
 	int SnapID,
 	float FromX,
@@ -15,11 +15,11 @@ SBone::SBone(
 	int Thickness,
 	int Color
 )
-	: SBone(pEntity, SnapID, vec2(FromX, FromY), vec2(ToX, ToY), Thickness, Color)
+	: CBone(pEntity, SnapID, vec2(FromX, FromY), vec2(ToX, ToY), Thickness, Color)
 {
 }
 
-SBone::SBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness, int Color)
+CBone::CBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness, int Color)
 	: m_pEntity(pEntity),
 	  m_ID(SnapID),
 	  m_InitFrom(From),
@@ -34,7 +34,7 @@ SBone::SBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness, in
 {
 }
 
-SBounds SBone::GetBounds()
+SBounds CBone::GetBounds()
 {
 	return {
 		std::min(m_From.x, m_To.x),
@@ -44,31 +44,31 @@ SBounds SBone::GetBounds()
 	};
 }
 
-void SBone::AssignEntityAndID(CEntity *pEntity, int SnapID)
+void CBone::AssignEntityAndID(CEntity *pEntity, int SnapID)
 {
 	m_pEntity = pEntity;
 	m_ID = SnapID;
 }
 
-void SBone::UpdateLine(vec2 From, vec2 To)
+void CBone::UpdateLine(vec2 From, vec2 To)
 {
 	m_From = From;
 	m_To = To;
 }
 
-void SBone::Flip()
+void CBone::Flip()
 {
 	m_From.x = -m_From.x;
 	m_To.x = -m_To.x;
 }
 
-void SBone::Rotate(float Angle)
+void CBone::Rotate(float Angle)
 {
 	m_From = rotate(m_From, Angle);
 	m_To = rotate(m_To, Angle);
 }
 
-void SBone::Scale(float factor)
+void CBone::Scale(float factor)
 {
 	// Only use case where init positions matter after scaling
 	m_InitFrom *= factor;
@@ -77,13 +77,13 @@ void SBone::Scale(float factor)
 	m_To *= factor;
 }
 
-void SBone::ResetPositions()
+void CBone::ResetPositions()
 {
 	m_From = m_InitFrom;
 	m_To = m_InitTo;
 }
 
-void SBone::Snap(int SnappingClient, bool Flipped, float VertexSnapping, bool RainbowMode)
+void CBone::Snap(int SnappingClient, bool Flipped, float VertexSnapping, bool RainbowMode)
 {
 	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
@@ -118,17 +118,17 @@ void SBone::Snap(int SnappingClient, bool Flipped, float VertexSnapping, bool Ra
 
 //
 
-STrail::STrail()
+CTrailNode::CTrailNode()
 	: m_pEntity(nullptr), m_ID(-1), m_pPos(nullptr)
 {
 }
 
-STrail::STrail(CEntity *pEntity, int SnapID, vec2 *pPos)
+CTrailNode::CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos)
 	: m_pEntity(pEntity), m_ID(SnapID), m_pPos(pPos), m_Enabled(true)
 {
 }
 
-void STrail::Snap(int SnappingClient, bool Flipped, float VertexSnapping)
+void CTrailNode::Snap(int SnappingClient, bool Flipped, float VertexSnapping)
 {
 	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
@@ -157,17 +157,17 @@ void STrail::Snap(int SnappingClient, bool Flipped, float VertexSnapping)
 
 //
 
-SPickup::SPickup()
-	: SPickup(nullptr, -1, POWERUP_HEALTH, vec2(0.f, 0.f))
+CPickupNode::CPickupNode()
+	: CPickupNode(nullptr, -1, POWERUP_HEALTH, vec2(0.f, 0.f))
 {
 }
 
-SPickup::SPickup(CEntity *pEntity, int SnapID, int PickupType, vec2 Pos)
+CPickupNode::CPickupNode(CEntity *pEntity, int SnapID, int PickupType, vec2 Pos)
 	: m_pEntity(pEntity), m_Pos(Pos), m_ID(SnapID), m_PickupType(PickupType), m_Enabled(true)
 {
 }
 
-void SPickup::Snap(int SnappingClient)
+void CPickupNode::Snap(int SnappingClient)
 {
 	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
