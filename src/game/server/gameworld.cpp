@@ -1240,9 +1240,6 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 	return pClosest;
 }
 
-CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& Exclude, int CollideWith, int64 Types,
-	CCharacter *pThisOnly = nullptr, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
-
 bool CGameWorld::IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1)
 {
 	CPortalBlocker *pPortalBlocker = (CPortalBlocker *)FindFirst(ENTTYPE_PORTAL_BLOCKER);
