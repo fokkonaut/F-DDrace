@@ -1127,7 +1127,7 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 	return Num;
 }
 
-CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int64 Types, CCharacter *pThisOnly, bool CheckPlotTaserDestroy, bool PlotDoorOnly, bool CheckDrivers)
+CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const SNotTheseEntities& NotThese, int CollideWith, int64 Types, CCharacter *pThisOnly, bool CheckPlotTaserDestroy, bool PlotDoorOnly, bool CheckDrivers)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -1146,7 +1146,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 			bool EntTypeDestroyable = i == ENTTYPE_DOOR || i == ENTTYPE_PICKUP || i == ENTTYPE_BUTTON || i == ENTTYPE_SPEEDUP || i == ENTTYPE_TELEPORTER || i == ENTTYPE_DRAWTILE;
 			if ((CheckPlotTaserDestroy && !EntTypeDestroyable) || !CheckPlotTaserDestroy)
 			{
-				if(p == pNotThis)
+				if(NotThese.IsExcluded(p))
 					continue;
 
 				if (pThisOnly && p != pThisOnly)
@@ -1158,7 +1158,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
 					continue;
 
-				if (i == ENTTYPE_HELICOPTER && ((CHelicopter *)p)->IsBuilding())
+				if (i == ENTTYPE_HELICOPTER && ((CHelicopter *)p)->IsInvincible())
 					continue;
 
 				if (CollideWith != -1)
@@ -1239,6 +1239,9 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 
 	return pClosest;
 }
+
+CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const SNotTheseEntities& Exclude, int CollideWith, int64 Types,
+	CCharacter *pThisOnly = nullptr, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
 
 bool CGameWorld::IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1)
 {

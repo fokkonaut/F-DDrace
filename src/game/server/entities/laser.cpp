@@ -39,6 +39,30 @@ CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	DoBounce();
 }
 
+void CLaser::LaserHitCharacter(CCharacter* pChar)
+{
+	pChar->m_GotLasered = true;
+	pChar->UnFreeze();
+}
+
+void CLaser::TaserHitCharacter(CCharacter *pChar)
+{
+	int RandomPercentage = random(0, 100);
+	if (pChar->GetPlayer()->m_TaserShield > 0 && pChar->GetPlayer()->m_TaserShield >= RandomPercentage)
+	{
+		pChar->GetPlayer()->m_TaserShield = max(pChar->GetPlayer()->m_TaserShield - 5, 0);
+		new CTaserShield(GameWorld(), pChar->GetPos(), pChar->GetPlayer()->GetCID());
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), pChar->GetPlayer()->Localize("Taser shield has been used, -5%%, new current: %d%%"), pChar->GetPlayer()->m_TaserShield);
+		GameServer()->SendChatTarget(pChar->GetPlayer()->GetCID(), aBuf);
+	}
+	else
+	{
+		pChar->Freeze((float)m_TaserStrength / 10.f);
+		pChar->m_GotLasered = true;
+	}
+}
+
 bool CLaser::HitEntity(vec2 From, vec2 To)
 {
 	vec2 At;
@@ -181,35 +205,71 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		}
 		else if (pChr)
 		{
-			pChr->m_GotLasered = true;
-			pChr->UnFreeze();
+			LaserHitCharacter(pChr);
+			// pChr->m_GotLasered = true;
+			// pChr->UnFreeze();
 		}
-
-		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+		else if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
 		{
 			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
 			pHelicopter->Heal(1.0f);
+
+			for (int i = 0; i < pHelicopter->NumPassengers(); i++)
+			{
+				int passengerCID = pHelicopter->GetPassengers()[i];
+				if (passengerCID == -1)
+					continue;
+
+				CCharacter* pPassenger = GameServer()->GetPlayerChar(i);
+				if (!pPassenger)
+					continue;
+
+				LaserHitCharacter(pPassenger);
+			}
+
 			return true;
 		}
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
+		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+		{
+			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
+			pHelicopter->TakeDamage((float)m_TaserStrength, At, pHelicopter->LastKnownOwnerCID());
+
+			for (int i = 0; i < pHelicopter->NumPassengers(); i++)
+			{
+				int passengerCID = pHelicopter->GetPassengers()[i];
+				if (passengerCID == -1)
+					continue;
+
+				CCharacter* pPassenger = GameServer()->GetPlayerChar(passengerCID);
+				if (!pPassenger)
+					continue;
+
+				TaserHitCharacter(pPassenger);
+			}
+
+			return true;
+		}
+
 		if (pChr)
 		{
-			int RandomPercentage = random(0, 100);
-			if (pChr->GetPlayer()->m_TaserShield > 0 && pChr->GetPlayer()->m_TaserShield >= RandomPercentage)
-			{
-				pChr->GetPlayer()->m_TaserShield = max(pChr->GetPlayer()->m_TaserShield - 5, 0);
-				new CTaserShield(GameWorld(), pChr->GetPos(), pChr->GetPlayer()->GetCID());
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), pChr->GetPlayer()->Localize("Taser shield has been used, -5%%, new current: %d%%"), pChr->GetPlayer()->m_TaserShield);
-				GameServer()->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
-			}
-			else
-			{
-				pChr->Freeze(m_TaserStrength / 10.f);
-				pChr->m_GotLasered = true;
-			}
+			TaserHitCharacter(pChr); //
+			// int RandomPercentage = random(0, 100);
+			// if (pChr->GetPlayer()->m_TaserShield > 0 && pChr->GetPlayer()->m_TaserShield >= RandomPercentage)
+			// {
+			// 	pChr->GetPlayer()->m_TaserShield = max(pChr->GetPlayer()->m_TaserShield - 5, 0);
+			// 	new CTaserShield(GameWorld(), pChr->GetPos(), pChr->GetPlayer()->GetCID());
+			// 	char aBuf[64];
+			// 	str_format(aBuf, sizeof(aBuf), pChr->GetPlayer()->Localize("Taser shield has been used, -5%%, new current: %d%%"), pChr->GetPlayer()->m_TaserShield);
+			// 	GameServer()->SendChatTarget(pChr->GetPlayer()->GetCID(), aBuf);
+			// }
+			// else
+			// {
+			// 	pChr->Freeze(m_TaserStrength / 10.f);
+			// 	pChr->m_GotLasered = true;
+			// }
 		}
 	 	else if (IsPlotTaser)
 		{
@@ -230,13 +290,6 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			m_TaserStrength -= 2;
 			if (m_TaserStrength <= 0)
 				m_Energy = -1;
-			return true;
-		}
-
-		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
-		{
-			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
-			pHelicopter->TakeDamage((float)(m_TaserStrength), At, pOwnerChar ? pOwnerChar->GetPlayer()->GetCID() : -1);
 			return true;
 		}
 	}
