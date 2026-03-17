@@ -203,10 +203,6 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			vec2 Pos = At + normalize(At - From) * vec2(-32.f, -32.f);
 			GameServer()->CreateExplosion(Pos, m_Owner, WEAPON_LASER, true, pOwnerChar ? pOwnerChar->Team() : pChr->Team(), m_TeamMask);
 		}
-		else if (pChr)
-		{
-			LaserHitCharacter(pChr);
-		}
 		else if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
 		{
 			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
@@ -227,6 +223,12 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 
 			return true;
 		}
+
+		if (pChr)
+		{
+			LaserHitCharacter(pChr);
+		}
+
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
