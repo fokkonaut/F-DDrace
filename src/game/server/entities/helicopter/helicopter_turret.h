@@ -5,7 +5,7 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 
-#include "bone.h"
+#include "bone/bone_model.h"
 
 enum
 {
@@ -79,7 +79,7 @@ public:
 
 	// Ticking
 	virtual void Tick();
-	virtual void Snap(int SnappingClient, bool Flipped);
+	virtual void Snap(int SnappingClient);
 
 	virtual void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
 };
@@ -110,7 +110,7 @@ private:
 	// Retainer - 2 parts `holding` the cluster together
 	float m_RetainerPosition;
 	float m_RetainerRadius;
-	void InitRetainer();
+	void UpdateRetainer();
 
 	// void SetFlipped(bool flipped) override;
 	// void SetRotation(float PivotRotation, float TurretRotation) override;
@@ -131,7 +131,7 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient, bool Flipped) override;
+	void Snap(int SnappingClient) override;
 	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
 };
 
@@ -178,7 +178,7 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient, bool Flipped) override;
+	void Snap(int SnappingClient) override;
 	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
 };
 

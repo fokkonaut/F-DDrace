@@ -3069,7 +3069,23 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					
 					if (!InHouse)
 					{
-						pChr->DropFlag();
+						CHelicopter* pHelicopter = pChr->m_pHelicopter;
+						if (pHelicopter)
+						{
+							if (pChr->CanSwitchSeats())
+							{
+								int switchSeat = pHelicopter->GetNextAvailableSeat(pChr->m_HelicopterSeat);
+								if (switchSeat != -1)
+								{
+									pHelicopter->Dismount(ClientID);
+									pHelicopter->Mount(ClientID, switchSeat);
+								}
+							}
+						}
+						else
+						{
+							pChr->DropFlag();
+						}
 					}
 				}
 			}
@@ -8178,14 +8194,17 @@ bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int Helicopt
 	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
 		return false;
 
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, true, Number, TurretType);
+	if (HelicopterType < 0 || HelicopterType >= NUM_HELICOPTER_TYPES)
+		return false;
+
+	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number, TurretType);
 	CVehicleTurret *pTurret = nullptr;
 	if (TurretType == TURRETTYPE_MINIGUN)
 		pTurret = new CMinigunTurret();
 	else if (TurretType == TURRETTYPE_LAUNCHER)
 		pTurret = new CLauncherTurret();
 
-	if (!pHelicopter->AttachTurret(pTurret))
+	if (!pHelicopter->TryAttachTurret(pTurret))
 		delete pTurret; // Failed to assign ownership
 	return true;
 }
