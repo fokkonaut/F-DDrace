@@ -28,7 +28,7 @@ public:
 	bool Includes(vec2 Pos) { return (Pos.x >= TopLeft().x-1 && Pos.x <= BottomRight().x+1 && Pos.y >= TopLeft().y-1 && Pos.y <= BottomRight().y+1); }
 };
 
-struct CNotTheseEntities
+class CNotTheseEntities
 {
 private:
 	CEntity* m_pSingleEntity;
