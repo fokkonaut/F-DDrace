@@ -543,7 +543,7 @@ void CHelicopter::ApplyAcceleration()
 		for (int HookerCID : pPassenger->Core()->m_AttachedPlayers)
 		{
 			CCharacter *pChr = GameServer()->GetPlayerChar(HookerCID);
-			if (!pChr)
+			if (!pChr || pChr->GetCore().HookedPlayer() != passengerCID)
 				continue;
 
 			float Distance = distance(pChr->GetPos(), pPassenger->GetPos());
