@@ -16,6 +16,9 @@ public:
 	virtual void Snap(int SnappingClient);
 
 protected:
+	void LaserHitCharacter(CCharacter* pChar);
+	void TaserHitCharacter(CCharacter* pChar);
+
 	bool HitEntity(vec2 From, vec2 To);
 	void DoBounce();
 

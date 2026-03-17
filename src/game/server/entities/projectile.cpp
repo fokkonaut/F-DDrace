@@ -95,7 +95,7 @@ void CProjectile::Tick()
 	CAdvancedEntity *pTargetEntity = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
 	{
-		int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+		int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 		if (Config()->m_SvInteractiveDrops)
 		{
 			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);

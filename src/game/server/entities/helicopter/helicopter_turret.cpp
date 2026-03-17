@@ -7,112 +7,62 @@
 #include "game/server/entities/projectile.h"
 #include "helicopter_turret.h"
 
-// void CVehicleTurret::SetFlipped(bool flipped)
-// {
-// 	// SetFlipped instead of Flip because if turret is attached later to match the helicopter flip, flip |ovo|
-// 	// if (flipped == m_Flipped)
-// 	// 	return;
-//
-// 	m_Flipped = flipped;
-//
-// 	// m_Pivot = m_InitPivot;
-// 	// m_Pivot.x *= (m_Flipped ? -1.0f : 1.0f);
-//
-//
-// 	// m_Angle *= -1.f;
-// 	// m_PivotAngle *= -1.f;
-// 	// m_Pivot.x *= -1.f;
-// 	// m_TurretBone.Flip();
-// 	// for (int i = 0; i < m_NumBones; i++)
-// 	// m_apBones[i].Flip();
-// }
-
 void CVehicleTurret::UpdateVisual()
 {
 }
 
-void CVehicleTurret::SetRotation(float PivotRotation, float TurretRotation)
+void CVehicleTurret::SetRotation(float PivotRotation, float TurretRotation) //
 {
 	m_Angle = PivotRotation;
 	m_TurretAngle = TurretRotation;
 
 	float flip = (m_pHelicopter->IsFlipped() ? -1.0f : 1.0f);
 
-	// m_Pivot = rotate(m_InitPivot, PivotRotation);
-	// m_Pivot = m_InitPivot;
-	// m_Pivot.x *= (m_Flipped ? -1.0f : 1.0f);
-
 	// Rotate turret
 	m_TurretBone.m_To = m_TurretBone.m_InitTo - m_Pivot;
 	m_TurretBone.m_From = m_TurretBone.m_InitFrom - m_Pivot;
 	m_TurretBone.Rotate(TurretRotation);
-	m_TurretBone.m_To += m_Pivot;
-	m_TurretBone.m_From += m_Pivot;
-	m_TurretBone.Rotate(PivotRotation * flip);
 	if (m_pHelicopter->IsFlipped())
 		m_TurretBone.Flip();
 
+	m_TurretBone.m_To += m_Pivot;
+	m_TurretBone.m_From += m_Pivot;
+	m_TurretBone.Rotate(PivotRotation * flip);
+
 	for (int i = 0; i < m_NumBones; i++)
 	{
-		m_apBones[i].m_To = m_TurretBone.m_InitTo - m_Pivot;
-		m_apBones[i].m_From = m_TurretBone.m_InitFrom - m_Pivot;
+		m_apBones[i].m_To = m_apBones[i].m_InitTo - m_Pivot;
+		m_apBones[i].m_From = m_apBones[i].m_InitFrom - m_Pivot;
 		m_apBones[i].Rotate(TurretRotation);
+		if (m_pHelicopter->IsFlipped())
+			m_apBones[i].Flip();
+
 		m_apBones[i].m_To += m_Pivot;
 		m_apBones[i].m_From += m_Pivot;
 		m_apBones[i].Rotate(PivotRotation * flip);
-		if (m_pHelicopter->IsFlipped())
-			m_apBones[i].Flip();
 	}
-
-	// m_Angle = NewAngle;
-	// // m_PivotAngle = NewAngle;
-	// m_Pivot = rotate(m_InitPivot,  NewAngle);
-	// // rotate(m_Pivot, NewAngle);
-	// // m_TurretBone.Rotate(NewAngle);
-	// for (int i = 0; i < m_NumBones; i++)
-	// 	m_apBones[i].Rotate(NewAngle);
 }
 
 void CVehicleTurret::AimTurret()
 {
-	CCharacter *pGunner = m_pHelicopter->GetGunner();
-	if (!pGunner)
-		return;
-
 	float flip = (m_pHelicopter->IsFlipped() ? -1.0f : 1.0f);
 
-	vec2 barrelExit = m_TurretBone.m_To;
-	vec2 aimFromTurret = (pGunner->GetCursorPos() - m_pHelicopter->GetPos() - barrelExit) * flip;
-	float targetAngle = (atan2f(aimFromTurret.y, aimFromTurret.x) / pi * 180.f) * flip;
-	float targetAngleClamped = clamp(targetAngle, m_Angle * flip - m_AimingRange, m_Angle * flip + m_AimingRange) - m_Angle * flip;
-	SetRotation(m_Angle, m_TurretAngle + (targetAngleClamped - m_TurretAngle) * 0.15f);
-	// RotateTurret(m_Angle - targetAngle);
-}
+	vec2 aimFromTurret;
+	CCharacter *pGunner = m_pHelicopter->GetGunner();
+	if (pGunner)
+	{
+		vec2 gunOrigin = m_TurretBone.m_To;
+		aimFromTurret = (pGunner->GetCursorPos() - m_pHelicopter->GetPos() - gunOrigin) * flip;
+	}
+	else
+	{
+		aimFromTurret = vec2(1000, 0);
+	}
 
-// void CVehicleTurret::RotateTurret(float NewRotation)
-// {
-// 	m_TurretAngle = NewRotation;
-//
-// 	// Rotate turret
-// 	//m_TurretBone.m_To -= m_Pivot;
-// 	//m_TurretBone.m_From -= m_Pivot;
-// 	m_TurretBone.m_To = m_TurretBone.m_InitTo;
-// 	m_TurretBone.m_From = m_TurretBone.m_InitFrom;
-// 	m_TurretBone.Rotate(m_TurretAngle);
-// 	m_TurretBone.m_To += m_Pivot;
-// 	m_TurretBone.m_From += m_Pivot;
-// 	m_TurretBone.Rotate(m_Angle);
-//
-// 	for (int i = 0; i < m_NumBones; i++)
-// 	{
-// 		m_apBones[i].m_To = m_TurretBone.m_InitTo;
-// 		m_apBones[i].m_From = m_TurretBone.m_InitFrom;
-// 		m_apBones[i].Rotate(NewRotation);
-// 		m_apBones[i].m_To += m_Pivot;
-// 		m_apBones[i].m_From += m_Pivot;
-// 		m_apBones[i].Rotate(m_Angle);
-// 	}
-// }
+	float targetAngle = (atan2f(aimFromTurret.y, aimFromTurret.x) / pi * 180.f) * flip;
+	float targetAngleClamped = clamp(targetAngle, m_Angle * flip - m_AimingRange, m_Angle * flip + m_AimingRange) - m_Angle;
+	SetRotation(m_Angle, m_TurretAngle + (targetAngleClamped - m_TurretAngle) * 0.15f);
+}
 
 void CVehicleTurret::FireTurret()
 {
@@ -138,7 +88,7 @@ void CVehicleTurret::FireTurret()
 		Server()->TickSpeed() * 2,
 		false, false,
 		0.f, -1,
-		projectileDirection * 100 // bug
+		projectileDirection * 100
 	);
 }
 
@@ -150,7 +100,7 @@ vec2 CVehicleTurret::GetTurretDirection()
 CVehicleTurret::CVehicleTurret(
 	int TurretType,
 	int NumBones,
-	const SBone& TurretBone,
+	const CBone& TurretBone,
 	const vec2& Pivot,
 	float AimingRange,
 	int ShootingCooldown
@@ -158,7 +108,7 @@ CVehicleTurret::CVehicleTurret(
 {
 	m_TurretType = TurretType;
 	m_pHelicopter = nullptr;
-	m_apBones = new SBone[NumBones];
+	m_apBones = new CBone[NumBones];
 	m_NumBones = NumBones;
 
 	// Unsure
@@ -219,10 +169,8 @@ bool CVehicleTurret::TryBindHelicopter(CHelicopter *helicopter)
 
 		// Match helicopter posture initially
 		ApplyScale(m_pHelicopter->GetScale());
-		// SetFlipped(m_pHelicopter->IsFlipped());
-		SetRotation(m_pHelicopter->Angle(), m_TurretAngle);
-		// Rotate(m_pHelicopter->Angle());
 		UpdateVisual();
+		SetRotation(m_pHelicopter->Angle(), m_TurretAngle);
 		return true;
 	}
 	return false;
@@ -250,10 +198,10 @@ void CVehicleTurret::Tick()
 	UpdateVisual();
 }
 
-void CVehicleTurret::Snap(int SnappingClient, bool Flipped)
+void CVehicleTurret::Snap(int SnappingClient)
 {
-	if (!m_pHelicopter)
-		return;
+	// if (!m_pHelicopter)
+	// 	return;
 
 	for (int i = 0; i < m_NumBones; i++)
 		m_apBones[i].Snap(SnappingClient, false);
@@ -294,9 +242,10 @@ void CMinigunTurret::UpdateClusterBones()
 	float flip = (m_pHelicopter && m_pHelicopter->IsFlipped()) ? -1.0f : 1.0f;
 	for (int i = 0; i < NUM_BONES_CLUSTER; i++)
 	{
-		float currentBoneRotation = m_ClusterRotation + AngleDiff() * (float)i * flip;
+		float currentBoneRotation = m_ClusterRotation + AngleDiff() * (float)i;
+		float depthOffset = cosf(currentBoneRotation); // also horizontal
 		float verticalOffset = sinf(currentBoneRotation) * m_ClusterVerticalRange;
-		float horizontalOffset = cosf(currentBoneRotation) * m_ClusterHorizontalRange;
+		float horizontalOffset = depthOffset * m_ClusterHorizontalRange * flip;
 
 		// This will move each bone in an elliptical motion, even if the gun is rotated it will look as intended
 		vec2 verticalDirection = Perpendicular * verticalOffset;
@@ -311,19 +260,20 @@ void CMinigunTurret::UpdateClusterBones()
 		Cluster()[i].m_InitFrom = barrelEndPos;
 		Cluster()[i].m_To = barrelStartPos;
 		Cluster()[i].m_From = barrelEndPos;
+		Cluster()[i].m_Thickness = Cluster()[i].m_InitThickness - round_to_int(depthOffset) - 1;
 	}
 }
 
 void CMinigunTurret::SpinCluster()
 {
-	CCharacter* pGunner = m_pHelicopter->GetGunner();
+	CCharacter *pGunner = m_pHelicopter->GetGunner();
 	if (pGunner && !pGunner->m_FreezeTime && m_Shooting)
 		m_ClusterSpeed += (float)Server()->TickSpeed() / 5000.f;
 	m_ClusterSpeed *= 0.98f;
 	m_ClusterRotation += m_ClusterSpeed;
 }
 
-void CMinigunTurret::InitRetainer()
+void CMinigunTurret::UpdateRetainer()
 {
 	float Radius = m_RetainerRadius;
 	vec2 initialPosition = m_TurretBone.m_From + vec2(m_RetainerPosition, 0);
@@ -332,62 +282,15 @@ void CMinigunTurret::InitRetainer()
 		vec2 fromPosition = initialPosition;
 		vec2 toPosition = initialPosition + vec2(0.f, Radius);
 
+		Retainer()[i].m_InitTo = toPosition;
+		Retainer()[i].m_InitFrom = fromPosition;
 		Retainer()[i].m_To = toPosition;
 		Retainer()[i].m_From = fromPosition;
 		Retainer()[i].m_Color = LASERTYPE_FREEZE;
 		Retainer()[i].m_Thickness = 2;
-		Radius *= -1.f;
+		Radius = -Radius;
 	}
 }
-
-// void CMinigunTurret::SetFlipped(bool flipped)
-// {
-// 	// SetFlipped instead of Flip because if turret is attached later to match the helicopter flip, flip |ovo|
-// 	// if (flipped == m_Flipped)
-// 	// 	return;
-//
-// 	m_Flipped = !m_Flipped;
-// 	// m_Angle *= -1.f;
-//
-// 	// m_PivotAngle *= -1.f;
-//
-// 	// m_Pivot.x *= -1.f;
-// 	// m_TurretBone.Flip(); // Cluster bones update dynamically
-// 	// for (int i = 0; i < NUM_BONES_RETAINER; i++)
-// 	// Retainer()[i].Flip();
-// }
-
-// void CMinigunTurret::Rotate(float Angle)
-// {
-// 	m_Angle += Angle;
-// 	m_TurretAngle += Angle;
-// 	rotate(m_Pivot, Angle);
-// 	m_TurretBone.Rotate(Angle); // Cluster bones update dynamically
-// 	for (int i = 0; i < NUM_BONES_RETAINER; i++)
-// 		Retainer()[i].Rotate(Angle);
-// }
-
-// void CMinigunTurret::RotateTurret(float Angle)
-// {
-// 	m_TurretAngle += Angle;
-//
-// 	// Rotate turret
-// 	m_TurretBone.m_To -= m_Pivot;
-// 	m_TurretBone.m_From -= m_Pivot;
-// 	m_TurretBone.Rotate(Angle);
-// 	m_TurretBone.m_To += m_Pivot;
-// 	m_TurretBone.m_From += m_Pivot;
-//
-// 	// Rotate retainer
-// 	for (int i = 0; i < NUM_BONES_RETAINER; i++)
-// 	{
-// 		Retainer()[i].m_To -= m_Pivot;
-// 		Retainer()[i].m_From -= m_Pivot;
-// 		Retainer()[i].Rotate(Angle);
-// 		Retainer()[i].m_To += m_Pivot;
-// 		Retainer()[i].m_From += m_Pivot;
-// 	}
-// }
 
 void CMinigunTurret::FireTurret()
 {
@@ -395,7 +298,7 @@ void CMinigunTurret::FireTurret()
 	if (!pGunner || pGunner->m_FreezeTime || !m_Shooting || m_ClusterSpeed < 0.3f)
 		return;
 
-	int shootingCooldown = (m_pHelicopter->GetHelicopterType() == HELICOPTER_APACHE) ? m_ShootingCooldown >> 1 : m_ShootingCooldown;
+	int shootingCooldown = (m_pHelicopter->GetHelicopterType() == HELICOPTER_APACHE) ? (int)((float)m_ShootingCooldown * 0.67f) : m_ShootingCooldown;
 	if (Server()->Tick() - m_LastShot <= shootingCooldown)
 		return;
 
@@ -425,8 +328,8 @@ void CMinigunTurret::FireTurret()
 
 CMinigunTurret::CMinigunTurret()
 	: CVehicleTurret(TURRETTYPE_MINIGUN, NUM_BONES,
-	                 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
-	                 vec2(4.f, 50.f), 35.f, 10)
+	                 CBone(nullptr, -1, vec2(70.f, 50.f), vec2(-34.f, 50.f)),
+	                 vec2(4.f, 50.f), 35.f, 7)
 {
 	m_pHelicopter = nullptr;
 
@@ -441,7 +344,7 @@ CMinigunTurret::CMinigunTurret()
 	m_ShootingBarrelIndex = 0;
 
 	InitCluster();
-	InitRetainer();
+	UpdateRetainer();
 }
 
 CMinigunTurret::~CMinigunTurret()
@@ -475,10 +378,10 @@ void CMinigunTurret::Tick()
 	UpdateVisual();
 }
 
-void CMinigunTurret::Snap(int SnappingClient, bool Flipped)
+void CMinigunTurret::Snap(int SnappingClient)
 {
-	if (!m_pHelicopter)
-		return;
+	// if (!m_pHelicopter)
+	// 	return;
 
 	for (int i = 0; i < m_NumBones; i++)
 		m_apBones[i].Snap(SnappingClient, false);
@@ -562,7 +465,7 @@ void CLauncherTurret::FireTurret()
 	if (!pGunner || pGunner->m_FreezeTime || !m_Shooting)
 		return;
 
-	int shootingCooldown = (m_pHelicopter->GetHelicopterType() == HELICOPTER_APACHE) ? m_ShootingCooldown >> 1 : m_ShootingCooldown;
+	int shootingCooldown = (m_pHelicopter->GetHelicopterType() == HELICOPTER_APACHE) ? (int)((float)m_ShootingCooldown * 0.5f) : m_ShootingCooldown;
 	if (Server()->Tick() - m_LastShot <= shootingCooldown)
 		return;
 
@@ -585,7 +488,7 @@ void CLauncherTurret::FireTurret()
 
 CLauncherTurret::CLauncherTurret()
 	: CVehicleTurret(TURRETTYPE_LAUNCHER, NUM_BONES,
-	                 SBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
+	                 CBone(nullptr, -1, vec2(70.f, 50.f), vec2(-44.f, 50.f)),
 	                 vec2(-10.f, 50.f), 35.f, 50)
 {
 	m_pHelicopter = nullptr;
@@ -631,10 +534,10 @@ void CLauncherTurret::Tick()
 	UpdateVisual();
 }
 
-void CLauncherTurret::Snap(int SnappingClient, bool Flipped)
+void CLauncherTurret::Snap(int SnappingClient)
 {
-	if (!m_pHelicopter)
-		return;
+	// if (!m_pHelicopter)
+	// 	return;
 
 	for (int i = 0; i < m_NumBones; i++)
 		m_apBones[i].Snap(SnappingClient, false);

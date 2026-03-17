@@ -5,7 +5,7 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 
-#include "bone.h"
+#include "bone/bone_model.h"
 
 enum
 {
@@ -22,10 +22,10 @@ protected:
 
 	int m_TurretType;
 	CHelicopter *m_pHelicopter;
-	SBone *m_apBones;
+	CBone *m_apBones;
 	int m_NumBones;
 
-	SBone m_TurretBone; // don't snap this one
+	CBone m_TurretBone; // don't snap this one
 	vec2 m_InitPivot;
 	vec2 m_Pivot;
 	float m_Length;
@@ -58,7 +58,7 @@ protected:
 public:
 	CVehicleTurret(int TurretType,
 	               int NumBones,
-	               const SBone& TurretBone,
+	               const CBone& TurretBone,
 	               const vec2& Pivot,
 	               float AimingRange,
 	               int ShootingCooldown);
@@ -70,7 +70,7 @@ public:
 	CGameContext *GameServer();
 	int GetType() { return m_TurretType; }
 	int GetNumBones() { return m_NumBones; }
-	SBone *Bones() { return m_apBones; } // size: m_NumBones || GetNumBones()
+	CBone *Bones() { return m_apBones; } // size: m_NumBones || GetNumBones()
 	float GetTurretRotation() { return m_TurretAngle; }
 
 	// Manipulating
@@ -79,7 +79,7 @@ public:
 
 	// Ticking
 	virtual void Tick();
-	virtual void Snap(int SnappingClient, bool Flipped);
+	virtual void Snap(int SnappingClient);
 
 	virtual void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
 };
@@ -110,7 +110,7 @@ private:
 	// Retainer - 2 parts `holding` the cluster together
 	float m_RetainerPosition;
 	float m_RetainerRadius;
-	void InitRetainer();
+	void UpdateRetainer();
 
 	// void SetFlipped(bool flipped) override;
 	// void SetRotation(float PivotRotation, float TurretRotation) override;
@@ -119,8 +119,8 @@ private:
 	void FireTurret() override;
 
 	static float AngleDiff() { return 2.f * pi / NUM_BONES_CLUSTER; } // 360deg / 3 = 120deg per bone
-	SBone *Cluster() { return &m_apBones[0]; } // size: NUM_BONES_CLUSTER
-	SBone *Retainer() { return &m_apBones[NUM_BONES_CLUSTER]; } // size: NUM_BONES_RETAINER
+	CBone *Cluster() { return &m_apBones[0]; } // size: NUM_BONES_CLUSTER
+	CBone *Retainer() { return &m_apBones[NUM_BONES_CLUSTER]; } // size: NUM_BONES_RETAINER
 
 public:
 	CMinigunTurret();
@@ -131,7 +131,7 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient, bool Flipped) override;
+	void Snap(int SnappingClient) override;
 	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
 };
 
@@ -165,9 +165,9 @@ private:
 	void HandleRecoil();
 	void FireTurret() override;
 
-	SBone *Ejector() { return &m_apBones[0]; } // size: NUM_BONES_EJECTOR
-	SBone *Shaft() { return &m_apBones[NUM_BONES_EJECTOR]; } // size: NUM_BONES_SHAFT
-	SBone *Retainer() { return &m_apBones[NUM_BONES_EJECTOR + NUM_BONES_SHAFT]; } // size: NUM_BONES_RETAINER
+	CBone *Ejector() { return &m_apBones[0]; } // size: NUM_BONES_EJECTOR
+	CBone *Shaft() { return &m_apBones[NUM_BONES_EJECTOR]; } // size: NUM_BONES_SHAFT
+	CBone *Retainer() { return &m_apBones[NUM_BONES_EJECTOR + NUM_BONES_SHAFT]; } // size: NUM_BONES_RETAINER
 
 public:
 	CLauncherTurret();
@@ -178,7 +178,7 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient, bool Flipped) override;
+	void Snap(int SnappingClient) override;
 	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
 };
 

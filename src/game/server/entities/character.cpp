@@ -4451,6 +4451,7 @@ void CCharacter::FDDraceInit()
 	m_DoorHammer = false;
 	m_pHelicopter = nullptr;
 	m_HelicopterSeat = -1;
+	m_SeatSwitchedTick = Server()->Tick();
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
 	{
@@ -5807,8 +5808,16 @@ bool CCharacter::TryMountHelicopter()
 	if (m_FreezeTime)
 		return false;
 
-	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, 0, true, Team());
+	if (!CanSwitchSeats())
+		return true;
+
+	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, nullptr, true, Team());
 	return pHelicopter && pHelicopter->Mount(m_pPlayer->GetCID());
+}
+
+bool CCharacter::CanSwitchSeats()
+{
+	return Server()->Tick() - m_SeatSwitchedTick > Server()->TickSpeed() / 2;
 }
 
 int CCharacter::GetAliveState()

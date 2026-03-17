@@ -543,7 +543,9 @@ public:
 	// helicopter
 	CHelicopter *m_pHelicopter;
 	int m_HelicopterSeat;
+	int m_SeatSwitchedTick;
 	bool TryMountHelicopter();
+	bool CanSwitchSeats();
 
 	int GetCurrentTilePlotID(bool CheckDoor = false);
 	void TeleOutOfPlot(int PlotID);

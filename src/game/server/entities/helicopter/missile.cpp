@@ -102,13 +102,28 @@ void CMissile::HandleCollisions()
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 	//
+
+	CEntity* aExclude[2]; // owner + helicopter
+	int NumExcluded = 0;
+
+	if (pOwnerChar)
+	{
+		aExclude[0] = pOwnerChar;
+		NumExcluded++;
+		if (pOwnerChar->m_pHelicopter)
+		{
+			aExclude[1] = pOwnerChar->m_pHelicopter;
+			NumExcluded++;
+		}
+	}
+
 	CCharacter *pTargetChr = nullptr;
 	CAdvancedEntity *pTargetEntity = nullptr;
 
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 	if (Config()->m_SvInteractiveDrops)
 		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
-	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, pOwnerChar, m_Owner, Types);
+	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, CNotTheseEntities(aExclude, NumExcluded), m_Owner, Types);
 
 	if (pEnt)
 	{

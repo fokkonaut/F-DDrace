@@ -28,6 +28,39 @@ public:
 	bool Includes(vec2 Pos) { return (Pos.x >= TopLeft().x-1 && Pos.x <= BottomRight().x+1 && Pos.y >= TopLeft().y-1 && Pos.y <= BottomRight().y+1); }
 };
 
+class CNotTheseEntities
+{
+private:
+	CEntity* m_pSingleEntity;
+	CEntity** m_apExcludeEntities;
+	int m_NumEntities;
+
+public:
+	// Automatic cast (short scope)
+	CNotTheseEntities(CEntity* pSingleEntity)
+	{
+		m_pSingleEntity = pSingleEntity;
+		m_apExcludeEntities = &m_pSingleEntity;
+		m_NumEntities = 1;
+	}
+	CNotTheseEntities(CEntity** apEntities, int NumEntities)
+	{
+		m_pSingleEntity = nullptr;
+		m_apExcludeEntities = apEntities;
+		m_NumEntities = NumEntities;
+	}
+
+	// Getting
+	bool IsExcluded(CEntity* pEntity) const
+	{
+		for (int i = 0; i < m_NumEntities; i++)
+			if (m_apExcludeEntities[i] == pEntity)
+				return true;
+
+		return false;
+	}
+};
+
 /*
 	Class: Game World
 		Tracks all entities in the game. Propagates tick and
@@ -278,7 +311,7 @@ public:
 			is being created.
 	*/
 	void Snap(int SnappingClient);
-	
+
 	void PostSnap();
 
 	/*
@@ -316,8 +349,8 @@ public:
 	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
 	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckDrivers = true);
 	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team = -1);
-	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, int CollideWith, int64 Types,
-		class CCharacter *pThisOnly = 0, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
+	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types,
+		CCharacter *pThisOnly = nullptr, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
 	bool IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1);
 	int IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDoors, int Max);
 };
