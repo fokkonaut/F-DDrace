@@ -39,6 +39,9 @@ CGameWorld::CGameWorld()
 	m_ResetRequested = false;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		m_apFirstEntityTypes[i] = 0;
+
+	m_vpResponsibeDrawTiles.clear();
+	m_vPendingTileRemovals.clear();
 }
 
 CGameWorld::~CGameWorld()
@@ -148,7 +151,7 @@ void CGameWorld::Snap(int SnappingClient)
 	std::vector<CEntity *> vpPlotObjects;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		if(i == ENTTYPE_CHARACTER)
+		if(i == ENTTYPE_CHARACTER || i == ENTTYPE_DRAWTILE)
 			continue;
 
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
@@ -162,6 +165,13 @@ void CGameWorld::Snap(int SnappingClient)
 		}
 	}
 
+	// never iterate through all drawtiles
+	for (auto &pPendingRemoval : m_vPendingTileRemovals)
+		m_vpResponsibeDrawTiles.erase(pPendingRemoval);
+	m_vPendingTileRemovals.clear();
+	for (auto &pDrawTile : m_vpResponsibeDrawTiles)
+		pDrawTile->Snap(SnappingClient);
+
 	// snap plot objects after we got everything else, so we dont fill the snap with plot objects before everything important
 	for (unsigned int i = 0; i < vpPlotObjects.size(); i++)
 		vpPlotObjects[i]->Snap(SnappingClient);
@@ -170,12 +180,17 @@ void CGameWorld::Snap(int SnappingClient)
 void CGameWorld::PostSnap()
 {
 	for(int i = 0; i < NUM_ENTTYPES; i++)
+	{
+		if (i == ENTTYPE_DRAWTILE)
+			continue;
+
 		for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->PostSnap();
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 }
 
 void CGameWorld::Reset()
@@ -703,12 +718,17 @@ void CGameWorld::Tick()
 	{
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
+		{
+			if (i == ENTTYPE_DRAWTILE)
+				continue;
+				
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickPaused();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 	else
 	{
@@ -724,7 +744,7 @@ void CGameWorld::Tick()
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
 			// processed above
-			if (i == ENTTYPE_LIGHTNING_LASER)
+			if (i == ENTTYPE_LIGHTNING_LASER || i == ENTTYPE_DRAWTILE)
 				continue;
 
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
@@ -759,12 +779,17 @@ void CGameWorld::Tick()
 			m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
 
 		for(int i = 0; i < NUM_ENTTYPES; i++)
+		{
+			if (i == ENTTYPE_DRAWTILE)
+				continue;
+				
 			for(CEntity *pEnt = m_apFirstEntityTypes[i]; pEnt; )
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->TickDeferred();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 	}
 
 	RemoveEntities();

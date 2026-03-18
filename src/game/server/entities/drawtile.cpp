@@ -14,14 +14,17 @@ CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, boo
 	for (int i = 0; i < NUM_SIDES; i++)
 		m_aSides[i].m_ID = Server()->SnapNewID();
 
-	ProcessAndCacheEdges();
-
+	PrepareForCaching();
 	ResetCollision();
 	GameWorld()->InsertEntity(this);
 }
 
 CDrawTile::~CDrawTile()
 {
+	// Performance saving by handling draw tiles differently while keeping them supported as entity for saving, loading, and the draweditor itself
+	// Drawtiles do not need Tick() etc only Snap()
+	GameWorld()->RemoveDrawTile(this);
+	
 	ResetCollision(true);
 	for (int i = 0; i < NUM_SIDES; i++)
 		Server()->SnapFreeID(m_aSides[i].m_ID);
@@ -61,18 +64,20 @@ void CDrawTile::ResetCollision(bool Remove)
 	CDrawTile *pDrawTile = (CDrawTile *)GameWorld()->FindFirst(CGameWorld::ENTTYPE_DRAWTILE);
 	for (; pDrawTile; pDrawTile = (CDrawTile *)pDrawTile->TypeNext())
 		if (pDrawTile->GetIndex() == m_Index)
-			pDrawTile->ProcessAndCacheEdges();
+			pDrawTile->PrepareForCaching();
 }
 
 void CDrawTile::SetPos(vec2 Pos)
 {
 	CEntity::SetPos(Pos);
 	// specifically for draweditor preview position updating
-	ProcessAndCacheEdges();
+	PrepareForCaching();
 }
 
-void CDrawTile::ProcessAndCacheEdges()
+void CDrawTile::PrepareForCaching()
 {
+	GameWorld()->AddDrawTile(this);
+	m_IsResponsible = false;
 	m_HasCachedValues = false;
 	for (int i = 0; i < NUM_SIDES; i++)
 		m_aSides[i].m_Active = false;
@@ -160,14 +165,16 @@ void CDrawTile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
 
-	if (m_HasCachedValues)
-	{
-		for (int i = 0; i < NUM_SIDES; i++)
-			if (m_aSides[i].m_Active && !NetworkClippedLine(SnappingClient, m_aSides[i].m_To, m_aSides[i].m_From))
-				GameServer()->SnapLaserObject(Context, m_aSides[i].m_ID, m_aSides[i].m_To, m_aSides[i].m_From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
-		return;
-	}
+	if (!m_HasCachedValues)
+		UpdateSnapCache();
 
+	for (int i = 0; i < NUM_SIDES; i++)
+		if (m_aSides[i].m_Active && !NetworkClippedLine(SnappingClient, m_aSides[i].m_To, m_aSides[i].m_From))
+			GameServer()->SnapLaserObject(Context, m_aSides[i].m_ID, m_aSides[i].m_To, m_aSides[i].m_From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
+}
+
+void CDrawTile::UpdateSnapCache()
+{
 	const int CornerOffset = 10;
 	const int ExtendBy = ((32 / 2) - CornerOffset) * 2;
 	vec2 aCorners[4] = {
@@ -217,8 +224,16 @@ void CDrawTile::Snap(int SnappingClient)
 		m_aSides[i].m_To = Pos;
 		m_aSides[i].m_From = From;
 		m_aSides[i].m_Active = true;
-		GameServer()->SnapLaserObject(Context, m_aSides[i].m_ID, Pos, From, Server()->Tick(), -1, m_Color, -1, m_Number, LASERFLAG_NO_PREDICT);
+		m_IsResponsible = true;
 	}
 
 	m_HasCachedValues = true;
+	if (m_IsResponsible)
+	{
+		GameWorld()->AddDrawTile(this);
+	}
+	else
+	{
+		GameWorld()->RemoveDrawTile(this);
+	}
 }

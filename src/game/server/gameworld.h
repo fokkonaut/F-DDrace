@@ -12,6 +12,7 @@ class CCharacter;
 class CPlayer;
 class CGameContext;
 class CDoor;
+class CDrawTile;
 
 // Needs to be here because we need it in gamecontext.h but also in draweditor.h
 class CSelectedArea
@@ -181,6 +182,11 @@ public:
 		int m_MaxPoliceTilePlayers = 0;
 		bool IsActive() { return m_MaxPoliceTilePlayers <= 0 || m_NumPoliceTilePlayers <= m_MaxPoliceTilePlayers; }
 	} m_PoliceFarm;
+
+	std::set<CDrawTile *> m_vpResponsibeDrawTiles;
+	std::set<CDrawTile *> m_vPendingTileRemovals;
+	void AddDrawTile(CDrawTile *pEnt) { m_vpResponsibeDrawTiles.insert(pEnt); }
+	void RemoveDrawTile(CDrawTile *pEnt) { m_vPendingTileRemovals.insert(pEnt); }
 
 	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }

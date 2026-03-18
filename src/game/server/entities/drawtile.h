@@ -29,8 +29,9 @@ private:
 
 	int m_Index;
 	int m_Color;
-
+	
 	bool m_HasCachedValues;
+	bool m_IsResponsible;
 
 	bool HasSameIndexNeighbor(int Side);
 	bool HasEdge(vec2 Pos, int Side);
@@ -38,6 +39,7 @@ private:
 	bool IsResponsibleForEdge(int Side);
 	vec2 ExtendEdgeEnd(int Side, vec2 From);
 	bool HasInsideCornerAt(vec2 TilePos, int CornerIndex);
+	void UpdateSnapCache();
 
 public:
 	CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, bool Collision = true);
@@ -50,7 +52,8 @@ public:
 	int GetColor() { return m_Color; }
 
 	void SetPos(vec2 Pos) override;
-	void ProcessAndCacheEdges();
+	void PrepareForCaching();
+	bool IsResponsible() { return m_IsResponsible; }
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAWTILE_H
