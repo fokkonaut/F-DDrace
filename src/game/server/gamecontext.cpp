@@ -561,12 +561,19 @@ void CGameContext::SendChatTeam(int Team, const char *pText, CFormatArg *pArgs, 
 
 void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
 {
-	if (ClientID < 0)
-		return;
-
 	char aName[128];
-	str_format(aName, sizeof(aName), "%s (%s)", Server()->ClientName(ClientID), Server()->GetAuthIdent(ClientID));
-	Server()->SendWebhookMessage(Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(GetAvatarURL(ClientID)));
+	char aAvatarURL[256];
+	if (ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		str_format(aName, sizeof(aName), "%s (%s)", Server()->ClientName(ClientID), Server()->GetAuthIdent(ClientID));
+		str_copy(aAvatarURL, GetAvatarURL(ClientID), sizeof(aAvatarURL));
+	}
+	else
+	{
+		str_copy(aName, "[Server]", sizeof(aName));
+		str_copy(aAvatarURL, Config()->m_SvWebhookChatAvatarURL, sizeof(aAvatarURL));
+	}
+	Server()->SendWebhookMessage(Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(aAvatarURL));
 }
 
 const char *CGameContext::GetAvatarURL(int ClientID)
@@ -1433,9 +1440,25 @@ void CGameContext::OnTick()
 			// Do it safely here so we dont get any crashes
 			if (pPlayer->m_BotDetected)
 			{
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "Bot detected (%s)", Server()->ClientName(i));
-				Server()->Ban(i, 60*Config()->m_SvAntibotBanMinutes, aBuf);
+				const int Action = Config()->m_SvAntibotAutoAction;
+				if (Action == 1)
+				{
+					int Seconds = Config()->m_SvAntibotAutoActionTime;
+					if (JailPlayer(i, Seconds, -1))
+					{
+						char aBuf[256];
+						SendChatPoliceFormat(Localizable("'%s' has been arrested for using a suspicious client (%d seconds arrest)"), Server()->ClientName(i), Seconds);
+						str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly."), Seconds);
+						SendChatTarget(i, aBuf);
+					}
+				}
+				else if (Action == 2)
+				{
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "Bot detected (%s)", Server()->ClientName(i));
+					int Seconds = 60 * Config()->m_SvAntibotAutoActionTime;
+					Server()->Ban(i, Seconds, aBuf);
+				}
 				continue;
 			}
 
@@ -7148,11 +7171,12 @@ int CGameContext::FindSavedPlayer(int ClientID)
 		bool SameTimeoutCode = Info.m_aTimeoutCode[0] != '\0' && str_comp(Info.m_aTimeoutCode, m_apPlayers[ClientID]->m_TimeoutCode) == 0;
 		bool SameAcc = Info.m_aAccUsername[0] != '\0' && str_comp(Info.m_aAccUsername, m_Accounts[m_apPlayers[ClientID]->GetAccID()].m_Username) == 0;
 		bool SameName = str_comp(Info.m_aName, Server()->ClientName(ClientID)) == 0;
-		bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
+		//bool SameTeeInfo = mem_comp(&Info.m_TeeInfo, &m_apPlayers[ClientID]->m_TeeInfos, sizeof(CTeeInfo)) == 0;
 
 		// SameTeeInfo is not really used, since players with the same skin and ip would get fucked up otherwise, in CSaveTee::Save() the identity of e.g. dummy would get saved then
 		bool SameClientInfo = SameAddr && SameName;
-		SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
+		// always match account for extensive bypassing
+		//SameAcc = SameAcc && (SameAddr || SameName || SameTeeInfo || SameTimeoutCode);
 		if (SameAddrAndPort || SameAcc || SameTimeoutCode || SameClientInfo)
 		{
 			Found = i;
@@ -7188,10 +7212,10 @@ const char *CGameContext::GetSavedIdentityHash(SSavedIdentity Info)
 	return aSha256;
 }
 
-bool CGameContext::CheckLoadPlayer(int ClientID)
+bool CGameContext::CheckLoadPlayer(int ClientID, bool Force)
 {
 	// dont load two saves for one tee, because they are probably two clients with identical information, sending a info change can cause a second load, of the tee thats the 2nd client
-	if (!m_apPlayers[ClientID] || m_apPlayers[ClientID]->m_LoadedSavedPlayer)
+	if (!m_apPlayers[ClientID] || (!Force && m_apPlayers[ClientID]->m_LoadedSavedPlayer))
 		return false;
 
 	int Index = FindSavedPlayer(ClientID);
@@ -7470,7 +7494,7 @@ bool CGameContext::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-bool CGameContext::JailPlayer(int ClientID, int Seconds)
+bool CGameContext::JailPlayer(int ClientID, int Seconds, int ModLogID)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if (!pPlayer || Seconds <= 0)
@@ -7488,6 +7512,14 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds)
 	int PlotID = GetPlotID(pPlayer->GetAccID());
 	if (PlotID >= PLOT_START)
 		m_aPlots[PlotID].m_DestroyEndTick = 1;
+
+	if (ModLogID != -2)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d seconds", Server()->ClientName(ClientID), Seconds);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		SendModLogMessage(ModLogID, aBuf);
+	}
 	return true;
 }
 

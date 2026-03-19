@@ -29,6 +29,7 @@ private:
 	static void Teehistorian(const void *pData, int Size, void *pUser);
 	static void Report(int ClientID, const char *pMessage, /*int Count,*/ void *pUser);
 
+	int m_aCount[MAX_CLIENTS];
 	char m_aKind[MAX_CLIENTS][16];
 	int m_DumpFilterID;
 	int m_FetchKindID;

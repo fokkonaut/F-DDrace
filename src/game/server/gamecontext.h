@@ -853,7 +853,7 @@ public:
 		SendChat(-1, CHAT_POLICE_CHANNEL, -1, pFormat, -1, CHATFLAG_ALL, aArgs, std::size(aArgs));
 	}
 	void SendChatPolice(const char *pMessage);
-	bool JailPlayer(int ClientID, int Seconds);
+	bool JailPlayer(int ClientID, int Seconds, int ModLogID = -2);
 	bool ForceJailRelease(int ClientID);
 
 	// gangster
@@ -863,7 +863,7 @@ public:
 	// saved
 	int SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
 	int FindSavedPlayer(int ClientID);
-	bool CheckLoadPlayer(int ClientID);
+	bool CheckLoadPlayer(int ClientID, bool Force = false);
 	bool TryLoadPlayer(int ClientID, int Index, bool RedirectTile);
 	const char *GetSavedIdentityHash(SSavedIdentity Info);
 	std::vector<SSavedIdentity> m_vSavedIdentities;

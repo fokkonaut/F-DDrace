@@ -1628,7 +1628,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	}
 
 	if (pSelf->Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1)))
-		pSelf->CheckLoadPlayer(pResult->m_ClientID);
+		pSelf->CheckLoadPlayer(pResult->m_ClientID, pSelf->Config()->m_SvSaveTeeForceAccMatch);
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)

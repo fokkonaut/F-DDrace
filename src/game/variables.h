@@ -185,6 +185,7 @@ MACRO_CONFIG_INT(SvAccSysBanPinFails, sv_acc_sys_ban_pin_fails, 3, 0, 10, CFGFLA
 MACRO_CONFIG_INT(SvShutdownSaveTees, sv_shutdown_save_tees, 1, 0, 1, CFGFLAG_SERVER, "Whether to save characters before shutdown/reload to load them again", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvSavedTeesFilePath, sv_saved_tees_file_path, 128, "savedtees", CFGFLAG_SAVE|CFGFLAG_SERVER, "The path to saved tees files (relative to dumps dir)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvShutdownSaveTeeExpire, sv_shutdown_save_tee_expire, 8, 1, 24*7, CFGFLAG_SERVER, "How many hours until a shutdown save expires", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvSaveTeeForceAccMatch, sv_save_tee_force_acc_match, 1, 0, 1, CFGFLAG_SERVER, "Whether login always tries to load a matching save regardless of previously loaded saves", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvJailSaveTeeExpire, sv_jail_save_tee_expire, 24, 1, 24*7, CFGFLAG_SERVER, "How many hours until a jail save expires", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDisconnectSaveTees, sv_disconnect_save_tees, 0, 0, 1, CFGFLAG_SERVER, "Whether to save characters before disconnect to load them again (0=disabled, 1=allow manual activation)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDisconnectSaveTeeExpire, sv_disconnect_save_tee_expire, 2, 1, 24, CFGFLAG_SERVER, "How many hours until a disconnect save expires", AUTHED_ADMIN)
@@ -355,11 +356,11 @@ MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_S
 // discord
 MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord server URL", AUTHED_ADMIN)
 
-// antibot
-MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 16, CFGFLAG_SERVER, "Treshold for antibot autoban (0=off)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAntibotBanMinutes, sv_antibot_ban_minutes, 10000, 0, 99999, CFGFLAG_SERVER, "Time in minutes a player gets banned for by antibot", AUTHED_ADMIN)
+// antibo
+MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 32, CFGFLAG_SERVER, "Treshold for antibot autoban (0=off)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotAutoAction, sv_antibot_auto_action, 1, 0, 2, CFGFLAG_SERVER, "Automatic antibot action (0=off, 1=jail, 2=ban)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotAutoActionTime, sv_antibot_auto_action_time, 900, 0, 99999, CFGFLAG_SERVER, "Time for sv_antibot_auto_action (if 1: jail seconds, if 2: ban minutes)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotReportsLevel, sv_antibot_reports_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to see antibot reports", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvAntibotReportsFilter, sv_antibot_reports_filter, 1, 0, 1, CFGFLAG_SERVER, "Whether antibot reports are filtered if they are legit", AUTHED_ADMIN)
 
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)

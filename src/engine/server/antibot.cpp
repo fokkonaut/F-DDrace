@@ -13,7 +13,10 @@ CAntibot::CAntibot() :
 	m_DumpFilterID = -1;
 	m_FetchKindID = -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
 		str_copy(m_aKind[i], "pending", sizeof(m_aKind[i]));
+		m_aCount[i] = 0;
+	}
 }
 CAntibot::~CAntibot()
 {
@@ -71,11 +74,9 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 		pAntibot->m_FetchKindID = -1;
 	}
 
-	if (pAntibot->Config()->m_SvAntibotReportsFilter
-		&& str_comp(pAntibot->m_aKind[ClientID], "known_bot")
+	if (str_comp(pAntibot->m_aKind[ClientID], "known_bot")
 		&& str_comp(pAntibot->m_aKind[ClientID], "weird")
 		&& str_comp(pAntibot->m_aKind[ClientID], "selfbuilt/linux")
-		&& str_comp(pAntibot->m_aKind[ClientID], "pending")
 		&& str_comp(pAntibot->m_aKind[ClientID], "old"))
 		return;
 
@@ -83,13 +84,17 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
 	Log(aBuf, pUser);
 
+	pAntibot->m_aCount[ClientID]++;
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
-	if (pAntibot->Config()->m_SvAntibotTreshold != 0 /*&& Count >= pAntibot->Config()->m_SvAntibotTreshold*/ && str_startswith(pMessage, "known_bot"))
+	int Action = pAntibot->Config()->m_SvAntibotAutoAction;
+	int Treshold = pAntibot->Config()->m_SvAntibotTreshold;
+	if (Action && Treshold && pAntibot->m_aCount[ClientID] >= Treshold)
 	{
-		str_format(aBuf, sizeof(aBuf), "%d: %s has been banned", ClientID, pAntibot->Server()->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "%d: %s has been %s", ClientID, pAntibot->Server()->ClientName(ClientID), Action == 1 ? "jailed" : "banned");
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 		pAntibot->GameServer()->SetBotDetected(ClientID);
+		pAntibot->m_aCount[ClientID] = 0;
 	}
 }
 void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
@@ -260,7 +265,10 @@ CAntibot::CAntibot() :
 	m_DumpFilterID = -1;
 	m_FetchKindID = -1;
 	for (int i = 0; i < MAX_CLIENTS; i++)
+	{
 		str_copy(m_aKind[i], "pending", sizeof(m_aKind[i]));
+		m_aCount[i] = 0;
+	}
 }
 CAntibot::~CAntibot()
 {
