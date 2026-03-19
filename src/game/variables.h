@@ -361,6 +361,7 @@ MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 32, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvAntibotAutoAction, sv_antibot_auto_action, 1, 0, 2, CFGFLAG_SERVER, "Automatic antibot action (0=off, 1=jail, 2=ban)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotAutoActionTime, sv_antibot_auto_action_time, 900, 0, 99999, CFGFLAG_SERVER, "Time for sv_antibot_auto_action (if 1: jail seconds, if 2: ban minutes)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotReportsLevel, sv_antibot_reports_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to see antibot reports", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotLogPending, sv_antibot_log_pending, 1, 0, 1, CFGFLAG_SERVER, "Whether pending antibot reports are logged", AUTHED_ADMIN)
 
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)

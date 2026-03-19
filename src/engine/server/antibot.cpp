@@ -74,22 +74,25 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 		pAntibot->m_FetchKindID = -1;
 	}
 
-	if (str_comp(pAntibot->m_aKind[ClientID], "known_bot")
+	bool LogPending = !str_comp(pAntibot->m_aKind[ClientID], "pending") && pAntibot->Config()->m_SvAntibotLogPending;
+	if (!LogPending
+		&& str_comp(pAntibot->m_aKind[ClientID], "known_bot")
 		&& str_comp(pAntibot->m_aKind[ClientID], "weird")
 		&& str_comp(pAntibot->m_aKind[ClientID], "selfbuilt/linux")
 		&& str_comp(pAntibot->m_aKind[ClientID], "old"))
 		return;
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
+	str_format(aBuf, sizeof(aBuf), "%d: %s%s", ClientID, pMessage, LogPending ? " (pending)" : "");
 	Log(aBuf, pUser);
-
-	pAntibot->m_aCount[ClientID]++;
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
+
+	if (LogPending)
+		return;
 
 	int Action = pAntibot->Config()->m_SvAntibotAutoAction;
 	int Treshold = pAntibot->Config()->m_SvAntibotTreshold;
-	if (Action && Treshold && pAntibot->m_aCount[ClientID] >= Treshold)
+	if (Action && Treshold && ++pAntibot->m_aCount[ClientID] >= Treshold)
 	{
 		str_format(aBuf, sizeof(aBuf), "%d: %s has been %s", ClientID, pAntibot->Server()->ClientName(ClientID), Action == 1 ? "jailed" : "banned");
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
