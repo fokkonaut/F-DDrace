@@ -39,6 +39,8 @@ private:
 	bool IsResponsibleForEdge(int Side);
 	vec2 ExtendEdgeEnd(int Side, vec2 From);
 	bool HasInsideCornerAt(vec2 TilePos, int CornerIndex);
+
+	void PrepareForCaching();
 	void UpdateSnapCache();
 
 public:
@@ -52,8 +54,6 @@ public:
 	int GetColor() { return m_Color; }
 
 	void SetPos(vec2 Pos) override;
-	void PrepareForCaching();
-	bool IsResponsible() { return m_IsResponsible; }
 };
 
 #endif // GAME_SERVER_ENTITIES_DRAWTILE_H
