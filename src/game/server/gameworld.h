@@ -183,10 +183,23 @@ public:
 		bool IsActive() { return m_MaxPoliceTilePlayers <= 0 || m_NumPoliceTilePlayers <= m_MaxPoliceTilePlayers; }
 	} m_PoliceFarm;
 
-	std::set<CDrawTile *> m_vpResponsibeDrawTiles;
-	std::set<CDrawTile *> m_vPendingTileRemovals;
-	void AddDrawTile(CDrawTile *pEnt) { m_vpResponsibeDrawTiles.insert(pEnt); }
-	void RemoveDrawTile(CDrawTile *pEnt) { m_vPendingTileRemovals.insert(pEnt); }
+	class CDrawTileContext
+	{
+		std::set<CDrawTile *> m_vpResponsibleTiles;
+		std::set<CDrawTile *> m_vPendingRemovals;
+
+	public:
+		void Insert(CDrawTile *pEnt) { m_vpResponsibleTiles.insert(pEnt); }
+		void MarkForRemoval(CDrawTile *pEnt) { m_vPendingRemovals.insert(pEnt); }
+		void ProcessRemovals()
+		{
+			for (auto &pPendingRemoval : m_vPendingRemovals)
+				m_vpResponsibleTiles.erase(pPendingRemoval);
+			m_vPendingRemovals.clear();
+		}
+		const std::set<CDrawTile *> &ResponsibleTiles() const { return m_vpResponsibleTiles; }
+	};
+	CDrawTileContext m_DrawTiles;
 
 	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }

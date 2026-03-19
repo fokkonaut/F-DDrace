@@ -29,9 +29,6 @@ private:
 
 	int m_Index;
 	int m_Color;
-	
-	bool m_HasCachedValues;
-	bool m_IsResponsible;
 
 	bool HasSameIndexNeighbor(int Side);
 	bool HasEdge(vec2 Pos, int Side);
@@ -40,6 +37,7 @@ private:
 	vec2 ExtendEdgeEnd(int Side, vec2 From);
 	bool HasInsideCornerAt(vec2 TilePos, int CornerIndex);
 
+	bool m_CacheValid;
 	void PrepareForCaching();
 	void UpdateSnapCache();
 

@@ -23,7 +23,7 @@ CDrawTile::~CDrawTile()
 {
 	// Performance saving by handling draw tiles differently while keeping them supported as entity for saving, loading, and the draweditor itself
 	// Drawtiles do not need Tick() etc only Snap()
-	GameWorld()->RemoveDrawTile(this);
+	GameWorld()->m_DrawTiles.MarkForRemoval(this);
 	
 	ResetCollision(true);
 	for (int i = 0; i < NUM_SIDES; i++)
@@ -76,9 +76,8 @@ void CDrawTile::SetPos(vec2 Pos)
 
 void CDrawTile::PrepareForCaching()
 {
-	GameWorld()->AddDrawTile(this);
-	m_IsResponsible = false;
-	m_HasCachedValues = false;
+	GameWorld()->m_DrawTiles.Insert(this);
+	m_CacheValid = false;
 	for (int i = 0; i < NUM_SIDES; i++)
 		m_aSides[i].m_Active = false;
 }
@@ -165,7 +164,7 @@ void CDrawTile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CSnapContext Context(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient);
 
-	if (!m_HasCachedValues)
+	if (!m_CacheValid)
 		UpdateSnapCache();
 
 	for (int i = 0; i < NUM_SIDES; i++)
@@ -191,6 +190,7 @@ void CDrawTile::UpdateSnapCache()
 		vec2(0, -32) // left
 	};
 
+	bool MarkForRemoval = true;
 	for (int i = 0; i < NUM_SIDES; i++)
 	{
 		if (HasSameIndexNeighbor(i) || !IsResponsibleForEdge(i))
@@ -224,16 +224,12 @@ void CDrawTile::UpdateSnapCache()
 		m_aSides[i].m_To = Pos;
 		m_aSides[i].m_From = From;
 		m_aSides[i].m_Active = true;
-		m_IsResponsible = true;
+		MarkForRemoval = false;
 	}
 
-	m_HasCachedValues = true;
-	if (m_IsResponsible)
+	m_CacheValid = true;
+	if (MarkForRemoval)
 	{
-		GameWorld()->AddDrawTile(this);
-	}
-	else
-	{
-		GameWorld()->RemoveDrawTile(this);
+		GameWorld()->m_DrawTiles.MarkForRemoval(this);
 	}
 }

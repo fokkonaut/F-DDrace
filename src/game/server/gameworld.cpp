@@ -39,9 +39,6 @@ CGameWorld::CGameWorld()
 	m_ResetRequested = false;
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		m_apFirstEntityTypes[i] = 0;
-
-	m_vpResponsibeDrawTiles.clear();
-	m_vPendingTileRemovals.clear();
 }
 
 CGameWorld::~CGameWorld()
@@ -166,10 +163,8 @@ void CGameWorld::Snap(int SnappingClient)
 	}
 
 	// never iterate through all drawtiles
-	for (auto &pPendingRemoval : m_vPendingTileRemovals)
-		m_vpResponsibeDrawTiles.erase(pPendingRemoval);
-	m_vPendingTileRemovals.clear();
-	for (auto &pDrawTile : m_vpResponsibeDrawTiles)
+	m_DrawTiles.ProcessRemovals();
+	for (auto &pDrawTile : m_DrawTiles.ResponsibleTiles())
 		pDrawTile->Snap(SnappingClient);
 
 	// snap plot objects after we got everything else, so we dont fill the snap with plot objects before everything important
