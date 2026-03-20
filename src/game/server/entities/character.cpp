@@ -2402,7 +2402,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	int Events = m_TriggeredEvents;
 	// jump is used for flying up, annoying air jump effect otherwise
 	bool Local = SnappingClient == m_pPlayer->GetCID();
-	if (m_pHelicopter || (Local && (m_Snake.Active() || RainbowNameAffected)))
+
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
+	bool HelicopterPrediction = m_pHelicopter && pSnapChar && pSnapChar->m_pHelicopter == m_pHelicopter && m_pHelicopter->GetDriver() == pSnapChar;
+
+	if (HelicopterPrediction || (Local && (m_Snake.Active() || RainbowNameAffected)))
 	{
 		if (Local)
 		{
@@ -2410,7 +2414,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			Events |= COREEVENTFLAG_AIR_JUMP;
 		}
 
-		if (m_pHelicopter)
+		if (HelicopterPrediction)
 		{
 			vec2 Vel = m_pHelicopter->GetVel();
 			pCharacter->m_VelX = round_to_int(Vel.x * 256.0f);
