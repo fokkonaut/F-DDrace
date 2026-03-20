@@ -77,7 +77,21 @@ void CBone::Scale(float factor)
 	m_To *= factor;
 }
 
-void CBone::ResetPositions()
+void CBone::Save()
+{
+	m_InitFrom = m_From;
+	m_InitTo = m_To;
+	m_InitColor = m_Color;
+	m_InitThickness = m_Thickness;
+}
+
+void CBone::SavePositions()
+{
+	m_InitFrom = m_From;
+	m_InitTo = m_To;
+}
+
+void CBone::LoadPositions()
 {
 	m_From = m_InitFrom;
 	m_To = m_InitTo;

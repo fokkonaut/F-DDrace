@@ -5,6 +5,15 @@
 #include "../../../gamecontext.h"
 #include "bone_model.h"
 
+void IBoneModel::SetBonesRotation(float NewRotation)
+{
+	for (int i = 0; i < m_NumBones; i++)
+	{
+		m_aBones[i].LoadPositions();
+		m_aBones[i].Rotate(NewRotation);
+	}
+}
+
 void IBoneModel::ApplyScaleBones(float Scale)
 {
 	for (int i = 0; i < m_NumBones; i++)
@@ -71,38 +80,6 @@ IServer *IBoneModel::Server()
 	return m_pEntity->Server();
 }
 
-void IBoneModel::UpdateAndCacheBounds()
-{
-	m_Bounds = { 0, 0, 0, 0 };
-	for (int i = 0; i < m_NumBones; i++)
-	{
-		SBounds BoneBounds = m_aBones[i].GetBounds();
-		m_Bounds.Expand(BoneBounds);
-	}
-
-	m_TotalSize = m_Bounds.GetSize();
-}
-
-void IBoneModel::ApplyScale(float Scale)
-{
-	ApplyScaleBones(Scale);
-}
-
-void IBoneModel::Flip()
-{
-	for (int i = 0; i < m_NumBones; i++)
-		m_aBones[i].Flip();
-}
-
-void IBoneModel::SetRotation(float NewRotation)
-{
-	for (int i = 0; i < m_NumBones; i++)
-	{
-		m_aBones[i].ResetPositions();
-		m_aBones[i].Rotate(NewRotation);
-	}
-}
-
 void IBoneModel::InitBuildAnimation()
 {
 	for (int i = 0; i < m_NumBones; i++)
@@ -114,6 +91,28 @@ void IBoneModel::InitBuildAnimation()
 
 	for (int i = 0; i < m_NumTrails; i++)
 		Trails()[i].m_Enabled = false;
+}
+
+void IBoneModel::SetRotation(float NewRotation)
+{
+	SetBonesRotation(NewRotation);
+}
+
+void IBoneModel::ApplyScale(float Scale)
+{
+	ApplyScaleBones(Scale);
+}
+
+void IBoneModel::UpdateAndCacheBounds()
+{
+	m_Bounds = { 0, 0, 0, 0 };
+	for (int i = 0; i < m_NumBones; i++)
+	{
+		SBounds BoneBounds = m_aBones[i].GetBounds();
+		m_Bounds.Expand(BoneBounds);
+	}
+
+	m_TotalSize = m_Bounds.GetSize();
 }
 
 void IBoneModel::Snap(int SnappingClient, bool SendTrails, bool Flipped, float VertexSnapping, bool RainbowMode)

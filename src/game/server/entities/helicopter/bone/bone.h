@@ -73,7 +73,9 @@ public:
 	void Flip();
 	void Rotate(float Angle);
 	void Scale(float factor);
-	void ResetPositions();
+	void Save();
+	void SavePositions();
+	void LoadPositions();
 
 	// Ticking
 	void Snap(int SnappingClient, bool Flipped = false, float VertexSnapping = 0.0f, bool RainbowMode = false);

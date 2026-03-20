@@ -73,12 +73,48 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	return distSq <= radius * radius;
 }
 
-IServer *Server();
+namespace Helicopters
+{
+static IHelicopterModel *CreateDefaultModel(CHelicopter *pHeli) { return new CHelicopterModel(pHeli); }
+static IHelicopterModel *CreateApacheModel(CHelicopter *pHeli) { return new CHelicopterApacheModel(pHeli); }
+static IHelicopterModel *CreateChinookModel(CHelicopter *pHeli) { return new CHelicopterChinookModel(pHeli); }
 
 SHelicopterMeta aHelicopterMetadata[NUM_HELICOPTER_TYPES] = {
-	{ "Helicopter", 30, 0, 4, 0, vec2(0.75f, 0.6f), { vec2(0, 0) }, 1 },
-	{ "Attack Helicopter", 60, 30, 4, 2, vec2(1.0f, 1.0f), { vec2(0, 0), vec2(50, 10) }, 2 }
+	{
+		"Helicopter", // m_pName
+		30, // m_BaseHealth
+		0, // m_BaseArmorHealth
+		4, // m_NumHeartsIndicator
+		0, // m_NumArmorIndicator
+		6, // m_NumExplosions
+		vec2(80, 128),// m_BaseSize
+		vec2(0.75f, 0.6f), // m_BaseAccel
+		CreateDefaultModel, // m_pModelFactory
+	},
+	{
+		"Attack Helicopter", // m_pName
+		60, // m_BaseHealth
+		30, // m_BaseArmorHealth
+		4, // m_NumHeartsIndicator
+		2, // m_NumArmorIndicator
+		12, // m_NumExplosions
+		vec2(170, 128),// m_BaseSize
+		vec2(1.0f, 1.0f), // m_BaseAccel
+		CreateApacheModel, // m_pModelFactory
+	},
+	{
+		"Transport Helicopter", // m_pName
+		30, // m_BaseHealth
+		60, // m_BaseArmorHealth
+		2, // m_NumHeartsIndicator
+		4, // m_NumArmorIndicator
+		12, // m_NumExplosions
+		vec2(230, 128),// m_BaseSize
+		vec2(0.65f, 0.65f), // m_BaseAccel
+		CreateChinookModel, // m_pModelFactory
+	},
 };
+}
 
 CHelicopter::CHelicopter(
 	CGameWorld *pGameWorld,
@@ -91,12 +127,9 @@ CHelicopter::CHelicopter(
 	int Number,
 	int DelayTurretType
 )
-	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE * HelicopterScale)
+	: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE)
 {
 	m_HelicopterType = clamp(HelicopterType, 0, (int)NUM_HELICOPTER_TYPES - 1);
-	for (int i = 0; i < NUM_MAX_SEATS; i++)
-		m_aPassengers[i] = -1;
-	m_NumPassengers = 0;
 
 	m_AllowVipPlus = false;
 	m_Elasticity = vec2(0.f, 0.f);
@@ -123,7 +156,6 @@ CHelicopter::CHelicopter(
 	m_NumArmorIndicator = 0;
 	m_BaseAccel = vec2(0.5f, 0.5f);
 	m_pName = "Helicopter";
-	m_NumSeats = 0;
 	m_EngineOn = false;
 
 	m_Scale = 1.f;
@@ -137,7 +169,8 @@ CHelicopter::CHelicopter(
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aFlungCharacters[i] = -1;
 
-	m_ExplosionsLeft = -1;
+	m_ExplosionsOnDeath = 1;
+	m_ExplosionsLeft = 0;
 
 	m_ShowHealthbarUntil = 0;
 	m_LastDamage = 0;
@@ -153,9 +186,7 @@ CHelicopter::CHelicopter(
 	for (int i = 0; i < NUM_BUILD_IDS; i++)
 		m_Build.m_aBuildIDs[i] = -1;
 
-	SetClassAttributes(HelicopterType, true);
-	InitModel();
-	m_pModel->UpdateLastPropellerPositions(); // Thop
+	SetClassType(HelicopterType, true);
 
 	UpdateHealthbarIndicator();
 
@@ -173,7 +204,7 @@ CHelicopter::CHelicopter(
 
 CHelicopter::~CHelicopter()
 {
-	delete m_pModel; // Also deletes laser and particle ids
+	delete m_pModel;
 
 	for (int i = 0; i < m_NumHeartsIndicator; i++)
 		Server()->SnapFreeID(m_aHeartsIndicator[i].m_ID);
@@ -209,30 +240,40 @@ bool CHelicopter::CanRegenerateArmor()
 
 CCharacter *CHelicopter::GetDriver()
 {
-	int driverID = m_aPassengers[0];
-	if (driverID != -1)
-		return GameServer()->GetPlayerChar(driverID);
+	if (m_pModel->NumSeats() >= 1)
+	{
+		int driverCID = m_pModel->Seats()[0].m_SeatedCID;
+		if (driverCID != -1)
+			return GameServer()->GetPlayerChar(driverCID);
+	}
+
 	return nullptr;
 }
 
 CCharacter *CHelicopter::GetGunner()
 {
-	if (m_NumSeats == 1 && m_aPassengers[0] != -1)
-		return GameServer()->GetPlayerChar(m_aPassengers[0]);
-	if (m_NumSeats >= 2 && m_aPassengers[1] != -1)
-		return GameServer()->GetPlayerChar(m_aPassengers[1]);
+	// One seat = gunner
+	if (m_pModel->NumSeats() == 1 && m_pModel->Seats()[0].m_SeatedCID != -1)
+		return GameServer()->GetPlayerChar(m_pModel->Seats()[0].m_SeatedCID);
+
+	// Two or more seats = second is gunner
+	if (m_pModel->NumSeats() >= 2 && m_pModel->Seats()[1].m_SeatedCID != -1)
+		return GameServer()->GetPlayerChar(m_pModel->Seats()[1].m_SeatedCID);
+
 	return nullptr;
 }
 
 int CHelicopter::GetNextAvailableSeat(int AfterIndex)
 {
-	for (int i = 0; i < m_NumSeats; i++)
+	int NumSeats = m_pModel->NumSeats();
+	for (int i = 0; i < NumSeats; i++)
 	{
-		int Index = (AfterIndex + i) % m_NumSeats;
-		if (m_aPassengers[Index] == -1)
-			return Index;
+		int SeatID = (AfterIndex + i) % NumSeats;
+		if (m_pModel->Seats()[SeatID].m_SeatedCID == -1)
+			return SeatID;
 	}
-	return -1;
+
+	return -1; // Full
 }
 
 void CHelicopter::SetNumIndicator(CPickupNode *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType)
@@ -272,23 +313,29 @@ void CHelicopter::SetNumArmorIndicator(int NumArmor)
 	SetNumIndicator(m_aArmorIndicator, m_NumArmorIndicator, NumArmor, MAX_ARMOR, POWERUP_ARMOR);
 }
 
-void CHelicopter::SetClassAttributes(int HelicopterType, bool HealFullyToo)
+void CHelicopter::SetClassType(int HelicopterType, bool HealFullyToo)
 {
 	if (HelicopterType < 0 || HelicopterType >= NUM_HELICOPTER_TYPES)
 		return; // invalid class
 
-	SHelicopterMeta& metadata = aHelicopterMetadata[HelicopterType];
+	Helicopters::SHelicopterMeta& metadata = Helicopters::aHelicopterMetadata[HelicopterType];
 	m_pName = metadata.m_pName;
 	m_MaxHealth = metadata.m_BaseHealth;
 	m_MaxArmor = metadata.m_BaseArmorHealth;
 	SetNumHeartsIndicator(metadata.m_NumHeartsIndicator);
 	SetNumArmorIndicator(metadata.m_NumArmorIndicator);
+	m_ExplosionsOnDeath = metadata.m_NumExplosions;
+	SetSize(metadata.m_BaseSize);
 	m_BaseAccel = metadata.m_BaseAccel;
 
-	memcpy(m_aSeats, metadata.m_aSeats, sizeof(m_aSeats));
-	memcpy(m_aSeatsTransformed, metadata.m_aSeats, sizeof(m_aSeatsTransformed));
-	memcpy(m_aSeatsInterpolation, metadata.m_aSeats, sizeof(m_aSeatsInterpolation));
-	m_NumSeats = metadata.m_NumSeats;
+	// Model
+	IHelicopterModel *pNewModel = metadata.m_pModelFactory(this);
+	if (pNewModel)
+		pNewModel->PostConstructor();
+
+	delete m_pModel;
+	m_pModel = pNewModel;
+	//
 
 	if (HealFullyToo)
 	{
@@ -297,16 +344,16 @@ void CHelicopter::SetClassAttributes(int HelicopterType, bool HealFullyToo)
 	}
 }
 
-bool CHelicopter::TryAttachTurret(CVehicleTurret *helicopterTurret)
+bool CHelicopter::TryAttachTurret(CVehicleTurret *pNewTurret)
 {
 	DestroyTurret();
 
-	if (helicopterTurret == nullptr) // Just remove the current turret
+	if (pNewTurret == nullptr) // Just remove the current turret
 		return true;
 
-	if (helicopterTurret->TryBindHelicopter(this)) // Attempt to pass ownership
+	if (pNewTurret->TryBindHelicopter(this)) // Attempt to pass ownership
 	{
-		m_pTurret = helicopterTurret;
+		m_pTurret = pNewTurret;
 		SortBones();
 		return true;
 	}
@@ -350,23 +397,18 @@ void CHelicopter::FlingTee(CCharacter *pChar)
 
 void CHelicopter::ApplyScale(float HelicopterScale)
 {
-	// Experimental
 	m_Scale *= HelicopterScale;
 
-	//	m_Size *= HelicopterScale; // done in CHelicopter() : m_Size()
+	vec2 NewSize = m_Size * HelicopterScale;
+	SetSize(NewSize);
 	m_pModel->ApplyScale(HelicopterScale);
-	// m_Build.m_CurrentHeight *= HelicopterScale;
-	//
-
-	for (int i = 0; i < m_NumSeats; i++)
-		m_aSeats[i] *= HelicopterScale;
 
 	UpdateHealthbarIndicator();
 }
 
 void CHelicopter::Explode()
 {
-	m_ExplosionsLeft = (m_HelicopterType == HELICOPTER_APACHE) ? 12 : 6;
+	m_ExplosionsLeft = m_ExplosionsOnDeath;
 
 	Dismount(-1);
 
@@ -386,6 +428,9 @@ void CHelicopter::Explode()
 		pChar->m_FreezeTick = 0;
 		pChar->Freeze(3);
 	}
+
+	if (!m_ExplosionsLeft)
+		Reset(); // Early
 }
 
 void CHelicopter::TakeDamage(float Damage, vec2 HitPos, int FromID)
@@ -459,7 +504,7 @@ void CHelicopter::Tick()
 
 	BuildHelicopter();
 
-	if (!IsBuilding() && !IsExploding())
+	if (!IsInvincible())
 	{
 		HandleDropped();
 
@@ -498,7 +543,7 @@ void CHelicopter::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pControlle
 		return;
 
 	bool isDriver = (pController->m_HelicopterSeat == 0);
-	bool isGunner = (pController->m_HelicopterSeat == 1 || m_NumSeats == 1);
+	bool isGunner = (pController->m_HelicopterSeat == 1 || m_pModel->NumSeats() == 1);
 
 	// Movement controls
 	if (isDriver)
@@ -531,9 +576,9 @@ void CHelicopter::ApplyAcceleration()
 	if (!m_EngineOn)
 		m_Accel = vec2(0.f, 0.f);
 
-	for (int i = 0; i < m_NumSeats; i++)
+	for (int i = 0; i < m_pModel->NumSeats(); i++)
 	{
-		int passengerCID = m_aPassengers[i];
+		int passengerCID = m_pModel->Seats()[i].m_SeatedCID;
 		if (passengerCID == -1)
 			continue;
 
@@ -573,25 +618,33 @@ void CHelicopter::ApplyAcceleration()
 		(!m_pTurret || !m_pTurret->m_Shooting || (m_Flipped != (m_pTurret->m_TargetPosition.x < 0))))
 		m_Flipped = !m_Flipped;
 
-	SetRotation(m_Vel.x);
+	float targetAngle = (m_Vel.x != 0.0f) ? m_Vel.x / (abs(m_Vel.x) + 60) * 90 : 0.0f;
+	m_VisualAngle += (targetAngle - m_VisualAngle) * 0.1f;
+	SetRotation(m_VisualAngle);
 }
 
 void CHelicopter::FlingTeesInPropellersPath() // might be a bug, if propeller pivot x is not 0 (hehe)
 {
 	// be careful teleporting helicopter, update last propeller data
-	if (!m_EngineOn || !GetDriver())
+	CCharacter *pDriver = GetDriver();
+	if (!m_EngineOn || !pDriver)
 		return;
 
+	int DriverCID = pDriver->GetPlayer()->GetCID();
 	SPropeller *aPropellers = m_pModel->Propellers();
 	for (int j = 0; j < m_pModel->NumPropellers(); j++)
 	{
 		if (m_pModel->Propellers()[j].PropellerType() == PROPELLER_CIRCULAR)
 			continue;
 
-		CCharacter *aPossibleCollisions[10];
+		vec2 propellersCenter = aPropellers[j].GetCenter();
+		if (m_Flipped)
+			propellersCenter.x = -propellersCenter.x;
+
+		static CCharacter *aPossibleCollisions[10];
 		int numFound = GameWorld()->FindEntities(
 			m_Pos + aPropellers[j].GetCenter(),
-			aPropellers[j].m_Radius + 200.f,
+			aPropellers[j].m_Radius * 1.3f + 200,
 			(CEntity **)aPossibleCollisions, 10,
 			CGameWorld::ENTTYPE_CHARACTER, m_DDTeam
 		);
@@ -601,7 +654,7 @@ void CHelicopter::FlingTeesInPropellersPath() // might be a bug, if propeller pi
 		for (int i = 0; i < numFound; i++)
 		{
 			CCharacter *pChar = aPossibleCollisions[i];
-			if (pChar->m_pHelicopter == this)
+			if (pChar->m_pHelicopter == this || !pChar->CanCollide(DriverCID))
 				continue;
 
 			int cID = pChar->GetPlayer()->GetCID();
@@ -624,41 +677,25 @@ void CHelicopter::FlingTeesInPropellersPath() // might be a bug, if propeller pi
 	}
 }
 
-void CHelicopter::InitModel()
-{
-	switch (m_HelicopterType)
-	{
-		case HELICOPTER_DEFAULT:
-		{
-			m_pModel = new SHelicopterModel(this);
-			break;
-		}
-		case HELICOPTER_APACHE:
-		{
-			m_pModel = new SHelicopterApacheModel(this);
-			break;
-		}
-		default: return;
-	}
-
-	m_pModel->PostConstructor();
-}
-
 void CHelicopter::HandleExplosions()
 {
-	if (m_ExplosionsLeft < 0 || Server()->Tick() % 5 != 0)
+	if (m_ExplosionsLeft <= 0 || Server()->Tick() % 5 != 0)
 		return;
+
+	m_ExplosionsLeft--;
 
 	int Diameter = (int)min(GetSize().x, GetSize().y) + 150; // 150 seems fine minimum range for the explosion
 	int Radius = Diameter / 2;
 	for (int i = 0; i < 3; i++)
 	{
 		vec2 nearbyPos = m_Pos + vec2((float)(rand() % Diameter - Radius), (float)(rand() % Diameter - Radius));
-		GameServer()->CreateExplosion(nearbyPos,
-		                              m_Owner,
-		                              WEAPON_GRENADE,
-		                              m_Owner == -1,
-		                              m_DDTeam, m_TeamMask);
+		GameServer()->CreateExplosion(
+			nearbyPos,
+			m_Owner,
+			WEAPON_GRENADE,
+			m_Owner == -1,
+			m_DDTeam, m_TeamMask
+		);
 		GameServer()->CreateSound(nearbyPos, SOUND_GRENADE_EXPLODE, m_TeamMask);
 	}
 
@@ -668,8 +705,6 @@ void CHelicopter::HandleExplosions()
 
 	if (m_ExplosionsLeft == 0)
 		Reset();
-
-	m_ExplosionsLeft--;
 }
 
 void CHelicopter::UpdateHealthbarIndicator()
@@ -773,7 +808,7 @@ void CHelicopter::DamageInWall()
 
 void CHelicopter::SendBroadcastIndicator()
 {
-	if (m_NumPassengers == 0 || (Server()->Tick() - m_BroadcastingTick) % Server()->TickSpeed() != 0)
+	if (m_pModel->NumSeated() == 0 || (Server()->Tick() - m_BroadcastingTick) % Server()->TickSpeed() != 0)
 		return;
 
 	// CCharacter *pDriver = GetDriver();
@@ -795,9 +830,9 @@ void CHelicopter::SendBroadcastIndicator()
 	str_format(aMsg, sizeof(aMsg), "> %s <\nHealth [%i]%s\n\nF3 - Switch seat\nF4 - Dismount",
 	           m_pName, (int)m_Health, pArmorText);
 
-	for (int i = 0; i < m_NumSeats; i++)
+	for (int i = 0; i < m_pModel->NumSeats(); i++)
 	{
-		int passengerCID = m_aPassengers[i];
+		int passengerCID = m_pModel->Seats()[i].m_SeatedCID;
 		if (passengerCID == -1)
 			continue;
 
@@ -808,35 +843,33 @@ void CHelicopter::SendBroadcastIndicator()
 
 void CHelicopter::HandleSeats()
 {
-	for (int i = 0; i < m_NumSeats; i++)
+	for (int i = 0; i < m_pModel->NumSeats(); i++)
 	{
-		int passengerCID = m_aPassengers[i];
+		SSeat& Seat = m_pModel->Seats()[i];
+		int passengerCID = Seat.m_SeatedCID;
 		if (passengerCID == -1)
 			continue;
 
 		CCharacter *pCharacter = GameServer()->GetPlayerChar(passengerCID);
 		bool isDriver = (i == 0);
 
-		vec2 targetSeatPos = m_aSeatsTransformed[i];
-		// targetSeatPos = rotate(targetSeatPos, m_Angle);
-		// targetSeatPos.x *= (m_Flipped ? -1.0f : 1.0f);
-		// m_aSeatsTransformed[i] = targetSeatPos;
+		vec2 targetSeatPos = Seat.m_Seat;
+		if (m_Flipped)
+			targetSeatPos.x = -targetSeatPos.x;
+		Seat.m_Interpolated += (targetSeatPos - Seat.m_Interpolated) * 0.1f;
 
-		vec2 seatDiff = targetSeatPos - m_aSeatsInterpolation[i];
-		m_aSeatsInterpolation[i] += seatDiff * 0.1f;
-
-		vec2 seatPos = m_Pos + m_aSeatsInterpolation[i];
-		pCharacter->ForceSetPos(seatPos);
+		vec2 resultSeatPos = m_Pos + Seat.m_Interpolated;
+		pCharacter->ForceSetPos(resultSeatPos);
 		pCharacter->Core()->m_Vel = vec2(0, 0);
-
-		if (pCharacter->m_DeepFreeze)
-			Dismount(passengerCID);
 
 		if (isDriver)
 		{
 			m_Gravity = (pCharacter->m_FreezeTime > 0);
 			m_GroundVel = (pCharacter->m_FreezeTime || m_Accel.x == 0.f); // forgot what is ground vel
 		}
+
+		if (pCharacter->m_DeepFreeze)
+			Dismount(passengerCID);
 	}
 }
 
@@ -858,7 +891,7 @@ void CHelicopter::HandlePropellers()
 
 bool CHelicopter::Mount(int ClientID, int WantedSeat)
 {
-	if (ClientID < 0 || ClientID > MAX_CLIENTS || m_NumPassengers >= m_NumSeats || IsInvincible()) // used to check m_Owner != -1 (aka driver)
+	if (ClientID < 0 || ClientID > MAX_CLIENTS || m_pModel->NumSeated() >= m_pModel->NumSeats() || IsInvincible()) // used to check m_Owner != -1 (aka driver)
 		return false;
 
 	// scale specific mount condition
@@ -866,15 +899,17 @@ bool CHelicopter::Mount(int ClientID, int WantedSeat)
 	if (pCharacter->m_pHelicopter || distance(pCharacter->GetPos(), m_Pos) > pCharacter->GetProximityRadius() + GetProximityRadius())
 		return false;
 
-	if (WantedSeat < 0 || WantedSeat >= m_NumSeats || m_aPassengers[WantedSeat] != -1)
+	if (WantedSeat < 0 || WantedSeat >= m_pModel->NumSeats() || m_pModel->Seats()[WantedSeat].m_SeatedCID != -1)
 		WantedSeat = -1; // Default to any available seat
 
 	int gotSeatedAt = -1;
-	for (int i = 0; i < m_NumSeats; i++)
+	for (int i = 0; i < m_pModel->NumSeats(); i++)
 	{
+		SSeat& Seat = m_pModel->Seats()[i];
+
 		// Slot is taken
 		//  or we have a wanted seat, but it isn't our seat yet
-		if (m_aPassengers[i] != -1 || (WantedSeat != -1 && WantedSeat != i))
+		if (Seat.m_SeatedCID != -1 || (WantedSeat != -1 && WantedSeat != i))
 		{
 			// The seat we wanted is full, give up :(
 			if (WantedSeat == i)
@@ -884,12 +919,17 @@ bool CHelicopter::Mount(int ClientID, int WantedSeat)
 		}
 
 		gotSeatedAt = i;
-		m_aPassengers[i] = ClientID;
+		m_pModel->Seats()[i].m_SeatedCID = ClientID;
 		pCharacter->m_HelicopterSeat = i;
 		pCharacter->m_SeatSwitchedTick = Server()->Tick();
-		m_NumPassengers++;
+		m_pModel->SetNumSeated(m_pModel->NumSeated() + 1);
 
-		m_aSeatsInterpolation[i] = m_aSeatsTransformed[i];
+		// Previous
+		// Seat.m_Interpolated = Seat.m_Transformed; // Teleport for mounting
+
+		// Experimental
+		Seat.m_Interpolated = pCharacter->GetPos() - m_Pos; // Swing from character position to the seat
+
 		break;
 	}
 
@@ -915,15 +955,17 @@ bool CHelicopter::Mount(int ClientID, int WantedSeat)
 	return true;
 }
 
-void CHelicopter::Dismount(int ClientID)
+void CHelicopter::Dismount(int ClientID, bool ForceDismountAtHelicopter)
 {
-	for (int i = 0; i < m_NumSeats; i++)
+	for (int i = 0; i < m_pModel->NumSeats(); i++)
 	{
-		int passengerCID = m_aPassengers[i];
+		SSeat& Seat = m_pModel->Seats()[i];
+		int passengerCID = Seat.m_SeatedCID;
 		if (passengerCID == -1)
 			continue;
 
 		bool isDriver = (i == 0);
+		bool isGunner = (i == 1);
 		if (ClientID == -1 || passengerCID == ClientID)
 		{
 			CCharacter *pCharacter = GameServer()->GetPlayerChar(passengerCID);
@@ -934,18 +976,25 @@ void CHelicopter::Dismount(int ClientID)
 				m_Accel.y = 0;
 				m_Owner = -1;
 			}
+			if (isGunner && m_pTurret)
+				m_pTurret->m_Shooting = false;
 
 			if (pCharacter)
 			{
 				pCharacter->m_pHelicopter = nullptr;
-				pCharacter->ForceSetPos(m_Pos); //
+				if (ForceDismountAtHelicopter)
+				{
+					// Dismount at the bottom when propellers running and you're not the only passenger
+					vec2 dismountPos = (m_EngineOn && m_pModel->NumSeated() >= 2) ? vec2(0, m_Size.y / 2.0f - CCharacterCore::PHYS_SIZE / 2.0f - 1.0f) : vec2(0, 0);
+					pCharacter->ForceSetPos(m_Pos + dismountPos);
+				}
 				pCharacter->SetWeapon(pCharacter->GetLastWeapon());
 				GameServer()->SendTuningParams(m_Owner, pCharacter->m_TuneZone);
 				pCharacter->SendBroadcastHud("");
 			}
 
-			m_aPassengers[i] = -1;
-			m_NumPassengers--;
+			Seat.m_SeatedCID = -1;
+			m_pModel->SetNumSeated(m_pModel->NumSeated() - 1);
 
 			// Dismount only one player
 			if (ClientID != -1)
@@ -958,14 +1007,6 @@ void CHelicopter::SetRotation(float NewRotation)
 {
 	m_Angle = NewRotation;
 	m_pModel->SetRotation(NewRotation * (m_Flipped ? -1.0f : 1.0f));
-
-	for (int i = 0; i < m_NumSeats; i++)
-	{
-		vec2 targetSeatPos = m_aSeats[i];
-		targetSeatPos.x *= m_Flipped ? -1.0f : 1.0f;
-		targetSeatPos = rotate(targetSeatPos, m_Angle);
-		m_aSeatsTransformed[i] = targetSeatPos;
-	}
 
 	if (m_pTurret)
 		m_pTurret->SetRotation(NewRotation, m_pTurret->GetTurretRotation());
@@ -999,7 +1040,7 @@ void CHelicopter::Snap(int SnappingClient)
 		}
 	}
 	else if (
-		(!m_NumPassengers || IsPassenger(pChar)) && // Show when no passengers or if you're a passenger
+		(!m_pModel->NumSeats() || IsPassenger(pChar)) && // Show when no passengers or if you're a passenger
 		(ShouldShowHealthbar() || !IsFullHealthAndArmor()) && // Show until specified (on mount, damage, etc.) or when not max
 		(!m_LastDamage || (m_LastDamage && m_LastDamage + Server()->TickSpeed() / 2 <= Server()->Tick()) || // Show if damaged not long ago
 			ShouldFlashDamagedHearts())) // Show flashing damaged recently
@@ -1011,7 +1052,7 @@ void CHelicopter::Snap(int SnappingClient)
 	}
 
 	// Draw helicopter
-	CCharacter* pDriver = GetDriver();
+	CCharacter *pDriver = GetDriver();
 	bool HelicopterRainbowMode = pDriver && (pDriver->m_Rainbow || pDriver->m_IsRainbowHooked);
 	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped, (int)((1.0f - m_Health / m_MaxHealth) * 10), HelicopterRainbowMode);
 

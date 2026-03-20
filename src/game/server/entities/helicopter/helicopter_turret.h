@@ -110,7 +110,7 @@ private:
 	// Retainer - 2 parts `holding` the cluster together
 	float m_RetainerPosition;
 	float m_RetainerRadius;
-	void UpdateRetainer();
+	void InitRetainer();
 
 	// void SetFlipped(bool flipped) override;
 	// void SetRotation(float PivotRotation, float TurretRotation) override;

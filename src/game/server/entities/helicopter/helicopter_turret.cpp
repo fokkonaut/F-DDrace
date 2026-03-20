@@ -16,8 +16,6 @@ void CVehicleTurret::SetRotation(float PivotRotation, float TurretRotation) //
 	m_Angle = PivotRotation;
 	m_TurretAngle = TurretRotation;
 
-	float flip = (m_pHelicopter->IsFlipped() ? -1.0f : 1.0f);
-
 	// Rotate turret
 	m_TurretBone.m_To = m_TurretBone.m_InitTo - m_Pivot;
 	m_TurretBone.m_From = m_TurretBone.m_InitFrom - m_Pivot;
@@ -27,7 +25,7 @@ void CVehicleTurret::SetRotation(float PivotRotation, float TurretRotation) //
 
 	m_TurretBone.m_To += m_Pivot;
 	m_TurretBone.m_From += m_Pivot;
-	m_TurretBone.Rotate(PivotRotation * flip);
+	m_TurretBone.Rotate(PivotRotation);
 
 	for (int i = 0; i < m_NumBones; i++)
 	{
@@ -39,7 +37,7 @@ void CVehicleTurret::SetRotation(float PivotRotation, float TurretRotation) //
 
 		m_apBones[i].m_To += m_Pivot;
 		m_apBones[i].m_From += m_Pivot;
-		m_apBones[i].Rotate(PivotRotation * flip);
+		m_apBones[i].Rotate(PivotRotation);
 	}
 }
 
@@ -60,7 +58,7 @@ void CVehicleTurret::AimTurret()
 	}
 
 	float targetAngle = (atan2f(aimFromTurret.y, aimFromTurret.x) / pi * 180.f) * flip;
-	float targetAngleClamped = clamp(targetAngle, m_Angle * flip - m_AimingRange, m_Angle * flip + m_AimingRange) - m_Angle;
+	float targetAngleClamped = clamp(targetAngle, m_Angle * flip - m_AimingRange, m_Angle * flip + m_AimingRange) - m_Angle * flip;
 	SetRotation(m_Angle, m_TurretAngle + (targetAngleClamped - m_TurretAngle) * 0.15f);
 }
 
@@ -256,8 +254,6 @@ void CMinigunTurret::UpdateClusterBones()
 		vec2 barrelEndPos = m_TurretBone.m_From + Combined;
 
 		// Start and end are flipped to have laserball on our side of the gun
-		Cluster()[i].m_InitTo = barrelStartPos;
-		Cluster()[i].m_InitFrom = barrelEndPos;
 		Cluster()[i].m_To = barrelStartPos;
 		Cluster()[i].m_From = barrelEndPos;
 		Cluster()[i].m_Thickness = Cluster()[i].m_InitThickness - round_to_int(depthOffset) - 1;
@@ -273,7 +269,7 @@ void CMinigunTurret::SpinCluster()
 	m_ClusterRotation += m_ClusterSpeed;
 }
 
-void CMinigunTurret::UpdateRetainer()
+void CMinigunTurret::InitRetainer()
 {
 	float Radius = m_RetainerRadius;
 	vec2 initialPosition = m_TurretBone.m_From + vec2(m_RetainerPosition, 0);
@@ -282,8 +278,6 @@ void CMinigunTurret::UpdateRetainer()
 		vec2 fromPosition = initialPosition;
 		vec2 toPosition = initialPosition + vec2(0.f, Radius);
 
-		Retainer()[i].m_InitTo = toPosition;
-		Retainer()[i].m_InitFrom = fromPosition;
 		Retainer()[i].m_To = toPosition;
 		Retainer()[i].m_From = fromPosition;
 		Retainer()[i].m_Color = LASERTYPE_FREEZE;
@@ -344,7 +338,9 @@ CMinigunTurret::CMinigunTurret()
 	m_ShootingBarrelIndex = 0;
 
 	InitCluster();
-	UpdateRetainer();
+	InitRetainer();
+	for (int i = 0; i < NUM_BONES; i++)
+		Bones()[i].Save();
 }
 
 CMinigunTurret::~CMinigunTurret()
@@ -502,6 +498,8 @@ CLauncherTurret::CLauncherTurret()
 	m_CurrentRecoilFactor = 0.f;
 
 	InitBones();
+	for (int i = 0; i < NUM_BONES; i++)
+		Bones()[i].Save();
 }
 
 CLauncherTurret::~CLauncherTurret()
@@ -549,6 +547,5 @@ void CLauncherTurret::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pContr
 		return;
 
 	m_TargetPosition = vec2((float)pNewInput->m_TargetX, (float)pNewInput->m_TargetY);
-	// dbg_msg("turret", "input %i %i\n", pNewInput->m_TargetX, pNewInput->m_TargetY);
 	m_Shooting = pNewInput->m_Fire % 2 == 1;
 }

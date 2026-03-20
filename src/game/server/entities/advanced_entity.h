@@ -10,12 +10,16 @@ class CAdvancedEntity : public CEntity
 {
 public:
 	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner = -1, bool CheckDeath = true);
-	virtual ~CAdvancedEntity() {}
+	virtual ~CAdvancedEntity()
+	{
+	}
 
 	virtual void Reset();
 	// CAdvancedEntity::Tick() has to be called within the tick function of the child entity
 	virtual void Tick();
-	virtual void Snap(int SnappingClient) {}
+	virtual void Snap(int SnappingClient)
+	{
+	}
 
 	CCharacter *GetOwner();
 	int GetMoveRestrictions() { return m_MoveRestrictions; }
@@ -23,7 +27,14 @@ public:
 	vec2 GetVel() { return m_Vel; }
 	void SetVel(vec2 Vel) { m_Vel = Vel; }
 	void SetPrevPos(vec2 Pos) { m_PrevPos = Pos; }
-	virtual void ReleaseHooked() {}
+	void SetSize(vec2 NewSize)
+	{
+		m_Size = NewSize;
+		SetProximityRadius(min(NewSize.x, NewSize.y));
+	}
+	virtual void ReleaseHooked()
+	{
+	}
 
 	int GetDDTeam() { return m_DDTeam; }
 	Mask128 TeamMask() { return m_TeamMask; }
@@ -54,7 +65,7 @@ protected:
 	vec2 m_Elasticity;
 	bool m_AllowVipPlus;
 
-	static bool IsSwitchActiveCb(int Number, void* pUser);
+	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
 	int m_TileIndex;
 	int m_TileFIndex;

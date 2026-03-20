@@ -3107,7 +3107,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 								int switchSeat = pHelicopter->GetNextAvailableSeat(pChr->m_HelicopterSeat);
 								if (switchSeat != -1)
 								{
-									pHelicopter->Dismount(ClientID);
+									pHelicopter->Dismount(ClientID, false);
 									pHelicopter->Mount(ClientID, switchSeat);
 								}
 							}

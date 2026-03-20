@@ -5,7 +5,9 @@
 #include "../../gamecontext.h"
 #include "helicopter_models.h"
 
-void SHelicopterModel::InitBody()
+// Default helicopter model
+
+void CHelicopterModel::InitBody()
 {
 	CBone aBones[NUM_BONES_BODY] = {
 		// Base
@@ -30,14 +32,7 @@ void SHelicopterModel::InitBody()
 	mem_copy(Body(), aBones, sizeof(CBone) * NUM_BONES_BODY);
 }
 
-void SHelicopterModel::InitModel()
-{
-	InitBody();
-	InitPropellers();
-	SpinPropellers(); //
-}
-
-void SHelicopterModel::InitPropellers()
+void CHelicopterModel::InitPropellers()
 {
 	vec2 UPDATE_POS_LATER = vec2(0, 0);
 	CBone aBlades[NUM_BONES_PROPELLERS] = {
@@ -50,31 +45,47 @@ void SHelicopterModel::InitPropellers()
 
 	// Link
 
-	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(0, -60), 100.f, 0.57f);
+	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(0, -60), 100.f, 0.23f);
 	Propellers()[1] = SPropeller(PROPELLER_CIRCULAR, &Blades()[2], &Blades()[3], vec2(-110, -10), 30.f, 0.2f);
 	Trails()[0] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[2].m_From);
 	Trails()[1] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[3].m_From);
 }
 
-SHelicopterModel::SHelicopterModel(CEntity *pEntity)
-	: IHelicopterModel(pEntity, NUM_BONES, NUM_TRAILS, NUM_PROPELLERS)
+void CHelicopterModel::InitSeats()
 {
-
+	SSeat aSeats[NUM_SEATS] = { SSeat(vec2(0, 0)) };
+	memcpy(Seats(), aSeats, sizeof(SSeat) * NUM_SEATS);
 }
 
-void SHelicopterModel::ApplyScale(float Scale)
+void CHelicopterModel::InitModel()
 {
-	ApplyScaleBones(Scale);
-	ApplyScalePropellers(Scale);
+	InitBody();
+	InitPropellers();
+	InitSeats();
+
+	SpinPropellers(); //
+	UpdateLastPropellerPositions();
 }
 
-SHelicopterApacheModel::SHelicopterApacheModel(CEntity *pEntity)
-	: IHelicopterModel(pEntity, NUM_BONES, NUM_TRAILS, NUM_PROPELLERS)
+CHelicopterModel::CHelicopterModel(CEntity *pEntity)
+	: IHelicopterModel(pEntity, NUM_BONES, NUM_TRAILS, NUM_PROPELLERS, NUM_SEATS)
 {
-
 }
 
-void SHelicopterApacheModel::InitBody()
+// void CHelicopterModel::ApplyScale(float Scale)
+// {
+// 	ApplyScaleBones(Scale);
+// 	ApplyScalePropellers(Scale);
+// }
+
+// Attack helicopter model
+
+CHelicopterApacheModel::CHelicopterApacheModel(CEntity *pEntity)
+	: IHelicopterModel(pEntity, NUM_BONES, NUM_TRAILS, NUM_PROPELLERS, NUM_SEATS)
+{
+}
+
+void CHelicopterApacheModel::InitBody()
 {
 	CBone aBones[NUM_BONES_BODY] = {
 		// Base
@@ -104,14 +115,7 @@ void SHelicopterApacheModel::InitBody()
 	Body()[10].m_InitColor = LASERTYPE_RIFLE; // windshield bottom
 }
 
-void SHelicopterApacheModel::InitModel()
-{
-	InitBody();
-	InitPropellers();
-	SpinPropellers(); //
-}
-
-void SHelicopterApacheModel::InitPropellers()
+void CHelicopterApacheModel::InitPropellers()
 {
 	vec2 UPDATE_POS_LATER = vec2(0, 0);
 	CBone aBlades[NUM_BONES_PROPELLERS] = {
@@ -124,14 +128,102 @@ void SHelicopterApacheModel::InitPropellers()
 
 	// Link
 
-	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(0, -60), 170.f, 0.57f);
+	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(0, -60), 170.f, 0.23f);
 	Propellers()[1] = SPropeller(PROPELLER_CIRCULAR, &Blades()[2], &Blades()[3], vec2(-200, -10), 40.f, 0.3f);
 	Trails()[0] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[2].m_From);
 	Trails()[1] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[3].m_From);
 }
 
-void SHelicopterApacheModel::ApplyScale(float Scale)
+void CHelicopterApacheModel::InitSeats()
 {
-	ApplyScaleBones(Scale);
-	ApplyScalePropellers(Scale);
+	SSeat aSeats[NUM_SEATS] = {
+		SSeat(vec2(0, 0)),
+		SSeat(vec2(50, 10))
+	};
+	memcpy(Seats(), aSeats, sizeof(SSeat) * NUM_SEATS);
+}
+
+void CHelicopterApacheModel::InitModel()
+{
+	InitBody();
+	InitPropellers();
+	InitSeats();
+
+	SpinPropellers(); //
+	UpdateLastPropellerPositions();
+}
+
+// Transport helicopter model
+
+CHelicopterChinookModel::CHelicopterChinookModel(CEntity *pEntity)
+	: IHelicopterModel(pEntity, NUM_BONES, NUM_TRAILS, NUM_PROPELLERS, NUM_SEATS)
+{
+}
+
+void CHelicopterChinookModel::InitBody()
+{
+	CBone aBones[NUM_BONES_BODY] = {
+		// Base
+		CBone(Entity(), Server()->SnapNewID(), -125, 60, -95, 60, 4), // left tire
+		CBone(Entity(), Server()->SnapNewID(), 45, 60, 75, 60, 4), // right tire
+		CBone(Entity(), Server()->SnapNewID(), -100, 35, -110, 60, 3), // left connector
+		CBone(Entity(), Server()->SnapNewID(), 50, 30, 60, 60, 3), // right connector
+		// Body
+		CBone(Entity(), Server()->SnapNewID(), -110, -55, -180, -45, 4), // left roof
+		CBone(Entity(), Server()->SnapNewID(), -90, -30, -110, -55, 4), // left slope
+		CBone(Entity(), Server()->SnapNewID(), 45, -40, -90, -30, 4), // roof
+		CBone(Entity(), Server()->SnapNewID(), 60, -55, 45, -40, 4), // right slope
+		CBone(Entity(), Server()->SnapNewID(), 120, -60, 60, -55, 4), // right roof
+		CBone(Entity(), Server()->SnapNewID(), 135, -15, 120, -60, 4), // windshield
+		CBone(Entity(), Server()->SnapNewID(), 160, 0, 135, -15, 1), // nose top
+		CBone(Entity(), Server()->SnapNewID(), 150, 20, 160, 0, 4), // nose bottom
+		CBone(Entity(), Server()->SnapNewID(), -110, 40, 150, 20, 3), // floor
+		CBone(Entity(), Server()->SnapNewID(), -180, 10, -110, 40, 4), // tail bottom
+		CBone(Entity(), Server()->SnapNewID(), -180, -45, -180, 10, 4), // tail
+	};
+	mem_copy(Body(), aBones, sizeof(CBone) * NUM_BONES_BODY);
+
+	for (int i = 0; i < NUM_BONES_BODY; i++)
+		Body()[i].m_InitColor = LASERTYPE_FREEZE;
+	Body()[9].m_InitColor = LASERTYPE_RIFLE; // windshield bottom
+}
+
+void CHelicopterChinookModel::InitPropellers()
+{
+	vec2 UPDATE_POS_LATER = vec2(0, 0);
+	CBone aBlades[NUM_BONES_PROPELLERS] = {
+		CBone(Entity(), Server()->SnapNewID(), UPDATE_POS_LATER, UPDATE_POS_LATER, 3, LASERTYPE_DOOR),
+		CBone(Entity(), Server()->SnapNewID(), UPDATE_POS_LATER, UPDATE_POS_LATER, 3, LASERTYPE_DOOR),
+		CBone(Entity(), Server()->SnapNewID(), UPDATE_POS_LATER, UPDATE_POS_LATER, 3, LASERTYPE_DOOR),
+		CBone(Entity(), Server()->SnapNewID(), UPDATE_POS_LATER, UPDATE_POS_LATER, 3, LASERTYPE_DOOR),
+	};
+	memcpy(Blades(), aBlades, sizeof(CBone) * NUM_BONES_PROPELLERS);
+
+	// Link
+
+	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(90, -65), 120.f, 0.24f);
+	Propellers()[1] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[2], &Blades()[3], vec2(-145, -60), 120.f, 0.21f);
+	Trails()[0] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[2].m_From);
+	Trails()[1] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[3].m_From);
+}
+
+void CHelicopterChinookModel::InitSeats()
+{
+	SSeat aSeats[NUM_SEATS] = {
+		SSeat(vec2(90, -10)),
+		SSeat(vec2(30, -5)),
+		SSeat(vec2(-30, 5)),
+		SSeat(vec2(-90, 10)),
+	};
+	memcpy(Seats(), aSeats, sizeof(SSeat) * NUM_SEATS);
+}
+
+void CHelicopterChinookModel::InitModel()
+{
+	InitBody();
+	InitPropellers();
+	InitSeats();
+
+	SpinPropellers(); //
+	UpdateLastPropellerPositions();
 }
