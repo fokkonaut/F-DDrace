@@ -5581,12 +5581,12 @@ void CCharacter::ForceSetPos(vec2 Pos)
 
 void CCharacter::IncreaseNoBonusScore(int Summand)
 {
-	if (!m_NoBonusContext.m_InArea || Config()->m_SvNoBonusScoreTreshold == 0 || m_pPlayer->m_IsDummy)
+	if (!m_NoBonusContext.m_InArea || Config()->m_SvNoBonusScoreThreshold == 0 || m_pPlayer->m_IsDummy)
 		return;
 
 	m_NoBonusContext.m_Score += Summand;
 
-	bool Wanted = m_NoBonusContext.m_Score >= Config()->m_SvNoBonusScoreTreshold;
+	bool Wanted = m_NoBonusContext.m_Score >= Config()->m_SvNoBonusScoreThreshold;
 	bool ForceSendMessage = Wanted && !m_pPlayer->m_EscapeTime;
 	if (Wanted)
 	{
@@ -5594,8 +5594,8 @@ void CCharacter::IncreaseNoBonusScore(int Summand)
 		m_pPlayer->m_EscapeTime += Server()->TickSpeed() * (m_pPlayer->m_EscapeTime ? 30 : 120);
 	}
 
-	// treshold to span: [1] = warn when we got fucked up already, [2,4] = warn one before reaching treshold, [5...] = warn on every 4th
-	int MessageSpan = min(max(Config()->m_SvNoBonusScoreTreshold-1, 1), 4);
+	// threshold to span: [1] = warn when we got fucked up already, [2,4] = warn one before reaching threshold, [5...] = warn on every 4th
+	int MessageSpan = min(max(Config()->m_SvNoBonusScoreThreshold-1, 1), 4);
 
 	// When we get our initial escape time we always want to send a message
 	if (ForceSendMessage || m_NoBonusContext.m_Score % MessageSpan == 0)
@@ -5627,8 +5627,8 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 	m_NoBonusContext.m_SavedBonus.m_NoBonusMaxJumps = Config()->m_SvNoBonusMaxJumps;
 	m_LastNoBonusTick = Server()->Tick();
 
-	// If treshold is set, we don't disable bonus and we keep track of the treshold to see when we want to be searched by the police, more fun
-	if (Config()->m_SvNoBonusScoreTreshold > 0)
+	// If threshold is set, we don't disable bonus and we keep track of the threshold to see when we want to be searched by the police, more fun
+	if (Config()->m_SvNoBonusScoreThreshold > 0)
 		return true;
 
 	// Save or load previous bonuses

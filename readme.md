@@ -172,7 +172,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_default_score_mode` |
 | `sv_allow_bonus_score_mode` |
 | `sv_no_bonus_max_jumps` |
-| `sv_bonus_score_treshold` |
+| `sv_bonus_score_threshold` |
 | `sv_bonus_score_decrease` |
 | `sv_spawn_as_zombie` |
 | `sv_increase_human_cap_bots` |

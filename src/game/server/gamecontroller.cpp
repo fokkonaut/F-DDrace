@@ -627,7 +627,7 @@ void IGameController::Snap(int SnappingClient)
 		if (GameServer()->Arenas()->FightStarted(ScoreLimitID))
 			ScoreLimit = GameServer()->Arenas()->GetScoreLimit(ScoreLimitID);
 		else if (pSnap->m_ScoreMode == SCORE_BONUS)
-			ScoreLimit = Config()->m_SvNoBonusScoreTreshold;
+			ScoreLimit = Config()->m_SvNoBonusScoreThreshold;
 
 		((int*)pGameData)[0] = m_GameFlags;
 		((int*)pGameData)[1] = TranslatedGameStateFlags;
@@ -850,7 +850,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 			if (GameServer()->Arenas()->FightStarted(i))
 				GameInfoMsg.m_ScoreLimit = GameServer()->Arenas()->GetScoreLimit(i);
 			else if (pPlayer->m_ScoreMode == SCORE_BONUS)
-				GameInfoMsg.m_ScoreLimit = Config()->m_SvNoBonusScoreTreshold;
+				GameInfoMsg.m_ScoreLimit = Config()->m_SvNoBonusScoreThreshold;
 
 			if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_BirthdayGiftEndTick > Server()->Tick())
 				GameInfoMsg.m_TimeLimit = 1;
@@ -869,7 +869,7 @@ void IGameController::UpdateGameInfo(int ClientID)
 		if (GameServer()->Arenas()->FightStarted(ClientID))
 			GameInfoMsg.m_ScoreLimit = GameServer()->Arenas()->GetScoreLimit(ClientID);
 		else if (pPlayer->m_ScoreMode == SCORE_BONUS)
-			GameInfoMsg.m_ScoreLimit = Config()->m_SvNoBonusScoreTreshold;
+			GameInfoMsg.m_ScoreLimit = Config()->m_SvNoBonusScoreThreshold;
 
 		if (pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_BirthdayGiftEndTick > Server()->Tick())
 			GameInfoMsg.m_TimeLimit = 1;

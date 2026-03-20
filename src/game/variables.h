@@ -357,7 +357,7 @@ MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_S
 MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord server URL", AUTHED_ADMIN)
 
 // antibo
-MACRO_CONFIG_INT(SvAntibotTreshold, sv_antibot_treshold, 0, 0, 64, CFGFLAG_SERVER, "Treshold for antibot autoban (0=off)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvAntibotThreshold, sv_antibot_threshold, 0, 0, 64, CFGFLAG_SERVER, "Threshold for antibot autoban (0=off)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotAutoAction, sv_antibot_auto_action, 1, 0, 2, CFGFLAG_SERVER, "Automatic antibot action (0=off, 1=jail, 2=ban)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotAutoActionTime, sv_antibot_auto_action_time, 900, 0, 99999, CFGFLAG_SERVER, "Time for sv_antibot_auto_action (if 1: jail seconds, if 2: ban minutes)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotReportsLevel, sv_antibot_reports_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to see antibot reports", AUTHED_ADMIN)
@@ -377,8 +377,8 @@ MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_G
 MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, SCORE_LEVEL, 0, NUM_SCORE_MODES-1, CFGFLAG_SERVER|CFGFLAG_GAME, "Default score (0=time, 1=level, 2=blockpoints, 3=bonus)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowBonusScoreMode, sv_allow_bonus_score_mode, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether bonus score can be seen using '/score'", AUTHED_ADMIN)
 // no-bonus area
-MACRO_CONFIG_INT(SvNoBonusMaxJumps, sv_no_bonus_max_jumps, 5, 2, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum number of jumps in no-bonus area (treshold=0: set this amount, else: start score increase at this)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvNoBonusScoreTreshold, sv_bonus_score_treshold, 10, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Treshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvNoBonusMaxJumps, sv_no_bonus_max_jumps, 5, 2, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum number of jumps in no-bonus area (threshold=0: set this amount, else: start score increase at this)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvNoBonusScoreThreshold, sv_bonus_score_threshold, 10, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Threshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvNoBonusScoreDecrease, sv_bonus_score_decrease, 10, 0, 60, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds between bonus score decrease", AUTHED_ADMIN)
 
 // grog

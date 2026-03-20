@@ -91,8 +91,8 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 		return;
 
 	int Action = pAntibot->Config()->m_SvAntibotAutoAction;
-	int Treshold = pAntibot->Config()->m_SvAntibotTreshold;
-	if (Action && Treshold && ++pAntibot->m_aCount[ClientID] >= Treshold)
+	int Threshold = pAntibot->Config()->m_SvAntibotThreshold;
+	if (Action && Threshold && ++pAntibot->m_aCount[ClientID] >= Threshold)
 	{
 		str_format(aBuf, sizeof(aBuf), "%d: %s has been %s", ClientID, pAntibot->Server()->ClientName(ClientID), Action == 1 ? "jailed" : "banned");
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
