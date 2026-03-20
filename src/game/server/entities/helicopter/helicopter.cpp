@@ -875,7 +875,7 @@ void CHelicopter::HandleSeats()
 
 void CHelicopter::HandlePropellers()
 {
-	if (!m_EngineOn || Server()->Tick() % 2 != 0)
+	if (!m_EngineOn)
 		return;
 
 	if (!GetDriver() && IsGrounded()) // Reset top propellers when grounded without driver
@@ -1054,7 +1054,7 @@ void CHelicopter::Snap(int SnappingClient)
 	// Draw helicopter
 	CCharacter *pDriver = GetDriver();
 	bool HelicopterRainbowMode = pDriver && (pDriver->m_Rainbow || pDriver->m_IsRainbowHooked);
-	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped, (int)((1.0f - m_Health / m_MaxHealth) * 10), HelicopterRainbowMode);
+	m_pModel->Snap(SnappingClient, m_EngineOn, m_Flipped, floor((1.0f - m_Health / m_MaxHealth) * 10), HelicopterRainbowMode);
 
 	// Draw guns
 	if (m_pTurret)

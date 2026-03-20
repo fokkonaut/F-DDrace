@@ -201,8 +201,8 @@ void CHelicopterChinookModel::InitPropellers()
 
 	// Link
 
-	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(90, -65), 120.f, 0.24f);
-	Propellers()[1] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[2], &Blades()[3], vec2(-145, -60), 120.f, 0.21f);
+	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(90, -65), 120.f, 0.1f);
+	Propellers()[1] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[2], &Blades()[3], vec2(-145, -60), 120.f, 0.11f);
 }
 
 void CHelicopterChinookModel::InitSeats()
