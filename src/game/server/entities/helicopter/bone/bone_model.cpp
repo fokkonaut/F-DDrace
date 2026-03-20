@@ -31,10 +31,10 @@ IBoneModel::IBoneModel(CEntity *pEntity, int NumBones, int NumTrails)
 {
 	m_pEntity = pEntity;
 
-	m_aBones = new CBone[NumBones];
+	m_aBones = NumBones ? new CBone[NumBones] : nullptr;
 	m_NumBones = NumBones;
 
-	m_aTrails = new CTrailNode[NumTrails];
+	m_aTrails = NumTrails ? new CTrailNode[NumTrails] : nullptr;
 	m_NumTrails = NumTrails;
 
 	m_Bounds = { 0, 0, 0, 0 };

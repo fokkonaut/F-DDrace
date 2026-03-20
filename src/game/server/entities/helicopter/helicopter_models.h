@@ -185,9 +185,9 @@ public:
 	IHelicopterModel(CEntity *pEntity, int NumBones, int NumTrails, int NumPropellers, int NumSeats)
 		: IBoneModel(pEntity, NumBones, NumTrails)
 	{
-		m_apPropellers = new SPropeller[NumPropellers];
+		m_apPropellers = NumPropellers ? new SPropeller[NumPropellers] : nullptr;
 		m_NumPropellers = NumPropellers;
-		m_apSeats = new SSeat[NumSeats];
+		m_apSeats = NumSeats ? new SSeat[NumSeats] : nullptr;
 		m_NumSeats = NumSeats;
 	}
 	virtual ~IHelicopterModel()
