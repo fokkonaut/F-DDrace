@@ -203,8 +203,6 @@ void CHelicopterChinookModel::InitPropellers()
 
 	Propellers()[0] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[0], &Blades()[1], vec2(90, -65), 120.f, 0.24f);
 	Propellers()[1] = SPropeller(PROPELLER_HORIZONTAL, &Blades()[2], &Blades()[3], vec2(-145, -60), 120.f, 0.21f);
-	Trails()[0] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[2].m_From);
-	Trails()[1] = CTrailNode(Entity(), Server()->SnapNewID(), &Blades()[3].m_From);
 }
 
 void CHelicopterChinookModel::InitSeats()
