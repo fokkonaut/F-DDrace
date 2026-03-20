@@ -802,6 +802,10 @@ public:
 
 	void SnapSelectedArea(CSelectedArea *pSelectedArea, const CSnapContext &Context);
 
+	enum
+	{
+		MODLOG_ID_SERVER = -2,
+	};
 	void SendModLogMessage(int ClientID, const char *pMsg) override;
 
 	//pickup drops
@@ -853,7 +857,7 @@ public:
 		SendChat(-1, CHAT_POLICE_CHANNEL, -1, pFormat, -1, CHATFLAG_ALL, aArgs, std::size(aArgs));
 	}
 	void SendChatPolice(const char *pMessage);
-	bool JailPlayer(int ClientID, int Seconds, int ModLogID = -2);
+	bool JailPlayer(int ClientID, int Seconds, int ModLogID = -1);
 	bool ForceJailRelease(int ClientID);
 
 	// gangster

@@ -561,6 +561,9 @@ void CGameContext::SendChatTeam(int Team, const char *pText, CFormatArg *pArgs, 
 
 void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
 {
+	if (ClientID < 0 && ClientID != MODLOG_ID_SERVER)
+		return;
+
 	char aName[128];
 	char aAvatarURL[256];
 	if (ClientID >= 0 && ClientID < MAX_CLIENTS)
@@ -568,7 +571,7 @@ void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
 		str_format(aName, sizeof(aName), "%s (%s)", Server()->ClientName(ClientID), Server()->GetAuthIdent(ClientID));
 		str_copy(aAvatarURL, GetAvatarURL(ClientID), sizeof(aAvatarURL));
 	}
-	else
+	else if (ClientID == MODLOG_ID_SERVER)
 	{
 		str_copy(aName, "[Server]", sizeof(aName));
 		str_copy(aAvatarURL, Config()->m_SvWebhookChatAvatarURL, sizeof(aAvatarURL));
@@ -1444,13 +1447,16 @@ void CGameContext::OnTick()
 				if (Action == 1)
 				{
 					int Seconds = Config()->m_SvAntibotAutoActionTime;
-					if (JailPlayer(i, Seconds, -1))
+					if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
 					{
 						char aBuf[256];
 						SendChatPoliceFormat(Localizable("'%s' has been arrested for using a suspicious client (%d seconds arrest)"), Server()->ClientName(i), Seconds);
 						str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly."), Seconds);
 						SendChatTarget(i, aBuf);
 					}
+
+					// Reset, so we dont loop
+					pPlayer->m_BotDetected = false;
 				}
 				else if (Action == 2)
 				{
@@ -1459,6 +1465,7 @@ void CGameContext::OnTick()
 					int Seconds = 60 * Config()->m_SvAntibotAutoActionTime;
 					Server()->Ban(i, Seconds, aBuf);
 				}
+
 				continue;
 			}
 
@@ -7513,7 +7520,7 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds, int ModLogID)
 	if (PlotID >= PLOT_START)
 		m_aPlots[PlotID].m_DestroyEndTick = 1;
 
-	if (ModLogID != -2)
+	if (ModLogID != -1)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d seconds", Server()->ClientName(ClientID), Seconds);
