@@ -10,16 +10,12 @@ class CAdvancedEntity : public CEntity
 {
 public:
 	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner = -1, bool CheckDeath = true);
-	virtual ~CAdvancedEntity()
-	{
-	}
+	virtual ~CAdvancedEntity() {}
 
 	virtual void Reset();
 	// CAdvancedEntity::Tick() has to be called within the tick function of the child entity
 	virtual void Tick();
-	virtual void Snap(int SnappingClient)
-	{
-	}
+	virtual void Snap(int SnappingClient) {}
 
 	CCharacter *GetOwner();
 	int GetMoveRestrictions() { return m_MoveRestrictions; }
@@ -30,11 +26,10 @@ public:
 	void SetSize(vec2 NewSize)
 	{
 		m_Size = NewSize;
+		// Set ProximityRadius to the smaller value for now
 		SetProximityRadius(min(NewSize.x, NewSize.y));
 	}
-	virtual void ReleaseHooked()
-	{
-	}
+	virtual void ReleaseHooked() {}
 
 	int GetDDTeam() { return m_DDTeam; }
 	Mask128 TeamMask() { return m_TeamMask; }
