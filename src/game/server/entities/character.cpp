@@ -2287,18 +2287,18 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 				aGotWeapon[GameServer()->GetWeaponType(i)] = true;
 	}
 
-	bool Helicopter = Local && m_pHelicopter;
+	bool LocalHelicopter = Local && m_pHelicopter;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
 	if(m_Super)
 		Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super) || Helicopter)
+	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super) || m_pHelicopter)
 		Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super) || Helicopter)
+	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super) || m_pHelicopter)
 		Flags |= CHARACTERFLAG_NO_HOOK;
-	if(m_SuperJump && !Helicopter)
+	if(m_SuperJump && !LocalHelicopter)
 		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Jetpack && (GameServer()->GetWeaponType(GetActiveWeapon()) != WEAPON_GUN || GetActiveWeapon() == WEAPON_GUN))
 		Flags |= CHARACTERFLAG_JETPACK;
@@ -2406,7 +2406,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
 	bool HelicopterPrediction = m_pHelicopter && pSnapChar && pSnapChar->m_pHelicopter == m_pHelicopter && m_pHelicopter->GetDriver() == pSnapChar;
 
-	if (HelicopterPrediction || (Local && (m_Snake.Active() || RainbowNameAffected)))
+	if (HelicopterPrediction || (Local && (m_pHelicopter || m_Snake.Active() || RainbowNameAffected)))
 	{
 		if (Local)
 		{
