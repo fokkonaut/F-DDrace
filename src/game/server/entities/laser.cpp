@@ -203,9 +203,10 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
 			pHelicopter->Heal(1.0f);
 
-			for (int i = 0; i < pHelicopter->NumPassengers(); i++)
+			IHelicopterModel* pModel = pHelicopter->Model();
+			for (int i = 0; i < pModel->NumSeated(); i++)
 			{
-				int passengerCID = pHelicopter->GetPassengers()[i];
+				int passengerCID = pModel->Seats()[i].m_SeatedCID;
 				if (passengerCID == -1)
 					continue;
 
@@ -237,9 +238,10 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
 			pHelicopter->TakeDamage((float)m_TaserStrength, At, pHelicopter->LastKnownOwnerCID());
 
-			for (int i = 0; i < pHelicopter->NumPassengers(); i++)
+			IHelicopterModel* pModel = pHelicopter->Model();
+			for (int i = 0; i < pModel->NumSeated(); i++)
 			{
-				int passengerCID = pHelicopter->GetPassengers()[i];
+				int passengerCID = pModel->Seats()[i].m_SeatedCID;
 				if (passengerCID == -1)
 					continue;
 

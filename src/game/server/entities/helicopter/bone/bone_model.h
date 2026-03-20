@@ -21,6 +21,7 @@ protected:
 	SBounds m_Bounds;
 	vec2 m_TotalSize;
 
+	void SetBonesRotation(float NewRotation);
 	void ApplyScaleBones(float Scale);
 	virtual void InitModel() = 0;
 
@@ -41,10 +42,9 @@ public:
 
 	// Manipulating
 	void InitBuildAnimation();
-	void SetRotation(float NewRotation);
-	void UpdateAndCacheBounds();
-	void Flip();
+	virtual void SetRotation(float NewRotation);
 	virtual void ApplyScale(float Scale);
+	void UpdateAndCacheBounds();
 
 	// Ticking
 	void Snap(int SnappingClient, bool SendTrails, bool Flipped = false, float VertexSnapping = 0.0f, bool RainbowMode = false);

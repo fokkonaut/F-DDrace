@@ -5817,7 +5817,7 @@ bool CCharacter::TryMountHelicopter()
 
 bool CCharacter::CanSwitchSeats()
 {
-	return Server()->Tick() - m_SeatSwitchedTick > Server()->TickSpeed() / 2;
+	return !m_FreezeTime && Server()->Tick() - m_SeatSwitchedTick > Server()->TickSpeed() / 3;
 }
 
 int CCharacter::GetAliveState()
