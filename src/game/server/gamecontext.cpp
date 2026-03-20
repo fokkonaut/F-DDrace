@@ -1330,6 +1330,9 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
 			Tunings.m_Gravity = 0.f;
 
+		if (pChr->m_pHelicopter)
+			Tunings.m_ExplosionStrength = 0.f;
+
 		// AntiPing
 		if (pChr->GetPlayer()->AntiPing())
 		{

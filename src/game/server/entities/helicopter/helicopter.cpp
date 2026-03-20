@@ -949,7 +949,7 @@ bool CHelicopter::Mount(int ClientID, int WantedSeat)
 	m_ShowHealthbarUntil = Server()->Tick() + Server()->TickSpeed() * 3;
 	pCharacter->m_pHelicopter = this;
 	pCharacter->SetWeapon(-1);
-	GameServer()->SendTuningParams(m_Owner, pCharacter->m_TuneZone);
+	GameServer()->SendTuningParams(ClientID, pCharacter->m_TuneZone);
 	m_BroadcastingTick = Server()->Tick() + 1; // Start updating broadcast next tick
 
 	return true;
@@ -989,7 +989,7 @@ void CHelicopter::Dismount(int ClientID, bool ForceDismountAtHelicopter)
 					pCharacter->ForceSetPos(m_Pos + dismountPos);
 				}
 				pCharacter->SetWeapon(pCharacter->GetLastWeapon());
-				GameServer()->SendTuningParams(m_Owner, pCharacter->m_TuneZone);
+				GameServer()->SendTuningParams(ClientID, pCharacter->m_TuneZone);
 				pCharacter->SendBroadcastHud("");
 			}
 
