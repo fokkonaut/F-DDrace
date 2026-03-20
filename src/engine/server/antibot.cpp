@@ -89,17 +89,22 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 	Log(aBuf, pUser);
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
+	// Count already
+	pAntibot->m_aCount[ClientID]++;
 	if (LogPending)
 		return;
 
 	int Action = pAntibot->Config()->m_SvAntibotAutoAction;
 	int Threshold = pAntibot->Config()->m_SvAntibotThreshold;
-	if (Action && Threshold && ++pAntibot->m_aCount[ClientID] >= Threshold)
+	if (Action && Threshold && pAntibot->m_aCount[ClientID] >= Threshold)
 	{
 		str_format(aBuf, sizeof(aBuf), "%d: %s has been %s", ClientID, pAntibot->Server()->ClientName(ClientID), Action == 1 ? "arrested" : "banned");
 		pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 		pAntibot->GameServer()->SetBotDetected(ClientID);
+		// Reset
 		pAntibot->m_aCount[ClientID] = 0;
+		pAntibot->OnPlayerDestroy(ClientID);
+		pAntibot->OnPlayerInit(ClientID);
 	}
 }
 void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
