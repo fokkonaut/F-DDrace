@@ -1981,7 +1981,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	if (m_Passive)
 		Passive(false, -1, true);
 	UnsetSpookyGhost();
-	SetZombieHuman(false);
+	SetZombieHuman(false, -1, true);
 	SetSafeArea(false, true);
 
 	// unset skin specific stuff
@@ -6066,7 +6066,7 @@ bool CCharacter::TryCatchingWanted(int TargetCID, vec2 EffectPos)
 	return true;
 }
 
-bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID)
+bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID, bool Silent)
 {
 	if (m_IsZombie == Zombie)
 		return false;
@@ -6085,7 +6085,7 @@ bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID)
 		m_pPlayer->m_DefEmoteReset = -1;
 
 		// no duplicate entry, other guy already sent the correct message
-		if (HitHumanID == -1)
+		if (HitHumanID == -1 && !Silent)
 		{
 			CNetMsg_Sv_KillMsg Msg;
 			Msg.m_Killer = m_pPlayer->GetCID();
@@ -6105,7 +6105,7 @@ bool CCharacter::SetZombieHuman(bool Zombie, int HitHumanID)
 	}
 	else
 	{
-		if (HitHumanID != -1)
+		if (HitHumanID != -1 && !Silent)
 		{
 			CNetMsg_Sv_KillMsg Msg;
 			Msg.m_Killer = m_pPlayer->GetCID();
