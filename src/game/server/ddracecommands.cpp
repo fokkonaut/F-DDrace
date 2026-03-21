@@ -1336,14 +1336,25 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->NumArguments() > 0 ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr)
+	if (!pChr)
+		return;
+
+	int NumHelicopters = 0;
+	CHelicopter *pHelicopter = (CHelicopter *)pSelf->m_World.FindFirst(CGameWorld::ENTTYPE_HELICOPTER);
+	for (; pHelicopter; pHelicopter = (CHelicopter *)pHelicopter->TypeNext())
+		NumHelicopters++;
+
+	if (NumHelicopters >= 64)
 	{
-		int HelicopterType = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : HELICOPTER_DEFAULT;
-		int TurretType = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
-		float Scale = pResult->NumArguments() > 3 ? pResult->GetFloat(3) : 1.f;
-		if (!pSelf->SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), HelicopterType, TurretType, Scale))
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn helicopter here or invalid type");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Too many helicopters");
+		return;
 	}
+
+	int HelicopterType = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : HELICOPTER_DEFAULT;
+	int TurretType = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
+	float Scale = pResult->NumArguments() > 3 ? pResult->GetFloat(3) : 1.f;
+	if (!pSelf->SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), HelicopterType, TurretType, Scale))
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn helicopter here or invalid type");
 }
 
 void CGameContext::ConRemoveHelicopters(IConsole::IResult *pResult, void *pUserData)
