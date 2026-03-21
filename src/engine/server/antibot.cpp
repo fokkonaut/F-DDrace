@@ -67,31 +67,27 @@ void CAntibot::Log(const char *pMessage, void *pUser)
 void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
-	if (!str_comp(pAntibot->m_aKind[ClientID], "pending"))
+	bool IsPending = !str_comp(pAntibot->m_aKind[ClientID], "pending");
+	if (IsPending)
 	{
 		pAntibot->m_FetchKindID = ClientID;
 		pAntibot->Dump(ClientID);
 		pAntibot->m_FetchKindID = -1;
 	}
 
-	bool LogPending = !str_comp(pAntibot->m_aKind[ClientID], "pending") && pAntibot->Config()->m_SvAntibotLogPending;
-	if (!LogPending && str_in_list(pAntibot->Config()->m_SvAntibotSkipKinds, ",", pAntibot->m_aKind[ClientID]))
+	if (!IsPending && str_in_list(pAntibot->Config()->m_SvAntibotSkipKinds, ",", pAntibot->m_aKind[ClientID]))
+		return;
+		
+	pAntibot->m_aCount[ClientID]++;
+	if (IsPending && !pAntibot->Config()->m_SvAntibotLogPending)
 		return;
 
-	/*if (!LogPending
-		&& str_comp(pAntibot->m_aKind[ClientID], "known_bot")
-		&& str_comp(pAntibot->m_aKind[ClientID], "weird")
-		&& str_comp(pAntibot->m_aKind[ClientID], "old"))
-		return;*/
-
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%d: %s%s", ClientID, pMessage, LogPending ? " (pending)" : "");
+	str_format(aBuf, sizeof(aBuf), "%d: %s%s", ClientID, pMessage, IsPending ? " (pending)" : "");
 	Log(aBuf, pUser);
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
-	// Count already
-	pAntibot->m_aCount[ClientID]++;
-	if (LogPending)
+	if (IsPending)
 		return;
 
 	int Action = pAntibot->Config()->m_SvAntibotAutoAction;
@@ -198,11 +194,15 @@ void CAntibot::OnHammerFire(int ClientID)
 }
 void CAntibot::OnHammerHit(int ClientID, int TargetID)
 {
+	if (Config()->m_SvAntibotSkipDummyHammer && Server()->HammerflyMarked(ClientID))
+		return;
 	Update();
 	AntibotOnHammerHit(ClientID, TargetID);
 }
 void CAntibot::OnDirectInput(int ClientID)
 {
+	if (Config()->m_SvAntibotSkipDummyHammer && Server()->HammerflyMarked(ClientID))
+		return;
 	Update();
 	AntibotOnDirectInput(ClientID);
 }

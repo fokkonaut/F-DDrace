@@ -1844,7 +1844,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if (!m_aClients[ClientID].m_DummyHammer)
 						m_aClients[ClientID].m_HammerflyMarked = false;
 				}
-				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0 && pPlayerInput->m_Fire != m_aClients[ClientID].m_LastFire)
+				else if (pPlayerInput->m_WantedWeapon == WEAPON_HAMMER + 1 && (pPlayerInput->m_Fire&1) != 0 && pPlayerInput->m_Fire != m_aClients[ClientID].m_LastFire
+					&& pPlayerInput->m_Direction == 0 && pPlayerInput->m_Hook == 0 && pPlayerInput->m_Jump == 0)
 				{
 					m_aClients[ClientID].m_HammerflyMarked = true;
 				}
