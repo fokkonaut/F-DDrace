@@ -18,6 +18,9 @@ public:
 	{
 		m_Active = false;
 		m_ScoreLimit = 10;
+		m_BetAmount = 0;
+		m_StartTick = 0;
+		m_BetCollected = false;
 		m_KillBorder = false;
 		m_LongFreezeStart = false;
 
@@ -38,6 +41,9 @@ public:
 	vec2 m_aSpawns[2];
 	vec2 m_MiddlePos;
 	int m_ScoreLimit;
+	int64 m_BetAmount;
+	int64 m_StartTick;
+	bool m_BetCollected;
 	bool m_KillBorder;
 	bool m_LongFreezeStart;
 
@@ -96,6 +102,12 @@ class CArenas : public CMinigame
 	bool IsGrounded(CCharacter *pChr);
 	bool ValidSpawnPos(vec2 Pos);
 	void StartFight(int Fight);
+	bool CanConfigureBet(int ClientID, int Participant, int64 BetAmount);
+	void SendInviteMessages(int Fight, int ClientID, int Invited);
+	bool TryCollectBetOnStart(int Fight);
+	bool CanStartBetFight(int Fight, bool SendMessages);
+	bool CollectBet(int Fight);
+	void PayBet(int Fight, int Winner);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];
@@ -144,7 +156,7 @@ public:
 	void OnInput(int ClientID, CNetObj_PlayerInput *pNewInput);
 	bool ClampViewPos(int ClientID);
 
-	void StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder);
+	void StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder, int64 BetAmount = 0);
 	bool AcceptFight(int Creator, int ClientID);
 	void EndFight(int Fight);
 

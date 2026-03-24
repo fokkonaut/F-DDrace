@@ -122,7 +122,7 @@ vec2 CArenas::GetSpawnPos(int ClientID)
 	return m_aFights[Fight].m_aSpawns[Index];
 }
 
-void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder)
+void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder, int64 BetAmount)
 {
 	if (ClientID == Participant)
 	{
@@ -142,6 +142,9 @@ void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, 
 		return;
 	}
 
+	if (!CanConfigureBet(ClientID, Participant, BetAmount))
+		return;
+
 	int FreeArena = GetFreeArena();
 	if (FreeArena == -1)
 	{
@@ -151,6 +154,7 @@ void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, 
 
 	m_aFights[FreeArena].m_Active = true;
 	m_aFights[FreeArena].m_ScoreLimit = clamp(ScoreLimit, 0, 100);
+	m_aFights[FreeArena].m_BetAmount = BetAmount;
 	m_aFights[FreeArena].m_KillBorder = KillBorder;
 
 	for (int i = 0; i < 2; i++)
@@ -231,16 +235,7 @@ void CArenas::FinishConfiguration(int Fight, int ClientID)
 	else
 	{
 		m_aFights[Fight].m_aParticipants[1].m_Status = PARTICIPANT_INVITED;
-
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You invited '%s' to a fight"), Server()->ClientName(Invited));
-		GameServer()->SendChatTarget(ClientID, aBuf);
-
-		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a fight by '%s', type '/1vs1 %s' to join"), Server()->ClientName(ClientID), Server()->ClientName(ClientID));
-		GameServer()->SendChatTarget(Invited, aBuf);
-
-		if (GameServer()->m_apPlayers[Invited] && GameServer()->m_apPlayers[Invited]->m_Minigame != MINIGAME_1VS1)
-			GameServer()->SendChatTarget(Invited, GameServer()->m_apPlayers[Invited]->Localize("Join the 1vs1 lobby using '/1vs1' before you accept the fight"));
+		SendInviteMessages(Fight, ClientID, Invited);
 	}
 }
 
@@ -415,7 +410,6 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 	{
 		if (pFight->m_aParticipants[i].m_ClientID == ClientID && pFight->m_aParticipants[i].m_Status == PARTICIPANT_INVITED)
 		{
-			pFight->m_aParticipants[i].m_Status = PARTICIPANT_ACCEPTED;
 			Found = true;
 			break;
 		}
@@ -423,6 +417,18 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 
 	if (!Found)
 		return false;
+
+	if (!CanStartBetFight(Fight, true))
+		return true;
+
+	for (int i = 0; i < 2; i++)
+	{
+		if (pFight->m_aParticipants[i].m_ClientID == ClientID && pFight->m_aParticipants[i].m_Status == PARTICIPANT_INVITED)
+		{
+			pFight->m_aParticipants[i].m_Status = PARTICIPANT_ACCEPTED;
+			break;
+		}
+	}
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You have accepted the invite by '%s'"), Server()->ClientName(Creator));
@@ -495,6 +501,7 @@ void CArenas::StartFight(int Fight)
 		if (GameServer()->m_apPlayers[aID[i]])
 			GameServer()->m_apPlayers[aID[i]]->SetPlaying();
 	}
+	m_aFights[Fight].m_StartTick = Server()->Tick();
 }
 
 const char *CArenas::StartGlobalArenaFight(int ClientID1, int ClientID2)
@@ -620,6 +627,7 @@ void CArenas::IncreaseScore(int Fight, int Index)
 		Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 		GameServer()->m_apPlayers[ClientID]->m_ConfettiWinEffectTick = Server()->Tick();
 
+		PayBet(Fight, Index);
 		EndFight(Fight);
 	}
 }
@@ -665,7 +673,7 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, aFormat, Server()->ClientName(ClientID), Server()->ClientName(OtherID),
 				m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 
-			if(FightScore > 0 || OtherScore > 0)
+			if (FightScore > 0 || OtherScore > 0)
 			{
 				// Then fill untranslated format
 				char aBuf[128];
@@ -674,6 +682,7 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 				Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 			}
 			GameServer()->m_apPlayers[OtherID]->m_ConfettiWinEffectTick = Server()->Tick();
+			PayBet(Fight, Other);
 		}
 
 		EndFight(Fight);
@@ -707,6 +716,12 @@ void CArenas::Tick()
 		CFight *pFight = &m_aFights[f];
 		if (!pFight->m_Active)
 			continue;
+
+		if (!TryCollectBetOnStart(f))
+		{
+			EndFight(f);
+			continue;
+		}
 
 		for (int i = 0; i < 2; i++)
 		{

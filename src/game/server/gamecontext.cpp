@@ -8808,6 +8808,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force, bool DoCh
 		else if (Minigame == MINIGAME_1VS1)
 		{
 			SendChatTarget(ClientID, pPlayer->Localize("Type '/1vs1 <playername>' to start a fight with someone"));
+			SendChatTarget(ClientID, pPlayer->Localize("For a bank account bet use '/1vs1 bet <amount> <playername>'"));
 			SendChatTarget(ClientID, pPlayer->Localize("For custom scorelimits or a kill-border use '/1vs1 <playername> <scorelimit> <killborder>'"));
 		}
 	}

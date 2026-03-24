@@ -1,5 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
+#include "minigames/duel_bet_command.h"
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -2868,6 +2869,9 @@ void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
 	str_copy(aBuf, pResult->GetFullString(), sizeof(aBuf));
 	const char *pRest = pSelf->GetWhisper(aBuf, &OtherID);
 	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID))
+		return;
+
+	if (Defaif::TryStart1vs1Bet(pSelf, pResult, pPlayer, OtherID))
 		return;
 
 	int ScoreLimit = 10;
