@@ -103,7 +103,7 @@ CHAT_COMMAND("block", "", CFGFLAG_CHAT, ConJoinBlock, this, "Joins the block min
 CHAT_COMMAND("survival", "", CFGFLAG_CHAT, ConJoinSurvival, this, "Joins the survival minigame", AUTHED_NO)
 CHAT_COMMAND("boomfng", "", CFGFLAG_CHAT, ConJoinBoomFNG, this, "Joins the boom fng minigame", AUTHED_NO)
 CHAT_COMMAND("fng", "", CFGFLAG_CHAT, ConJoinFNG, this, "Joins the fng minigame", AUTHED_NO)
-CHAT_COMMAND("1vs1", "?r[params]", CFGFLAG_CHAT, Con1VS1, this, "Joins 1vs1, accepts a fight, or starts '/1vs1 bet <amount> <player>'", AUTHED_NO)
+CHAT_COMMAND("1vs1", "?s[playername] ?i[stake] ?i[scorelimit] ?i[killborder]", CFGFLAG_CHAT, Con1VS1, this, "Joins 1vs1, accepts a fight, or starts '/1vs1 <playername> [stake] [scorelimit] [killborder]'", AUTHED_NO)
 CHAT_COMMAND("durak", "", CFGFLAG_CHAT, ConJoinDurak, this, "Joins the durak minigame", AUTHED_NO)
 
 //account top5s

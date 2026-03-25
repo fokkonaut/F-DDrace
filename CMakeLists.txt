@@ -1607,8 +1607,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   mask128.h
   minigames/arenas.cpp
   minigames/arenas.h
-  minigames/duel_bet_command.cpp
-  minigames/duel_bet_command.h
   minigames/duel_bets.cpp
   minigames/durak.cpp
   minigames/durak.h

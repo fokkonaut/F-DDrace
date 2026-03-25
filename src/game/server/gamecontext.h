@@ -1302,7 +1302,6 @@ public:
 	bool PlayerCollision();
 	bool PlayerHooking();
 	float PlayerJetpack();
-	const char *ParseWhisperTarget(char *pStr, int *pTarget) { return GetWhisper(pStr, pTarget); }
 
 	void ResetTuning();
 

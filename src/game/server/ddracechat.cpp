@@ -1,6 +1,7 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
-#include "minigames/duel_bet_command.h"
+#include <climits>
+#include <cstdlib>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
@@ -13,6 +14,73 @@
 #include <engine/server/server.h>
 
 bool CheckClientID(int ClientID);
+
+namespace
+{
+bool Parse1vs1Args(CGameContext *pGameContext, CPlayer *pPlayer, const char *pArgs, int64 *pStakeAmount, int *pScoreLimit, int *pKillBorder)
+{
+	*pStakeAmount = 0;
+	*pScoreLimit = 10;
+	*pKillBorder = 0;
+
+	char aArgs[128];
+	str_copy(aArgs, pArgs, sizeof(aArgs));
+	char *pToken = str_skip_whitespaces(aArgs);
+	int64 aValues[3] = {0, 10, 0};
+	int NumValues = 0;
+
+	while (*pToken)
+	{
+		if (NumValues >= 3)
+		{
+			pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Usage: /1vs1 <playername> [stake] [scorelimit] [killborder]"));
+			return false;
+		}
+
+		char *pEnd = str_skip_to_whitespace(pToken);
+		char EndChar = *pEnd;
+		*pEnd = 0;
+
+		if (str_is_number(pToken) != 0)
+		{
+			if (NumValues == 0)
+				pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Invalid 1vs1 stake amount"));
+			else
+				pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Usage: /1vs1 <playername> [stake] [scorelimit] [killborder]"));
+			return false;
+		}
+
+		int64 Value = atoll(pToken);
+		if (Value < INT_MIN || Value > INT_MAX)
+		{
+			if (NumValues == 0)
+				pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Invalid 1vs1 stake amount"));
+			else
+				pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Usage: /1vs1 <playername> [stake] [scorelimit] [killborder]"));
+			return false;
+		}
+
+		aValues[NumValues++] = Value;
+		if (!EndChar)
+			break;
+		*pEnd = EndChar;
+		pToken = str_skip_whitespaces(pEnd + 1);
+	}
+
+	*pStakeAmount = aValues[0];
+	if (*pStakeAmount < 0 || *pStakeAmount > INT_MAX / 2)
+	{
+		pGameContext->SendChatTarget(pPlayer->GetCID(), pPlayer->Localize("Invalid 1vs1 stake amount"));
+		return false;
+	}
+
+	if (NumValues > 1)
+		*pScoreLimit = (int)aValues[1];
+	if (NumValues > 2)
+		*pKillBorder = (int)aValues[2];
+	return true;
+}
+}
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
@@ -2868,22 +2936,16 @@ void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_copy(aBuf, pResult->GetFullString(), sizeof(aBuf));
 	const char *pRest = pSelf->GetWhisper(aBuf, &OtherID);
-	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID))
-		return;
-
-	if (Defaif::TryStart1vs1Bet(pSelf, pResult, pPlayer, OtherID))
-		return;
-
+	int64 StakeAmount = 0;
 	int ScoreLimit = 10;
 	int KillBorder = 0;
-	if (pResult->NumArguments() > 1) // more than just name
-	{
-		int Num = sscanf(pRest, "%d %d", &ScoreLimit, &KillBorder);
-		if (Num == 1)
-			KillBorder = 0;
-	}
+	if (!Parse1vs1Args(pSelf, pPlayer, pRest, &StakeAmount, &ScoreLimit, &KillBorder))
+		return;
 
-	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, ScoreLimit, KillBorder);
+	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID, StakeAmount))
+		return;
+
+	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, ScoreLimit, KillBorder, StakeAmount);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)

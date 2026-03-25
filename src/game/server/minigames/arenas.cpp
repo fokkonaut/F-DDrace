@@ -389,7 +389,7 @@ bool CArenas::ClampViewPos(int ClientID)
 	return Clamp;
 }
 
-bool CArenas::AcceptFight(int Creator, int ClientID)
+bool CArenas::AcceptFight(int Creator, int ClientID, int64 BetAmount)
 {
 	int Fight = GetClientFight(Creator);
 	if (Fight < 0)
@@ -417,6 +417,24 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 
 	if (!Found)
 		return false;
+
+	if (pFight->m_BetAmount != BetAmount)
+	{
+		char aBuf[128];
+		if (pFight->m_BetAmount > 0)
+		{
+			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("This fight requires a stake of %lld money"), pFight->m_BetAmount);
+			GameServer()->SendChatTarget(ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("Type '/1vs1 %s %lld' to accept"), Server()->ClientName(Creator), pFight->m_BetAmount);
+			GameServer()->SendChatTarget(ClientID, aBuf);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("This fight has no stake. Type '/1vs1 %s' to accept"), Server()->ClientName(Creator));
+			GameServer()->SendChatTarget(ClientID, aBuf);
+		}
+		return true;
+	}
 
 	if (!CanStartBetFight(Fight, true))
 		return true;

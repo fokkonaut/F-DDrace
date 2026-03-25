@@ -3,6 +3,28 @@
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 
+bool CArenas::HasStakeMoney(int ClientID, int64 BetAmount)
+{
+	CPlayer *pPlayer = ClientID >= 0 ? GameServer()->m_apPlayers[ClientID] : 0;
+	if (!pPlayer)
+		return false;
+
+	if (pPlayer->GetAccID() >= ACC_START)
+		return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money >= BetAmount;
+	return pPlayer->GetWalletMoney() >= BetAmount;
+}
+
+bool CArenas::HandleStakeTransaction(int ClientID, int Amount, const char *pDescription)
+{
+	CPlayer *pPlayer = ClientID >= 0 ? GameServer()->m_apPlayers[ClientID] : 0;
+	if (!pPlayer)
+		return false;
+
+	if (pPlayer->GetAccID() >= ACC_START)
+		return pPlayer->BankTransaction(Amount, pDescription);
+	return pPlayer->WalletTransaction(Amount, pDescription);
+}
+
 bool CArenas::CanConfigureBet(int ClientID, int Participant, int64 BetAmount)
 {
 	if (BetAmount <= 0)
@@ -10,30 +32,25 @@ bool CArenas::CanConfigureBet(int ClientID, int Participant, int64 BetAmount)
 
 	if (Participant == PARTICIPANT_GLOBAL)
 	{
-		GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("1vs1 bets are only available in direct duels"));
+		GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("1vs1 stakes are only available in direct duels"));
 		return false;
 	}
 
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	CPlayer *pParticipant = Participant >= 0 ? GameServer()->m_apPlayers[Participant] : 0;
-	if (pPlayer->GetAccID() < ACC_START)
+	if (!HasStakeMoney(ClientID, BetAmount))
 	{
-		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You have to be logged in to start a 1vs1 bet"));
+		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You don't have enough money for this 1vs1 stake"));
 		return false;
 	}
-	if (GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money < BetAmount)
+	if (!pParticipant)
 	{
-		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You don't have enough money on your bank account"));
+		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("Invalid participant"));
 		return false;
 	}
-	if (!pParticipant || pParticipant->GetAccID() < ACC_START)
+	if (!HasStakeMoney(Participant, BetAmount))
 	{
-		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("That player is not logged in"));
-		return false;
-	}
-	if (GameServer()->m_Accounts[pParticipant->GetAccID()].m_Money < BetAmount)
-	{
-		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("That player doesn't have enough money on the bank account"));
+		GameServer()->SendChatTarget(ClientID, pPlayer->Localize("That player doesn't have enough money for this 1vs1 stake"));
 		return false;
 	}
 
@@ -44,13 +61,13 @@ void CArenas::SendInviteMessages(int Fight, int ClientID, int Invited)
 {
 	char aBuf[128];
 	if (m_aFights[Fight].m_BetAmount > 0)
-		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You invited '%s' to a 1vs1 bet of %lld money"), Server()->ClientName(Invited), m_aFights[Fight].m_BetAmount);
+		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You invited '%s' to a 1vs1 stake of %lld money"), Server()->ClientName(Invited), m_aFights[Fight].m_BetAmount);
 	else
 		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You invited '%s' to a fight"), Server()->ClientName(Invited));
 	GameServer()->SendChatTarget(ClientID, aBuf);
 
 	if (m_aFights[Fight].m_BetAmount > 0)
-		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a 1vs1 bet of %lld money by '%s', type '/1vs1 %s' to join"), m_aFights[Fight].m_BetAmount, Server()->ClientName(ClientID), Server()->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a 1vs1 stake of %lld money by '%s', type '/1vs1 %s %lld' to join"), m_aFights[Fight].m_BetAmount, Server()->ClientName(ClientID), Server()->ClientName(ClientID), m_aFights[Fight].m_BetAmount);
 	else
 		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a fight by '%s', type '/1vs1 %s' to join"), Server()->ClientName(ClientID), Server()->ClientName(ClientID));
 	GameServer()->SendChatTarget(Invited, aBuf);
@@ -80,7 +97,7 @@ bool CArenas::TryCollectBetOnStart(int Fight)
 	{
 		int ClientID = pFight->m_aParticipants[i].m_ClientID;
 		if (ClientID >= 0 && GameServer()->m_apPlayers[ClientID])
-			GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("The 1vs1 bet couldn't be collected and the fight was cancelled"));
+			GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("The 1vs1 stake couldn't be collected and the fight was cancelled"));
 	}
 	return false;
 }
@@ -101,28 +118,13 @@ bool CArenas::CanStartBetFight(int Fight, bool SendMessages)
 		if (!pPlayer)
 			return false;
 
-		if (pPlayer->GetAccID() < ACC_START)
+		if (!HasStakeMoney(ClientID, BetAmount))
 		{
 			if (SendMessages)
 			{
-				GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You have to be logged in to join a 1vs1 bet"));
+				GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You don't have enough money for this 1vs1 stake"));
 				if (pOther)
-				{
-					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), pOther->Localize("'%s' is not logged in and can't join this 1vs1 bet"), Server()->ClientName(ClientID));
-					GameServer()->SendChatTarget(OtherID, aBuf);
-				}
-			}
-			return false;
-		}
-
-		if (GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money < BetAmount)
-		{
-			if (SendMessages)
-			{
-				GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You don't have enough money on your bank account"));
-				if (pOther)
-					GameServer()->SendChatTarget(OtherID, pOther->Localize("The other player doesn't have enough money on the bank account for this 1vs1 bet"));
+					GameServer()->SendChatTarget(OtherID, pOther->Localize("The other player doesn't have enough money for this 1vs1 stake"));
 			}
 			return false;
 		}
@@ -149,15 +151,13 @@ bool CArenas::CollectBet(int Fight)
 			return false;
 
 		char aHistory[128];
-		str_format(aHistory, sizeof(aHistory), "1vs1 bet against '%s'", Server()->ClientName(OtherID));
-		if (!pPlayer->BankTransaction(-(int)BetAmount, aHistory))
+		str_format(aHistory, sizeof(aHistory), "1vs1 stake against '%s'", Server()->ClientName(OtherID));
+		if (!HasStakeMoney(ClientID, BetAmount) || !HandleStakeTransaction(ClientID, -(int)BetAmount, aHistory))
 		{
 			for (int j = 0; j < Collected; j++)
 			{
 				int RollbackID = m_aFights[Fight].m_aParticipants[j].m_ClientID;
-				CPlayer *pRollback = RollbackID >= 0 ? GameServer()->m_apPlayers[RollbackID] : 0;
-				if (pRollback)
-					pRollback->BankTransaction((int)BetAmount, "1vs1 bet rollback");
+				HandleStakeTransaction(RollbackID, (int)BetAmount, "1vs1 stake rollback");
 			}
 			return false;
 		}
@@ -173,7 +173,7 @@ bool CArenas::CollectBet(int Fight)
 			continue;
 
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Your 1vs1 bet of %lld money got collected from your bank account"), BetAmount);
+		str_format(aBuf, sizeof(aBuf), pPlayer->Localize("Your 1vs1 stake of %lld money was collected"), BetAmount);
 		GameServer()->SendChatTarget(ClientID, aBuf);
 	}
 	return true;
@@ -194,17 +194,17 @@ void CArenas::PayBet(int Fight, int Winner)
 	int64 BetAmount = m_aFights[Fight].m_BetAmount;
 	int64 PotAmount = BetAmount * 2;
 	char aHistory[128];
-	str_format(aHistory, sizeof(aHistory), "won 1vs1 bet against '%s'", Server()->ClientName(LoserID));
-	pWinner->BankTransaction((int)PotAmount, aHistory);
+	str_format(aHistory, sizeof(aHistory), "won 1vs1 stake against '%s'", Server()->ClientName(LoserID));
+	HandleStakeTransaction(WinnerID, (int)PotAmount, aHistory);
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), pWinner->Localize("You won the 1vs1 bet against '%s': +%lld money on your bank account"), Server()->ClientName(LoserID), PotAmount);
+	str_format(aBuf, sizeof(aBuf), pWinner->Localize("You won the 1vs1 stake against '%s': +%lld money"), Server()->ClientName(LoserID), PotAmount);
 	GameServer()->SendChatTarget(WinnerID, aBuf);
 
 	CPlayer *pLoser = LoserID >= 0 ? GameServer()->m_apPlayers[LoserID] : 0;
 	if (pLoser)
 	{
-		str_format(aBuf, sizeof(aBuf), pLoser->Localize("You lost the 1vs1 bet against '%s'. The full pot of %lld money was paid to their bank account"), Server()->ClientName(WinnerID), PotAmount);
+		str_format(aBuf, sizeof(aBuf), pLoser->Localize("You lost the 1vs1 stake against '%s'. The full pot of %lld money was paid to them"), Server()->ClientName(WinnerID), PotAmount);
 		GameServer()->SendChatTarget(LoserID, aBuf);
 	}
 

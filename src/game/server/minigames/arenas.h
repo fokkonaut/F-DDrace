@@ -102,6 +102,8 @@ class CArenas : public CMinigame
 	bool IsGrounded(CCharacter *pChr);
 	bool ValidSpawnPos(vec2 Pos);
 	void StartFight(int Fight);
+	bool HasStakeMoney(int ClientID, int64 BetAmount);
+	bool HandleStakeTransaction(int ClientID, int Amount, const char *pDescription);
 	bool CanConfigureBet(int ClientID, int Participant, int64 BetAmount);
 	void SendInviteMessages(int Fight, int ClientID, int Invited);
 	bool TryCollectBetOnStart(int Fight);
@@ -157,7 +159,7 @@ public:
 	bool ClampViewPos(int ClientID);
 
 	void StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder, int64 BetAmount = 0);
-	bool AcceptFight(int Creator, int ClientID);
+	bool AcceptFight(int Creator, int ClientID, int64 BetAmount = 0);
 	void EndFight(int Fight);
 
 	bool GlobalArenaExists() { return m_GlobalArena.m_Active; }
