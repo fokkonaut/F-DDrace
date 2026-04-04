@@ -408,7 +408,7 @@ MACRO_CONFIG_INT(SvHumanLimitPercent, sv_human_limit_percent, 50, 0, 100, CFGFLA
 
 // dummy and 1vs1
 MACRO_CONFIG_INT(SvAllowDummy, sv_allow_dummy, 1, 0, 1, CFGFLAG_SERVER, "Whether clients can connect their dummy to the server", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDummyControlCopyUpdateMovement, sv_dummy_control_copy_update_movement, 1, 0, 1, CFGFLAG_SERVER, "Whether dummy control and copy moves will update movement (0=might cause bugs with minigame auto leave)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDummyCtrlCopyUpdateIdle, sv_dummy_ctrl_copy_update_idle, 1, 0, 1, CFGFLAG_SERVER, "Whether dummy control/copy moves will update idle (0=can cause bugs with minigame auto leave)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Minigame auto leave when afk for x seconds (0=off)", AUTHED_ADMIN)
 
 // other
