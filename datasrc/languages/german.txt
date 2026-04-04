@@ -944,8 +944,8 @@ Say '/leave' to join the normal area again
 Type '/1vs1 <playername>' to start a fight with someone
 == Gib '/1vs1 <spielername>' ein, um einen Kampf mit jemandem zu beginnen
 
-For custom scorelimits or a kill-border use '/1vs1 <playername> <scorelimit> <killborder>'
-== Für benutzerdefinierte Punktelimits oder einen Kill-Rahmen verwende '/1vs1 <spielername> <punktelimit> <killrahmen>'
+For a stake, custom scorelimits or a kill-border use '/1vs1 <playername> <stake> <scorelimit> <killborder>'
+== Für einen Einsatz, benutzerdefinierte Punktelimits oder einen Kill-Rahmen verwende '/1vs1 <spielername> <stake> <punktelimit> <killrahmen>'
 
 You have to leave first in order to join another minigame
 == Du musst zuerst verlassen, um einem anderen Minispiel beizutreten
