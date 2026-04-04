@@ -136,7 +136,7 @@ private:
 		};
 
 		void Init(int ClientID, CGameWorld *pGameWorld);
-		void InitPlayer(bool Rejoin);
+		void InitPlayer(bool Rejoin, bool Timeout);
 		CGameWorld *m_pGameWorld;
 		CPlayer *GetPlayer();
 		int m_ClientID;
@@ -201,7 +201,7 @@ public:
 	};
 	CDrawTileContext m_DrawTiles;
 
-	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
+	void InitPlayerMap(int ClientID, bool Rejoin = false, bool Timeout = false) { m_aMap[ClientID].InitPlayer(Rejoin, Timeout); }
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 	void AddToNumReserved(int ClientID, int Summand) { m_aMap[ClientID].AddToNumReserved(Summand); }

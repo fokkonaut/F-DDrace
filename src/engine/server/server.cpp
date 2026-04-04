@@ -4238,10 +4238,15 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 	m_aClients[ClientID].m_GotDDNetVersionPacket = m_aClients[OrigID].m_GotDDNetVersionPacket;
 	m_aClients[ClientID].m_DDNetVersionSettled = m_aClients[OrigID].m_DDNetVersionSettled;
 
-	// important ot call OnSetTimedOut before we remove the original client but after we swapped already
-	GameServer()->OnSetTimedOut(ClientID, OrigID);
-
 	DelClientCallback(OrigID, "Timeout Protection used", this);
+
+	// OnSetTimedOut must be called after DelClientCallback to preserve the client id.
+	// The order is important for the player initialization algorithm in CPlayerMapping::CPlayerMap::InitPlayer
+	// because it loops over all players to find others with the same ip address.
+	// IP matching is important for hammerfly/dummy copy to work by guaran-tee-ing dummy and player map have the same ids
+	// Never forget: 0.7 really implemented netmsgs for join/leave, means client ids have to be stable across using timeout protection.
+	// When InitPlayer runs it has to assign the same client id as before since local id cant be changed in 0.7
+	GameServer()->OnSetTimedOut(ClientID, OrigID);
 	return true;
 }
 

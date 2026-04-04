@@ -8308,7 +8308,7 @@ void CGameContext::UnsetKiller(int ClientID)
 
 void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
-	m_World.InitPlayerMap(ClientID, true);
+	m_World.InitPlayerMap(ClientID, true, true);
 }
 
 bool CGameContext::FlagsUsed()

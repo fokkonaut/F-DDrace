@@ -431,47 +431,33 @@ void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
 	m_pMap = m_pGameWorld->Server()->GetIdMap(m_ClientID);
 	m_pReverseMap = m_pGameWorld->Server()->GetReverseIdMap(m_ClientID);
 	m_UpdateTeamsState = false;
+	m_NumSeeOthers = 0;
+	m_ResortReserved = false;
 	ResetSeeOthers();
 }
 
-void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
+void CGameWorld::PlayerMap::InitPlayer(bool Rejoin, bool Timeout)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aReserved[i] = false;
 
-	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
-	if (Rejoin)
-	{
-		m_UpdateTeamsState = true; // to get flag spectators back and all teams aswell
-
-		for (int i = 0; i < MAX_CLIENTS; i++)
-			Remove(i);
-	}
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_pMap[i] = -1;
-
-	for (int i = 0; i < MAX_CLIENTS; i++)
-		m_pReverseMap[i] = -1;
-
-	if (GetPlayer()->m_IsDummy)
-		return; // just need to initialize the arrays
-
 	int NextFreeID = 0;
 	NETADDR OwnAddr, Addr;
 	m_pGameWorld->Server()->GetClientAddr(m_ClientID, &OwnAddr);
-	while (1)
+	while (true && !GetPlayer()->m_IsDummy)
 	{
 		bool Break = true;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if (!m_pGameWorld->GameServer()->m_apPlayers[i] || m_pGameWorld->GameServer()->m_apPlayers[i]->m_IsDummy || i == m_ClientID)
+			if (!m_pGameWorld->GameServer()->m_apPlayers[i] || m_pGameWorld->GameServer()->m_apPlayers[i]->m_IsDummy)
 				continue;
 
 			m_pGameWorld->Server()->GetClientAddr(i, &Addr);
 			if (net_addr_comp(&OwnAddr, &Addr, false) == 0)
 			{
-				if (m_pGameWorld->m_aMap[i].m_pReverseMap[i] == NextFreeID)
+				// For 0.7 timeout: Rejoin has to check ourselves because it's the id of the old connection that we want to skip
+				// Do not access our own reverse map on initial initialization, as it's only initialized below
+				if ((i != m_ClientID || Timeout) && m_pGameWorld->m_aMap[i].m_pReverseMap[i] == NextFreeID)
 				{
 					NextFreeID++;
 					Break = false;
@@ -482,6 +468,23 @@ void CGameWorld::PlayerMap::InitPlayer(bool Rejoin)
 		if (Break)
 			break;
 	}
+
+	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
+	if (Rejoin)
+	{
+		m_UpdateTeamsState = true; // to get flag spectators back and all teams aswell
+		for (int i = 0; i < MAX_CLIENTS; i++)
+			Remove(i);
+	}
+
+	// Clear map, for 0.7 timeouts do this after we got our id back
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_pMap[i] = -1;
+	for (int i = 0; i < MAX_CLIENTS; i++)
+		m_pReverseMap[i] = -1;
+
+	if (GetPlayer()->m_IsDummy)
+		return; // just need to initialize the arrays
 
 	m_NumReserved = 1;
 	m_pMap[m_pGameWorld->Server()->GetMaxClients(m_ClientID) - 1] = -1; // player with empty name to say chat msgs
