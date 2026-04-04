@@ -945,7 +945,7 @@ Type '/1vs1 <playername>' to start a fight with someone
 == Gib '/1vs1 <spielername>' ein, um einen Kampf mit jemandem zu beginnen
 
 For a stake, custom scorelimits or a kill-border use '/1vs1 <playername> <stake> <scorelimit> <killborder>'
-== Für einen Einsatz, benutzerdefinierte Punktelimits oder einen Kill-Rahmen verwende '/1vs1 <spielername> <stake> <punktelimit> <killrahmen>'
+== Für einen Einsatz, benutzerdefinierte Punktelimits oder einen Kill-Rahmen verwende '/1vs1 <spielername> <einsatz> <punktelimit> <killrahmen>'
 
 You have to leave first in order to join another minigame
 == Du musst zuerst verlassen, um einem anderen Minispiel beizutreten
@@ -2149,28 +2149,28 @@ Save player session
 == Sitzungs-Speicherung
 
 Please enter the tile index into the chat (0-255)
-== 
+== Bitte gib den Feld-Index in den Chat ein (0-255)
 
 Entering index aborted
-== 
+== Index-Eingabe abgebrochen
 
 The entered value is not a valid number
-== 
+== Der eingegebene Wert ist keine gültige Zahl
 
 '%s' has been arrested for using a suspicious client (%d seconds arrest)
-== 
+== '%s' wurde wegen der Nutzung eines verdächtigen Clients verhaftet (%d Sekunden Haft)
 
 You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly.
-== 
+== Du wurdest für %d Sekunden wegen der Verwendung eines verdächtigen Clients verhaftet. Versuche den offiziellen DDNet-Client zu verwenden oder Dummy-Hammerfly zu deaktivieren.
 
 Invalid stake, please enter a value between 0 and 10.000.000
-== 
+== Ungültiger Einsatz. Bitte gebe einen Wert zwischen 0 und 10.000.000 ein
 
 This fight requires a stake of %lld money. Accept by typing '/1vs1 %s %lld'
-== 
+== Für diesen Kampf ist ein Einsatz von %lld erforderlich. Nimm an, indem du '/1vs1 %s %lld' eingibst.
 
 Fight cancelled, someone couldn't pay the stake.
-== 
+== Kampf abgebrochen, jemand konnte den Einsatz nicht bezahlen.
 
 You won this 1vs1 round! Your earnings: +%lld money.
-== 
+== Du hast diese 1vs1-Runde gewonnen! Dein Gewinn: +%lld Geld.
