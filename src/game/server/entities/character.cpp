@@ -135,7 +135,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			m_pPlayer->UpdateDoubleXpLifes();
 		}
 		
-		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime && m_pPlayer->GetDummyMode() != DUMMYMODE_TAVERN_DUMMY)
+		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime &&
+			m_pPlayer->GetDummyMode() != DUMMYMODE_TAVERN_DUMMY && m_pPlayer->GetDummyMode() != DUMMYMODE_BLMAPCHILL_POLICE)
 		{
 			SetZombieHuman(true);
 		}
@@ -3834,7 +3835,6 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if (FightStarted)
 		{
-			Die(WEAPON_SELF);
 			return;
 		}
 
@@ -4095,9 +4095,7 @@ void CCharacter::HandleTuneLayer()
 
 		// send zone enter msg
 		SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]);
-	}
-
-	
+	}	
 }
 
 void CCharacter::SendTuneMsg(const char *pMessage)
@@ -4721,43 +4719,46 @@ void CCharacter::FDDraceTick()
 		m_pLightsaber->Retract();
 
 	// flag bonus
-	if (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)
+	if (!m_MoneyTile)
 	{
-		if (!m_MoneyTile && Server()->Tick() % 50 == 0)
+		if (HasFlag() != -1 && m_pPlayer->GetAccID() >= ACC_START)
 		{
-			// Reset here for voting menu
-			m_aLineMoney[0] = '\0';
-			CGameContext::AccountInfo* pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
-
-			int AliveState = GetAliveState();
-			int XP = 0;
-			XP += AliveState + 1 + m_GrogSpirit;
-
-			if (pAccount->m_VIP)
-				XP += 2;
-
-			m_pPlayer->GiveXP(XP);
-
-			char aSurvival[32];
-			char aSpirit[32];
-			str_format(aSurvival, sizeof(aSurvival), " +%dsurvival", AliveState);
-			str_format(aSpirit, sizeof(aSpirit), " +%dspirit", m_GrogSpirit);
-			str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld] +1flag%s%s%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level),
-				pAccount->m_VIP ? " +2vip" : "",
-				AliveState ? aSurvival : "",
-				m_GrogSpirit ? aSpirit : "",
-				m_IsDoubleXp ? " (x2)" : "");
-			if (!IsWeaponIndicator() && !m_pPlayer->m_HideBroadcasts)
+			if (Server()->Tick() % 50 == 0)
 			{
-				SendBroadcastHud(GameServer()->FormatExperienceBroadcast(m_aLineExp, m_pPlayer->GetCID()));
+				// Reset here for voting menu
+				m_aLineMoney[0] = '\0';
+				CGameContext::AccountInfo* pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+
+				int AliveState = GetAliveState();
+				int XP = 0;
+				XP += AliveState + 1 + m_GrogSpirit;
+
+				if (pAccount->m_VIP)
+					XP += 2;
+
+				m_pPlayer->GiveXP(XP);
+
+				char aSurvival[32];
+				char aSpirit[32];
+				str_format(aSurvival, sizeof(aSurvival), " +%dsurvival", AliveState);
+				str_format(aSpirit, sizeof(aSpirit), " +%dspirit", m_GrogSpirit);
+				str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld] +1flag%s%s%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level),
+					pAccount->m_VIP ? " +2vip" : "",
+					AliveState ? aSurvival : "",
+					m_GrogSpirit ? aSpirit : "",
+					m_IsDoubleXp ? " (x2)" : "");
+				if (!IsWeaponIndicator() && !m_pPlayer->m_HideBroadcasts)
+				{
+					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(m_aLineExp, m_pPlayer->GetCID()));
+				}
 			}
 		}
-	}
-	else if (!m_MoneyTile)
-	{
-		// reset them here, so that they are either null or the formatted line so votingmenu knows when to show this or simple
-		m_aLineExp[0] = '\0';
-		m_aLineMoney[0] = '\0';
+		else
+		{
+			// reset them here, so that they are either null or the formatted line so votingmenu knows when to show this or simple
+			m_aLineExp[0] = '\0';
+			m_aLineMoney[0] = '\0';
+		}
 	}
 
 	// set cursor pos when controlling another tee
