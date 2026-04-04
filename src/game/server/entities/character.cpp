@@ -3281,7 +3281,7 @@ void CCharacter::HandleTiles(int Index)
 	RequiredSwitchTile = RequiredSwitchTile ||
 			((m_TileIndex == TILE_DURAK_TABLE || m_TileFIndex == TILE_DURAK_TABLE) &&
 			m_LastIndexTile != TILE_DURAK_TABLE && m_LastIndexFrontTile != TILE_DURAK_TABLE);
-	if (RequiredSwitchTile)
+	if (RequiredSwitchTile && !Config()->m_SvHideTileWarnings)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("[WARNING] Place this tile from switch layer"));
 	}
@@ -3299,7 +3299,7 @@ void CCharacter::HandleTiles(int Index)
 		for (int &Tile : aMaskableTiles)
 			if (m_TileIndex == Tile || m_TileFIndex == Tile)
 				Found = true;
-		if (!Found)
+		if (!Found && !Config()->m_SvHideTileWarnings)
 		{
 			char aBuf[256];
 			str_copy(aBuf, m_pPlayer->Localize("[WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: "), sizeof(aBuf));

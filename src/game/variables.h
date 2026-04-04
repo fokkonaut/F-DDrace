@@ -262,6 +262,8 @@ MACRO_CONFIG_INT(SvEditorPresetLevel, sv_editor_preset_level, AUTHED_ADMIN, AUTH
 MACRO_CONFIG_INT(SvClearFreeDrawLevel, sv_clear_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to clear free draw area (clearplot 0)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEditorMaxDistance, sv_editor_max_distance, 750, 0, 99999, CFGFLAG_SERVER, "Maximum distance to place something with draw editor", AUTHED_ADMIN)
 
+MACRO_CONFIG_INT(SvHideTileWarnings, sv_hide_tile_warnings, 0, 0, 1, CFGFLAG_SERVER, "Whether tile warnings are shown (invalid toggle mask, wrongly placed switch tiles...)", AUTHED_ADMIN)
+
 // taser officers can shoot doors of wanted players' plots
 MACRO_CONFIG_INT(SvPoliceTaserPlotRaid, sv_police_taser_plot_raid, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether police taser can destroy plots of wanted players", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvPlotDoorHealth, sv_plot_door_health, 30, 0, 1000, CFGFLAG_SERVER|CFGFLAG_GAME, "Initial plot door health to withstand tasers", AUTHED_ADMIN)
