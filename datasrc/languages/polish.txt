@@ -2143,6 +2143,21 @@ You are now in a safe area
 You are no longer in a safe area
 == 
 
+Please enter the tile index into the chat (0-255)
+== 
+
+Entering index aborted
+== 
+
+The entered value is not a valid number
+== 
+
+'%s' has been arrested for using a suspicious client (%d seconds arrest)
+== 
+
+You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly.
+== 
+
 AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
 == 
 
@@ -2193,4 +2208,16 @@ The blue flag defends against infection.
 == 
 
 You can drop it by pressing F3.
+== 
+
+Invalid stake, please enter a value between 0 and 10.000.000
+== 
+
+This fight requires a stake of %lld money. Accept by typing '/1vs1 %s %lld'
+== 
+
+Fight cancelled, someone couldn't pay the stake.
+== 
+
+You won this 1vs1 round! Your earnings: +%lld money.
 == 
