@@ -226,6 +226,7 @@ MACRO_CONFIG_INT(SvDropsPickupDelay, sv_drops_pickup_delay, 2000, 100, 60000, CF
 
 // helicopter
 MACRO_CONFIG_INT(SvHeliRespawnTime, sv_heli_respawn_time, 60, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Delay in seconds for a tile-placed helicopter to (re)spawn", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHeliTileType, sv_heli_tile_type, 3, 0, 3/*NUM_HELICOPTER_TYPES, HELICOPTER_DEFAULT, NUM_HELICOPTER_TYPES*/, CFGFLAG_SERVER|CFGFLAG_GAME, "Helicopter tile type (0=default, 1=attack, 2=chinook, 3=random)", AUTHED_ADMIN)
 
 // vanilla
 MACRO_CONFIG_INT(SvVanillaModeStart, sv_vanilla_mode_start, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to set the players mode to vanilla on spawn or ddrace", AUTHED_ADMIN)

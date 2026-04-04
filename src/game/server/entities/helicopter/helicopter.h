@@ -89,9 +89,7 @@ private:
 	// Tile respawn
 	bool TryRespawnNewHelicopter();
 	int m_DelayTurretType;
-	int64 m_NextSpawnTick;
 	vec2 m_InitialPosition;
-	int m_SpawnTick;
 
 	int m_ExplosionsOnDeath;
 	int m_ExplosionsLeft;
@@ -158,7 +156,7 @@ public:
 	int LastKnownOwnerCID() { return m_LastKnownOwner; }
 	bool IsExploding() { return m_ExplosionsLeft; }
 	bool IsBuilding() { return m_Build.m_Building; }
-	bool IsInvincible() { return IsBuilding() || IsSpawning() || IsExploding(); }
+	bool IsInvincible() { return IsBuilding() || IsExploding(); }
 	bool IsFullHealthAndArmor() { return m_Health == m_MaxHealth && m_Armor == m_MaxArmor; }
 	bool CanRegenerateArmor();
 	CCharacter *GetDriver();
@@ -166,8 +164,7 @@ public:
 	int GetNextAvailableSeat(int AfterIndex = 0);
 	IHelicopterModel *Model() { return m_pModel; }
 
-	bool IsSpawning() { return m_SpawnTick > -1; }
-	bool PlacedByTile() { return m_Number >= 0 && m_DelayTurretType >= TURRETTYPE_NONE; }
+	bool PlacedByTile() { return m_Number >= 0; }
 
 	// Manipulating
 	void SetNumHeartsIndicator(int NumHearts);

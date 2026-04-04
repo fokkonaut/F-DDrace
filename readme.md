@@ -137,6 +137,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_interactive_drops` |
 | `sv_drops_pickup_delay` |
 | `sv_heli_respawn_time` |
+| `sv_heli_tile_type` |
 | `sv_vanilla_mode_start` |
 | `sv_survival_min_players` |
 | `sv_survival_lobby_countdown` |

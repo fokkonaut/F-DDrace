@@ -135,18 +135,6 @@ CHelicopter::CHelicopter(
 	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
 
-	m_Number = Number;
-	m_DelayTurretType = DelayTurretType;
-	m_NextSpawnTick = 0;
-	m_InitialPosition = Pos;
-
-	m_SpawnTick = -1;
-	if (PlacedByTile())
-	{
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
-		m_Layer = LAYER_SWITCH; // unused rn, but for completeness
-	}
-
 	m_InputDirection = 0;
 	m_MaxHealth = 60;
 	m_Health = m_MaxHealth;
@@ -190,8 +178,17 @@ CHelicopter::CHelicopter(
 
 	UpdateHealthbarIndicator();
 
+	m_Number = Number;
+	m_DelayTurretType = DelayTurretType;
+	m_InitialPosition = Pos;
+	if (PlacedByTile())
+	{
+		m_Build.m_Duration = Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
+		m_Layer = LAYER_SWITCH; // unused rn, but for completeness
+	}
+
 	// Order matters
-	if (BuildTime)
+	if (m_Build.m_Duration)
 		InitBuildAnimation();
 
 	SortBones();
@@ -227,7 +224,7 @@ bool CHelicopter::TryRespawnNewHelicopter()
 {
 	if (!PlacedByTile())
 		return false;
-	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, m_HelicopterType, m_DelayTurretType, 1.f, false, m_Number);
+	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, GameServer()->GetHelicopterTileType(), m_DelayTurretType, 1.f, false, m_Number);
 }
 
 bool CHelicopter::CanRegenerateArmor()
@@ -485,24 +482,17 @@ void CHelicopter::Tick()
 	if (m_LastKnownOwner >= 0 && !GameServer()->m_apPlayers[m_LastKnownOwner])
 		m_LastKnownOwner = -1;
 
-	if (PlacedByTile() && IsSpawning())
+	BuildHelicopter();
+
+	if (PlacedByTile() && IsBuilding())
 	{
 		CCollision::SSwitchers *pSwitcher = m_Number > 0 ? &GameServer()->Collision()->m_pSwitchers[m_Number] : 0;
-		if (pSwitcher && !pSwitcher->m_Status[0]) // always use team 0, we dont have management for other teams right now for tile-based helis
+		if (pSwitcher && !pSwitcher->m_Status[m_DDTeam])
 		{
-			m_SpawnTick++;
-		}
-
-		if (Server()->Tick() > m_SpawnTick)
-		{
-			// respawn
-			m_SpawnTick = -1;
-			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, m_TeamMask);
+			m_Build.m_StartTick++;
 		}
 		return;
 	}
-
-	BuildHelicopter();
 
 	if (!IsInvincible())
 	{
@@ -1014,7 +1004,7 @@ void CHelicopter::SetRotation(float NewRotation)
 
 void CHelicopter::Snap(int SnappingClient)
 {
-	if (IsExploding() || IsSpawning())
+	if (IsExploding())
 		return;
 
 	if (NetworkClipped(SnappingClient) || !CmaskIsSet(m_TeamMask, SnappingClient))
@@ -1023,20 +1013,25 @@ void CHelicopter::Snap(int SnappingClient)
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 	if (IsBuilding())
 	{
-		const SBounds& ModelBounds = m_pModel->GetCachedBounds();
-		for (int i = 0; i < NUM_BUILD_IDS; i++)
+		// only show when constructing, switch is active
+		CCollision::SSwitchers *pSwitcher = m_Number > 0 ? &GameServer()->Collision()->m_pSwitchers[m_Number] : 0;
+		if (!PlacedByTile() || (pSwitcher && pSwitcher->m_Status[m_DDTeam]))
 		{
-			CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_Build.m_aBuildIDs[i],
-			                                                                                   sizeof(CNetObj_Projectile)));
-			if (!pObj)
-				continue;
+			const SBounds& ModelBounds = m_pModel->GetCachedBounds();
+			for (int i = 0; i < NUM_BUILD_IDS; i++)
+			{
+				CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_Build.m_aBuildIDs[i],
+																								sizeof(CNetObj_Projectile)));
+				if (!pObj)
+					continue;
 
-			pObj->m_X = round_to_int(m_Pos.x + ModelBounds.m_Left + rand() % (int)m_pModel->GetTotalSize().x);
-			pObj->m_Y = round_to_int(m_Pos.y + m_Build.m_CachedHeight);
-			pObj->m_VelX = 0;
-			pObj->m_VelY = 0;
-			pObj->m_StartTick = Server()->Tick();
-			pObj->m_Type = WEAPON_HAMMER;
+				pObj->m_X = round_to_int(m_Pos.x + ModelBounds.m_Left + rand() % (int)m_pModel->GetTotalSize().x);
+				pObj->m_Y = round_to_int(m_Pos.y + m_Build.m_CachedHeight);
+				pObj->m_VelX = 0;
+				pObj->m_VelY = 0;
+				pObj->m_StartTick = Server()->Tick();
+				pObj->m_Type = WEAPON_HAMMER;
+			}
 		}
 	}
 	else if (

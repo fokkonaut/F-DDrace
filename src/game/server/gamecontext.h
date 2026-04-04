@@ -813,6 +813,7 @@ public:
 
 	// helicopter
 	bool SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
+	int GetHelicopterTileType() { return Config()->m_SvHeliTileType == NUM_HELICOPTER_TYPES ? random(HELICOPTER_DEFAULT, NUM_HELICOPTER_TYPES - 1) : Config()->m_SvHeliTileType; }
 
 	//minigames disabled
 	bool m_aMinigameDisabled[NUM_MINIGAMES];
