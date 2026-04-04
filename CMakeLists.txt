@@ -976,6 +976,7 @@ set(EXPECTED_DATA
   mapres/winter_mountains.png
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
+  maps-fddrace/LobbyChill.map
   maps-fddrace/blWorld.map
   maps/BlmapChill.map
   maps/BlmapChill_versions/BlmapChill_v0004.map
