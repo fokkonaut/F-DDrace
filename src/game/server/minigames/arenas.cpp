@@ -671,18 +671,24 @@ void CArenas::IncreaseScore(int Fight, int Index)
 			m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 
 		Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
-		GameServer()->m_apPlayers[ClientID]->m_ConfettiWinEffectTick = Server()->Tick();
-		
-		int64 Earnings = m_aFights[Fight].m_Stake * 2;
-		if (Earnings > 0)
-		{
-			GameServer()->m_apPlayers[ClientID]->BankOrWalletTransaction(Earnings, "won 1vs1 round");
-			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You won this 1vs1 round! Your earnings: +%lld money."), Earnings);
-			GameServer()->SendChatTarget(ClientID, aBuf);
-		}
 
+		ProcessPlayerWin(ClientID, m_aFights[Fight].m_Stake);
 		EndFight(Fight);
 	}
+}
+
+void CArenas::ProcessPlayerWin(int ClientID, int64 Stake)
+{
+	GameServer()->m_apPlayers[ClientID]->m_ConfettiWinEffectTick = Server()->Tick();
+
+	int64 Earnings = Stake * 2;
+	if (Earnings <= 0)
+		return;
+
+	char aBuf[128];
+	GameServer()->m_apPlayers[ClientID]->BankOrWalletTransaction(Earnings, "won 1vs1 round");
+	str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You won this 1vs1 round! Your earnings: +%lld money."), Earnings);
+	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
 bool CArenas::OnCharacterSpawn(int ClientID)
@@ -734,7 +740,8 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 					m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 				Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 			}
-			GameServer()->m_apPlayers[OtherID]->m_ConfettiWinEffectTick = Server()->Tick();
+			
+			ProcessPlayerWin(OtherID, m_aFights[Fight].m_Stake);
 		}
 
 		EndFight(Fight);

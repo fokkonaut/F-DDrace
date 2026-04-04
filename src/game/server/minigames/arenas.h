@@ -100,6 +100,7 @@ class CArenas : public CMinigame
 	bool ValidSpawnPos(vec2 Pos);
 	void StartFight(int Fight);
 	bool CanPayStake(int ClientID, int64 Stake);
+	void ProcessPlayerWin(int ClientID, int64 Stake);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];
