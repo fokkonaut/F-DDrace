@@ -1976,6 +1976,12 @@ bool CPlayer::WalletTransaction(int Amount, const char *pDescription)
 	return true;
 }
 
+bool CPlayer::BankOrWalletTransaction(int Amount, const char *pDescription)
+{
+	// if logged in, use bank money, otherwise try wallet
+	return BankTransaction(Amount, pDescription) || WalletTransaction(Amount, pDescription);
+}
+
 void CPlayer::ApplyMoneyHistoryMsg(int Type, float Amount, const char *pDescription)
 {
 	if (!pDescription[0] || GetAccID() < ACC_START)

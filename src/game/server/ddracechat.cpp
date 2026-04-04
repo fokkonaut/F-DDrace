@@ -2868,19 +2868,17 @@ void CGameContext::Con1VS1(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_copy(aBuf, pResult->GetFullString(), sizeof(aBuf));
 	const char *pRest = pSelf->GetWhisper(aBuf, &OtherID);
-	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID))
-		return;
 
+	int64 Stake = 0;
 	int ScoreLimit = 10;
 	int KillBorder = 0;
 	if (pResult->NumArguments() > 1) // more than just name
-	{
-		int Num = sscanf(pRest, "%d %d", &ScoreLimit, &KillBorder);
-		if (Num == 1)
-			KillBorder = 0;
-	}
+		sscanf(pRest, "%lld %d %d", &Stake, &ScoreLimit, &KillBorder);
 
-	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, ScoreLimit, KillBorder);
+	if (pSelf->Arenas()->AcceptFight(OtherID, pResult->m_ClientID, Stake))
+		return;
+
+	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, OtherID, Stake, ScoreLimit, KillBorder);
 }
 
 void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)

@@ -37,6 +37,7 @@ public:
 	vec2 m_aCorners[4];
 	vec2 m_aSpawns[2];
 	vec2 m_MiddlePos;
+	int64 m_Stake;
 	int m_ScoreLimit;
 	bool m_KillBorder;
 	bool m_LongFreezeStart;
@@ -61,6 +62,8 @@ class CArenas : public CMinigame
 {
 	enum
 	{
+		MAX_ARENAS_STAKE = 10000000,
+
 		MAX_FIGHTS = VANILLA_MAX_CLIENTS-1, // team 1-63
 
 		POINT_TOP_LEFT = 0,
@@ -96,6 +99,7 @@ class CArenas : public CMinigame
 	bool IsGrounded(CCharacter *pChr);
 	bool ValidSpawnPos(vec2 Pos);
 	void StartFight(int Fight);
+	bool CanPayStake(int ClientID, int64 Stake);
 
 	int m_aState[MAX_CLIENTS];
 	int m_aLastDirection[MAX_CLIENTS];
@@ -144,8 +148,8 @@ public:
 	void OnInput(int ClientID, CNetObj_PlayerInput *pNewInput);
 	bool ClampViewPos(int ClientID);
 
-	void StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder);
-	bool AcceptFight(int Creator, int ClientID);
+	void StartConfiguration(int ClientID, int Participant, int64 Stake, int ScoreLimit, bool KillBorder);
+	bool AcceptFight(int Creator, int ClientID, int64 Stake);
 	void EndFight(int Fight);
 
 	bool GlobalArenaExists() { return m_GlobalArena.m_Active; }

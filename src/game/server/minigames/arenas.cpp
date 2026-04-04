@@ -122,7 +122,14 @@ vec2 CArenas::GetSpawnPos(int ClientID)
 	return m_aFights[Fight].m_aSpawns[Index];
 }
 
-void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, bool KillBorder)
+bool CArenas::CanPayStake(int ClientID, int64 Stake)
+{
+	int AccID = GameServer()->m_apPlayers[ClientID]->GetAccID();
+	int64 Money = AccID >= ACC_START ? GameServer()->m_Accounts[AccID].m_Money : GameServer()->m_apPlayers[ClientID]->GetWalletMoney();
+	return Money >= Stake;
+}
+
+void CArenas::StartConfiguration(int ClientID, int Participant, int64 Stake, int ScoreLimit, bool KillBorder)
 {
 	if (ClientID == Participant)
 	{
@@ -142,6 +149,18 @@ void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, 
 		return;
 	}
 
+	if (Stake < 0 || Stake > MAX_ARENAS_STAKE)
+	{
+		GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("Invalid stake, please enter a value between 0 and 10.000.000"));
+		return;
+	}
+
+	if (Stake > 0 && !CanPayStake(ClientID, Stake))
+	{
+		GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("You don't have enough money"));
+		return;
+	}
+
 	int FreeArena = GetFreeArena();
 	if (FreeArena == -1)
 	{
@@ -150,6 +169,7 @@ void CArenas::StartConfiguration(int ClientID, int Participant, int ScoreLimit, 
 	}
 
 	m_aFights[FreeArena].m_Active = true;
+	m_aFights[FreeArena].m_Stake = Stake;
 	m_aFights[FreeArena].m_ScoreLimit = clamp(ScoreLimit, 0, 100);
 	m_aFights[FreeArena].m_KillBorder = KillBorder;
 
@@ -236,7 +256,16 @@ void CArenas::FinishConfiguration(int Fight, int ClientID)
 		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You invited '%s' to a fight"), Server()->ClientName(Invited));
 		GameServer()->SendChatTarget(ClientID, aBuf);
 
-		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a fight by '%s', type '/1vs1 %s' to join"), Server()->ClientName(ClientID), Server()->ClientName(ClientID));
+		char aParameters[128];
+		str_format(aParameters, sizeof(aParameters), "%s", Server()->ClientName(ClientID));
+		if (m_aFights[Fight].m_Stake)
+		{
+			char aTemp[128];
+			str_format(aTemp, sizeof(aTemp), " %lld", m_aFights[Fight].m_Stake);
+			str_append(aParameters, aTemp, sizeof(aParameters));
+		}
+
+		str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[Invited]->Localize("You have been invited to a fight by '%s', type '/1vs1 %s' to join"), Server()->ClientName(ClientID), aParameters);
 		GameServer()->SendChatTarget(Invited, aBuf);
 
 		if (GameServer()->m_apPlayers[Invited] && GameServer()->m_apPlayers[Invited]->m_Minigame != MINIGAME_1VS1)
@@ -394,7 +423,7 @@ bool CArenas::ClampViewPos(int ClientID)
 	return Clamp;
 }
 
-bool CArenas::AcceptFight(int Creator, int ClientID)
+bool CArenas::AcceptFight(int Creator, int ClientID, int64 Stake)
 {
 	int Fight = GetClientFight(Creator);
 	if (Fight < 0)
@@ -411,11 +440,12 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 
 	CFight *pFight = &m_aFights[Fight];
 	bool Found = false;
+	int OwnSlot = -1;
 	for (int i = 0; i < 2; i++)
 	{
 		if (pFight->m_aParticipants[i].m_ClientID == ClientID && pFight->m_aParticipants[i].m_Status == PARTICIPANT_INVITED)
 		{
-			pFight->m_aParticipants[i].m_Status = PARTICIPANT_ACCEPTED;
+			OwnSlot = i;
 			Found = true;
 			break;
 		}
@@ -425,6 +455,29 @@ bool CArenas::AcceptFight(int Creator, int ClientID)
 		return false;
 
 	char aBuf[128];
+	if (pFight->m_Stake)
+	{
+		if (Stake != pFight->m_Stake)
+		{
+			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("This fight requires a stake of %lld money. Accept by typing '/1vs1 %s %lld'"), pFight->m_Stake, Server()->ClientName(Creator), pFight->m_Stake);
+			GameServer()->SendChatTarget(ClientID, aBuf);
+			return true; // dont process further
+		}
+
+		if (!CanPayStake(ClientID, Stake) || !CanPayStake(Creator, Stake))
+		{
+			GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("Fight cancelled, someone couldn't pay the stake."));
+			GameServer()->SendChatTarget(Creator, GameServer()->m_apPlayers[Creator]->Localize("Fight cancelled, someone couldn't pay the stake."));
+			EndFight(Fight);
+			return true; // dont process further
+		}
+
+		GameServer()->m_apPlayers[ClientID]->BankOrWalletTransaction(-Stake, "collected 1vs1 stake");
+		GameServer()->m_apPlayers[Creator]->BankOrWalletTransaction(-Stake, "collected 1vs1 stake");
+	}
+
+	pFight->m_aParticipants[OwnSlot].m_Status = PARTICIPANT_ACCEPTED;
+
 	str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You have accepted the invite by '%s'"), Server()->ClientName(Creator));
 	GameServer()->SendChatTarget(ClientID, aBuf);
 
@@ -619,6 +672,14 @@ void CArenas::IncreaseScore(int Fight, int Index)
 
 		Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 		GameServer()->m_apPlayers[ClientID]->m_ConfettiWinEffectTick = Server()->Tick();
+		
+		int64 Earnings = m_aFights[Fight].m_Stake * 2;
+		if (Earnings > 0)
+		{
+			GameServer()->m_apPlayers[ClientID]->BankOrWalletTransaction(Earnings, "won 1vs1 round");
+			str_format(aBuf, sizeof(aBuf), GameServer()->m_apPlayers[ClientID]->Localize("You won this 1vs1 round! Your earnings: +%lld money."), Earnings);
+			GameServer()->SendChatTarget(ClientID, aBuf);
+		}
 
 		EndFight(Fight);
 	}

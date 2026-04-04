@@ -2161,7 +2161,7 @@ void CGameContext::Con1VS1GlobalCreate(IConsole::IResult *pResult, void *pUserDa
 			KillBorder = pResult->GetInteger(1);
 	}
 
-	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, CArenas::PARTICIPANT_GLOBAL, ScoreLimit, KillBorder);
+	pSelf->Arenas()->StartConfiguration(pResult->m_ClientID, CArenas::PARTICIPANT_GLOBAL, 0, ScoreLimit, KillBorder);
 }
 
 void CGameContext::Con1VS1GlobalStart(IConsole::IResult *pResult, void *pUserData)
