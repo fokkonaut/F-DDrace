@@ -550,13 +550,14 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if (CheckPoint(ix, iy))
+		int CheckPointRes = CheckPoint(ix, iy);
+		if (CheckPointRes)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			return GetCollisionAt(ix, iy);
+			return CheckPointRes == 1 ? GetCollisionAt(ix, iy) : GetFCollisionAt(ix, iy);
 		}
 
 		Last = Pos;
