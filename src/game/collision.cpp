@@ -845,8 +845,15 @@ void CCollision::Dest()
 
 int CCollision::IsSolid(int x, int y)
 {
-	int index = GetTile(x, y);
-	return index == TILE_SOLID || index == TILE_NOHOOK;
+	int Nx = clamp(x / 32, 0, m_Width - 1);
+	int Ny = clamp(y / 32, 0, m_Height - 1);
+	int Pos = Ny * m_Width + Nx;
+
+	// Allow front layer hook and unhook, for draweditor tile placement on map freeze tiles which wont work otherwise
+	// Note: this "feature" is not supported 100%. Neither clientside or serverside. Do not place solid tiles from game layer in map editor.
+	int Index = m_pTiles ? m_pTiles[Pos].m_Index : -1;
+	int FIndex = m_pFront ? m_pFront[Pos].m_Index : -1;
+	return Index == TILE_SOLID || Index == TILE_NOHOOK || FIndex == TILE_SOLID || FIndex == TILE_NOHOOK;
 }
 
 bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1)
