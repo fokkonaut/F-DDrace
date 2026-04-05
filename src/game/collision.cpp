@@ -853,7 +853,7 @@ int CCollision::IsSolid(int x, int y)
 	int Pos = Ny * m_Width + Nx;
 
 	// Allow front layer hook and unhook, for draweditor tile placement on map freeze tiles which wont work otherwise
-	// Note: this "feature" might not be supported 100%. Neither clientside or serverside. Do not place solid tiles from game layer in map editor.
+	// Note: this "feature" might not be supported 100%. Neither clientside or serverside. Do not place solid tiles from front layer in map editor.
 	int Index = m_pTiles ? m_pTiles[Pos].m_Index : -1;
 	if (Index == TILE_SOLID || Index == TILE_NOHOOK)
 		return 1;
@@ -1542,8 +1542,8 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
-		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK;
-		bool FrontLayerBlocked = GetFIndex(Nx, Ny) == TILE_SOLID || GetFIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_NOLASER || GetFIndex(Nx, Ny) == TILE_NOLASER;
+		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_NOLASER;
+		bool FrontLayerBlocked = GetFIndex(Nx, Ny) == TILE_SOLID || GetFIndex(Nx, Ny) == TILE_NOHOOK || GetFIndex(Nx, Ny) == TILE_NOLASER;
 		bool PlotDoor = Number != -1 && !IsPlotDoor(Number) && CheckPointDoor(Pos, 0, true, false) != -1; // can just use team 0 because ClosedOnly is false anyways
 		if (GameLayerBlocked || FrontLayerBlocked || PlotDoor)
 		{
