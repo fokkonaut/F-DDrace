@@ -138,7 +138,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		if (Config()->m_SvSpawnAsZombie && !m_pPlayer->m_JailTime &&
 			m_pPlayer->GetDummyMode() != DUMMYMODE_TAVERN_DUMMY && m_pPlayer->GetDummyMode() != DUMMYMODE_BLMAPCHILL_POLICE)
 		{
-			SetZombieHuman(true);
+			SetZombieHuman(true, -1, true);
 		}
 	}
 
