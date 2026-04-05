@@ -448,13 +448,14 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 	for (int i = 0; i <= End; i++)
 	{
 		vec2 Pos = mix(Pos0, Pos1, i*InverseEnd);
-		if (CheckPoint(Pos.x, Pos.y))
+		int CheckPointRes = CheckPoint(Pos.x, Pos.y);
+		if (CheckPointRes)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
-			return GetCollisionAt(Pos.x, Pos.y);
+			return CheckPointRes == 1 ? GetCollisionAt(Pos.x, Pos.y) : GetFCollisionAt(Pos.x, Pos.y);
 		}
 
 		Last = Pos;
@@ -495,10 +496,11 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision,
 		}
 
 		int hit = 0;
-		if (CheckPoint(ix, iy))
+		int CheckPointRes = CheckPoint(ix, iy);
+		if (CheckPointRes)
 		{
 			if (!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
-				hit = GetCollisionAt(ix, iy);
+				hit = CheckPointRes == 1 ? GetCollisionAt(ix, iy) : GetFCollisionAt(ix, iy);
 		}
 		else if (IsHookBlocker(ix, iy, Pos0, Pos1))
 		{
@@ -850,10 +852,14 @@ int CCollision::IsSolid(int x, int y)
 	int Pos = Ny * m_Width + Nx;
 
 	// Allow front layer hook and unhook, for draweditor tile placement on map freeze tiles which wont work otherwise
-	// Note: this "feature" is not supported 100%. Neither clientside or serverside. Do not place solid tiles from game layer in map editor.
+	// Note: this "feature" might not be supported 100%. Neither clientside or serverside. Do not place solid tiles from game layer in map editor.
 	int Index = m_pTiles ? m_pTiles[Pos].m_Index : -1;
+	if (Index == TILE_SOLID || Index == TILE_NOHOOK)
+		return 1;
 	int FIndex = m_pFront ? m_pFront[Pos].m_Index : -1;
-	return Index == TILE_SOLID || Index == TILE_NOHOOK || FIndex == TILE_SOLID || FIndex == TILE_NOHOOK;
+	if (FIndex == TILE_SOLID || FIndex == TILE_NOHOOK)
+		return 2;
+	return 0;
 }
 
 bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1)
@@ -1409,8 +1415,7 @@ int CCollision::GetFTile(int x, int y)
 		return 0;
 	int Nx = clamp(x / 32, 0, m_Width - 1);
 	int Ny = clamp(y / 32, 0, m_Height - 1);
-	if (m_pFront[Ny * m_Width + Nx].m_Index == TILE_DEATH
-		|| m_pFront[Ny * m_Width + Nx].m_Index == TILE_NOLASER)
+	if (m_pFront[Ny * m_Width + Nx].m_Index >= TILE_SOLID && m_pFront[Ny * m_Width + Nx].m_Index <= TILE_NOLASER)
 		return m_pFront[Ny * m_Width + Nx].m_Index;
 	else
 		return 0;
@@ -1536,19 +1541,17 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2
 		int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
 		int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 
+		bool GameLayerBlocked = GetIndex(Nx, Ny) == TILE_SOLID || GetIndex(Nx, Ny) == TILE_NOHOOK;
+		bool FrontLayerBlocked = GetFIndex(Nx, Ny) == TILE_SOLID || GetFIndex(Nx, Ny) == TILE_NOHOOK || GetIndex(Nx, Ny) == TILE_NOLASER || GetFIndex(Nx, Ny) == TILE_NOLASER;
 		bool PlotDoor = Number != -1 && !IsPlotDoor(Number) && CheckPointDoor(Pos, 0, true, false) != -1; // can just use team 0 because ClosedOnly is false anyways
-		if (GetIndex(Nx, Ny) == TILE_SOLID
-			|| GetIndex(Nx, Ny) == TILE_NOHOOK
-			|| GetIndex(Nx, Ny) == TILE_NOLASER
-			|| GetFIndex(Nx, Ny) == TILE_NOLASER
-			|| PlotDoor)
+		if (GameLayerBlocked || FrontLayerBlocked || PlotDoor)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
 			if (PlotDoor) return TILE_STOPA;
-			else if (GetFIndex(Nx, Ny) == TILE_NOLASER)	return GetFCollisionAt(Pos.x, Pos.y);
+			else if (FrontLayerBlocked)	return GetFCollisionAt(Pos.x, Pos.y);
 			else return GetCollisionAt(Pos.x, Pos.y);
 
 		}
@@ -1929,7 +1932,7 @@ int CCollision::IntersectLinePortalRifleStop(vec2 Pos0, vec2 Pos1, vec2* pOutCol
 		int Index = GetIndex(Nx, Ny);
 		int FIndex = GetFIndex(Nx, Ny);
 		bool GameLayerBlocked = Index == TILE_SOLID || Index == TILE_NOHOOK || Index == TILE_PORTAL_RIFLE_STOP || Index == TILE_DFREEZE || Index == TILE_VIP_PLUS_ONLY;
-		bool FrontLayerBlocked = FIndex == TILE_PORTAL_RIFLE_STOP || FIndex == TILE_DFREEZE || FIndex == TILE_VIP_PLUS_ONLY;
+		bool FrontLayerBlocked = FIndex == TILE_PORTAL_RIFLE_STOP || FIndex == TILE_DFREEZE || FIndex == TILE_VIP_PLUS_ONLY || FIndex == TILE_SOLID || FIndex == TILE_NOHOOK;
 		if (GameLayerBlocked || FrontLayerBlocked)
 		{
 			if (pOutCollision)

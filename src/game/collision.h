@@ -81,8 +81,8 @@ public:
 	~CCollision();
 	void Init(class CLayers* pLayers, class CConfig *pConfig);
 	void FillAntibot(CAntibotMapData *pMapData);
-	bool CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
-	bool CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
+	int CheckPoint(float x, float y) { return IsSolid(round_to_int(x), round_to_int(y)); }
+	int CheckPoint(vec2 Pos) { return CheckPoint(Pos.x, Pos.y); }
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
