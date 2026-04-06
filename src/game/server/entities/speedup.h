@@ -28,6 +28,7 @@ class CSpeedup : public CEntity
 	int m_Angle;
 	int m_Force;
 	int m_MaxSpeed;
+	bool m_ModeOld;
 
 	float m_Distance;
 	float m_CurrentDist;
@@ -35,7 +36,7 @@ class CSpeedup : public CEntity
 	void Rotate(int Angle);
 
 public:
-	CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision = true);
+	CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool ModeOld, bool Collision = true);
 	virtual ~CSpeedup();
 	virtual void ResetCollision(bool Remove = false);
 	virtual void Tick();
@@ -45,6 +46,7 @@ public:
 	int GetAngle() { return m_Angle; }
 	int GetForce() { return m_Force; }
 	int GetMaxSpeed() { return m_MaxSpeed; }
+	bool IsModeOld() { return m_ModeOld; }
 };
 
 #endif // GAME_SERVER_ENTITIES_SPEEDUP_H

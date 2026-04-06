@@ -37,6 +37,7 @@ class CDrawEditor
 		// Speedup
 		SPEEDUP_FORCE = 0,
 		SPEEDUP_MAXSPEED,
+		SPEEDUP_MODE_OLD,
 		NUM_SPEEDUP_SETTINGS,
 
 		// Teleporters
@@ -180,6 +181,7 @@ class CDrawEditor
 		int m_Force;
 		int m_MaxSpeed;
 		int m_Angle;
+		bool m_ModeOld;
 	} m_Speedup;
 
 	struct

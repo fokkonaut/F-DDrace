@@ -31,6 +31,7 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_Speedup.m_Angle = 0;
 	m_Speedup.m_Force = 2;
 	m_Speedup.m_MaxSpeed = 0;
+	m_Speedup.m_ModeOld = false;
 	m_Teleporter.m_Number = 0;
 	m_Teleporter.m_Evil = true;
 	m_Transform.m_State = TRANSFORM_STATE_SETTING_FIRST;
@@ -635,6 +636,10 @@ void CDrawEditor::HandleInput()
 					else if (m_Speedup.m_MaxSpeed < 0)
 						m_Speedup.m_MaxSpeed = Max;
 				}
+				else if (m_Setting == SPEEDUP_MODE_OLD)
+				{
+					m_Speedup.m_ModeOld = !m_Speedup.m_ModeOld;
+				}
 			}
 			else if (m_Category == CAT_TELEPORTER)
 			{
@@ -818,7 +823,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 		return new CButton(m_pCharacter->GameWorld(), m_Pos, Number, !Preview);
 	}
 	case CGameWorld::ENTTYPE_SPEEDUP:
-		return new CSpeedup(m_pCharacter->GameWorld(), m_Pos, m_Speedup.m_Angle, m_Speedup.m_Force, m_Speedup.m_MaxSpeed, !Preview);
+		return new CSpeedup(m_pCharacter->GameWorld(), m_Pos, m_Speedup.m_Angle, m_Speedup.m_Force, m_Speedup.m_MaxSpeed, m_Speedup.m_ModeOld, !Preview);
 	case CGameWorld::ENTTYPE_TELEPORTER:
 	{
 		int Number = !Preview ? GameServer()->Collision()->GetSwitchByPlotTeleporter(CurrentPlotID(), m_Teleporter.m_Number) : 0;
@@ -842,7 +847,7 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 	case CGameWorld::ENTTYPE_BUTTON:
 		pEntity = new CButton(pTemplate->GameWorld(), pTemplate->GetPos(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_SPEEDUP:
-		pEntity = new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), !Preview && pTemplate->m_InitialCollision); break;
+		pEntity = new CSpeedup(pTemplate->GameWorld(), pTemplate->GetPos(), ((CSpeedup *)pTemplate)->GetAngle(), ((CSpeedup *)pTemplate)->GetForce(), ((CSpeedup *)pTemplate)->GetMaxSpeed(), ((CSpeedup *)pTemplate)->IsModeOld(), !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_TELEPORTER:
 		pEntity = new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_DRAWTILE:
@@ -930,6 +935,8 @@ void CDrawEditor::SendWindow()
 		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_FORCE), sizeof(aMsg));
 		str_format(aBuf, sizeof(aBuf), "Max speed: %d", m_Speedup.m_MaxSpeed);
 		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_MAXSPEED), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Old tile: %s", m_Speedup.m_ModeOld ? "Yes" : "No");
+		str_append(aMsg, FormatSetting(aBuf, SPEEDUP_MODE_OLD), sizeof(aMsg));
 	}
 	else if (m_Category == CAT_TELEPORTER)
 	{

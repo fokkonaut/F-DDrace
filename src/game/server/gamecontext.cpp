@@ -5613,7 +5613,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_SPEEDUP:
 		{
 			CSpeedup *pSpeedup = (CSpeedup *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d,", CGameWorld::ENTTYPE_SPEEDUP, Pos.x/32.f, Pos.y/32.f, pSpeedup->GetAngle(), pSpeedup->GetForce(), pSpeedup->GetMaxSpeed());
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d:%d,", CGameWorld::ENTTYPE_SPEEDUP, Pos.x/32.f, Pos.y/32.f, pSpeedup->GetAngle(), pSpeedup->GetForce(), pSpeedup->GetMaxSpeed(), (int)pSpeedup->IsModeOld());
 			*pFile << aEntry;
 			break;
 		}
@@ -5735,10 +5735,11 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 				int Angle = -1;
 				int Force = -1;
 				int MaxSpeed = -1;
-				sscanf(pData, "%d:%f/%f:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Angle, &Force, &MaxSpeed);
+				int ModeOld = 1;
+				sscanf(pData, "%d:%f/%f:%d:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Angle, &Force, &MaxSpeed, &ModeOld);
 				if (Angle >= 0 && Force > 0 && MaxSpeed >= 0)
 				{
-					vEntities.push_back(new CSpeedup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Angle, Force, MaxSpeed));
+					vEntities.push_back(new CSpeedup(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Angle, Force, MaxSpeed, ModeOld));
 				}
 				break;
 			}

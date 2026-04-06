@@ -4,12 +4,13 @@
 #include <game/server/gamecontext.h>
 #include "speedup.h"
 
-CSpeedup::CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool Collision)
+CSpeedup::CSpeedup(CGameWorld *pGameWorld, vec2 Pos, float Angle, int Force, int MaxSpeed, bool ModeOld, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_SPEEDUP, Pos, 14, Collision)
 {
 	m_Angle = 0;
 	m_Force = Force;
 	m_MaxSpeed = MaxSpeed;
+	m_ModeOld = ModeOld;
 
 	vec2 aOffsets[NUM_DOTS] = {
 		vec2(5, 0),
@@ -58,7 +59,7 @@ void CSpeedup::ResetCollision(bool Remove)
 		MaxSpeed = 0;
 		m_Collision = false;
 	}
-	GameServer()->Collision()->SetSpeedup(m_Pos, Angle, Force, MaxSpeed, TILE_SPEED_BOOST_OLD);
+	GameServer()->Collision()->SetSpeedup(m_Pos, Angle, Force, MaxSpeed, m_ModeOld ? TILE_SPEED_BOOST_OLD : TILE_SPEED_BOOST);
 }
 
 void CSpeedup::Rotate(int Angle)
