@@ -741,9 +741,10 @@ void IGameController::Snap(int SnappingClient)
 	if (!pSnap->IsMinigame() && pSnap->m_ScoreMode == SCORE_TIME)
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_TIMESCORE;
 
-	if (pSnap->ShowDDraceHud())
+	bool DDraceHud = pSnap->ShowDDraceHud();
+	if (DDraceHud)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_DDRACE;
-	else // fng, survival
+	if (!DDraceHud || pSnap->m_Gamemode == GAMEMODE_VANILLA) // fng, survival
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
 
 	// allow inputs for arena placing while in spec, or for click to spectate in spectators

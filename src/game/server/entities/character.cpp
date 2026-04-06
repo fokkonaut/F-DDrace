@@ -182,15 +182,18 @@ void CCharacter::SetWeapon(int W)
 	// AntiPing
 	if (m_pPlayer->AntiPing())
 	{
+		bool SwitchToVanillaShotgun = GetActiveWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA;
+		bool SwitchFromVanillaShotgun = GetLastWeapon() == WEAPON_SHOTGUN && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA;
 		bool SwitchToNormal = GetActiveWeapon() < NUM_VANILLA_WEAPONS && GetLastWeapon() >= NUM_VANILLA_WEAPONS;
 		bool SwitchToExtra = GetActiveWeapon() >= NUM_VANILLA_WEAPONS;
-		if (SwitchToNormal || SwitchToExtra)
+		if (SwitchToNormal || SwitchToExtra || SwitchToVanillaShotgun || SwitchFromVanillaShotgun)
 		{
 			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+
+			// Unfix PreventReloadTimer
 			if (GetActiveWeapon() == WEAPON_HAMMER && (GetLastWeapon() == WEAPON_LIGHTSABER/* || GetLastWeapon() == WEAPON_TELEKINESIS
 				|| GetLastWeapon() == WEAPON_DRAW_EDITOR*/))
 			{
-				// Unfix PreventReloadTimer
 				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
 			}
 		}
@@ -5432,13 +5435,18 @@ int CCharacter::NumDDraceHudRows()
 	if (!Server()->IsSevendown(m_pPlayer->GetCID()) || GameServer()->GetClientDDNetVersion(m_pPlayer->GetCID()) < VERSION_DDNET_NEW_HUD)
 		return 0;
 
+	if (!m_pPlayer->ShowDDraceHud())
+		return 0;
+
 	CCharacter *pChr = this;
 	if ((m_pPlayer->GetTeam() == TEAM_SPECTATORS || m_pPlayer->IsPaused()) && m_pPlayer->GetSpectatorID() >= 0 && GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID()))
 		pChr = GameServer()->GetPlayerChar(m_pPlayer->GetSpectatorID());
 
 	int Flags = pChr->GetDDNetCharacterFlags(pChr->GetPlayer()->GetCID());
 	int Rows = 0;
-	if (ShowAmmoHud() && pChr->GetPlayer()->ShowDDraceHud()) // when we dont show ddrace hud we have either nothing or health/armor. then we dont need to add a row
+	if (pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+		Rows += 2;
+	if (ShowAmmoHud())
 		Rows++;
 	if (Flags&(CHARACTERFLAG_ENDLESS_JUMP|CHARACTERFLAG_ENDLESS_HOOK|CHARACTERFLAG_JETPACK|CHARACTERFLAG_TELEGUN_GUN|CHARACTERFLAG_TELEGUN_GRENADE|CHARACTERFLAG_TELEGUN_LASER))
 		Rows++;

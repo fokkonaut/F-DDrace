@@ -1356,6 +1356,8 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 				else if (ActiveWeapon == WEAPON_LIGHTNING_LASER)
 					Tunings.m_LaserFireDelay = Tunings.m_LightningLaserFireDelay;
 			}
+			else if (ActiveWeapon == WEAPON_SHOTGUN && pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)
+				Tunings.m_LaserReach = 0;
 			else if (ActiveWeapon == WEAPON_STRAIGHT_GRENADE)
 				Tunings.m_GrenadeFireDelay = Tunings.m_StraightGrenadeFireDelay;
 			else if (ActiveWeapon == WEAPON_BALL_GRENADE)
