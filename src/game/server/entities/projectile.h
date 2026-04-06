@@ -25,7 +25,7 @@ public:
 	);
 
 	vec2 GetPos(float Time);
-	void FillInfo(CNetObj_Projectile *pProj);
+	void FillInfo(CNetObj_Projectile *pProj, int SnappingClient);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -58,15 +58,26 @@ private:
 	bool m_DefaultTuning;
 	bool m_DDrace;
 	bool m_IsSpreadWeapon;
-	vec2 m_LastResetPos;
-	int m_LastResetTick;
-	bool m_CalculatedVel;
-	vec2 m_Vel;
 
+	bool m_CalculatedVel;
 	virtual void TickDeferred();
 	void CalculateVel();
 	void GetOriginalTunings(float *pCurvature, float *pSpeed);
 	void DetermineTuning();
+
+	enum
+	{
+		SNAPINFO_LOWBANDWIDTH,
+		SNAPINFO_HIGHBANDWIDTH,
+		NUM_SNAPINFO
+	};
+
+	struct SSnapInfo
+	{
+		vec2 m_LastResetPos;
+		int m_LastResetTick;
+		ivec2 m_Vel;
+	} m_aSnap[NUM_SNAPINFO];
 
 public:
 
@@ -74,6 +85,7 @@ public:
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
 	vec2 m_CurPos;
+	vec2 m_PrevPos;
 };
 
 #endif

@@ -8,11 +8,22 @@
 class CStableProjectile : public CEntity
 {
 	int m_Type;
-	vec2 m_LastResetPos;
-	int m_LastResetTick;
 	bool m_CalculatedVel;
-	int m_VelX;
-	int m_VelY;
+	vec2 m_PrevPos;
+
+	enum
+	{
+		SNAPINFO_LOWBANDWIDTH,
+		SNAPINFO_HIGHBANDWIDTH,
+		NUM_SNAPINFO
+	};
+
+	struct SSnapInfo
+	{
+		vec2 m_LastResetPos;
+		int m_LastResetTick;
+		ivec2 m_Vel;
+	} m_aSnap[NUM_SNAPINFO];
 
 	Mask128 m_TeamMask;
 	int m_Owner;

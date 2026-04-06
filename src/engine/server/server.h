@@ -567,7 +567,7 @@ public:
 	unsigned m_AnnouncementLastLine;
 
 	void SetHighBandwidth(int ClientID, bool Value) override { m_aClients[ClientID].m_HighBandwidth = Value; }
-	bool GetHighBandwidth(int ClientID) override { return m_aClients[ClientID].m_HighBandwidth; }
+	bool GetHighBandwidth(int ClientID) override { return ClientID < 0 || m_aClients[ClientID].m_HighBandwidth; }
 
 	bool IsBrowserScoreFix();
 

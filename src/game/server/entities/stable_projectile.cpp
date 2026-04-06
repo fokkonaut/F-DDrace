@@ -11,10 +11,14 @@ CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner
 {
 	m_Type = GameServer()->GetWeaponType(Type);
 	m_Pos = Pos;
-	m_LastResetPos = Pos;
+	m_PrevPos = Pos;
+	for (int i = 0; i < NUM_SNAPINFO; i++)
+	{
+		m_aSnap[i].m_LastResetTick = Server()->Tick();
+		m_aSnap[i].m_LastResetPos = Pos;
+	}
 	m_Owner = Owner;
 	m_HideOnSpec = HideOnSpec;
-	m_LastResetTick = Server()->Tick();
 	m_CalculatedVel = false;
 	m_TeamMask = Mask128();
 	m_OnlyShowOwner = OnlyShowOwner;
@@ -29,18 +33,21 @@ void CStableProjectile::Reset()
 
 void CStableProjectile::TickDeferred()
 {
-	if(Server()->Tick()%4 == 1)
+	if(Server()->Tick()%2 == 1)
 	{
-		m_LastResetPos = m_Pos;
-		m_LastResetTick = Server()->Tick();
+		m_aSnap[SNAPINFO_LOWBANDWIDTH].m_LastResetPos = m_Pos;
+		m_aSnap[SNAPINFO_LOWBANDWIDTH].m_LastResetTick = Server()->Tick();
 	}
+	m_aSnap[SNAPINFO_HIGHBANDWIDTH].m_LastResetTick = Server()->Tick() - 1;
+	m_aSnap[SNAPINFO_HIGHBANDWIDTH].m_LastResetPos = m_PrevPos;
+	m_PrevPos = m_Pos;
+
 	m_CalculatedVel = false;
 	m_TeamMask = GameServer()->GetPlayerChar(m_Owner) ? GameServer()->GetPlayerChar(m_Owner)->TeamMask() : Mask128();
 }
 
 void CStableProjectile::CalculateVel()
 {
-	float Time = (Server()->Tick()-m_LastResetTick)/(float)Server()->TickSpeed();
 	float Curvature = 0;
 	float Speed = 0;
 
@@ -62,8 +69,12 @@ void CStableProjectile::CalculateVel()
 			break;
 	}
 
-	m_VelX = ((m_Pos.x - m_LastResetPos.x)/Time/Speed) * 100;
-	m_VelY = ((m_Pos.y - m_LastResetPos.y)/Time/Speed - Time*Speed*Curvature/10000) * 100;
+	for (int i = 0; i < NUM_SNAPINFO; i++)
+	{
+		float Time = (Server()->Tick()-m_aSnap[i].m_LastResetTick)/(float)Server()->TickSpeed();
+		m_aSnap[i].m_Vel.x = ((m_Pos.x - m_aSnap[i].m_LastResetPos.x)/Time/Speed) * 100;
+		m_aSnap[i].m_Vel.y = ((m_Pos.y - m_aSnap[i].m_LastResetPos.y)/Time/Speed - Time*Speed*Curvature/10000) * 100;
+	}
 
 	m_CalculatedVel = true;
 }
@@ -96,12 +107,13 @@ void CStableProjectile::Snap(int SnappingClient)
 	if(!m_CalculatedVel)
 		CalculateVel();
 
-	pProj->m_X = round_to_int(m_LastResetPos.x);
-	pProj->m_Y = round_to_int(m_LastResetPos.y);
-	pProj->m_VelX = m_VelX;
-	pProj->m_VelY = m_VelY;
-	if (Server()->IsSevendown(SnappingClient) && m_VelY >= 0 && (m_VelY & 512) != 0) // dont send PROJECTILEFLAG_IS_DDNET
+	int i = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
+	pProj->m_X = round_to_int(m_aSnap[i].m_LastResetPos.x);
+	pProj->m_Y = round_to_int(m_aSnap[i].m_LastResetPos.y);
+	pProj->m_VelX = m_aSnap[i].m_Vel.x;
+	pProj->m_VelY = m_aSnap[i].m_Vel.y;
+	if (Server()->IsSevendown(SnappingClient) && m_aSnap[i].m_Vel.y >= 0 && (m_aSnap[i].m_Vel.y & 512) != 0) // dont send PROJECTILEFLAG_IS_DDNET
 		pProj->m_VelY = 0;
-	pProj->m_StartTick = m_LastResetTick;
+	pProj->m_StartTick = m_aSnap[i].m_LastResetTick;
 	pProj->m_Type = m_Type;
 }

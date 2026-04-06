@@ -62,10 +62,15 @@ CProjectile::CProjectile
 	m_IsSpreadWeapon = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->m_aSpreadWeapon[m_Type];
 
 	m_TeamMask = Mask128();
-	m_LastResetPos = Pos;
-	m_LastResetTick = Server()->Tick();
+
+	for (int i = 0; i < NUM_SNAPINFO; i++)
+	{
+		m_aSnap[i].m_LastResetTick = Server()->Tick();
+		m_aSnap[i].m_LastResetPos = Pos;
+	}
 	m_CalculatedVel = false;
 	m_CurPos = GetPos((Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed());
+	m_PrevPos = m_CurPos;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -85,11 +90,11 @@ void CProjectile::Tick()
 {
 	float Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
 	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
-	vec2 PrevPos = GetPos(Pt);
+	m_PrevPos = GetPos(Pt);
 	m_CurPos = GetPos(Ct);
 	vec2 ColPos;
 	vec2 NewPos;
-	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, m_CurPos, &ColPos, &NewPos);
+	int Collide = GameServer()->Collision()->IntersectLine(m_PrevPos, m_CurPos, &ColPos, &NewPos);
 	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
 	CCharacter *pTargetChr = 0;
 	CAdvancedEntity *pTargetEntity = 0;
@@ -101,7 +106,7 @@ void CProjectile::Tick()
 			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 		}
 		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
-		CEntity *pEnt = GameWorld()->IntersectEntityTypes(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
+		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
 		if (pEnt)
 		{
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
@@ -269,7 +274,7 @@ void CProjectile::Tick()
 		return;
 	}
 
-	int x = GameServer()->Collision()->GetIndex(PrevPos, m_CurPos);
+	int x = GameServer()->Collision()->GetIndex(m_PrevPos, m_CurPos);
 	int z;
 	if (Config()->m_SvOldTeleportWeapons)
 		z = GameServer()->Collision()->IsTeleport(x);
@@ -288,7 +293,7 @@ void CProjectile::TickPaused()
 	++m_StartTick;
 }
 
-void CProjectile::FillInfo(CNetObj_Projectile* pProj)
+void CProjectile::FillInfo(CNetObj_Projectile* pProj, int SnappingClient)
 {
 	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
 
@@ -306,11 +311,12 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj)
 		if (!m_CalculatedVel)
 			CalculateVel();
 
-		pProj->m_X = round_to_int(m_LastResetPos.x);
-		pProj->m_Y = round_to_int(m_LastResetPos.y);
-		pProj->m_VelX = round_to_int(m_Vel.x);
-		pProj->m_VelY = round_to_int(m_Vel.y);
-		pProj->m_StartTick = m_LastResetTick;
+		int i = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
+		pProj->m_X = round_to_int(m_aSnap[i].m_LastResetPos.x);
+		pProj->m_Y = round_to_int(m_aSnap[i].m_LastResetPos.y);
+		pProj->m_VelX = m_aSnap[i].m_Vel.x;
+		pProj->m_VelY = m_aSnap[i].m_Vel.y;
+		pProj->m_StartTick = m_aSnap[i].m_LastResetTick;
 	}
 }
 
@@ -369,7 +375,7 @@ void CProjectile::Snap(int SnappingClient)
 		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 		if(!pProj)
 			return;
-		FillInfo(pProj);
+		FillInfo(pProj, SnappingClient);
 	}
 }
 
@@ -468,23 +474,28 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 
 void CProjectile::TickDeferred()
 {
-	if (Server()->Tick() % 4 == 1)
+	if(Server()->Tick()%2 == 1)
 	{
-		m_LastResetPos = m_CurPos;
-		m_LastResetTick = Server()->Tick();
+		m_aSnap[SNAPINFO_LOWBANDWIDTH].m_LastResetPos = m_CurPos;
+		m_aSnap[SNAPINFO_LOWBANDWIDTH].m_LastResetTick = Server()->Tick();
 	}
+	m_aSnap[SNAPINFO_HIGHBANDWIDTH].m_LastResetTick = Server()->Tick() - 1;
+	m_aSnap[SNAPINFO_HIGHBANDWIDTH].m_LastResetPos = m_PrevPos;
 	m_CalculatedVel = false;
 }
 
 void CProjectile::CalculateVel()
 {
-	float Time = (Server()->Tick() - m_LastResetTick) / (float)Server()->TickSpeed();
 	float Curvature;
 	float Speed;
 	GetOriginalTunings(&Curvature, &Speed);
 
-	m_Vel.x = ((m_CurPos.x - m_LastResetPos.x) / Time / Speed) * 100;
-	m_Vel.y = ((m_CurPos.y - m_LastResetPos.y) / Time / Speed - Time * Speed * Curvature / 10000) * 100;
+	for (int i = 0; i < NUM_SNAPINFO; i++)
+	{
+		float Time = (Server()->Tick()-m_aSnap[i].m_LastResetTick)/(float)Server()->TickSpeed();
+		m_aSnap[i].m_Vel.x = ((m_CurPos.x - m_aSnap[i].m_LastResetPos.x)/Time/Speed) * 100;
+		m_aSnap[i].m_Vel.y = ((m_CurPos.y - m_aSnap[i].m_LastResetPos.y)/Time/Speed - Time*Speed*Curvature/10000) * 100;
+	}
 
 	m_CalculatedVel = true;
 }

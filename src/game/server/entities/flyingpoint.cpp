@@ -86,7 +86,7 @@ void CFlyingPoint::Snap(int SnappingClient)
 		pObj->m_Y = round_to_int(m_Pos.y);
 		pObj->m_VelX = 0;
 		pObj->m_VelY = 0;
-		pObj->m_StartTick = Server()->Tick();
+		pObj->m_StartTick = Server()->Tick()-1;
 		pObj->m_Type = WEAPON_HAMMER;
 	}
 }
