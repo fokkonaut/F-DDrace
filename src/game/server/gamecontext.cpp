@@ -6033,6 +6033,11 @@ CDrawTile *CGameContext::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 	}
 
 	vec2 Pos = RoundPos(Collision()->GetPos(MapIndex));
+	int rx = round_to_int(Pos.x) / 32;
+	int ry = round_to_int(Pos.y) / 32;
+	if (rx <= 0 || rx >= Collision()->GetWidth()-1 || ry <= 0 || ry >= Collision()->GetHeight()-1)
+		return 0;
+
 	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0, false);
 	if (pDrawTile && pDrawTile->m_Collision == HasCollision && (
 		(BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) &&
