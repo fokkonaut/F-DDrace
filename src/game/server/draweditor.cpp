@@ -132,7 +132,12 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 			{
 				int TileIndex = GameServer()->Collision()->GetTileIndex(Index);
 				int TileFIndex = GameServer()->Collision()->GetFTileIndex(Index);
-				ValidTile = ValidTile && (TileIndex == TILE_AIR || TileFIndex == TILE_AIR) && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
+				// check for free tile
+				ValidTile = ValidTile && (TileIndex == TILE_AIR || TileFIndex == TILE_AIR);
+				// check if the other layer doesnt have the same index already
+				ValidTile = ValidTile && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
+				// check to not place in solid blocks, but allow transform on drawtile solid blocks
+				ValidTile = ValidTile && TileIndex != TILE_SOLID && TileIndex != TILE_NOHOOK && TileFIndex != TILE_SOLID && TileFIndex != TILE_NOHOOK;
 			}
 		}
 	}
