@@ -56,7 +56,9 @@ class CDrawEditor
 		// Tile
 		TILEPLACE_INDEX = 0,
 		TILEPLACE_ENTER_INDEX,
+		TILEPLACE_TUNE_NUMBER = TILEPLACE_ENTER_INDEX, // show one or another if Tune is enabled
 		TILEPLACE_COLOR,
+		TILEPLACE_TUNE,
 		NUM_TILEPLACE_SETTINGS,
 
 		// Transform
@@ -151,6 +153,9 @@ class CDrawEditor
 	const char *GetTeleporterMode();
 	int GetTeleporterType();
 
+	const char *GetTilePlaceIndex();
+	int GetTilePlaceTuneNumber();
+
 	void StopTransform(bool Silent = false);
 	bool RemoveEntity(CEntity *pEntity);
 
@@ -191,6 +196,16 @@ class CDrawEditor
 		int m_Mode;
 	} m_Teleporter;
 
+	struct
+	{
+		int m_Index;
+		bool m_EnterIndex;
+		int m_Color;
+		bool m_Tune;
+		int m_TuneNumber;
+		int m_CachedIndex;
+	} m_TilePlace;
+
 	struct SSelectedEnt
 	{
 		CEntity *m_pEnt;
@@ -204,13 +219,6 @@ class CDrawEditor
 		std::vector<SSelectedEnt> m_vPreview;
 		std::vector<CEntity *> m_vSelected;
 	} m_Transform;
-	
-	struct
-	{
-		int m_Index;
-		bool m_EnterIndex;
-		int m_Color;
-	} m_TilePlace;
 
 	// preview
 	void SetPreview();

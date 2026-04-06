@@ -5,11 +5,12 @@
 #include <game/server/gamemodes/DDRace.h>
 #include "drawtile.h"
 
-CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, bool Collision)
+CDrawTile::CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, int TuneNumber, bool Collision)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_DRAWTILE, Pos, 14.f, Collision)
 {
 	m_Index = Index;
 	m_Color = Color;
+	m_TuneNumber = TuneNumber;
 
 	for (int i = 0; i < NUM_SIDES; i++)
 		m_aSides[i].m_ID = Server()->SnapNewID();
@@ -40,10 +41,21 @@ void CDrawTile::ResetCollision(bool Remove)
 	if (!Remove)
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+		if (m_TuneNumber != -1)
+		{
+			m_Layer = LAYER_TUNE;
+			if (m_Index == TILE_TUNELOCK_RESET)
+				m_TuneNumber = 0;
+			if (GameServer()->Collision()->IsTune(MapIndex) || GameServer()->Collision()->IsTuneLock(MapIndex))
+				m_Layer = -1;
+		}
+		else
+		{
+			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+			m_Layer = TileIndex == TILE_AIR ? LAYER_GAME : TileFIndex == TILE_AIR ? LAYER_FRONT : -1;
+		}
 
-		m_Layer = TileIndex == TILE_AIR ? LAYER_GAME : TileFIndex == TILE_AIR ? LAYER_FRONT : -1;
 		if (m_Layer == -1)
 			return; // shouldnt happen
 	}
@@ -59,12 +71,18 @@ void CDrawTile::ResetCollision(bool Remove)
 		GameServer()->Collision()->SetCollisionAt(m_Pos.x, m_Pos.y, Index);
 	else if (m_Layer == LAYER_FRONT)
 		GameServer()->Collision()->SetFCollisionAt(m_Pos.x, m_Pos.y, Index);
+	else if (m_Layer == LAYER_TUNE)
+		GameServer()->Collision()->SetTuneCollisionAt(m_Pos.x, m_Pos.y, Index, m_TuneNumber);
 
 	// Update other tiles
 	CDrawTile *pDrawTile = (CDrawTile *)GameWorld()->FindFirst(CGameWorld::ENTTYPE_DRAWTILE);
 	for (; pDrawTile; pDrawTile = (CDrawTile *)pDrawTile->TypeNext())
-		if (pDrawTile->GetIndex() == m_Index)
+	{
+		bool IsNoTune = m_Layer != LAYER_TUNE && pDrawTile->m_Layer != LAYER_TUNE;
+		bool SameTuneTile = m_Layer == LAYER_TUNE && pDrawTile->m_Layer == LAYER_TUNE && pDrawTile->GetTuneNumber() == m_TuneNumber;
+		if (pDrawTile->GetIndex() == m_Index && (IsNoTune || SameTuneTile))
 			pDrawTile->PrepareForCaching();
+	}
 }
 
 void CDrawTile::SetPos(vec2 Pos)
@@ -89,15 +107,28 @@ bool CDrawTile::HasSameIndexNeighborAt(vec2 Pos)
 	// only check for real tiles, not when moving or copying, only rely on drawtile entity info for that
 	if (m_BrushCID == -1)
 	{
-		int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-
-		if (TileIndex != m_Index && TileFIndex != m_Index)
-			return false;
+		if (m_TuneNumber != -1)
+		{
+			int Zone = GameServer()->Collision()->IsTune(MapIndex);
+			if (Zone && (m_Index != TILE_TUNE || m_TuneNumber != Zone))
+				return false;
+			int Lock = GameServer()->Collision()->IsTuneLock(MapIndex);
+			if (Lock == -1 && m_Index != TILE_TUNELOCK_RESET)
+				return false;
+			if (Lock > 0 && (m_Index != TILE_TUNELOCK || m_TuneNumber != Lock))
+				return false;
+		}
+		else
+		{
+			int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+			if (TileIndex != m_Index && TileFIndex != m_Index)
+				return false;
+		}
 	}
 
 	// dont try to connect to map tiles, only connect to already placed tiles or when moving an area together
-	return GameServer()->HasDrawTile(MapIndex, m_Index, m_BrushCID);
+	return GameServer()->HasDrawTile(MapIndex, this);
 }
 
 static vec2 s_aNeighborOffsets[CDrawTile::NUM_SIDES] = {

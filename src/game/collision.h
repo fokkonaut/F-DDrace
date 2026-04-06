@@ -113,6 +113,7 @@ public:
 	// DDRace
 
 	void Dest();
+	void SetTuneCollisionAt(float x, float y, int id, int Number);
 	void SetCollisionAt(float x, float y, int id);
 	void SetFCollisionAt(float x, float y, int id);
 	int GetFCollisionAt(float x, float y) { return GetFTile(round_to_int(x), round_to_int(y)); }

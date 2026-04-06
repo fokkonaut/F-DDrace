@@ -40,6 +40,9 @@ void CDrawEditor::Init(CCharacter *pChr)
 	m_TilePlace.m_Index = TILE_RAINBOW;
 	m_TilePlace.m_EnterIndex = false;
 	m_TilePlace.m_Color = LASERTYPE_RIFLE;
+	m_TilePlace.m_Tune = false;
+	m_TilePlace.m_TuneNumber = 1;
+	m_TilePlace.m_CachedIndex = -1;
 	
 	m_Setting = -1;
 	m_RoundPos = true;
@@ -134,10 +137,20 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 				int TileFIndex = GameServer()->Collision()->GetFTileIndex(Index);
 				// check for free tile
 				ValidTile = ValidTile && (TileIndex == TILE_AIR || TileFIndex == TILE_AIR);
-				// check if the other layer doesnt have the same index already
-				ValidTile = ValidTile && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
 				// check to not place in solid blocks, but allow transform on drawtile solid blocks
 				ValidTile = ValidTile && TileIndex != TILE_SOLID && TileIndex != TILE_NOHOOK && TileFIndex != TILE_SOLID && TileFIndex != TILE_NOHOOK;
+
+				if (m_TilePlace.m_Tune)
+				{
+					int Zone = GameServer()->Collision()->IsTune(Index);
+					int Lock = GameServer()->Collision()->IsTuneLock(Index);
+					ValidTile = ValidTile && !Zone && !Lock;
+				}
+				else
+				{
+					// check if the other layer doesnt have the same index already
+					ValidTile = ValidTile && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
+				}
 			}
 		}
 	}
@@ -470,7 +483,7 @@ void CDrawEditor::OnPlayerFire()
 	}
 	else if (m_Category == CAT_TILEPLACE)
 	{
-		if (m_Setting == TILEPLACE_ENTER_INDEX)
+		if (m_Setting == TILEPLACE_ENTER_INDEX && !m_TilePlace.m_Tune)
 		{
 			m_TilePlace.m_EnterIndex = true;
 			GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("Please enter the tile index into the chat (0-255)"));
@@ -674,12 +687,16 @@ void CDrawEditor::HandleInput()
 			{
 				if (m_Setting == TILEPLACE_INDEX)
 				{
+					int Min = m_TilePlace.m_Tune ? TILE_TUNE : TILE_SOLID;
+					int Max = m_TilePlace.m_Tune ? TILE_TUNELOCK_RESET : NUM_INDICES-1;
+
 					m_TilePlace.m_Index += m_Input.m_Direction;
-					if (m_TilePlace.m_Index >= NUM_INDICES)
-						m_TilePlace.m_Index = TILE_AIR+1;
-					else if (m_TilePlace.m_Index <= TILE_AIR)
-						m_TilePlace.m_Index = NUM_INDICES-1;
+					if (m_TilePlace.m_Index >= Max+1)
+						m_TilePlace.m_Index = Min;
+					else if (m_TilePlace.m_Index < Min)
+						m_TilePlace.m_Index = Max;
 					((CDrawTile *)m_pPreview)->SetIndex(m_TilePlace.m_Index);
+					((CDrawTile *)m_pPreview)->SetTuneNumber(GetTilePlaceTuneNumber());
 				}
 				else if (m_Setting == TILEPLACE_COLOR)
 				{
@@ -689,6 +706,29 @@ void CDrawEditor::HandleInput()
 					else if (m_TilePlace.m_Color < 0)
 						m_TilePlace.m_Color = LASERTYPE_DRAGGER-1;
 					((CDrawTile *)m_pPreview)->SetColor(m_TilePlace.m_Color);
+				}
+				else if (m_Setting == TILEPLACE_TUNE)
+				{
+					m_TilePlace.m_Tune = !m_TilePlace.m_Tune;
+					if (m_TilePlace.m_Tune)
+					{
+						m_TilePlace.m_CachedIndex = m_TilePlace.m_Index;
+						m_TilePlace.m_Index = TILE_TUNE;
+					}
+					else
+					{
+						m_TilePlace.m_Index = m_TilePlace.m_CachedIndex;
+					}
+					((CDrawTile *)m_pPreview)->SetTuneNumber(GetTilePlaceTuneNumber());
+				}
+				else if (m_Setting == TILEPLACE_TUNE_NUMBER && m_TilePlace.m_Tune)
+				{
+					m_TilePlace.m_TuneNumber += m_Input.m_Direction;
+					if (m_TilePlace.m_TuneNumber > 255)
+						m_TilePlace.m_TuneNumber = 1;
+					else if (m_TilePlace.m_TuneNumber < 1)
+						m_TilePlace.m_TuneNumber = 255;
+					((CDrawTile *)m_pPreview)->SetTuneNumber(GetTilePlaceTuneNumber());
 				}
 			}
 			SendWindow();
@@ -800,7 +840,7 @@ void CDrawEditor::SetSetting(int Setting)
 		{
 			StopTransform();
 		}
-		else if (m_Category == CAT_TILEPLACE && (LastSetting == TILEPLACE_ENTER_INDEX))
+		else if (m_Category == CAT_TILEPLACE && LastSetting == TILEPLACE_ENTER_INDEX)
 		{
 			if (m_TilePlace.m_EnterIndex)
 			{
@@ -835,7 +875,7 @@ CEntity *CDrawEditor::CreateEntity(bool Preview)
 		return new CTeleporter(m_pCharacter->GameWorld(), m_Pos, GetTeleporterType(), Number, !Preview);
 	}
 	case CGameWorld::ENTTYPE_DRAWTILE:
-		return new CDrawTile(m_pCharacter->GameWorld(), m_Pos, m_TilePlace.m_Index, m_TilePlace.m_Color, !Preview);
+		return new CDrawTile(m_pCharacter->GameWorld(), m_Pos, m_TilePlace.m_Index, m_TilePlace.m_Color, GetTilePlaceTuneNumber(), !Preview);
 	}
 	return 0;
 }
@@ -856,7 +896,7 @@ CEntity *CDrawEditor::CreateTransformEntity(CEntity *pTemplate, bool Preview)
 	case CGameWorld::ENTTYPE_TELEPORTER:
 		pEntity = new CTeleporter(pTemplate->GameWorld(), pTemplate->GetPos(), ((CTeleporter *)pTemplate)->GetType(), pTemplate->m_Number, !Preview && pTemplate->m_InitialCollision); break;
 	case CGameWorld::ENTTYPE_DRAWTILE:
-		pEntity = new CDrawTile(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDrawTile *)pTemplate)->GetIndex(), ((CDrawTile *)pTemplate)->GetColor(), !Preview && pTemplate->m_InitialCollision); break;
+		pEntity = new CDrawTile(pTemplate->GameWorld(), pTemplate->GetPos(), ((CDrawTile *)pTemplate)->GetIndex(), ((CDrawTile *)pTemplate)->GetColor(), ((CDrawTile *)pTemplate)->GetTuneNumber(), !Preview && pTemplate->m_InitialCollision); break;
 	}
 
 	// update initialcollision in case we have a preview right now it it was set to false in the constructor
@@ -968,11 +1008,24 @@ void CDrawEditor::SendWindow()
 	else if (m_Category == CAT_TILEPLACE)
 	{
 		str_append(aMsg, "     Settings:\n\n", sizeof(aMsg));
-		str_format(aBuf, sizeof(aBuf), "Index: %d", m_TilePlace.m_Index);
+		str_format(aBuf, sizeof(aBuf), "%s: %s", m_TilePlace.m_Tune ? "Tune" : "Index", GetTilePlaceIndex());
 		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_INDEX), sizeof(aMsg));
-		str_append(aMsg, FormatSetting("Enter Index", TILEPLACE_ENTER_INDEX), sizeof(aMsg));
+		if (!m_TilePlace.m_Tune)
+		{
+			str_append(aMsg, FormatSetting("Enter Index", TILEPLACE_ENTER_INDEX), sizeof(aMsg));
+		}
+		else
+		{
+			if (m_TilePlace.m_Index == TILE_TUNELOCK_RESET)
+				str_copy(aBuf, "Number: -/-", sizeof(aBuf));
+			else
+				str_format(aBuf, sizeof(aBuf), "Number: %d/255", m_TilePlace.m_TuneNumber);
+			str_append(aMsg, FormatSetting(aBuf, TILEPLACE_TUNE_NUMBER), sizeof(aMsg));
+		}
 		str_format(aBuf, sizeof(aBuf), "Color: %s", GetLaserColor(m_TilePlace.m_Color));
 		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_COLOR), sizeof(aMsg));
+		str_format(aBuf, sizeof(aBuf), "Tune: %s", m_TilePlace.m_Tune ? "Yes" : "No");
+		str_append(aMsg, FormatSetting(aBuf, TILEPLACE_TUNE), sizeof(aMsg));
 	}
 
 	GameServer()->SendMotd(aMsg, GetCID());
@@ -1081,6 +1134,33 @@ int CDrawEditor::GetTeleporterType()
 	case TELE_MODE_HOOK: return TILE_TELEINHOOK;
 	default: return 0;
 	}
+}
+
+const char *CDrawEditor::GetTilePlaceIndex()
+{
+	if (!m_TilePlace.m_Tune)
+	{
+		static char aBuf[8];
+		str_format(aBuf, sizeof(aBuf), "%d", m_TilePlace.m_Index);
+		return aBuf;
+	}
+
+	switch (m_TilePlace.m_Index)
+	{
+	case TILE_TUNE: return "Zone";
+	case TILE_TUNELOCK: return "Lock";
+	case TILE_TUNELOCK_RESET: return "Lock Reset";
+	default: return "Unknown";
+	}
+}
+
+int CDrawEditor::GetTilePlaceTuneNumber()
+{
+	if (!m_TilePlace.m_Tune)
+		return -1;
+	if (m_TilePlace.m_Index == TILE_TUNELOCK_RESET)
+		return 0;
+	return m_TilePlace.m_TuneNumber;
 }
 
 int CDrawEditor::GetCID()

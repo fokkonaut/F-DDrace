@@ -29,6 +29,7 @@ private:
 
 	int m_Index;
 	int m_Color;
+	int m_TuneNumber;
 
 	bool HasSameIndexNeighbor(int Side);
 	bool HasEdge(vec2 Pos, int Side);
@@ -42,7 +43,7 @@ private:
 	void UpdateSnapCache();
 
 public:
-	CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, bool Collision = true);
+	CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, int TuneNumber = -1, bool Collision = true);
 	virtual ~CDrawTile();
 	virtual void ResetCollision(bool Remove = false);
 	virtual void Snap(int SnappingClient);
@@ -50,6 +51,8 @@ public:
 	int GetIndex() { return m_Index; }
 	void SetColor(int Lasertype) { m_Color = Lasertype; }
 	int GetColor() { return m_Color; }
+	void SetTuneNumber(int Number) { m_TuneNumber = Number; }
+	int GetTuneNumber() { return m_TuneNumber; }
 
 	void SetPos(vec2 Pos) override;
 };

@@ -5627,7 +5627,7 @@ void CGameContext::WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 
 		case CGameWorld::ENTTYPE_DRAWTILE:
 		{
 			CDrawTile *pDrawTile = (CDrawTile *)pEntity;
-			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d,", CGameWorld::ENTTYPE_DRAWTILE, Pos.x/32.f, Pos.y/32.f, pDrawTile->GetIndex(), pDrawTile->GetColor());
+			str_format(aEntry, sizeof(aEntry), "%d:%.2f/%.2f:%d:%d:%d,", CGameWorld::ENTTYPE_DRAWTILE, Pos.x/32.f, Pos.y/32.f, pDrawTile->GetIndex(), pDrawTile->GetColor(), pDrawTile->GetTuneNumber());
 			*pFile << aEntry;
 			break;
 		}
@@ -5775,10 +5775,11 @@ std::vector<CEntity *> CGameContext::ReadPlotObjects(const char *pLine, int Plot
 			{
 				int Index = -1;
 				int Color = LASERTYPE_RIFLE;
-				sscanf(pData, "%d:%f/%f:%d:%d", &EntityType, &Pos.x, &Pos.y, &Index, &Color);
+				int TuneNumber = -1;
+				sscanf(pData, "%d:%f/%f:%d:%d:%d", &EntityType, &Pos.x, &Pos.y, &Index, &Color, &TuneNumber);
 				if (Index > TILE_AIR)
 				{
-					vEntities.push_back(new CDrawTile(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Index, Color));
+					vEntities.push_back(new CDrawTile(&m_World, vec2(Pos.x*32.f, Pos.y*32.f), Index, Color, TuneNumber));
 				}
 				break;
 			}
@@ -6017,11 +6018,27 @@ void CGameContext::RemovePortalsFromPlot(int PlotID)
 	}
 }
 
-CDrawTile *CGameContext::HasDrawTile(int MapIndex, int Index, int BrushCID)
+CDrawTile *CGameContext::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 {
+	int BrushCID = -1;
+	int Index = -1;
+	int TuneNumber = -1;
+	bool HasCollision = true;
+	if (pMatch)
+	{
+		BrushCID = pMatch->m_BrushCID;
+		Index = pMatch->GetIndex();
+		TuneNumber = pMatch->GetTuneNumber();
+		HasCollision = pMatch->m_Collision;
+	}
+
 	vec2 Pos = RoundPos(Collision()->GetPos(MapIndex));
 	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0, false);
-	if (pDrawTile && ((BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) && (Index == -1 || pDrawTile->GetIndex() == Index)))
+	if (pDrawTile && pDrawTile->m_Collision == HasCollision && (
+		(BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) &&
+		(Index == -1 || pDrawTile->GetIndex() == Index) &&
+		(TuneNumber == -1 || pDrawTile->GetTuneNumber() == TuneNumber)
+	))
 		return pDrawTile;
 	return 0;
 }

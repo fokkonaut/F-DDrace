@@ -1498,6 +1498,21 @@ void CCollision::SetFCollisionAt(float x, float y, int id)
 	m_pFront[Index].m_Index = id;
 }
 
+void CCollision::SetTuneCollisionAt(float x, float y, int id, int Number)
+{
+	if (!m_pTune)
+		return;
+
+	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
+	int Index = Ny * m_Width + Nx;
+	if (Index < 0)
+		return;
+
+	m_pTune[Index].m_Type = id;
+	m_pTune[Index].m_Number = Number;
+}
+
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int* Ox, int* Oy)
 {
 	float x = Pos0.x - Pos1.x;
