@@ -238,7 +238,7 @@ public:
 				return str_comp(Tune.m_aParam, pParam) == 0;
 			}); }
 	bool ResetLockedTune(LOCKED_TUNES *pLockedTunings, const char *pParam);
-	bool SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune);
+	bool SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune, bool AllowGlobalValues = false);
 	void ApplyTuneLock(LOCKED_TUNES *pLockedTunings, int TuneLock);
 	CTuningParams *ApplyLockedTunings(CTuningParams *pTuning, LOCKED_TUNES &LockedTunings);
 

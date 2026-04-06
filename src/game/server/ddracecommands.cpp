@@ -1655,7 +1655,7 @@ void CGameContext::ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUser
 	const char *pName = pSelf->Server()->ClientName(Victim);
 	for(unsigned int i = 0; i < pChr->m_LockedTunings.size(); i++)
 	{
-		str_format(aBuf, sizeof(aBuf), "lock '%s': %s %.2f", pName, pChr->m_LockedTunings[i].m_aParam, pChr->m_LockedTunings[i].m_Value);
+		str_format(aBuf, sizeof(aBuf), "lock '%s': %s %.2f", pName, pChr->m_LockedTunings[i].m_aParam, (float)pChr->m_LockedTunings[i].m_Value);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
