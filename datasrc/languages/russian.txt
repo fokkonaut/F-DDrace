@@ -2091,86 +2091,86 @@ Next move: %ds
 == Ход: %ds
 
 You are now in a safe area
-== 
+== Теперь вы находитесь в безопасной зоне
 
 You are no longer in a safe area
-== 
+== Вы больше не находитесь в безопасной зоне
 
 Please enter the tile index into the chat (0-255)
-== 
+== Пожалуйста, введите индекс тайла в чат (0-255)
 
 Entering index aborted
-== 
+== Ввод индекса отменён
 
 The entered value is not a valid number
-== 
+== Введённое значение не является допустимым числом
 
 '%s' has been arrested for using a suspicious client (%d seconds arrest)
-== 
+== '%s' был арестован за использование подозрительного клиента (арест на %d секунд)
 
 You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly.
-== 
+== Вы были арестованы на %d секунд за использование подозрительного клиента. Попробуйте использовать официальный клиент DDNet или отключить dummy hammerfly.
 
 AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
-== 
+== AntiPing включён (только для 'cl_antiping 1', может вызывать нежелательные побочные эффекты)
 
 AntiPing disabled
-== 
+== AntiPing выключен
 
 High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
-== 
+== Режим High Bandwidth включён (полные 50 снапшотов вместо 25 в секунду)
 
 High Bandwidth mode disabled
-== 
+== Режим High Bandwidth выключен
 
 Saving player sessions is currently disabled by an admin
-== 
+== Сохранение сессий игроков в данный момент отключено администратором
 
 Saving player session on disconnect enabled
-== 
+== Сохранение сессии игрока при выходе включено
 
 Saving player session on disconnect disabled
-== 
+== Сохранение сессии игрока при выходе выключено
 
 AntiPing weapons (only for 'cl_antiping 1')
-== 
+== AntiPing оружия (только для 'cl_antiping 1')
 
 High Bandwidth mode
-== 
+== Режим High Bandwidth
 
 Save player session
-== 
+== Сохранять сессию игрока
 
 {vote-header}
 Tᴇᴄʜɴɪᴄᴀʟ
-== 
+== Техническое
 
 [WARNING] Place this tile from switch layer
-== 
+== [ПРЕДУПРЕЖДЕНИЕ] Размещайте этот тайл на слое switch
 
 [WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: 
-== 
+== [ПРЕДУПРЕЖДЕНИЕ] Пустой тайл маски переключателя. Также разместите один из следующих тайлов на слое game/front: 
 
 Humans limit reached.
-== 
+== Достигнут лимит людей.
 
 Congratulations, you got the immunity flag.
-== 
+== Поздравляем, вы получили флаг иммунитета.
 
 The blue flag defends against infection.
-== 
+== Синий флаг защищает от заражения.
 
 You can drop it by pressing F3.
-== 
+== Вы можете выбросить его, нажав F3.
 
 Invalid stake, please enter a value between 0 and 10.000.000
-== 
+== Недопустимая ставка, пожалуйста, введите значение от 0 до 10.000.000
 
 This fight requires a stake of %lld money. Accept by typing '/1vs1 %s %lld'
-== 
+== Для этого боя требуется ставка в размере %lld денег. Примите её, введя '/1vs1 %s %lld'
 
 Fight cancelled, someone couldn't pay the stake.
-== 
+== Бой отменён, кто-то не смог оплатить ставку.
 
 You won this 1vs1 round! Your earnings: +%lld money.
-== 
+== Вы выиграли этот раунд 1на1! Ваш выигрыш: +%lld денег.
