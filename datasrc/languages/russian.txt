@@ -1254,10 +1254,10 @@ Police is searching you because of illegal bonus use
 == [ПРЕДУПРЕЖДЕНИЕ] Использование бонуса в зоне без бонусов незаконно
 
 [WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим дублем в течение 30 секунд, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим манекеном в течение 30 секунд, чтобы безопасно переместиться
 
 [WARNING] Your dummy has to be alive in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Ваш дубль должен быть жив, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Ваш манекен должен быть жив, чтобы безопасно переместиться
 
 '%s' has been moved to another map
 == '%s' был перемещен на другую карту
