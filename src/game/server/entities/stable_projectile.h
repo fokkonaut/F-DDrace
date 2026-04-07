@@ -1,4 +1,4 @@
-// made by timakro
+// made by timakro originally
 
 #ifndef GAME_SERVER_ENTITIES_STABLE_PROJECTILE_H
 #define GAME_SERVER_ENTITIES_STABLE_PROJECTILE_H
@@ -27,13 +27,22 @@ class CStableProjectile : public CEntity
 
 	Mask128 m_TeamMask;
 	int m_Owner;
-	bool m_HideOnSpec;
-	bool m_OnlyShowOwner;
+	int m_Flags;
 
 	void CalculateVel();
 
+	void SnapProjectile(int SnappingClient, int InfoId);
+	void SnapDDNetProjectile(int SnappingClient, int InfoId);
+
 public:
-	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec = false, bool OnlyShowOwner = false);
+	enum EFlags
+	{
+		HIDE_ON_SPEC = 1<<0,
+		ONLY_SHOW_OWNER = 1<<1,
+		DDNETPROJ_ANTIPING = 1<<2,
+	};
+
+	CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, int Flags = 0);
 
 	virtual void Reset();
 	virtual void TickDeferred();

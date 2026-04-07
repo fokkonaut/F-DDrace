@@ -1,4 +1,4 @@
-// made by timakro
+// made by timakro originally
 
 #include <game/server/gamecontext.h>
 #include "stable_projectile.h"
@@ -6,7 +6,7 @@
 #include <game/server/player.h>
 #include "character.h"
 
-CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, bool HideOnSpec, bool OnlyShowOwner)
+CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner, vec2 Pos, int Flags)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_STABLE_PROJECTILE, Pos)
 {
 	m_Type = GameServer()->GetWeaponType(Type);
@@ -18,10 +18,9 @@ CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner
 		m_aSnap[i].m_LastResetPos = Pos;
 	}
 	m_Owner = Owner;
-	m_HideOnSpec = HideOnSpec;
+	m_Flags = Flags;
 	m_CalculatedVel = false;
 	m_TeamMask = Mask128();
-	m_OnlyShowOwner = OnlyShowOwner;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -90,30 +89,79 @@ void CStableProjectile::Snap(int SnappingClient)
 		return;
 	}
 
-	if (m_OnlyShowOwner && SnappingClient != m_Owner)
+	if (m_Flags & EFlags::ONLY_SHOW_OWNER && SnappingClient != m_Owner)
+		return;
+
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
+	if (m_Flags & EFlags::HIDE_ON_SPEC && pOwner && pOwner->IsPaused())
 		return;
 
 	if (!CmaskIsSet(m_TeamMask, SnappingClient))
 		return;
 
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if (m_HideOnSpec && pOwner && pOwner->IsPaused())
-		return;
+	if(!m_CalculatedVel)
+		CalculateVel();
 
+	int InfoId = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
+	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
+	bool VanillaProj = SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS;
+
+	// Atom or meteor look kinda bad on lowbandwidth using DDNetProj.
+	// Only use DDNetProj on lowbandwidth if antiping is on (grenade explosions), for prediction over visual...
+	// DDNetProj on highbandwidth actually looks better due to optimizations, still not as clean as vanillaproj tho
+	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	if (!(m_Flags & EFlags::DDNETPROJ_ANTIPING) || (InfoId == SNAPINFO_LOWBANDWIDTH && pSnap && !pSnap->AntiPing()))
+		VanillaProj = true;
+
+	if (VanillaProj)
+		SnapProjectile(SnappingClient, InfoId);
+	else
+		SnapDDNetProjectile(SnappingClient, InfoId);
+}
+
+void CStableProjectile::SnapProjectile(int SnappingClient, int InfoId)
+{
 	CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
 	if(!pProj)
 		return;
 
-	if(!m_CalculatedVel)
-		CalculateVel();
-
-	int i = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
-	pProj->m_X = round_to_int(m_aSnap[i].m_LastResetPos.x);
-	pProj->m_Y = round_to_int(m_aSnap[i].m_LastResetPos.y);
-	pProj->m_VelX = m_aSnap[i].m_Vel.x;
-	pProj->m_VelY = m_aSnap[i].m_Vel.y;
-	if (Server()->IsSevendown(SnappingClient) && m_aSnap[i].m_Vel.y >= 0 && (m_aSnap[i].m_Vel.y & 512) != 0) // dont send PROJECTILEFLAG_IS_DDNET
+	pProj->m_X = round_to_int(m_aSnap[InfoId].m_LastResetPos.x);
+	pProj->m_Y = round_to_int(m_aSnap[InfoId].m_LastResetPos.y);
+	pProj->m_VelX = m_aSnap[InfoId].m_Vel.x;
+	pProj->m_VelY = m_aSnap[InfoId].m_Vel.y;
+	if (Server()->IsSevendown(SnappingClient) && m_aSnap[InfoId].m_Vel.y >= 0 && (m_aSnap[InfoId].m_Vel.y & 512) != 0) // dont send PROJECTILEFLAG_IS_DDNET
 		pProj->m_VelY = 0;
-	pProj->m_StartTick = m_aSnap[i].m_LastResetTick;
+	pProj->m_StartTick = m_aSnap[InfoId].m_LastResetTick;
 	pProj->m_Type = m_Type;
+}
+
+void CStableProjectile::SnapDDNetProjectile(int SnappingClient, int InfoId)
+{
+	CNetObj_DDNetProjectile *pProj = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
+	if(!pProj)
+		return;
+
+	int Owner = m_Owner;
+	if (!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
+	if(Owner < 0)
+	{
+		pProj->m_VelX = round_to_int(m_aSnap[InfoId].m_Vel.x * 1e6f);
+		pProj->m_VelY = round_to_int(m_aSnap[InfoId].m_Vel.y * 1e6f);
+	}
+	else
+	{
+		pProj->m_VelX = round_to_int(m_aSnap[InfoId].m_Vel.x);
+		pProj->m_VelY = round_to_int(m_aSnap[InfoId].m_Vel.y);
+	}
+
+	pProj->m_X = round_to_int(m_aSnap[InfoId].m_LastResetPos.x * 100.f);
+	pProj->m_Y = round_to_int(m_aSnap[InfoId].m_LastResetPos.y * 100.f);
+	pProj->m_StartTick = m_aSnap[InfoId].m_LastResetTick;
+	pProj->m_Type = m_Type;
+	pProj->m_Owner = Owner;
+	pProj->m_Flags = PROJECTILEFLAG_NORMALIZE_VEL;
+	pProj->m_SwitchNumber = -1;
+	pProj->m_TuneZone = 0;
 }

@@ -15,7 +15,7 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team, vec2 Pos)
 	m_StandPos = Pos;
 	m_Team = Team;
 	Reset(true);
-	m_AllowVipPlus = false;
+	SetFlags(EFlags::ALLOW_VIP_PLUS, false);
 
 	GameWorld()->InsertEntity(this);
 }

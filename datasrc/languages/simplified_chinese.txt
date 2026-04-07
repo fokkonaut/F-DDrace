@@ -1810,10 +1810,10 @@ You will have rifle if you respawn. For more information about spawn weapons, pl
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == 它会使你的jetpack枪变成忍者。使用 '/ninjajetpack' 切换。
 
-Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
+Taser is a rifle that freezes a player. For more information about the taser and your taser stats, please visit '/taser'.
 == 电击枪是一种使玩家冻结的激光枪。关于电击枪和你的电击枪统计数据，请访问 '/taser'。
 
-Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
+Taser battery is required to use the taser. Maximum amount of ammo is 100. Please visit '/taser'.
 == 使用电击枪需要电击电池。最大弹药量为 100。请访问 '/taser'。
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.

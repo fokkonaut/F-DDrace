@@ -242,7 +242,7 @@ CMissile::CMissile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Vel, vec2 D
 	m_Vel = Vel;
 	m_Direction = Direction;
 
-	m_pStableRocket = new CStableProjectile(pGameWorld, WEAPON_GRENADE, Owner, Pos, false, false);
+	m_pStableRocket = new CStableProjectile(pGameWorld, WEAPON_GRENADE, Owner, Pos);
 	for (int i = 0; i < NUM_SPARKS; i++) // Lifespan = sparks : one spark per tick
 		m_apSparks[i] = new CSpark(this, NUM_SPARKS, i);
 

@@ -55,7 +55,8 @@ void CTrail::Tick()
 	{
 		for (int i = 0; i<NUM_TRAILS; i++)
 		{
-			m_TrailProjs.push_back(new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_Owner, m_Pos, true));
+			int Flags = CStableProjectile::EFlags::HIDE_ON_SPEC | CStableProjectile::EFlags::DDNETPROJ_ANTIPING;
+			m_TrailProjs.push_back(new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_Owner, m_Pos, Flags));
 		}
 		m_TrailHistory.clear();
 		m_TrailHistory.push_front(HistoryPoint(m_Pos, 0.0f));

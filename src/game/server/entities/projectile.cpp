@@ -58,8 +58,7 @@ CProjectile::CProjectile
 	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
 	DetermineTuning();
-	m_DefaultTuning = IsDefaultTuning() && m_DDrace;
-	m_IsSpreadWeapon = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->m_aSpreadWeapon[m_Type];
+	m_DefaultTuning = DetermineIfDefaultTuning() && m_DDrace;
 
 	m_TeamMask = Mask128();
 
@@ -311,12 +310,12 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj, int SnappingClient)
 		if (!m_CalculatedVel)
 			CalculateVel();
 
-		int i = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
-		pProj->m_X = round_to_int(m_aSnap[i].m_LastResetPos.x);
-		pProj->m_Y = round_to_int(m_aSnap[i].m_LastResetPos.y);
-		pProj->m_VelX = m_aSnap[i].m_Vel.x;
-		pProj->m_VelY = m_aSnap[i].m_Vel.y;
-		pProj->m_StartTick = m_aSnap[i].m_LastResetTick;
+		int InfoId = Server()->GetHighBandwidth(SnappingClient) ? SNAPINFO_HIGHBANDWIDTH : SNAPINFO_LOWBANDWIDTH;
+		pProj->m_X = round_to_int(m_aSnap[InfoId].m_LastResetPos.x);
+		pProj->m_Y = round_to_int(m_aSnap[InfoId].m_LastResetPos.y);
+		pProj->m_VelX = m_aSnap[InfoId].m_Vel.x;
+		pProj->m_VelY = m_aSnap[InfoId].m_Vel.y;
+		pProj->m_StartTick = m_aSnap[InfoId].m_LastResetTick;
 	}
 }
 
@@ -354,13 +353,11 @@ void CProjectile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CNetObj_DDRaceProjectile DDRaceProjectile;
 
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && m_DefaultTuning && !m_IsSpreadWeapon)
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && m_DefaultTuning)
 	{
 		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
 		if(!pDDNetProjectile)
-		{
 			return;
-		}
 		FillExtraInfo(pDDNetProjectile, SnappingClient);
 	}
 	else if(SnappingClient != -1 && SnappingClientVersion >= VERSION_DDNET_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile, SnappingClient))
@@ -446,7 +443,11 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 		Flags |= PROJECTILEFLAG_FREEZE;
 	}
 
-	if(m_Owner < 0)
+	int Owner = m_Owner;
+	if (!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
+	if(Owner < 0)
 	{
 		pProj->m_VelX = round_to_int(m_Direction.x * 1e6f);
 		pProj->m_VelY = round_to_int(m_Direction.y * 1e6f);
@@ -457,10 +458,6 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 		pProj->m_VelY = round_to_int(m_InitDir.y);
 		Flags |= PROJECTILEFLAG_NORMALIZE_VEL;
 	}
-
-	int Owner = m_Owner;
-	if (!Server()->Translate(Owner, SnappingClient))
-		Owner = -1;
 
 	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
 	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
@@ -565,7 +562,7 @@ void CProjectile::DetermineTuning()
 	}
 }
 
-bool CProjectile::IsDefaultTuning()
+bool CProjectile::DetermineIfDefaultTuning()
 {
 	CTuningParams *pDefaultTuning = GameServer()->Tuning();
 	switch (m_Type)

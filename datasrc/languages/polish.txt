@@ -2001,10 +2001,10 @@ You will have rifle if you respawn. For more information about spawn weapons, pl
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == Sprawi, że twoja broń z plecakiem odrzutowym stanie się ninja. Przełącz to za pomocą '/ninjajetpack'.
 
-Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
+Taser is a rifle that freezes a player. For more information about the taser and your taser stats, please visit '/taser'.
 == Paralizator to karabin, który zamraża gracza. Aby uzyskać więcej informacji o paralizatorze i twoich statystykach paralizatora, odwiedź '/taser'.
 
-Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
+Taser battery is required to use the taser. Maximum amount of ammo is 100. Please visit '/taser'.
 == Do korzystania z paralizatora wymagana jest bateria. Maksymalna ilość amunicji to 100. Odwiedź '/taser'.
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.

@@ -58,7 +58,8 @@ void CAtom::Tick()
 	{
 		for (int i = 0; i<NUM_ATOMS; i++)
 		{
-			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner, m_Pos, true));
+			int Flags = CStableProjectile::EFlags::HIDE_ON_SPEC | CStableProjectile::EFlags::DDNETPROJ_ANTIPING;
+			m_AtomProjs.push_back(new CStableProjectile(GameWorld(), i % 2 ? WEAPON_GRENADE : WEAPON_SHOTGUN, m_Owner, m_Pos, Flags));
 		}
 		m_AtomPosition = 0;
 	}
