@@ -1599,13 +1599,29 @@ void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData
 
 	float Value = pResult->GetFloat(2);
 	CLockedTune LockedTune(pParam, Value);
-	if (!pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune))
-		return;
-	pChr->ApplyLockedTunings();
 
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Set '%s' to %.2f for '%s'", pParam, Value, pSelf->Server()->ClientName(Victim));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	char aBuf[256];
+	// AllowGlobalValues = true via command. This is not possible by tile.
+	// Example: global tune gravity is 0.5, then using 0.5 from tile resets any other previous gravity lock and wont add it.
+	// Via command its possibly allowing to force lock default tuning overriding a zone. Should probably just be "false" tho.
+	int Result = pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune, true);
+	if(Result == 3)
+	{
+		str_format(aBuf, sizeof(aBuf), "Reset '%s' for '%s'", pParam, pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+	else if(Result)
+	{
+		str_format(aBuf, sizeof(aBuf), "Set '%s' to %.2f for '%s'", pParam, Value, pSelf->Server()->ClientName(Victim));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+	}
+	else
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+
+	if (Result)
+	{
+		pChr->ApplyLockedTunings();
+	}
 }
 
 void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUserData)

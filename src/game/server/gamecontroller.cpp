@@ -576,18 +576,16 @@ void IGameController::Snap(int SnappingClient)
 	CCharacter *pSpectator = !pSnap ? 0 : (pSnap->GetTeam() == TEAM_SPECTATORS || pSnap->IsPaused()) ? GameServer()->GetPlayerChar(pSnap->GetSpectatorID()) : pSnap->m_pControlledTee ? pSnap->m_pControlledTee->GetCharacter() : 0;
 	int GameStartTick = m_GameStartTick;
 	bool IsBirthdayPresent = false;
+	CCharacter *pChrOrSpec = pSpectator ? pSpectator : pSnappingChar;
+	if (pChrOrSpec)
 	{
-		CCharacter *pChr = pSpectator ? pSpectator : pSnappingChar;
-		if (pChr)
+		if (pChrOrSpec->m_BirthdayGiftEndTick > Server()->Tick())
 		{
-			if (pChr->m_BirthdayGiftEndTick > Server()->Tick())
-			{
-				GameStartTick = pChr->m_BirthdayGiftEndTick - Server()->TickSpeed() * 60;
-				IsBirthdayPresent = true;
-			}
-			else if (pChr->m_DDRaceState == DDRACE_STARTED)
-				GameStartTick = pChr->m_StartTime;
+			GameStartTick = pChrOrSpec->m_BirthdayGiftEndTick - Server()->TickSpeed() * 60;
+			IsBirthdayPresent = true;
 		}
+		else if (pChrOrSpec->m_DDRaceState == DDRACE_STARTED)
+			GameStartTick = pChrOrSpec->m_StartTime;
 	}
 
 	int GameStateFlags = 0;
@@ -744,7 +742,7 @@ void IGameController::Snap(int SnappingClient)
 	bool DDraceHud = pSnap->ShowDDraceHud();
 	if (DDraceHud)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_DDRACE;
-	if (!DDraceHud || pSnap->m_Gamemode == GAMEMODE_VANILLA) // fng, survival
+	if (!DDraceHud || (pChrOrSpec && pChrOrSpec->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA)) // fng, survival
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
 
 	// allow inputs for arena placing while in spec, or for click to spectate in spectators

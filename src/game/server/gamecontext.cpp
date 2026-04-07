@@ -186,23 +186,11 @@ CTuningParams *CGameContext::TuningFromChrOrZone(int ClientID, int Zone)
 	return &m_Tuning;
 }
 
-bool CGameContext::ResetLockedTune(LOCKED_TUNES *pLockedTunings, const char *pParam)
-{
-	if (!IsTuneInList(pLockedTunings, pParam))
-		return false;
-	float GlobalValue;
-	if (!m_Tuning.Get(pParam, &GlobalValue))
-		return false;
-	CLockedTune Tune(pParam, GlobalValue);
-	SetLockedTune(pLockedTunings, Tune);
-	return true;
-}
-
-bool CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune, bool AllowGlobalValues)
+int CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune, bool AllowGlobalValues)
 {
 	float GlobalValue;
 	if(!m_Tuning.Get(Tune.m_aParam, &GlobalValue))
-		return false;
+		return 0;
 
 	bool IsGlobalValue = Tune.m_Value.Get() == (int)(GlobalValue * 100.f);
 	for(unsigned int i = 0; i < pLockedTunings->size(); i++)
@@ -210,18 +198,20 @@ bool CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune
 		if(str_comp_nocase(pLockedTunings->at(i).m_aParam, Tune.m_aParam) == 0)
 		{
 			if(IsGlobalValue)
+			{
 				pLockedTunings->erase(pLockedTunings->begin() + i);
-			else
-				pLockedTunings->at(i).m_Value = Tune.m_Value;
-			return true;
+				return 3;
+			}
+			pLockedTunings->at(i).m_Value = Tune.m_Value;
+			return 2;
 		}
 	}
 
 	if (IsGlobalValue && !AllowGlobalValues)
-		return true;
+		return 0;
 		
 	pLockedTunings->push_back(Tune);
-	return true;
+	return 1;
 }
 
 void CGameContext::ApplyTuneLock(LOCKED_TUNES *pLockedTunings, int TuneLock)
@@ -3723,15 +3713,61 @@ void CGameContext::ConTuneLock(IConsole::IResult *pResult, void *pUserData)
 	if(List >= 0 && List < TuneZone::NUM)
 	{
 		CLockedTune LockedTune(pParamName, NewValue);
-		if(pSelf->SetLockedTune(&pSelf->LockedTuning()[List], LockedTune, true))
+		char aBuf[256];
+		int Result = pSelf->SetLockedTune(&pSelf->LockedTuning()[List], LockedTune, true);
+		if(Result == 3)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%s for lock %d changed to %.2f", pParamName, List, NewValue);
+			str_format(aBuf, sizeof(aBuf), "Reset '%s' for lock %d", pParamName, List);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
-			pSelf->SendTuningParams(-1);
+		}
+		else if(Result)
+		{
+			str_format(aBuf, sizeof(aBuf), "'%s' for lock %d changed to %.2f", pParamName, List, NewValue);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 		else
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+	}
+}
+
+void CGameContext::ConTuneLockReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int List = pResult->GetInteger(0);
+
+	LOCKED_TUNES *pLockedTunings = &pSelf->LockedTuning()[List];
+
+	char aBuf[256];
+	if (pResult->NumArguments() == 1)
+	{
+		pLockedTunings->clear();
+		pSelf->m_aaTuneLockMsg[List][0] = 0;
+		str_format(aBuf, sizeof(aBuf), "Reset all locked tunings and enter message for lock %d", List);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		return;
+	}
+
+	const char *pParam = pResult->GetString(1);
+
+	float GlobalValue;
+	if (!pSelf->m_Tuning.Get(pParam, &GlobalValue))
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		return;
+	}
+
+	if (!pSelf->IsTuneInList(pLockedTunings, pParam))
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' is not in lock list %d", pParam, List);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		return;
+	}
+
+	CLockedTune Tune(pParam, GlobalValue);
+	if (pSelf->SetLockedTune(pLockedTunings, Tune) == 3)
+	{
+		str_format(aBuf, sizeof(aBuf), "Reset '%s' for lock %d", pParam, List);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
 }
 
@@ -4222,6 +4258,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("tune_zone_enter", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgEnter, this, "which message to display on zone enter; use 0 for normal area", AUTHED_ADMIN);
 	Console()->Register("tune_zone_leave", "i[zone] s[message]", CFGFLAG_SERVER|CFGFLAG_GAME, ConTuneSetZoneMsgLeave, this, "which message to display on zone leave; use 0 for normal area", AUTHED_ADMIN);
 	Console()->Register("tune_lock", "i[number] s[tuning] i[value]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneLock, this, "Tune for lock a variable to value", AUTHED_ADMIN);
+	Console()->Register("tune_lock_reset", "i[number] ?s[tuning]", CFGFLAG_SERVER, ConTuneLockReset, this, "Reset a specific locked tuning variable to default for lock i or all and enter message", AUTHED_ADMIN);
 	Console()->Register("tune_lock_dump", "i[number]", CFGFLAG_SERVER, ConTuneLockDump, this, "Dump lock tuning for number x", AUTHED_ADMIN);
 	Console()->Register("tune_lock_enter", "i[number] r[message]", CFGFLAG_SERVER | CFGFLAG_GAME, ConTuneLockSetMsgEnter, this, "which message to display on tune lock enter; use 0 for lock reset", AUTHED_ADMIN);
 	Console()->Register("switch_open", "i[switch]", CFGFLAG_SERVER|CFGFLAG_GAME, ConSwitchOpen, this, "Whether a switch is deactivated by default (otherwise activated)", AUTHED_ADMIN);

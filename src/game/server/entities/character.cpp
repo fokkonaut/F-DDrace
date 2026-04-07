@@ -2681,7 +2681,10 @@ void CCharacter::ApplyLockedTunings(bool SendTuningParams)
 	CTuningParams* pTunings = m_TuneZone > 0 ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
 	m_Core.m_Tuning = *GameServer()->ApplyLockedTunings(pTunings, m_LockedTunings);
 	if (SendTuningParams)
+	{
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
+		m_LastLockedTunings = m_LockedTunings;
+	}
 }
 
 CTuningParams *CCharacter::Tuning()
@@ -4086,7 +4089,6 @@ void CCharacter::HandleTuneLayer()
 		{
 			ApplyLockedTunings(); // Update before sending new tuning params, or it will create prediction errors
 			SendTuneMsg(GameServer()->m_aaTuneLockMsg[TuneLock == -1 ? 0 : TuneLock]); // -1 = tune lock reset, number 0 is used to set the message
-			m_LastLockedTunings = m_LockedTunings;
 		}
 	}
 
@@ -6678,7 +6680,7 @@ void CCharacter::SetJumps(int NewJumps, bool Silent)
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
 	}
 
-	if (NewJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT && !GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()))
+	if (NewJumps > m_MaxJumps && m_DDRaceState != DDRACE_CHEAT && !GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID()) && !IsInSafeArea())
 	{
 		m_pPlayer->GiveXP(NewJumps * 100, "for upgrading jumps");
 		m_MaxJumps = NewJumps;
