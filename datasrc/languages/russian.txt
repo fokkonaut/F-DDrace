@@ -213,7 +213,7 @@ Kill logout is activated, kill within %d seconds to logout
 == Активирован выход через убийство, убейте в течение %d секунд, чтобы выйти
 
 You are not verified, please enter your security pin using '/pin'
-== Вы не подтверждены, пожалуйста, введите ваш защитный PIN-код, используя '/pin'
+== Вы не прошли проверку, пожалуйста, введите ваш защитный PIN-код с помощью '/pin'
 
 Wrong password
 == Неверный пароль
@@ -387,7 +387,7 @@ Clears all objects of your plot
 == Очищает все объекты вашего участка
 
 Starts an auction for your plot, everyone can buy it using the buy command
-== Начинает аукцион на ваш участок, каждый может купить его с помощью команды buy
+== Начинает аукцион вашего участка, и любой игрок сможет купить его с помощью команды '/plot buy'.
 
 Buys a plot if the given player is running a plot auction
 == Покупает участок, если указанный игрок проводит аукцион участка
@@ -405,7 +405,7 @@ Shows a list with all currently open plot auctions and swap offers
 == Показывает список всех текущих открытых аукционов участков и предложений обмена
 
 This player doesn't exists
-== Этот игрок не существует
+== Такого игрока не существует
 
 You can't buy your own plot
 == Вы не можете купить свой собственный участок
@@ -1473,7 +1473,7 @@ You didn't deploy your stake in time, game started without you
 == Вы не успели разместить свою ставку вовремя, игра началась без вас
 
 Your stake got collected: -%lld money.
-== Ваша ставка собрана: -%lld денег.
+== Ваша ставка списана: -%lld денег.
 
 '%s' is the Durák!
 == '%s' - Дурак!
@@ -1943,13 +1943,13 @@ VIP+ gives you even more benefits than VIP Classic, check '/vip'.
 == VIP+ предоставляет вам ещё больше преимуществ, чем VIP Classic, проверьте '/vip'.
 
 You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет дробовик, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет дробовик, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет граната, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет граната, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет винтовка, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет винтовка, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == Это сделает ваш реактивный пистолет ниндзя. Переключите его с помощью '/ninjajetpack'.
@@ -1964,7 +1964,7 @@ With Portal Rifle you can create two portals where your cursor is, then teleport
 == С Портальной Винтовкой вы можете создать два портала там, где находится ваш курсор, а затем телепортироваться между ними.
 
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
-== Создайте молот блокиратора порталов и эти боеприпасы с помощью курсора. Смотрите '/portal' для информации о текущем количестве. Как это работает: '/helptoggle'
+== Молотом вы создаёте блокираторы порталов в месте курсора. Текущее количество смотрите в '/portal'. Как это работает: '/helptoggle'
 
 Welcome to the shop, %s! Press F4 to start shopping.
 == Добро пожаловать в магазин, %s! Нажмите F4, чтобы начать покупки.
@@ -2084,7 +2084,7 @@ Take cards
 
 {durak-name}
 Passed…
-== Пас..
+== Паc…
 
 {durak-name}
 Next move: %ds
