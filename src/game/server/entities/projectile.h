@@ -24,8 +24,14 @@ public:
 		bool Spooky = false
 	);
 
+	vec2 m_CurPos;
+	vec2 m_PrevPos;
 	vec2 GetPos(float Time);
+	void SetBouncing(int Value);
+
 	void FillInfo(CNetObj_Projectile *pProj, int SnappingClient);
+	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
+	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);
 
 	virtual void Reset();
 	virtual void Tick();
@@ -54,10 +60,9 @@ private:
 
 	bool m_Spooky;
 
-	bool IsDefaultTuning();
+	bool DetermineIfDefaultTuning();
 	bool m_DefaultTuning;
 	bool m_DDrace;
-	bool m_IsSpreadWeapon;
 
 	bool m_CalculatedVel;
 	virtual void TickDeferred();
@@ -78,14 +83,6 @@ private:
 		int m_LastResetTick;
 		ivec2 m_Vel;
 	} m_aSnap[NUM_SNAPINFO];
-
-public:
-
-	void SetBouncing(int Value);
-	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);
-	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
-	vec2 m_CurPos;
-	vec2 m_PrevPos;
 };
 
 #endif

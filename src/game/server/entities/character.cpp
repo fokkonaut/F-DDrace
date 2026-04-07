@@ -596,6 +596,7 @@ void CCharacter::FireWeapon()
 		float Angle = GetAngle(TempDirection);
 		Angle += Spread[i];
 		vec2 Direction = vec2(cosf(Angle), sinf(Angle));
+		vec2 InitDir = Direction * 100.f;
 
 		switch (GetActiveWeapon())
 		{
@@ -826,7 +827,7 @@ void CCharacter::FireWeapon()
 							false,//Explosive
 							0,//Force
 							-1,//SoundImpact
-							MouseTarget,
+							InitDir,
 							0,
 							0,
 							m_pPlayer->m_SpookyGhost
@@ -884,7 +885,7 @@ void CCharacter::FireWeapon()
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
-					MouseTarget,
+					InitDir,
 					0,//Layer
 					0,//Number
 					false//Spooky
@@ -1122,7 +1123,7 @@ void CCharacter::FireWeapon()
 					true,//Explosive
 					0,//Force
 					SOUND_GRENADE_EXPLODE,//SoundImpact
-					MouseTarget,
+					InitDir,
 					0,
 					0,
 					m_pPlayer->m_SpookyGhost
@@ -1150,7 +1151,7 @@ void CCharacter::FireWeapon()
 						i < 3,//Explosive
 						0,//Force
 						i == 0 ? SOUND_GRENADE_EXPLODE : -1,//SoundImpact
-						MouseTarget
+						InitDir
 					);
 				}
 
@@ -6300,7 +6301,7 @@ void CCharacter::SetTeeControlCursor()
 	if (m_pTeeControlCursor || !m_pPlayer->m_pControlledTee || Server()->IsSevendown(m_pPlayer->GetCID()))
 		return;
 
-	m_pTeeControlCursor = new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_pPlayer->GetCID(), vec2(), false, true);
+	m_pTeeControlCursor = new CStableProjectile(GameWorld(), WEAPON_SHOTGUN, m_pPlayer->GetCID(), vec2(), CStableProjectile::EFlags::ONLY_SHOW_OWNER);
 }
 
 void CCharacter::RemoveTeeControlCursor()

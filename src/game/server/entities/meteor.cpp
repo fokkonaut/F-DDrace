@@ -6,7 +6,7 @@
 #include <game/server/player.h>
 
 CMeteor::CMeteor(CGameWorld *pGameWorld, vec2 Pos, int Owner, bool Infinite)
-: CStableProjectile(pGameWorld, WEAPON_SHOTGUN, Owner, Pos, true)
+: CStableProjectile(pGameWorld, WEAPON_SHOTGUN, Owner, Pos, CStableProjectile::EFlags::HIDE_ON_SPEC)
 {
 	m_Vel = vec2(0.1f, 0.1f);
 	m_Owner = Owner;
