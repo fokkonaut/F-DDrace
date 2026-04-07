@@ -1,5 +1,5 @@
 English translation by the developers
-== Русский перевод ИИ
+== Русский перевод ИИ и qmaa
 
 /cmdlist will show a list of all chat commands
 == /cmdlist покажет список всех чат-команд
