@@ -1954,10 +1954,10 @@ You will have rifle if you respawn. For more information about spawn weapons, pl
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == Это сделает ваш реактивный пистолет ниндзя. Переключите его с помощью '/ninjajetpack'.
 
-Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
+Taser is a rifle that freezes a player. For more information about the taser and your taser stats, please visit '/taser'.
 == Электрошокер — это винтовка, которая замораживает игрока. Для получения дополнительной информации об электрошокере и ваших статистиках электрошокера, посетите '/taser'.
 
-Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
+Taser battery is required to use the taser. Maximum amount of ammo is 100. Please visit '/taser'.
 == Для использования электрошокера требуется батарея. Максимальное количество боеприпасов — 100. Посетите '/taser'.
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.

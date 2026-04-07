@@ -1954,10 +1954,10 @@ You will have rifle if you respawn. For more information about spawn weapons, pl
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == Jetpack silahınızın ninja gibi olmasını sağlar. '/ninjajetpack' kullanarak açıp kapatabilirsiniz.
 
-Taser is a rifle that freezes a player. For more information about the taser and your taser stats, plase visit '/taser'.
+Taser is a rifle that freezes a player. For more information about the taser and your taser stats, please visit '/taser'.
 == Taser, bir oyuncuyu donduran bir tüfektir. Taser ve taser istatistikleriniz hakkında daha fazla bilgi için lütfen '/taser' adresini ziyaret edin.
 
-Taser battery is required to use the taser. Maximum amount of ammo is 100. Plase visit '/taser'.
+Taser battery is required to use the taser. Maximum amount of ammo is 100. Please visit '/taser'.
 == Taser'ı kullanmak için taser pili gereklidir. Maksimum cephane miktarı 100'dür. Lütfen '/taser' adresini ziyaret edin.
 
 With Portal Rifle you can create two portals where your cursor is, then teleport between them.
