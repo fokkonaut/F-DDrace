@@ -178,14 +178,14 @@ void CShop::OnPageChange(int ClientID)
 
 	// send page
 	int Item = m_aBackgroundItem[ClientID];
-	char aMsg[512];
+	char aMsg[1536];
 	if (m_aClients[ClientID].m_Page <= PAGE_MAIN)
 	{
 		str_copy(aMsg, GameServer()->m_apPlayers[ClientID]->Localize("Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back."), sizeof(aMsg));
 	}
 	else
 	{
-		char aDescription[256];
+		char aDescription[512];
 		if (IsType(HOUSE_SHOP))
 			str_copy(aDescription, GameServer()->m_apPlayers[ClientID]->Localize(m_aItems[Item].m_pDescription), sizeof(aDescription));
 		else if (IsType(HOUSE_PLOT_SHOP))

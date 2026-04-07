@@ -35,7 +35,7 @@ void CHouse::Reset(int ClientID)
 
 void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg, int Page)
 {
-	char aMsg[900];
+	char aMsg[1536];
 	const char *pCut = "*************************************\n";
 
 	char aPage[8] = "";
@@ -46,7 +46,7 @@ void CHouse::SendWindow(int ClientID, const char *pMsg, const char *pFooterMsg, 
 		str_format(aPage, sizeof(aPage), "~ %d ~", Page);
 	}
 
-	char aFooter[128];
+	char aFooter[256];
 	str_format(aFooter, sizeof(aFooter), "%s%s\n                       %s", pCut, pFooterMsg, aPage);
 
 	str_format(aMsg, sizeof(aMsg),

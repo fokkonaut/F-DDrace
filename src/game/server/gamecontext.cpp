@@ -7742,7 +7742,7 @@ bool CGameContext::IsAccountSystemBanned(int ClientID, bool ChatMsg)
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)
 {
-	static char aRet[900] = "";
+	static char aRet[1536] = "";
 	if (pMsg[0])
 		str_format(aRet, sizeof(aRet), "%s\n\n%s", pMsg, pFooter);
 	return aRet;
