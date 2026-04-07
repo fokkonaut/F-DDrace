@@ -65,7 +65,8 @@ void CEventHandler::SnapBuffer(int SnappingClient, int Buf)
 	{
 		if(SnappingClient == -1 || CmaskIsSet(m_aClientMasks[Buf][i], SnappingClient))
 		{
-			CNetEvent_Common *pEvent = (CNetEvent_Common *)&m_aData[Buf][m_aOffsets[Buf][i]];
+			char *pData = &m_aData[Buf][m_aOffsets[Buf][i]];
+			CNetEvent_Common *pEvent = (CNetEvent_Common *)pData;
 			vec2 EventPos = vec2(pEvent->m_X, pEvent->m_Y);
 			if(!NetworkClipped(GameServer(), SnappingClient, EventPos))
 			{
@@ -89,7 +90,7 @@ void CEventHandler::SnapBuffer(int SnappingClient, int Buf)
 					int Size = m_aSizes[Buf][i];
 					void *pItem = GameServer()->Server()->SnapNewItem(Type, SnapID, Size);
 					if (pItem)
-						mem_copy(pItem, pEvent, Size);
+						mem_copy(pItem, pData, Size);
 				};
 				const auto &&SnapTranslateEvent = [&](int *pClientId) {
 					int ClientId = *pClientId; // Save real Id
@@ -102,12 +103,12 @@ void CEventHandler::SnapBuffer(int SnappingClient, int Buf)
 
 				if (Type == NETEVENTTYPE_DEATH)
 				{
-					CNetEvent_Death *pDeath = (CNetEvent_Death *)&pEvent;
+					CNetEvent_Death *pDeath = (CNetEvent_Death *)pData;
 					SnapTranslateEvent(&pDeath->m_ClientID);
 				}
-				if (Type == NETEVENTTYPE_DAMAGE)
+				else if (Type == NETEVENTTYPE_DAMAGE)
 				{
-					CNetEvent_Damage *pDamage = (CNetEvent_Damage *)&pEvent;
+					CNetEvent_Damage *pDamage = (CNetEvent_Damage *)pData;
 					SnapTranslateEvent(&pDamage->m_ClientID);
 				}
 				else
