@@ -1302,10 +1302,10 @@ minutes
 == минут
 
 This %s will respawn in %d %s
-== Этот %s появится через %d %s
+== Эта %s появится через %d %s
 
 This %s got picked up %d %s ago
-== Этот %s был подобран %d %s назад
+== Эта %s была подобрана %d %s назад
 
 You need to select an amount to deposit or withdraw.
 == Вам нужно выбрать сумму для внесения или снятия.
