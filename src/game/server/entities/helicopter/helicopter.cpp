@@ -131,7 +131,7 @@ CHelicopter::CHelicopter(
 {
 	m_HelicopterType = clamp(HelicopterType, 0, (int)NUM_HELICOPTER_TYPES - 1);
 
-	m_AllowVipPlus = false;
+	SetFlags(EFlags::ALLOW_VIP_PLUS, false);
 	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
 
@@ -854,8 +854,8 @@ void CHelicopter::HandleSeats()
 
 		if (isDriver)
 		{
-			m_Gravity = (pCharacter->m_FreezeTime > 0);
-			m_GroundVel = (pCharacter->m_FreezeTime || m_Accel.x == 0.f); // forgot what is ground vel
+			SetFlags(EFlags::APPLY_GRAVITY, pCharacter->m_FreezeTime > 0);
+			SetFlags(EFlags::APPLY_GROUND_VEL, pCharacter->m_FreezeTime || m_Accel.x == 0.f);
 		}
 
 		if (pCharacter->m_DeepFreeze)
@@ -932,8 +932,7 @@ bool CHelicopter::Mount(int ClientID, int WantedSeat)
 		m_Owner = ClientID;
 		m_LastKnownOwner = ClientID;
 		m_EngineOn = true;
-		m_Gravity = false;
-		m_GroundVel = false;
+		SetFlags(EFlags::APPLY_GRAVITY | EFlags::APPLY_GROUND_VEL, false);
 	}
 
 	m_ShowHealthbarUntil = Server()->Tick() + Server()->TickSpeed() * 3;
@@ -961,8 +960,7 @@ void CHelicopter::Dismount(int ClientID, bool ForceDismountAtHelicopter)
 			CCharacter *pCharacter = GameServer()->GetPlayerChar(passengerCID);
 			if (isDriver)
 			{
-				m_Gravity = true;
-				m_GroundVel = true;
+				SetFlags(EFlags::APPLY_GRAVITY | EFlags::APPLY_GROUND_VEL, true);
 				m_Accel.y = 0;
 				m_Owner = -1;
 			}

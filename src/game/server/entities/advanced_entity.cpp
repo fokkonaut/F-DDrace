@@ -5,24 +5,19 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
-CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner, bool CheckDeath)
+CAdvancedEntity::CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner)
 : CEntity(pGameWorld, Objtype, Pos)
 {
 	SetSize(Size);
 	m_Pos = Pos;
 	m_Owner = Owner;
-	m_CheckDeath = CheckDeath;
 	m_TeleCheckpoint = GetOwner() ? GetOwner()->m_TeleCheckpoint : 0;
 	m_PrevPos = m_Pos;
 	m_DDTeam = GetOwner() ? GetOwner()->Team() : 0;
 	m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
-	m_Gravity = true;
-	m_GroundVel = true;
-	m_AirVel = true;
-	m_AllowVipPlus = true;
-	m_CheckGameLayerClipped = true;
 	m_Elasticity = vec2(0.5f, 0.5f);
 	m_LastInOutTeleporter = 0;
+	m_Flags = EFlags::CHECK_DEATH | EFlags::APPLY_GRAVITY | EFlags::APPLY_GROUND_VEL | EFlags::APPLY_AIR_VEL | EFlags::ALLOW_VIP_PLUS | EFlags::CHECK_GAME_LAYER_CLIPPED;
 }
 
 void CAdvancedEntity::Reset()
@@ -47,7 +42,7 @@ void CAdvancedEntity::Tick()
 	m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
 
 	// weapon hits death-tile or left the game layer, reset it
-	if ((m_CheckGameLayerClipped && GameLayerClipped(m_Pos)) || (m_CheckDeath && (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH)))
+	if ((IsFlags(EFlags::CHECK_GAME_LAYER_CLIPPED) && GameLayerClipped(m_Pos)) || (IsFlags(EFlags::CHECK_DEATH) && (GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH || GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH)))
 	{
 		Reset();
 		return;
@@ -93,7 +88,7 @@ void CAdvancedEntity::HandleDropped()
 	CTuningParams *pTuning = m_TuneZone ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
 
 	//Gravity
-	if (m_Gravity)
+	if (IsFlags(EFlags::APPLY_GRAVITY))
 	{
 		m_Vel.y += pTuning->m_Gravity;
 	}
@@ -192,7 +187,7 @@ void CAdvancedEntity::HandleDropped()
 		HandleTiles(CurrentIndex);
 		m_LastInOutTeleporter = 0;
 	}
-	IsGrounded(m_GroundVel, m_AirVel);
+	IsGrounded(IsFlags(EFlags::APPLY_GROUND_VEL), IsFlags(EFlags::APPLY_AIR_VEL));
 	GameServer()->Collision()->MoveBox(IsSwitchActiveCb, this, &m_Pos, &m_Vel, m_Size, m_Elasticity, !Config()->m_SvStoppersPassthrough, GetMoveRestrictionExtra());
 }
 
@@ -206,7 +201,7 @@ bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
 CCollision::MoveRestrictionExtra CAdvancedEntity::GetMoveRestrictionExtra()
 {
 	CCollision::MoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra();
-	if (!m_AllowVipPlus)
+	if (!IsFlags(EFlags::ALLOW_VIP_PLUS))
 		Extra.m_VipPlus = false; // explicitly disallow passing the vip room if the entity wants to force it
 	return Extra;
 }

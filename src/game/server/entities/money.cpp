@@ -6,13 +6,14 @@
 #include "money.h"
 
 CMoney::CMoney(CGameWorld *pGameWorld, vec2 Pos, int64 Amount, int Owner, float Direction, bool GlobalPickupDelay)
-: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, vec2(GetRadius(Amount)*2, GetRadius(Amount)*2), Owner, false)
+: CAdvancedEntity(pGameWorld, CGameWorld::ENTTYPE_MONEY, Pos, vec2(GetRadius(Amount)*2, GetRadius(Amount)*2), Owner)
 {
 	m_Pos = Pos;
 	m_Amount = Amount;
 	m_GlobalPickupDelay = GlobalPickupDelay;
 	m_Vel = vec2(5*Direction, Direction == 0 ? 0 : -5);
 	m_StartTick = Server()->Tick();
+	SetFlags(EFlags::CHECK_DEATH, false);
 	
 	m_Snap.m_Pos = m_Pos;
 	m_Snap.m_Time = 0.f;
@@ -49,7 +50,7 @@ void CMoney::Tick()
 		return;
 	}
 
-	m_Gravity = true;
+	SetFlags(EFlags::APPLY_GRAVITY, true);
 
 	CCharacter *pClosest = 0;
 	bool PickupDelayOver = SecondsPassed(Config()->m_SvDropsPickupDelay / 1000.f);
@@ -101,7 +102,7 @@ void CMoney::MoveTo(vec2 Pos, int Radius)
 	if (MaxFlySpeed <= 0.f)
 		return;
 
-	m_Gravity = false;
+	SetFlags(EFlags::APPLY_GRAVITY, false);
 
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
 	float AddVelX = (Diff.x/Radius*5);

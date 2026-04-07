@@ -9,7 +9,7 @@
 class CAdvancedEntity : public CEntity
 {
 public:
-	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner = -1, bool CheckDeath = true);
+	CAdvancedEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos, vec2 Size, int Owner = -1);
 	virtual ~CAdvancedEntity() {}
 
 	virtual void Reset();
@@ -34,6 +34,15 @@ public:
 	int GetDDTeam() { return m_DDTeam; }
 	Mask128 TeamMask() { return m_TeamMask; }
 
+	bool IsFlags(int Flags) { return (m_Flags & Flags) == Flags; }
+	void SetFlags(int Flags, bool Enabled)
+	{
+		if (Enabled)
+			m_Flags |= Flags;
+		else
+			m_Flags &= ~Flags;
+	}
+
 protected:
 	bool IsGrounded(bool GroundVel = false, bool AirVel = false);
 	// HandleDropped() has to be called within the tick function of the child entity whenever the entity is dropped and not being carried
@@ -48,17 +57,21 @@ protected:
 	int m_Owner;
 	int m_TeleCheckpoint;
 	int m_TuneZone;
-
-	bool m_CheckDeath;
-	bool m_CheckGameLayerClipped;
-	Mask128 m_TeamMask;
 	int m_DDTeam;
-
-	bool m_Gravity;
-	bool m_GroundVel;
-	bool m_AirVel;
+	Mask128 m_TeamMask;
 	vec2 m_Elasticity;
-	bool m_AllowVipPlus;
+
+	int m_Flags;
+
+	enum EFlags
+	{
+		CHECK_DEATH = 1<<0,
+		CHECK_GAME_LAYER_CLIPPED = 1<<1,
+		APPLY_GRAVITY = 1<<2,
+		APPLY_GROUND_VEL = 1<<3,
+		APPLY_AIR_VEL = 1<<4,
+		ALLOW_VIP_PLUS = 1<<5,
+	};
 
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void HandleTiles(int Index);
