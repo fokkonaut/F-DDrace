@@ -1922,10 +1922,10 @@ Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
 == Доступные языки
 
 Rainbow will make your tee change the color very fast.
-== Радуга заставит ваш тройник очень быстро менять цвет.
+== Радуга заставит ваш персонаж очень быстро менять цвет.
 
 Bloody will give your tee a permanent kill effect.
-== Кровавый придаст вашему тройнику постоянный эффект убийства.
+== Кровавый придаст вашему персонажу постоянный эффект убийства.
 
 Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.
 == Офицеры полиции получают помощь от полицейского бота. Для получения дополнительной информации о конкретных полицейских званиях, пожалуйста, введите '/police'.
