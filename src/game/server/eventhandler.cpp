@@ -21,96 +21,98 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 
 void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
 {
-	if(m_NumEvents == MAX_EVENTS)
+	int Cur = m_CurrentBuffer;
+	int NumEvents = m_NumEvents[Cur];
+	if(NumEvents == MAX_EVENTS)
 		return 0;
-	if(m_CurrentOffset+Size >= MAX_DATASIZE)
+	if(m_CurrentOffset[Cur] + Size >= MAX_DATASIZE)
 		return 0;
 
-	void *p = &m_aData[m_CurrentOffset];
-	m_aOffsets[m_NumEvents] = m_CurrentOffset;
-	m_aTypes[m_NumEvents] = Type;
-	m_aSizes[m_NumEvents] = Size;
-	m_aClientMasks[m_NumEvents] = Mask;
-	m_CurrentOffset += Size;
-	m_NumEvents++;
+	void *p = &m_aData[Cur][m_CurrentOffset[Cur]];
+	m_aOffsets[Cur][NumEvents] = m_CurrentOffset[Cur];
+	m_aTypes[Cur][NumEvents] = Type;
+	m_aSizes[Cur][NumEvents] = Size;
+	m_aClientMasks[Cur][NumEvents] = Mask;
+	m_CurrentOffset[Cur] += Size;
+	m_NumEvents[Cur]++;
 	return p;
 }
 
 void CEventHandler::Clear()
 {
-	m_NumEvents = 0;
-	m_CurrentOffset = 0;
+	// Switch buffer, store previous events to send them to low bandwidth players
+	// without resending them to highbandwidth players
+	m_CurrentBuffer ^= 1;
+
+	// Reset new current buffer
+	m_NumEvents[m_CurrentBuffer] = 0;
+	m_CurrentOffset[m_CurrentBuffer] = 0;
 }
 
 void CEventHandler::Snap(int SnappingClient)
 {
-	for(int i = 0; i < m_NumEvents; i++)
+	int Cur = m_CurrentBuffer;
+	int Prev = Cur ^ 1;
+
+	SnapBuffer(SnappingClient, Cur);
+	if (!GameServer()->Server()->GetHighBandwidth(SnappingClient))
+		SnapBuffer(SnappingClient, Prev);
+}
+
+void CEventHandler::SnapBuffer(int SnappingClient, int Buf)
+{
+	for(int i = 0; i < m_NumEvents[Buf]; i++)
 	{
-		if(SnappingClient == -1 || CmaskIsSet(m_aClientMasks[i], SnappingClient))
+		if(SnappingClient == -1 || CmaskIsSet(m_aClientMasks[Buf][i], SnappingClient))
 		{
-			CNetEvent_Common *ev = (CNetEvent_Common *)&m_aData[m_aOffsets[i]];
-			vec2 EventPos = vec2(ev->m_X, ev->m_Y);
+			CNetEvent_Common *pEvent = (CNetEvent_Common *)&m_aData[Buf][m_aOffsets[Buf][i]];
+			vec2 EventPos = vec2(pEvent->m_X, pEvent->m_Y);
 			if(!NetworkClipped(GameServer(), SnappingClient, EventPos))
 			{
-				if (m_aTypes[i] == NETEVENTTYPE_SOUNDWORLD || m_aTypes[i] == NETEVENTTYPE_HAMMERHIT || m_aTypes[i] == NETEVENTTYPE_SPAWN)
+				int Type = m_aTypes[Buf][i];
+				if (Type == NETEVENTTYPE_SOUNDWORLD || Type == NETEVENTTYPE_HAMMERHIT || Type == NETEVENTTYPE_SPAWN)
 				{
 					CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
 					CCharacter *pChr = pSnap ? pSnap->GetCharacter() : 0;
-					if (m_aTypes[i] == NETEVENTTYPE_HAMMERHIT && pChr && pChr->m_pGrog && pChr->m_pGrog->m_LastNudgePos == EventPos)
-					{
+					if (Type == NETEVENTTYPE_HAMMERHIT && pChr && pChr->m_pGrog && pChr->m_pGrog->m_LastNudgePos == EventPos)
 						pChr->m_pGrog->m_LastNudgePos = vec2(-1, -1);
-					}
 					else if (pSnap && pSnap->SilentFarmActive())
+						continue;
+				}
+
+				const auto &&SnapEvent = [&]() {
+					// offset: dont overlap ids, start where m_CurrentBuffer stopped and append previously missed events
+					int SnapID = i;
+					if (Buf != m_CurrentBuffer)
+						SnapID += m_NumEvents[m_CurrentBuffer];
+
+					int Size = m_aSizes[Buf][i];
+					void *pItem = GameServer()->Server()->SnapNewItem(Type, SnapID, Size);
+					if (pItem)
+						mem_copy(pItem, pEvent, Size);
+				};
+				const auto &&SnapTranslateEvent = [&](int *pClientId) {
+					int ClientId = *pClientId; // Save real Id
+					if(GameServer()->Server()->Translate(*pClientId, SnappingClient))
 					{
-						continue;
+						SnapEvent();
+						*pClientId = ClientId; // Reset Id for others
 					}
-				}
+				};
 
-				if (m_aTypes[i] == NETEVENTTYPE_DEATH)
+				if (Type == NETEVENTTYPE_DEATH)
 				{
-					CNetEvent_Death *pDeath = (CNetEvent_Death *)&m_aData[m_aOffsets[i]];
-					// save real id
-					int ClientID = pDeath->m_ClientID;
-
-					// translate id
-					int ID = pDeath->m_ClientID;
-					if (!GameServer()->Server()->Translate(ID, SnappingClient))
-						continue;
-					pDeath->m_ClientID = ID;
-
-					// create event
-					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
-					if(d)
-						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
-
-					// reset id for others
-					pDeath->m_ClientID = ClientID;
+					CNetEvent_Death *pDeath = (CNetEvent_Death *)&pEvent;
+					SnapTranslateEvent(&pDeath->m_ClientID);
 				}
-				else if (m_aTypes[i] == NETEVENTTYPE_DAMAGE)
+				if (Type == NETEVENTTYPE_DAMAGE)
 				{
-					CNetEvent_Damage *pDamage = (CNetEvent_Damage *)&m_aData[m_aOffsets[i]];
-					// save real id
-					int ClientID = pDamage->m_ClientID;
-
-					// translate id
-					int ID = pDamage->m_ClientID;
-					if (!GameServer()->Server()->Translate(ID, SnappingClient))
-						continue;
-					pDamage->m_ClientID = ID;
-
-					// create event
-					void *d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
-					if(d)
-						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
-
-					// reset id for others
-					pDamage->m_ClientID = ClientID;
+					CNetEvent_Damage *pDamage = (CNetEvent_Damage *)&pEvent;
+					SnapTranslateEvent(&pDamage->m_ClientID);
 				}
 				else
 				{
-					void* d = GameServer()->Server()->SnapNewItem(m_aTypes[i], i, m_aSizes[i]);
-					if (d)
-						mem_copy(d, &m_aData[m_aOffsets[i]], m_aSizes[i]);
+					SnapEvent();
 				}
 			}
 		}

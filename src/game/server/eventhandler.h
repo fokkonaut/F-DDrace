@@ -20,16 +20,22 @@ class CEventHandler
 	static const int MAX_EVENTS = 1024;
 	static const int MAX_DATASIZE = 256*64;
 
-	int m_aTypes[MAX_EVENTS]; // TODO: remove some of these arrays
-	int m_aOffsets[MAX_EVENTS];
-	int m_aSizes[MAX_EVENTS];
-	Mask128 m_aClientMasks[MAX_EVENTS];
-	char m_aData[MAX_DATASIZE];
+	// Required for lowbandwidth players, so that they dont skip events
+	static const int NUM_BUFFERS = 2;
+	int m_CurrentBuffer;
+
+	int m_aTypes[NUM_BUFFERS][MAX_EVENTS]; // TODO: remove some of these arrays
+	int m_aOffsets[NUM_BUFFERS][MAX_EVENTS];
+	int m_aSizes[NUM_BUFFERS][MAX_EVENTS];
+	Mask128 m_aClientMasks[NUM_BUFFERS][MAX_EVENTS];
+	char m_aData[NUM_BUFFERS][MAX_DATASIZE];
+
+	int m_CurrentOffset[NUM_BUFFERS];
+	int m_NumEvents[NUM_BUFFERS];
+
+	void SnapBuffer(int SnappingClient, int Buf);
 
 	class CGameContext *m_pGameServer;
-
-	int m_CurrentOffset;
-	int m_NumEvents;
 public:
 	CGameContext *GameServer() const { return m_pGameServer; }
 	void SetGameServer(CGameContext *pGameServer);
