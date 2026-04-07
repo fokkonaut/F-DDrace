@@ -348,7 +348,7 @@ void CPickup::Tick()
 				if (!pType[0])
 					continue;
 
-				char aBuf[64] = "";
+				char aBuf[256] = "";
 				const char *pTime = pChr->GetPlayer()->Localize("seconds");
 				if (RespawnTimer)
 				{

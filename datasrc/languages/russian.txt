@@ -1,5 +1,5 @@
 English translation by the developers
-== Русский перевод ИИ
+== Русский перевод ИИ и qmaa
 
 /cmdlist will show a list of all chat commands
 == /cmdlist покажет список всех чат-команд
@@ -213,7 +213,7 @@ Kill logout is activated, kill within %d seconds to logout
 == Активирован выход через убийство, убейте в течение %d секунд, чтобы выйти
 
 You are not verified, please enter your security pin using '/pin'
-== Вы не подтверждены, пожалуйста, введите ваш защитный PIN-код, используя '/pin'
+== Вы не прошли проверку, пожалуйста, введите ваш защитный PIN-код с помощью '/pin'
 
 Wrong password
 == Неверный пароль
@@ -387,7 +387,7 @@ Clears all objects of your plot
 == Очищает все объекты вашего участка
 
 Starts an auction for your plot, everyone can buy it using the buy command
-== Начинает аукцион на ваш участок, каждый может купить его с помощью команды buy
+== Начинает аукцион вашего участка, и любой игрок сможет купить его с помощью команды '/plot buy'.
 
 Buys a plot if the given player is running a plot auction
 == Покупает участок, если указанный игрок проводит аукцион участка
@@ -405,7 +405,7 @@ Shows a list with all currently open plot auctions and swap offers
 == Показывает список всех текущих открытых аукционов участков и предложений обмена
 
 This player doesn't exists
-== Этот игрок не существует
+== Такого игрока не существует
 
 You can't buy your own plot
 == Вы не можете купить свой собственный участок
@@ -1254,10 +1254,10 @@ Police is searching you because of illegal bonus use
 == [ПРЕДУПРЕЖДЕНИЕ] Использование бонуса в зоне без бонусов незаконно
 
 [WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим дублем в течение 30 секунд, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим манекеном в течение 30 секунд, чтобы безопасно переместиться
 
 [WARNING] Your dummy has to be alive in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Ваш дубль должен быть жив, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Ваш манекен должен быть жив, чтобы безопасно переместиться
 
 '%s' has been moved to another map
 == '%s' был перемещен на другую карту
@@ -1302,10 +1302,10 @@ minutes
 == минут
 
 This %s will respawn in %d %s
-== Этот %s появится через %d %s
+== Эта %s появится через %d %s
 
 This %s got picked up %d %s ago
-== Этот %s был подобран %d %s назад
+== Эта %s была подобрана %d %s назад
 
 You need to select an amount to deposit or withdraw.
 == Вам нужно выбрать сумму для внесения или снятия.
@@ -1473,7 +1473,7 @@ You didn't deploy your stake in time, game started without you
 == Вы не успели разместить свою ставку вовремя, игра началась без вас
 
 Your stake got collected: -%lld money.
-== Ваша ставка собрана: -%lld денег.
+== Ваша ставка списана: -%lld денег.
 
 '%s' is the Durák!
 == '%s' - Дурак!
@@ -1922,10 +1922,10 @@ Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
 == Доступные языки
 
 Rainbow will make your tee change the color very fast.
-== Радуга заставит ваш тройник очень быстро менять цвет.
+== Радуга заставит ваш персонаж очень быстро менять цвет.
 
 Bloody will give your tee a permanent kill effect.
-== Кровавый придаст вашему тройнику постоянный эффект убийства.
+== Кровавый придаст вашему персонажу постоянный эффект убийства.
 
 Police officers get help from the police bot. For more information about the specific police ranks, please say '/police'.
 == Офицеры полиции получают помощь от полицейского бота. Для получения дополнительной информации о конкретных полицейских званиях, пожалуйста, введите '/police'.
@@ -1943,13 +1943,13 @@ VIP+ gives you even more benefits than VIP Classic, check '/vip'.
 == VIP+ предоставляет вам ещё больше преимуществ, чем VIP Classic, проверьте '/vip'.
 
 You will have shotgun if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет дробовик, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет дробовик, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 You will have grenade if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет граната, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет граната, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 You will have rifle if you respawn. For more information about spawn weapons, please type '/spawnweapons'.
-== У вас будет винтовка, если вы возродитесь. Для получения дополнительной информации о оружии возрождения, введите '/spawnweapons'.
+== У вас будет винтовка, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
 == Это сделает ваш реактивный пистолет ниндзя. Переключите его с помощью '/ninjajetpack'.
@@ -1964,7 +1964,7 @@ With Portal Rifle you can create two portals where your cursor is, then teleport
 == С Портальной Винтовкой вы можете создать два портала там, где находится ваш курсор, а затем телепортироваться между ними.
 
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
-== Создайте молот блокиратора порталов и эти боеприпасы с помощью курсора. Смотрите '/portal' для информации о текущем количестве. Как это работает: '/helptoggle'
+== Молотом вы создаёте блокираторы порталов в месте курсора. Текущее количество смотрите в '/portal'. Как это работает: '/helptoggle'
 
 Welcome to the shop, %s! Press F4 to start shopping.
 == Добро пожаловать в магазин, %s! Нажмите F4, чтобы начать покупки.
@@ -2084,93 +2084,93 @@ Take cards
 
 {durak-name}
 Passed…
-== Пас..
+== Паc…
 
 {durak-name}
 Next move: %ds
 == Ход: %ds
 
 You are now in a safe area
-== 
+== Теперь вы находитесь в безопасной зоне
 
 You are no longer in a safe area
-== 
+== Вы больше не находитесь в безопасной зоне
 
 Please enter the tile index into the chat (0-255)
-== 
+== Пожалуйста, введите индекс тайла в чат (0-255)
 
 Entering index aborted
-== 
+== Ввод индекса отменён
 
 The entered value is not a valid number
-== 
+== Введённое значение не является допустимым числом
 
 '%s' has been arrested for using a suspicious client (%d seconds arrest)
-== 
+== '%s' был арестован за использование подозрительного клиента (арест на %d секунд)
 
 You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly.
-== 
+== Вы были арестованы на %d секунд за использование подозрительного клиента. Попробуйте использовать официальный клиент DDNet или отключить dummy hammerfly.
 
 AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
-== 
+== AntiPing включён (только для 'cl_antiping 1', может вызывать нежелательные побочные эффекты)
 
 AntiPing disabled
-== 
+== AntiPing выключен
 
 High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)
-== 
+== Режим High Bandwidth включён (полные 50 снапшотов вместо 25 в секунду)
 
 High Bandwidth mode disabled
-== 
+== Режим High Bandwidth выключен
 
 Saving player sessions is currently disabled by an admin
-== 
+== Сохранение сессий игроков в данный момент отключено администратором
 
 Saving player session on disconnect enabled
-== 
+== Сохранение сессии игрока при выходе включено
 
 Saving player session on disconnect disabled
-== 
+== Сохранение сессии игрока при выходе выключено
 
 AntiPing weapons (only for 'cl_antiping 1')
-== 
+== AntiPing оружия (только для 'cl_antiping 1')
 
 High Bandwidth mode
-== 
+== Режим High Bandwidth
 
 Save player session
-== 
+== Сохранять сессию игрока
 
 {vote-header}
 Tᴇᴄʜɴɪᴄᴀʟ
-== 
+== Техническое
 
 [WARNING] Place this tile from switch layer
-== 
+== [ПРЕДУПРЕЖДЕНИЕ] Размещайте этот тайл на слое switch
 
 [WARNING] Empty toggle mask tile. Place one of the following tiles from game/front layer too: 
-== 
+== [ПРЕДУПРЕЖДЕНИЕ] Пустой тайл маски переключателя. Также разместите один из следующих тайлов на слое game/front: 
 
 Humans limit reached.
-== 
+== Достигнут лимит людей.
 
 Congratulations, you got the immunity flag.
-== 
+== Поздравляем, вы получили флаг иммунитета.
 
 The blue flag defends against infection.
-== 
+== Синий флаг защищает от заражения.
 
 You can drop it by pressing F3.
-== 
+== Вы можете выбросить его, нажав F3.
 
 Invalid stake, please enter a value between 0 and 10.000.000
-== 
+== Недопустимая ставка, пожалуйста, введите значение от 0 до 10.000.000
 
 This fight requires a stake of %lld money. Accept by typing '/1vs1 %s %lld'
-== 
+== Для этого боя требуется ставка в размере %lld денег. Примите её, введя '/1vs1 %s %lld'
 
 Fight cancelled, someone couldn't pay the stake.
-== 
+== Бой отменён, кто-то не смог оплатить ставку.
 
 You won this 1vs1 round! Your earnings: +%lld money.
-== 
+== Вы выиграли этот раунд 1на1! Ваш выигрыш: +%lld денег.
