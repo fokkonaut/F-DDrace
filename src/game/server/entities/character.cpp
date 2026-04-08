@@ -1034,7 +1034,7 @@ void CCharacter::FireWeapon()
 				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START && Config()->m_SvPortalThroughDoor;
 				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
-				if (!Found || !PortalPos
+				if (!Found
 					|| (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
 					|| (BatteryRequired && !pAccount->m_PortalBattery)
 					|| distance(PortalPos, m_Pos) > Config()->m_SvPortalMaxDistance
@@ -1165,7 +1165,7 @@ void CCharacter::FireWeapon()
 				if (!Config()->m_SvTeleRifleAllowBlocks && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
 					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
-					if (!Found || !NewPos)
+					if (!Found)
 					{
 						if (ClickedFire)
 							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());

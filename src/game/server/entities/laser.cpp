@@ -391,7 +391,7 @@ void CLaser::DoBounce()
 		else
 			Found = GetNearestAirPos(m_Pos, m_From, &PossiblePos);
 
-		if (Found && PossiblePos)
+		if (Found)
 		{
 			pOwnerChar->m_TeleGunPos = PossiblePos;
 			pOwnerChar->m_TeleGunTeleport = true;

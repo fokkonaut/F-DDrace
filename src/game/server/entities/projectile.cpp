@@ -218,11 +218,11 @@ void CProjectile::Tick()
 				vec2 PossiblePos;
 
 				if (!Collide)
-					Found = GetNearestAirPosPlayer(pTargetChr->GetPos(), &PossiblePos);
+					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->GetPos() : ColPos, &PossiblePos);
 				else
 					Found = GetNearestAirPos(NewPos, m_CurPos, &PossiblePos);
 
-				if (Found && PossiblePos)
+				if (Found)
 				{
 					pOwnerChar->m_TeleGunPos = PossiblePos;
 					pOwnerChar->m_TeleGunTeleport = true;
