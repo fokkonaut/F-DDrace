@@ -140,7 +140,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		}
 	}
 
-	bool IsPlotTaser = IntersectEntTypesFlags & CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY && pIntersected && pIntersected->m_PlotID >= PLOT_START;
+	bool IsPlotTaser = (IntersectEntTypesFlags & CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY) && pIntersected && pIntersected->m_PlotID >= PLOT_START;
 	if (!IsPlotTaser)
 	{
 		if ((!IsCharacter && !pEnt) || ((IsCharacter && !pChr) || (IsCharacter && pChr == pOwnerChar && Config()->m_SvOldLaser) || (pChr != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !Config()->m_SvHit)))

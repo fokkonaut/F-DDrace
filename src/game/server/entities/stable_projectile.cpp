@@ -89,11 +89,11 @@ void CStableProjectile::Snap(int SnappingClient)
 		return;
 	}
 
-	if (m_Flags & EFlags::ONLY_SHOW_OWNER && SnappingClient != m_Owner)
+	if ((m_Flags & EFlags::ONLY_SHOW_OWNER) && SnappingClient != m_Owner)
 		return;
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
-	if (m_Flags & EFlags::HIDE_ON_SPEC && pOwner && pOwner->IsPaused())
+	if ((m_Flags & EFlags::HIDE_ON_SPEC) && pOwner && pOwner->IsPaused())
 		return;
 
 	if (!CmaskIsSet(m_TeamMask, SnappingClient))
