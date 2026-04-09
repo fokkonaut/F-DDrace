@@ -1114,7 +1114,8 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEn
 		}
 		else
 		{
-			CEntity* pEntity = ClosestEntity(Pos, Radius, i, pNotThis, -1, Flags & EFindEntFlag::WALL);
+			bool CheckWall = Flags != -1 && Flags & EFindEntFlag::WALL;
+			CEntity* pEntity = ClosestEntity(Pos, Radius, i, pNotThis, -1, CheckWall);
 			if (pEntity)
 				return pEntity;
 		}
