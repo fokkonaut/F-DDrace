@@ -6080,13 +6080,17 @@ CDrawTile *CGameContext::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 	if (rx <= 0 || rx >= Collision()->GetWidth()-1 || ry <= 0 || ry >= Collision()->GetHeight()-1)
 		return 0;
 
-	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0);
-	if (pDrawTile && pDrawTile->m_Collision == HasCollision && (
-		(BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) &&
-		(Index == -1 || pDrawTile->GetIndex() == Index) &&
-		(TuneNumber == -1 || pDrawTile->GetTuneNumber() == TuneNumber)
-	))
-		return pDrawTile;
+	CDrawTile *apEnts[3]; // game, front, tune is currently possible with draweditor
+	int Num = m_World.FindEntities(Pos, 14.0f, (CEntity **)apEnts, 3, CGameWorld::ENTTYPE_DRAWTILE);
+	for (int i = 0; i < Num; i++)
+	{
+		if (apEnts[i]->m_Collision == HasCollision && (
+			(BrushCID == -1 || apEnts[i]->m_BrushCID == BrushCID) &&
+			(Index == -1 || apEnts[i]->GetIndex() == Index) &&
+			(TuneNumber == -1 || apEnts[i]->GetTuneNumber() == TuneNumber)
+		))
+			return apEnts[i];
+	}
 	return 0;
 }
 
