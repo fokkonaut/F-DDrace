@@ -842,13 +842,17 @@ void CDrawEditor::SetSetting(int Setting)
 		}
 		else if (m_Category == CAT_TILEPLACE && LastSetting == TILEPLACE_ENTER_INDEX)
 		{
-			if (m_TilePlace.m_EnterIndex)
-			{
-				GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("Entering index aborted"));
-				m_TilePlace.m_EnterIndex = false;
-			}
+			AbortEnterIndex();
 		}
 	}
+}
+
+void CDrawEditor::AbortEnterIndex()
+{
+	if (!m_TilePlace.m_EnterIndex)
+		return;
+	GameServer()->SendChatTarget(GetCID(), m_pCharacter->GetPlayer()->Localize("Entering index aborted"));
+	m_TilePlace.m_EnterIndex = false;
 }
 
 CEntity *CDrawEditor::CreateEntity(bool Preview)
@@ -1361,6 +1365,7 @@ void CDrawEditor::OnWeaponSwitch()
 	{
 		RemovePreview();
 		StopTransform();
+		AbortEnterIndex();
 
 		int PlotID = GetPlotID();
 		if (CurrentPlotID() == PlotID)

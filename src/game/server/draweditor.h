@@ -155,6 +155,7 @@ class CDrawEditor
 
 	const char *GetTilePlaceIndex();
 	int GetTilePlaceTuneNumber();
+	void AbortEnterIndex();
 
 	void StopTransform(bool Silent = false);
 	bool RemoveEntity(CEntity *pEntity);
