@@ -7627,7 +7627,10 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds, int ModLogID)
 	pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
 	pPlayer->m_EscapeTime = 0;
 	if(pPlayer->GetCharacter())
+	{
 		pPlayer->KillCharacter(WEAPON_GAME);
+		pPlayer->Respawn();
+	}
 
 	// Force destroyendtick to be 1, so it can get resetted in the next tick and the owner gets the message aswell
 	int PlotID = GetPlotID(pPlayer->GetAccID());
