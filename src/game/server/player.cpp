@@ -1100,8 +1100,8 @@ void CPlayer::OnDisconnect()
 	{
 		m_pCharacter->DropMoney(GetWalletMoney());
 	}
-
-	if (m_JailTime || m_EscapeTime)
+	
+	if ((m_JailTime && !Server()->DnsblBlack(m_ClientID)) || m_EscapeTime)
 	{
 		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
 	}
