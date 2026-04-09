@@ -11,7 +11,12 @@
 CEventHandler::CEventHandler()
 {
 	m_pGameServer = 0;
-	Clear();
+	m_CurrentBuffer = 0;
+	for (int i = 0; i < NUM_BUFFERS; i++)
+	{
+		m_NumEvents[i] = 0;
+		m_CurrentOffset[i] = 0;
+	}
 }
 
 void CEventHandler::SetGameServer(CGameContext *pGameServer)
