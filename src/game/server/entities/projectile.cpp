@@ -135,13 +135,17 @@ void CProjectile::Tick()
 	{
 		IsWeaponCollide = true;
 	}
+
 	m_TeamMask = Mask128();
-	if (pOwnerChar && pOwnerChar->IsAlive())
+	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
+	if (pOwnerChar && pOwnerChar->IsAlive() && !IsPlotEdit)
 	{
 		m_TeamMask = pOwnerChar->TeamMask();
 	}
-	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath || GameServer()->Arenas()->FightStarted(m_Owner)))
+	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath
+		|| GameServer()->Arenas()->FightStarted(m_Owner) || IsPlotEdit))
 	{
+		// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
 		GameWorld()->DestroyEntity(this);
 		return;
 	}

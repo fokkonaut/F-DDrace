@@ -440,10 +440,12 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner)))
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
+	// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
+	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || IsPlotEdit))
 	{
-		CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-		if (!(pOwnerChar && pOwnerChar->IsAlive()))
+		if (!(pOwnerChar && pOwnerChar->IsAlive()) || IsPlotEdit)
 		{
 			Reset();
 		}
