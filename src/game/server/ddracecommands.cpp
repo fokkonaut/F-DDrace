@@ -1650,7 +1650,7 @@ void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUse
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Invalid tuning parameter");
 		}
 	}
-	else
+	else if (pChr->m_LockedTunings.size())
 	{
 		pChr->m_LockedTunings.clear();
 		pChr->ApplyLockedTunings();

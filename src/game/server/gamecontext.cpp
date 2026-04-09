@@ -3742,7 +3742,10 @@ void CGameContext::ConTuneLockReset(IConsole::IResult *pResult, void *pUserData)
 	{
 		pLockedTunings->clear();
 		pSelf->m_aaTuneLockMsg[List][0] = 0;
-		str_format(aBuf, sizeof(aBuf), "Reset all locked tunings and enter message for lock %d", List);
+		if (List == 0)
+			str_copy(aBuf, "Reset enter message for lock reset", sizeof(aBuf));
+		else
+			str_format(aBuf, sizeof(aBuf), "Reset all locked tunings and enter message for lock %d", List);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		return;
 	}
