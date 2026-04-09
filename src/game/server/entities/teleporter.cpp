@@ -77,11 +77,11 @@ void CTeleporter::Tick()
 {
 	if (!s_LastProcessTick || s_LastProcessTick != Server()->Tick())
 	{
-		if (Config()->m_SvLightTeleporters && Server()->Tick() % 2 == 0)
+		if (Config()->m_SvLightTeleporters)
 		{
 			if (s_CurrentDist < 32.f)
 			{
-				s_CurrentDist = clamp(s_CurrentDist+3.75f, 0.f, 32.f);
+				s_CurrentDist = clamp(s_CurrentDist+1.875f, 0.f, 32.f);
 			}
 			else
 			{

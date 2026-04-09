@@ -77,13 +77,10 @@ void CSpeedup::SetAngle(int Angle)
 
 void CSpeedup::Tick()
 {
-	if (Server()->Tick() % 2 == 0)
-	{
-		if (m_CurrentDist < m_Distance)
-			m_CurrentDist = clamp(m_CurrentDist+3.25f, 0.f, m_Distance);
-		else
-			m_CurrentDist = 0.f;
-	}
+	if (m_CurrentDist < m_Distance)
+		m_CurrentDist = clamp(m_CurrentDist+1.625f, 0.f, m_Distance);
+	else
+		m_CurrentDist = 0.f;
 }
 
 void CSpeedup::Snap(int SnappingClient)
