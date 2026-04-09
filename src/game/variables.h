@@ -359,7 +359,7 @@ MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_S
 // discord
 MACRO_CONFIG_STR(SvDiscordURL, sv_discord_url, 128, "", CFGFLAG_SERVER, "Discord server URL", AUTHED_ADMIN)
 
-// antibo
+// antibot
 MACRO_CONFIG_INT(SvAntibotThreshold, sv_antibot_threshold, 0, 0, 64, CFGFLAG_SERVER, "Threshold for antibot autoban (0=off)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotAutoAction, sv_antibot_auto_action, 1, 0, 2, CFGFLAG_SERVER, "Automatic antibot action (0=off, 1=jail, 2=ban)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotAutoActionTime, sv_antibot_auto_action_time, 900, 0, 99999, CFGFLAG_SERVER, "Time for sv_antibot_auto_action (if 1: jail seconds, if 2: ban minutes)", AUTHED_ADMIN)
@@ -367,6 +367,17 @@ MACRO_CONFIG_INT(SvAntibotReportsLevel, sv_antibot_reports_level, AUTHED_ADMIN, 
 MACRO_CONFIG_INT(SvAntibotLogPending, sv_antibot_log_pending, 1, 0, 1, CFGFLAG_SERVER, "Whether pending antibot reports are logged", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvAntibotSkipKinds, sv_antibot_skip_kinds, 256, "", CFGFLAG_SERVER, "Antibot skip kinds list", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAntibotSkipDummyHammer, sv_antibot_skip_dummy_hammer, 0, 0, 1, CFGFLAG_SERVER, "Whether antibot tries to ignore dummy hammerfly", AUTHED_ADMIN)
+
+// DNSBL
+MACRO_CONFIG_INT(SvDnsbl, sv_dnsbl, 0, 0, 1, CFGFLAG_SERVER, "Enable DNSBL (DNS-based Blackhole List)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvDnsblHost, sv_dnsbl_host, 128, "", CFGFLAG_SERVER, "Hostname of DNSBL provider to use for IP Verification", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvDnsblKey, sv_dnsbl_key, 128, "", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "Optional Authentication Key for the specified DNSBL provider", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblVote, sv_dnsbl_vote, 0, 0, 1, CFGFLAG_SERVER, "Block votes by blacklisted addresses", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblBan, sv_dnsbl_ban, 0, 0, 1, CFGFLAG_SERVER, "Automatically ban blacklisted addresses", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvDnsblBanReason, sv_dnsbl_ban_reason, 128, "VPN detected, try connecting without. Contact admin if mistaken", CFGFLAG_SERVER, "Ban/jail reason for 'sv_dnsbl_ban/sv_dnsbl_jail'", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblChat, sv_dnsbl_chat, 0, 0, 1, CFGFLAG_SERVER, "Don't allow chat from blacklisted addresses", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblJail, sv_dnsbl_jail, 0, 0, 1, CFGFLAG_SERVER, "Automatically jail blacklisted addresses", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblCache, sv_dnsbl_cache, 0, 0, 1, CFGFLAG_SERVER, "Whether black and whitelisted address results are cached for 36 hours", AUTHED_ADMIN)
 
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)

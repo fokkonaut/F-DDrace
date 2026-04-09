@@ -1464,6 +1464,29 @@ void CGameContext::OnTick()
 				continue;
 			}
 
+			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i))
+			{
+				int Seconds = 60 * 60 * 24; // Jail a day, basically infinite
+				if (pPlayer->m_JailTime)
+				{
+					// Update jail timer upon reconnecting
+					pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
+				}
+				else if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
+				{
+					char aBuf[256];
+					SendChatPoliceFormat(Localizable("'%s' has been arrested for using a VPN (%d seconds arrest)"), Server()->ClientName(i), Seconds);
+					str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You were arrested for %d seconds"), Seconds);
+					if (Config()->m_SvDnsblBanReason[0])
+					{
+						char aReason[132];
+						str_format(aReason, sizeof(aReason), " (%s)", Config()->m_SvDnsblBanReason);
+						str_append(aBuf, aReason, sizeof(aBuf));
+					}
+					SendChatTarget(i, aBuf);
+				}
+			}
+
 			// send vote options
 			ProgressVoteOptions(i);
 
@@ -1505,6 +1528,10 @@ void CGameContext::OnTick()
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
 					if(!m_apPlayers[i] || m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS || aVoteChecked[i])	// don't count in votes by spectators
+						continue;
+
+					// don't count votes by blacklisted clients
+					if(Config()->m_SvDnsblVote && !m_pServer->DnsblWhite(i))
 						continue;
 
 					int ActVote = m_apPlayers[i]->m_Vote;
@@ -5260,6 +5287,11 @@ int CGameContext::ProcessSpamProtection(int ClientID)
 	if(Config()->m_SvSpamprotection && m_apPlayers[ClientID]->m_LastChat
 		&& m_apPlayers[ClientID]->m_LastChat + Server()->TickSpeed() * Config()->m_SvChatDelay > Server()->Tick())
 		return 1;
+	else if(Config()->m_SvDnsblChat && Server()->DnsblBlack(ClientID))
+	{
+		SendChatTarget(ClientID, m_apPlayers[ClientID]->Localize("Players are not allowed to chat from VPNs at this time"));
+		return 1;
+	}
 	else
 		m_apPlayers[ClientID]->m_LastChat = Server()->Tick();
 	NETADDR Addr;
@@ -5402,6 +5434,20 @@ bool CGameContext::RateLimitPlayerVote(int ClientID)
 	{
 		SendChatTarget(ClientID, pPlayer->Localize("You can only vote after logging in."));
 		return true;
+	}
+
+	if(Config()->m_SvDnsblVote)
+	{
+		if(m_pServer->DnsblPending(ClientID))
+		{
+			SendChatTarget(ClientID, m_apPlayers[ClientID]->Localize("You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds."));
+			return true;
+		}
+		else if(m_pServer->DnsblBlack(ClientID))
+		{
+			SendChatTarget(ClientID, m_apPlayers[ClientID]->Localize("You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake."));
+			return true;
+		}
 	}
 
 	if(m_VoteCloseTime)

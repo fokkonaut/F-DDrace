@@ -55,6 +55,10 @@ public:
 	virtual void GetClientAddr(int ClientID, NETADDR* pAddr) = 0;
 	virtual const char* GetAnnouncementLine(char const* FileName) = 0;
 
+	virtual bool DnsblWhite(int ClientId) = 0;
+	virtual bool DnsblPending(int ClientId) = 0;
+	virtual bool DnsblBlack(int ClientId) = 0;
+
 	virtual void SendWebhookMessage(const char *pURL, const char *pMessage, const char *pUsername = "", const char *pAvatarURL = "") = 0;
 
 	virtual const char *GetAuthIdent(int ClientID) = 0;

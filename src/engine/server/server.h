@@ -264,7 +264,7 @@ public:
 			char m_aCommand[512];
 		};
 		int m_DnsblState;
-		std::shared_ptr<CDnsblLookup> m_pDnsblLookup;
+		std::shared_ptr<IJob> m_pDnsblLookup; // CDnsblLookup or CHostLookup
 
 		class CPgscLookup : public IJob
 		{
@@ -601,6 +601,20 @@ public:
 		std::vector<NETADDR> m_vBlacklist;
 		std::vector<NETADDR> m_vWhitelist;
 	} m_DnsblCache;
+
+	bool DnsblWhite(int ClientId) override
+	{
+		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE ||
+		       m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_WHITELISTED;
+	}
+	bool DnsblPending(int ClientId) override
+	{
+		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING;
+	}
+	bool DnsblBlack(int ClientId) override
+	{
+		return m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
+	}
 
 	// white list in case iphub.info falsely flagged someone or to whitelist a server ip in case no proxy game server string is set and someone falsely got banned as "proxy game server"
 	struct SWhitelist

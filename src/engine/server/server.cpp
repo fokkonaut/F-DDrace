@@ -2982,7 +2982,9 @@ int CServer::Run()
 					continue;
 
 				// vpn/proxy detection
-				if (Config()->m_SvIPHubXKey[0])
+				bool UseIpHub = Config()->m_SvIPHubXKey[0];
+				bool UseDnsbl = Config()->m_SvDnsbl;
+				if (UseIpHub || UseDnsbl)
 				{
 					if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
 					{
@@ -2991,11 +2993,26 @@ int CServer::Run()
 					}
 					else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 					{
-						if(m_aClients[i].m_pDnsblLookup->m_Result == 1) // only return on 1, not on 2 as that might be a false positive
+						bool ResultBlocked = false;
+						if (UseDnsbl)
+						{
+							std::shared_ptr<CHostLookup> pLookup = std::dynamic_pointer_cast<CHostLookup>(m_aClients[i].m_pDnsblLookup);
+							ResultBlocked = pLookup && pLookup->m_Result == 0;
+						}
+						else if (UseIpHub)
+						{
+							std::shared_ptr<CClient::CDnsblLookup> pLookup = std::dynamic_pointer_cast<CClient::CDnsblLookup>(m_aClients[i].m_pDnsblLookup);
+							ResultBlocked = pLookup && pLookup->m_Result == 1; // only return on 1, not on 2 as that might be a false positive
+						}
+
+						if(ResultBlocked)
 						{
 							// bad ip -> blacklisted
 							m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
-							m_DnsblCache.m_vBlacklist.push_back(*m_NetServer.ClientAddr(i));
+							if (Config()->m_SvDnsblCache)
+							{
+								m_DnsblCache.m_vBlacklist.push_back(*m_NetServer.ClientAddr(i));
+							}
 
 							// console output
 							char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -3004,17 +3021,22 @@ int CServer::Run()
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> blacklisted", i, aAddrStr);
 							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
+
+							if (Config()->m_SvDnsblBan)
+							{
+								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, Config()->m_SvDnsblBanReason);
+							}
 						}
 						else
 						{
 							// good ip -> whitelisted
 							m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
-							m_DnsblCache.m_vWhitelist.push_back(*m_NetServer.ClientAddr(i));
+							if (Config()->m_SvDnsblCache)
+							{
+								m_DnsblCache.m_vWhitelist.push_back(*m_NetServer.ClientAddr(i));
+							}
 						}
 					}
-
-					if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED)
-						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, "VPN detected, try connecting without. Contact admin if mistaken");
 				}
 
 				// proxy game server detection
@@ -4673,15 +4695,44 @@ void CServer::InitDnsbl(int ClientID)
 		}
 	}
 
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
-
-	char aBuf[512];
-	str_format(aBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
-
+	NETADDR Addr = *m_NetServer.ClientAddr(ClientID);
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CClient::CDnsblLookup>(aBuf));
-	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+
+	if (Config()->m_SvDnsbl)
+	{
+		//TODO: support ipv6
+		if(Addr.type != NETTYPE_IPV4)
+			return;
+
+		// build dnsbl host lookup
+		char aBuf[256];
+		if(Config()->m_SvDnsblKey[0] == '\0')
+		{
+			// without key
+			str_format(aBuf, sizeof(aBuf), "%d.%d.%d.%d.%s", Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
+		}
+		else
+		{
+			// with key
+			str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", Config()->m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
+		}
+
+		m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
+		pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup);
+		m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+	}
+	else if (Config()->m_SvIPHubXKey[0])
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), false);
+
+		char aBuf[512];
+		str_format(aBuf, 512, "curl -s http://v2.api.iphub.info/ip/%s -H \"X-Key: %s\"", aAddrStr, Config()->m_SvIPHubXKey);
+
+		IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
+		pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CClient::CDnsblLookup>(aBuf));
+		m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+	}
 }
 
 void CServer::CTranslateChat::Run()
