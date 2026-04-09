@@ -219,6 +219,7 @@ void CPlayer::Reset()
 	m_SkipSetViewPos = 0;
 
 	m_BotDetected = false;
+	m_ProcessedDnsblJail = false;
 
 	// Set this to MINIGAME_NONE so we dont have a timer when we want to leave a minigame, just when we enter
 	m_RequestedMinigame = MINIGAME_NONE;

@@ -444,6 +444,7 @@ public:
 	bool m_aMuted[MAX_CLIENTS];
 
 	bool m_BotDetected;
+	bool m_ProcessedDnsblJail;
 
 	// ddrace hud
 	bool ShowDDraceHud();

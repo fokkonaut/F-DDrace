@@ -1464,15 +1464,10 @@ void CGameContext::OnTick()
 				continue;
 			}
 
-			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i))
+			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i) && !pPlayer->m_ProcessedDnsblJail)
 			{
 				int Seconds = 60 * 60 * 24; // Jail a day, basically infinite
-				if (pPlayer->m_JailTime)
-				{
-					// Update jail timer upon reconnecting
-					pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
-				}
-				else if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
+				if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
 				{
 					char aBuf[256];
 					SendChatPoliceFormat(Localizable("'%s' has been arrested for using a VPN (%d seconds arrest)"), Server()->ClientName(i), Seconds);
@@ -1484,6 +1479,7 @@ void CGameContext::OnTick()
 						str_append(aBuf, aReason, sizeof(aBuf));
 					}
 					SendChatTarget(i, aBuf);
+					pPlayer->m_ProcessedDnsblJail = true;
 				}
 			}
 
