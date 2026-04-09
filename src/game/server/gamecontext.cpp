@@ -6080,7 +6080,7 @@ CDrawTile *CGameContext::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 	if (rx <= 0 || rx >= Collision()->GetWidth()-1 || ry <= 0 || ry >= Collision()->GetHeight()-1)
 		return 0;
 
-	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0, false);
+	CDrawTile *pDrawTile = (CDrawTile *)m_World.ClosestEntity(Pos, 14.f, CGameWorld::ENTTYPE_DRAWTILE, 0);
 	if (pDrawTile && pDrawTile->m_Collision == HasCollision && (
 		(BrushCID == -1 || pDrawTile->m_BrushCID == BrushCID) &&
 		(Index == -1 || pDrawTile->GetIndex() == Index) &&

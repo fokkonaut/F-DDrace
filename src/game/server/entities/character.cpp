@@ -964,7 +964,10 @@ void CCharacter::FireWeapon()
 				if (!m_pTelekinesisEntity)
 				{
 					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
-					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f * max(1.f, m_pPlayer->GetZoomLevel()), Types, this, m_pPlayer->GetCID(), !m_Passive);
+					int Flags = CGameWorld::EFindEntFlag::IN_HELICOPTER;
+					if (!m_Passive)
+						Flags |= CGameWorld::EFindEntFlag::PASSIVE;
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f * max(1.f, m_pPlayer->GetZoomLevel()), Types, this, m_pPlayer->GetCID(), Flags);
 
 					CCharacter *pChr = 0;
 					CFlag *pFlag = 0;
@@ -1034,6 +1037,7 @@ void CCharacter::FireWeapon()
 				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START && Config()->m_SvPortalThroughDoor;
 				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
+				int Flags = CGameWorld::EFindEntFlag::WALL | CGameWorld::EFindEntFlag::IN_HELICOPTER;
 				if (!Found
 					|| (pAccount->m_PortalRifle && !m_pPlayer->m_aSecurityPin[0])
 					|| (BatteryRequired && !pAccount->m_PortalBattery)
@@ -1043,7 +1047,7 @@ void CCharacter::FireWeapon()
 					|| GameLayerClipped(PortalPos)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
 					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
-					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), false, true) // dont allow to place portals too close to other tees
+					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), -1, Flags) // dont allow to place portals too close to other tees
 					)
 				{
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
@@ -5830,7 +5834,7 @@ bool CCharacter::TryMountHelicopter()
 	if (!CanSwitchSeats())
 		return true;
 
-	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, nullptr, true, Team());
+	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, nullptr, Team(), true);
 	return pHelicopter && pHelicopter->Mount(m_pPlayer->GetCID());
 }
 

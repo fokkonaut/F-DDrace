@@ -56,7 +56,8 @@ void CMoney::Tick()
 	bool PickupDelayOver = SecondsPassed(Config()->m_SvDropsPickupDelay / 1000.f);
 	if (!m_GlobalPickupDelay || PickupDelayOver)
 	{
-		pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, PickupDelayOver ? 0 : GetOwner(), -1, false, true, false, m_DDTeam);
+		int Flags = CGameWorld::EFindEntFlag::WALL | CGameWorld::EFindEntFlag::IN_HELICOPTER;
+		pClosest = GameWorld()->ClosestCharacter(m_Pos, RADIUS_FIND_PLAYERS, PickupDelayOver ? 0 : GetOwner(), -1, m_DDTeam, Flags);
 		if (pClosest)
 		{
 			if (distance(m_Pos, pClosest->GetPos()) < GetRadius() + pClosest->GetProximityRadius())
@@ -78,7 +79,7 @@ void CMoney::Tick()
 		}
 	}
 
-	CMoney *pMoney = (CMoney *)GameWorld()->ClosestEntity(m_Pos, RADIUS_FIND_MONEY, CGameWorld::ENTTYPE_MONEY, this, true, m_DDTeam);
+	CMoney *pMoney = (CMoney *)GameWorld()->ClosestEntity(m_Pos, RADIUS_FIND_MONEY, CGameWorld::ENTTYPE_MONEY, this, m_DDTeam, true);
 	if (pMoney && !pMoney->IsMarkedForDestroy())
 	{
 		if (distance(m_Pos, pMoney->GetPos()) < GetRadius() + pMoney->GetRadius())

@@ -30,7 +30,7 @@ void CDummyChillBlock5Police::OnTick()
 		}
 	}
 
-	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID());
+	CCharacter *pChr = GameWorld()->ClosestCharacterMode(GetPos(), m_pCharacter, m_pPlayer->GetCID());
 	if (pChr && pChr->IsAlive())
 	{
 		if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel) //police

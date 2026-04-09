@@ -861,7 +861,7 @@ CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 }
 
 
-CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, bool CheckWall, int Team)
+CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, int Team, bool CheckWall)
 {
 	// Find other players
 	float ClosestRange = Radius*2;
@@ -898,8 +898,14 @@ CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pN
 	return pClosest;
 }
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, bool CheckPassive, bool CheckWall, bool CheckMinigameTee, int Team, bool CheckDrivers)
+CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotThis, int CollideWith, int Team, int Flags)
 {
+	// Default flags if nothing is specified
+	if (Flags == -1)
+	{
+		Flags = EFindEntFlag::PASSIVE | EFindEntFlag::IN_HELICOPTER;
+	}
+
 	// Find other players
 	float ClosestRange = Radius * 2;
 	CCharacter* pClosest = 0;
@@ -913,14 +919,14 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (Team != -1 && Team != p->Team())
 			continue;
 
-		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, Flags & EFindEntFlag::PASSIVE))
 			continue;
 
-		if (CheckDrivers && p->m_pHelicopter)
+		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pHelicopter)
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
-		if (CheckMinigameTee && p->GetPlayer()->IsMinigame() && p->GetPlayer()->m_SavedMinigameTee)
+		if (Flags & EFindEntFlag::MINIGAME_TEE && p->GetPlayer()->IsMinigame() && p->GetPlayer()->m_SavedMinigameTee)
 		{
 			float LenMinigame = distance(Pos, p->GetPlayer()->m_MinigameTee.GetPos());
 			if (LenMinigame < Len)
@@ -931,7 +937,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		{
 			if (Len < ClosestRange)
 			{
-				if (CheckWall && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
+				if (Flags & EFindEntFlag::WALL && GameServer()->Collision()->IntersectLine(Pos, p->GetPos(), 0, 0))
 					continue;
 
 				ClosestRange = Len;
@@ -986,7 +992,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 
 // F-DDrace
 
-CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith, int Mode)
+CCharacter* CGameWorld::ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int CollideWith, int Mode)
 {
 	// Find other players
 	float ClosestRange = 0.f;
@@ -1093,7 +1099,7 @@ int CGameWorld::GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, i
 	return pClosest ? pClosest->GetPlayer()->GetCID() : GameServer()->GetHouseDummy(Type);
 }
 
-CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith, bool CheckPassive, bool CheckDrivers)
+CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith, int Flags)
 {
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
@@ -1102,13 +1108,13 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEn
 
 		if (i == ENTTYPE_CHARACTER)
 		{
-			CCharacter* pChr = ClosestCharacter(Pos, Radius, pNotThis, CollideWith, CheckPassive, false, false, -1, CheckDrivers);
+			CCharacter* pChr = ClosestCharacter(Pos, Radius, pNotThis, CollideWith, -1, Flags);
 			if (pChr)
 				return pChr;
 		}
 		else
 		{
-			CEntity* pEntity = ClosestEntity(Pos, Radius, i, pNotThis);
+			CEntity* pEntity = ClosestEntity(Pos, Radius, i, pNotThis, -1, Flags & EFindEntFlag::WALL);
 			if (pEntity)
 				return pEntity;
 		}
@@ -1150,13 +1156,20 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 	return Num;
 }
 
-CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types, CCharacter *pThisOnly, bool CheckPlotTaserDestroy, bool PlotDoorOnly, bool CheckDrivers)
+CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types, CCharacter *pThisOnly, int Flags)
 {
+	if (Flags == -1)
+	{
+		Flags = EIntersectEntTypesFlag::TEE_IN_HELICOPTER;
+	}
+
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
 	CEntity *pClosest = 0;
 
 	int Team = CollideWith == -1 ? 0 : GameServer()->GetDDRaceTeam(CollideWith);
+	bool CheckPlotTaserDestroy = Flags & EIntersectEntTypesFlag::PLOT_TASER_DESTROY;
+
 	for (int i = 0; i < NUM_ENTTYPES; i++)
 	{
 		if (!(Types&(1ULL<<i)))
@@ -1175,7 +1188,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (pThisOnly && p != pThisOnly)
 					continue;
 
-				if (i == ENTTYPE_CHARACTER && CheckDrivers && ((CCharacter *)p)->m_pHelicopter)
+				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::TEE_IN_HELICOPTER && ((CCharacter *)p)->m_pHelicopter)
 					continue;
 
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
@@ -1209,7 +1222,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (i == ENTTYPE_DOOR)
 				{
 					bool IsPlotDoor = p->IsPlotDoor();
-					if (p->m_BrushCID != -1 || p->m_TransformCID != -1 || (PlotDoorOnly && !IsPlotDoor))
+					if (p->m_BrushCID != -1 || p->m_TransformCID != -1 || (Flags & EIntersectEntTypesFlag::PLOT_DOOR_ONLY && !IsPlotDoor))
 						continue;
 
 					CDoor *pDoor = (CDoor *)p;
@@ -1244,8 +1257,6 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 			if (closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
 			{
 				float Len = distance(p->m_Pos, IntersectPos);
-//				dbg_msg("findentities", "%f", ProximityRadius+Radius);
-//				this is the function that looks for the heli right
 				if(Len < ProximityRadius+Radius)
 				{
 					Len = distance(Pos0, IntersectPos);

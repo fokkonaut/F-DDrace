@@ -26,7 +26,7 @@ void CDummyHouse::OnTick()
 	default: return;
 	}
 
-	CCharacter *pChr = GameWorld()->ClosestCharacter(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 9);
+	CCharacter *pChr = GameWorld()->ClosestCharacterMode(GetPos(), m_pCharacter, m_pPlayer->GetCID(), 9);
 	if (pChr && GameServer()->m_pHouses[Type]->IsInside(pChr->GetPlayer()->GetCID()))
 	{
 		AimPos(pChr->GetPos());

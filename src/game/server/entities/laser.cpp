@@ -69,8 +69,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	bool CheckPlotTaserDestroy = false;
-	bool PlotDoorOnly = true;
+	int IntersectEntTypesFlags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_HELICOPTER | CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
 	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 	if (m_Type == WEAPON_SHOTGUN)
 	{
@@ -92,15 +91,15 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			if (pAccount->m_PoliceLevel >= 4)
 			{
 				Types |= (1<<CGameWorld::ENTTYPE_DOOR);
-				CheckPlotTaserDestroy = true;
+				IntersectEntTypesFlags |= CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY;
 			}
 			if (pAccount->m_PoliceLevel >= 5)
 			{
 				Types |= (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
 					(1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
-				CheckPlotTaserDestroy = true;
+				IntersectEntTypesFlags |= CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY;
 				// Allow only tasering the door with police 4. police 5 can also destroy objects ON the plot
-				PlotDoorOnly = false;
+				IntersectEntTypesFlags &= ~CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
 			}
 		}
 	}
@@ -116,9 +115,9 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	CEntity *pIntersected = 0;
 
 	if (pOwnerChar ? (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE) && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (!(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN) && m_Type == WEAPON_SHOTGUN) : Config()->m_SvHit)
-		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types, 0, CheckPlotTaserDestroy, PlotDoorOnly);
+		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types, 0, IntersectEntTypesFlags);
 	else
-		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types, pOwnerChar, CheckPlotTaserDestroy, PlotDoorOnly);
+		pIntersected = GameWorld()->IntersectEntityTypes(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, Types, pOwnerChar, IntersectEntTypesFlags);
 
 	bool IsCharacter = false;
 	if (pIntersected)
@@ -141,7 +140,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		}
 	}
 
-	bool IsPlotTaser = CheckPlotTaserDestroy && pIntersected && pIntersected->m_PlotID >= PLOT_START;
+	bool IsPlotTaser = IntersectEntTypesFlags & CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY && pIntersected && pIntersected->m_PlotID >= PLOT_START;
 	if (!IsPlotTaser)
 	{
 		if ((!IsCharacter && !pEnt) || ((IsCharacter && !pChr) || (IsCharacter && pChr == pOwnerChar && Config()->m_SvOldLaser) || (pChr != pOwnerChar && pOwnerChar ? (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_RIFLE && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_SHOTGUN && m_Type == WEAPON_SHOTGUN) : !Config()->m_SvHit)))

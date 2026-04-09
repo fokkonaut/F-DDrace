@@ -261,7 +261,7 @@ public:
 		Returns:
 			Returns a pointer to the closest CEntity or NULL if no CEntity is close enough.
 	*/
-	CEntity *ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, bool CheckWall = false, int Team = -1);
+	CEntity *ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, int Team = -1, bool CheckWall = false);
 
 	/*
 		Function: interserct_CCharacter
@@ -279,6 +279,15 @@ public:
 	*/
 	class CCharacter* IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, class CCharacter* pNotThis = 0, int CollideWith = -1, class CCharacter* pThisOnly = 0);
 
+
+	enum EFindEntFlag
+	{
+		PASSIVE = 1<<0,
+		WALL = 1<<1,
+		MINIGAME_TEE = 1<<2,
+		IN_HELICOPTER = 1<<3,
+	};
+
 	/*
 		Function: closest_CCharacter
 			Finds the closest CCharacter to a specific point.
@@ -291,7 +300,7 @@ public:
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckWall = false, bool CheckMinigameTee = false, int Team = -1, bool CheckDrivers = true);
+	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1, int Team = -1, int Flags = -1);
 
 	/*
 		Function: insert_entity
@@ -362,14 +371,20 @@ public:
 	*/
 	std::list<class CCharacter*> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity* pNotThis = 0, int CollideWith = -1);
 
-	class CCharacter* ClosestCharacter(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
+	class CCharacter* ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int CollideWith = -1, int Mode = 0);
 	int GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith = -1);
 
-	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2...
-	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith = -1, bool CheckPassive = true, bool CheckDrivers = true);
+	// when defining the Types, add them bitwise: 1 << TYPE | 1 << TYPE2... (or 1ULL << TYPE32 for types over 31)
+	CEntity *ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEntity *pNotThis, int CollideWith = -1, int Flags = -1);
 	int FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team = -1);
-	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types,
-		CCharacter *pThisOnly = nullptr, bool CheckPlotTaserDestroy = false, bool PlotDoorOnly = false, bool CheckDrivers = true);
+
+	enum EIntersectEntTypesFlag
+	{
+		PLOT_TASER_DESTROY = 1<<0,
+		PLOT_DOOR_ONLY = 1<<1,
+		TEE_IN_HELICOPTER = 1<<2,
+	};
+	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types, CCharacter *pThisOnly = nullptr, int Flags = -1);
 	bool IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1);
 	int IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDoors, int Max);
 };

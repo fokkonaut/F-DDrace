@@ -1286,7 +1286,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 				if (m_pControlledTee && m_pControlledTee->m_pCharacter)
 					pNotThis = m_pControlledTee->m_pCharacter;
 
-				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestCharacter(m_ViewPos, 6.0f*32, pNotThis, -1, true, false, true); // also allow minigame spec chars to be chosen
+				int Flags = CGameWorld::EFindEntFlag::MINIGAME_TEE | CGameWorld::EFindEntFlag::IN_HELICOPTER;
+				CCharacter *pChar = (CCharacter *)GameServer()->m_World.ClosestCharacter(m_ViewPos, 6.0f*32, pNotThis, -1, -1, Flags); // also allow minigame spec chars to be chosen
 				CFlag *pFlag = (CFlag *)GameServer()->m_World.ClosestEntity(m_ViewPos, 6.0f*32, CGameWorld::ENTTYPE_FLAG, 0);
 				if(pChar || pFlag)
 				{
