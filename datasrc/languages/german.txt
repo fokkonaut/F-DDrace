@@ -2176,13 +2176,13 @@ You won this 1vs1 round! Your earnings: +%lld money.
 == Du hast diese 1vs1-Runde gewonnen! Dein Gewinn: +%lld Geld.
 
 '%s' has been arrested for using a VPN (%d seconds arrest)
-== 
+== '%s' wurde wegen der Nutzung eines VPNs verhaftet (%d Sekunden Haft)
 
 Players are not allowed to chat from VPNs at this time
-== 
+== Spieler dürfen zurzeit nicht über VPNs chatten
 
 You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
-== 
+== Du kannst momentan nicht abstimmen, da wir gerade auf VPNs prüfen. Versuche es in ~30 Sekunden erneut.
 
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
-== 
+== Du kannst nicht abstimmen, da du anscheinend ein VPN verwendest. Verbinde dich ohne VPN oder kontaktiere einen Admin, falls du denkst, dass dies ein Fehler ist.
