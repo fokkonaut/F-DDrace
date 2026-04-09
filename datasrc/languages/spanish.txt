@@ -855,6 +855,9 @@ Preset loading aborted
 You were arrested for %d seconds for using a suspicious client. Try using official DDNet client or disable dummy hammerfly.
 == 
 
+'%s' has been arrested for using a VPN (%d seconds arrest)
+== 
+
 Vote aborted
 == 
 
@@ -1005,6 +1008,9 @@ Local chat mode has been disabled, automatically entered public chat
 Automatic wallet to bank due to bank disabling
 == 
 
+Players are not allowed to chat from VPNs at this time
+== 
+
 You are not permitted to talk for the next %d seconds.
 == 
 
@@ -1015,6 +1021,12 @@ Listing all players:
 == 
 
 You can only vote after logging in.
+== 
+
+You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
+== 
+
+You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
 == 
 
 Wait for current vote to end before calling a new one.

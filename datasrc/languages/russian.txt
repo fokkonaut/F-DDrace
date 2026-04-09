@@ -2174,3 +2174,15 @@ Fight cancelled, someone couldn't pay the stake.
 
 You won this 1vs1 round! Your earnings: +%lld money.
 == Вы выиграли этот раунд 1на1! Ваш выигрыш: +%lld денег.
+
+'%s' has been arrested for using a VPN (%d seconds arrest)
+== 
+
+Players are not allowed to chat from VPNs at this time
+== 
+
+You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
+== 
+
+You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
+== 
