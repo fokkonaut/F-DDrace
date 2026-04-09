@@ -4956,6 +4956,9 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 	{
 		ForceSetPos(GameServer()->m_aPlots[PlotID].m_ToTele);
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);
+
+		// in case there is a safearea tile on the plot and owner starts editing, we dont want people being outside with safe area
+		SetSafeArea(false, true);
 	}
 }
 

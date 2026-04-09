@@ -21,6 +21,8 @@ void CSaveTee::TeleOutOfPlot(vec2 ToTele)
 {
 	m_Pos = m_PrevPos = m_CorePos = ToTele;
 	StopPlotEditing();
+	// in case there is a safearea tile on the plot and owner starts editing, we dont want people being outside with safe area
+	m_InSafeArea = false;
 }
 
 void CSaveTee::StopPlotEditing()
