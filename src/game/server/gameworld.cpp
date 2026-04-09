@@ -903,7 +903,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 	// Default flags if nothing is specified
 	if (Flags == -1)
 	{
-		Flags = EFindEntFlag::PASSIVE | EFindEntFlag::IN_HELICOPTER;
+		Flags = EFindEntFlag::PASSIVE | EFindEntFlag::IN_HELICOPTER | EFindEntFlag::SAFE_AREA;
 	}
 
 	// Find other players
@@ -919,7 +919,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (Team != -1 && Team != p->Team())
 			continue;
 
-		if (CollideWith != -1 && !p->CanCollide(CollideWith, Flags & EFindEntFlag::PASSIVE))
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, Flags & EFindEntFlag::PASSIVE, Flags & EFindEntFlag::SAFE_AREA))
 			continue;
 
 		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pHelicopter)

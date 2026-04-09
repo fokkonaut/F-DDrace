@@ -286,6 +286,7 @@ public:
 		WALL = 1<<1,
 		MINIGAME_TEE = 1<<2,
 		IN_HELICOPTER = 1<<3,
+		SAFE_AREA = 1<<4,
 	};
 
 	/*
