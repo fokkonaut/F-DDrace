@@ -579,7 +579,7 @@ You can set one of the following languages by using '/chatlanguage <option>':
 == Вы можете установить один из следующих языков, используя '/chatlanguage <вариант>':
 
 This server does not have a linked Discord server
-== У этого сервер связанного Discord-сервера
+== У этого сервера нет связанного Discord-сервера
 
 Minigames
 == Мини-игры
