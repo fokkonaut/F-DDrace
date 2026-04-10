@@ -734,7 +734,7 @@ int CSaveTee::LoadString(const char *pString)
 	{
 	case 91:
 		return 0;
-	case 254: // F-DDrace extra vars
+	case 255: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

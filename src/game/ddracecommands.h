@@ -132,7 +132,7 @@ CONSOLE_COMMAND("whois", "i[mode] i[cutoff] r[name]", CFGFLAG_SERVER, ConWhoIs, 
 CONSOLE_COMMAND("whoisid", "i[mode] i[cutoff] v[id]", CFGFLAG_SERVER, ConWhoIsID, this, "Mode 0=ip, 1=name, cutoff 0=direct, 1=/24, 2=/16", AUTHED_ADMIN)
 
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
-CONSOLE_COMMAND("whitelist_add", "s[ip] ?s[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
+CONSOLE_COMMAND("whitelist_add", "s[ip] ?r[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist_remove", "s[ip/index]", CFGFLAG_SERVER, ConWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whitelist for DNSBL/PGSC/Antibot", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist_save", "", CFGFLAG_SERVER, ConWhitelistSave, this, "Save whitelist to sv_whitelist_file", AUTHED_ADMIN)
