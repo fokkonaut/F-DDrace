@@ -2875,7 +2875,7 @@ void CPlayer::SetLanguage(int Language, bool Silent, bool UpdateDummy)
 void CPlayer::UpdateDoubleXpLifes()
 {
 	m_DoubleXpLifesLeft--;
-	char aBuf[64];
+	char aBuf[128];
 	if (m_DoubleXpLifesLeft > 0)
 		str_format(aBuf, sizeof(aBuf), Localize("You have %dx double-xp life left"), m_DoubleXpLifesLeft);
 	else

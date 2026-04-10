@@ -2176,13 +2176,13 @@ You won this 1vs1 round! Your earnings: +%lld money.
 == Вы выиграли этот раунд 1на1! Ваш выигрыш: +%lld денег.
 
 '%s' has been arrested for using a VPN (%d seconds arrest)
-== 
+== '%s' был арестован за использование VPN (%d секунд ареста)
 
 Players are not allowed to chat from VPNs at this time
-== 
+== В настоящее время игрокам запрещено общаться в чате используя VPN.
 
 You are not allowed to vote because we're currently checking for VPNs. Try again in ~30 seconds.
-== 
+== Вы не можете голосовать, потому что в сейчас мы проверяем наличие VPN-подключений. Попробуйте еще раз примерно через 30 секунд.
 
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
-== 
+== Вам не разрешено голосовать, потому что, похоже, вы используете VPN. Попробуйте подключиться без VPN или свяжитесь с администратором, если считаете, что это ошибка.
