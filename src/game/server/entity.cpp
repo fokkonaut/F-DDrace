@@ -43,9 +43,9 @@ bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos, bool CheckShowAl
 	return ::NetworkClipped(GameServer(), SnappingClient, CheckPos, m_PlotID, CheckShowAll, DefaultRange);
 }
 
-bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos, bool CheckShowAll)
+bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos, bool CheckShowAll, bool DefaultRange)
 {
-	return ::NetworkClippedLine(GameServer(), SnappingClient, StartPos, EndPos, m_PlotID, CheckShowAll);
+	return ::NetworkClippedLine(GameServer(), SnappingClient, StartPos, EndPos, m_PlotID, CheckShowAll, DefaultRange);
 }
 
 bool CEntity::GameLayerClipped(vec2 CheckPos)
@@ -117,13 +117,15 @@ bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 Ch
 	return 0;
 }
 
-bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos, int PlotID, bool CheckShowAll)
+bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos, int PlotID, bool CheckShowAll, bool DefaultRange)
 {
 	if(SnappingClient == -1 || (CheckShowAll && pGameServer->m_apPlayers[SnappingClient]->m_ShowAll))
 		return false;
 
 	vec2 &ViewPos = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos;
 	vec2 &ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance;
+	if (PlotID >= PLOT_START || DefaultRange)
+		ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_StandardShowDistance;
 
 	vec2 DistanceToLine, ClosestPoint;
 	if(closest_point_on_line(StartPos, EndPos, ViewPos, ClosestPoint))
