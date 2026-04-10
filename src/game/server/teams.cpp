@@ -506,6 +506,8 @@ void CGameTeams::SendTeamsState(int ClientID)
 			}
 		}
 
+		const int SafeAreaTeam = 63;
+
 		// in game / save area
 		int ID = i;
 		bool Translated = false;
@@ -514,7 +516,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 			Translated = true;
 			if (!m_Core.GetInGame(ID))
 			{
-				Msg.AddInt(63);
+				Msg.AddInt(SafeAreaTeam);
 				continue;
 			}
 		}
@@ -527,7 +529,8 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 			// If color is >= 56 we simply use the previous color, so that the spectate menu won't change order all the time.
 			bool IsSpec = LegacyTeams && Team >= 56 && Team < VANILLA_MAX_CLIENTS && (GameServer()->m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[ClientID]->IsPaused());
-			if (Team == -2 || IsSpec) // TEAM_SUPER
+			bool IsSafeAreaTeam = LegacyTeams && Team == SafeAreaTeam; // if player is in safe area and someone who isnt has rainbowname prevent blink
+			if (Team == -2 || IsSpec || IsSafeAreaTeam) // TEAM_SUPER
 			{
 				// keep the previous color
 				Team = s_aLegacyTeams[Color - 1];
