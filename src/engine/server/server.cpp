@@ -2732,6 +2732,8 @@ void CServer::PumpNetwork()
 						
 					if (Config()->m_SvWhitelistFile[0] && m_LastWhitelistUpdate < Tick() - TickSpeed())
 					{
+						// Clear whitelist, otherwise can't remove old entries upon updating. Bans have the same issue but they time out eventually
+						m_vWhitelist.clear();
 						Console()->ExecuteFile(Config()->m_SvWhitelistFile);
 						m_LastWhitelistUpdate = Tick();
 
