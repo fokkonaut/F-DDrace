@@ -2317,12 +2317,7 @@ void CGameContext::ConWhitelist(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConWhitelistSave(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if (pSelf->Server()->SaveWhitelist())
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "saved whitelist to '%s'", pSelf->Config()->m_SvWhitelistFile);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
-	}
+	pSelf->Server()->SaveWhitelist(pResult->GetString(0));
 }
 
 void CGameContext::ConWhitelistUpdateServers(IConsole::IResult* pResult, void* pUserData)

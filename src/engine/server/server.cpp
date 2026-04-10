@@ -5147,23 +5147,28 @@ void CServer::PrintWhitelist()
 	}
 }
 
-bool CServer::SaveWhitelist()
+void CServer::SaveWhitelist(const char *pFilename)
 {
-	std::string data;
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s", Config()->m_SvWhitelistFile);
-	std::ofstream Whitelist(aBuf);
-	if (!Whitelist.is_open())
-		return false;
+	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to save whitelist to '%s'", pFilename);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+		return;
+	}
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
 		net_addr_str(&m_vWhitelist[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\" \"%s\"", aAddrStr, m_vWhitelist[i].m_aReason);
-		Whitelist << aBuf << "\n";
+		io_write(File, aBuf, str_length(aBuf));
+		io_write_newline(File);
 	}
-	return true;
+
+	io_close(File);
+	str_format(aBuf, sizeof(aBuf), "saved whitelist to '%s'", pFilename);
+	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
 }
 
 bool CServer::IsWhitelisted(int ClientID)

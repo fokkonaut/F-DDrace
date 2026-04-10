@@ -5064,7 +5064,7 @@ void CGameContext::OnPreShutdown()
 		str_format(aBuf, sizeof(aBuf), "bans_save \"%s\"", Config()->m_SvBansFile);
 		Console()->ExecuteLine(aBuf);
 	}
-	Server()->SaveWhitelist();
+	Server()->SaveWhitelist(Config()->m_SvWhitelistFile);
 	SendPlayerCountUpdate(true);
 
 	if (ServerIsStopping && Config()->m_SvShutdownAutoReconnect == 2 && Config()->m_SvShutdownSaveTees)

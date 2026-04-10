@@ -629,7 +629,7 @@ public:
 		char m_aReason[128];
 	};
 	std::vector<SWhitelist> m_vWhitelist;
-	bool SaveWhitelist() override;
+	void SaveWhitelist(const char *pFilename) override;
 	void AddWhitelist(const NETADDR *pAddr, const char *pReason) override;
 	void RemoveWhitelist(const NETADDR *pAddr) override;
 	void RemoveWhitelistByIndex(unsigned int Index) override;

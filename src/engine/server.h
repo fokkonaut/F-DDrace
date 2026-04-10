@@ -91,7 +91,7 @@ public:
 	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode) = 0;
 	virtual const char *GetCountryCode(int ClientID) = 0;
 
-	virtual bool SaveWhitelist() = 0;
+	virtual void SaveWhitelist(const char *pFilename) = 0;
 	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason) = 0;
 	virtual void RemoveWhitelist(const NETADDR *pAddr) = 0;
 	virtual void RemoveWhitelistByIndex(unsigned int Index) = 0;
