@@ -73,6 +73,8 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	int Type = m_Entity;
 	int Number = GameServer()->Collision()->GetSwitchByPlotLaserDoor(CursorPlotID, m_Laser.m_Number);
 	bool CheckBorders = IsCategoryLaser() || m_Category == CAT_SPEEDUPS || m_Category == CAT_TELEPORTER || m_Category == CAT_TILEPLACE;
+	bool IsTune = m_TilePlace.m_Tune;
+	int Index = m_TilePlace.m_Index;
 
 	if (pEntity)
 	{
@@ -81,6 +83,11 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		Type = pEntity->GetObjType();
 		Number = pEntity->m_Number;
 		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER || Type == CGameWorld::ENTTYPE_DRAWTILE;
+		if (Type == CGameWorld::ENTTYPE_DRAWTILE)
+		{
+			IsTune = ((CDrawTile *)pEntity)->GetTuneNumber() != -1;
+			Index = ((CDrawTile *)pEntity)->GetIndex();
+		}
 		Remove = false;
 	}
 
@@ -93,12 +100,12 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	}
 
 	bool ValidTile = !GameServer()->Collision()->CheckPoint(Pos);
-	int Index = GameServer()->Collision()->GetPureMapIndex(Pos);
+	int MapIndex = GameServer()->Collision()->GetPureMapIndex(Pos);
 
 	if (Type == CGameWorld::ENTTYPE_DRAWTILE)
 	{
 		// check if its a drawtile, can be moved/replaced
-		if (Remove || GameServer()->HasDrawTile(Index))
+		if (Remove || GameServer()->HasDrawTile(MapIndex))
 		{
 			// TilePlace can place and remove solid blocks so we can check for an entity while on a solid block
 			ValidTile = true;
@@ -113,13 +120,13 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 				return false;
 
 			if (!TransformPreview)
-				ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(Index);
+				ValidTile = ValidTile && !GameServer()->Collision()->IsSpeedup(MapIndex);
 		}
 		else if (Type == CGameWorld::ENTTYPE_BUTTON)
 		{
 			// disallow placing buttons on already existing buttons with the same number
 			if (!TransformPreview)
-				ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(Index, TILE_SWITCHTOGGLE, Number) == -1;
+				ValidTile = ValidTile && GameServer()->Collision()->GetDoorIndex(MapIndex, TILE_SWITCHTOGGLE, Number) == -1;
 		}
 		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
@@ -127,29 +134,29 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 				return false;
 
 			if (!TransformPreview)
-				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(Index);
+				ValidTile = ValidTile && !GameServer()->Collision()->IsTeleportTile(MapIndex);
 		}
 		else if (Type == CGameWorld::ENTTYPE_DRAWTILE)
 		{
 			if (!TransformPreview)
 			{
-				int TileIndex = GameServer()->Collision()->GetTileIndex(Index);
-				int TileFIndex = GameServer()->Collision()->GetFTileIndex(Index);
+				int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+				int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 				// check for free tile
 				ValidTile = ValidTile && (TileIndex == TILE_AIR || TileFIndex == TILE_AIR);
 				// check to not place in solid blocks, but allow transform on drawtile solid blocks
 				ValidTile = ValidTile && TileIndex != TILE_SOLID && TileIndex != TILE_NOHOOK && TileFIndex != TILE_SOLID && TileFIndex != TILE_NOHOOK;
 
-				if (m_TilePlace.m_Tune)
+				if (IsTune)
 				{
-					int Zone = GameServer()->Collision()->IsTune(Index);
-					int Lock = GameServer()->Collision()->IsTuneLock(Index);
+					int Zone = GameServer()->Collision()->IsTune(MapIndex);
+					int Lock = GameServer()->Collision()->IsTuneLock(MapIndex);
 					ValidTile = ValidTile && !Zone && !Lock;
 				}
 				else
 				{
 					// check if the other layer doesnt have the same index already
-					ValidTile = ValidTile && TileIndex != m_TilePlace.m_Index && TileFIndex != m_TilePlace.m_Index;
+					ValidTile = ValidTile && TileIndex != Index && TileFIndex != Index;
 				}
 			}
 		}
