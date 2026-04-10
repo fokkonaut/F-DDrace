@@ -8,7 +8,7 @@ English translation by the developers
 == /help + любая команда покажет вам справку по этой команде
 
 Example /help settings will display the help about /settings
-== Пример /help settings отобразит справку о /settings
+== Пример /help settings покажет справку о /settings
 
 Usage
 == Использование
@@ -17,7 +17,7 @@ Command is either unknown or you have given a blank command without any paramete
 == Команда неизвестна или вы ввели пустую команду без параметров.
 
 You can't join the spectators while you are in survival
-== Вы не можете присоединиться к зрителям, пока находитесь в режиме выживания
+== Вы не можете перейти в наблюдатели, пока находитесь в режиме выживания
 
 Timeout code has to be at least 8 characters long, make sure to use a safe code.
 == Код тайм-аута должен содержать не менее 8 символов, убедитесь, что используете безопасный код.
@@ -135,7 +135,7 @@ Spooky ghost (gun) and portal blocker (hammer) can be enabled like the following
 == Жуткий призрак (пистолет) и блокиратор порталов (молот) можно включить следующим образом:
 
 Hold TAB (or other scoreboard key) and during that fire your weapon two times.
-== Удерживайте TAB (или другую клавишу таблицы результатов) и во время этого дважды выстрелите из оружия.
+== Удерживайте TAB (или другую клавишу таблицы результатов) и, удерживая ее, выстрелите из оружия.
 
 With VIP Classic you get an XP and money boost of '+2' per second, aswell as access to the following commands:
 == С VIP Classic вы получаете бонус к опыту и деньгам '+2' в секунду, а также доступ к следующим командам:
@@ -156,7 +156,7 @@ You will have the bought weapon on spawn.
 == У вас будет купленное оружие при спавне.
 
 You can have max. 5 bullets per weapon.
-== Вы можете иметь максимум 5 патронов на оружие.
+== Вы можете иметь не более 5 патронов на оружие.
 
 Each bullet costs 600.000 money.
 == Каждый патрон стоит 600.000 денег.
@@ -183,7 +183,7 @@ Your username can only consist of letters and numbers
 == Ваше имя пользователя может состоять только из букв и цифр
 
 The passwords need to be identical
-== Пароли должны быть идентичными
+== Пароли должны совподать
 
 The password is too long or too short
 == Пароль слишком длинный или слишком короткий
@@ -213,7 +213,7 @@ Kill logout is activated, kill within %d seconds to logout
 == Активирован выход через убийство, убейте в течение %d секунд, чтобы выйти
 
 You are not verified, please enter your security pin using '/pin'
-== Вы не прошли проверку, пожалуйста, введите ваш защитный PIN-код с помощью '/pin'
+== Вы не прошли проверку, пожалуйста, введите защитный PIN-код с помощью '/pin'
 
 Wrong password
 == Неверный пароль
@@ -267,13 +267,13 @@ Successfully changed the security pin
 == Защитный PIN-код успешно изменен
 
 You have to be inside of a bank to pay money from your bank account to others
-== Вы должны находиться в банке, чтобы переводить деньги с вашего банковского счета другим
+== Вы должны находиться в банке, чтобы переводить деньги с вашего банковского счета другим игрокам
 
 You can't pay money that frequently
 == Вы не можете так часто переводить деньги
 
 That player doesn't exist
-== Этот игрок не существует
+== Такого игрока не существует
 
 You can't pay money to yourself
 == Вы не можете перевести деньги самому себе
@@ -285,7 +285,7 @@ You don't have enough money
 == У вас недостаточно денег
 
 You can't pay nothing
-== Вы не можете перевести ничего
+== Вы не можете перевести ноль
 
 You paid %lld money from your bank account to '%s'
 == Вы перевели %lld денег с вашего банковского счета игроку '%s'
@@ -390,7 +390,7 @@ Starts an auction for your plot, everyone can buy it using the buy command
 == Начинает аукцион вашего участка, и любой игрок сможет купить его с помощью команды '/plot buy'.
 
 Buys a plot if the given player is running a plot auction
-== Покупает участок, если указанный игрок проводит аукцион участка
+== Покупает участок, если указанный игрок выставил участок на аукцион
 
 Lets you respawn at your plot
 == Позволяет возродиться на вашем участке
@@ -402,7 +402,7 @@ Swaps plot with given player
 == Обменивает участок с указанным игроком
 
 Shows a list with all currently open plot auctions and swap offers
-== Показывает список всех текущих открытых аукционов участков и предложений обмена
+== Показывает список всех открытых аукционов участков и предложений обмена
 
 This player doesn't exists
 == Такого игрока не существует
@@ -459,7 +459,7 @@ You already sell your plot
 == Вы уже продаете свой участок
 
 You need to enter a valid price
-== Вам нужно ввести действительную цену
+== Вам нужно ввести корректную цену
 
 '%s' started an auction on plot %d for %d money (plot expires on %s)
 == '%s' начал аукцион на участок %d за %d денег (срок действия участка истекает %s)
@@ -546,7 +546,7 @@ Map Designs
 == Дизайны карты
 
 If you have your dummy connected, you need to reconnect it after the design change so it can get back it's state.
-== Если у вас подключен манекен, вам нужно переподключить его после изменения дизайна, чтобы он вернулся в свое состояние.
+== Если у вас подключен дамми, вам нужно переподключить его после изменения дизайна, чтобы он вернулся в свое состояние.
 
 You can set one of the following designs by using '/design <name>':
 == Вы можете установить один из следующих дизайнов, используя '/design <имя>':
@@ -579,13 +579,13 @@ You can set one of the following languages by using '/chatlanguage <option>':
 == Вы можете установить один из следующих языков, используя '/chatlanguage <вариант>':
 
 This server does not have a linked Discord server
-== Этот сервер не имеет связанного сервера Discord
+== У этого сервер связанного Discord-сервера
 
 Minigames
 == Мини-игры
 
 You can join any minigame using '/<minigame>'
-== Вы можете присоединиться к любой мини-игре, используя '/<мини-игра>'
+== Вы можете присоединиться к любой мини-игре, используя '/<minigame>'
 
 To leave a minigame, just type '/leave'
 == Чтобы покинуть мини-игру, просто введите '/leave'
@@ -600,7 +600,7 @@ Spree
 == Серия
 
 Durák Wins
-== Победы в Дурака
+== Победы в "Дурака"
 
 Durák Profit
 == Прибыль в Дураке
@@ -1110,7 +1110,7 @@ You will now respawn at your plot (TAB+kill to join at normal spawn)
 == Теперь вы будете возрождаться на своем участке (TAB+kill, чтобы появиться на обычном спавне)
 
 You will no longer respawn at your plot (TAB+kill to join at plot spawn)
-== Вы больше не будете возрождаться на своем участке (TAB+kill, чтобы появиться на спавне участка)
+== Теперь вы больше не будете автоматически возрождаться на своем участке (TAB+kill, чтобы появиться на спавне участка)
 
 You will now resume from pause if your tee gets moved
 == Теперь вы будете выходить из паузы, если ваш персонаж будет перемещен
@@ -1587,7 +1587,7 @@ You cannot join this team at this time
 == Вы не можете присоединиться к этой команде в данный момент
 
 You can't check your team while you are dead/a spectator.
-== Вы не можете проверить свою команду, пока вы мертвы/наблюдатель.
+== Вы не можете проверить свою команду, пока вы мертвы или находитесь в режиме наблюдателя.
 
 /me is disabled on this server
 == /me отключено на этом сервере
@@ -1952,7 +1952,7 @@ You will have rifle if you respawn. For more information about spawn weapons, pl
 == У вас будет винтовка, если вы возродитесь. Для получения дополнительной информации об оружии возрождения введите '/spawnweapons'.
 
 It will make your jetpack gun be a ninja. Toggle it using '/ninjajetpack'.
-== Это сделает ваш реактивный пистолет ниндзя. Переключите его с помощью '/ninjajetpack'.
+== Это превратит ваш джетпак в режим ниндзя. Переключите его с помощью '/ninjajetpack'.
 
 Taser is a rifle that freezes a player. For more information about the taser and your taser stats, please visit '/taser'.
 == Электрошокер — это винтовка, которая замораживает игрока. Для получения дополнительной информации об электрошокере и ваших статистиках электрошокера, посетите '/taser'.
