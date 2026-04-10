@@ -134,7 +134,10 @@ CONSOLE_COMMAND("whoisid", "i[mode] i[cutoff] v[id]", CFGFLAG_SERVER, ConWhoIsID
 // white list in case iphub.info falsely flagged someone or to whitelist gameserver ips
 CONSOLE_COMMAND("whitelist_add", "s[ip] ?s[reason]", CFGFLAG_SERVER, ConWhitelistAdd, this, "Adds address s to whitelist", AUTHED_ADMIN)
 CONSOLE_COMMAND("whitelist_remove", "s[ip/index]", CFGFLAG_SERVER, ConWhitelistRemove, this, "Removes address s from whitelist", AUTHED_ADMIN)
-CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whitelist for DNSBL/PGSC", AUTHED_ADMIN)
+CONSOLE_COMMAND("whitelist", "", CFGFLAG_SERVER, ConWhitelist, this, "Shows whitelist for DNSBL/PGSC/Antibot", AUTHED_ADMIN)
+CONSOLE_COMMAND("whitelist_save", "", CFGFLAG_SERVER, ConWhitelistSave, this, "Save whitelist to sv_whitelist_file", AUTHED_ADMIN)
+CONSOLE_COMMAND("whitelist_update_servers", "", CFGFLAG_SERVER, ConWhitelistUpdateServers, this, "Notifies servers in sv_redirect_server_tile_ports and reloads whitelist (save before!)", AUTHED_ADMIN)
+CONSOLE_COMMAND("bans_update_servers", "", CFGFLAG_SERVER, ConBansUpdateServers, this, "Notifies servers in sv_redirect_server_tile_ports and reloads bans (save before!)", AUTHED_ADMIN)
 
 // bot lookup
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)

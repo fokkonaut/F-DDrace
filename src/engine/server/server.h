@@ -328,6 +328,9 @@ public:
 
 	int m_RconRestrict;
 
+	int m_LastBansUpdate;
+	int m_LastWhitelistUpdate;
+
 	// map
 	enum
 	{
@@ -484,6 +487,9 @@ public:
 	void SendRedirectSaveTeeRemove(int Port, const char *pHash) override;
 	void SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash);
 	void SendPlayerCountUpdate(bool Shutdown = false) override;
+	bool SendWhitelistUpdate() override;
+	bool SendBansUpdate() override;
+	bool SendUpdateToConnectedServers(CPacker *pPacker);
 
 	void PumpNetwork();
 
@@ -620,14 +626,15 @@ public:
 	struct SWhitelist
 	{
 		NETADDR m_Addr;
-		char m_aReason[64];
+		char m_aReason[128];
 	};
 	std::vector<SWhitelist> m_vWhitelist;
-	void SaveWhitelist() override;
+	bool SaveWhitelist() override;
 	void AddWhitelist(const NETADDR *pAddr, const char *pReason) override;
 	void RemoveWhitelist(const NETADDR *pAddr) override;
 	void RemoveWhitelistByIndex(unsigned int Index) override;
 	void PrintWhitelist() override;
+	bool IsWhitelisted(int ClientID) override;
 
 	class CWebhook : public IJob
 	{

@@ -2314,6 +2314,35 @@ void CGameContext::ConWhitelist(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Server()->PrintWhitelist();
 }
 
+void CGameContext::ConWhitelistSave(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (pSelf->Server()->SaveWhitelist())
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "saved whitelist to '%s'", pSelf->Config()->m_SvWhitelistFile);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+	}
+}
+
+void CGameContext::ConWhitelistUpdateServers(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (!pSelf->Server()->SendWhitelistUpdate())
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", "Notifying connected servers failed, please configure 'sv_redirect_server_tile_ports'");
+	}
+}
+
+void CGameContext::ConBansUpdateServers(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if (!pSelf->Server()->SendBansUpdate())
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "Notifying connected servers failed, please configure 'sv_redirect_server_tile_ports'");
+	}
+}
+
 void CGameContext::ConBotLookup(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

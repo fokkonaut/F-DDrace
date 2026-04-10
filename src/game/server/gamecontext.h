@@ -1209,6 +1209,9 @@ private:
 	static void ConWhitelistAdd(IConsole::IResult* pResult, void* pUserData);
 	static void ConWhitelistRemove(IConsole::IResult* pResult, void* pUserData);
 	static void ConWhitelist(IConsole::IResult* pResult, void* pUserData);
+	static void ConWhitelistSave(IConsole::IResult* pResult, void* pUserData);
+	static void ConWhitelistUpdateServers(IConsole::IResult* pResult, void* pUserData);
+	static void ConBansUpdateServers(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConBotLookup(IConsole::IResult* pResult, void* pUserData);
 

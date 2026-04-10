@@ -378,6 +378,9 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 
 	m_RconPasswordSet = 0;
 
+	m_LastBansUpdate = 0;
+	m_LastWhitelistUpdate = 0;
+
 #ifdef CONF_FAMILY_UNIX
 	m_ConnLoggingSocketCreated = false;
 #endif
@@ -2529,6 +2532,33 @@ void CServer::SendRedirectSaveTeeImpl(bool Add, int Port, const char *pHash)
 	m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
 }
 
+bool CServer::SendUpdateToConnectedServers(CPacker *pPacker)
+{
+	CNetChunk Packet;
+	Packet.m_ClientID = -1;
+	mem_zero(&Packet.m_Address, sizeof(Packet.m_Address));
+	Packet.m_Address.type = m_NetServer.NetType(SOCKET_MAIN) | NETTYPE_LINK_BROADCAST;
+	Packet.m_Flags = NETSENDFLAG_CONNLESS;
+	Packet.m_DataSize = pPacker->Size();
+	Packet.m_pData = pPacker->Data();
+
+	bool Success = false;
+	const char *pList = Config()->m_SvRedirectServerTilePorts;
+	char aBuf[16];
+	while ((pList = str_next_token(pList, ",", aBuf, sizeof(aBuf))))
+	{
+		int Switch = 0;
+		int Port = 0;
+		if (sscanf(aBuf, "%d:%d", &Switch, &Port) == 2)
+		{
+			Packet.m_Address.port = Port;
+			m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
+			Success = true;
+		}
+	}
+	return Success;
+}
+
 void CServer::SendPlayerCountUpdate(bool Shutdown)
 {
 	int PlayerCount = 0;
@@ -2548,27 +2578,25 @@ void CServer::SendPlayerCountUpdate(bool Shutdown)
 	Packer.AddRaw(PLAYERCOUNTER_UPDATE, sizeof(PLAYERCOUNTER_UPDATE));
 	Packer.AddInt(Config()->m_SvPort);
 	Packer.AddInt(PlayerCount);
+	SendUpdateToConnectedServers(&Packer);
+}
 
-	CNetChunk Packet;
-	Packet.m_ClientID = -1;
-	mem_zero(&Packet.m_Address, sizeof(Packet.m_Address));
-	Packet.m_Address.type = m_NetServer.NetType(SOCKET_MAIN) | NETTYPE_LINK_BROADCAST;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	Packet.m_DataSize = Packer.Size();
-	Packet.m_pData = Packer.Data();
+bool CServer::SendWhitelistUpdate()
+{
+	CPacker Packer;
+	Packer.Reset();
+	Packer.AddRaw(WHITELIST_UPDATE, sizeof(WHITELIST_UPDATE));
+	Packer.AddInt(Config()->m_SvPort);
+	return SendUpdateToConnectedServers(&Packer);
+}
 
-	const char *pList = Config()->m_SvRedirectServerTilePorts;
-	char aBuf[16];
-	while ((pList = str_next_token(pList, ",", aBuf, sizeof(aBuf))))
-	{
-		int Switch = 0;
-		int Port = 0;
-		if (sscanf(aBuf, "%d:%d", &Switch, &Port) == 2)
-		{
-			Packet.m_Address.port = Port;
-			m_NetServer.Send(&Packet, NET_TOKEN_NONE, true);
-		}
-	}
+bool CServer::SendBansUpdate()
+{
+	CPacker Packer;
+	Packer.Reset();
+	Packer.AddRaw(BANS_UPDATE, sizeof(BANS_UPDATE));
+	Packer.AddInt(Config()->m_SvPort);
+	return SendUpdateToConnectedServers(&Packer);
 }
 
 void CServer::PumpNetwork()
@@ -2578,6 +2606,9 @@ void CServer::PumpNetwork()
 	bool Sevendown = true;
 
 	m_NetServer.Update();
+
+	#define IS_CONNLESS_PACKET(Type) Packet.m_DataSize >= int(sizeof(Type)) && mem_comp(Packet.m_pData, Type, sizeof(Type)) == 0
+	#define RESET_UNPACKER(Type) Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(Type), Packet.m_DataSize-sizeof(Type))
 
 	// process packets
 	for (int Socket = 0; Socket < NUM_SOCKETS; Socket++)
@@ -2597,10 +2628,10 @@ void CServer::PumpNetwork()
 				if (ResponseToken == NET_TOKEN_NONE && pRegister->OnPacket(&Packet))
 					continue;
 
-				if(Packet.m_DataSize >= int(sizeof(SERVERBROWSE_GETINFO)) && mem_comp(Packet.m_pData, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO)) == 0)
+				if(IS_CONNLESS_PACKET(SERVERBROWSE_GETINFO))
 				{
 					CUnpacker Unpacker;
-					Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
+					RESET_UNPACKER(SERVERBROWSE_GETINFO);
 
 					int SrvBrwsToken;
 					if (Sevendown)
@@ -2632,10 +2663,10 @@ void CServer::PumpNetwork()
 						m_NetServer.Send(&Response, ResponseToken, false, Socket);
 					}
 				}
-				else if (Packet.m_DataSize >= int(sizeof(REDIRECT_SAVE_TEE_ADD)) && mem_comp(Packet.m_pData, REDIRECT_SAVE_TEE_ADD, sizeof(REDIRECT_SAVE_TEE_ADD)) == 0)
+				else if (IS_CONNLESS_PACKET(REDIRECT_SAVE_TEE_ADD))
 				{
 					CUnpacker Unpacker;
-					Unpacker.Reset((unsigned char*)Packet.m_pData + sizeof(REDIRECT_SAVE_TEE_ADD), Packet.m_DataSize - sizeof(REDIRECT_SAVE_TEE_ADD));
+					RESET_UNPACKER(SERVERBROWSE_GETINFO);
 
 					int Port = Unpacker.GetInt();
 					const char *pHash = Unpacker.GetString(CUnpacker::SANITIZE_CC);
@@ -2645,10 +2676,10 @@ void CServer::PumpNetwork()
 
 					GameServer()->OnRedirectSaveTeeAdd(pHash);
 				}
-				else if (Packet.m_DataSize >= int(sizeof(REDIRECT_SAVE_TEE_REMOVE)) && mem_comp(Packet.m_pData, REDIRECT_SAVE_TEE_REMOVE, sizeof(REDIRECT_SAVE_TEE_REMOVE)) == 0)
+				else if (IS_CONNLESS_PACKET(REDIRECT_SAVE_TEE_REMOVE))
 				{
 					CUnpacker Unpacker;
-					Unpacker.Reset((unsigned char*)Packet.m_pData + sizeof(REDIRECT_SAVE_TEE_REMOVE), Packet.m_DataSize - sizeof(REDIRECT_SAVE_TEE_REMOVE));
+					RESET_UNPACKER(REDIRECT_SAVE_TEE_REMOVE);
 
 					int Port = Unpacker.GetInt();
 					const char *pHash = Unpacker.GetString(CUnpacker::SANITIZE_CC);
@@ -2658,10 +2689,10 @@ void CServer::PumpNetwork()
 
 					GameServer()->OnRedirectSaveTeeRemove(pHash);
 				}
-				else if (Packet.m_DataSize >= int(sizeof(PLAYERCOUNTER_UPDATE)) && mem_comp(Packet.m_pData, PLAYERCOUNTER_UPDATE, sizeof(PLAYERCOUNTER_UPDATE)) == 0)
+				else if (IS_CONNLESS_PACKET(PLAYERCOUNTER_UPDATE))
 				{
 					CUnpacker Unpacker;
-					Unpacker.Reset((unsigned char*)Packet.m_pData + sizeof(PLAYERCOUNTER_UPDATE), Packet.m_DataSize - sizeof(PLAYERCOUNTER_UPDATE));
+					RESET_UNPACKER(PLAYERCOUNTER_UPDATE);
 
 					int Port = Unpacker.GetInt();
 					int PlayerCount = Unpacker.GetInt();
@@ -2670,6 +2701,44 @@ void CServer::PumpNetwork()
 						continue;
 
 					GameServer()->OnPlayerCountUpdate(Port, PlayerCount);
+				}
+				else if (IS_CONNLESS_PACKET(BANS_UPDATE))
+				{
+					CUnpacker Unpacker;
+					RESET_UNPACKER(BANS_UPDATE);
+
+					int Port = Unpacker.GetInt();
+					if (Unpacker.Error() || Port == Config()->m_SvPort)
+						continue;
+						
+					if (Config()->m_SvBansFile[0] && m_LastBansUpdate < Tick() - TickSpeed())
+					{
+						Console()->ExecuteFile(Config()->m_SvBansFile);
+						m_LastBansUpdate = Tick();
+
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "Received bans update from port %d, reloaded bans", Port);
+						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aBuf);
+					}
+				}
+				else if (IS_CONNLESS_PACKET(WHITELIST_UPDATE))
+				{
+					CUnpacker Unpacker;
+					RESET_UNPACKER(WHITELIST_UPDATE);
+
+					int Port = Unpacker.GetInt();
+					if (Unpacker.Error() || Port == Config()->m_SvPort)
+						continue;
+						
+					if (Config()->m_SvWhitelistFile[0] && m_LastWhitelistUpdate < Tick() - TickSpeed())
+					{
+						Console()->ExecuteFile(Config()->m_SvWhitelistFile);
+						m_LastWhitelistUpdate = Tick();
+
+						char aBuf[128];
+						str_format(aBuf, sizeof(aBuf), "Received whitelist update from port %d, reloaded whitelist", Port);
+						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+					}
 				}
 			}
 			else
@@ -2691,6 +2760,9 @@ void CServer::PumpNetwork()
 			}
 		}
 	}
+
+	#undef IS_CONNLESS_PACKET
+	#undef RESET_UNPACKER
 
 	{
 		unsigned char aBuffer[NET_MAX_PAYLOAD];
@@ -4626,13 +4698,10 @@ void CServer::CClient::CPgscLookup::Run()
 
 void CServer::InitProxyGameServerCheck(int ClientID)
 {
-	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
+	if (IsWhitelisted(ClientID))
 	{
-		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &m_vWhitelist[i].m_Addr, false) == 0)
-		{
-			m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_DONE;
-			return;
-		}
+		m_aClients[ClientID].m_PgscState = CClient::PGSC_STATE_DONE;
+		return;
 	}
 
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
@@ -4669,19 +4738,19 @@ void CServer::CClient::CDnsblLookup::Run()
 
 void CServer::InitDnsbl(int ClientID)
 {
-	for (int i = 0; i < 3; i++)
+	if (IsWhitelisted(ClientID))
+	{
+		m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+		return;
+	}
+
+	for (int i = 0; i < 2; i++)
 	{
 		std::vector<NETADDR> List;
 		switch (i)
 		{
-		case 0:
-		{
-			for (unsigned int k = 0; k < m_vWhitelist.size(); k++)
-				List.push_back(m_vWhitelist[k].m_Addr);
-			break;
-		} 
-		case 1: List = m_DnsblCache.m_vBlacklist; break;
-		case 2: List = m_DnsblCache.m_vWhitelist; break;
+		case 0: List = m_DnsblCache.m_vBlacklist; break;
+		case 1: List = m_DnsblCache.m_vWhitelist; break;
 		default: return;
 		}
 
@@ -4689,7 +4758,7 @@ void CServer::InitDnsbl(int ClientID)
 		{
 			if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &List[j], false) == 0)
 			{
-				m_aClients[ClientID].m_DnsblState = i == 1 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
+				m_aClients[ClientID].m_DnsblState = i == 0 ? CClient::DNSBL_STATE_BLACKLISTED : CClient::DNSBL_STATE_WHITELISTED;
 				return;
 			}
 		}
@@ -5025,7 +5094,7 @@ void CServer::AddWhitelist(const NETADDR *pAddr, const char *pReason)
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), false);
 
-	char aReason[64] = "";
+	char aReason[128] = "";
 	if (pReason[0])
 		str_format(aReason, sizeof(aReason), "(%s)", pReason);
 
@@ -5068,7 +5137,7 @@ void CServer::PrintWhitelist()
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&m_vWhitelist[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
-		char aReason[64] = "";
+		char aReason[128] = "";
 		if (m_vWhitelist[i].m_aReason[0])
 			str_format(aReason, sizeof(aReason), "(%s)", m_vWhitelist[i].m_aReason);
 
@@ -5078,14 +5147,14 @@ void CServer::PrintWhitelist()
 	}
 }
 
-void CServer::SaveWhitelist()
+bool CServer::SaveWhitelist()
 {
 	std::string data;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%s", Config()->m_SvWhitelistFile);
 	std::ofstream Whitelist(aBuf);
 	if (!Whitelist.is_open())
-		return;
+		return false;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
@@ -5094,6 +5163,15 @@ void CServer::SaveWhitelist()
 		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\" \"%s\"", aAddrStr, m_vWhitelist[i].m_aReason);
 		Whitelist << aBuf << "\n";
 	}
+	return true;
+}
+
+bool CServer::IsWhitelisted(int ClientID)
+{
+	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
+		if (net_addr_comp(m_NetServer.ClientAddr(ClientID), &m_vWhitelist[i].m_Addr, false) == 0)
+			return true;
+	return false;
 }
 
 int *CServer::GetIdMap(int ClientID)

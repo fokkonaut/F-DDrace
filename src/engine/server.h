@@ -91,11 +91,12 @@ public:
 	virtual void TranslateChat(int ClientID, const char *pMsg, int Mode) = 0;
 	virtual const char *GetCountryCode(int ClientID) = 0;
 
-	virtual void SaveWhitelist() = 0;
+	virtual bool SaveWhitelist() = 0;
 	virtual void AddWhitelist(const NETADDR *pAddr, const char *pReason) = 0;
 	virtual void RemoveWhitelist(const NETADDR *pAddr) = 0;
 	virtual void RemoveWhitelistByIndex(unsigned int Index) = 0;
 	virtual void PrintWhitelist() = 0;
+	virtual bool IsWhitelisted(int ClientID) = 0;
 
 	virtual bool IsUniqueAddress(int ClientID) = 0;
 	virtual int GetDummy(int ClientID) = 0;
@@ -288,6 +289,8 @@ public:
 	virtual void SendRedirectSaveTeeAdd(int Port, const char *pHash) = 0;
 	virtual void SendRedirectSaveTeeRemove(int Port, const char *pHash) = 0;
 	virtual void SendPlayerCountUpdate(bool Shutdown = false) = 0;
+	virtual bool SendWhitelistUpdate() = 0;
+	virtual bool SendBansUpdate() = 0;
 
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
