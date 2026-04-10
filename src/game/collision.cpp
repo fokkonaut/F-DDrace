@@ -439,7 +439,7 @@ int CCollision::GetTile(int x, int y)
 }
 
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision)
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool IsTeleProjectile, int Team)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -456,6 +456,22 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 			if (pOutBeforeCollision)
 				* pOutBeforeCollision = Last;
 			return CheckPointRes == 1 ? GetCollisionAt(Pos.x, Pos.y) : GetFCollisionAt(Pos.x, Pos.y);
+		}
+
+		if (IsTeleProjectile)
+		{
+			int ix = round_to_int(Pos.x);
+			int iy = round_to_int(Pos.y);
+			// Avoid tele projectile skipping
+			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, Team);
+			if (TeleBlockRes)
+			{
+				if (pOutCollision)
+					* pOutCollision = Pos;
+				if (pOutBeforeCollision)
+					* pOutBeforeCollision = Last;
+				return TeleBlockRes;
+			}
 		}
 
 		Last = Pos;
@@ -524,7 +540,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision,
 	return 0;
 }
 
-int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr)
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, bool IsTeleLaser, int Team)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -560,12 +576,44 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 			return CheckPointRes == 1 ? GetCollisionAt(ix, iy) : GetFCollisionAt(ix, iy);
 		}
 
+		// Avoid telelaser skipping
+		if (IsTeleLaser)
+		{
+			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, Team);
+			if (TeleBlockRes)
+			{
+				if (pOutCollision)
+					* pOutCollision = Pos;
+				if (pOutBeforeCollision)
+					* pOutBeforeCollision = Last;
+				return TeleBlockRes;
+			}
+		}
+		
 		Last = Pos;
 	}
 	if (pOutCollision)
 		* pOutCollision = Pos1;
 	if (pOutBeforeCollision)
 		* pOutBeforeCollision = Pos1;
+	return 0;
+}
+
+int CCollision::IntersectTeleProjLaser(int ix, int iy, vec2 Pos, int Team)
+{
+	int Nx = clamp(ix / 32, 0, m_Width - 1);
+	int Ny = clamp(iy / 32, 0, m_Height - 1);
+	int TileIndex = GetIndex(Nx, Ny);
+	int TileFIndex = GetFIndex(Nx, Ny);
+	bool GameLayerBlocked = TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL;
+	bool FrontLayerBlocked = TileFIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_PORTAL_RIFLE_STOP || TileFIndex == TILE_REM_FIRST_PORTAL;
+	bool IsClosedPlotDoor = CheckPointDoor(Pos, Team, true, true) != -1;
+	if (GameLayerBlocked)
+		return TileIndex;
+	if (FrontLayerBlocked)
+		return TileFIndex;
+	if (IsClosedPlotDoor)
+		return TILE_STOPA;
 	return 0;
 }
 
@@ -1910,7 +1958,8 @@ int CCollision::IntersectLineFlagPickup(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 		bool FrontLayerBlocked = FIndex == TILE_VIP_PLUS_ONLY || Index == TILE_FLAG_STOP;
 		int PlotDoor = GetPlotBySwitch(CheckPointDoor(Pos, 0, true, false));
 
-		if (CheckPoint(ix, iy) || GameLayerBlocked || FrontLayerBlocked || PlotDoor)
+		int CheckPointRes = CheckPoint(ix, iy);
+		if (CheckPointRes || GameLayerBlocked || FrontLayerBlocked || PlotDoor)
 		{
 			if (pOutCollision)
 				* pOutCollision = Pos;
@@ -1922,7 +1971,7 @@ int CCollision::IntersectLineFlagPickup(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 				return FIndex;
 			if (PlotDoor)
 				return TILE_STOPA;
-			return GetCollisionAt(ix, iy);
+			return CheckPointRes == 1 ? GetCollisionAt(ix, iy) : GetFCollisionAt(ix, iy);
 		}
 
 		Last = Pos;

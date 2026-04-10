@@ -312,7 +312,10 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	int Team = pOwnerChar ? pOwnerChar->Team() : 0;
+	bool IsTeleLaser = pOwnerChar && (m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser);
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, IsTeleLaser, Team);
 
 	if (Res)
 	{
@@ -356,6 +359,13 @@ void CLaser::DoBounce()
 			if (m_Bounces > m_BounceNum)
 				m_Energy = -1;
 
+			bool IsPlotDoor = Res == TILE_STOPA;
+			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
+			{
+				m_Energy = -1;
+				m_TeleportCancelled = true;
+			}
+
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_TeamMask);
 		}
 	}
@@ -369,7 +379,6 @@ void CLaser::DoBounce()
 		}
 	}
 
-	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_LASER)
 	{
