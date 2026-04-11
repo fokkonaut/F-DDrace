@@ -2568,7 +2568,7 @@ void CGameContext::ConPoliceInfo(IConsole::IResult *pResult, void *pUserData)
 	{
 		int Level = 0;
 		int Policelevel = Page - 1;
-		char aPolice[64];
+		char aPolice[128];
 
 		if (Policelevel == 1)
 			Level = 18;
