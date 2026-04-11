@@ -425,13 +425,13 @@ MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600
 
 // tele weapons
 MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 1, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones (1=red/evil, 2=blue/keep velocity)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvTeleWeaponThroughRoomVip, sv_tele_weapon_through_room_vip, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can used through room and vip door if player can pass it", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvTeleWeaponThroughRoomVip, sv_tele_weapon_through_room_vip, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used through room and vip door if player can pass it", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowNameSpec, sv_rainbowname_spec, 0, 0, 1, CFGFLAG_SERVER, "Whether rainbowname is processed while paused or spectating (annoying in +spectate)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 50, CFGFLAG_SERVER|CFGFLAG_GAME, "Default speed for rainbow", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvRainbowSpeedDefault, sv_rainbow_speed_default, 5, 1, 20, CFGFLAG_SERVER|CFGFLAG_GAME, "Default speed for rainbow", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether to use the default gun sound for jetpack or another sound", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClanProtection, sv_clan_protection, 1, 0, 1, CFGFLAG_SERVER, "Whether players have to use greensward skin for Chilli.* clantag", AUTHED_ADMIN)
