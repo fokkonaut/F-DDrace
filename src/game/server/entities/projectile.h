@@ -51,8 +51,10 @@ private:
 
 	// F-DDrace
 	bool m_TeleportCancelled;
+	CCollision::CTeleWeaponInfo GetTeleWeaponInfo();
 	bool TryCancelTeleport(int TileIndex);
-	bool m_ShotInSafeArea;
+	bool m_InitialSafeArea;
+	bool m_InitialTeleWeapon;
 
 	int m_Bouncing;
 	bool m_Freeze;

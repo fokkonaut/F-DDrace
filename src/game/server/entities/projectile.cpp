@@ -62,7 +62,8 @@ CProjectile::CProjectile
 
 	m_TeamMask = Mask128();
 	m_TeleportCancelled = false;
-	m_ShotInSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
+	m_InitialSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
+	m_InitialTeleWeapon = GetTeleWeaponInfo().m_IsTeleWeapon;
 
 	for (int i = 0; i < NUM_SNAPINFO; i++)
 	{
@@ -99,6 +100,19 @@ bool CProjectile::TryCancelTeleport(int TileIndex)
 	return false;
 }
 
+CCollision::CTeleWeaponInfo CProjectile::GetTeleWeaponInfo()
+{
+	CCollision::CTeleWeaponInfo TeleWeaponInfo;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwnerChar)
+	{
+		TeleWeaponInfo.m_IsTeleWeapon = (m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun);
+		TeleWeaponInfo.m_Team = pOwnerChar->Team();
+		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
+	}
+	return TeleWeaponInfo;
+}
+
 void CProjectile::Tick()
 {
 	float Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
@@ -108,16 +122,10 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 
-	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
-	CCollision::CTeleWeaponInfo TeleWeaponInfo;
-	if (pOwnerChar)
-	{
-		TeleWeaponInfo.m_IsTeleWeapon = (m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun);
-		TeleWeaponInfo.m_Team = pOwnerChar->Team();
-		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
-	}
+	CCollision::CTeleWeaponInfo TeleWeaponInfo = GetTeleWeaponInfo();
 	int Collide = GameServer()->Collision()->IntersectLine(m_PrevPos, m_CurPos, &ColPos, &NewPos, TeleWeaponInfo);
 
+	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
 	CCharacter *pTargetChr = 0;
 	CAdvancedEntity *pTargetEntity = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
@@ -163,8 +171,9 @@ void CProjectile::Tick()
 
 	m_TeamMask = Mask128();
 	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
-	bool SwitchedSafeArea = TeleWeaponInfo.m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_ShotInSafeArea) || (!pOwnerChar->IsInSafeArea() && m_ShotInSafeArea));
-	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea;
+	bool SwitchedSafeArea = TeleWeaponInfo.m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_InitialSafeArea) || (!pOwnerChar->IsInSafeArea() && m_InitialSafeArea));
+	bool EnabledTeleWeapon = TeleWeaponInfo.m_IsTeleWeapon && !m_InitialTeleWeapon;
+	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea || EnabledTeleWeapon;
 	if (pOwnerChar && pOwnerChar->IsAlive() && !DestroyBulletWhileAlive)
 	{
 		m_TeamMask = pOwnerChar->TeamMask();
