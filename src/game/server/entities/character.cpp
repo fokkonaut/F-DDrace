@@ -4220,8 +4220,9 @@ void CCharacter::DDracePostCoreTick()
 	}
 
 	// save values before processing tiles
-	bool InitialSafeArea = IsInSafeArea();
 	bool InitialTeleWeapon = HasTeleWeapon(m_TeleGunTeleportType);
+	bool InitialSafeArea = IsInSafeArea();
+	bool InitialNoBonusArea = m_NoBonusContext.m_InArea;
 
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
@@ -4260,7 +4261,7 @@ void CCharacter::DDracePostCoreTick()
 	{
 		// Processing order: Projectiles -> lasers -> characters. dont process teleport if it should be prevented,
 		// for example because we hit a safe area tile in the same tick as teleport would happen
-		if (!ShouldRemoveTeleProjLaser(true, InitialSafeArea, InitialTeleWeapon))
+		if (!ShouldRemoveTeleProjLaser(true, InitialTeleWeapon, InitialSafeArea, InitialNoBonusArea))
 		{
 			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
 			m_Core.m_Pos = m_TeleGunPos;
@@ -4932,12 +4933,13 @@ bool CCharacter::HasTeleWeapon(int Type)
 	return (Type == WEAPON_GRENADE && m_HasTeleGrenade) || (Type == WEAPON_GUN && m_HasTeleGun) || (Type == WEAPON_LASER && m_HasTeleLaser);
 }
 
-bool CCharacter::ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialSafeArea, bool InitialTeleWeapon)
+bool CCharacter::ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialTeleWeapon, bool InitialSafeArea, bool InitialNoBonusArea)
 {
 	bool IsPlotEdit = m_DrawEditor.Active();
-	bool SwitchedSafeArea = IsTeleWeapon && ((IsInSafeArea() && !InitialSafeArea) || (!IsInSafeArea() && InitialSafeArea));
 	bool EnabledTeleWeapon = IsTeleWeapon && !InitialTeleWeapon;
-	return IsPlotEdit || SwitchedSafeArea || EnabledTeleWeapon;
+	bool SwitchedSafeArea = IsTeleWeapon && ((IsInSafeArea() && !InitialSafeArea) || (!IsInSafeArea() && InitialSafeArea));
+	bool SwitchedNoBonusArea = IsTeleWeapon && ((m_NoBonusContext.m_InArea && !InitialNoBonusArea) || (!m_NoBonusContext.m_InArea && InitialNoBonusArea));
+	return IsPlotEdit || EnabledTeleWeapon || SwitchedSafeArea || SwitchedNoBonusArea;
 }
 
 int CCharacter::GetPowerHooked()

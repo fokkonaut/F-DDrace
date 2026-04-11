@@ -541,7 +541,7 @@ public:
 	int64 m_HookExceededTick;
 
 	bool HasTeleWeapon(int Type);
-	bool ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialSafeArea, bool InitialTeleWeapon);
+	bool ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialTeleWeapon, bool InitialSafeArea, bool InitialNoBonusArea);
 
 	// helicopter
 	CHelicopter *m_pHelicopter;

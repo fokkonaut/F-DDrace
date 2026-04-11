@@ -606,12 +606,15 @@ int CCollision::IntersectTeleProjLaser(vec2 Pos, const CTeleWeaponInfo &TeleWeap
 	int aIndices[2] = { GetIndex(Nx, Ny), GetFIndex(Nx, Ny) };
 	for (int i = 0; i < 2; i++)
 	{
-		bool BlockedVip = aIndices[i] == TILE_VIP_PLUS_ONLY && !TeleWeaponInfo.m_MoveRestrictionExtra.m_VipPlus;
-		bool BlockedRoom = aIndices[i] == TILE_ROOM && !TeleWeaponInfo.m_MoveRestrictionExtra.m_RoomKey;
-		bool LayerBlocked = BlockedVip || BlockedRoom || aIndices[i] == TILE_DFREEZE ||
-			aIndices[i] == TILE_PORTAL_RIFLE_STOP || aIndices[i] == TILE_REM_FIRST_PORTAL;
+		const int Index = aIndices[i];
+		bool BlockedVip = Index == TILE_VIP_PLUS_ONLY && !TeleWeaponInfo.m_MoveRestrictionExtra.m_VipPlus;
+		bool BlockedRoom = Index == TILE_ROOM && !TeleWeaponInfo.m_MoveRestrictionExtra.m_RoomKey;
+		bool SafeArea = Index == TILE_INGAME_OFF || Index == TILE_INGAME_ON;
+		bool NoBonus = Index == TILE_NO_BONUS_AREA || Index == TILE_NO_BONUS_AREA_LEAVE;
+		bool LayerBlocked = BlockedVip || BlockedRoom || SafeArea || NoBonus ||
+			Index == TILE_DFREEZE || Index == TILE_PORTAL_RIFLE_STOP || Index == TILE_REM_FIRST_PORTAL;
 		if (LayerBlocked)
-			return aIndices[i];
+			return Index;
 	}
 
 	// Door

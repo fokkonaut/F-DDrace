@@ -62,8 +62,9 @@ CProjectile::CProjectile
 
 	m_TeamMask = Mask128();
 	m_TeleportCancelled = false;
-	m_InitialSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
 	m_InitialTeleWeapon = GetTeleWeaponInfo().m_IsTeleWeapon;
+	m_InitialSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
+	m_InitialNoBonusArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->m_NoBonusContext.m_InArea;
 
 	for (int i = 0; i < NUM_SNAPINFO; i++)
 	{
@@ -90,9 +91,11 @@ vec2 CProjectile::GetPos(float Time)
 
 bool CProjectile::TryCancelTeleport(int TileIndex)
 {
+	bool SafeArea = TileIndex == TILE_INGAME_OFF || TileIndex == TILE_INGAME_ON;
+	bool NoBonus = TileIndex == TILE_NO_BONUS_AREA || TileIndex == TILE_NO_BONUS_AREA_LEAVE;
 	bool IsPlotDoor = TileIndex == TILE_STOPA;
-	if (IsPlotDoor || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM || TileIndex == TILE_DFREEZE ||
-		TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
+	if (IsPlotDoor || SafeArea || NoBonus || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM ||
+		TileIndex == TILE_DFREEZE || TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
 	{
 		m_TeleportCancelled = true;
 		return true;
@@ -170,7 +173,7 @@ void CProjectile::Tick()
 	}
 
 	m_TeamMask = Mask128();
-	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(TeleWeaponInfo.m_IsTeleWeapon, m_InitialSafeArea, m_InitialTeleWeapon);
+	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(TeleWeaponInfo.m_IsTeleWeapon, m_InitialTeleWeapon, m_InitialSafeArea, m_InitialNoBonusArea);
 	if (pOwnerChar && pOwnerChar->IsAlive() && !DestroyWhileAlive)
 	{
 		m_TeamMask = pOwnerChar->TeamMask();

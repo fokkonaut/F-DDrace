@@ -29,8 +29,9 @@ CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 
 	CCharacter *pOwner = GameServer()->GetPlayerChar(Owner);
 	m_TeamMask = pOwner ? pOwner->TeamMask() : Mask128();
-	m_InitialSafeArea = pOwner && pOwner->IsInSafeArea();
 	m_InitialTeleWeapon = GetTeleWeaponInfo().m_IsTeleWeapon;
+	m_InitialSafeArea = pOwner && pOwner->IsInSafeArea();
+	m_InitialNoBonusArea = pOwner && pOwner->m_NoBonusContext.m_InArea;
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CTuningParams *pTuning = GameServer()->TuningFromChrOrZone(m_Owner, m_TuneZone);
@@ -316,9 +317,11 @@ CCollision::CTeleWeaponInfo CLaser::GetTeleWeaponInfo()
 
 bool CLaser::TryCancelTeleport(int TileIndex)
 {
+	bool SafeArea = TileIndex == TILE_INGAME_OFF || TileIndex == TILE_INGAME_ON;
+	bool NoBonus = TileIndex == TILE_NO_BONUS_AREA || TileIndex == TILE_NO_BONUS_AREA_LEAVE;
 	bool IsPlotDoor = TileIndex == TILE_STOPA;
-	if (IsPlotDoor || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM || TileIndex == TILE_DFREEZE ||
-		TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
+	if (IsPlotDoor || SafeArea || NoBonus || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM ||
+		TileIndex == TILE_DFREEZE || TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
 	{
 		m_Energy = -1;
 		m_TeleportCancelled = true;
@@ -486,7 +489,7 @@ void CLaser::Reset()
 void CLaser::Tick()
 {
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(GetTeleWeaponInfo().m_IsTeleWeapon, m_InitialSafeArea, m_InitialTeleWeapon);
+	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(GetTeleWeaponInfo().m_IsTeleWeapon, m_InitialTeleWeapon, m_InitialSafeArea, m_InitialNoBonusArea);
 	// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
 	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || DestroyWhileAlive))
 	{
