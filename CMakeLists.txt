@@ -1317,26 +1317,20 @@ set_src(BASE GLOB_RECURSE src/base
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
   antibot.h
-  client.h
   config.h
   console.h
-  contacts.h
   demo.h
-  editor.h
   engine.h
   graphics.h
   http.h
-  input.h
   kernel.h
   keys.h
   map.h
   masterserver.h
   message.h
   server.h
-  serverbrowser.h
   sound.h
   storage.h
-  textrender.h
   uuid.h
 )
 set_src(ENGINE_SHARED GLOB src/engine/shared
