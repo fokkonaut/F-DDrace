@@ -139,6 +139,8 @@ void CProjectile::Tick()
 			{
 				pTargetEntity = (CHelicopter *)pEnt;
 				pTargetChr = pTargetEntity->GetOwner();
+				// Only teleport to players
+				m_TeleportCancelled = true;
 			}
 		}
 	}

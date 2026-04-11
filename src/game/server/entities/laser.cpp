@@ -140,6 +140,8 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			}
 			else
 				pChr = pEnt->GetOwner();
+			// Only teleport to players
+			m_TeleportCancelled = true;
 		}
 	}
 
