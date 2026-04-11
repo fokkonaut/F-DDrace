@@ -2920,23 +2920,31 @@ void CPlayer::SetHideBroadcasts(bool Set)
 		GameServer()->SendChatTarget(m_ClientID, Localize("You will now see all broadcasts again"));
 }
 
-void CPlayer::SetAntiPing(bool Set)
+void CPlayer::SetAntiPing(bool Set, bool Silent)
 {
 	if (m_AntiPing == Set)
 		return;
 	m_AntiPing = Set;
+	GameServer()->SendTuningParams(m_ClientID, m_pCharacter ? m_pCharacter->m_TuneZone : m_TuneZone);
+	
+	if (Silent)
+		return;
+
 	if (Set)
 		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)"));
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("AntiPing disabled"));
-	GameServer()->SendTuningParams(m_ClientID, m_pCharacter ? m_pCharacter->m_TuneZone : m_TuneZone);
 }
 
-void CPlayer::SetHighBandwidth(bool Value)
+void CPlayer::SetHighBandwidth(bool Value, bool Silent)
 {
 	if (Server()->GetHighBandwidth(m_ClientID) == Value)
 		return;
 	Server()->SetHighBandwidth(m_ClientID, Value);
+
+	if (Silent)
+		return;
+
 	if (Value)
 		GameServer()->SendChatTarget(m_ClientID, Localize("High Bandwidth mode enabled (full 50 snapshots instead of 25 per second)"));
 	else

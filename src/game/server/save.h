@@ -176,6 +176,9 @@ private:
 	std::vector< std::pair<int, int> > m_vCheckpoints;
 	int m_BirthdayGiftTicksLeft;
 	int m_InSafeArea;
+	int m_HasTeleGun;
+	int m_HasTeleGrenade;
+	int m_HasTeleLaser;
 
 	// core
 	int m_MoveRestrictionExtraRoomKey;
@@ -197,6 +200,9 @@ private:
 	int m_IsBirthdayGift;
 	int m_TaserShield;
 	int m_DoubleXpLifesLeft;
+	int m_SavePlayerDisconnect;
+	int m_HighBandwidth;
+	int m_AntiPing;
 
 	SSavedIdentity m_Identity;
 };

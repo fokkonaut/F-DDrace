@@ -5371,7 +5371,7 @@ int CCharacter::GetWeaponSpecial(int Type)
 		Special |= SPECIAL_JETPACK;
 	if (m_aSpreadWeapon[Type])
 		Special |= SPECIAL_SPREADWEAPON;
-	if ((Type == WEAPON_GUN && m_HasTeleGun) || (Type == WEAPON_GRENADE && m_HasTeleGrenade) || (Type == WEAPON_LASER && m_HasTeleLaser))
+	if (HasTeleWeapon(Type))
 		Special |= SPECIAL_TELEWEAPON;
 	if (Type == WEAPON_HAMMER && m_DoorHammer)
 		Special |= SPECIAL_DOORHAMMER;

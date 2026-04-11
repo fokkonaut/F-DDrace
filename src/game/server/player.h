@@ -527,10 +527,10 @@ public:
 	int64 m_LastVoteStatusUpdateTick;
 
 	// AntiPing
-	void SetAntiPing(bool Set);
+	void SetAntiPing(bool Set, bool Silent = false);
 	bool AntiPing() { return m_AntiPing; }
 
-	void SetHighBandwidth(bool Value);
+	void SetHighBandwidth(bool Value, bool Silent = false);
 
 private:
 	int64 m_WalletMoney;
