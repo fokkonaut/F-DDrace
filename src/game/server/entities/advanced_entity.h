@@ -79,7 +79,7 @@ protected:
 	int m_TileFIndex;
 	int m_MoveRestrictions;
 	int m_LastInOutTeleporter;
-	CCollision::MoveRestrictionExtra GetMoveRestrictionExtra();
+	CCollision::SMoveRestrictionExtra GetMoveRestrictionExtra();
 };
 
 #endif

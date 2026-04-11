@@ -95,10 +95,15 @@ void CProjectile::Tick()
 	vec2 NewPos;
 
 	CCharacter *pOwnerChar = m_Owner >= 0 ? GameServer()->GetPlayerChar(m_Owner) : 0;
-	bool IsTeleProj = pOwnerChar && ((m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun));
-	int Team = pOwnerChar ? pOwnerChar->Team() : 0;
+	CCollision::CTeleWeaponInfo TeleWeaponInfo;
+	if (pOwnerChar)
+	{
+		TeleWeaponInfo.m_IsTeleWeapon = (m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun);
+		TeleWeaponInfo.m_Team = pOwnerChar->Team();
+		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
+	}
+	int Collide = GameServer()->Collision()->IntersectLine(m_PrevPos, m_CurPos, &ColPos, &NewPos, TeleWeaponInfo);
 
-	int Collide = GameServer()->Collision()->IntersectLine(m_PrevPos, m_CurPos, &ColPos, &NewPos, IsTeleProj, Team);
 	CCharacter *pTargetChr = 0;
 	CAdvancedEntity *pTargetEntity = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
@@ -195,7 +200,7 @@ void CProjectile::Tick()
 			}
 		}
 
-		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) && IsTeleProj)
+		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) && TeleWeaponInfo.m_IsTeleWeapon)
 		{
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->GetPos() : ColPos);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
@@ -217,7 +222,7 @@ void CProjectile::Tick()
 
 			bool IsNotBlocked = true;
 			bool IsPlotDoor = Collide == TILE_STOPA;
-			if (IsPlotDoor || Collide == TILE_VIP_PLUS_ONLY || Collide == TILE_PORTAL_RIFLE_STOP || Collide == TILE_REM_FIRST_PORTAL)
+			if (IsPlotDoor || Collide == TILE_VIP_PLUS_ONLY || Collide == TILE_ROOM || Collide == TILE_PORTAL_RIFLE_STOP || Collide == TILE_REM_FIRST_PORTAL)
 				IsNotBlocked = false;
 
 			if (IsNotBlocked && (TileFIndex == TILE_ALLOW_TELE_GUN

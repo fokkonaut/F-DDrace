@@ -282,7 +282,7 @@ static int Here(int MoveRestrictions)
 	return MoveRestrictions;
 }
 
-static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags, CCollision::MoveRestrictionExtra Extra)
+static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags, CCollision::SMoveRestrictionExtra Extra)
 {
 	Flags = Flags & (TILEFLAG_HFLIP | TILEFLAG_VFLIP | TILEFLAG_ROTATE);
 	switch(Tile)
@@ -348,7 +348,7 @@ static int GetMoveRestrictionsMask(int Direction)
 	return 0;
 }
 
-static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::MoveRestrictionExtra Extra)
+static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::SMoveRestrictionExtra Extra)
 {
 	int Result = GetMoveRestrictionsRaw(Direction, Tile, Flags, Extra);
 	// Generally, stoppers only have an effect if they block us from moving
@@ -369,7 +369,7 @@ static int GetMoveRestrictions(int Direction, int Tile, int Flags, CCollision::M
 	return (Result&GetMoveRestrictionsMask(Direction))|Extras;
 }
 
-int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, int OverrideCenterTileIndex, MoveRestrictionExtra Extra)
+int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance, int OverrideCenterTileIndex, SMoveRestrictionExtra Extra)
 {
 	dbg_assert(0.0f <= Distance && Distance <= 32.0f, "invalid distance");
 	int Restrictions = 0;
@@ -439,7 +439,7 @@ int CCollision::GetTile(int x, int y)
 }
 
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool IsTeleProjectile, int Team)
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, const CTeleWeaponInfo &TeleWeaponInfo)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -458,12 +458,12 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 			return CheckPointRes == 1 ? GetCollisionAt(Pos.x, Pos.y) : GetFCollisionAt(Pos.x, Pos.y);
 		}
 
-		if (IsTeleProjectile)
+		if (TeleWeaponInfo.m_IsTeleWeapon)
 		{
 			int ix = round_to_int(Pos.x);
 			int iy = round_to_int(Pos.y);
 			// Avoid tele projectile skipping
-			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, Team);
+			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, TeleWeaponInfo);
 			if (TeleBlockRes)
 			{
 				if (pOutCollision)
@@ -540,7 +540,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision,
 	return 0;
 }
 
-int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, bool IsTeleLaser, int Team)
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, const CTeleWeaponInfo &TeleWeaponInfo)
 {
 	const int End = distance(Pos0, Pos1)+1;
 	const float InverseEnd = 1.0f/End;
@@ -577,9 +577,9 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 		}
 
 		// Avoid telelaser skipping
-		if (IsTeleLaser)
+		if (TeleWeaponInfo.m_IsTeleWeapon)
 		{
-			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, Team);
+			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, TeleWeaponInfo);
 			if (TeleBlockRes)
 			{
 				if (pOutCollision)
@@ -599,19 +599,24 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 	return 0;
 }
 
-int CCollision::IntersectTeleProjLaser(int ix, int iy, vec2 Pos, int Team)
+int CCollision::IntersectTeleProjLaser(int ix, int iy, vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo)
 {
 	int Nx = clamp(ix / 32, 0, m_Width - 1);
 	int Ny = clamp(iy / 32, 0, m_Height - 1);
-	int TileIndex = GetIndex(Nx, Ny);
-	int TileFIndex = GetFIndex(Nx, Ny);
-	bool GameLayerBlocked = TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL;
-	bool FrontLayerBlocked = TileFIndex == TILE_VIP_PLUS_ONLY || TileFIndex == TILE_PORTAL_RIFLE_STOP || TileFIndex == TILE_REM_FIRST_PORTAL;
-	bool IsClosedPlotDoor = CheckPointDoor(Pos, Team, true, true) != -1;
-	if (GameLayerBlocked)
-		return TileIndex;
-	if (FrontLayerBlocked)
-		return TileFIndex;
+	
+	// Game and Front
+	int aIndices[2] = { GetIndex(Nx, Ny), GetFIndex(Nx, Ny) };
+	for (int i = 0; i < 2; i++)
+	{
+		bool BlockedVip = aIndices[i] == TILE_VIP_PLUS_ONLY && !TeleWeaponInfo.m_MoveRestrictionExtra.m_VipPlus;
+		bool BlockedRoom = aIndices[i] == TILE_ROOM && !TeleWeaponInfo.m_MoveRestrictionExtra.m_RoomKey;
+		bool LayerBlocked = BlockedVip || BlockedRoom || aIndices[i] == TILE_PORTAL_RIFLE_STOP || aIndices[i] == TILE_REM_FIRST_PORTAL;
+		if (LayerBlocked)
+			return aIndices[i];
+	}
+
+	// Door
+	bool IsClosedPlotDoor = CheckPointDoor(Pos, TeleWeaponInfo.m_Team, true, true) != -1;
 	if (IsClosedPlotDoor)
 		return TILE_STOPA;
 	return 0;
@@ -721,7 +726,7 @@ static int DirSign(int Direction)
 	return 0;
 }
 
-void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStoppers, MoveRestrictionExtra Extra, bool *pGrounded)
+void CCollision::MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStoppers, SMoveRestrictionExtra Extra, bool *pGrounded)
 {
 	if (Size.x > ms_MinStaticPhysSize || Size.y > ms_MinStaticPhysSize)
 	{

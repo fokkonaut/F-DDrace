@@ -198,9 +198,9 @@ bool CAdvancedEntity::IsSwitchActiveCb(int Number, void* pUser)
 	return pCollision->m_pSwitchers && pThis->m_DDTeam != TEAM_SUPER && pCollision->m_pSwitchers[Number].m_Status[pThis->m_DDTeam];
 }
 
-CCollision::MoveRestrictionExtra CAdvancedEntity::GetMoveRestrictionExtra()
+CCollision::SMoveRestrictionExtra CAdvancedEntity::GetMoveRestrictionExtra()
 {
-	CCollision::MoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::MoveRestrictionExtra();
+	CCollision::SMoveRestrictionExtra Extra = GetOwner() ? GetOwner()->Core()->m_MoveRestrictionExtra : CCollision::SMoveRestrictionExtra();
 	if (!IsFlags(EFlags::ALLOW_VIP_PLUS))
 		Extra.m_VipPlus = false; // explicitly disallow passing the vip room if the entity wants to force it
 	return Extra;

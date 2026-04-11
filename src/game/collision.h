@@ -86,26 +86,39 @@ public:
 	int GetCollisionAt(float x, float y) { return GetTile(round_to_int(x), round_to_int(y)); }
 	int GetWidth() { return m_Width; };
 	int GetHeight() { return m_Height; };
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, bool IsTeleProjectile = false, int Team = 0);
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, bool IsTeleLaser = false, int Team = 0);
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
-	int IntersectTeleProjLaser(int ix, int iy, vec2 Pos, int Team);
-	void MovePoint(vec2* pInoutPos, vec2* pInoutVel, float Elasticity, int* pBounces);
 
-	struct MoveRestrictionExtra
+	struct SMoveRestrictionExtra
 	{
 		bool m_RoomKey;
 		bool m_VipPlus;
 
-		MoveRestrictionExtra()
+		SMoveRestrictionExtra()
 		{
 			m_RoomKey = false;
 			m_VipPlus = false;
 		}
 	};
 
-	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra(), bool *pGrounded = nullptr);
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, MoveRestrictionExtra Extra = MoveRestrictionExtra())
+	class CTeleWeaponInfo
+	{
+	public:
+		bool m_IsTeleWeapon;
+		int m_Team;
+		SMoveRestrictionExtra m_MoveRestrictionExtra;
+		CTeleWeaponInfo() : m_IsTeleWeapon(false), m_Team(0) {}
+		CTeleWeaponInfo(bool IsTeleWeapon, int Team, const SMoveRestrictionExtra &Extra)
+			: m_IsTeleWeapon(IsTeleWeapon), m_Team(Team), m_MoveRestrictionExtra(Extra) {}
+	};
+
+	int IntersectTeleProjLaser(int ix, int iy, vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo);
+
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, const CTeleWeaponInfo &TeleWeaponInfo = CTeleWeaponInfo());
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, const CTeleWeaponInfo &TeleWeaponInfo = CTeleWeaponInfo());
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr);
+	void MovePoint(vec2* pInoutPos, vec2* pInoutVel, float Elasticity, int* pBounces);
+
+	void MoveBox(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, SMoveRestrictionExtra Extra = SMoveRestrictionExtra(), bool *pGrounded = nullptr);
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool CheckStopper, SMoveRestrictionExtra Extra = SMoveRestrictionExtra())
 	{
 		MoveBox(0, 0, pInoutPos, pInoutVel, Size, Elasticity, CheckStopper, Extra);
 	}
@@ -125,8 +138,8 @@ public:
 	int GetIndex(vec2 PrevPos, vec2 Pos);
 	int GetFIndex(int x, int y);
 
-	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, MoveRestrictionExtra Extra = MoveRestrictionExtra());
-	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f, MoveRestrictionExtra Extra = MoveRestrictionExtra())
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1, SMoveRestrictionExtra Extra = SMoveRestrictionExtra());
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f, SMoveRestrictionExtra Extra = SMoveRestrictionExtra())
 	{
 		return GetMoveRestrictions(0, 0, Pos, Distance, -1, Extra);
 	}

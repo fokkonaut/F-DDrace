@@ -271,7 +271,7 @@ public:
 
 	int m_FakeTuneCID;
 
-	CCollision::MoveRestrictionExtra m_MoveRestrictionExtra;
+	CCollision::SMoveRestrictionExtra m_MoveRestrictionExtra;
 
 	bool m_FightStarted;
 	bool m_ActivelyPlayingDurak;

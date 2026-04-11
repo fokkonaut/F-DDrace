@@ -313,9 +313,14 @@ void CLaser::DoBounce()
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	int Team = pOwnerChar ? pOwnerChar->Team() : 0;
-	bool IsTeleLaser = pOwnerChar && (m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser);
-	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, IsTeleLaser, Team);
+	CCollision::CTeleWeaponInfo TeleWeaponInfo;
+	if (pOwnerChar)
+	{
+		TeleWeaponInfo.m_IsTeleWeapon = m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser;
+		TeleWeaponInfo.m_Team = pOwnerChar->Team();
+		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
+	}
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, TeleWeaponInfo);
 
 	if (Res)
 	{
@@ -360,7 +365,7 @@ void CLaser::DoBounce()
 				m_Energy = -1;
 
 			bool IsPlotDoor = Res == TILE_STOPA;
-			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
+			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_ROOM || Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
 			{
 				m_Energy = -1;
 				m_TeleportCancelled = true;
