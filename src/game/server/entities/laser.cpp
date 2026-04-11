@@ -310,7 +310,8 @@ CCollision::CTeleWeaponInfo CLaser::GetTeleWeaponInfo()
 	{
 		TeleWeaponInfo.m_IsTeleWeapon = pOwnerChar->HasTeleWeapon(m_Type);
 		TeleWeaponInfo.m_Team = pOwnerChar->Team();
-		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
+		if (Config()->m_SvTeleWeaponThroughRoomVip)
+			TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
 	}
 	return TeleWeaponInfo;
 }

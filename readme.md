@@ -183,6 +183,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_old_jetpack_sound` |
 | `sv_block_points_delay` |
 | `sv_always_tele_weapon` |
+| `sv_tele_weapon_through_room_vip` |
 | `sv_touched_kills` |
 | `sv_tele_rifle_allow_blocks` |
 | `sv_minigame_afk_auto_leave` |
