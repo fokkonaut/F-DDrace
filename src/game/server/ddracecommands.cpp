@@ -2010,9 +2010,9 @@ void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserDa
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
+	int Victim = pResult->NumArguments() == 2 ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter* pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pChr->AlwaysTeleWeapon(!pChr->m_AlwaysTeleWeapon, pResult->m_ClientID);
+	if (pChr) pChr->AlwaysTeleWeapon(pResult->GetInteger(0), pResult->m_ClientID);
 }
 
 void CGameContext::ConTeleGun(IConsole::IResult* pResult, void* pUserData)

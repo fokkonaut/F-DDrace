@@ -178,7 +178,7 @@ public:
 	void Invisible(bool Set = true, int FromID = -1, bool Silent = false);
 	void Item(int Item, int FromID = -1, bool Silent = false);
 	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
-	void AlwaysTeleWeapon(bool Set = true, int FromID = -1, bool Silent = false);
+	void AlwaysTeleWeapon(int Mode = 1, int FromID = -1, bool Silent = false);
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void TeeControl(bool Set = true, int ForcedID = -1, int FromID = -1, bool Silent = false);
 	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
@@ -455,7 +455,7 @@ public:
 	bool m_aSpreadWeapon[NUM_WEAPONS];
 	CEntity* m_pTelekinesisEntity;
 	CLightsaber* m_pLightsaber;
-	bool m_AlwaysTeleWeapon;
+	int m_AlwaysTeleWeapon;
 	bool m_DoorHammer;
 	bool m_FakeTuneCollision;
 	bool m_OldFakeTuneCollision;

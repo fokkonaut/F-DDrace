@@ -213,7 +213,7 @@ CONSOLE_COMMAND("ddracemode", "?v[id]", CFGFLAG_SERVER, ConDDraceMode, this, "De
 CONSOLE_COMMAND("bloody", "?v[id]", CFGFLAG_SERVER, ConBloody, this, "Toggles bloody for player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("strongbloody", "?v[id]", CFGFLAG_SERVER, ConStrongBloody, this, "Toggles strong bloody for player v", AUTHED_ADMIN)
 
-CONSOLE_COMMAND("alwaysteleweapon", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConAlwaysTeleWeapon, this, "Lets player v always use tele weapons", AUTHED_ADMIN)
+CONSOLE_COMMAND("alwaysteleweapon", "i[mode] ?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConAlwaysTeleWeapon, this, "Lets player v always use tele weapons (1=red/evil, 2=blue/keep velocity)", AUTHED_ADMIN)
 CONSOLE_COMMAND("telegun", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleGun, this, "Gives a tele gun to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("telegrenade", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleGrenade, this, "Gives a tele grenade to player v", AUTHED_ADMIN)
 CONSOLE_COMMAND("telelaser", "?v[id]", CFGFLAG_SERVER|CMDFLAG_TEST, ConTeleLaser, this, "Gives a tele laser to player v", AUTHED_ADMIN)
