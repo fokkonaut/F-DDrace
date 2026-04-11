@@ -110,7 +110,7 @@ public:
 			: m_IsTeleWeapon(IsTeleWeapon), m_Team(Team), m_MoveRestrictionExtra(Extra) {}
 	};
 
-	int IntersectTeleProjLaser(int ix, int iy, vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo);
+	int IntersectTeleProjLaser(vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo);
 
 	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, const CTeleWeaponInfo &TeleWeaponInfo = CTeleWeaponInfo());
 	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int* pTeleNr, const CTeleWeaponInfo &TeleWeaponInfo = CTeleWeaponInfo());

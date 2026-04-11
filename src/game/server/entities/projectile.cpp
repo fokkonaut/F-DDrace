@@ -54,6 +54,8 @@ CProjectile::CProjectile
 	// F-DDrace
 	m_Spooky = Spooky;
 
+	m_TeleportCancelled = false;
+
 	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
 	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
@@ -83,6 +85,18 @@ void CProjectile::Reset()
 vec2 CProjectile::GetPos(float Time)
 {
 	return CalcPos(m_Pos, m_Direction, m_Curvature, m_Speed, Time);
+}
+
+bool CProjectile::TryCancelTeleport(int TileIndex)
+{
+	bool IsPlotDoor = TileIndex == TILE_STOPA;
+	if (IsPlotDoor || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM || TileIndex == TILE_DFREEZE ||
+		TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
+	{
+		m_TeleportCancelled = true;
+		return true;
+	}
+	return false;
 }
 
 void CProjectile::Tick()
@@ -200,9 +214,17 @@ void CProjectile::Tick()
 			}
 		}
 
+		// if we are on a disallowed block dont process our teleport. can be abused to glitch through due to ProjStartPos offset hitting floor with telegun
+		if (pOwnerChar)
+		{
+			int BlockedRes = GameServer()->Collision()->IntersectTeleProjLaser(pOwnerChar->GetPos(), TeleWeaponInfo);
+			TryCancelTeleport(BlockedRes);
+		}
+
 		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) && TeleWeaponInfo.m_IsTeleWeapon)
 		{
-			int MapIndex = GameServer()->Collision()->GetPureMapIndex(pTargetChr ? pTargetChr->GetPos() : ColPos);
+			vec2 Pos = pTargetChr ? pTargetChr->GetPos() : ColPos;
+			int MapIndex = GameServer()->Collision()->GetPureMapIndex(Pos);
 			int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
 			bool IsSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_TELE_GUN || pOwnerChar->m_AlwaysTeleWeapon;
 			bool IsBlueSwitchTeleGun = GameServer()->Collision()->IsSwitch(MapIndex) == TILE_ALLOW_BLUE_TELE_GUN;
@@ -220,13 +242,13 @@ void CProjectile::Tick()
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 			}
 
-			bool IsNotBlocked = true;
-			bool IsPlotDoor = Collide == TILE_STOPA;
-			if (IsPlotDoor || Collide == TILE_VIP_PLUS_ONLY || Collide == TILE_ROOM || Collide == TILE_DFREEZE ||
-				Collide == TILE_PORTAL_RIFLE_STOP || Collide == TILE_REM_FIRST_PORTAL)
-				IsNotBlocked = false;
+			// check tile collision (int Collide). If a player is on a tile that should block and we shoot at him, we can bug through
+			int BlockedRes = Collide;
+			if (pTargetChr)
+				BlockedRes = GameServer()->Collision()->IntersectTeleProjLaser(Pos, TeleWeaponInfo);
+			TryCancelTeleport(BlockedRes);
 
-			if (IsNotBlocked && (TileFIndex == TILE_ALLOW_TELE_GUN
+			if (!m_TeleportCancelled && (TileFIndex == TILE_ALLOW_TELE_GUN
 				|| TileFIndex == TILE_ALLOW_BLUE_TELE_GUN
 				|| IsSwitchTeleGun
 				|| IsBlueSwitchTeleGun
@@ -236,7 +258,7 @@ void CProjectile::Tick()
 				vec2 PossiblePos;
 
 				if (!Collide)
-					Found = GetNearestAirPosPlayer(pTargetChr ? pTargetChr->GetPos() : ColPos, &PossiblePos);
+					Found = GetNearestAirPosPlayer(Pos, &PossiblePos);
 				else
 					Found = GetNearestAirPos(NewPos, m_CurPos, &PossiblePos);
 

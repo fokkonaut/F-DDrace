@@ -50,6 +50,8 @@ private:
 	bool m_Explosive;
 
 	// F-DDrace
+	bool m_TeleportCancelled;
+	bool TryCancelTeleport(int TileIndex);
 
 	int m_Bouncing;
 	bool m_Freeze;

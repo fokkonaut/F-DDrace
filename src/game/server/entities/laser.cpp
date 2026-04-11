@@ -218,15 +218,22 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 
 			return true;
 		}
+		
+		if (IsCharacter)
+		{
+			// if a player is on a tile that should block and we shoot at him, we can bug through
+			int BlockedRes = GameServer()->Collision()->IntersectTeleProjLaser(pChr->GetPos(), GetTeleWeaponInfo());
+			TryCancelTeleport(BlockedRes);
 
-		if (IsCharacter && pChr->m_IsZombie)
-		{
-			vec2 Pos = At + normalize(At - From) * vec2(-32.f, -32.f);
-			GameServer()->CreateExplosion(Pos, m_Owner, WEAPON_LASER, true, pOwnerChar ? pOwnerChar->Team() : pChr->Team(), m_TeamMask);
-		}
-		else if (pChr)
-		{
-			LaserHitCharacter(pChr);
+			if (pChr->m_IsZombie)
+			{
+				vec2 Pos = At + normalize(At - From) * vec2(-32.f, -32.f);
+				GameServer()->CreateExplosion(Pos, m_Owner, WEAPON_LASER, true, pOwnerChar ? pOwnerChar->Team() : pChr->Team(), m_TeamMask);
+			}
+			else
+			{
+				LaserHitCharacter(pChr);
+			}
 		}
 
 	}
@@ -288,6 +295,32 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	return true;
 }
 
+CCollision::CTeleWeaponInfo CLaser::GetTeleWeaponInfo()
+{
+	CCollision::CTeleWeaponInfo TeleWeaponInfo;
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if (pOwnerChar)
+	{
+		TeleWeaponInfo.m_IsTeleWeapon = m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser;
+		TeleWeaponInfo.m_Team = pOwnerChar->Team();
+		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
+	}
+	return TeleWeaponInfo;
+}
+
+bool CLaser::TryCancelTeleport(int TileIndex)
+{
+	bool IsPlotDoor = TileIndex == TILE_STOPA;
+	if (IsPlotDoor || TileIndex == TILE_VIP_PLUS_ONLY || TileIndex == TILE_ROOM || TileIndex == TILE_DFREEZE ||
+		TileIndex == TILE_PORTAL_RIFLE_STOP || TileIndex == TILE_REM_FIRST_PORTAL)
+	{
+		m_Energy = -1;
+		m_TeleportCancelled = true;
+		return true;
+	}
+	return false;
+}
+
 void CLaser::DoBounce()
 {
 	m_EvalTick = Server()->Tick();
@@ -311,16 +344,7 @@ void CLaser::DoBounce()
 	}
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
-
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	CCollision::CTeleWeaponInfo TeleWeaponInfo;
-	if (pOwnerChar)
-	{
-		TeleWeaponInfo.m_IsTeleWeapon = m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser;
-		TeleWeaponInfo.m_Team = pOwnerChar->Team();
-		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
-	}
-	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, TeleWeaponInfo);
+	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, GetTeleWeaponInfo());
 
 	if (Res)
 	{
@@ -364,13 +388,7 @@ void CLaser::DoBounce()
 			if (m_Bounces > m_BounceNum)
 				m_Energy = -1;
 
-			bool IsPlotDoor = Res == TILE_STOPA;
-			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_ROOM || Res == TILE_DFREEZE ||
-				Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
-			{
-				m_Energy = -1;
-				m_TeleportCancelled = true;
-			}
+			TryCancelTeleport(Res);
 
 			GameServer()->CreateSound(m_Pos, SOUND_LASER_BOUNCE, m_TeamMask);
 		}
@@ -385,6 +403,7 @@ void CLaser::DoBounce()
 		}
 	}
 
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_LASER)
 	{

@@ -460,10 +460,8 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* p
 
 		if (TeleWeaponInfo.m_IsTeleWeapon)
 		{
-			int ix = round_to_int(Pos.x);
-			int iy = round_to_int(Pos.y);
 			// Avoid tele projectile skipping
-			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, TeleWeaponInfo);
+			int TeleBlockRes = IntersectTeleProjLaser(Pos, TeleWeaponInfo);
 			if (TeleBlockRes)
 			{
 				if (pOutCollision)
@@ -579,7 +577,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 		// Avoid telelaser skipping
 		if (TeleWeaponInfo.m_IsTeleWeapon)
 		{
-			int TeleBlockRes = IntersectTeleProjLaser(ix, iy, Pos, TeleWeaponInfo);
+			int TeleBlockRes = IntersectTeleProjLaser(Pos, TeleWeaponInfo);
 			if (TeleBlockRes)
 			{
 				if (pOutCollision)
@@ -599,10 +597,10 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2* pOutCollisio
 	return 0;
 }
 
-int CCollision::IntersectTeleProjLaser(int ix, int iy, vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo)
+int CCollision::IntersectTeleProjLaser(vec2 Pos, const CTeleWeaponInfo &TeleWeaponInfo)
 {
-	int Nx = clamp(ix / 32, 0, m_Width - 1);
-	int Ny = clamp(iy / 32, 0, m_Height - 1);
+	int Nx = clamp(round_to_int(Pos.x) / 32, 0, m_Width - 1);
+	int Ny = clamp(round_to_int(Pos.y) / 32, 0, m_Height - 1);
 	
 	// Game and Front
 	int aIndices[2] = { GetIndex(Nx, Ny), GetFIndex(Nx, Ny) };

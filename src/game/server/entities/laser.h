@@ -22,6 +22,9 @@ protected:
 	bool HitEntity(vec2 From, vec2 To);
 	void DoBounce();
 
+	CCollision::CTeleWeaponInfo GetTeleWeaponInfo();
+	bool TryCancelTeleport(int TileIndex);
+
 private:
 	vec2 m_From;
 	vec2 m_Dir;
