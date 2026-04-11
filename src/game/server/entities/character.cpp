@@ -4219,6 +4219,10 @@ void CCharacter::DDracePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
+	// save values before processing tiles
+	bool InitialSafeArea = IsInSafeArea();
+	bool InitialTeleWeapon = HasTeleWeapon(m_TeleGunTeleportType);
+
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
 	if (!m_Alive)
@@ -4252,15 +4256,20 @@ void CCharacter::DDracePostCoreTick()
 	m_ProcessedMoneyTile = false;
 
 	// teleport gun
-	if (m_TeleGunTeleport)
+	if (m_TeleGunTeleportType != -1)
 	{
-		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
-		m_Core.m_Pos = m_TeleGunPos;
-		if (!m_IsBlueTeleGunTeleport)
-			m_Core.m_Vel = vec2(0, 0);
-		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), TeamMask());
-		GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
-		m_TeleGunTeleport = false;
+		// Processing order: Projectiles -> lasers -> characters. dont process teleport if it should be prevented,
+		// for example because we hit a safe area tile in the same tick as teleport would happen
+		if (!ShouldRemoveTeleProjLaser(true, InitialSafeArea, InitialTeleWeapon))
+		{
+			GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID(), TeamMask());
+			m_Core.m_Pos = m_TeleGunPos;
+			if (!m_IsBlueTeleGunTeleport)
+				m_Core.m_Vel = vec2(0, 0);
+			GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID(), TeamMask());
+			GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, TeamMask());
+		}
+		m_TeleGunTeleportType = -1;
 		m_IsBlueTeleGunTeleport = false;
 	}
 
@@ -4361,7 +4370,7 @@ void CCharacter::DDraceInit()
 	m_HasTeleGun = false;
 	m_HasTeleLaser = false;
 	m_HasTeleGrenade = false;
-	m_TeleGunTeleport = false;
+	m_TeleGunTeleportType = -1;
 	m_IsBlueTeleGunTeleport = false;
 	m_Solo = false;
 
@@ -4916,6 +4925,19 @@ int CCharacter::SendDroppedFlagCooldown(int SnappingClient)
 	if (pFlag && !pFlag->GetCarrier())
 		return Team;
 	return -1;
+}
+
+bool CCharacter::HasTeleWeapon(int Type)
+{
+	return (Type == WEAPON_GRENADE && m_HasTeleGrenade) || (Type == WEAPON_GUN && m_HasTeleGun) || (Type == WEAPON_LASER && m_HasTeleLaser);
+}
+
+bool CCharacter::ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialSafeArea, bool InitialTeleWeapon)
+{
+	bool IsPlotEdit = m_DrawEditor.Active();
+	bool SwitchedSafeArea = IsTeleWeapon && ((IsInSafeArea() && !InitialSafeArea) || (!IsInSafeArea() && InitialSafeArea));
+	bool EnabledTeleWeapon = IsTeleWeapon && !InitialTeleWeapon;
+	return IsPlotEdit || SwitchedSafeArea || EnabledTeleWeapon;
 }
 
 int CCharacter::GetPowerHooked()

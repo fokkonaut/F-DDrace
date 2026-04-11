@@ -369,7 +369,7 @@ public:
 	bool m_HasTeleGrenade;
 	bool m_HasTeleLaser;
 	vec2 m_TeleGunPos;
-	bool m_TeleGunTeleport;
+	int m_TeleGunTeleportType;
 	bool m_IsBlueTeleGunTeleport;
 	int m_StrongWeakID;
 
@@ -539,6 +539,9 @@ public:
 	int64 m_LastNoBonusTick;
 	int m_LastJumpedTotal;
 	int64 m_HookExceededTick;
+
+	bool HasTeleWeapon(int Type);
+	bool ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialSafeArea, bool InitialTeleWeapon);
 
 	// helicopter
 	CHelicopter *m_pHelicopter;

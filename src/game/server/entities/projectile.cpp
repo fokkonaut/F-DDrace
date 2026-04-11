@@ -106,7 +106,7 @@ CCollision::CTeleWeaponInfo CProjectile::GetTeleWeaponInfo()
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwnerChar)
 	{
-		TeleWeaponInfo.m_IsTeleWeapon = (m_Type == WEAPON_GRENADE && pOwnerChar->m_HasTeleGrenade) || (m_Type == WEAPON_GUN && pOwnerChar->m_HasTeleGun);
+		TeleWeaponInfo.m_IsTeleWeapon = pOwnerChar->HasTeleWeapon(m_Type);
 		TeleWeaponInfo.m_Team = pOwnerChar->Team();
 		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
 	}
@@ -170,16 +170,13 @@ void CProjectile::Tick()
 	}
 
 	m_TeamMask = Mask128();
-	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
-	bool SwitchedSafeArea = TeleWeaponInfo.m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_InitialSafeArea) || (!pOwnerChar->IsInSafeArea() && m_InitialSafeArea));
-	bool EnabledTeleWeapon = TeleWeaponInfo.m_IsTeleWeapon && !m_InitialTeleWeapon;
-	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea || EnabledTeleWeapon;
-	if (pOwnerChar && pOwnerChar->IsAlive() && !DestroyBulletWhileAlive)
+	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(TeleWeaponInfo.m_IsTeleWeapon, m_InitialSafeArea, m_InitialTeleWeapon);
+	if (pOwnerChar && pOwnerChar->IsAlive() && !DestroyWhileAlive)
 	{
 		m_TeamMask = pOwnerChar->TeamMask();
 	}
 	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath
-		|| GameServer()->Arenas()->FightStarted(m_Owner) || DestroyBulletWhileAlive))
+		|| GameServer()->Arenas()->FightStarted(m_Owner) || DestroyWhileAlive))
 	{
 		// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
 		GameWorld()->DestroyEntity(this);
@@ -278,7 +275,7 @@ void CProjectile::Tick()
 				if (Found)
 				{
 					pOwnerChar->m_TeleGunPos = PossiblePos;
-					pOwnerChar->m_TeleGunTeleport = true;
+					pOwnerChar->m_TeleGunTeleportType = m_Type;
 					pOwnerChar->m_IsBlueTeleGunTeleport = TileFIndex == TILE_ALLOW_BLUE_TELE_GUN || IsBlueSwitchTeleGun;
 				}
 			}

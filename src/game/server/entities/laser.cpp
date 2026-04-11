@@ -307,7 +307,7 @@ CCollision::CTeleWeaponInfo CLaser::GetTeleWeaponInfo()
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	if (pOwnerChar)
 	{
-		TeleWeaponInfo.m_IsTeleWeapon = m_Type == WEAPON_LASER && pOwnerChar->m_HasTeleLaser;
+		TeleWeaponInfo.m_IsTeleWeapon = pOwnerChar->HasTeleWeapon(m_Type);
 		TeleWeaponInfo.m_Team = pOwnerChar->Team();
 		TeleWeaponInfo.m_MoveRestrictionExtra = pOwnerChar->Core()->m_MoveRestrictionExtra;
 	}
@@ -433,7 +433,7 @@ void CLaser::DoBounce()
 		if (Found)
 		{
 			pOwnerChar->m_TeleGunPos = PossiblePos;
-			pOwnerChar->m_TeleGunTeleport = true;
+			pOwnerChar->m_TeleGunTeleportType = m_Type;
 			pOwnerChar->m_IsBlueTeleGunTeleport = m_IsBlueTeleport;
 		}
 	}
@@ -480,16 +480,12 @@ void CLaser::Reset()
 
 void CLaser::Tick()
 {
-	CCollision::CTeleWeaponInfo TeleWeaponInfo = GetTeleWeaponInfo();
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
-	bool SwitchedSafeArea = TeleWeaponInfo.m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_InitialSafeArea) || (!pOwnerChar->IsInSafeArea() && m_InitialSafeArea));
-	bool EnabledTeleWeapon = TeleWeaponInfo.m_IsTeleWeapon && !m_InitialTeleWeapon;
-	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea || EnabledTeleWeapon;
+	bool DestroyWhileAlive = pOwnerChar && pOwnerChar->ShouldRemoveTeleProjLaser(GetTeleWeaponInfo().m_IsTeleWeapon, m_InitialSafeArea, m_InitialTeleWeapon);
 	// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
-	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || DestroyBulletWhileAlive))
+	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || DestroyWhileAlive))
 	{
-		if (!(pOwnerChar && pOwnerChar->IsAlive()) || DestroyBulletWhileAlive)
+		if (!(pOwnerChar && pOwnerChar->IsAlive()) || DestroyWhileAlive)
 		{
 			Reset();
 			return;
