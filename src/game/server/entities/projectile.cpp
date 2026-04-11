@@ -222,7 +222,8 @@ void CProjectile::Tick()
 
 			bool IsNotBlocked = true;
 			bool IsPlotDoor = Collide == TILE_STOPA;
-			if (IsPlotDoor || Collide == TILE_VIP_PLUS_ONLY || Collide == TILE_ROOM || Collide == TILE_PORTAL_RIFLE_STOP || Collide == TILE_REM_FIRST_PORTAL)
+			if (IsPlotDoor || Collide == TILE_VIP_PLUS_ONLY || Collide == TILE_ROOM || Collide == TILE_DFREEZE ||
+				Collide == TILE_PORTAL_RIFLE_STOP || Collide == TILE_REM_FIRST_PORTAL)
 				IsNotBlocked = false;
 
 			if (IsNotBlocked && (TileFIndex == TILE_ALLOW_TELE_GUN

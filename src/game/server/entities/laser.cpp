@@ -365,7 +365,8 @@ void CLaser::DoBounce()
 				m_Energy = -1;
 
 			bool IsPlotDoor = Res == TILE_STOPA;
-			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_ROOM || Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
+			if (IsPlotDoor || Res == TILE_VIP_PLUS_ONLY || Res == TILE_ROOM || Res == TILE_DFREEZE ||
+				Res == TILE_PORTAL_RIFLE_STOP || Res == TILE_REM_FIRST_PORTAL)
 			{
 				m_Energy = -1;
 				m_TeleportCancelled = true;

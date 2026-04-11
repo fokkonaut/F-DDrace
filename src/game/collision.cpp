@@ -610,7 +610,8 @@ int CCollision::IntersectTeleProjLaser(int ix, int iy, vec2 Pos, const CTeleWeap
 	{
 		bool BlockedVip = aIndices[i] == TILE_VIP_PLUS_ONLY && !TeleWeaponInfo.m_MoveRestrictionExtra.m_VipPlus;
 		bool BlockedRoom = aIndices[i] == TILE_ROOM && !TeleWeaponInfo.m_MoveRestrictionExtra.m_RoomKey;
-		bool LayerBlocked = BlockedVip || BlockedRoom || aIndices[i] == TILE_PORTAL_RIFLE_STOP || aIndices[i] == TILE_REM_FIRST_PORTAL;
+		bool LayerBlocked = BlockedVip || BlockedRoom || aIndices[i] == TILE_DFREEZE ||
+			aIndices[i] == TILE_PORTAL_RIFLE_STOP || aIndices[i] == TILE_REM_FIRST_PORTAL;
 		if (LayerBlocked)
 			return aIndices[i];
 	}

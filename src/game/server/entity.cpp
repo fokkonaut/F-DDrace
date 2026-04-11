@@ -123,7 +123,7 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 		return false;
 
 	vec2 &ViewPos = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos;
-	vec2 &ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance;
+	vec2 ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance;
 	if (PlotID >= PLOT_START || DefaultRange)
 		ShowDistance = pGameServer->m_apPlayers[SnappingClient]->m_StandardShowDistance;
 
