@@ -54,8 +54,6 @@ CProjectile::CProjectile
 	// F-DDrace
 	m_Spooky = Spooky;
 
-	m_TeleportCancelled = false;
-
 	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
 	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
@@ -63,6 +61,8 @@ CProjectile::CProjectile
 	m_DefaultTuning = DetermineIfDefaultTuning() && m_DDrace;
 
 	m_TeamMask = Mask128();
+	m_TeleportCancelled = false;
+	m_ShotInSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
 
 	for (int i = 0; i < NUM_SNAPINFO; i++)
 	{
@@ -161,12 +161,14 @@ void CProjectile::Tick()
 
 	m_TeamMask = Mask128();
 	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
-	if (pOwnerChar && pOwnerChar->IsAlive() && !IsPlotEdit)
+	bool SwitchedSafeArea = TeleWeaponInfo.m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_ShotInSafeArea) || (!pOwnerChar->IsInSafeArea() && m_ShotInSafeArea));
+	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea;
+	if (pOwnerChar && pOwnerChar->IsAlive() && !DestroyBulletWhileAlive)
 	{
 		m_TeamMask = pOwnerChar->TeamMask();
 	}
 	else if (m_Owner >= 0 && (GameServer()->GetProjectileType(m_Type) != WEAPON_GRENADE || Config()->m_SvDestroyBulletsOnDeath
-		|| GameServer()->Arenas()->FightStarted(m_Owner) || IsPlotEdit))
+		|| GameServer()->Arenas()->FightStarted(m_Owner) || DestroyBulletWhileAlive))
 	{
 		// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
 		GameWorld()->DestroyEntity(this);

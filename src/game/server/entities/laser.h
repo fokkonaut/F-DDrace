@@ -24,6 +24,7 @@ protected:
 
 	CCollision::CTeleWeaponInfo GetTeleWeaponInfo();
 	bool TryCancelTeleport(int TileIndex);
+	bool m_ShotInSafeArea;
 
 private:
 	vec2 m_From;

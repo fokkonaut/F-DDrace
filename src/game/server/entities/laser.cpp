@@ -26,7 +26,10 @@ CLaser::CLaser(CGameWorld* pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TaserStrength = TaserStrength;
 	m_TeleportCancelled = false;
 	m_IsBlueTeleport = false;
-	m_TeamMask = GameServer()->GetPlayerChar(Owner) ? GameServer()->GetPlayerChar(Owner)->TeamMask() : Mask128();
+
+	CCharacter *pOwner = GameServer()->GetPlayerChar(Owner);
+	m_TeamMask = pOwner ? pOwner->TeamMask() : Mask128();
+	m_ShotInSafeArea = pOwner && pOwner->IsInSafeArea();
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CTuningParams *pTuning = GameServer()->TuningFromChrOrZone(m_Owner, m_TuneZone);
@@ -476,10 +479,12 @@ void CLaser::Tick()
 {
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	bool IsPlotEdit = pOwnerChar && pOwnerChar->m_DrawEditor.Active();
+	bool SwitchedSafeArea = GetTeleWeaponInfo().m_IsTeleWeapon && pOwnerChar && ((pOwnerChar->IsInSafeArea() && !m_ShotInSafeArea) || (!pOwnerChar->IsInSafeArea() && m_ShotInSafeArea));
+	bool DestroyBulletWhileAlive = IsPlotEdit || SwitchedSafeArea;
 	// reset projectiles and lasers when entering plot editor in case someone has tele laser or tele gun/grenade
-	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || IsPlotEdit))
+	if (m_Owner >= 0 && (Config()->m_SvDestroyLasersOnDeath || GameServer()->Arenas()->FightStarted(m_Owner) || DestroyBulletWhileAlive))
 	{
-		if (!(pOwnerChar && pOwnerChar->IsAlive()) || IsPlotEdit)
+		if (!(pOwnerChar && pOwnerChar->IsAlive()) || DestroyBulletWhileAlive)
 		{
 			Reset();
 		}

@@ -52,6 +52,7 @@ private:
 	// F-DDrace
 	bool m_TeleportCancelled;
 	bool TryCancelTeleport(int TileIndex);
+	bool m_ShotInSafeArea;
 
 	int m_Bouncing;
 	bool m_Freeze;
