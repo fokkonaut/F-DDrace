@@ -492,6 +492,7 @@ void CLaser::Tick()
 		if (!(pOwnerChar && pOwnerChar->IsAlive()) || DestroyBulletWhileAlive)
 		{
 			Reset();
+			return;
 		}
 	}
 
