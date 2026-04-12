@@ -107,7 +107,6 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		m_pSwitch = new CSwitchTile[m_Width * m_Height];
 		m_pDoor = new CDoorTile[m_Width * m_Height];
 		m_pSwitchers = 0;
-		//m_pDoor = 0;
 	}
 
 	if (m_pLayers->TuneLayer())
@@ -116,12 +115,22 @@ void CCollision::Init(class CLayers* pLayers, class CConfig *pConfig)
 		if (Size >= m_Width * m_Height * sizeof(CTuneTile))
 			m_pTune = static_cast<CTuneTile*>(m_pLayers->Map()->GetData(m_pLayers->TuneLayer()->m_Tune));
 	}
+	else
+	{
+		// For draweditor
+		m_pTune = new CTuneTile[m_Width * m_Height];
+	}
 
 	if (m_pLayers->FrontLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->FrontLayer()->m_Front);
 		if (Size >= m_Width * m_Height * sizeof(CTile))
 			m_pFront = static_cast<CTile*>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
+	}
+	else
+	{
+		// For draweditor
+		m_pFront = new CTile[m_Width * m_Height];
 	}
 
 	for (int i = 0; i < m_Width * m_Height; i++)
