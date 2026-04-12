@@ -144,7 +144,7 @@ public:
 	bool HasJoined(int Fight, int Index) { return m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_OWNER || m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_ACCEPTED; }
 
 	bool OnCharacterSpawn(int ClientID);
-	void OnPlayerLeave(int ClientID, bool Disconnect = false);
+	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false);
 	void OnPlayerDie(int ClientID);
 	void OnInput(int ClientID, CNetObj_PlayerInput *pNewInput);
 	bool ClampViewPos(int ClientID);

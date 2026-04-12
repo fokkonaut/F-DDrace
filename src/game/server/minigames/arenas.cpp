@@ -712,7 +712,7 @@ bool CArenas::OnCharacterSpawn(int ClientID)
 	return true;
 }
 
-void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
+void CArenas::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
 {
 	int Fight;
 	while ((Fight = GetClientFight(ClientID, !Disconnect)) >= 0)
@@ -732,7 +732,8 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, aFormat, Server()->ClientName(ClientID), Server()->ClientName(OtherID),
 				m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 
-			if(FightScore > 0 || OtherScore > 0)
+			bool AnyPoints = FightScore > 0 || OtherScore > 0;
+			if(AnyPoints)
 			{
 				// Then fill untranslated format
 				char aBuf[128];
@@ -740,8 +741,18 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect)
 					m_aFights[Fight].m_aParticipants[Index].m_Score, m_aFights[Fight].m_aParticipants[Other].m_Score);
 				Server()->SendWebhookMessage(GameServer()->Config()->m_SvWebhook1vs1URL, aBuf, GameServer()->Config()->m_SvWebhook1vs1Name, GameServer()->Config()->m_SvWebhook1vs1AvatarURL);
 			}
-			
-			ProcessPlayerWin(OtherID, m_aFights[Fight].m_Stake);
+
+			if (AnyPoints && !Shutdown)
+			{
+				// only process win when at least one point was given and server is not shutting down
+				ProcessPlayerWin(OtherID, m_aFights[Fight].m_Stake);
+			}
+			else
+			{
+				// otherwise, no point or shutdown, give back stake
+				GameServer()->m_apPlayers[ClientID]->BankOrWalletTransaction(m_aFights[Fight].m_Stake, "return 1vs1 stake");
+				GameServer()->m_apPlayers[OtherID]->BankOrWalletTransaction(m_aFights[Fight].m_Stake, "return 1vs1 stake");
+			}
 		}
 
 		EndFight(Fight);
