@@ -458,6 +458,9 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->GetPlayer()->SetAntiPing(m_AntiPing, true);
 	}
 
+	// Remove all hooks on us
+	pChr->GameWorld()->ReleaseHooked(pChr->GetPlayer()->GetCID());
+
 	if (m_Flags&SAVE_IDENTITY)
 	{
 		if (m_Identity.m_aAccUsername[0] != '\0')
