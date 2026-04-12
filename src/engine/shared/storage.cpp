@@ -121,8 +121,6 @@ public:
 			}
 		}
 
-		io_close(File);
-
 		if(!m_NumPaths)
 			dbg_msg("storage", "no paths found in storage.cfg");
 	}
