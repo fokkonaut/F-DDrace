@@ -44,7 +44,7 @@ CFileScore::~CFileScore()
 std::string CFileScore::SaveFile()
 {
 	std::ostringstream oss;
-	char aBuf[256];
+	char aBuf[256] = {0};
 	str_copy(aBuf, GameServer()->Config()->m_SvMap, sizeof(aBuf));
 	for(int i = 0; i < 256; i++) if(aBuf[i] == '/') aBuf[i] = '-';
 	if (GameServer()->Config()->m_SvScoreFolder[0])

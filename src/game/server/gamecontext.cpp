@@ -81,6 +81,7 @@ void CGameContext::Construct(int Resetting)
 	m_NumVoteOptions = 0;
 	m_LastMapVote = 0;
 	m_LockTeams = 0;
+	m_NonEmptySince = 0;
 
 	if(Resetting==NO_RESET)
 	{

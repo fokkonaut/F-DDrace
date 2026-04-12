@@ -250,6 +250,9 @@ void CGameWorld::UpdatePlayerMap(int ClientID)
 		bool Update = Server()->Tick() % Config()->m_SvMapUpdateRate == 0;
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
+			if (!GameServer()->m_apPlayers[i])
+				continue;
+
 			// Calculate overhang every tick, not only when the map updates
 			int Overhang = max(0, Server()->NumClients() - m_aMap[i].GetMapSize());
 			if (Overhang != m_aMap[i].m_TotalOverhang)
@@ -430,9 +433,10 @@ void CGameWorld::PlayerMap::Init(int ClientID, CGameWorld *pGameWorld)
 	m_pGameWorld = pGameWorld;
 	m_pMap = m_pGameWorld->Server()->GetIdMap(m_ClientID);
 	m_pReverseMap = m_pGameWorld->Server()->GetReverseIdMap(m_ClientID);
-	m_UpdateTeamsState = false;
-	m_NumSeeOthers = 0;
 	m_ResortReserved = false;
+	m_NumPages = 0;
+	m_TotalOverhang = 0;
+	m_NumReserved = 0;
 	ResetSeeOthers();
 }
 

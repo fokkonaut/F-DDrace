@@ -897,6 +897,7 @@ void CCollision::Dest()
 	m_apPlotSize = 0;
 	m_NumPlots = 0;
 	m_NumTeleporters = 0;
+	m_HighestSwitchNumber = 0;
 	for (int i = 0; i < NUM_PLOT_SIZES; i++)
 		m_aNumPlots[i] = 0;
 }

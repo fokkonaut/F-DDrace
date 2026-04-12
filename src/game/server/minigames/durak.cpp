@@ -23,6 +23,7 @@ CDurak::CDurak(CGameContext *pGameServer, int Type) : CMinigame(pGameServer, Typ
 		m_aInDurakGame[i] = false;
 		m_aDurakNumReserved[i] = 0;
 		m_aSnappedSeatIndex[i] = -1;
+		m_aUpdateTeamsState[i] = false;
 	}
 	for (int i = 0; i < 5; i++)
 	{
