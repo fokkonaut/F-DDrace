@@ -72,7 +72,8 @@ CCharacter::CCharacter(CGameWorld *pWorld)
 {
 	m_Health = 0;
 	m_Armor = 0;
-	m_TriggeredEvents = 0;
+	for(int i = 0; i < CEventHandler::NUM_BUFFERS; i++)
+		m_TriggeredEvents[i] = 0;
 	m_StrongWeakID = 0;
 
 	// never intilize both to zero
@@ -1664,7 +1665,8 @@ void CCharacter::TickDeferred()
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
 
-	m_TriggeredEvents |= m_Core.m_TriggeredEvents;
+	int Cur = GameServer()->m_Events.CurrentBuffer();
+	m_TriggeredEvents[Cur] |= m_Core.m_TriggeredEvents;
 
 	// F-DDrace
 	int Events = m_Core.m_TriggeredEvents;
@@ -1689,7 +1691,7 @@ void CCharacter::TickDeferred()
 	if(Events&COREEVENTFLAG_HOOK_ATTACH_FLAG)
 	{
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_ATTACH_PLAYER, TeamMask());
-		m_TriggeredEvents &= ~COREEVENTFLAG_HOOK_ATTACH_FLAG;
+		m_TriggeredEvents[Cur] &= ~COREEVENTFLAG_HOOK_ATTACH_FLAG;
 	}
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
@@ -2407,8 +2409,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	pCharacter->m_Armor = 0;
 	pCharacter->m_Direction = m_Input.m_Direction;
 
+	const int Cur = GameServer()->m_Events.CurrentBuffer();
+	const int Prev = Cur ^ 1;
+	int Events = m_TriggeredEvents[Cur];
+	if (!Server()->GetHighBandwidth(SnappingClient))
+		Events |= m_TriggeredEvents[Prev];
+
 	bool RainbowNameAffected = SnappingClient == m_pPlayer->GetCID() && GameServer()->m_RainbowName.IsAffected(SnappingClient);
-	int Events = m_TriggeredEvents;
 	// jump is used for flying up, annoying air jump effect otherwise
 	bool Local = SnappingClient == m_pPlayer->GetCID();
 
@@ -2607,7 +2614,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 void CCharacter::PostSnap()
 {
-	m_TriggeredEvents = 0;
+	m_TriggeredEvents[GameServer()->m_Events.CurrentBuffer()] = 0;
 }
 
 // DDRace

@@ -17,11 +17,15 @@ typedef unsigned __int64 uint64_t;
 //
 class CEventHandler
 {
+public:
+	// Required for lowbandwidth players, so that they dont skip events
+	static const int NUM_BUFFERS = 2;
+	int CurrentBuffer() const { return m_CurrentBuffer; }
+
+private:
 	static const int MAX_EVENTS = 1024;
 	static const int MAX_DATASIZE = 256*64;
 
-	// Required for lowbandwidth players, so that they dont skip events
-	static const int NUM_BUFFERS = 2;
 	int m_CurrentBuffer;
 
 	int m_aTypes[NUM_BUFFERS][MAX_EVENTS]; // TODO: remove some of these arrays

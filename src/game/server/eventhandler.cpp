@@ -26,8 +26,8 @@ void CEventHandler::SetGameServer(CGameContext *pGameServer)
 
 void *CEventHandler::Create(int Type, int Size, Mask128 Mask)
 {
-	int Cur = m_CurrentBuffer;
-	int NumEvents = m_NumEvents[Cur];
+	const int Cur = m_CurrentBuffer;
+	const int NumEvents = m_NumEvents[Cur];
 	if(NumEvents == MAX_EVENTS)
 		return 0;
 	if(m_CurrentOffset[Cur] + Size >= MAX_DATASIZE)
@@ -56,8 +56,8 @@ void CEventHandler::Clear()
 
 void CEventHandler::Snap(int SnappingClient)
 {
-	int Cur = m_CurrentBuffer;
-	int Prev = Cur ^ 1;
+	const int Cur = m_CurrentBuffer;
+	const int Prev = Cur ^ 1;
 
 	SnapBuffer(SnappingClient, Cur);
 	if (!GameServer()->Server()->GetHighBandwidth(SnappingClient))

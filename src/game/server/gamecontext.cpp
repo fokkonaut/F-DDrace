@@ -5171,9 +5171,10 @@ void CGameContext::OnSnap(int ClientID)
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
 {
-	Durak()->PostSnap();
-	m_World.PostSnap();
+	// Call m_Events.Clear() before PostSnap to switch the buffer
 	m_Events.Clear();
+	m_World.PostSnap();
+	Durak()->PostSnap();
 }
 
 bool CGameContext::IsClientBot(int ClientID) const

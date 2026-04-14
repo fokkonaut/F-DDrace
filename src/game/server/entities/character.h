@@ -8,6 +8,7 @@
 
 #include <game/gamecore.h>
 #include <game/server/entity.h>
+#include <game/server/eventhandler.h>
 #include <game/server/player.h>
 #include <game/server/draweditor.h>
 #include <game/server/snake.h>
@@ -258,7 +259,7 @@ private:
 	int m_Health;
 	int m_Armor;
 
-	int m_TriggeredEvents;
+	int m_TriggeredEvents[CEventHandler::NUM_BUFFERS];
 
 	// ninja
 	struct
