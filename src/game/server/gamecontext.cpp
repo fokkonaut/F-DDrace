@@ -302,7 +302,7 @@ void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount,
 		SevendownAmount = HealthAmount+ArmorAmount;
 	for(int i = 0; i < SevendownAmount; i++)
 	{
-		float f = mix(s, e, float(i+1)/float(SevendownAmount+2));
+		float f = mix(s, e, float(i+1)/float(SevendownAmount+1));
 		int *pEvent = (int*)m_Events.Create(20 + NUM_NETOBJTYPES, 3*4, Mask);
 		if(pEvent)
 		{
