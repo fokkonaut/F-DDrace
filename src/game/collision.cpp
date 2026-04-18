@@ -1070,15 +1070,11 @@ int CCollision::IsTeleportHook(int Index)
 }
 
 
-int CCollision::IsSpeedup(int Index)
+bool CCollision::IsSpeedup(int Index)
 {
 	if (Index < 0 || !m_pSpeedup)
-		return 0;
-
-	if (m_pSpeedup[Index].m_Force > 0)
-		return Index;
-
-	return 0;
+		return false;
+	return m_pSpeedup[Index].m_Force > 0;
 }
 
 int CCollision::IsTune(int Index)
