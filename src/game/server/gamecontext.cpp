@@ -1307,6 +1307,15 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 		if (pChr->m_pHelicopter || pChr->m_InSnake || IsActivelyPlayingDurak)
 			Tunings.m_HookDragSpeed = 0.f;
 
+		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_SOLID_DRAWTILE)
+		{
+			Tunings.m_Gravity = 0.f;
+			Tunings.m_AirControlAccel = Tunings.m_GroundControlAccel;
+			Tunings.m_AirControlSpeed = Tunings.m_GroundControlSpeed;
+			Tunings.m_AirFriction = Tunings.m_GroundFriction;
+			Tunings.m_AirJumpImpulse = Tunings.m_GroundJumpImpulse;
+		}
+
 		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter|| pChr->m_InSnake || IsActivelyPlayingDurak
 			|| (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{

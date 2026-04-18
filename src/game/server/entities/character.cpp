@@ -215,12 +215,21 @@ void CCharacter::SetSolo(bool Solo)
 	}
 }
 
-bool CCharacter::IsGrounded(bool CheckDoor)
+bool CCharacter::IsGrounded(bool CheckDoor, bool SetDrawTilePred)
 {
-	if (GameServer()->Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
+	float PosX1 = m_Pos.x + GetProximityRadius() / 2;
+	float PosX2 = m_Pos.x - GetProximityRadius() / 2;
+	float PosY = m_Pos.y + GetProximityRadius() / 2 + 5;
+	if (GameServer()->Collision()->CheckPoint(PosX1, PosY) || GameServer()->Collision()->CheckPoint(PosX2, PosY))
+	{
+		if (SetDrawTilePred)
+		{
+			if (GameServer()->HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX1, PosY))) ||
+				GameServer()->HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX2, PosY))))
+				m_MoveRestrictions |= CANTMOVE_DOWN_SOLID_DRAWTILE;
+		}
 		return true;
-	if (GameServer()->Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5))
-		return true;
+	}
 
 	if (CheckDoor)
 	{
@@ -2882,8 +2891,9 @@ void CCharacter::HandleTiles(int Index)
 	int LastMoveRestrictions = m_MoveRestrictions;
 	m_MoveRestrictions = GameServer()->Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex, m_Core.m_MoveRestrictionExtra);
 	// update prediction
-	if (((m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR) && !(LastMoveRestrictions&CANTMOVE_DOWN_LASERDOOR))
-		|| (!(m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR) && (LastMoveRestrictions&CANTMOVE_DOWN_LASERDOOR)))
+	IsGrounded(false, true); // SetDrawTilePred: CANTMOVE_DOWN_SOLID_DRAWTILE
+	if ((m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR) != (LastMoveRestrictions&CANTMOVE_DOWN_LASERDOOR) ||
+		(m_MoveRestrictions&CANTMOVE_DOWN_SOLID_DRAWTILE) != (LastMoveRestrictions&CANTMOVE_DOWN_SOLID_DRAWTILE))
 		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
 	//Sensitivity
