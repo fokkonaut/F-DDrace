@@ -749,6 +749,9 @@ void IGameController::Snap(int SnappingClient)
 	if (GameServer()->Arenas()->IsConfiguring(SnappingClient) || pSnap->GetTeam() == TEAM_SPECTATORS)
 		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_BUG_DDRACE_INPUT;
 
+	if (pSnap->SilentFarmActive())
+		pGameInfoEx->m_Flags2 &= ~GAMEINFOFLAG2_PREDICT_EVENTS;
+
 	if (!pSnappingChar)
 		return;
 
