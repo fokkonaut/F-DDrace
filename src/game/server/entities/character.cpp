@@ -603,10 +603,20 @@ void CCharacter::FireWeapon()
 
 	for (int i = 0; i < NumShots; i++)
 	{
-		float Angle = GetAngle(TempDirection);
-		Angle += Spread[i];
-		vec2 Direction = vec2(cosf(Angle), sinf(Angle));
-		vec2 InitDir = Direction * 100.f;
+		vec2 Direction, InitDir;
+		if (i == 0)
+		{
+			// Keep Direction explicitly the same, for cl_predict_events. Avoid floating point precision error
+			Direction = TempDirection;
+			InitDir = MouseTarget;
+		}
+		else
+		{
+			float Angle = GetAngle(TempDirection);
+			Angle += Spread[i];
+			Direction = vec2(cosf(Angle), sinf(Angle));
+			InitDir = Direction * 100.f;
+		}
 
 		switch (GetActiveWeapon())
 		{

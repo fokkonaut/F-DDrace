@@ -294,7 +294,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 
 void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount, int ArmorAmount, bool Self, Mask128 Mask, int SevendownAmount)
 {
-	float a = 3 * 3.14159f / 2 + -atan2(Source.x, Source.y);
+	float a = 3 * pi / 2 + -std::atan2(Source.x, Source.y);
 	float s = a-pi/3;
 	float e = a+pi/3;
 
