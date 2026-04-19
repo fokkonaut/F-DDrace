@@ -1745,7 +1745,7 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 	if(!pClients || !m_apPlayers[ClientId])
 		return;
 
-	CCharacter *pInputChr = GetPlayerChar(ClientId);
+	CCharacter *pInputChr = m_apPlayers[ClientId]->GetCharacter();
 	if(!pInputChr || m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->m_Afk)
 		return;
 
