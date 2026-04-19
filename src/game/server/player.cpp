@@ -1182,16 +1182,18 @@ void CPlayer::TranslatePlayerFlags(CNetObj_PlayerInput *NewInput)
 void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	// F-DDrace
-	if (m_pControlledTee && !m_Paused && !TeeControlled)
+	if (!TeeControlled)
 	{
+		if (m_pControlledTee && !m_Paused && !TeeControlled)
+		{
+			TranslatePlayerFlags(NewInput);
+			m_pControlledTee->OnPredictedInput(NewInput, true);
+			return;
+		}
+		if (m_TeeControllerID != -1)
+			return;
 		TranslatePlayerFlags(NewInput);
-		m_pControlledTee->OnPredictedInput(NewInput, true);
-		return;
 	}
-	else if (m_TeeControllerID != -1 && !TeeControlled)
-		return;
-	else
-		TranslatePlayerFlags(NewInput);
 
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
@@ -1206,16 +1208,18 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
 	// F-DDrace
-	if (m_pControlledTee && !m_Paused && !TeeControlled)
+	if (!TeeControlled)
 	{
+		if (m_pControlledTee && !m_Paused)
+		{
+			TranslatePlayerFlags(NewInput);
+			m_pControlledTee->OnDirectInput(NewInput, true);
+			return;
+		}
+		if (m_TeeControllerID != -1)
+			return;
 		TranslatePlayerFlags(NewInput);
-		m_pControlledTee->OnDirectInput(NewInput, true);
-		return;
 	}
-	else if (m_TeeControllerID != -1 && !TeeControlled)
-		return;
-	else
-		TranslatePlayerFlags(NewInput);
 
 	if (AfkTimer(NewInput->m_TargetX, NewInput->m_TargetY))
 		return; // we must return if kicked, as player struct is already deleted
@@ -1331,16 +1335,18 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 {
-	if (m_pControlledTee && !m_Paused && !TeeControlled)
+	if (!TeeControlled)
 	{
+		if (m_pControlledTee && !m_Paused)
+		{
+			TranslatePlayerFlags(NewInput);
+			m_pControlledTee->OnPredictedEarlyInput(NewInput, true);
+			return;
+		}
+		if (m_TeeControllerID != -1)
+			return;
 		TranslatePlayerFlags(NewInput);
-		m_pControlledTee->OnPredictedEarlyInput(NewInput, true);
-		return;
 	}
-	else if (m_TeeControllerID != -1 && !TeeControlled)
-		return;
-	else
-		TranslatePlayerFlags(NewInput);
 
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))

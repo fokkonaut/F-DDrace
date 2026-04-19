@@ -3316,12 +3316,15 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(Config()->m_SvSpamprotection && pPlayer->m_LastEmote && pPlayer->m_LastEmote+Server()->TickSpeed()*Config()->m_SvEmoticonDelay > Server()->Tick())
 				return;
 
-			pPlayer->UpdatePlaytime();
-			pPlayer->m_LastEmote = Server()->Tick();
+			// On 0.6 local client can be changed, allow emoticons from controller tee
+			CPlayer *pProcessed = pPlayer->m_pControlledTee ? pPlayer->m_pControlledTee : pPlayer;
 
-			SendEmoticon(ClientID, pMsg->m_Emoticon);
-			CCharacter *pChr = pPlayer->GetCharacter();
-			if(pChr && Config()->m_SvEmotionalTees && pPlayer->m_EyeEmote)
+			pProcessed->UpdatePlaytime();
+			pProcessed->m_LastEmote = Server()->Tick();
+
+			SendEmoticon(pProcessed->GetCID(), pMsg->m_Emoticon);
+			CCharacter *pChr = pProcessed->GetCharacter();
+			if(pChr && Config()->m_SvEmotionalTees && pProcessed->m_EyeEmote)
 			{
 				switch(pMsg->m_Emoticon)
 				{
@@ -3355,7 +3358,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						pChr->SetEmoteType(EMOTE_NORMAL);
 						break;
 				}
-				if (pPlayer->m_SpookyGhost)
+				if (pProcessed->m_SpookyGhost)
 					pChr->SetEmoteType(EMOTE_SURPRISE);
 				else if (pChr->GetActiveWeapon() == WEAPON_HEART_GUN)
 					pChr->SetEmoteType(EMOTE_HAPPY);
