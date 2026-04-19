@@ -749,7 +749,9 @@ void IGameController::Snap(int SnappingClient)
 	if (GameServer()->Arenas()->IsConfiguring(SnappingClient) || pSnap->GetTeam() == TEAM_SPECTATORS)
 		pGameInfoEx->m_Flags &= ~GAMEINFOFLAG_BUG_DDRACE_INPUT;
 
-	if (pSnap->SilentFarmActive())
+	// disable events prediction in durak, as characters are used for labels.
+	// those characters can be intersected on the client side to predict events when shooting at the wall
+	if (pSnap->SilentFarmActive() || GameServer()->Durak()->ActivelyPlaying(SnappingClient))
 		pGameInfoEx->m_Flags2 &= ~GAMEINFOFLAG2_PREDICT_EVENTS;
 
 	if (!pSnappingChar)
