@@ -49,6 +49,8 @@ private:
 	} m_Snap;
 
 	void SetRespawnTime(bool Init = false);
+
+	bool IsAffectedByPickup(CCharacter *pChr);
 };
 
 #endif

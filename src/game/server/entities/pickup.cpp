@@ -102,6 +102,15 @@ void CPickup::SetRespawnTime(bool Init)
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 }
 
+bool CPickup::IsAffectedByPickup(CCharacter *pChr)
+{
+	if (!pChr || !pChr->IsAlive())
+		return false;
+	// avoid affecting players through a wall when pickups on plots are placed at the edge of the wall without position rounding
+	// also means pickups placed right next to the plot door are not pickable by someone that might be close enough to the pickup because they are not on the same plotid
+	return m_PlotID < PLOT_START || pChr->GetCurrentTilePlotID(true) == m_PlotID;
+}
+
 void CPickup::Tick()
 {
 	// no affect on players, just a preview for the brushing client
@@ -148,9 +157,7 @@ void CPickup::Tick()
 		if (!pChr || !pChr->IsAlive())
 			continue;
 
-		// avoid affecting players through a wall when pickups on plots are placed at the edge of the wall without position rounding
-		// also means pickups placed right next to the plot door are not pickable by someone that might be close enough to the pickup because they are not on the same plotid
-		if (m_PlotID >= PLOT_START && pChr->GetCurrentTilePlotID(true) != m_PlotID)
+		if (!IsAffectedByPickup(pChr))
 			continue;
 
 		if (m_Layer == LAYER_SWITCH && !GameServer()->Collision()->m_pSwitchers[m_Number].m_Status[pChr->Team()]) continue;
@@ -440,7 +447,7 @@ void CPickup::Snap(int SnappingClient)
 	bool IsZombie = pChr && pChr->m_IsZombie && m_Subtype != WEAPON_HAMMER;
 	bool IsVanilla = pChr && pChr->GetPlayer()->m_Gamemode == GAMEMODE_VANILLA && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR);
 	bool IsItem = m_Owner >= 0;
-	if (IsZombie || IsVanilla || IsItem)
+	if (IsZombie || IsVanilla || IsItem || !IsAffectedByPickup(pChr) || !m_Collision)
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
