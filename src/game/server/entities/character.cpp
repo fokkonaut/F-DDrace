@@ -604,7 +604,7 @@ void CCharacter::FireWeapon()
 	for (int i = 0; i < NumShots; i++)
 	{
 		vec2 Direction, InitDir;
-		if (i == 0)
+		if (Spread[i] == 0)
 		{
 			// Keep Direction explicitly the same, for cl_predict_events. Avoid floating point precision error
 			Direction = TempDirection;
