@@ -1910,7 +1910,7 @@ void CGameContext::ConPayMoney(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You paid %lld money from your bank account to '%s'"), Money, pSelf->Server()->ClientName(pTo->GetCID()));
 	pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
 
-	str_format(aBuf, sizeof(aBuf), pPlayer->Localize("You got %lld money to your bank account from '%s'"), Money, pSelf->Server()->ClientName(pResult->m_ClientID));
+	str_format(aBuf, sizeof(aBuf), pTo->Localize("You got %lld money to your bank account from '%s'"), Money, pSelf->Server()->ClientName(pResult->m_ClientID));
 	pSelf->SendChatTarget(pTo->GetCID(), aBuf);
 }
 
