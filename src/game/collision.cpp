@@ -1578,7 +1578,7 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int* Ox, int* Oy)
 {
 	float x = Pos0.x - Pos1.x;
 	float y = Pos0.y - Pos1.y;
-	if (fabs(x) > fabs(y))
+	if (absolute(x) > absolute(y))
 	{
 		if (x < 0)
 		{

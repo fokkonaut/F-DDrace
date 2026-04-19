@@ -662,7 +662,7 @@ void CGameTeams::OnFinish(CPlayer* Player, float Time, const char *pTimestamp)
 	else
 		GameServer()->SendChat(-1, CHAT_ALL, -1, aBuf);
 
-	float Diff = fabs(Time - pData->m_BestTime);
+	float Diff = absolute(Time - pData->m_BestTime);
 
 	if (Time - pData->m_BestTime < 0)
 	{

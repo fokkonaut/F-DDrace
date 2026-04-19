@@ -302,7 +302,7 @@ void CGameContext::CreateDamage(vec2 Pos, int Id, vec2 Source, int HealthAmount,
 		SevendownAmount = HealthAmount+ArmorAmount;
 	for(int i = 0; i < SevendownAmount; i++)
 	{
-		float f = mix(s, e, float(i+1)/float(SevendownAmount+1));
+		float f = mix(s, e, (i+1)/(float)(SevendownAmount+1));
 		int *pEvent = (int*)m_Events.Create(20 + NUM_NETOBJTYPES, 3*4, Mask);
 		if(pEvent)
 		{
@@ -3607,7 +3607,7 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult* pResult, void* pUserDat
 		return;
 	}
 
-	float NewValue = fabs(OldValue - pResult->GetFloat(1)) < 0.0001f
+	float NewValue = absolute(OldValue - pResult->GetFloat(1)) < 0.0001f
 		? pResult->GetFloat(2)
 		: pResult->GetFloat(1);
 

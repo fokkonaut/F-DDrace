@@ -609,7 +609,7 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 			}
 		}
 	}
-	else if (abs(pNewInput->m_TargetX - pSeat->m_Player.m_LastInput.m_TargetX) > 3.f || abs(pNewInput->m_TargetY - pSeat->m_Player.m_LastInput.m_TargetY) > 3.f)
+	else if (absolute(pNewInput->m_TargetX - pSeat->m_Player.m_LastInput.m_TargetX) > 3.f || absolute(pNewInput->m_TargetY - pSeat->m_Player.m_LastInput.m_TargetY) > 3.f)
 	{
 		if (pSeat->m_Player.m_KeyboardControl)
 		{
@@ -1096,12 +1096,12 @@ void CDurak::UpdateGame(int Game)
 			if (pSeat->m_Player.m_HoveredCard != -1 && NumCards > 10)
 			{
 				int Diff = c - pSeat->m_Player.m_HoveredCard;
-				if (Diff != 0 && abs(Diff) <= 3)
+				if (Diff != 0 && absolute(Diff) <= 3)
 				{
-					float Falloff = 1.f / abs(Diff);
+					float Falloff = 1.f / absolute(Diff);
 					if (NumCards < 15)
 						Falloff *= 0.5f;
-					float Multiplier = (float)(Diff) / abs(Diff); // -1 or +1
+					float Multiplier = (float)(Diff) / absolute(Diff); // -1 or +1
 					Offset = (Gap * PushStrength * Falloff) * Multiplier;
 
 					bool IsLeftMost = (c == 0);

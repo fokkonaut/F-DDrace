@@ -632,7 +632,7 @@ void CPlayer::Snap(int SnappingClient)
 			if (SnappingClient != m_ClientID && GameServer()->Config()->m_SvHideScore)
 				Score = -1;
 			else
-				Score = m_Score == -1 ? -1 : abs(m_Score) * 1000.0f;
+				Score = m_Score == -1 ? -1 : absolute(m_Score) * 1000.0f;
 			AccUsed = false;
 
 			if (Server()->IsSevendown(SnappingClient))
@@ -640,7 +640,7 @@ void CPlayer::Snap(int SnappingClient)
 				if (Score == -1)
 					Score = -9999;
 				else
-					Score = abs(m_Score) * -1;
+					Score = absolute(m_Score) * -1;
 			}
 		}
 		else if (pSnapping->m_ScoreMode == SCORE_LEVEL)
@@ -2103,7 +2103,7 @@ bool CPlayer::GiveTaserBattery(int Amount)
 	if (m_pCharacter)
 	{
 		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
+		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, absolute(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
 
 		if (m_pCharacter->GetActiveWeapon() == WEAPON_TASER)
@@ -2134,7 +2134,7 @@ bool CPlayer::GivePortalBattery(int Amount)
 	if (m_pCharacter)
 	{
 		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, abs(Amount));
+		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, absolute(Amount));
 		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
 
 		if (m_pCharacter->GetActiveWeapon() == WEAPON_PORTAL_RIFLE)

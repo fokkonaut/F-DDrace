@@ -297,9 +297,9 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if (m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if (fabs(m_Direction.x) < 1e-6)
+			if (absolute(m_Direction.x) < 1e-6)
 				m_Direction.x = 0;
-			if (fabs(m_Direction.y) < 1e-6)
+			if (absolute(m_Direction.y) < 1e-6)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
@@ -447,20 +447,20 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int Snapp
 		return false;
 
 	const int MaxPos = 0x7fffffff / 100;
-	if(abs((int)m_Pos.y) + 1 >= MaxPos || abs((int)m_Pos.x) + 1 >= MaxPos)
+	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
 	{
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		return false;
 	}
 	//Send additional/modified info, by modifiying the fields of the netobj
-	float Angle = -atan2f(m_Direction.x, m_Direction.y);
+	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
 	int Owner = m_Owner;
 	if (!Server()->Translate(Owner, SnappingClient))
 		Owner = -1;
 
 	int Data = 0;
-	Data |= (abs(Owner) & 255) << 0;
+	Data |= (absolute(Owner) & 255) << 0;
 	if(Owner < 0)
 		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info

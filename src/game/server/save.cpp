@@ -74,7 +74,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	str_copy(m_aName, pChr->Server()->ClientName(pChr->GetPlayer()->GetCID()), sizeof(m_aName));
 
 	m_Alive = pChr->IsAlive();
-	m_Paused = abs(pChr->GetPlayer()->IsPaused());
+	m_Paused = absolute(pChr->GetPlayer()->IsPaused());
 
 	m_TeeFinished = pChr->Teams()->TeeFinished(pChr->GetPlayer()->GetCID());
 	m_IsSolo = pChr->IsSolo();

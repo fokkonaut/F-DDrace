@@ -608,7 +608,7 @@ void CHelicopter::ApplyAcceleration()
 		(!m_pTurret || !m_pTurret->m_Shooting || (m_Flipped != (m_pTurret->m_TargetPosition.x < 0))))
 		m_Flipped = !m_Flipped;
 
-	float targetAngle = (m_Vel.x != 0.0f) ? m_Vel.x / (abs(m_Vel.x) + 60) * 90 : 0.0f;
+	float targetAngle = (m_Vel.x != 0.0f) ? m_Vel.x / (absolute(m_Vel.x) + 60) * 90 : 0.0f;
 	m_VisualAngle += (targetAngle - m_VisualAngle) * 0.1f;
 	SetRotation(m_VisualAngle);
 }

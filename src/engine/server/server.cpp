@@ -2279,7 +2279,7 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
 			// browserscorefix is not required anymore since we have client_score_kind, but we keep it in this, in case it's not fetched via http master and doesnt know about score kind
 			int Score = -9999;
 			if (Config()->m_SvDefaultScoreMode == 0 && m_aClients[i].m_Score != -1)
-				Score = abs(m_aClients[i].m_Score) * -1;
+				Score = absolute(m_aClients[i].m_Score) * -1;
 			else if (IsBrowserScoreFix())
 				Score = m_aClients[i].m_Score;
 			ADD_INT(pp, Score);
