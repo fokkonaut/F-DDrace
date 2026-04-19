@@ -1749,6 +1749,12 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 	if(!pInputChr || m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS || m_apPlayers[ClientId]->m_Afk)
 		return;
 
+	// Prevent pre inputs when player cant even move. Avoid annoying mispredictions for most common cases
+	// It would be possible to only reset m_Fire for telekinesis for example, but i think it doesnt matter
+	if (pInputChr->m_DrawEditor.Active() || pInputChr->m_pHelicopter || pInputChr->m_InSnake || pInputChr->GetActiveWeapon() == WEAPON_TELEKINESIS
+		|| Arenas()->IsConfiguring(ClientId) || Durak()->ActivelyPlaying(ClientId))
+		return;
+
 	for(int Id = 0; Id < MAX_CLIENTS; Id++)
 	{
 		if(ClientId == Id)
