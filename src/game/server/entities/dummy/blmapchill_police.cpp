@@ -79,17 +79,17 @@ bool CDummyBlmapChillPolice::CheckStuck()
 		if (m_Sad > 6)
 		{
 			Jump();
-			if (TicksPassed(random(10, 400)))
+			if (TicksPassed(random_int(10, 400)))
 				Jump(false);
 		}
 		if (m_Sad > 7)
 		{
 			Hook();
-			if (TicksPassed(random(10, 400)))
+			if (TicksPassed(random_int(10, 400)))
 				Hook(false);
 		}
 		if (m_Sad > 8 && (IsStuck || m_Sad > 9))
-			Aim(random(-100, 100), random(-100, 100));
+			Aim(random_int(-100, 100), random_int(-100, 100));
 		if (m_Sad > 20)
 		{
 			Die();
@@ -1147,7 +1147,7 @@ void CDummyBlmapChillPolice::WalkPoliceDir(int Direction)
 			Aim(0, 200);
 			Fire();
 			if (IsGrounded())
-				Jump(random(3));
+				Jump(random_int(3));
 		}
 	}
 	// when high enough stay there and move on the upper area

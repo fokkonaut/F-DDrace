@@ -403,7 +403,7 @@ public:
 		// Highest rank within each suit
 		int aSuitMaxRank[4] = { 0 };
 		for (const CCard &Card : vHandCards)
-			aSuitMaxRank[Card.m_Suit] = max(aSuitMaxRank[Card.m_Suit], Card.m_Rank);
+			aSuitMaxRank[Card.m_Suit] = maximum(aSuitMaxRank[Card.m_Suit], Card.m_Rank);
 
 		std::sort(vHandCards.begin(), vHandCards.end(), [&](const CCard &a, const CCard &b) {
 			// Trump cards first

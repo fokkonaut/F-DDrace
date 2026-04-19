@@ -1069,7 +1069,7 @@ void CVotingMenu::SendPageVotes(int ClientID, bool ResendVotesPage)
 	CMsgPacker Msg(NETMSGTYPE_SV_VOTEOPTIONLISTADD);
 	while (TotalVotesSent < NumVotesToSend)
 	{
-		const int VotesLeft = min(NumVotesToSend - TotalVotesSent, (int)MAX_VOTES_PER_PACKET);
+		const int VotesLeft = minimum(NumVotesToSend - TotalVotesSent, (int)MAX_VOTES_PER_PACKET);
 		Msg.AddInt(VotesLeft);
 
 		int CurIndex = 0;
@@ -1228,7 +1228,7 @@ bool CVotingMenu::DoLineCollapse(int Page, int *pNumOptions, const char *pDescri
 	int SuffixLength = str_length(pSuffix);
 	int TotalWidth = VOTE_DESC_LENGTH - 1; // -1 for null terminator ofc
 	int TotalSpaces = clamp(TotalWidth - PrefixLength - DescLength - SuffixLength, 0, 20);
-	int SpacesBefore = min(13, (int)(TotalSpaces * 0.7f));
+	int SpacesBefore = minimum(13, (int)(TotalSpaces * 0.7f));
 	int SpacesAfter = TotalSpaces - SpacesBefore;
 
 	char aSpacesBefore[VOTE_DESC_LENGTH] = { '\0' };

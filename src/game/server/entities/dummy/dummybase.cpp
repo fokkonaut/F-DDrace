@@ -209,7 +209,7 @@ void CDummyBase::AvoidFreezeWeapons()
 			{
 				Fire();
 				// TODO: priotize weapons the bot actually has
-				int PanicWeapon = random(2) ? WEAPON_GRENADE : WEAPON_LASER;
+				int PanicWeapon = random_int(2) ? WEAPON_GRENADE : WEAPON_LASER;
 				if (TicksPassed(10))
 					SetWeapon(PanicWeapon);
 				m_WantedWeapon = PanicWeapon;
@@ -254,7 +254,7 @@ void CDummyBase::AntiStuckDir(int Direction)
 		if (TicksPassed(200))
 			m_GoSlow = false;
 		if (m_AsTopFree)
-			Jump(random(5));
+			Jump(random_int(5));
 		return;
 	}
 	if (m_AsBackwards)
@@ -268,7 +268,7 @@ void CDummyBase::AntiStuckDir(int Direction)
 				!GameServer()->Collision()->IsSolid(RAW_X + 20 * Direction, RAW_Y + 70);
 		if (m_AsTopFree || m_AsBottomFree)
 		{
-			Jump(random(5));
+			Jump(random_int(5));
 			m_AsBackwards = false;
 			if (m_AsTopFree && !GameServer()->Collision()->IsSolid(RAW_X - 20 * Direction, RAW_Y - 20))
 			{
@@ -285,7 +285,7 @@ void CDummyBase::AntiStuckDir(int Direction)
 		GameServer()->Collision()->IsSolid(RAW_X + 30 * Direction, RAW_Y) ||
 		GameServer()->Collision()->IsSolid(RAW_X + 10 * Direction, RAW_Y))
 	{
-		Jump(random(5));
+		Jump(random_int(5));
 		// too slow? Check if in a dead end
 		if (IsVelXLt(Direction, 1.1f) && IsGrounded())
 		{

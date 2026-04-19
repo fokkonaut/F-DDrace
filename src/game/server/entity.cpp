@@ -139,7 +139,7 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 	}
 	// Border to also receive objects a bit off the screen so they dont pop up, 10 blocks should be okay
 	float Border = 32.f * (PlotID >= PLOT_START ? 6.f : 10.f);
-	float ClippDistance = max(ShowDistance.x, ShowDistance.y) / 2.f + Border;
+	float ClippDistance = maximum(ShowDistance.x, ShowDistance.y) / 2.f + Border;
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }
 

@@ -27,7 +27,7 @@ public:
 	{
 		m_Size = NewSize;
 		// Set ProximityRadius to the smaller value for now
-		SetProximityRadius(min(NewSize.x, NewSize.y));
+		SetProximityRadius(minimum(NewSize.x, NewSize.y));
 	}
 	virtual void ReleaseHooked() {}
 

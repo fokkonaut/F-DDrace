@@ -91,7 +91,7 @@ void CPickup::SetRespawnTime(bool Init)
 			{
 				// between 1 and 5 hours to respawn, and reduce time the more players are connected (1 player = 1 min)
 				int Minutes = ((rand() % (300 - 60) + 60) - GameServer()->CountConnectedPlayers(false, true));
-				RespawnTime = max(Minutes * 60, 30 * 60);
+				RespawnTime = maximum(Minutes * 60, 30 * 60);
 			}
 		}
 	}

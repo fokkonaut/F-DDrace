@@ -219,7 +219,7 @@ void CProjectile::Tick()
 		{
 			if (!m_Explosive)
 			{
-				pTargetChr->TakeDamage(m_Direction * max(0.001f, m_Force), m_Direction*-1, g_pData->m_Weapons.m_aId[GameServer()->GetProjectileType(m_Type)].m_Damage, m_Owner, m_Type);
+				pTargetChr->TakeDamage(m_Direction * maximum(0.001f, m_Force), m_Direction*-1, g_pData->m_Weapons.m_aId[GameServer()->GetProjectileType(m_Type)].m_Damage, m_Owner, m_Type);
 			}
 			if (m_Spooky)
 			{
@@ -235,7 +235,7 @@ void CProjectile::Tick()
 			TryCancelTeleport(BlockedRes);
 		}
 
-		if (pOwnerChar && ColPos && !GameLayerClipped(ColPos) && TeleWeaponInfo.m_IsTeleWeapon)
+		if (pOwnerChar && !GameLayerClipped(ColPos) && TeleWeaponInfo.m_IsTeleWeapon)
 		{
 			vec2 Pos = pTargetChr ? pTargetChr->GetPos() : ColPos;
 			int MapIndex = GameServer()->Collision()->GetPureMapIndex(Pos);

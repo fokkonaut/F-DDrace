@@ -24,8 +24,8 @@ public:
 
 	int m_aID[4];
 	vec2 m_aPos[2];
-	vec2 TopLeft() { return vec2(min(m_aPos[0].x, m_aPos[1].x), min(m_aPos[0].y, m_aPos[1].y)); }
-	vec2 BottomRight() { return vec2(max(m_aPos[0].x, m_aPos[1].x), max(m_aPos[0].y, m_aPos[1].y)); }
+	vec2 TopLeft() { return vec2(minimum(m_aPos[0].x, m_aPos[1].x), minimum(m_aPos[0].y, m_aPos[1].y)); }
+	vec2 BottomRight() { return vec2(maximum(m_aPos[0].x, m_aPos[1].x), maximum(m_aPos[0].y, m_aPos[1].y)); }
 	bool Includes(vec2 Pos) { return (Pos.x >= TopLeft().x-1 && Pos.x <= BottomRight().x+1 && Pos.y >= TopLeft().y-1 && Pos.y <= BottomRight().y+1); }
 };
 

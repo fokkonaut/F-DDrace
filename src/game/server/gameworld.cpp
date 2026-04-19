@@ -254,11 +254,11 @@ void CGameWorld::UpdatePlayerMap(int ClientID)
 				continue;
 
 			// Calculate overhang every tick, not only when the map updates
-			int Overhang = max(0, Server()->NumClients() - m_aMap[i].GetMapSize());
+			int Overhang = maximum(0, Server()->NumClients() - m_aMap[i].GetMapSize());
 			if (Overhang != m_aMap[i].m_TotalOverhang)
 			{
 				m_aMap[i].m_TotalOverhang = Overhang;
-				m_aMap[i].m_NumPages = std::max(1, (Overhang + PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS - 1) / PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
+				m_aMap[i].m_NumPages = maximum(1, (Overhang + PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS - 1) / PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
 				if (m_aMap[i].m_TotalOverhang <= 0 && m_aMap[i].m_SeeOthersState != PlayerMap::SSeeOthers::STATE_NONE)
 					m_aMap[i].ResetSeeOthers();
 
@@ -321,7 +321,7 @@ void CGameWorld::PlayerMap::CycleSeeOthers()
 		if (m_pMap[i] != -1)
 			m_aWasSeeOthers[m_pMap[i]] = true;
 
-	int Size = min(m_TotalOverhang, (int)PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
+	int Size = minimum(m_TotalOverhang, (int)PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
 	int Added = 0;
 	int MapID = GetMapSize()-1;
 	for (int i = 0; i < MAX_CLIENTS; i++)

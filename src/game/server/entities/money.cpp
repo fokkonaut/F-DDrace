@@ -107,10 +107,10 @@ void CMoney::MoveTo(vec2 Pos, int Radius)
 
 	vec2 Diff = vec2(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
 	float AddVelX = (Diff.x/Radius*5);
-	m_Vel.x = clamp(m_Vel.x+AddVelX, min(-MaxFlySpeed, m_Vel.x-AddVelX), max(MaxFlySpeed, m_Vel.x-AddVelX));
+	m_Vel.x = clamp(m_Vel.x+AddVelX, minimum(-MaxFlySpeed, m_Vel.x-AddVelX), maximum(MaxFlySpeed, m_Vel.x-AddVelX));
 
 	float AddVelY = (Diff.y/Radius*5);
-	m_Vel.y = clamp(m_Vel.y+AddVelY, min(-MaxFlySpeed, m_Vel.y-AddVelY), max(MaxFlySpeed, m_Vel.y-AddVelY));
+	m_Vel.y = clamp(m_Vel.y+AddVelY, minimum(-MaxFlySpeed, m_Vel.y-AddVelY), maximum(MaxFlySpeed, m_Vel.y-AddVelY));
 }
 
 void CMoney::Snap(int SnappingClient)

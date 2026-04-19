@@ -15,8 +15,8 @@ CLightningLaser::CLightningLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Directio
 	m_Lifespan  = m_StartLifespan = Server()->TickSpeed() / 5; // timer for the laser
 
 	int TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
-	m_Count = max(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserCount);
-	m_Length = max(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserLength);
+	m_Count = maximum(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserCount);
+	m_Length = maximum(1, (int)GameServer()->TuningFromChrOrZone(m_Owner, TuneZone)->m_LightningLaserLength);
 
 	m_aIDs = (int *)calloc(sizeof(int), m_Count);
 	m_aaPositions = (vec2 **)calloc(sizeof(vec2 *), m_Count);
@@ -184,7 +184,7 @@ void CLightningLaser::Snap(int SnappingClient)
 
 	float Percentage = 100.f - (m_Lifespan * 100.f / m_StartLifespan);
 
-	int Start = (int)max((float)ceil(Percentage * m_Count / 100.f), 1.f);
+	int Start = (int)maximum((float)ceil(Percentage * m_Count / 100.f), 1.f);
 
 	if(GameServer()->GetClientDDNetVersion(SnappingClient) >= VERSION_DDNET_MULTI_LASER)
 	{

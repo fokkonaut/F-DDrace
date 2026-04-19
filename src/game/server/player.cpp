@@ -298,8 +298,8 @@ void CPlayer::Tick()
 		if(Server()->GetClientInfo(m_ClientID, &Info))
 		{
 			m_Latency.m_Accum += Info.m_Latency;
-			m_Latency.m_AccumMax = max(m_Latency.m_AccumMax, Info.m_Latency);
-			m_Latency.m_AccumMin = min(m_Latency.m_AccumMin, Info.m_Latency);
+			m_Latency.m_AccumMax = maximum(m_Latency.m_AccumMax, Info.m_Latency);
+			m_Latency.m_AccumMin = minimum(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
 		if(Server()->Tick()%Server()->TickSpeed() == 0)
@@ -322,7 +322,7 @@ void CPlayer::Tick()
 	if (!GameServer()->m_World.m_Paused)
 	{
 		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
-		int RespawnTick = max(m_DieTick, EarliestRespawnTick)+2;
+		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick)+2;
 		if (!m_pCharacter && RespawnTick <= Server()->Tick())
 			m_Spawning = true;
 
@@ -3116,7 +3116,7 @@ vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) cons
 
 	if(l > 0.0001f) // make sure that this isn't 0
 	{
-		float OffsetAmount = max(l - m_Deadzone, 0.0f) * (m_FollowFactor / 100.0f);
+		float OffsetAmount = maximum(l - m_Deadzone, 0.0f) * (m_FollowFactor / 100.0f);
 		TargetCameraOffset = normalize_pre_length(Target, l) * OffsetAmount;
 	}
 

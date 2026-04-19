@@ -187,8 +187,8 @@ void CTeleporter::Snap(int SnappingClient)
 	{
 		for (int i = 0; i < NUM_PARTICLES; i++)
 		{
-			float RandomRadius = frandom()*(TELE_RADIUS-4.0f);
-			float RandomAngle = 2.0f * pi * frandom();
+			float RandomRadius = random_float()*(TELE_RADIUS-4.0f);
+			float RandomAngle = 2.0f * pi * random_float();
 			vec2 ParticlePos = m_Pos + vec2(RandomRadius * cos(RandomAngle), RandomRadius * sin(RandomAngle));
 			
 			CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[NUM_CIRCLE+i], sizeof(CNetObj_Projectile)));

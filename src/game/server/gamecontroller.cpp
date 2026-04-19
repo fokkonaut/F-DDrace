@@ -691,7 +691,7 @@ void IGameController::Snap(int SnappingClient)
 			mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
 
 			std::sort(vEndTicks.begin(), vEndTicks.end());
-			const int NumTimedSwitchers = min((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+			const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
 
 			for(int i = 0; i < NumTimedSwitchers; i++)
 			{

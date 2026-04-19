@@ -89,7 +89,7 @@ void CDoor::ResetCollision(bool Remove)
 	if (!m_Collision)
 		return;
 
-	int Length = max(m_Length - 1, 1); // make sure to always set at least the one tile
+	int Length = maximum(m_Length - 1, 1); // make sure to always set at least the one tile
 	for (int i = 0; i < Length; i++)
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),

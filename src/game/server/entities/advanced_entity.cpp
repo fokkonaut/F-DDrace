@@ -96,7 +96,7 @@ void CAdvancedEntity::HandleDropped()
 	//Speedups
 	if (GameServer()->Collision()->IsSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos)))
 	{
-		vec2 Direction, MaxVel, TempVel = m_Vel;
+		vec2 Direction, TempVel = m_Vel;
 		int Force, Type, MaxSpeed = 0;
 		GameServer()->Collision()->GetSpeedup(GameServer()->Collision()->GetMapIndex(m_Pos), &Direction, &Force, &MaxSpeed, &Type);
 
@@ -158,8 +158,8 @@ void CAdvancedEntity::HandleDropped()
 			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				float MaxRampSpeed = pTuning->m_VelrampRange / (50 * log(max((float)pTuning->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = max(MaxRampSpeed, pTuning->m_VelrampStart / 50) * MaxSpeedScale;
+				float MaxRampSpeed = pTuning->m_VelrampRange / (50 * log(maximum((float)pTuning->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, pTuning->m_VelrampStart / 50) * MaxSpeedScale;
 			}
 
 			// (signed) length of projection

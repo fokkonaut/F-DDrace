@@ -2251,7 +2251,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	int Price = pResult->NumArguments() > 1 ? max(1, str_toint(pResult->GetString(1))) : 0; // clamp price to 0
+	int Price = pResult->NumArguments() > 1 ? maximum(1, str_toint(pResult->GetString(1))) : 0; // clamp price to 0
 	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
 	int OwnPlotID = pSelf->GetPlotID(OwnAccID);
 
@@ -2892,7 +2892,7 @@ void CGameContext::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserDat
 
 	char aBuf[512];
 	int Debut = pResult->NumArguments() >= 1 && pResult->GetInteger(0) != 0 ? pResult->GetInteger(0) : 1;
-	Debut = max(1, Debut < 0 ? (int)pSelf->m_TopAccounts.size() + Debut - 3 : Debut);
+	Debut = maximum(1, Debut < 0 ? (int)pSelf->m_TopAccounts.size() + Debut - 3 : Debut);
 
 	// Header
 	const char *pType = "";

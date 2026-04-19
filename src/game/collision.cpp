@@ -2176,10 +2176,10 @@ bool CCollision::TestBoxBig(vec2 Pos, vec2 Size)
 
 	vec2 HalfSize = Size * 0.5f;
 
-	const int MsCountX = std::max(1, (int)ceil(Size.x / 32.0f));
+	const int MsCountX = maximum(1, (int)ceil(Size.x / 32.0f));
 	const float MsGapX = Size.x / (float)MsCountX;
 
-	const int MsCountY = std::max(1, (int)ceil(Size.y / 32.0f));
+	const int MsCountY = maximum(1, (int)ceil(Size.y / 32.0f));
 	const float MsGapY = Size.y / (float)MsCountY;
 
 	// Top & Bottom edges

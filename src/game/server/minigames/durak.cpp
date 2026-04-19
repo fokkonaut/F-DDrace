@@ -1082,13 +1082,13 @@ void CDurak::UpdateGame(int Game)
 
 		// Dynamically sort hand cards
 		float Gap = 4.f;
-		const float RequiredSpace = min(NumCards * (CCard::ms_CardSizeRadius.x*2 + Gap) - Gap, (CCard::ms_TableSizeRadius.x - 32.f) * 2);
+		const float RequiredSpace = minimum(NumCards * (CCard::ms_CardSizeRadius.x*2 + Gap) - Gap, (CCard::ms_TableSizeRadius.x - 32.f) * 2);
 		float PosX = -RequiredSpace / 2.f;
 		if (NumCards > 1)
 		{
 			Gap = RequiredSpace / (NumCards - 1);
 		}
-		float PushStrength = 0.5f + min((int)NumCards - 16, 10) * 0.1f;
+		float PushStrength = 0.5f + minimum((int)NumCards - 16, 10) * 0.1f;
 		for (unsigned int c = 0; c < NumCards; c++)
 		{
 			CCard *pCard = &pSeat->m_Player.m_vHandCards[c];

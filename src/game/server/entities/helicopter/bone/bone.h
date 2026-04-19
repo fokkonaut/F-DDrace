@@ -19,10 +19,10 @@ struct SBounds
 	// Manipulating
 	void Expand(const SBounds& IncludeArea)
 	{
-		m_Left = std::min(m_Left, IncludeArea.m_Left);
-		m_Top = std::min(m_Top, IncludeArea.m_Top);
-		m_Right = std::max(m_Right, IncludeArea.m_Right);
-		m_Bottom = std::max(m_Bottom, IncludeArea.m_Bottom);
+		m_Left = minimum(m_Left, IncludeArea.m_Left);
+		m_Top = minimum(m_Top, IncludeArea.m_Top);
+		m_Right = maximum(m_Right, IncludeArea.m_Right);
+		m_Bottom = maximum(m_Bottom, IncludeArea.m_Bottom);
 	}
 };
 

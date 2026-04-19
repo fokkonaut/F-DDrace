@@ -37,10 +37,10 @@ CBone::CBone(CEntity *pEntity, int SnapID, vec2 From, vec2 To, int Thickness, in
 SBounds CBone::GetBounds()
 {
 	return {
-		std::min(m_From.x, m_To.x),
-		std::min(m_From.y, m_To.y),
-		std::max(m_From.x, m_To.x),
-		std::max(m_From.y, m_To.y)
+		minimum(m_From.x, m_To.x),
+		minimum(m_From.y, m_To.y),
+		maximum(m_From.x, m_To.x),
+		maximum(m_From.y, m_To.y)
 	};
 }
 

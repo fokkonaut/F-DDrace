@@ -1886,7 +1886,7 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 		return; // shouldn't happen / fail silently
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
-	int NumVotesToSend = min(Config()->m_SvVotesPerTick, VotesLeft);
+	int NumVotesToSend = minimum(Config()->m_SvVotesPerTick, VotesLeft);
 
 	if (!VotesLeft)
 	{
@@ -2026,7 +2026,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendPlayerCountUpdate();
 
 	// initial chat delay
-	int Seconds = max(Config()->m_SvChatInitialDelay, Config()->m_SvJoinMsgDelay);
+	int Seconds = maximum(Config()->m_SvChatInitialDelay, Config()->m_SvJoinMsgDelay);
 	if(Seconds != 0 && m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed() && Server()->GetDummy(ClientID) == -1)
 	{
 		char aBuf[128];
@@ -5219,7 +5219,7 @@ void CGameContext::SendChatResponseAll(const char* pLine, void* pUser)
 {
 	CGameContext* pSelf = (CGameContext*)pUser;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 	const char* pLineOrig = pLine;
 
 	if (ReentryGuard)
@@ -5246,7 +5246,7 @@ void CGameContext::SendChatResponse(const char* pLine, void* pUser, bool Highlig
 
 	const char* pLineOrig = pLine;
 
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 
 	if (ReentryGuard)
 		return;
@@ -6171,7 +6171,7 @@ bool CGameContext::OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, 
 	if (PlotID < PLOT_START || !PlotCanBeRaided(PlotID) || m_aPlots[PlotID].m_DoorHealth <= 0)
 		return false;
 
-	int Diff = TaserStrength - max(TaserStrength - m_aPlots[PlotID].m_DoorHealth, 0);
+	int Diff = TaserStrength - maximum(TaserStrength - m_aPlots[PlotID].m_DoorHealth, 0);
 	m_aPlots[PlotID].m_DoorHealth -= Diff;
 	CreateDamage(Pos, ClientID, vec2(0, 0), Diff, 0, false);
 

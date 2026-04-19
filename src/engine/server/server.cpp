@@ -1257,7 +1257,7 @@ void CServer::SendRconLine(int ClientID, const char *pLine)
 void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighted)
 {
 	CServer *pThis = (CServer *)pUser;
-	static volatile int ReentryGuard = 0;
+	static int ReentryGuard = 0;
 	int i;
 
 	if(ReentryGuard) return;
@@ -1790,7 +1790,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if(m_aClients[ClientID].m_Snapshots.Get(m_aClients[ClientID].m_LastAckedSnapshot, &TagTime, 0, 0) >= 0)
 			{
 				m_aClients[ClientID].m_Latency = (int)(((Now-TagTime)*1000)/time_freq());
-				m_aClients[ClientID].m_Latency = max(0, m_aClients[ClientID].m_Latency - PingCorrection);
+				m_aClients[ClientID].m_Latency = maximum(0, m_aClients[ClientID].m_Latency - PingCorrection);
 			}
 
 			if(Config()->m_SvPreInput)
@@ -1908,7 +1908,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						pPw = pAuth;
 					else
 					{
-						str_copy(aName, pAuth, min((unsigned long)sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
+						str_copy(aName, pAuth, minimum((unsigned long)sizeof(aName), (unsigned long)(pDelim - pAuth + 1)));
 						pPw = pDelim + 1;
 					}
 				}
@@ -2146,17 +2146,17 @@ void CServer::GenerateServerInfo(CPacker *pPacker, int Token, int Socket)
 		}
 	}
 
-	ClientCount = min(ClientCount, (int)VANILLA_MAX_CLIENTS);
-	PlayerCount = min(PlayerCount, ClientCount);
-	MaxClients = min(MaxClients, (int)VANILLA_MAX_CLIENTS);
-	int PlayerSlots = min(Config()->m_SvPlayerSlots, MaxClients);
-	PlayerSlots = max(PlayerCount, PlayerSlots);
+	ClientCount = minimum(ClientCount, (int)VANILLA_MAX_CLIENTS);
+	PlayerCount = minimum(PlayerCount, ClientCount);
+	MaxClients = minimum(MaxClients, (int)VANILLA_MAX_CLIENTS);
+	int PlayerSlots = minimum(Config()->m_SvPlayerSlots, MaxClients);
+	PlayerSlots = maximum(PlayerCount, PlayerSlots);
 
 	pPacker->AddInt(Config()->m_SvSkillLevel);	// server skill level
 	pPacker->AddInt(PlayerCount); // num players
 	pPacker->AddInt(PlayerSlots); // max players
 	pPacker->AddInt(ClientCount); // num clients
-	pPacker->AddInt(max(ClientCount, MaxClients)); // max clients
+	pPacker->AddInt(maximum(ClientCount, MaxClients)); // max clients
 
 	if(Token != -1)
 	{
@@ -2226,10 +2226,10 @@ void CServer::SendServerInfoSevendown(const NETADDR *pAddr, int Token, int Socke
  
 	ADD_INT(p, Config()->m_Password[0] ? SERVERINFO_FLAG_PASSWORD : 0);
 
-	ADD_INT(p, min(PlayerCount, ClientCount));
-	ADD_INT(p, max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount));
+	ADD_INT(p, minimum(PlayerCount, ClientCount));
+	ADD_INT(p, maximum(PlayerCount, Config()->m_SvPlayerSlots-DummyCount));
 	ADD_INT(p, ClientCount);
-	ADD_INT(p, max(ClientCount, Config()->m_SvMaxClients-DummyCount));
+	ADD_INT(p, maximum(ClientCount, Config()->m_SvMaxClients-DummyCount));
 
 	p.AddString("", 0);
 
@@ -2353,8 +2353,8 @@ void CServer::UpdateRegisterServerInfo()
 		}
 	}
 
-	int MaxPlayers = max(PlayerCount, Config()->m_SvPlayerSlots-DummyCount);
-	int MaxClients = max(ClientCount, Config()->m_SvMaxClients-DummyCount);
+	int MaxPlayers = maximum(PlayerCount, Config()->m_SvPlayerSlots-DummyCount);
+	int MaxClients = maximum(ClientCount, Config()->m_SvMaxClients-DummyCount);
 	char aName[256];
 	char aGameType[32];
 	char aMapName[64];
@@ -4685,7 +4685,7 @@ void CServer::CClient::CPgscLookup::Run()
 			{
 				int NameLength = str_length(ptr) - str_length(ptr2) + 1; // for null terminator
 				char aServerName[128];
-				str_copy(aServerName, ptr, min(NameLength, (int)sizeof(aServerName)));
+				str_copy(aServerName, ptr, minimum(NameLength, (int)sizeof(aServerName)));
 				if (str_utf8_find_confusable(aServerName, m_aFindString)) // can be empty, then just ban ip if there is a game server broadcasted with this ip
 				{
 					free(pResult);

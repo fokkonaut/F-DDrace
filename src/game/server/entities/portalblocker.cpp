@@ -53,7 +53,7 @@ void CPortalBlocker::Tick()
 			{
 				// Clamp the length
 				float Multiples = distance(m_StartPos, CursorPos) / (Config()->m_SvPortalBlockerMaxLength * 32.f);
-				Amount = min(1.0f, 1 / Multiples);
+				Amount = minimum(1.0f, 1 / Multiples);
 			}
 			m_Pos = mix(m_StartPos, CursorPos, Amount);
 		}

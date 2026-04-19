@@ -52,10 +52,10 @@ void CLaser::LaserHitCharacter(CCharacter* pChar)
 
 void CLaser::TaserHitCharacter(CCharacter *pChar)
 {
-	int RandomPercentage = random(0, 100);
+	int RandomPercentage = random_int(0, 100);
 	if (pChar->GetPlayer()->m_TaserShield > 0 && pChar->GetPlayer()->m_TaserShield >= RandomPercentage)
 	{
-		pChar->GetPlayer()->m_TaserShield = max(pChar->GetPlayer()->m_TaserShield - 5, 0);
+		pChar->GetPlayer()->m_TaserShield = maximum(pChar->GetPlayer()->m_TaserShield - 5, 0);
 		new CTaserShield(GameWorld(), pChar->GetPos(), pChar->GetPlayer()->GetCID());
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), pChar->GetPlayer()->Localize("Taser shield has been used, -5%%, new current: %d%%"), pChar->GetPlayer()->m_TaserShield);
@@ -414,7 +414,7 @@ void CLaser::DoBounce()
 	}
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if (m_Owner >= 0 && m_Energy <= 0 && m_Pos && !m_TeleportCancelled && pOwnerChar &&
+	if (m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->m_HasTeleLaser && m_Type == WEAPON_LASER)
 	{
 		vec2 PossiblePos;
@@ -441,7 +441,7 @@ void CLaser::DoBounce()
 			pOwnerChar->m_IsBlueTeleGunTeleport = m_IsBlueTeleport;
 		}
 	}
-	else if (m_Owner >= 0 && m_Pos)
+	else if (m_Owner >= 0)
 	{
 		int MapIndex = GameServer()->Collision()->GetPureMapIndex(Coltile);
 		int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);

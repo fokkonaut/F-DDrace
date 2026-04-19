@@ -275,7 +275,7 @@ int CHelicopter::GetNextAvailableSeat(int AfterIndex)
 
 void CHelicopter::SetNumIndicator(CPickupNode *aPickups, int& NumPickups, int NewNumPickups, int MaxPickups, int PowerupType)
 {
-	NewNumPickups = std::min(NewNumPickups, MaxPickups);
+	NewNumPickups = minimum(NewNumPickups, MaxPickups);
 
 	int CurrentPickups = NumPickups;
 	int DeltaPickups = NewNumPickups - CurrentPickups;
@@ -386,7 +386,7 @@ void CHelicopter::FlingTee(CCharacter *pChar)
 	vec2 teeAcceleration = directionAwayFromBlades * transferForceTee * totalVelocity;
 	vec2 helicopterAcceleration = -directionAwayFromBlades * transferForceHelicopter * totalVelocity;
 
-	pChar->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 1.f, m_Owner, WEAPON_PLAYER);
+	pChar->TakeDamage(m_Vel * maximum(0.001f, 0.f), m_Vel * -1, 1.f, m_Owner, WEAPON_PLAYER);
 
 	pChar->SetCoreVel(pChar->GetCore().m_Vel + teeAcceleration);
 	m_Vel += helicopterAcceleration;
@@ -467,12 +467,12 @@ void CHelicopter::ExplosionDamage(float Strength, vec2 Pos, int FromID)
 
 void CHelicopter::Heal(float Health)
 {
-	m_Health = min(m_Health + Health, m_MaxHealth);
+	m_Health = minimum(m_Health + Health, m_MaxHealth);
 }
 
 void CHelicopter::HealArmor(float Armor)
 {
-	m_Armor = min(m_Armor + Armor, m_MaxArmor);
+	m_Armor = minimum(m_Armor + Armor, m_MaxArmor);
 }
 
 void CHelicopter::Tick()
@@ -674,7 +674,7 @@ void CHelicopter::HandleExplosions()
 
 	m_ExplosionsLeft--;
 
-	int Diameter = (int)min(GetSize().x, GetSize().y) + 150; // 150 seems fine minimum range for the explosion
+	int Diameter = (int)minimum(GetSize().x, GetSize().y) + 150; // 150 seems fine minimum range for the explosion
 	int Radius = Diameter / 2;
 	for (int i = 0; i < 3; i++)
 	{
@@ -691,7 +691,7 @@ void CHelicopter::HandleExplosions()
 
 	// F-DDrace
 	//    if (pTargetChr)
-	//        pTargetChr->TakeDamage(m_Vel * max(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
+	//        pTargetChr->TakeDamage(m_Vel * maximum(0.001f, 0.f), m_Vel * -1, 69.f, m_Owner, WEAPON_PLAYER);
 
 	if (m_ExplosionsLeft == 0)
 		Reset();
@@ -1072,7 +1072,7 @@ void CHelicopter::BuildHelicopter()
 
 	const SBounds& ModelBounds = m_pModel->GetCachedBounds();
 	int builtTicks = Server()->Tick() - m_Build.m_StartTick;
-	float builtProgress = std::min(1.0f, (float)builtTicks / (float)m_Build.m_Duration);
+	float builtProgress = minimum(1.0f, (float)builtTicks / (float)m_Build.m_Duration);
 	float currentHeight = ModelBounds.m_Bottom - m_pModel->GetTotalSize().y * builtProgress;
 	m_Build.m_CachedHeight = currentHeight;
 

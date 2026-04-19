@@ -977,7 +977,7 @@ void CCharacter::FireWeapon()
 					int Flags = CGameWorld::EFindEntFlag::IN_HELICOPTER;
 					if (!m_Passive)
 						Flags |= CGameWorld::EFindEntFlag::PASSIVE;
-					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f * max(1.f, m_pPlayer->GetZoomLevel()), Types, this, m_pPlayer->GetCID(), Flags);
+					CEntity *pEntity = GameWorld()->ClosestEntityTypes(GetCursorPos(), 20.f * maximum(1.f, m_pPlayer->GetZoomLevel()), Types, this, m_pPlayer->GetCID(), Flags);
 
 					CCharacter *pChr = 0;
 					CFlag *pFlag = 0;
@@ -1072,7 +1072,7 @@ void CCharacter::FireWeapon()
 
 				if (IntersectedPos != vec2(-1, -1))
 				{
-					new CFlyingPoint(GameWorld(), IntersectedPos, -1, m_pPlayer->GetCID(), vec2((float)random(0, 400)/100.f, (float)random(0, 400)/100.f), PortalPos, true);
+					new CFlyingPoint(GameWorld(), IntersectedPos, -1, m_pPlayer->GetCID(), vec2((float)random_int(0, 400)/100.f, (float)random_int(0, 400)/100.f), PortalPos, true);
 					GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
 					return;
 				}
@@ -1306,7 +1306,7 @@ void CCharacter::HandleWeapons()
 			if ((Server()->Tick() - m_aWeapons[GetActiveWeapon()].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
 			{
 				// Add some ammo
-				m_aWeapons[GetActiveWeapon()].m_Ammo = min(m_aWeapons[GetActiveWeapon()].m_Ammo + 1, 10);
+				m_aWeapons[GetActiveWeapon()].m_Ammo = minimum(m_aWeapons[GetActiveWeapon()].m_Ammo + 1, 10);
 				m_aWeapons[GetActiveWeapon()].m_AmmoRegenStart = -1;
 			}
 		}
@@ -2034,7 +2034,7 @@ bool CCharacter::TakeDamage(vec2 Force, vec2 Source, int Dmg, int From, int Weap
 	{
 		// m_pPlayer only inflicts half damage on self
 		if (From == m_pPlayer->GetCID())
-			Dmg = max(1, Dmg / 2);
+			Dmg = maximum(1, Dmg / 2);
 
 		int OldHealth = m_Health, OldArmor = m_Armor;
 		if (Dmg)
@@ -2533,7 +2533,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			else
 			{
 				int Seconds = (Server()->Tick() - m_LastLinkedPortals) / Server()->TickSpeed();
-				Ammo = (Seconds*10/max(Config()->m_SvPortalRifleDelay, 1));
+				Ammo = (Seconds*10/maximum(Config()->m_SvPortalRifleDelay, 1));
 			}
 		}
 		pCharacter->m_AmmoCount = clamp(Ammo, -1, 10);
@@ -2556,7 +2556,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		if (pFlag && !pFlag->IsAtStand())
 		{
 			int DroppedSinceSeconds = (Server()->Tick() - pFlag->GetDropTick()) / Server()->TickSpeed();
-			int Amount = 10 - (DroppedSinceSeconds*10/max(Config()->m_SvFlagRespawnDropped, 1));
+			int Amount = 10 - (DroppedSinceSeconds*10/maximum(Config()->m_SvFlagRespawnDropped, 1));
 			pCharacter->m_Health = pCharacter->m_Armor = Amount;
 		}
 		else
@@ -2841,8 +2841,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				float MaxRampSpeed = Tuning()->m_VelrampRange / (50 * log(max((float)Tuning()->m_VelrampCurvature, 1.01f)));
-				MaxSpeed = max(MaxRampSpeed, Tuning()->m_VelrampStart / 50) * MaxSpeedScale;
+				float MaxRampSpeed = Tuning()->m_VelrampRange / (50 * log(maximum((float)Tuning()->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, Tuning()->m_VelrampStart / 50) * MaxSpeedScale;
 			}
 
 			// (signed) length of projection
@@ -3146,7 +3146,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if ((m_LastIndexTile != TILE_TASER_SHIELD_PLUS) && (m_LastIndexFrontTile != TILE_TASER_SHIELD_PLUS))
 			{
-				m_pPlayer->m_TaserShield = min(m_pPlayer->m_TaserShield + 20, 100);
+				m_pPlayer->m_TaserShield = minimum(m_pPlayer->m_TaserShield + 20, 100);
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, +20%% taser shield, current: %d%%. Use '/taser' to check later."), m_pPlayer->m_TaserShield);
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
@@ -3159,7 +3159,7 @@ void CCharacter::HandleTiles(int Index)
 			if ((m_LastIndexTile != TILE_ADD_2X_XP_TWO_LIFES) && (m_LastIndexFrontTile != TILE_ADD_2X_XP_TWO_LIFES))
 			{
 				bool FirstlyAdded = m_pPlayer->m_DoubleXpLifesLeft == 0;
-				m_pPlayer->m_DoubleXpLifesLeft = min(m_pPlayer->m_DoubleXpLifesLeft + 2, 99);
+				m_pPlayer->m_DoubleXpLifesLeft = minimum(m_pPlayer->m_DoubleXpLifesLeft + 2, 99);
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), m_pPlayer->Localize("Congratulations, double-xp has been activated for %d lifes"), m_pPlayer->m_DoubleXpLifesLeft);
 				GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
@@ -4685,7 +4685,7 @@ void CCharacter::CalculateCursorPosZoomed()
 		if(l > 0.0001f) // make sure that this isn't 0
 		{
 			float FollowFactor = m_pPlayer->m_CameraInfo.m_FollowFactor / 100.0f;
-			float OffsetAmount = max(l - m_pPlayer->m_CameraInfo.m_Deadzone, 0.0f) * FollowFactor;
+			float OffsetAmount = maximum(l - m_pPlayer->m_CameraInfo.m_Deadzone, 0.0f) * FollowFactor;
 
 			TargetCameraOffset = normalize(MousePos) * OffsetAmount;
 			Pos -= TargetCameraOffset * (m_pPlayer->GetZoomLevel() - 1.f);
@@ -5662,7 +5662,7 @@ void CCharacter::IncreaseNoBonusScore(int Summand)
 	}
 
 	// threshold to span: [1] = warn when we got fucked up already, [2,4] = warn one before reaching threshold, [5...] = warn on every 4th
-	int MessageSpan = min(max(Config()->m_SvNoBonusScoreThreshold-1, 1), 4);
+	int MessageSpan = minimum(maximum(Config()->m_SvNoBonusScoreThreshold-1, 1), 4);
 
 	// When we get our initial escape time we always want to send a message
 	if (ForceSendMessage || m_NoBonusContext.m_Score % MessageSpan == 0)
@@ -5706,7 +5706,7 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 		m_NoBonusContext.m_SavedBonus.m_Jumps = m_Core.m_Jumps;
 		EndlessHook(false, -1, Silent);
 		InfiniteJumps(false, -1, Silent);
-		SetJumps(min(m_Core.m_Jumps, Config()->m_SvNoBonusMaxJumps), Silent);
+		SetJumps(minimum(m_Core.m_Jumps, Config()->m_SvNoBonusMaxJumps), Silent);
 	}
 	else
 	{
@@ -5920,10 +5920,10 @@ bool CCharacter::GrogTick()
 			// Random grog actions
 			if (!m_NextGrogEmote || m_NextGrogEmote - Now < 0)
 			{
-				int Random = random(0, 2);
+				int Random = random_int(0, 2);
 				GameServer()->SendEmoticon(m_pPlayer->GetCID(), Random == 0 ? EMOTICON_HEARTS : Random == 1 ? EMOTICON_EYES : EMOTICON_MUSIC);
 				SetEmote(EMOTE_HAPPY, Now + Server()->TickSpeed() * 2);
-				m_NextGrogEmote = Now + Server()->TickSpeed() * random(5, 60);
+				m_NextGrogEmote = Now + Server()->TickSpeed() * random_int(5, 60);
 			}
 
 			// Balance impaired
@@ -5952,7 +5952,7 @@ bool CCharacter::GrogTick()
 						if (m_GrogBalancePosX == GROG_BALANCE_POS_UNSET && m_Input.m_Direction == 0 && m_IsGrounded)
 						{
 							m_GrogBalancePosX = m_Pos.x;
-							int Emoticon = EMOTICON_SPLATTEE + random(0, 2); // one of the three angry emotes
+							int Emoticon = EMOTICON_SPLATTEE + random_int(0, 2); // one of the three angry emotes
 							GameServer()->SendEmoticon(m_pPlayer->GetCID(), Emoticon);
 							SetEmote(EMOTE_ANGRY, Now + Server()->TickSpeed() * 2);
 						}
@@ -5995,7 +5995,7 @@ bool CCharacter::GrogTick()
 						// Don't set yet when we're stil balancing
 						if (!m_GrogDirDelayEnd && m_GrogBalancePosX == GROG_BALANCE_POS_UNSET)
 						{
-							int Emoticon = EMOTICON_SPLATTEE + random(0, 2); // one of the three angry emotes
+							int Emoticon = EMOTICON_SPLATTEE + random_int(0, 2); // one of the three angry emotes
 							GameServer()->SendEmoticon(m_pPlayer->GetCID(), Emoticon);
 							SetEmote(EMOTE_ANGRY, Now + Server()->TickSpeed() * 2);
 							// 1/3 second delayed
@@ -6035,13 +6035,13 @@ bool CCharacter::GrogTick()
 		// long term alcoholics can handle it better
 		// let's add 0.5 permille on top, so 4.4permille is the ABSOLUTE maximum without dying, depending on register date
 		// for other people, 3.5 will be deadly limit
-		int DeadlyLimit = max(GetPermilleLimit() + 5, 35);
+		int DeadlyLimit = maximum(GetPermilleLimit() + 5, 35);
 		if (m_pPlayer->m_Permille > DeadlyLimit)
 		{
 			if (!m_DeadlyPermilleDieTick)
 			{
 				// Random timer between 3sec and 10min
-				m_DeadlyPermilleDieTick = Now + Server()->TickSpeed() * random(3, 600);
+				m_DeadlyPermilleDieTick = Now + Server()->TickSpeed() * random_int(3, 600);
 			}
 
 			// 5 minutes above the deadly limit will kill you
@@ -6067,9 +6067,9 @@ bool CCharacter::GrogTick()
 
 int64 CCharacter::GetNextGrogActionTick()
 {
-	int Seconds = random(20, 60);
-	float Multiplier = random(5, 10) / 10.f;
-	int DecreaseSeconds = min((int)(m_pPlayer->m_Permille * 3 * Multiplier), Seconds - 1);
+	int Seconds = random_int(20, 60);
+	float Multiplier = random_int(5, 10) / 10.f;
+	int DecreaseSeconds = minimum((int)(m_pPlayer->m_Permille * 3 * Multiplier), Seconds - 1);
 	return Server()->Tick() + Server()->TickSpeed() * (Seconds - DecreaseSeconds);
 }
 
@@ -6335,7 +6335,7 @@ bool CCharacter::SetSafeArea(bool Enter, bool Silent)
 		EndlessHook(m_SavedInGame.m_EndlessHook || m_EndlessHook, -1, Silent);
 		InfiniteJumps(m_SavedInGame.m_InfiniteJumps || m_SuperJump, -1, Silent);
 		Jetpack(m_SavedInGame.m_Jetpack || m_Jetpack, -1, Silent);
-		SetJumps(max(m_SavedInGame.m_Jumps, m_Core.m_Jumps), Silent);
+		SetJumps(maximum(m_SavedInGame.m_Jumps, m_Core.m_Jumps), Silent);
 		m_SavedInGame.m_EndlessHook = false;
 		m_SavedInGame.m_InfiniteJumps = false;
 		m_SavedInGame.m_Jetpack = false;
