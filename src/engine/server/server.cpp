@@ -1827,7 +1827,12 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						if(!aPreInputClients[Id])
 							continue;
 
+						if (!Translate(PreInput.m_Owner, Id))
+							continue;
+
 						SendPackMsg(&PreInput, MSGFLAG_FLUSH | MSGFLAG_NORECORD, Id);
+						// Reset for others after translating and sending
+						PreInput.m_Owner = ClientID;
 					}
 				}
 			}
