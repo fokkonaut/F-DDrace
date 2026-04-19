@@ -1294,7 +1294,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 	if (pChr)
 	{
-		if (pChr->m_FakeTuneCollision || pChr->m_InSnake)
+		if (pChr->m_FakeTuneCollision || pChr->m_InSnake || (pChr->m_Passive && !pChr->m_Super))
 			Tunings.m_PlayerCollision = 0.f;
 		if ((pChr->m_Passive && !pChr->m_Super) || pChr->m_Snake.Active())
 			Tunings.m_PlayerHooking = 0.f;

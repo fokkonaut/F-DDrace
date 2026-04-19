@@ -2318,6 +2318,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 	}
 
 	bool LocalHelicopter = Local && m_pHelicopter;
+	bool PassiveNotSuper = m_pPlayer->AntiPing() && m_Passive && !m_Super;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
 	if(m_Super)
@@ -2332,13 +2333,13 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Jetpack && (GameServer()->GetWeaponType(GetActiveWeapon()) != WEAPON_GUN || GetActiveWeapon() == WEAPON_GUN))
 		Flags |= CHARACTERFLAG_JETPACK;
-	if(m_Hit & DISABLE_HIT_GRENADE && m_aWeapons[WEAPON_GRENADE].m_Got)
+	if((m_Hit & DISABLE_HIT_GRENADE || PassiveNotSuper) && m_aWeapons[WEAPON_GRENADE].m_Got)
 		Flags |= CHARACTERFLAG_NO_GRENADE_HIT;
-	if(m_Hit & DISABLE_HIT_HAMMER && m_aWeapons[WEAPON_HAMMER].m_Got)
+	if((m_Hit & DISABLE_HIT_HAMMER || PassiveNotSuper) && m_aWeapons[WEAPON_HAMMER].m_Got)
 		Flags |= CHARACTERFLAG_NO_HAMMER_HIT;
-	if(m_Hit & DISABLE_HIT_RIFLE && m_aWeapons[WEAPON_LASER].m_Got)
+	if((m_Hit & DISABLE_HIT_RIFLE || PassiveNotSuper) && m_aWeapons[WEAPON_LASER].m_Got)
 		Flags |= CHARACTERFLAG_NO_LASER_HIT;
-	if(m_Hit & DISABLE_HIT_SHOTGUN && m_aWeapons[WEAPON_SHOTGUN].m_Got)
+	if((m_Hit & DISABLE_HIT_SHOTGUN || PassiveNotSuper) && m_aWeapons[WEAPON_SHOTGUN].m_Got)
 		Flags |= CHARACTERFLAG_NO_SHOTGUN_HIT;
 	if(m_HasTeleGun && m_aWeapons[WEAPON_GUN].m_Got)
 		Flags |= CHARACTERFLAG_TELEGUN_GUN;
