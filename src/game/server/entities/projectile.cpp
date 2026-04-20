@@ -657,6 +657,7 @@ bool CProjectile::DetermineIfDefaultTuning()
 	case WEAPON_SHOTGUN:
 		return m_Curvature == pDefaultTuning->m_ShotgunCurvature && m_Speed == pDefaultTuning->m_ShotgunSpeed;
 	case WEAPON_GRENADE:
+	case WEAPON_BALL_GRENADE:
 		return m_Curvature == pDefaultTuning->m_GrenadeCurvature && m_Speed == pDefaultTuning->m_GrenadeSpeed;
 	case WEAPON_STRAIGHT_GRENADE:
 		return false;
