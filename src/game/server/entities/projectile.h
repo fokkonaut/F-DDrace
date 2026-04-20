@@ -62,7 +62,7 @@ private:
 	bool m_InitialSafeArea;
 	bool m_InitialNoBonusArea;
 
-	CCharacter *m_pForceNotThis;
+	CCharacter *m_pHammerHitChr;
 
 	int m_Bouncing;
 	bool m_Freeze;

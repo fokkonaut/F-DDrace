@@ -37,7 +37,7 @@ private:
 	int m_LifeTime;
 	int m_InitialLifeTime;
 
-	CCharacter *m_pForceNotThis;
+	CCharacter *m_pHammerHitChr;
 
 	Mask128 m_TeamMask;
 	CCharacter* m_pOwner;
