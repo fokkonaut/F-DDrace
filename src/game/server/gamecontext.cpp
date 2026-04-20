@@ -8114,7 +8114,7 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 		SnapPickupObject(Context, SnapId, Pos, Type, SubType, SwitchNumber, Flags);
 	}
 
-	bool Gun = (SubType == WEAPON_GUN && (Special&SPECIAL_JETPACK || Special&SPECIAL_TELEWEAPON)) || SubType == WEAPON_PROJECTILE_RIFLE || (SubType == WEAPON_HAMMER && Special&SPECIAL_DOORHAMMER);
+	bool Gun = (SubType == WEAPON_GUN && (Special&SPECIAL_JETPACK || Special&SPECIAL_TELEWEAPON)) || SubType == WEAPON_PROJECTILE_RIFLE || (SubType == WEAPON_HAMMER && (Special&SPECIAL_DOORHAMMER || Special&SPECIAL_PPROJECTILEHAMMER));
 	bool Plasma = SubType == WEAPON_PLASMA_RIFLE || SubType == WEAPON_LIGHTSABER || SubType == WEAPON_PORTAL_RIFLE || SubType == WEAPON_TELE_RIFLE
 		|| SubType == WEAPON_LIGHTNING_LASER || (SubType == WEAPON_LASER && Special&SPECIAL_TELEWEAPON) || (SubType == WEAPON_TASER && Type == POWERUP_WEAPON);
 	bool Heart = SubType == WEAPON_HEART_GUN;
@@ -8626,7 +8626,7 @@ const char *CGameContext::CreateExtraMessage(int Extra, bool Set, int FromID, in
 	if (FromID == -1 || FromID == ToID)
 	{
 		if (Extra == JETPACK || Extra == ATOM || Extra == TRAIL || Extra == METEOR || Extra == INF_METEOR || Extra == SCROLL_NINJA || Extra == HOOK_POWER|| Extra == SPREAD_WEAPON
-			|| Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON || Extra == DOOR_HAMMER || Extra == ROTATING_BALL || Extra == EPIC_CIRCLE || Extra == STAFF_IND)
+			|| Extra == FREEZE_HAMMER || Extra == ITEM || Extra == TELE_WEAPON || Extra == DOOR_HAMMER || Extra == PROJECTILE_HAMMER || Extra == ROTATING_BALL || Extra == EPIC_CIRCLE || Extra == STAFF_IND)
 			str_format(aMsg, sizeof(aMsg), "You %s %s", Set ? "have a" : "lost your", aItem);
 		else if (Extra == VANILLA_MODE || Extra == DDRACE_MODE)
 			str_format(aMsg, sizeof(aMsg), "You are now in %s", aItem);
@@ -8716,6 +8716,8 @@ const char *CGameContext::GetExtraName(int Extra, int Special)
 		return "Always Tele Weapon";
 	case DOOR_HAMMER:
 		return "Door Hammer";
+	case PROJECTILE_HAMMER:
+		return "Projectile Hammer";
 	case TEE_CONTROL:
 		return "Tee Control";
 	case SNAKE:

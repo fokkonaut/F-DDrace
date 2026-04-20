@@ -58,6 +58,7 @@ enum Extra
 	RAINBOW_NAME,
 	CONFETTI,
 	SPARKLE,
+	PROJECTILE_HAMMER,
 	NUM_EXTRAS
 };
 
@@ -75,6 +76,7 @@ enum WeaponSpecial
 	SPECIAL_TELEWEAPON = 1<<2,
 	SPECIAL_DOORHAMMER = 1<<3,
 	SPECIAL_SCROLLNINJA = 1<<4,
+	SPECIAL_PPROJECTILEHAMMER = 1<<5,
 };
 
 class CAntibot;
@@ -181,6 +183,7 @@ public:
 	void TeleWeapon(int Type, bool Set = true, int FromID = -1, bool Silent = false);
 	void AlwaysTeleWeapon(int Mode = 1, int FromID = -1, bool Silent = false);
 	void DoorHammer(bool Set = true, int FromID = -1, bool Silent = false);
+	void ProjectileHammer(bool Set = true, int FromID = -1, bool Silent = false);
 	void TeeControl(bool Set = true, int ForcedID = -1, int FromID = -1, bool Silent = false);
 	void Snake(bool Set = true, int FromID = -1, bool Silent = false);
 	void Lovely(bool Set = true, int FromID = -1, bool Silent = false);
@@ -458,6 +461,7 @@ public:
 	CLightsaber* m_pLightsaber;
 	int m_AlwaysTeleWeapon;
 	bool m_DoorHammer;
+	bool m_ProjectileHammer;
 	bool m_FakeTuneCollision;
 	bool m_OldFakeTuneCollision;
 	bool m_Passive;

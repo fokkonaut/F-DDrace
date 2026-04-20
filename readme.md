@@ -98,7 +98,7 @@ Most custom tiles can be used and tested directly from Game and Front layer (or 
 | 195, 196 | Redirect FROM and TO teleport | Switch | FROM and TO teleporters but for redirect, ID to port mapping: `sv_redirect_server_tile_ports 1:8304,2:8303`, TO: Delay=1: Playercounter display |
 | 199, 200, 202, 241, 243, 244, 245, 249, 250, 252 | Most weapons | Switch | ID=0, Delay=1: Give spread weapon variant |
 | 201 | Scroll Ninja | Switch | ID=0, Delay=1: Give scroll ninja |
-| 242 | Door Hammer | Switch | ID=0, Delay=1: Give door hammmer, ability to open doors by hitting them |
+| 242 | Door and Projectile Hammer | Switch | ID=0, Delay=1: Give door hammmer to open doors by hitting, Delay=2: Give projectile hammer to redirect projectiles by hitting, Delay: Give both |
 | 219 | Helicopter | Switch | Delay=Variant: 0=standard, 1=minigun, 2=missile, spawning can be delayed by disabling switch with same ID |
 
 ## Map Settings

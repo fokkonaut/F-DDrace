@@ -11,6 +11,8 @@
 #include <utility>
 #include <engine/shared/config.h>
 #include "gamemodes/DDRace.h"
+#include "entities/projectile.h"
+#include "entities/custom_projectile.h"
 
 void CSelectedArea::Init(CGameContext *pGameServer)
 {
@@ -1128,7 +1130,7 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEn
 	return 0;
 }
 
-int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team)
+int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team, bool ProjHammer)
 {
 	int Num = 0;
 
@@ -1145,9 +1147,35 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 					continue;
 				if (pEnt->IsAdvancedEntity() && Team != ((CAdvancedEntity*)pEnt)->GetDDTeam())
 					continue;
+				if (i == ENTTYPE_PROJECTILE && Team != ((CProjectile*)pEnt)->DDTeam())
+					continue;
+				if (i == ENTTYPE_CUSTOM_PROJECTILE && Team != ((CCustomProjectile*)pEnt)->DDTeam())
+					continue;
 			}
 
-			if(distance(pEnt->m_Pos, Pos) < Radius+pEnt->m_ProximityRadius)
+			vec2 EntPos = pEnt->m_Pos;
+			float EntRadius = pEnt->m_ProximityRadius;
+			if (ProjHammer && (i == ENTTYPE_PROJECTILE || i == ENTTYPE_CUSTOM_PROJECTILE))
+			{
+				// projectiles have a ProximityRadius of 0, unhittable
+				EntRadius = CCharacterCore::PHYS_SIZE * 2.f;
+				
+				if (i == ENTTYPE_PROJECTILE) // fetch current position
+				{
+					// only allow projectiles shot by players
+					if (((CProjectile *)pEnt)->GetOwner() == -1)
+						continue;
+					EntPos = ((CProjectile *)pEnt)->m_CurPos;
+				}
+				else if (i == ENTTYPE_CUSTOM_PROJECTILE)
+				{
+					// only allow projectiles shot by players, even though custom projectiles currently cant be map placed
+					if (((CCustomProjectile *)pEnt)->GetOwner() == -1)
+						continue;
+				}
+			}
+
+			if(distance(EntPos, Pos) < Radius+EntRadius)
 			{
 				if(ppEnts)
 					ppEnts[Num] = pEnt;

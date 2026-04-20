@@ -116,6 +116,8 @@ void CPickupDrop::Pickup()
 				pChr->TeleWeapon(m_Weapon);
 			if (m_Special&SPECIAL_DOORHAMMER)
 				pChr->DoorHammer();
+			if (m_Special&SPECIAL_PPROJECTILEHAMMER)
+				pChr->ProjectileHammer();
 			if (m_Special&SPECIAL_SCROLLNINJA)
 				pChr->ScrollNinja();
 
@@ -165,6 +167,7 @@ int CPickupDrop::IsCharacterNear()
 				|| (m_Special&SPECIAL_SPREADWEAPON && (ChrSpecial&SPECIAL_SPREADWEAPON || !pChr->GetWeaponGot(m_Weapon)))
 				|| (m_Special&SPECIAL_TELEWEAPON && (ChrSpecial& SPECIAL_TELEWEAPON || !pChr->GetWeaponGot(m_Weapon)))
 				|| (m_Special&SPECIAL_DOORHAMMER && (ChrSpecial&SPECIAL_DOORHAMMER || !pChr->GetWeaponGot(WEAPON_HAMMER)))
+				|| (m_Special&SPECIAL_PPROJECTILEHAMMER && (ChrSpecial&SPECIAL_PPROJECTILEHAMMER || !pChr->GetWeaponGot(WEAPON_HAMMER)))
 				|| (m_Special&SPECIAL_SCROLLNINJA && ChrSpecial&SPECIAL_SCROLLNINJA)
 				)
 				AcceptSpecial = false;

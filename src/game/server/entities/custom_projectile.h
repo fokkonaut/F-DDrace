@@ -23,10 +23,15 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
+	void HitProjectile(vec2 Direction);
+	int DDTeam();
+	int GetOwner() { return m_Owner; }
+
 private:
 	vec2 m_Core;
 	vec2 m_PrevPos;
 	vec2 m_Direction;
+	float m_Speed;
 
 	int m_EvalTick;
 	int m_LifeTime;

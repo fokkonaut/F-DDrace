@@ -15,14 +15,15 @@ CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos
 {
 	m_Owner = Owner;
 	m_Pos = Pos;
-	m_Core = normalize(Dir) * Speed;
+	m_Speed = Speed;
+	m_Direction = Dir;
+	m_Core = normalize(m_Direction) * m_Speed;
 	m_Freeze = Freeze;
 	m_Explosive = Explosive;
 	m_Unfreeze = Unfreeze;
 	m_Bloody = Bloody;
 	m_Ghost = Ghost;
 	m_Spooky = Spooky;
-	m_Direction = Dir;
 	m_EvalTick = Server()->Tick();
 	m_LifeTime = Server()->TickSpeed() * Lifetime;
 	m_Type = Type;
@@ -36,6 +37,18 @@ CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos
 void CCustomProjectile::Reset()
 {
 	GameWorld()->DestroyEntity(this);
+}
+
+void CCustomProjectile::HitProjectile(vec2 Direction)
+{
+	m_Direction = Direction;
+	m_Core = normalize(m_Direction) * m_Speed;
+	m_EvalTick = Server()->Tick();
+}
+
+int CCustomProjectile::DDTeam()
+{
+	return m_pOwner ? m_pOwner->Team() : -1;
 }
 
 void CCustomProjectile::Tick()

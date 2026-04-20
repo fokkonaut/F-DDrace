@@ -1166,6 +1166,7 @@ private:
 	static void ConTeleGrenade(IConsole::IResult* pResult, void* pUserData);
 	static void ConTeleLaser(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConProjectileHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConDoorHammer(IConsole::IResult* pResult, void* pUserData);
 	static void ConLovely(IConsole::IResult* pResult, void* pUserData);
 	static void ConRotatingBall(IConsole::IResult* pResult, void* pUserData);

@@ -29,6 +29,10 @@ public:
 	vec2 GetPos(float Time);
 	void SetBouncing(int Value);
 
+	void HitProjectile(vec2 Direction, vec2 InitDir);
+	int DDTeam();
+	int GetOwner() { return m_Owner; }
+
 	void FillInfo(CNetObj_Projectile *pProj, int SnappingClient);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);

@@ -531,7 +531,12 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		if (Layer == LAYER_SWITCH && Number == 0 && Delay > 0)
 		{
 			if (SubType == WEAPON_HAMMER)
-				Special |= SPECIAL_DOORHAMMER;
+			{
+				if (Delay & 1)
+					Special |= SPECIAL_DOORHAMMER;
+				if (Delay & 2)
+					Special |= SPECIAL_PPROJECTILEHAMMER;
+			}
 			else if (SubType == WEAPON_NINJA)
 				Special |= SPECIAL_SCROLLNINJA;
 			else if (GameServer()->IsValidSpreadWeapon(SubType))

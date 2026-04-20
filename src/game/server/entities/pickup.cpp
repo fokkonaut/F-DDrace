@@ -251,6 +251,8 @@ void CPickup::Tick()
 							pChr->SpreadWeapon(m_Subtype);
 						if (m_Special&SPECIAL_DOORHAMMER)
 							pChr->DoorHammer();
+						if (m_Special&SPECIAL_PPROJECTILEHAMMER)
+							pChr->ProjectileHammer();
 
 						Picked = true;
 

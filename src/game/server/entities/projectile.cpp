@@ -350,6 +350,19 @@ void CProjectile::TickPaused()
 	++m_StartTick;
 }
 
+void CProjectile::HitProjectile(vec2 Direction, vec2 InitDir)
+{
+	m_Direction = Direction;
+	m_InitDir = InitDir;
+	m_StartTick = Server()->Tick();
+	m_Pos = m_CurPos;
+}
+
+int CProjectile::DDTeam()
+{
+	return GameServer()->GetPlayerChar(m_Owner) ? GameServer()->GetPlayerChar(m_Owner)->Team() : -1;
+}
+
 void CProjectile::FillInfo(CNetObj_Projectile* pProj, int SnappingClient)
 {
 	pProj->m_Type = GameServer()->GetProjectileType(m_Type);

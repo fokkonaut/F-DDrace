@@ -179,6 +179,7 @@ private:
 	int m_HasTeleGun;
 	int m_HasTeleGrenade;
 	int m_HasTeleLaser;
+	int m_ProjectileHammer;
 
 	// core
 	int m_MoveRestrictionExtraRoomKey;

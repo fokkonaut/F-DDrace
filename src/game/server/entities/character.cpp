@@ -706,22 +706,29 @@ void CCharacter::FireWeapon()
 				{
 					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 				}
-				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team());
+				if (m_ProjectileHammer)
+				{
+					Types |= (1<<CGameWorld::ENTTYPE_PROJECTILE) | (1<<CGameWorld::ENTTYPE_CUSTOM_PROJECTILE);
+				}
+				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team(), m_ProjectileHammer);
 
+				bool HitProjectile = false;
 				int Hits = 0;
 				for (int i = 0; i < Num; ++i)
 				{
 					CEntity *pEnt = apEnts[i];
 					CCharacter *pTarget = 0;
 					CAdvancedEntity *pEntity = 0;
+					CProjectile *pProj = 0;
+					CCustomProjectile *pCustomProj = 0;
 					if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
-					{
 						pTarget = (CCharacter *)pEnt;
-					}
 					else if (pEnt->IsAdvancedEntity())
-					{
 						pEntity = (CAdvancedEntity *)pEnt;
-					}
+					else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_PROJECTILE)
+						pProj = (CProjectile *)pEnt;
+					else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CUSTOM_PROJECTILE)
+						pCustomProj = (CCustomProjectile *)pEnt;
 
 					// set his velocity to fast upward (for now)
 					vec2 Dir;
@@ -800,10 +807,24 @@ void CCharacter::FireWeapon()
 						pEntity->SetVel(ClampVel(pEntity->GetMoveRestrictions(), Temp));
 						Hits++;
 					}
+					else if (pProj)
+					{
+						pProj->HitProjectile(Direction, MouseTarget);
+						if (length(pProj->m_CurPos - ProjStartPos) > 0.0f)
+							EffectPos = pProj->m_CurPos - normalize(pProj->m_CurPos - ProjStartPos) * GetProximityRadius() * 0.5f;
+						GameServer()->CreateHammerHit(EffectPos, TeamMask());
+						HitProjectile = true;
+					}
+					else if (pCustomProj)
+					{
+						pCustomProj->HitProjectile(Direction);
+						GameServer()->CreateHammerHit(EffectPos, TeamMask());
+						HitProjectile = true;
+					}
 				}
 
 				// if we Hit anything, we have to wait for the reload
-				if (Hits)
+				if (Hits && !HitProjectile) // hitting only projectiles will just set normal hammer fire delay
 				{
 					m_ReloadTimer = Tuning()->m_HammerHitFireDelay * Server()->TickSpeed() / 1000;
 				}
@@ -4502,6 +4523,7 @@ void CCharacter::FDDraceInit()
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_DoorHammer = false;
+	m_ProjectileHammer = false;
 	m_pHelicopter = nullptr;
 	m_HelicopterSeat = -1;
 	m_SeatSwitchedTick = Server()->Tick();
@@ -5270,6 +5292,8 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 		TeleWeapon(WeaponID, false, -1, OnDeath);
 	if (Special&SPECIAL_DOORHAMMER)
 		DoorHammer(false, -1, OnDeath);
+	if (Special&SPECIAL_PPROJECTILEHAMMER)
+		ProjectileHammer(false, -1, OnDeath);
 	if (Special&SPECIAL_SCROLLNINJA)
 		ScrollNinja(false, -1, OnDeath);
 }
@@ -5405,6 +5429,8 @@ int CCharacter::GetWeaponSpecial(int Type)
 		Special |= SPECIAL_TELEWEAPON;
 	if (Type == WEAPON_HAMMER && m_DoorHammer)
 		Special |= SPECIAL_DOORHAMMER;
+	if (Type == WEAPON_HAMMER && m_ProjectileHammer)
+		Special |= SPECIAL_PPROJECTILEHAMMER;
 	if (Type == WEAPON_NINJA && m_ScrollNinja)
 		Special |= SPECIAL_SCROLLNINJA;
 	return Special;
@@ -6240,6 +6266,11 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 				DoorHammer(true, -1, true);
 				pTarget->DoorHammer(false, -1, true);
 			}
+			if (Special & SPECIAL_PPROJECTILEHAMMER)
+			{
+				ProjectileHammer(true, -1, true);
+				pTarget->ProjectileHammer(false, -1, true);
+			}
 			if (Special & SPECIAL_SCROLLNINJA)
 			{
 				ScrollNinja(true, -1, true);
@@ -6653,6 +6684,14 @@ void CCharacter::DoorHammer(bool Set, int FromID, bool Silent)
 		return;
 	m_DoorHammer = Set;
 	GameServer()->SendExtraMessage(DOOR_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
+}
+
+void CCharacter::ProjectileHammer(bool Set, int FromID, bool Silent)
+{
+	if (m_ProjectileHammer == Set)
+		return;
+	m_ProjectileHammer = Set;
+	GameServer()->SendExtraMessage(PROJECTILE_HAMMER, m_pPlayer->GetCID(), Set, FromID, Silent);
 }
 
 void CCharacter::TeeControl(bool Set, int ForcedID, int FromID, bool Silent)
