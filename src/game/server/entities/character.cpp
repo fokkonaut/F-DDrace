@@ -706,11 +706,12 @@ void CCharacter::FireWeapon()
 				{
 					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 				}
-				if (m_ProjectileHammer)
+				bool IsProjectileHammer = m_ProjectileHammer || Tuning()->m_ProjectileHammer;
+				if (IsProjectileHammer)
 				{
 					Types |= (1<<CGameWorld::ENTTYPE_PROJECTILE) | (1<<CGameWorld::ENTTYPE_CUSTOM_PROJECTILE);
 				}
-				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team(), m_ProjectileHammer);
+				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team(), IsProjectileHammer);
 
 				bool HitProjectile = false;
 				int Hits = 0;
