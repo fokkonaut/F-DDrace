@@ -23,7 +23,7 @@ public:
 	virtual void Tick();
 	virtual void Snap(int SnappingClient);
 
-	void HitProjectile(int ClientId, vec2 Direction);
+	void HitProjectile(CCharacter *pFrom, vec2 Direction);
 	int DDTeam();
 	int GetOwner() { return m_Owner; }
 
@@ -37,7 +37,7 @@ private:
 	int m_LifeTime;
 	int m_InitialLifeTime;
 
-	bool m_CanHitOwner;
+	CCharacter *m_pForceNotThis;
 
 	Mask128 m_TeamMask;
 	CCharacter* m_pOwner;

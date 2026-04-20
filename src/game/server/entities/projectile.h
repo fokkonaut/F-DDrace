@@ -29,7 +29,7 @@ public:
 	vec2 GetPos(float Time);
 	void SetBouncing(int Value);
 
-	void HitProjectile(int ClientId, vec2 Direction, vec2 InitDir);
+	void HitProjectile(CCharacter *pFrom, vec2 Direction, vec2 InitDir);
 	int DDTeam();
 	int GetOwner() { return m_Owner; }
 
@@ -62,7 +62,7 @@ private:
 	bool m_InitialSafeArea;
 	bool m_InitialNoBonusArea;
 
-	bool m_CanHitOwner;
+	CCharacter *m_pForceNotThis;
 
 	int m_Bouncing;
 	bool m_Freeze;

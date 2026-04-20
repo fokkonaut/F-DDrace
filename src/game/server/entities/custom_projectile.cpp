@@ -30,7 +30,7 @@ CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos
 	m_Type = Type;
 	m_Accel = Accel;
 
-	m_CanHitOwner = false;
+	m_pForceNotThis = 0;
 	m_PrevPos = m_Pos;
 
 	GameWorld()->InsertEntity(this);
@@ -41,8 +41,11 @@ void CCustomProjectile::Reset()
 	GameWorld()->DestroyEntity(this);
 }
 
-void CCustomProjectile::HitProjectile(int ClientId, vec2 Direction)
+void CCustomProjectile::HitProjectile(CCharacter *pFrom, vec2 Direction)
 {
+	// allow hitting owner when someone redirected the projectile.
+	// Make it behave as before when owner redirected again
+	m_pForceNotThis = pFrom;
 	m_Direction = Direction;
 	m_Core = normalize(m_Direction) * m_Speed;
 	m_EvalTick = Server()->Tick();
@@ -50,12 +53,6 @@ void CCustomProjectile::HitProjectile(int ClientId, vec2 Direction)
 	{
 		m_InitialLifeTime *= 0.95f; // dont keep it around forever
 		m_LifeTime = m_InitialLifeTime;
-	}
-	// allow hitting owner when someone redirected the projectile.
-	// Make it behave as before when owner redirected again
-	if (m_Owner != -1)
-	{
-		m_CanHitOwner = ClientId != m_Owner;
 	}
 }
 
@@ -145,7 +142,8 @@ void CCustomProjectile::Move()
 void CCustomProjectile::HitCharacter()
 {
 	vec2 NewPos = m_Pos + m_Core;
-	CCharacter* pHit = GameWorld()->IntersectCharacter(m_PrevPos, NewPos, 6.0f, NewPos, m_CanHitOwner ? 0 : m_pOwner, m_Owner);
+	CCharacter *pNotThis = (m_pForceNotThis && m_pForceNotThis->IsAlive()) ? m_pForceNotThis : m_pOwner;
+	CCharacter* pHit = GameWorld()->IntersectCharacter(m_PrevPos, NewPos, 6.0f, NewPos, pNotThis, m_Owner);
 	if (!pHit)
 		return;
 

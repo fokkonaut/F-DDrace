@@ -54,7 +54,7 @@ CProjectile::CProjectile
 
 	// F-DDrace
 	m_Spooky = Spooky;
-	m_CanHitOwner = false;
+	m_pForceNotThis = 0;
 
 	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
 	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
@@ -141,7 +141,9 @@ void CProjectile::Tick()
 		{
 			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 		}
-		CEntity *pNotThis = m_CanHitOwner ? 0 : pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
+		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
+		if (m_pForceNotThis && m_pForceNotThis->IsAlive())
+			pNotThis = m_pForceNotThis;
 		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, m_Owner, Types);
 		if (pEnt)
 		{
@@ -352,8 +354,11 @@ void CProjectile::TickPaused()
 	++m_StartTick;
 }
 
-void CProjectile::HitProjectile(int ClientId, vec2 Direction, vec2 InitDir)
+void CProjectile::HitProjectile(CCharacter *pFrom, vec2 Direction, vec2 InitDir)
 {
+	// allow hitting owner when someone redirected the projectile.
+	// Make it behave as before when owner redirected again
+	m_pForceNotThis = pFrom;
 	m_Direction = Direction;
 	m_InitDir = InitDir;
 	m_StartTick = Server()->Tick();
@@ -362,12 +367,6 @@ void CProjectile::HitProjectile(int ClientId, vec2 Direction, vec2 InitDir)
 	{
 		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
 		m_LifeSpan = m_InitialLifeSpan;
-	}
-	// allow hitting owner when someone redirected the projectile.
-	// Make it behave as before when owner redirected again
-	if (m_Owner != -1)
-	{
-		m_CanHitOwner = ClientId != m_Owner;
 	}
 }
 
