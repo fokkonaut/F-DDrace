@@ -26,6 +26,7 @@ CCustomProjectile::CCustomProjectile(CGameWorld *pGameWorld, int Owner, vec2 Pos
 	m_Spooky = Spooky;
 	m_EvalTick = Server()->Tick();
 	m_LifeTime = Server()->TickSpeed() * Lifetime;
+	m_InitialLifeTime = m_LifeTime;
 	m_Type = Type;
 	m_Accel = Accel;
 
@@ -44,6 +45,11 @@ void CCustomProjectile::HitProjectile(vec2 Direction)
 	m_Direction = Direction;
 	m_Core = normalize(m_Direction) * m_Speed;
 	m_EvalTick = Server()->Tick();
+	if (Config()->m_SvResetProjLifetimeAfterHit)
+	{
+		m_InitialLifeTime *= 0.95f; // dont keep it around forever
+		m_LifeTime = m_InitialLifeTime;
+	}
 }
 
 int CCustomProjectile::DDTeam()

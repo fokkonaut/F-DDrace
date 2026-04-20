@@ -35,6 +35,7 @@ private:
 
 	int m_EvalTick;
 	int m_LifeTime;
+	int m_InitialLifeTime;
 
 	Mask128 m_TeamMask;
 	CCharacter* m_pOwner;

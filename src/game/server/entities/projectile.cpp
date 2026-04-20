@@ -40,6 +40,7 @@ CProjectile::CProjectile
 	m_Direction = Dir;
 
 	m_LifeSpan = Span;
+	m_InitialLifeSpan = m_LifeSpan;
 	m_Owner = Owner;
 	m_Force = Force;
 	m_SoundImpact = SoundImpact;
@@ -356,6 +357,11 @@ void CProjectile::HitProjectile(vec2 Direction, vec2 InitDir)
 	m_InitDir = InitDir;
 	m_StartTick = Server()->Tick();
 	m_Pos = m_CurPos;
+	if (Config()->m_SvResetProjLifetimeAfterHit)
+	{
+		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
+		m_LifeSpan = m_InitialLifeSpan;
+	}
 }
 
 int CProjectile::DDTeam()

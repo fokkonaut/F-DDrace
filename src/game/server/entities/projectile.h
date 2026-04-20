@@ -45,6 +45,7 @@ public:
 private:
 	vec2 m_Direction;
 	int m_LifeSpan;
+	int m_InitialLifeSpan;
 	Mask128 m_TeamMask;
 	int m_Owner;
 	int m_Type;

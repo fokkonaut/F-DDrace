@@ -187,6 +187,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_touched_kills` |
 | `sv_tele_rifle_allow_blocks` |
 | `sv_minigame_afk_auto_leave` |
+| `sv_reset_proj_lifetime_after_hit` |
 
 ## Credits
 

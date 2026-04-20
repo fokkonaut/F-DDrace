@@ -324,6 +324,7 @@ MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 1, 0, 2, CFGFLAG_SER
 MACRO_CONFIG_INT(SvTeleWeaponThroughRoomVip, sv_tele_weapon_through_room_vip, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used through room and vip door if player can pass it", AUTHED_ADMIN)
 
 // other
+MACRO_CONFIG_INT(SvResetProjLifetimeAfterHit, sv_reset_proj_lifetime_after_hit, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Wheter projectile lifetime is reset after being hit and redirected with hammer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvRainbowNameSpec, sv_rainbowname_spec, 0, 0, 1, CFGFLAG_SERVER, "Whether rainbowname is processed while paused or spectating (annoying in +spectate)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHideMinigamePlayers, sv_hide_minigame_players, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether players in different minigames are shown in the scoreboard", AUTHED_ADMIN)
