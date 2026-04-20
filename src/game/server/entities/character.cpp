@@ -809,7 +809,7 @@ void CCharacter::FireWeapon()
 					}
 					else if (pProj)
 					{
-						pProj->HitProjectile(Direction, MouseTarget);
+						pProj->HitProjectile(m_pPlayer->GetCID(), Direction, MouseTarget);
 						if (length(pProj->m_CurPos - ProjStartPos) > 0.0f)
 							EffectPos = pProj->m_CurPos - normalize(pProj->m_CurPos - ProjStartPos) * GetProximityRadius() * 0.5f;
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
@@ -817,7 +817,7 @@ void CCharacter::FireWeapon()
 					}
 					else if (pCustomProj)
 					{
-						pCustomProj->HitProjectile(Direction);
+						pCustomProj->HitProjectile(m_pPlayer->GetCID(), Direction);
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
 						HitProjectile = true;
 					}

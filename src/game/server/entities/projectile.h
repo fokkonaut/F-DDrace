@@ -29,7 +29,7 @@ public:
 	vec2 GetPos(float Time);
 	void SetBouncing(int Value);
 
-	void HitProjectile(vec2 Direction, vec2 InitDir);
+	void HitProjectile(int ClientId, vec2 Direction, vec2 InitDir);
 	int DDTeam();
 	int GetOwner() { return m_Owner; }
 
@@ -61,6 +61,8 @@ private:
 	bool m_InitialTeleWeapon;
 	bool m_InitialSafeArea;
 	bool m_InitialNoBonusArea;
+
+	bool m_CanHitOwner;
 
 	int m_Bouncing;
 	bool m_Freeze;
