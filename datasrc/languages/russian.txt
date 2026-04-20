@@ -2186,3 +2186,6 @@ You are not allowed to vote because we're currently checking for VPNs. Try again
 
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
 == Вам не разрешено голосовать, потому что, похоже, вы используете VPN. Попробуйте подключиться без VPN или свяжитесь с администратором, если считаете, что это ошибка.
+
+Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
+== 

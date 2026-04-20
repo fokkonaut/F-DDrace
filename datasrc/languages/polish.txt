@@ -2222,6 +2222,9 @@ The blue flag defends against infection.
 You can drop it by pressing F3.
 == 
 
+Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
+== 
+
 Invalid stake, please enter a value between 0 and 10.000.000
 == 
 

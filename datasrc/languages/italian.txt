@@ -1911,6 +1911,9 @@ With Portal Rifle you can create two portals where your cursor is, then teleport
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
 == 
 
+Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
+== 
+
 Welcome to the shop, %s! Press F4 to start shopping.
 == 
 
