@@ -2028,7 +2028,14 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 	m_Alive = false;
 
-	// F-DDrace
+	// F-DDrac
+	if (m_pPlayer->m_HasProjectileHammer && !m_ProjectileHammer)
+	{
+		// if projectile hammer got dropped remove it on death when bought in shop.
+		// not removing directly on drop allows to share it without buying again, if you get it back.
+		m_pPlayer->m_HasProjectileHammer = false;
+	}
+
 	if (m_Passive)
 		Passive(false, -1, true);
 	UnsetSpookyGhost();
@@ -4523,7 +4530,7 @@ void CCharacter::FDDraceInit()
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_DoorHammer = false;
-	m_ProjectileHammer = false;
+	m_ProjectileHammer = m_pPlayer->m_HasProjectileHammer;
 	m_pHelicopter = nullptr;
 	m_HelicopterSeat = -1;
 	m_SeatSwitchedTick = Server()->Tick();
@@ -5293,7 +5300,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (Special&SPECIAL_DOORHAMMER)
 		DoorHammer(false, -1, OnDeath);
 	if (Special&SPECIAL_PPROJECTILEHAMMER)
-		ProjectileHammer(false, -1, OnDeath);
+		ProjectileHammer(false, -1, OnDeath && !m_pPlayer->m_HasProjectileHammer); // notify player if he bought and dropped on death
 	if (Special&SPECIAL_SCROLLNINJA)
 		ScrollNinja(false, -1, OnDeath);
 }

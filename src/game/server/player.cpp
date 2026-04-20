@@ -174,6 +174,7 @@ void CPlayer::Reset()
 
 	m_ScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	m_HasRoomKey = false;
+	m_HasProjectileHammer = false;
 
 	m_ForcedSkin = SKIN_NONE;
 

@@ -303,6 +303,8 @@ public:
 	int m_InfMeteors;
 	bool m_HasSpookyGhost;
 
+	bool m_HasProjectileHammer;
+
 	CPortal *m_pPortal[NUM_PORTALS];
 	int64 m_ConfettiWinEffectTick;
 

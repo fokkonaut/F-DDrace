@@ -204,6 +204,7 @@ private:
 	int m_SavePlayerDisconnect;
 	int m_HighBandwidth;
 	int m_AntiPing;
+	int m_HasProjectileHammer;
 
 	SSavedIdentity m_Identity;
 };

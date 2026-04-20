@@ -242,6 +242,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_SavePlayerDisconnect = pChr->GetPlayer()->m_SavePlayerDisconnect;
 	m_HighBandwidth = pChr->Server()->GetHighBandwidth(pChr->GetPlayer()->GetCID());
 	m_AntiPing = pChr->GetPlayer()->AntiPing();
+	m_HasProjectileHammer = pChr->GetPlayer()->m_HasProjectileHammer;
 
 	if (m_Flags&SAVE_IDENTITY)
 	{
@@ -458,6 +459,7 @@ void CSaveTee::Load(CCharacter *pChr, int Team)
 		pChr->GetPlayer()->m_SavePlayerDisconnect = m_SavePlayerDisconnect;
 		pChr->GetPlayer()->SetHighBandwidth(m_HighBandwidth, true);
 		pChr->GetPlayer()->SetAntiPing(m_AntiPing, true);
+		pChr->GetPlayer()->m_HasProjectileHammer = m_HasProjectileHammer;
 	}
 
 	// Remove all hooks on us
@@ -548,7 +550,8 @@ char* CSaveTee::GetString()
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%s\t%d\t%d\t%d\t"
-		"%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
+		"%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t",
 		m_aName, m_Alive, m_Paused, m_TeeFinished, m_IsSolo,
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Got,
 		m_aWeapons[1].m_AmmoRegenStart, m_aWeapons[1].m_Ammo, m_aWeapons[1].m_Got,
@@ -600,7 +603,8 @@ char* CSaveTee::GetString()
 		m_Identity.m_TeeInfo.m_aUseCustomColors[0], m_Identity.m_TeeInfo.m_aUseCustomColors[1], m_Identity.m_TeeInfo.m_aUseCustomColors[2], m_Identity.m_TeeInfo.m_aUseCustomColors[3], m_Identity.m_TeeInfo.m_aUseCustomColors[4], m_Identity.m_TeeInfo.m_aUseCustomColors[5],
 		m_Identity.m_TeeInfo.m_aSkinPartColors[0], m_Identity.m_TeeInfo.m_aSkinPartColors[1], m_Identity.m_TeeInfo.m_aSkinPartColors[2], m_Identity.m_TeeInfo.m_aSkinPartColors[3], m_Identity.m_TeeInfo.m_aSkinPartColors[4], m_Identity.m_TeeInfo.m_aSkinPartColors[5],
 		m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, m_Identity.m_TeeInfo.m_Sevendown.m_UseCustomColor, m_Identity.m_TeeInfo.m_Sevendown.m_ColorBody, m_Identity.m_TeeInfo.m_Sevendown.m_ColorFeet,
-		aCheckpointList, m_BirthdayGiftTicksLeft, m_InSafeArea, m_HasTeleGun, m_HasTeleGrenade, m_HasTeleLaser, m_SavePlayerDisconnect, m_HighBandwidth, m_AntiPing, m_ProjectileHammer
+		aCheckpointList, m_BirthdayGiftTicksLeft, m_InSafeArea, m_HasTeleGun, m_HasTeleGrenade, m_HasTeleLaser, m_SavePlayerDisconnect, m_HighBandwidth, m_AntiPing,
+		m_HasProjectileHammer, m_ProjectileHammer
 	);
 	return m_aString;
 }
@@ -661,7 +665,8 @@ int CSaveTee::LoadString(const char *pString)
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%d\t%d\t%d\t%d\t%d\t%d\t"
 		"%[^\t]\t%d\t%d\t%d\t"
-		"%[^\t]\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
+		"%[^\t]\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t"
+		"%d\t%d\t",
 		m_aName, &m_Alive, &m_Paused, &m_TeeFinished, &m_IsSolo,
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Got,
 		&m_aWeapons[1].m_AmmoRegenStart, &m_aWeapons[1].m_Ammo, &m_aWeapons[1].m_Got,
@@ -713,7 +718,8 @@ int CSaveTee::LoadString(const char *pString)
 		&m_Identity.m_TeeInfo.m_aUseCustomColors[0], &m_Identity.m_TeeInfo.m_aUseCustomColors[1], &m_Identity.m_TeeInfo.m_aUseCustomColors[2], &m_Identity.m_TeeInfo.m_aUseCustomColors[3], &m_Identity.m_TeeInfo.m_aUseCustomColors[4], &m_Identity.m_TeeInfo.m_aUseCustomColors[5],
 		&m_Identity.m_TeeInfo.m_aSkinPartColors[0], &m_Identity.m_TeeInfo.m_aSkinPartColors[1], &m_Identity.m_TeeInfo.m_aSkinPartColors[2], &m_Identity.m_TeeInfo.m_aSkinPartColors[3], &m_Identity.m_TeeInfo.m_aSkinPartColors[4], &m_Identity.m_TeeInfo.m_aSkinPartColors[5],
 		m_Identity.m_TeeInfo.m_Sevendown.m_SkinName, &m_Identity.m_TeeInfo.m_Sevendown.m_UseCustomColor, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorBody, &m_Identity.m_TeeInfo.m_Sevendown.m_ColorFeet,
-		aCheckpointList, &m_BirthdayGiftTicksLeft, &m_InSafeArea, &m_HasTeleGun, &m_HasTeleGrenade, &m_HasTeleLaser, &m_SavePlayerDisconnect, &m_HighBandwidth, &m_AntiPing, &m_ProjectileHammer
+		aCheckpointList, &m_BirthdayGiftTicksLeft, &m_InSafeArea, &m_HasTeleGun, &m_HasTeleGrenade, &m_HasTeleLaser, &m_SavePlayerDisconnect, &m_HighBandwidth, &m_AntiPing,
+		&m_HasProjectileHammer, &m_ProjectileHammer
 	);
 
 	const char *pList = aCheckpointList;
@@ -751,7 +757,7 @@ int CSaveTee::LoadString(const char *pString)
 	{
 	case 91:
 		return 0;
-	case 262: // F-DDrace extra vars
+	case 263: // F-DDrace extra vars
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");
