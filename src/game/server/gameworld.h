@@ -384,6 +384,7 @@ public:
 		PLOT_TASER_DESTROY = 1<<0,
 		PLOT_DOOR_ONLY = 1<<1,
 		TEE_IN_HELICOPTER = 1<<2,
+		PREVENT_EVENT_PREDICTION = 1<<3,
 	};
 	CEntity *IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, const CNotTheseEntities& NotThese, int CollideWith, int64 Types, CCharacter *pThisOnly = nullptr, int Flags = -1);
 	bool IntersectLinePortalBlocker(vec2 Pos0, vec2 Pos1);

@@ -1130,6 +1130,8 @@ CEntity *CGameWorld::ClosestEntityTypes(vec2 Pos, float Radius, int64 Types, CEn
 	return 0;
 }
 
+static const float s_ProjectileHammerRadius = CCharacterCore::PHYS_SIZE * 2.f;
+
 int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int64 Types, int Team, bool ProjHammer)
 {
 	int Num = 0;
@@ -1158,7 +1160,7 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 			if (ProjHammer && (i == ENTTYPE_PROJECTILE || i == ENTTYPE_CUSTOM_PROJECTILE))
 			{
 				// projectiles have a ProximityRadius of 0, unhittable
-				EntRadius = CCharacterCore::PHYS_SIZE * 2.f;
+				EntRadius = s_ProjectileHammerRadius;
 				
 				if (i == ENTTYPE_PROJECTILE) // fetch current position
 				{
@@ -1212,6 +1214,9 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 		for(; p; p = p->TypeNext())
  		{
 			float ProximityRadius = p->m_ProximityRadius;
+			bool MarkForPredictPrevent = false;
+			CCharacter *pChr = 0;
+
 			bool EntTypeDestroyable = i == ENTTYPE_DOOR || i == ENTTYPE_PICKUP || i == ENTTYPE_BUTTON || i == ENTTYPE_SPEEDUP || i == ENTTYPE_TELEPORTER || i == ENTTYPE_DRAWTILE;
 			if ((CheckPlotTaserDestroy && !EntTypeDestroyable) || !CheckPlotTaserDestroy)
 			{
@@ -1232,9 +1237,16 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 
 				if (CollideWith != -1)
 				{
-					CCharacter *pChr = 0;
 					if (i == ENTTYPE_CHARACTER)
+					{
 						pChr = (CCharacter *)p;
+						if ((Flags & EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION) && pChr->IsActiveProjectileHammer() && pChr->GetPlayer()->AntiPing())
+						{
+							// prevent explosion and damageind prediction as we redirect the projectile
+							MarkForPredictPrevent = true;
+							ProximityRadius = s_ProjectileHammerRadius * 3.f;
+						}
+					}
 					else if (p->IsAdvancedEntity())
 					{
 						pChr = ((CAdvancedEntity *)p)->GetOwner();
@@ -1292,6 +1304,14 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				float Len = distance(p->m_Pos, IntersectPos);
 				if(Len < ProximityRadius+Radius)
 				{
+					if (MarkForPredictPrevent)
+					{
+						pChr->PreventEventPrediction();
+						// dont process if character is not actually nearby.
+						if(Len >= pChr->GetProximityRadius()+Radius)
+							continue;
+					}
+
 					Len = distance(Pos0, IntersectPos);
 					if(Len < ClosestLen)
 					{

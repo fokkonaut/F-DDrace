@@ -489,6 +489,11 @@ public:
 	bool m_StaffInd;
 	bool m_Confetti;
 
+	bool IsActiveProjectileHammer();
+	int m_AntiPingPreventPredictionUntil;
+	void PreventEventPrediction();
+	bool IsPreventEventPredict();
+
 	void ResetOnlyFirstPortal();
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

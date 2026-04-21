@@ -148,7 +148,8 @@ void CProjectile::Tick()
 			pNotThis = m_pHammerHitChr;
 			CollideWith = m_pHammerHitChr->GetPlayer()->GetCID();
 		}
-		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, CollideWith, Types);
+		int Flags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_HELICOPTER | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, CollideWith, Types, 0, Flags);
 		if (pEnt)
 		{
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
@@ -484,7 +485,7 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int Snapp
 	//Send additional/modified info, by modifiying the fields of the netobj
 	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
-	int Owner = m_Owner;
+	int Owner = (m_pHammerHitChr && m_pHammerHitChr->IsAlive()) ? m_pHammerHitChr->GetPlayer()->GetCID() : m_Owner;
 	if (!Server()->Translate(Owner, SnappingClient))
 		Owner = -1;
 
@@ -530,7 +531,7 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 		Flags |= PROJECTILEFLAG_FREEZE;
 	}
 
-	int Owner = m_Owner;
+	int Owner = (m_pHammerHitChr && m_pHammerHitChr->IsAlive()) ? m_pHammerHitChr->GetPlayer()->GetCID() : m_Owner;
 	if (!Server()->Translate(Owner, SnappingClient))
 		Owner = -1;
 

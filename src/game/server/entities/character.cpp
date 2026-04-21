@@ -706,7 +706,7 @@ void CCharacter::FireWeapon()
 				{
 					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
 				}
-				bool IsProjectileHammer = m_ProjectileHammer || Tuning()->m_ProjectileHammer;
+				bool IsProjectileHammer = IsActiveProjectileHammer();
 				if (IsProjectileHammer)
 				{
 					Types |= (1<<CGameWorld::ENTTYPE_PROJECTILE) | (1<<CGameWorld::ENTTYPE_CUSTOM_PROJECTILE);
@@ -4532,6 +4532,7 @@ void CCharacter::FDDraceInit()
 	m_Item = -3;
 	m_DoorHammer = false;
 	m_ProjectileHammer = m_pPlayer->m_HasProjectileHammer;
+	m_AntiPingPreventPredictionUntil = 0;
 	m_pHelicopter = nullptr;
 	m_HelicopterSeat = -1;
 	m_SeatSwitchedTick = Server()->Tick();
@@ -5656,6 +5657,21 @@ void CCharacter::ResetOnlyFirstPortal()
 int CCharacter::HasFlag()
 {
 	return ((CGameControllerDDRace*)GameServer()->m_pController)->HasFlag(this);
+}
+
+bool CCharacter::IsActiveProjectileHammer()
+{
+	return GetActiveWeaponUnclamped() == WEAPON_HAMMER && (m_ProjectileHammer || Tuning()->m_ProjectileHammer);
+}
+
+void CCharacter::PreventEventPrediction()
+{
+	m_AntiPingPreventPredictionUntil = Server()->Tick() + Server()->TickSpeed() / 3;
+}
+
+bool CCharacter::IsPreventEventPredict()
+{
+	return m_AntiPingPreventPredictionUntil > Server()->Tick();
 }
 
 bool CCharacter::SendExtendedEntity(CEntity *pEntity)

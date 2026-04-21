@@ -775,6 +775,9 @@ void IGameController::Snap(int SnappingClient)
 
 	if (pSnappingChar->ShowAmmoHud())
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_AMMO;
+
+	if (pSnappingChar->IsPreventEventPredict())
+		pGameInfoEx->m_Flags2 &= ~GAMEINFOFLAG2_PREDICT_EVENTS;
 }
 
 void IGameController::Tick()
