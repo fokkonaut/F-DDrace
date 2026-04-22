@@ -134,10 +134,10 @@ void CProjectile::Tick()
 	CAdvancedEntity *pTargetEntity = 0;
 	if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
 	{
-		int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+		int64 Types = (1LL<<CGameWorld::ENTTYPE_CHARACTER);
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER) | (1<<CGameWorld::ENTTYPE_GROG);
+			Types |= (1LL<<CGameWorld::ENTTYPE_FLAG) | (1LL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1LL<<CGameWorld::ENTTYPE_MONEY) | (1LL<<CGameWorld::ENTTYPE_HELICOPTER) | (1LL<<CGameWorld::ENTTYPE_SPIDER) | (1LL<<CGameWorld::ENTTYPE_GROG);
 		}
 		int CollideWith = m_Owner;
 		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pVehicle ? (CEntity *)pOwnerChar->m_pVehicle : (CEntity *)pOwnerChar;
