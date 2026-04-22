@@ -259,7 +259,6 @@ void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction)
 	{
 		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
 		m_LifeSpan = m_InitialLifeSpan;
-		m_LifeSpan = m_InitialLifeSpan;
 	}
 }
 
