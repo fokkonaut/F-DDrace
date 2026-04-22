@@ -1178,12 +1178,6 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 					if (((CCustomProjectile *)pEnt)->GetOwner() == -1)
 						continue;
 				}
-				else if (i == ENTTYPE_MISSILE)
-				{
-					if (((CMissile*)pEnt)->GetOwner() == -1)
-						continue;
-					EntPos = pEnt->m_Pos;
-				}
 			}
 
 			if(distance(EntPos, Pos) < Radius+EntRadius)
