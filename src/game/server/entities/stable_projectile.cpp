@@ -2,7 +2,6 @@
 
 #include <game/server/gamecontext.h>
 #include "stable_projectile.h"
-#include <game/server/teams.h>
 #include <game/server/player.h>
 #include "character.h"
 

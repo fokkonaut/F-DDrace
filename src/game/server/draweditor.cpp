@@ -572,8 +572,8 @@ void CDrawEditor::HandleInput()
 			{
 				m_Erasing = true;
 
-				int64 Types = (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_DOOR) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
-					(1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
+				int64 Types = (1ULL<<CGameWorld::ENTTYPE_PICKUP) | (1ULL<<CGameWorld::ENTTYPE_DOOR) | (1ULL<<CGameWorld::ENTTYPE_SPEEDUP) |
+					(1ULL<<CGameWorld::ENTTYPE_BUTTON) | (1ULL<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
 				float Radius = m_Category == CAT_TILEPLACE ? 8.f : 16.f; 
 				CEntity *pEntity = GameServer()->m_World.ClosestEntityTypes(m_Pos, Radius, Types, m_pPreview, GetCID());
 

@@ -47,7 +47,7 @@ public:
 	void UpdateAndCacheBounds();
 
 	// Ticking
-	void Snap(int SnappingClient, bool SendTrails, bool Flipped = false, float VertexSnapping = 0.0f, bool RainbowMode = false);
+	virtual void Snap(int SnappingClient, const SBoneModelSnapping& Options);
 };
 
 #endif // GAME_SERVER_ENTITIES_HELICOPTER_BONE_H

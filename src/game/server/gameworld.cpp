@@ -13,6 +13,7 @@
 #include "gamemodes/DDRace.h"
 #include "entities/projectile.h"
 #include "entities/custom_projectile.h"
+#include "entities/missile.h"
 
 void CSelectedArea::Init(CGameContext *pGameServer)
 {
@@ -928,7 +929,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, Flags & EFindEntFlag::PASSIVE, Flags & EFindEntFlag::SAFE_AREA))
 			continue;
 
-		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pHelicopter)
+		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pVehicle)
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
@@ -1153,11 +1154,13 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 					continue;
 				if (i == ENTTYPE_CUSTOM_PROJECTILE && Team != ((CCustomProjectile*)pEnt)->DDTeam())
 					continue;
+				if (i == ENTTYPE_MISSILE && Team != ((CMissile*)pEnt)->DDTeam())
+					continue;
 			}
 
 			vec2 EntPos = pEnt->m_Pos;
 			float EntRadius = pEnt->m_ProximityRadius;
-			if (ProjHammer && (i == ENTTYPE_PROJECTILE || i == ENTTYPE_CUSTOM_PROJECTILE))
+			if (ProjHammer && (i == ENTTYPE_PROJECTILE || i == ENTTYPE_CUSTOM_PROJECTILE || i == ENTTYPE_MISSILE))
 			{
 				// projectiles have a ProximityRadius of 0, unhittable
 				EntRadius = s_ProjectileHammerRadius;
@@ -1173,6 +1176,11 @@ int CGameWorld::FindEntitiesTypes(vec2 Pos, float Radius, CEntity **ppEnts, int 
 				{
 					// only allow projectiles shot by players, even though custom projectiles currently cant be map placed
 					if (((CCustomProjectile *)pEnt)->GetOwner() == -1)
+						continue;
+				}
+				else if (i == ENTTYPE_MISSILE)
+				{
+					if (((CMissile*)pEnt)->GetOwner() == -1)
 						continue;
 				}
 			}
@@ -1195,7 +1203,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 {
 	if (Flags == -1)
 	{
-		Flags = EIntersectEntTypesFlag::TEE_IN_HELICOPTER;
+		Flags = EIntersectEntTypesFlag::IN_VEHICLE;
 	}
 
 	// Find other players
@@ -1226,13 +1234,13 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (pThisOnly && p != pThisOnly)
 					continue;
 
-				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::TEE_IN_HELICOPTER && ((CCharacter *)p)->m_pHelicopter)
+				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::IN_VEHICLE && ((CCharacter *)p)->m_pVehicle)
 					continue;
 
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
 					continue;
 
-				if (i == ENTTYPE_HELICOPTER && ((CHelicopter *)p)->IsInvincible())
+				if ((i == ENTTYPE_HELICOPTER || i == ENTTYPE_SPIDER) && ((IVehicle *)p)->IsInvincible())
 					continue;
 
 				if (CollideWith != -1)

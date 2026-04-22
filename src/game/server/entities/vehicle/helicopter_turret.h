@@ -5,23 +5,23 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H
 
-#include "bone/bone_model.h"
+#include "game/server/entities/bone/base/bone_model.h"
+#include "game/server/mask128.h"
 
 enum
 {
 	TURRETTYPE_NONE,
 	TURRETTYPE_MINIGUN,
 	TURRETTYPE_LAUNCHER,
+	NUM_TURRET_TYPES
 };
 
-class CHelicopter;
-class CVehicleTurret
+class IVehicle;
+class IVehicleTurret
 {
 protected:
-	friend class CHelicopter;
-
 	int m_TurretType;
-	CHelicopter *m_pHelicopter;
+	IVehicle *m_pVehicle;
 	CBone *m_apBones;
 	int m_NumBones;
 
@@ -29,22 +29,18 @@ protected:
 	vec2 m_InitPivot;
 	vec2 m_Pivot;
 	float m_Length;
-
-	// bool m_Flipped;
-	// virtual void SetFlipped(bool flipped);
+	float m_Angle;
 
 	virtual void UpdateVisual(); // used for Tick() or separately when manipulating bones
 
-	float m_Angle;
-	void SetRotation(float PivotRotation, float TurretRotation);
-	// virtual void SetRotation(float PivotRotation, float TurretRotation);
-
+	int m_Controllers;
 	vec2 m_TargetPosition;
+	vec2 m_TargetPositionWorld;
 	float m_TurretAngle;
 	float m_AimingRange;
 	void AimTurret();
-	// virtual void RotateTurret(float NewRotation);
 
+	int m_ShooterCID;
 	bool m_Shooting;
 	int m_LastShot;
 	int m_ShootingCooldown;
@@ -56,36 +52,44 @@ protected:
 	vec2 GetTurretDirection();
 
 public:
-	CVehicleTurret(int TurretType,
+	IVehicleTurret(int TurretType,
 	               int NumBones,
 	               const CBone& TurretBone,
 	               const vec2& Pivot,
 	               float AimingRange,
 	               int ShootingCooldown);
-	virtual ~CVehicleTurret();
+	virtual ~IVehicleTurret();
 
 	// Sense
 	IServer *Server();
 	CGameWorld *GameWorld();
 	CGameContext *GameServer();
 	int GetType() { return m_TurretType; }
-	int GetNumBones() { return m_NumBones; }
+	int NumBones() { return m_NumBones; }
 	CBone *Bones() { return m_apBones; } // size: m_NumBones || GetNumBones()
 	float GetTurretRotation() { return m_TurretAngle; }
+	int NumControllers() { return m_Controllers; }
+	Mask128 GetShooterTeamMask();
 
 	// Manipulating
-	bool TryBindHelicopter(CHelicopter *helicopter);
+	bool TryBindVehicle(IVehicle *pVehicle);
 	virtual void ApplyScale(float TurretScale);
+	void Dismounted();
+	void SetRotation(float PivotRotation, float TurretRotation);
+	void AddController() { m_Controllers++; }
+	void RemoveController() { m_Controllers--; }
+	void ResetNumControllers() { m_Controllers = 0;}
+	void CountControllers();
 
 	// Ticking
 	virtual void Tick();
-	virtual void Snap(int SnappingClient);
+	virtual void Snap(int SnappingClient, const SBoneModelSnapping& Options);
 
-	virtual void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
+	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
 };
 
 class CHelicopter;
-class CMinigunTurret : public CVehicleTurret
+class CMinigunTurret : public IVehicleTurret
 {
 private:
 	friend class CHelicopter;
@@ -131,11 +135,10 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient) override;
-	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
+	void Snap(int SnappingClient, const SBoneModelSnapping& Options) override;
 };
 
-class CLauncherTurret : public CVehicleTurret
+class CLauncherTurret : public IVehicleTurret
 {
 private:
 	friend class CHelicopter;
@@ -154,10 +157,6 @@ private:
 	float m_RetainerRadius;
 	void InitBones();
 	void UpdateBones();
-
-	//    void SetFlipped(bool flipped) override;
-	//    void Rotate(float Angle) override;
-	//    void RotateTurret(float Angle) override;
 
 	float m_RecoilAmount;
 	float m_RecoilSpan;
@@ -178,8 +177,7 @@ public:
 
 	// Ticking
 	void Tick() override;
-	void Snap(int SnappingClient) override;
-	void OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
+	void Snap(int SnappingClient, const SBoneModelSnapping& Options) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_TURRET_H

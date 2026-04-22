@@ -2,8 +2,8 @@
 // Created by Matq on 14/04/2025.
 //
 
-#include "game/server/gamemodes/DDRace.h"
 #include "missile.h"
+#include "game/server/gamemodes/DDRace.h"
 
 CSpark::CSpark(CMissile *pMissile, int ResetLifespan, int Lifespan)
 {
@@ -93,7 +93,6 @@ void CMissile::HandleCollisions()
 	if (m_ExplosionsLeft >= 0)
 		return;
 
-	// Yeaaaaaaaaaaaaaaaaaaa
 	vec2 collisionPos, newPos;
 	int Collide = GameServer()->Collision()->IntersectLine(m_PrevPos, m_Pos, &collisionPos, &newPos);
 
@@ -101,29 +100,22 @@ void CMissile::HandleCollisions()
 	if (m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	//
-
-	CEntity* aExclude[2]; // owner + helicopter
-	int NumExcluded = 0;
-
-	if (pOwnerChar)
-	{
-		aExclude[0] = pOwnerChar;
-		NumExcluded++;
-		if (pOwnerChar->m_pHelicopter)
-		{
-			aExclude[1] = pOwnerChar->m_pHelicopter;
-			NumExcluded++;
-		}
-	}
-
 	CCharacter *pTargetChr = nullptr;
 	CAdvancedEntity *pTargetEntity = nullptr;
 
-	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	int CollideWith = m_Owner;
+	CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pVehicle ? (CEntity *)pOwnerChar->m_pVehicle : (CEntity *)pOwnerChar;
+	if (m_pHammerHitChr && m_pHammerHitChr->IsAlive())
+	{
+		pNotThis = m_pHammerHitChr;
+		CollideWith = m_pHammerHitChr->GetPlayer()->GetCID();
+	}
+	int64 Types = (1ULL << CGameWorld::ENTTYPE_CHARACTER);
 	if (Config()->m_SvInteractiveDrops)
-		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
-	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, CNotTheseEntities(aExclude, NumExcluded), m_Owner, Types);
+		Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG)|(1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP)|(1ULL<<CGameWorld::ENTTYPE_MONEY)|
+			(1ULL<<CGameWorld::ENTTYPE_HELICOPTER)|(1ULL<<CGameWorld::ENTTYPE_SPIDER)|(1ULL<<CGameWorld::ENTTYPE_GROG);
+	int Flags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, pNotThis, CollideWith, Types, 0, Flags);
 
 	if (pEnt)
 	{
@@ -137,10 +129,9 @@ void CMissile::HandleCollisions()
 			pTargetChr = pTargetEntity->GetOwner();
 		}
 	}
-	//
 
 	// if (pOwnerChar ? !(pOwnerChar->m_Hit & CCharacter::DISABLE_HIT_GRENADE) : Config()->m_SvHit)
-		// pTargetChr = GameWorld()->IntersectCharacter(m_PrevPos, collisionPos, 6.0f, collisionPos, pOwnerChar, m_Owner);
+	// pTargetChr = GameWorld()->IntersectCharacter(m_PrevPos, collisionPos, 6.0f, collisionPos, pOwnerChar, m_Owner);
 
 	if (m_LifeSpan > -1)
 		m_LifeSpan--;
@@ -181,7 +172,6 @@ void CMissile::HandleCollisions()
 
 void CMissile::UpdateStableProjectiles()
 {
-	// When ignition started, teleport/reset smoke trail to the missile
 	if (m_IgnitionTime == 0)
 		for (int i = 0; i < NUM_SPARKS; i++)
 			m_apSparks[i]->ResetFromMissile();
@@ -189,10 +179,8 @@ void CMissile::UpdateStableProjectiles()
 	for (int i = 1; i < NUM_SPARKS; i++)
 		m_apSparks[i]->Tick();
 
-	if (m_ExplosionsLeft >= 0)
-		return;
-
-	m_pStableRocket->SetPos(m_Pos);
+	if (m_ExplosionsLeft < 0)
+		m_pStableRocket->SetPos(m_Pos);
 }
 
 void CMissile::TriggerExplosions()
@@ -200,6 +188,7 @@ void CMissile::TriggerExplosions()
 	m_ExplosionsLeft = 5;
 
 	GameWorld()->DestroyEntity(m_pStableRocket);
+	m_pStableRocket = nullptr;
 }
 
 void CMissile::HandleExplosions()
@@ -207,6 +196,7 @@ void CMissile::HandleExplosions()
 	if (m_ExplosionsLeft < 0 || Server()->Tick() % 4 != 0)
 		return;
 
+	// Missile can explode before "ignited", small explosion
 	if (IsIgnited())
 	{
 		vec2 nearbyPos = m_Pos + vec2((float)(rand() % 151 - 75), (float)(rand() % 151 - 75));
@@ -231,9 +221,10 @@ CMissile::CMissile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Vel, vec2 D
 	: CEntity(pGameWorld, CGameWorld::ENTTYPE_MISSILE, Pos)
 {
 	m_Owner = Owner;
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(Owner);
 	m_DDTeam = pOwnerChar ? pOwnerChar->Team() : 0;
-	m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
+	m_TeamMask = ((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
+	m_InitialLifeSpan = Span;
 	m_LifeSpan = Span;
 	m_StartTick = Server()->Tick();
 
@@ -257,9 +248,24 @@ CMissile::~CMissile()
 		delete m_apSparks[i];
 }
 
+void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction)
+{
+	m_pHammerHitChr = pFrom;
+	m_StartTick = Server()->Tick();
+	m_Direction = Direction;
+	m_Vel = Direction * 8.0f;
+
+	if (Config()->m_SvResetProjLifetimeAfterHit)
+	{
+		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
+		m_LifeSpan = m_InitialLifeSpan;
+		m_LifeSpan = m_InitialLifeSpan;
+	}
+}
+
 void CMissile::Tick()
 {
-	m_TeamMask = ((CGameControllerDDRace*)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
+	m_TeamMask = ((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
 
 	ApplyAcceleration();
 	HandleCollisions();

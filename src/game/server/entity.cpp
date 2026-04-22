@@ -151,5 +151,5 @@ bool CEntity::IsPlotDoor()
 bool CEntity::IsAdvancedEntity()
 {
 	return m_ObjType == CGameWorld::ENTTYPE_FLAG || m_ObjType == CGameWorld::ENTTYPE_MONEY || m_ObjType == CGameWorld::ENTTYPE_PICKUP_DROP
-		|| m_ObjType == CGameWorld::ENTTYPE_GROG || m_ObjType == CGameWorld::ENTTYPE_HELICOPTER;
+		|| m_ObjType == CGameWorld::ENTTYPE_GROG || m_ObjType == CGameWorld::ENTTYPE_HELICOPTER || m_ObjType == CGameWorld::ENTTYPE_SPIDER;
 }

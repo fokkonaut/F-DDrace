@@ -5,8 +5,8 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
 
-#include "../../gamecontext.h"
-#include "../stable_projectile.h"
+#include "game/server/entities/stable_projectile.h"
+#include "game/server/gamecontext.h"
 
 class CMissile;
 class CSpark
@@ -46,8 +46,10 @@ class CMissile : public CEntity
 	int m_Owner;
 	int m_DDTeam;
 	Mask128 m_TeamMask;
+	int m_InitialLifeSpan;
 	int m_LifeSpan;
 	int m_StartTick;
+	CCharacter* m_pHammerHitChr;
 
 	vec2 m_Vel;
 	vec2 m_PrevPos;
@@ -70,14 +72,18 @@ public:
 	~CMissile();
 
 	// Getting
+	int GetOwner() { return m_Owner; }
+	int DDTeam() { return m_DDTeam;; }
 	vec2 GetVel() { return m_Vel; }
 	bool IsIgnited() { return m_IgnitionTime <= 0; }
 	bool IsExploding() { return m_ExplosionsLeft > -1; }
 
+	// Manipulating
+	void HitMissile(CCharacter *pFrom, vec2 Direction);
+
 	// Ticking
 	void Tick() override;
 	void Snap(int SnappingClient) override;
-
 };
 
 #endif // GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H

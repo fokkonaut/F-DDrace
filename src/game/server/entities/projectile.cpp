@@ -137,16 +137,16 @@ void CProjectile::Tick()
 		int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
+			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER) | (1<<CGameWorld::ENTTYPE_GROG);
 		}
 		int CollideWith = m_Owner;
-		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pHelicopter ? (CEntity *)pOwnerChar->m_pHelicopter : (CEntity *)pOwnerChar;
+		CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pVehicle ? (CEntity *)pOwnerChar->m_pVehicle : (CEntity *)pOwnerChar;
 		if (m_pHammerHitChr && m_pHammerHitChr->IsAlive())
 		{
 			pNotThis = m_pHammerHitChr;
 			CollideWith = m_pHammerHitChr->GetPlayer()->GetCID();
 		}
-		int Flags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_HELICOPTER | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+		int Flags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
 		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, CollideWith, Types, 0, Flags);
 		if (pEnt)
 		{
@@ -156,7 +156,7 @@ void CProjectile::Tick()
 			}
 			else if (pEnt->IsAdvancedEntity())
 			{
-				pTargetEntity = (CHelicopter *)pEnt;
+				pTargetEntity = (IVehicle *)pEnt;
 				pTargetChr = pTargetEntity->GetOwner();
 				// Only teleport to players
 				m_TeleportCancelled = true;
@@ -615,7 +615,7 @@ void CProjectile::DetermineTuning()
 
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CTuningParams *pTuning = GameServer()->TuningFromChrOrZone(m_Owner, m_TuneZone);
-	
+
 	if (m_Type == WEAPON_SHOTGUN && !m_DDrace)
 	{
 		m_Curvature = pTuning->m_VanillaShotgunCurvature;

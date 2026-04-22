@@ -20,7 +20,8 @@
 
 #include "entities/character.h"
 #include "entities/money.h"
-#include "game/server/entities/helicopter/helicopter.h"
+#include "entities/vehicle/spider.h"
+#include "entities/vehicle/helicopter.h"
 #include "entities/speedup.h"
 #include "entities/button.h"
 #include "entities/teleporter.h"
@@ -210,7 +211,7 @@ int CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune &Tune,
 
 	if (IsGlobalValue && !AllowGlobalValues)
 		return 0;
-		
+
 	pLockedTunings->push_back(Tune);
 	return 1;
 }
@@ -353,9 +354,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 	float Radius = g_pData->m_Explosion.m_Radius;
 	float InnerRadius = 48.0f;
 
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER);
 	if (Config()->m_SvInteractiveDrops)
-		Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_GROG) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
+		Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG) | (1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL<<CGameWorld::ENTTYPE_MONEY) | (1ULL<<CGameWorld::ENTTYPE_GROG) | (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 	int Num = m_World.FindEntitiesTypes(Pos, Radius, (CEntity * *)apEnts, MAX_CLIENTS, Types);
 	Mask128 TeamMask = Mask128();
 	for (int i = 0; i < Num; i++)
@@ -378,9 +379,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				if (((CFlag *)pEnt)->GetCarrier())
 					continue;
 			}
-			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEnt->GetObjType() == CGameWorld::ENTTYPE_SPIDER)
 			{
-				if (((CHelicopter *)pEnt)->IsBuilding())
+				if (((IVehicle *)pEnt)->IsBuilding())
 					continue;
 
 				l -= pEnt->GetProximityRadius();
@@ -422,8 +423,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			{
 				if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 					((CFlag *)pEnt)->SetAtStand(false);
-				else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
-					((CHelicopter *)pEnt)->ExplosionDamage(Strength, Pos, Owner);
+				else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEnt->GetObjType() == CGameWorld::ENTTYPE_SPIDER)
+					((IVehicle *)pEnt)->ExplosionDamage(Strength, Pos, Owner);
 
 				vec2 Temp = pEnt->GetVel() + Force;
 				pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
@@ -1300,11 +1301,11 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tunings.m_PlayerHooking = 0.f;
 
 		bool IsActivelyPlayingDurak = Durak()->ActivelyPlaying(ClientID);
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter || pChr->m_Snake.Active())
+		if (pChr->m_DrawEditor.Active() || pChr->m_pVehicle || pChr->m_Snake.Active())
 			Tunings.m_HookFireSpeed = 0.f;
-		if (pChr->m_pHelicopter || pChr->m_Snake.Active() || IsActivelyPlayingDurak)
+		if (pChr->m_pVehicle || pChr->m_Snake.Active() || IsActivelyPlayingDurak)
 			Tunings.m_HookDragAccel = 0.f;
-		if (pChr->m_pHelicopter || pChr->m_InSnake || IsActivelyPlayingDurak)
+		if (pChr->m_pVehicle || pChr->m_InSnake || IsActivelyPlayingDurak)
 			Tunings.m_HookDragSpeed = 0.f;
 
 		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_SOLID_DRAWTILE)
@@ -1316,7 +1317,7 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tunings.m_AirJumpImpulse = Tunings.m_GroundJumpImpulse;
 		}
 
-		if (pChr->m_DrawEditor.Active() || pChr->m_pHelicopter|| pChr->m_InSnake || IsActivelyPlayingDurak
+		if (pChr->m_DrawEditor.Active() || pChr->m_pVehicle || pChr->m_InSnake || IsActivelyPlayingDurak
 			|| (!Server()->IsSevendown(ClientID) && ((pChr->m_FreezeTime && Config()->m_SvFreezePrediction) || pChr->GetPlayer()->m_TeeControllerID != -1)))
 		{
 			Tunings.m_GroundControlSpeed = 0.f;
@@ -1327,10 +1328,10 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 			Tunings.m_AirControlAccel = 0.f;
 		}
 
-		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pHelicopter || pChr->m_InSnake)
+		if (pChr->m_MoveRestrictions&CANTMOVE_DOWN_LASERDOOR || pChr->m_pVehicle || pChr->m_InSnake)
 			Tunings.m_Gravity = 0.f;
 
-		if (pChr->m_pHelicopter)
+		if (pChr->m_pVehicle)
 			Tunings.m_ExplosionStrength = 0.f;
 
 		// AntiPing
@@ -1751,7 +1752,7 @@ void CGameContext::PreInputClients(int ClientId, bool *pClients)
 
 	// Prevent pre inputs when player cant even move. Avoid annoying mispredictions for most common cases
 	// It would be possible to only reset m_Fire for telekinesis for example, but i think it doesnt matter
-	if (pInputChr->m_DrawEditor.Active() || pInputChr->m_pHelicopter || pInputChr->m_InSnake || pInputChr->GetActiveWeapon() == WEAPON_TELEKINESIS
+	if (pInputChr->m_DrawEditor.Active() || pInputChr->m_pVehicle || pInputChr->m_InSnake || pInputChr->GetActiveWeapon() == WEAPON_TELEKINESIS
 		|| Arenas()->IsConfiguring(ClientId) || Durak()->ActivelyPlaying(ClientId) || m_apPlayers[ClientId]->m_pControlledTee)
 		return;
 
@@ -3130,16 +3131,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					
 					if (!InHouse)
 					{
-						CHelicopter* pHelicopter = pChr->m_pHelicopter;
-						if (pHelicopter)
+						IVehicle* pVehicle = pChr->m_pVehicle;
+						if (pVehicle)
 						{
 							if (pChr->CanSwitchSeats())
 							{
-								int switchSeat = pHelicopter->GetNextAvailableSeat(pChr->m_HelicopterSeat);
+								int switchSeat = pVehicle->GetNextAvailableSeat(pChr->m_VehicleSeat);
 								if (switchSeat != -1)
 								{
-									pHelicopter->Dismount(ClientID, false);
-									pHelicopter->Mount(ClientID, switchSeat);
+									pVehicle->Dismount(ClientID, false);
+									pVehicle->Mount(ClientID, switchSeat);
 								}
 							}
 						}
@@ -3171,11 +3172,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 					if (!InHouse)
 					{
-						if (pChr->m_pHelicopter)
+						if (pChr->m_pVehicle)
 						{
-							pChr->m_pHelicopter->Dismount(ClientID);
+							pChr->m_pVehicle->Dismount(ClientID);
 						}
-						else if (!pChr->TryMountHelicopter() && !pChr->DropGrog())
+						else if (!pChr->DropGrog() && !pChr->TryMountVehicle())
 						{
 							pChr->DropWeapon(pChr->GetActiveWeaponUnclamped(), false);
 						}
@@ -8358,10 +8359,26 @@ CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText
 	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
 }
 
+bool CGameContext::SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale, bool SpawnOnFloor, int Number)
+{
+	Scale = clamp(Scale, SPIDER_MIN_SCALE, SPIDER_MAX_SCALE);
+	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(SPIDER_PHYSSIZE * Scale);
+	ResultingHitbox = vec2(maximum(ResultingHitbox.x, 28.0f), maximum(ResultingHitbox.y, 28.0f));
+	if (SpawnOnFloor)
+		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
+
+	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
+		return false;
+
+	new CSpider(&m_World, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number);
+
+	return true;
+}
+
 bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale, bool SpawnOnFloor, int Number)
 {
 	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
-	vec2 ResultingHitbox = HELICOPTER_PHYSSIZE * Scale;
+	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(HELICOPTER_PHYSSIZE * Scale);
 	if (SpawnOnFloor)
 		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
 
@@ -8372,14 +8389,20 @@ bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int Helicopt
 		return false;
 
 	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number, TurretType);
-	CVehicleTurret *pTurret = nullptr;
-	if (TurretType == TURRETTYPE_MINIGUN)
-		pTurret = new CMinigunTurret();
-	else if (TurretType == TURRETTYPE_LAUNCHER)
-		pTurret = new CLauncherTurret();
+	if (TurretType > TURRETTYPE_NONE && TurretType < NUM_TURRET_TYPES)
+	{
+		pHelicopter->AllocateNumAttachments(1);
 
-	if (!pHelicopter->TryAttachTurret(pTurret))
-		delete pTurret; // Failed to assign ownership
+		IVehicleTurret *pTurret = nullptr;
+		if (TurretType == TURRETTYPE_MINIGUN)
+			pTurret = new CMinigunTurret();
+		else if (TurretType == TURRETTYPE_LAUNCHER)
+			pTurret = new CLauncherTurret();
+
+		if (!pHelicopter->TryAttach(pTurret))
+			delete pTurret; // Failed to assign ownership
+	}
+
 	return true;
 }
 
