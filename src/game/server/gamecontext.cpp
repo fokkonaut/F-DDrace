@@ -8370,7 +8370,7 @@ bool CGameContext::SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale, boo
 	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
 		return false;
 
-	CSpider* pSpider = new CSpider(&m_World, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number);
+	new CSpider(&m_World, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number);
 
 	return true;
 }

@@ -5960,9 +5960,8 @@ bool CCharacter::TryMountVehicle()
 		return true;
 
 	int64 Types = (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
-	CEntity* apEnts[10];
-	memset(apEnts, 0, sizeof(CEntity*) * 10);
-	int Num = GameWorld()->FindEntitiesTypes(m_Pos, 300.0f, apEnts, 10, Types, Team()); // no CheckWalls
+	CEntity* apEnts[16] = {};
+	int Num = GameWorld()->FindEntitiesTypes(m_Pos, 300.0f, apEnts, 16, Types, Team()); // no CheckWalls
 
 	// Sort by closest
 	std::sort(apEnts, apEnts + Num, [&](CEntity* a, CEntity* b)

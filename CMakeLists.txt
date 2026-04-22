@@ -1504,6 +1504,16 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/advanced_entity.h
   entities/atom.cpp
   entities/atom.h
+  entities/bone/base/bone.cpp
+  entities/bone/base/bone.h
+  entities/bone/base/bone_model.cpp
+  entities/bone/base/bone_model.h
+  entities/bone/helicopter_models.cpp
+  entities/bone/helicopter_models.h
+  entities/bone/spider_model.cpp
+  entities/bone/spider_model.h
+  entities/bone/vehicle_model.cpp
+  entities/bone/vehicle_model.h
   entities/button.cpp
   entities/button.h
   entities/character.cpp
@@ -1540,28 +1550,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/grog.h
   entities/gun.cpp
   entities/gun.h
-  entities/bone/base/bone.cpp
-  entities/bone/base/bone.h
-  entities/bone/base/bone_model.cpp
-  entities/bone/base/bone_model.h
-  entities/bone/helicopter_models.cpp
-  entities/bone/helicopter_models.h
-  entities/bone/spider_model.cpp
-  entities/bone/spider_model.h
-  entities/bone/vehicle_model.cpp
-  entities/bone/vehicle_model.h
-  entities/vehicle/base/healthbar.cpp
-  entities/vehicle/base/healthbar.h
-  entities/vehicle/base/vehicle.cpp
-  entities/vehicle/base/vehicle.h
-  entities/vehicle/helicopter.cpp
-  entities/vehicle/helicopter.h
-  entities/vehicle/helicopter_turret.cpp
-  entities/vehicle/helicopter_turret.h
-  entities/vehicle/spider.cpp
-  entities/vehicle/spider.h
-  entities/missile.cpp
-  entities/missile.h
   entities/laser.cpp
   entities/laser.h
   entities/lasertext.cpp
@@ -1576,6 +1564,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/lovely.h
   entities/meteor.cpp
   entities/meteor.h
+  entities/missile.cpp
+  entities/missile.h
   entities/money.cpp
   entities/money.h
   entities/pickup.cpp
@@ -1606,6 +1596,16 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/teleporter.h
   entities/trail.cpp
   entities/trail.h
+  entities/vehicle/base/healthbar.cpp
+  entities/vehicle/base/healthbar.h
+  entities/vehicle/base/vehicle.cpp
+  entities/vehicle/base/vehicle.h
+  entities/vehicle/helicopter.cpp
+  entities/vehicle/helicopter.h
+  entities/vehicle/helicopter_turret.cpp
+  entities/vehicle/helicopter_turret.h
+  entities/vehicle/spider.cpp
+  entities/vehicle/spider.h
   entity.cpp
   entity.h
   eventhandler.cpp

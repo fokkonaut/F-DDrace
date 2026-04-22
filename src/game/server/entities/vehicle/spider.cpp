@@ -305,27 +305,8 @@ bool CSpider::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController)
 	if (!IVehicle::OnInput(pNewInput, pController))
 		return false;
 
-	int CharSeat = pController->m_VehicleSeat;
-	SSeat& Seat = m_pModel->Seats()[CharSeat];
-
-	// Movement controls
-	// if (Seat.m_Type == SEATTYPE_DRIVER)
-	// {
-	// 	m_Accel = vec2(0.f, 0.f);
-	// 	if (!pController->m_FreezeTime)
-	// 	{
-	// 		bool Drive = pNewInput->m_Hook % 2 == 1;
-	// 		bool Boost = pNewInput->m_Fire % 2 == 1;
-	// 		if (Drive && pNewInput->m_TargetX && pNewInput->m_TargetY)
-	// 		{
-	// 			vec2 Direction = normalize(vec2((float)pNewInput->m_TargetX, (float)pNewInput->m_TargetY));
-	// 			m_Accel = Direction * (Boost ? 2.0f : 1.0f);
-	//
-	// 			float targetAngle = atan2(Direction.y, Direction.x);
-	// 			m_VisualAngle = targetAngle;
-	// 		}
-	// 	}
-	// }
+	// int CharSeat = pController->m_VehicleSeat;
+	// SSeat& Seat = m_pModel->Seats()[CharSeat];
 
 	return true;
 }
