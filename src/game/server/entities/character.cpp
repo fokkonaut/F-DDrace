@@ -198,6 +198,12 @@ void CCharacter::SetWeapon(int W)
 				m_AntiPingHideHammerTicks = Server()->TickSpeed() + 5;
 			}
 		}
+
+		if (GetLastWeapon() == WEAPON_HAMMER)
+		{
+			// only hammer can redirect projectiles and therefore cause mispredictions
+			DisablePreventEventPredict();
+		}
 	}
 }
 
@@ -4532,7 +4538,7 @@ void CCharacter::FDDraceInit()
 	m_Item = -3;
 	m_DoorHammer = false;
 	m_ProjectileHammer = m_pPlayer->m_HasProjectileHammer;
-	m_AntiPingPreventPredictionUntil = 0;
+	m_AntiPingPreventPredictEventUntil = 0;
 	m_pHelicopter = nullptr;
 	m_HelicopterSeat = -1;
 	m_SeatSwitchedTick = Server()->Tick();
@@ -5666,12 +5672,12 @@ bool CCharacter::IsActiveProjectileHammer()
 
 void CCharacter::PreventEventPrediction()
 {
-	m_AntiPingPreventPredictionUntil = Server()->Tick() + Server()->TickSpeed() / 3;
+	m_AntiPingPreventPredictEventUntil = Server()->Tick() + Server()->TickSpeed() / 3;
 }
 
 bool CCharacter::IsPreventEventPredict()
 {
-	return m_AntiPingPreventPredictionUntil > Server()->Tick();
+	return m_AntiPingPreventPredictEventUntil > Server()->Tick();
 }
 
 bool CCharacter::SendExtendedEntity(CEntity *pEntity)

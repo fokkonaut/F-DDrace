@@ -490,7 +490,8 @@ public:
 	bool m_Confetti;
 
 	bool IsActiveProjectileHammer();
-	int m_AntiPingPreventPredictionUntil;
+	int m_AntiPingPreventPredictEventUntil;
+	void DisablePreventEventPredict() { m_AntiPingPreventPredictEventUntil = 0; }
 	void PreventEventPrediction();
 	bool IsPreventEventPredict();
 
