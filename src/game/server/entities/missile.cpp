@@ -100,19 +100,6 @@ void CMissile::HandleCollisions()
 	if (m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-	CEntity *aExclude[2]; // owner + vehicle
-	int NumExcluded = 0;
-	if (pOwnerChar)
-	{
-		aExclude[0] = pOwnerChar;
-		NumExcluded++;
-		if (pOwnerChar->m_pVehicle)
-		{
-			aExclude[1] = pOwnerChar->m_pVehicle;
-			NumExcluded++;
-		}
-	}
-
 	CCharacter *pTargetChr = nullptr;
 	CAdvancedEntity *pTargetEntity = nullptr;
 
