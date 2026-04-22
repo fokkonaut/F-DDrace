@@ -2,7 +2,8 @@
 // Created by Matq on 02/04/2026.
 //
 
-#pragma once
+#ifndef GAME_SERVER_ENTITIES_BONE_SPIDER_MODEL_H
+#define GAME_SERVER_ENTITIES_BONE_SPIDER_MODEL_H
 
 #include "vehicle_model.h"
 #include "game/server/entities/advanced_entity.h"
@@ -166,3 +167,5 @@ private:
 public:
 	CSpiderModel(CEntity *pEntity);
 };
+
+#endif

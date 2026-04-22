@@ -2,7 +2,8 @@
 // Created by Matq on 02/04/2026.
 //
 
-#pragma once
+#ifndef GAME_SERVER_ENTITIES_VEHICLE_SPIDER_H
+#define GAME_SERVER_ENTITIES_VEHICLE_SPIDER_H
 
 #include "base/vehicle.h"
 #include "game/server/entities/advanced_entity.h"
@@ -58,3 +59,5 @@ public:
 
 	bool OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
 };
+
+#endif

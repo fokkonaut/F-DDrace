@@ -2,7 +2,8 @@
 // Created by Matq on 02/04/2026.
 //
 
-#pragma once
+#ifndef GAME_SERVER_ENTITIES_VEHICLE_BASE_VEHICLE_H
+#define GAME_SERVER_ENTITIES_VEHICLE_BASE_VEHICLE_H
 
 #include "healthbar.h"
 #include "../helicopter_turret.h"
@@ -185,3 +186,5 @@ public:
 	void Dismount(int ClientID, bool ForceDismountAtHelicopter = true); // -1 for all
 	virtual bool OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pControllerChar);
 };
+
+#endif

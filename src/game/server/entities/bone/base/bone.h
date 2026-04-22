@@ -2,7 +2,8 @@
 // Created by Matq on 16/03/2026.
 //
 
-#pragma once
+#ifndef GAME_SERVER_ENTITIES_BONE_BASE_BONE_H
+#define GAME_SERVER_ENTITIES_BONE_BASE_BONE_H
 
 #include "game/server/entity.h"
 
@@ -130,3 +131,5 @@ public:
 	// Ticking
 	void Snap(int SnappingClient);
 };
+
+#endif
