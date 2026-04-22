@@ -114,7 +114,7 @@ void CMissile::HandleCollisions()
 	if (Config()->m_SvInteractiveDrops)
 		Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG)|(1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP)|(1ULL<<CGameWorld::ENTTYPE_MONEY)|
 			(1ULL<<CGameWorld::ENTTYPE_HELICOPTER)|(1ULL<<CGameWorld::ENTTYPE_SPIDER)|(1ULL<<CGameWorld::ENTTYPE_GROG);
-	int Flags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+	int Flags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE;
 	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, pNotThis, CollideWith, Types, 0, Flags);
 
 	if (pEnt)
@@ -258,7 +258,6 @@ void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction)
 	if (Config()->m_SvResetProjLifetimeAfterHit)
 	{
 		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
-		m_LifeSpan = m_InitialLifeSpan;
 		m_LifeSpan = m_InitialLifeSpan;
 	}
 }
