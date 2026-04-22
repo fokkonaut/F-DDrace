@@ -56,17 +56,15 @@ CProjectile::CProjectile
 	m_Spooky = Spooky;
 	m_pHammerHitChr = 0;
 
-	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
-	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
-	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
 	DetermineTuning();
-	m_DefaultTuning = DetermineIfDefaultTuning() && m_DDrace;
+	m_DefaultTuning = DetermineIfDefaultTuning();
 
 	m_TeamMask = Mask128();
 	m_TeleportCancelled = false;
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 	m_InitialTeleWeapon = GetTeleWeaponInfo().m_IsTeleWeapon;
-	m_InitialSafeArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->IsInSafeArea();
-	m_InitialNoBonusArea = pOwner && pOwner->GetCharacter() && pOwner->GetCharacter()->m_NoBonusContext.m_InArea;
+	m_InitialSafeArea = pOwner && pOwner->IsInSafeArea();
+	m_InitialNoBonusArea = pOwner && pOwner->m_NoBonusContext.m_InArea;
 
 	for (int i = 0; i < NUM_SNAPINFO; i++)
 	{
@@ -385,7 +383,7 @@ void CProjectile::FillInfo(CNetObj_Projectile* pProj, int SnappingClient)
 	pProj->m_Type = GameServer()->GetProjectileType(m_Type);
 
 	// F-DDrace
-	if (m_DefaultTuning)
+	if (IsDefaultTuning())
 	{
 		pProj->m_X = round_to_int(m_Pos.x);
 		pProj->m_Y = round_to_int(m_Pos.y);
@@ -441,7 +439,7 @@ void CProjectile::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	CNetObj_DDRaceProjectile DDRaceProjectile;
 
-	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && m_DefaultTuning)
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS && IsDefaultTuning())
 	{
 		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
 		if(!pDDNetProjectile)
@@ -473,7 +471,7 @@ void CProjectile::SetBouncing(int Value)
 
 bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient)
 {
-	if (!m_DefaultTuning)
+	if (!IsDefaultTuning())
 		return false;
 
 	const int MaxPos = 0x7fffffff / 100;
@@ -611,8 +609,13 @@ void CProjectile::GetOriginalTunings(float *pCurvature, float *pSpeed)
 
 void CProjectile::DetermineTuning()
 {
+	// activate faked tuning for tunezones, vanilla shotgun and gun, straightgrenade
+	CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
+	m_DDrace = !pOwner || pOwner->m_Gamemode == GAMEMODE_DDRACE || (m_Type != WEAPON_GUN && m_Type != WEAPON_SHOTGUN);
+
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CTuningParams *pTuning = GameServer()->TuningFromChrOrZone(m_Owner, m_TuneZone);
+	
 	if (m_Type == WEAPON_SHOTGUN && !m_DDrace)
 	{
 		m_Curvature = pTuning->m_VanillaShotgunCurvature;
@@ -652,6 +655,9 @@ void CProjectile::DetermineTuning()
 
 bool CProjectile::DetermineIfDefaultTuning()
 {
+	if (!m_DDrace)
+		return false;
+
 	CTuningParams *pDefaultTuning = GameServer()->Tuning();
 	switch (m_Type)
 	{

@@ -73,15 +73,16 @@ private:
 
 	bool m_Spooky;
 
-	bool DetermineIfDefaultTuning();
-	bool m_DefaultTuning;
-	bool m_DDrace;
-
 	bool m_CalculatedVel;
 	virtual void TickDeferred();
 	void CalculateVel();
 	void GetOriginalTunings(float *pCurvature, float *pSpeed);
 	void DetermineTuning();
+
+	bool DetermineIfDefaultTuning();
+	bool IsDefaultTuning() { return m_DefaultTuning; }
+	bool m_DefaultTuning;
+	bool m_DDrace;
 
 	enum
 	{
