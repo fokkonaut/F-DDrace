@@ -106,7 +106,7 @@ void CPortal::EntitiesEnter()
 			m_vTeleported.erase(m_vTeleported.begin() + i);
 	}
 
-	int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_GROG);
+	int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER) | (1ULL<<CGameWorld::ENTTYPE_FLAG) | (1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL<<CGameWorld::ENTTYPE_MONEY) | (1ULL<<CGameWorld::ENTTYPE_GROG);
 	CEntity *apEnts[128];
 	int Num = GameWorld()->FindEntitiesTypes(m_Pos, Config()->m_SvPortalRadius, (CEntity**)apEnts, 128, Types);
 

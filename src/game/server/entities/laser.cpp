@@ -75,19 +75,19 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
 	int IntersectEntTypesFlags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
-	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+	int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER);
 	if (m_Type == WEAPON_SHOTGUN)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_GROG) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
+			Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG) | (1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL<<CGameWorld::ENTTYPE_MONEY) | (1ULL<<CGameWorld::ENTTYPE_GROG) | (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 		}
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
+			Types |= (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 		}
 		CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 		if (pOwner)
@@ -95,13 +95,13 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pOwner->GetAccID()];
 			if (pAccount->m_PoliceLevel >= 4)
 			{
-				Types |= (1<<CGameWorld::ENTTYPE_DOOR);
+				Types |= (1ULL<<CGameWorld::ENTTYPE_DOOR);
 				IntersectEntTypesFlags |= CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY;
 			}
 			if (pAccount->m_PoliceLevel >= 5)
 			{
-				Types |= (1<<CGameWorld::ENTTYPE_PICKUP) | (1<<CGameWorld::ENTTYPE_BUTTON) | (1<<CGameWorld::ENTTYPE_SPEEDUP) |
-					(1<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
+				Types |= (1ULL<<CGameWorld::ENTTYPE_PICKUP) | (1ULL<<CGameWorld::ENTTYPE_BUTTON) | (1ULL<<CGameWorld::ENTTYPE_SPEEDUP) |
+					(1ULL<<CGameWorld::ENTTYPE_TELEPORTER) | (1ULL<<CGameWorld::ENTTYPE_DRAWTILE);
 				IntersectEntTypesFlags |= CGameWorld::EIntersectEntTypesFlag::PLOT_TASER_DESTROY;
 				// Allow only tasering the door with police 4. police 5 can also destroy objects ON the plot
 				IntersectEntTypesFlags &= ~CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
@@ -112,7 +112,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
+			Types |= (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 		}
 	}
 	CCharacter *pChr = 0;

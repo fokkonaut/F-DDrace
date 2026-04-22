@@ -357,9 +357,9 @@ void CCharacter::HandleNinja()
 			float Radius = GetProximityRadius() * 2.0f;
 			vec2 Center = OldPos + Dir * 0.5f;
 
-			int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+			int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER);
 			if (Config()->m_SvInteractiveDrops)
-				Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
+				Types |= (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 			int Num = GameWorld()->FindEntitiesTypes(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, Types);
 
 			for (int i = 0; i < Num; ++i)
@@ -1022,7 +1022,7 @@ void CCharacter::FireWeapon()
 
 				if (!m_pTelekinesisEntity)
 				{
-					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
+					int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER) | (1ULL<<CGameWorld::ENTTYPE_FLAG) | (1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL<<CGameWorld::ENTTYPE_MONEY) | (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
 					int Flags = CGameWorld::EFindEntFlag::IN_HELICOPTER;
 					if (!m_Passive)
 						Flags |= CGameWorld::EFindEntFlag::PASSIVE;
