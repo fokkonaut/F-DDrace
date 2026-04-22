@@ -1204,7 +1204,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 {
 	if (Flags == -1)
 	{
-		Flags = EIntersectEntTypesFlag::TEE_IN_VEHICLE;
+		Flags = EIntersectEntTypesFlag::IN_VEHICLE;
 	}
 
 	// Find other players
@@ -1235,7 +1235,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (pThisOnly && p != pThisOnly)
 					continue;
 
-				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::TEE_IN_VEHICLE && ((CCharacter *)p)->m_pVehicle)
+				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::IN_VEHICLE && ((CCharacter *)p)->m_pVehicle)
 					continue;
 
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
