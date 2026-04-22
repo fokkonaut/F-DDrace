@@ -16,7 +16,7 @@
 #include "pickup.h"
 #include "lightsaber.h"
 #include "stable_projectile.h"
-#include "game/server/entities/helicopter/helicopter.h"
+#include "vehicle/helicopter.h"
 #include "portalblocker.h"
 #include "grog.h"
 
@@ -555,10 +555,10 @@ public:
 	bool ShouldRemoveTeleProjLaser(bool IsTeleWeapon, bool InitialTeleWeapon, bool InitialSafeArea, bool InitialNoBonusArea);
 
 	// helicopter
-	CHelicopter *m_pHelicopter;
-	int m_HelicopterSeat;
+	IVehicle *m_pVehicle;
+	int m_VehicleSeat;
 	int m_SeatSwitchedTick;
-	bool TryMountHelicopter();
+	bool TryMountVehicle();
 	bool CanSwitchSeats();
 
 	int GetCurrentTilePlotID(bool CheckDoor = false);

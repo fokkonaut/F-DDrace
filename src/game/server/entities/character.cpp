@@ -357,7 +357,7 @@ void CCharacter::HandleNinja()
 
 			int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 			if (Config()->m_SvInteractiveDrops)
-				Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+				Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
 			int Num = GameWorld()->FindEntitiesTypes(Center, Radius, (CEntity**)aEnts, MAX_CLIENTS, Types);
 
 			for (int i = 0; i < Num; ++i)
@@ -395,13 +395,13 @@ void CCharacter::HandleNinja()
 				{
 					((CCharacter *)aEnts[i])->TakeDamage(vec2(0, -10.0f), m_Ninja.m_ActivationDir * -1, g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
 				}
-				else if (aEnts[i]->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+				else if (aEnts[i]->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || aEnts[i]->GetObjType() == CGameWorld::ENTTYPE_SPIDER)
 				{
-					CHelicopter* pHelicopter = (CHelicopter *)aEnts[i];
-					if (pHelicopter->IsBuilding())
+					IVehicle* pVehicle = (IVehicle *)aEnts[i];
+					if (pVehicle->IsBuilding())
 						continue;
 
-					pHelicopter->TakeDamage((float)g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, Center, m_pPlayer->GetCID());
+					pVehicle->TakeDamage((float)g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, Center, m_pPlayer->GetCID());
 				}
 			}
 		}
@@ -413,7 +413,7 @@ void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
 	if (m_ReloadTimer != 0 || m_QueuedWeapon == -1 || (m_QueuedWeapon != -2 && !m_aWeapons[m_QueuedWeapon].m_Got) || (m_aWeapons[WEAPON_NINJA].m_Got && !m_ScrollNinja)
-		|| m_DrawEditor.Selecting() || ((m_NumGrogsHolding || m_pHelicopter) && !m_DrawEditor.Active()) || m_BirthdayGiftEndTick)
+		|| m_DrawEditor.Selecting() || ((m_NumGrogsHolding || m_pVehicle) && !m_DrawEditor.Active()) || m_BirthdayGiftEndTick)
 		return;
 
 	if (m_QueuedWeapon == -2)
@@ -710,7 +710,7 @@ void CCharacter::FireWeapon()
 				int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 				if (Config()->m_SvInteractiveDrops)
 				{
-					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_GROG);
+					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER) | (1<<CGameWorld::ENTTYPE_GROG);
 				}
 				bool IsProjectileHammer = IsActiveProjectileHammer();
 				if (IsProjectileHammer)
@@ -796,14 +796,14 @@ void CCharacter::FireWeapon()
 							if (((CFlag *)pEntity)->GetCarrier())
 								continue; // carrier is getting hit
 						}
-						else if (pEntity->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+						else if (pEntity->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_SPIDER)
 						{
-							CHelicopter *pHelicopter = (CHelicopter*)pEntity;
-							if(pHelicopter->IsBuilding() || pHelicopter->IsExploding())
+							IVehicle *pVehicle = (IVehicle*)pEntity;
+							if(pVehicle->IsInvincible())
 								continue;
 
 							Temp *= 0.5f;
-							pHelicopter->TakeDamage((float)g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, EffectPos, m_pPlayer->GetCID());
+							pVehicle->TakeDamage((float)g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, EffectPos, m_pPlayer->GetCID());
 							if (length(pEnt->GetPos() - ProjStartPos) > 0.0f)
 							{
 								EffectPos = pEnt->GetPos() - normalize(pEnt->GetPos() - ProjStartPos) * pEnt->GetProximityRadius() * 0.5f;
@@ -1011,7 +1011,7 @@ void CCharacter::FireWeapon()
 
 				if (!m_pTelekinesisEntity)
 				{
-					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
+					int Types = (1<<CGameWorld::ENTTYPE_CHARACTER) | (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
 					int Flags = CGameWorld::EFindEntFlag::IN_HELICOPTER;
 					if (!m_Passive)
 						Flags |= CGameWorld::EFindEntFlag::PASSIVE;
@@ -1487,9 +1487,9 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 		m_Snake.OnInput(pNewInput);
 		ResetInput |= 1;
 	}
-	else if (m_pHelicopter)
+	else if (m_pVehicle)
 	{
-		m_pHelicopter->OnInput(pNewInput, this);
+		m_pVehicle->OnInput(pNewInput, this);
 		ResetInput |= 1;
 	}
 	else if (m_GrogBalancePosX != GROG_BALANCE_POS_UNSET)
@@ -2053,8 +2053,8 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	m_pPlayer->ResetSkin();
 
 	// dismount helicopter
-	if (m_pHelicopter)
-		m_pHelicopter->Dismount(m_pPlayer->GetCID());
+	if (m_pVehicle)
+		m_pVehicle->Dismount(m_pPlayer->GetCID());
 
 	GameWorld()->RemoveEntity(this);
 	GameWorld()->m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
@@ -2352,7 +2352,7 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 				aGotWeapon[GameServer()->GetWeaponType(i)] = true;
 	}
 
-	bool LocalHelicopter = Local && m_pHelicopter;
+	bool LocalHelicopter = Local && m_pVehicle;
 	bool PassiveNotSuper = m_pPlayer->AntiPing() && m_Passive && !m_Super;
 	if(m_Solo)
 		Flags |= CHARACTERFLAG_SOLO;
@@ -2360,9 +2360,9 @@ int CCharacter::GetDDNetCharacterFlags(int SnappingClient)
 		Flags |= CHARACTERFLAG_SUPER;
 	if(m_EndlessHook)
 		Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super) || m_pHelicopter)
+	if(!m_Core.m_Collision || !Tuning()->m_PlayerCollision || (m_Passive && !m_Super) || m_pVehicle)
 		Flags |= CHARACTERFLAG_NO_COLLISION;
-	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super) || m_pHelicopter)
+	if(!m_Core.m_Hook || !Tuning()->m_PlayerHooking || (m_Passive && !m_Super) || m_pVehicle)
 		Flags |= CHARACTERFLAG_NO_HOOK;
 	if(m_SuperJump && !LocalHelicopter)
 		Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -2475,9 +2475,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	bool Local = SnappingClient == m_pPlayer->GetCID();
 
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClient);
-	bool HelicopterPrediction = m_pHelicopter && pSnapChar && pSnapChar->m_pHelicopter == m_pHelicopter && m_pHelicopter->GetDriver() == pSnapChar;
+	bool HelicopterPrediction = m_pVehicle && pSnapChar && pSnapChar->m_pVehicle == m_pVehicle && m_pVehicle->GetDriver() == pSnapChar;
 
-	if (HelicopterPrediction || (Local && (m_pHelicopter || m_Snake.Active() || RainbowNameAffected)))
+	if (HelicopterPrediction || (Local && (m_pVehicle || m_Snake.Active() || RainbowNameAffected)))
 	{
 		if (Local)
 		{
@@ -2487,7 +2487,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 		if (HelicopterPrediction)
 		{
-			vec2 Vel = m_pHelicopter->GetVel();
+			vec2 Vel = m_pVehicle->GetVel();
 			pCharacter->m_VelX = round_to_int(Vel.x * 256.0f);
 			pCharacter->m_VelY = round_to_int(Vel.y * 256.0f);
 		}
@@ -4168,7 +4168,7 @@ void CCharacter::HandleTuneLayer()
 
 		// send zone enter msg
 		SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]);
-	}	
+	}
 }
 
 void CCharacter::SendTuneMsg(const char *pMessage)
@@ -4537,10 +4537,10 @@ void CCharacter::FDDraceInit()
 	m_pLightsaber = 0;
 	m_Item = -3;
 	m_DoorHammer = false;
+	m_pVehicle = nullptr;
+	m_VehicleSeat = -1;
 	m_ProjectileHammer = m_pPlayer->m_HasProjectileHammer;
 	m_AntiPingPreventPredictEventUntil = 0;
-	m_pHelicopter = nullptr;
-	m_HelicopterSeat = -1;
 	m_SeatSwitchedTick = Server()->Tick();
 
 	for (int i = 0; i < NUM_BACKUPS; i++)
@@ -5186,6 +5186,9 @@ int CCharacter::DetermineGrogSpirit()
 
 bool CCharacter::AddGrog()
 {
+	if (m_pVehicle)
+		return false;
+
 	if (m_NumGrogsHolding >= Config()->m_SvGrogHoldLimit)
 	{
 		if (m_LastGrogHoldMsg + Server()->TickSpeed() * 3 < Server()->Tick())
@@ -5937,7 +5940,7 @@ void CCharacter::SetCheckpointList(std::vector< std::pair<int, int> > vCheckpoin
 	}
 }
 
-bool CCharacter::TryMountHelicopter()
+bool CCharacter::TryMountVehicle()
 {
 	if (m_FreezeTime)
 		return false;
@@ -5945,8 +5948,30 @@ bool CCharacter::TryMountHelicopter()
 	if (!CanSwitchSeats())
 		return true;
 
-	CHelicopter *pHelicopter = (CHelicopter *)GameWorld()->ClosestEntity(m_Pos, 300.f, CGameWorld::ENTTYPE_HELICOPTER, nullptr, Team(), true);
-	return pHelicopter && pHelicopter->Mount(m_pPlayer->GetCID());
+	int64 Types = (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER);
+	CEntity* apEnts[10];
+	memset(apEnts, 0, sizeof(CEntity*) * 10);
+	int Num = GameWorld()->FindEntitiesTypes(m_Pos, 300.0f, apEnts, 10, Types, Team()); // no CheckWalls
+
+	// Sort by closest
+	std::sort(apEnts, apEnts + Num, [&](CEntity* a, CEntity* b)
+	{
+		auto dist = [&](CEntity* e) {
+			float dx = e->GetPos().x - m_Pos.x;
+			float dy = e->GetPos().y - m_Pos.y;
+			return dx*dx + dy*dy;
+		};
+		return dist(a) < dist(b);
+	});
+
+	for (int i = 0; i < Num; i++)
+	{
+		IVehicle* pVehicle = (IVehicle*)apEnts[i];
+		if (pVehicle->Mount(m_pPlayer->GetCID()))
+			return true;
+	}
+
+	return false;
 }
 
 bool CCharacter::CanSwitchSeats()

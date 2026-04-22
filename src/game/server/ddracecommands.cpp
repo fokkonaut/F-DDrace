@@ -7,6 +7,8 @@
 #include <game/server/entities/character.h>
 #include <stdio.h>
 
+#include "entities/vehicle/spider.h"
+
 bool CheckClientID(int ClientID);
 
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
@@ -1330,6 +1332,27 @@ void CGameContext::ConSendMotd(IConsole::IResult *pResult, void *pUserData)
 	if (pResult->GetInteger(1) == 1)
 		pText = pSelf->FormatMotd(pText);
 	pSelf->SendMotd(pText, Victim);
+}
+
+void CGameContext::ConSpider(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() > 0 ? pResult->GetVictim() : pResult->m_ClientID;
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if (!pChr)
+		return;
+
+	float Scale = pResult->NumArguments() > 1 ? pResult->GetFloat(1) : 1.f;
+	if (!pSelf->SpawnSpider(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), Scale))
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn spider here");
+}
+
+void CGameContext::ConRemoveSpiders(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CSpider *pSpider = (CSpider *)pSelf->m_World.FindFirst(CGameWorld::ENTTYPE_SPIDER);
+	for (; pSpider; pSpider = (CSpider *)pSpider->TypeNext())
+		pSpider->Reset();
 }
 
 void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)

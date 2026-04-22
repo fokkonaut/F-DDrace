@@ -3,7 +3,7 @@
 //
 
 #include "bone.h"
-#include "../../../gamecontext.h"
+#include "game/server/gamecontext.h"
 
 CBone::CBone(
 	CEntity *pEntity,
@@ -97,7 +97,7 @@ void CBone::LoadPositions()
 	m_To = m_InitTo;
 }
 
-void CBone::Snap(int SnappingClient, bool Flipped, float VertexSnapping, bool RainbowMode)
+void CBone::Snap(int SnappingClient, const SBoneModelSnapping& Options)
 {
 	if (!m_Enabled || !m_pEntity || m_ID == -1)
 		return;
@@ -109,23 +109,25 @@ void CBone::Snap(int SnappingClient, bool Flipped, float VertexSnapping, bool Ra
 	);
 
 	auto parentPos = m_pEntity->GetPos();
-	float toX = parentPos.x + (Flipped ? -m_To.x : m_To.x);
+	float toX = parentPos.x + (Options.m_Flipped ? -m_To.x : m_To.x);
 	float toY = parentPos.y + m_To.y;
-	float fromX = parentPos.x + (Flipped ? -m_From.x : m_From.x);
+	float fromX = parentPos.x + (Options.m_Flipped ? -m_From.x : m_From.x);
 	float fromY = parentPos.y + m_From.y;
 	int startTick = Server()->Tick() - 4 + m_Thickness;
 
-	if (VertexSnapping > 1.0f)
+	if (Options.m_VertexSnapping > 1.0f)
 	{
-		toX = floor(toX / VertexSnapping) * VertexSnapping;
-		toY = floor(toY / VertexSnapping) * VertexSnapping;
-		fromX = floor(fromX / VertexSnapping) * VertexSnapping;
-		fromY = floor(fromY / VertexSnapping) * VertexSnapping;
+		toX = floor(toX / Options.m_VertexSnapping) * Options.m_VertexSnapping;
+		toY = floor(toY / Options.m_VertexSnapping) * Options.m_VertexSnapping;
+		fromX = floor(fromX / Options.m_VertexSnapping) * Options.m_VertexSnapping;
+		fromY = floor(fromY / Options.m_VertexSnapping) * Options.m_VertexSnapping;
 	}
 
 	vec2 To = vec2(toX, toY);
 	vec2 From = vec2(fromX, fromY);
-	int Color = RainbowMode ? (m_Color + Server()->Tick()) / 4 % 4 : m_Color;
+	int Color = Options.m_RainbowMode ? (m_Color + Server()->Tick()) / 8 % 5 : m_Color;
+	if (Color == LASERTYPE_DRAGGER)
+		std::swap(To, From);
 
 	GameServer()->SnapLaserObject(ctx, m_ID, To, From, startTick, -1, Color, -1, -1, LASERFLAG_NO_PREDICT);
 }
@@ -137,8 +139,8 @@ CTrailNode::CTrailNode()
 {
 }
 
-CTrailNode::CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos)
-	: m_pEntity(pEntity), m_ID(SnapID), m_pPos(pPos), m_Enabled(true)
+CTrailNode::CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos, bool RelativeMode, bool Enabled)
+	: m_pEntity(pEntity), m_ID(SnapID), m_pPos(pPos), m_InitEnabled(Enabled), m_Enabled(Enabled), m_RelativeMode(RelativeMode)
 {
 }
 
@@ -151,7 +153,7 @@ void CTrailNode::Snap(int SnappingClient, bool Flipped, float VertexSnapping)
 	if (!pObj)
 		return;
 
-	auto parentPos = m_pEntity->GetPos();
+	auto parentPos = m_RelativeMode ? m_pEntity->GetPos() : vec2(0, 0);
 	float x = parentPos.x + (Flipped ? -m_pPos->x : m_pPos->x);
 	float y = parentPos.y + m_pPos->y;
 

@@ -80,14 +80,14 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_GROG) | (1<<CGameWorld::ENTTYPE_HELICOPTER);
+			Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_GROG) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
 		}
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
 		}
 		CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 		if (pOwner)
@@ -112,7 +112,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	{
 		if (Config()->m_SvInteractiveDrops)
 		{
-			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER);
+			Types |= (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER);
 		}
 	}
 	CCharacter *pChr = 0;
@@ -195,7 +195,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		{
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_FLAG)
 				((CFlag *)pEnt)->SetAtStand(false);
-			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+			else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEnt->GetObjType() == CGameWorld::ENTTYPE_SPIDER)
 				Temp *= 0.5f;
 
 			pEnt->SetVel(ClampVel(pEnt->GetMoveRestrictions(), Temp));
@@ -204,12 +204,12 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	}
 	else if (m_Type == WEAPON_LASER)
 	{
-		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+		if (pEnt && (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEnt->GetObjType() == CGameWorld::ENTTYPE_SPIDER))
 		{
-			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
-			pHelicopter->Heal(1.0f);
+			IVehicle* pVehicle = (IVehicle*)pEnt;
+			pVehicle->HealHealth(1.0f);
 
-			IHelicopterModel* pModel = pHelicopter->Model();
+			IVehicleModel* pModel = pVehicle->Model();
 			for (int i = 0; i < pModel->NumSeated(); i++)
 			{
 				int passengerCID = pModel->Seats()[i].m_SeatedCID;
@@ -246,12 +246,12 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	}
 	else if (m_Type == WEAPON_TASER)
 	{
-		if (pEnt && pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER)
+		if (pEnt && (pEnt->GetObjType() == CGameWorld::ENTTYPE_HELICOPTER || pEnt->GetObjType() == CGameWorld::ENTTYPE_SPIDER))
 		{
-			CHelicopter* pHelicopter = (CHelicopter*)pEnt;
-			pHelicopter->TakeDamage((float)m_TaserStrength, At, pHelicopter->LastKnownOwnerCID());
+			IVehicle* pVehicle = (IVehicle*)pEnt;
+			pVehicle->TakeDamage((float)m_TaserStrength, At, pVehicle->LastKnownOwnerCID());
 
-			IHelicopterModel* pModel = pHelicopter->Model();
+			IVehicleModel* pModel = pVehicle->Model();
 			for (int i = 0; i < pModel->NumSeated(); i++)
 			{
 				int passengerCID = pModel->Seats()[i].m_SeatedCID;

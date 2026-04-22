@@ -1,12 +1,10 @@
 //
-// Created by Matq on 12/05/2025.
+// Created by Matq on 14/04/2026.
 //
 
-#ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
-#define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
+#pragma once
 
-#include "helicopter_models.h"
-#include "bone/bone_model.h"
+#include "base/bone_model.h"
 
 enum
 {
@@ -14,25 +12,52 @@ enum
 	PROPELLER_CIRCULAR
 };
 
+enum
+{
+	SEATTYPE_DRIVER,
+	SEATTYPE_PASSENGER,
+};
+
 struct SSeat
 {
-	vec2 m_InitSeat; // Only scaled, reset pos
+	vec2 m_InitSeat; // Only scaled
 	vec2 m_Seat; // Rotated / flipped
-	vec2 m_Interpolated; // Smooth transition
+	vec2 m_Interpolated; // Resulting smooth transition
 
 	int m_SeatedCID; // -1 empty
+	int m_Type;
+	int m_AttachmentID; // Controls which components, like turrets
+
+	struct SInputs
+	{
+		int m_WalkDirection;
+		int m_Fire;
+		int m_PrevFire;
+		int m_Hook;
+		int m_PrevHook;
+		int m_MouseX;
+		int m_MouseY;
+
+		// For example dismount while holding A/D, shooting or hooking
+		int m_HeldWalkDirection;
+		bool m_HeldFire;
+		bool m_HeldHook;
+	} m_Inputs;
 
 public:
 	SSeat() : SSeat(vec2(0, 0))
 	{
 	}
-	SSeat(vec2 SeatPos)
+	SSeat(vec2 SeatPos, int SeatType = SEATTYPE_PASSENGER, int ControllingAttachmentIdx = -1)
 	{
 		m_InitSeat = SeatPos;
 		m_Seat = SeatPos;
 		m_Interpolated = SeatPos;
 
 		m_SeatedCID = -1;
+		m_Type = SeatType;
+		memset(&m_Inputs, 0, sizeof(SInputs));
+		m_AttachmentID = ControllingAttachmentIdx;
 	}
 
 	void Flip();
@@ -48,6 +73,7 @@ public:
 	}
 };
 
+class IVehicle;
 struct SPropeller
 {
 	int m_PropellerType;
@@ -120,6 +146,7 @@ public:
 		m_pBoneA->m_From = m_pBoneA->m_To + twoDim;
 		m_pBoneB->m_From = m_pBoneB->m_To - twoDim;
 	}
+	void FlingTee(CCharacter *pChar, IVehicle* pVehicle);
 
 	// Ticking
 	void Tick()
@@ -150,7 +177,66 @@ public:
 	}
 };
 
-class IHelicopterModel : public IBoneModel
+struct SRope
+{
+public:
+	struct SSegment // Fk instead
+	{
+		vec2 m_Pos;
+		vec2 m_Vel;
+	};
+
+	CEntity *m_pEntity;
+	vec2 m_ResetPos;
+	vec2 m_Connection;
+	float m_SegLength;
+	SSegment *m_apSegments;
+	CTrailNode *m_apTrails;
+	int m_NumSegments;
+	float m_Slack;
+
+	float m_FullLength;
+
+public:
+	SRope() : SRope(nullptr, vec2(0, 0), 32.f, 10, 40.f)
+	{
+	}
+	SRope(CEntity *pEntity, vec2 Connection, float SegmentLength, int NumSegments, float MaxSlack)
+	{
+		m_pEntity = pEntity;
+		m_ResetPos = Connection;
+		m_Connection = Connection;
+		m_apSegments = NumSegments ? new SSegment[NumSegments] : nullptr;
+		m_apTrails = NumSegments ? new CTrailNode[NumSegments] : nullptr;
+		m_SegLength = SegmentLength;
+		m_NumSegments = NumSegments;
+		m_Slack = MaxSlack;
+
+		m_FullLength = SegmentLength * (float)NumSegments;
+	}
+	void Destroy()
+	{
+		delete[] m_apSegments;
+		delete[] m_apTrails;
+	}
+
+	// Getting
+	vec2 ConnectionWorldPos() { return m_pEntity->GetPos() + m_Connection; }
+
+	// Manipulating
+	void InitRope();
+	void ApplyScale(float Scale)
+	{
+		m_ResetPos *= Scale;
+		m_Connection *= Scale;
+	}
+
+	// Ticking
+	void Tick();
+	void Snap(int SnappingClient);
+};
+
+class IVehicleModel : public IBoneModel
 {
 protected:
 	SPropeller *m_apPropellers;
@@ -175,26 +261,34 @@ protected:
 			m_apSeats[i].m_Seat = rotate(m_apSeats[i].m_InitSeat, NewRotation);
 	}
 
+	SRope *m_apRopes;
+	int m_NumRopes;
+	void ApplyScaleRopes(float Scale)
+	{
+		for (int i = 0; i < m_NumRopes; i++)
+			m_apRopes[i].ApplyScale(Scale);
+	}
+
 	virtual void InitBody() = 0;
 	virtual void InitPropellers() = 0;
 	virtual void InitSeats() = 0;
+	virtual void InitRopes() = 0;
 
 	void InitModel() override = 0;
 
 public:
-	IHelicopterModel(CEntity *pEntity, int NumBones, int NumTrails, int NumPropellers, int NumSeats)
+	IVehicleModel(CEntity *pEntity, int NumBones, int NumTrails, int NumPropellers, int NumSeats, int NumRopes)
 		: IBoneModel(pEntity, NumBones, NumTrails)
 	{
 		m_apPropellers = NumPropellers ? new SPropeller[NumPropellers] : nullptr;
 		m_NumPropellers = NumPropellers;
 		m_apSeats = NumSeats ? new SSeat[NumSeats] : nullptr;
 		m_NumSeats = NumSeats;
+		m_NumSeated = 0;
+		m_apRopes = NumRopes ? new SRope[NumRopes] : nullptr;
+		m_NumRopes = NumRopes;
 	}
-	virtual ~IHelicopterModel()
-	{
-		delete[] m_apPropellers;
-		delete[] m_apSeats;
-	}
+	virtual ~IVehicleModel();
 
 	// Getting
 	SPropeller *Propellers() { return m_apPropellers; } // size: m_NumPropellers
@@ -202,6 +296,8 @@ public:
 	SSeat *Seats() { return m_apSeats; } // size: m_NumPropellers
 	int NumSeats() { return m_NumSeats; }
 	int NumSeated() { return m_NumSeated; }
+	SRope *Ropes() { return m_apRopes; }
+	int NumRopes() { return m_NumRopes; }
 
 	// Manipulating
 	void ApplyScale(float Scale) override
@@ -209,6 +305,7 @@ public:
 		ApplyScaleBones(Scale);
 		ApplyScalePropellers(Scale);
 		ApplyScaleSeats(Scale);
+		ApplyScaleRopes(Scale);
 	}
 	void SetRotation(float NewRotation) override
 	{
@@ -246,93 +343,18 @@ public:
 		for (int i = 0; i < m_NumPropellers; i++)
 			m_apPropellers[i].Tick();
 	}
+	void Snap(int SnappingClient, const SBoneModelSnapping& Options) override;
 };
 
-// Default helicopter model
 
-class CHelicopterModel : public IHelicopterModel
-{
-private:
-	enum
-	{
-		NUM_TRAILS = 2,
-		NUM_PROPELLERS = 2,
-		NUM_SEATS = 1,
+// Propeller function
 
-		NUM_BONES_BODY = 14,
-		NUM_BONES_PROPELLERS = NUM_PROPELLERS * 2,
-		NUM_BONES = NUM_BONES_BODY + NUM_BONES_PROPELLERS,
-	};
-
-	void InitBody() override;
-	void InitPropellers() override;
-	void InitSeats() override;
-
-	void InitModel() override;
-
-	CBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	CBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
-
-public:
-	CHelicopterModel(CEntity *pEntity);
-};
-
-// Attack helicopter model
-
-class CHelicopterApacheModel : public IHelicopterModel
-{
-private:
-	enum
-	{
-		NUM_TRAILS = 2,
-		NUM_PROPELLERS = 2,
-		NUM_SEATS = 2,
-
-		NUM_BONES_BODY = 14,
-		NUM_BONES_PROPELLERS = NUM_PROPELLERS * 2,
-		NUM_BONES = NUM_BONES_BODY + NUM_BONES_PROPELLERS,
-	};
-
-	void InitBody() override;
-	void InitPropellers() override;
-	void InitSeats() override;
-
-	void InitModel() override;
-
-	CBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	CBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
-
-public:
-	CHelicopterApacheModel(CEntity *pEntity);
-};
-
-// Transport helicopter model
-
-class CHelicopterChinookModel : public IHelicopterModel
-{
-private:
-	enum
-	{
-		NUM_PROPELLERS = 2,
-		NUM_TRAILS = 0,
-		NUM_SEATS = 4,
-
-		NUM_BONES_BODY = 15,
-		NUM_BONES_PROPELLERS = NUM_PROPELLERS * 2,
-		NUM_BONES = NUM_BONES_BODY + NUM_BONES_PROPELLERS,
-	};
-
-	void InitBody() override;
-	void InitPropellers() override;
-	void InitSeats() override;
-
-	void InitModel() override;
-
-	CBone *Body() { return &m_aBones[0]; } // size: NUM_BONES_BODY
-	CBone *Blades() { return &m_aBones[NUM_BONES_BODY]; } // size: NUM_BONES_PROPELLERS
-
-public:
-	CHelicopterChinookModel(CEntity *pEntity);
-};
-
-#endif // GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
+bool MovingCircleHitsMovingSegment_Analytical(
+	vec2 circleLast,
+	vec2 circleNow,
+	float radius,
+	vec2 lineLastA,
+	vec2 lineNowA,
+	vec2 lineLastB,
+	vec2 lineNowB
+	);

@@ -812,6 +812,7 @@ public:
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
 
 	// helicopter
+	bool SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
 	bool SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
 	int GetHelicopterTileType() { return Config()->m_SvHeliTileType == NUM_HELICOPTER_TYPES ? random_int(HELICOPTER_DEFAULT, NUM_HELICOPTER_TYPES - 1) : Config()->m_SvHeliTileType; }
 
@@ -1108,6 +1109,8 @@ private:
 	static void ConSound(IConsole::IResult* pResult, void* pUserData);
 	static void ConLaserText(IConsole::IResult* pResult, void* pUserData);
 	static void ConSendMotd(IConsole::IResult* pResult, void* pUserData);
+	static void ConSpider(IConsole::IResult* pResult, void* pUserData);
+	static void ConRemoveSpiders(IConsole::IResult* pResult, void* pUserData);
 	static void ConHelicopter(IConsole::IResult* pResult, void* pUserData);
 	static void ConRemoveHelicopters(IConsole::IResult* pResult, void* pUserData);
 	static void ConSnake(IConsole::IResult* pResult, void* pUserData);

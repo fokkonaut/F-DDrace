@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../../entity.h"
+#include "game/server/entity.h"
 
 struct SBounds
 {
@@ -24,6 +24,14 @@ struct SBounds
 		m_Right = maximum(m_Right, IncludeArea.m_Right);
 		m_Bottom = maximum(m_Bottom, IncludeArea.m_Bottom);
 	}
+};
+
+struct SBoneModelSnapping
+{
+	bool m_SendTrails;
+	bool m_Flipped;
+	float m_VertexSnapping;
+	bool m_RainbowMode;
 };
 
 class CBone
@@ -78,7 +86,7 @@ public:
 	void LoadPositions();
 
 	// Ticking
-	void Snap(int SnappingClient, bool Flipped = false, float VertexSnapping = 0.0f, bool RainbowMode = false);
+	void Snap(int SnappingClient, const SBoneModelSnapping& Options);
 };
 
 class CTrailNode
@@ -87,11 +95,13 @@ public:
 	CEntity *m_pEntity;
 	int m_ID;
 	vec2 *m_pPos;
+	bool m_InitEnabled;
 	bool m_Enabled;
+	bool m_RelativeMode;
 
 public:
 	CTrailNode();
-	CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos);
+	CTrailNode(CEntity *pEntity, int SnapID, vec2 *pPos, bool RelativeMode = true, bool Enabled = true);
 
 	// Getting
 	IServer *Server() { return m_pEntity->Server(); }

@@ -2,8 +2,8 @@
 // Created by Matq on 11/04/2025.
 //
 
-#include "../../../gamecontext.h"
 #include "bone_model.h"
+#include "game/server/gamecontext.h"
 
 void IBoneModel::SetBonesRotation(float NewRotation)
 {
@@ -115,12 +115,12 @@ void IBoneModel::UpdateAndCacheBounds()
 	m_TotalSize = m_Bounds.GetSize();
 }
 
-void IBoneModel::Snap(int SnappingClient, bool SendTrails, bool Flipped, float VertexSnapping, bool RainbowMode)
+void IBoneModel::Snap(int SnappingClient, const SBoneModelSnapping& Options)
 {
 	for (int i = 0; i < m_NumBones; i++)
-		Bones()[i].Snap(SnappingClient, Flipped, VertexSnapping, RainbowMode);
+		Bones()[i].Snap(SnappingClient, Options);
 
-	if (SendTrails)
+	if (Options.m_SendTrails)
 		for (int i = 0; i < m_NumTrails; i++)
-			Trails()[i].Snap(SnappingClient, Flipped, VertexSnapping);
+			Trails()[i].Snap(SnappingClient, Options.m_Flipped, Options.m_VertexSnapping);
 }

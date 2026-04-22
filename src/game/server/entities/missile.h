@@ -5,8 +5,8 @@
 #ifndef GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
 #define GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
 
-#include "../../gamecontext.h"
-#include "../stable_projectile.h"
+#include "game/server/entities/stable_projectile.h"
+#include "game/server/gamecontext.h"
 
 class CMissile;
 class CSpark

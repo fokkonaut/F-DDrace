@@ -928,7 +928,7 @@ CCharacter* CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity* pNotTh
 		if (CollideWith != -1 && !p->CanCollide(CollideWith, Flags & EFindEntFlag::PASSIVE, Flags & EFindEntFlag::SAFE_AREA))
 			continue;
 
-		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pHelicopter)
+		if (Flags & EFindEntFlag::IN_HELICOPTER && p->m_pVehicle)
 			continue;
 
 		float Len = distance(Pos, p->m_Pos);
@@ -1226,13 +1226,13 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 				if (pThisOnly && p != pThisOnly)
 					continue;
 
-				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::TEE_IN_HELICOPTER && ((CCharacter *)p)->m_pHelicopter)
+				if (i == ENTTYPE_CHARACTER && Flags & EIntersectEntTypesFlag::TEE_IN_HELICOPTER && ((CCharacter *)p)->m_pVehicle)
 					continue;
 
 				if (i == ENTTYPE_FLAG && ((CFlag *)p)->GetCarrier())
 					continue;
 
-				if (i == ENTTYPE_HELICOPTER && ((CHelicopter *)p)->IsInvincible())
+				if ((i == ENTTYPE_HELICOPTER || i == ENTTYPE_SPIDER) && ((IVehicle *)p)->IsInvincible())
 					continue;
 
 				if (CollideWith != -1)
