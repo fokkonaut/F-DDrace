@@ -11,7 +11,7 @@
 
 vec2 IVehicle::MinimumVehicleHitbox(vec2 Hitbox)
 {
-	return { maximum(Hitbox.x, 28.0f), maximum(Hitbox.y, 28.0f) };
+	return { maximum(Hitbox.x, CCharacterCore::PHYS_SIZE), maximum(Hitbox.y, CCharacterCore::PHYS_SIZE) };
 }
 
 IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Pos, vec2 BaseSize, int Owner, int Team, int Number, int BuildTime)

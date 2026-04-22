@@ -474,15 +474,14 @@ void CLauncherTurret::FireTurret()
 
 	vec2 startingPos = m_pVehicle->GetPos() + m_TurretBone.m_From;
 	vec2 Direction = GetTurretDirection();
-	CMissile *pMissile = new CMissile(
+	new CMissile(
 		GameWorld(),
 		m_ShooterCID,
 		startingPos,
-		vec2(0, 0),
+		m_pVehicle->GetVel() * 0.5f + Direction * 8.0f,
 		Direction,
 		Server()->TickSpeed() * 3
 	);
-	pMissile->Launch(Direction, m_pVehicle->GetVel());
 	Mask128 TeamMask = GetShooterTeamMask();
 	GameServer()->CreateSound(startingPos, SOUND_GRENADE_FIRE, TeamMask);
 	GameServer()->CreateSound(startingPos, SOUND_GRENADE_EXPLODE, TeamMask);

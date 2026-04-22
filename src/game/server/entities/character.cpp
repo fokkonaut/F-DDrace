@@ -835,7 +835,7 @@ void CCharacter::FireWeapon()
 					}
 					else if (pMissile)
 					{
-						pMissile->HitMissile(this, Direction, m_Core.m_Vel);
+						pMissile->HitMissile(this, Direction);
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
 						HitProjectile = true;
 					}

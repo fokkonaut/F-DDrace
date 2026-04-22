@@ -79,8 +79,7 @@ public:
 	bool IsExploding() { return m_ExplosionsLeft > -1; }
 
 	// Manipulating
-	void Launch(vec2 Direction, vec2 Velocity);
-	void HitMissile(CCharacter *pFrom, vec2 Direction, vec2 Velocity);
+	void HitMissile(CCharacter *pFrom, vec2 Direction);
 
 	// Ticking
 	void Tick() override;

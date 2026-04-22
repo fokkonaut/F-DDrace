@@ -116,11 +116,19 @@ void CMissile::HandleCollisions()
 	CCharacter *pTargetChr = nullptr;
 	CAdvancedEntity *pTargetEntity = nullptr;
 
+	int CollideWith = m_Owner;
+	CEntity *pNotThis = pOwnerChar && pOwnerChar->m_pVehicle ? (CEntity *)pOwnerChar->m_pVehicle : (CEntity *)pOwnerChar;
+	if (m_pHammerHitChr && m_pHammerHitChr->IsAlive())
+	{
+		pNotThis = m_pHammerHitChr;
+		CollideWith = m_pHammerHitChr->GetPlayer()->GetCID();
+	}
 	int64 Types = (1ULL << CGameWorld::ENTTYPE_CHARACTER);
 	if (Config()->m_SvInteractiveDrops)
-		Types |= (1ULL << CGameWorld::ENTTYPE_FLAG) | (1ULL << CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL << CGameWorld::ENTTYPE_MONEY) | (1ULL <<
-			CGameWorld::ENTTYPE_HELICOPTER) | (1ULL << CGameWorld::ENTTYPE_SPIDER) | (1ULL << CGameWorld::ENTTYPE_GROG);
-	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, CNotTheseEntities(aExclude, NumExcluded), m_Owner, Types);
+		Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG)|(1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP)|(1ULL<<CGameWorld::ENTTYPE_MONEY)|
+			(1ULL<<CGameWorld::ENTTYPE_HELICOPTER)|(1ULL<<CGameWorld::ENTTYPE_SPIDER)|(1ULL<<CGameWorld::ENTTYPE_GROG);
+	int Flags = CGameWorld::EIntersectEntTypesFlag::IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+	CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, m_Pos, 1.0f, collisionPos, pNotThis, CollideWith, Types, 0, Flags);
 
 	if (pEnt)
 	{
@@ -253,21 +261,17 @@ CMissile::~CMissile()
 		delete m_apSparks[i];
 }
 
-void CMissile::Launch(vec2 Direction, vec2 Velocity)
-{
-	m_Direction = Direction;
-	m_Vel = Velocity * 0.5f + Direction * 8.0f;
-}
-
-void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction, vec2 Velocity)
+void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction)
 {
 	m_pHammerHitChr = pFrom;
 	m_StartTick = Server()->Tick();
-	Launch(Direction, Velocity);
+	m_Direction = Direction;
+	m_Vel = Direction * 8.0f;
 
 	if (Config()->m_SvResetProjLifetimeAfterHit)
 	{
 		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
+		m_LifeSpan = m_InitialLifeSpan;
 		m_LifeSpan = m_InitialLifeSpan;
 	}
 }
