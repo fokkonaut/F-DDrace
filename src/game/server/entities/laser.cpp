@@ -74,7 +74,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	bool pDontHitSelf = Config()->m_SvOldLaser || (m_Bounces == 0 && !m_WasTele);
 
-	int IntersectEntTypesFlags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_HELICOPTER | CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
+	int IntersectEntTypesFlags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PLOT_DOOR_ONLY;
 	int64 Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
 	if (m_Type == WEAPON_SHOTGUN)
 	{

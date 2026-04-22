@@ -37,6 +37,8 @@
 #include <game/server/score.h>
 #include <generated/protocol.h>
 
+#include "missile.h"
+
 //input count
 struct CInputCount
 {
@@ -707,15 +709,15 @@ void CCharacter::FireWeapon()
 					break;
 
 				CCharacter* apEnts[MAX_CLIENTS];
-				int Types = (1<<CGameWorld::ENTTYPE_CHARACTER);
+				int64 Types = (1ULL<<CGameWorld::ENTTYPE_CHARACTER);
 				if (Config()->m_SvInteractiveDrops)
 				{
-					Types |= (1<<CGameWorld::ENTTYPE_FLAG) | (1<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1<<CGameWorld::ENTTYPE_MONEY) | (1<<CGameWorld::ENTTYPE_HELICOPTER) | (1<<CGameWorld::ENTTYPE_SPIDER) | (1<<CGameWorld::ENTTYPE_GROG);
+					Types |= (1ULL<<CGameWorld::ENTTYPE_FLAG) | (1ULL<<CGameWorld::ENTTYPE_PICKUP_DROP) | (1ULL<<CGameWorld::ENTTYPE_MONEY) | (1ULL<<CGameWorld::ENTTYPE_HELICOPTER) | (1ULL<<CGameWorld::ENTTYPE_SPIDER) | (1ULL<<CGameWorld::ENTTYPE_GROG);
 				}
 				bool IsProjectileHammer = IsActiveProjectileHammer();
 				if (IsProjectileHammer)
 				{
-					Types |= (1<<CGameWorld::ENTTYPE_PROJECTILE) | (1<<CGameWorld::ENTTYPE_CUSTOM_PROJECTILE);
+					Types |= (1ULL<<CGameWorld::ENTTYPE_PROJECTILE) | (1ULL<<CGameWorld::ENTTYPE_CUSTOM_PROJECTILE) | (1ULL<<CGameWorld::ENTTYPE_MISSILE);
 				}
 				int Num = GameWorld()->FindEntitiesTypes(ProjStartPos, GetProximityRadius() * 0.5f, (CEntity * *)apEnts, MAX_CLIENTS, Types, Team(), IsProjectileHammer);
 
@@ -728,6 +730,7 @@ void CCharacter::FireWeapon()
 					CAdvancedEntity *pEntity = 0;
 					CProjectile *pProj = 0;
 					CCustomProjectile *pCustomProj = 0;
+					CMissile *pMissile = 0;
 					if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
 						pTarget = (CCharacter *)pEnt;
 					else if (pEnt->IsAdvancedEntity())
@@ -736,6 +739,8 @@ void CCharacter::FireWeapon()
 						pProj = (CProjectile *)pEnt;
 					else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CUSTOM_PROJECTILE)
 						pCustomProj = (CCustomProjectile *)pEnt;
+					else if (pEnt->GetObjType() == CGameWorld::ENTTYPE_MISSILE)
+						pMissile = (CMissile *)pEnt;
 
 					// set his velocity to fast upward (for now)
 					vec2 Dir;
@@ -825,6 +830,12 @@ void CCharacter::FireWeapon()
 					else if (pCustomProj)
 					{
 						pCustomProj->HitProjectile(this, Direction);
+						GameServer()->CreateHammerHit(EffectPos, TeamMask());
+						HitProjectile = true;
+					}
+					else if (pMissile)
+					{
+						pMissile->HitMissile(this, Direction, m_Core.m_Vel);
 						GameServer()->CreateHammerHit(EffectPos, TeamMask());
 						HitProjectile = true;
 					}

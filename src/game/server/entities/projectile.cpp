@@ -146,7 +146,7 @@ void CProjectile::Tick()
 			pNotThis = m_pHammerHitChr;
 			CollideWith = m_pHammerHitChr->GetPlayer()->GetCID();
 		}
-		int Flags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_HELICOPTER | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
+		int Flags = CGameWorld::EIntersectEntTypesFlag::TEE_IN_VEHICLE | CGameWorld::EIntersectEntTypesFlag::PREVENT_EVENT_PREDICTION;
 		CEntity *pEnt = GameWorld()->IntersectEntityTypes(m_PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pNotThis, CollideWith, Types, 0, Flags);
 		if (pEnt)
 		{
@@ -156,7 +156,7 @@ void CProjectile::Tick()
 			}
 			else if (pEnt->IsAdvancedEntity())
 			{
-				pTargetEntity = (CHelicopter *)pEnt;
+				pTargetEntity = (IVehicle *)pEnt;
 				pTargetChr = pTargetEntity->GetOwner();
 				// Only teleport to players
 				m_TeleportCancelled = true;

@@ -157,10 +157,6 @@ private:
 	void InitBones();
 	void UpdateBones();
 
-	//    void SetFlipped(bool flipped) override;
-	//    void Rotate(float Angle) override;
-	//    void RotateTurret(float Angle) override;
-
 	float m_RecoilAmount;
 	float m_RecoilSpan;
 	float m_CurrentRecoilFactor;

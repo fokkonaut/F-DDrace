@@ -229,6 +229,7 @@ CMissile::CMissile(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Vel, vec2 D
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(Owner);
 	m_DDTeam = pOwnerChar ? pOwnerChar->Team() : 0;
 	m_TeamMask = ((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.TeamMask(m_DDTeam);
+	m_InitialLifeSpan = Span;
 	m_LifeSpan = Span;
 	m_StartTick = Server()->Tick();
 
@@ -250,6 +251,25 @@ CMissile::~CMissile()
 {
 	for (int i = 0; i < NUM_SPARKS; i++)
 		delete m_apSparks[i];
+}
+
+void CMissile::Launch(vec2 Direction, vec2 Velocity)
+{
+	m_Direction = Direction;
+	m_Vel = Velocity * 0.5f + Direction * 8.0f;
+}
+
+void CMissile::HitMissile(CCharacter *pFrom, vec2 Direction, vec2 Velocity)
+{
+	m_pHammerHitChr = pFrom;
+	m_StartTick = Server()->Tick();
+	Launch(Direction, Velocity);
+
+	if (Config()->m_SvResetProjLifetimeAfterHit)
+	{
+		m_InitialLifeSpan *= 0.95f; // dont keep it around forever
+		m_LifeSpan = m_InitialLifeSpan;
+	}
 }
 
 void CMissile::Tick()

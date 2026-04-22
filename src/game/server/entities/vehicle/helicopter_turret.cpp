@@ -46,7 +46,7 @@ void IVehicleTurret::CountControllers()
 	if (!m_pVehicle || !m_pVehicle->Model())
 		return;
 
-	IVehicleModel* pModel = m_pVehicle->Model();
+	IVehicleModel *pModel = m_pVehicle->Model();
 
 	m_Controllers = 0;
 	for (int i = 0; i < pModel->NumSeats(); i++)
@@ -174,7 +174,7 @@ CGameContext *IVehicleTurret::GameServer()
 
 Mask128 IVehicleTurret::GetShooterTeamMask()
 {
-	CCharacter* pShooter = GameServer()->GetPlayerChar(m_ShooterCID);
+	CCharacter *pShooter = GameServer()->GetPlayerChar(m_ShooterCID);
 	return pShooter ? pShooter->TeamMask() : Mask128();
 }
 
@@ -184,7 +184,7 @@ bool IVehicleTurret::TryBindVehicle(IVehicle *pVehicle)
 	if (pVehicle == nullptr)
 		return false;
 
-	if (!m_pVehicle) // really only assign owner once
+	if (m_pVehicle) // really only assign owner once
 		return false;
 
 	m_pVehicle = pVehicle;
@@ -474,13 +474,15 @@ void CLauncherTurret::FireTurret()
 
 	vec2 startingPos = m_pVehicle->GetPos() + m_TurretBone.m_From;
 	vec2 Direction = GetTurretDirection();
-	float missileStartingSpeed = 8.f;
-	new CMissile(GameWorld(),
-	             m_ShooterCID,
-	             startingPos,
-	             m_pVehicle->GetVel() * 0.5f + Direction * missileStartingSpeed,
-	             Direction,
-	             Server()->TickSpeed() * 3);
+	CMissile *pMissile = new CMissile(
+		GameWorld(),
+		m_ShooterCID,
+		startingPos,
+		vec2(0, 0),
+		Direction,
+		Server()->TickSpeed() * 3
+	);
+	pMissile->Launch(Direction, m_pVehicle->GetVel());
 	Mask128 TeamMask = GetShooterTeamMask();
 	GameServer()->CreateSound(startingPos, SOUND_GRENADE_FIRE, TeamMask);
 	GameServer()->CreateSound(startingPos, SOUND_GRENADE_EXPLODE, TeamMask);

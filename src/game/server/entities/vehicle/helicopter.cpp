@@ -62,7 +62,7 @@ CHelicopter::CHelicopter(
 	int Number,
 	int DelayTurretType
 )
-	: IVehicle(pGameWorld, VEHICLETYPE_HELICOPTER, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE, Spawner, Team, Number, BuildTime, 0)
+	: IVehicle(pGameWorld, VEHICLETYPE_HELICOPTER, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE, Spawner, Team, Number, BuildTime, 1)
 {
 	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
