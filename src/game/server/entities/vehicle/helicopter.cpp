@@ -62,7 +62,7 @@ CHelicopter::CHelicopter(
 	int Number,
 	int DelayTurretType
 )
-	: IVehicle(pGameWorld, VEHICLETYPE_HELICOPTER, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE, Spawner, Team, Number, BuildTime, 1)
+	: IVehicle(pGameWorld, VEHICLETYPE_HELICOPTER, CGameWorld::ENTTYPE_HELICOPTER, Pos, HELICOPTER_PHYSSIZE, Spawner, Team, Number, BuildTime)
 {
 	m_Elasticity = vec2(0.f, 0.f);
 	m_DDTeam = Team;
@@ -76,7 +76,6 @@ CHelicopter::CHelicopter(
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
 		m_Layer = LAYER_SWITCH; // unused rn, but for completeness
 	}
-
 
 	if (HelicopterType >= 0 && HelicopterType < NUM_HELICOPTER_TYPES)
 		SetVehicleMetadata(Helicopters::aHelicopterMetadata[HelicopterType], true);
@@ -93,7 +92,6 @@ CHelicopter::CHelicopter(
 
 CHelicopter::~CHelicopter()
 {
-
 }
 
 void CHelicopter::Reset()
@@ -162,26 +160,26 @@ bool CHelicopter::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pControlle
 		SSeat& Seat = m_pModel->Seats()[CharSeat];
 
 		// Movement controls
-		if (Seat.m_Type == SEATTYPE_DRIVER)
-		{
-			if (!pControllerChar->m_FreezeTime)
-			{
-				m_Strafing = pNewInput->m_Fire % 2 == 0;
-				m_InputDirection = pNewInput->m_Direction;
-				m_Accel.x = (float)pNewInput->m_Direction;
-
-				bool Rise = pNewInput->m_Jump;
-				bool Sink = pNewInput->m_Hook;
-				if (Rise == Sink)
-					m_Accel.y = 0.f;
-				else
-					m_Accel.y = Rise ? -1 : 1;
-			}
-			else
-			{
-				m_Accel = vec2(0.f, 0.f);
-			}
-		}
+		// if (Seat.m_Type == SEATTYPE_DRIVER)
+		// {
+		// 	if (!pControllerChar->m_FreezeTime)
+		// 	{
+		// 		m_Strafing = pNewInput->m_Fire % 2 == 0;
+		// 		m_InputDirection = pNewInput->m_Direction;
+		// 		m_Accel.x = (float)pNewInput->m_Direction;
+		//
+		// 		bool Rise = pNewInput->m_Jump;
+		// 		bool Sink = pNewInput->m_Hook;
+		// 		if (Rise == Sink)
+		// 			m_Accel.y = 0.f;
+		// 		else
+		// 			m_Accel.y = Rise ? -1 : 1;
+		// 	}
+		// 	else
+		// 	{
+		// 		m_Accel = vec2(0.f, 0.f);
+		// 	}
+		// }
 
 		// Weapon controls
 		if (Seat.m_AttachmentID >= 0 && Seat.m_AttachmentID < m_NumAttachments && m_apAttachments[Seat.m_AttachmentID])
@@ -207,9 +205,36 @@ void CHelicopter::ApplyAcceleration()
 void CHelicopter::HandleFlipping()
 {
 	if (((m_InputDirection == -1 && !m_Flipped && m_Vel.x < 0.f) ||
-		(m_InputDirection == 1 && m_Flipped && m_Vel.x > 0.f)) &&
+			(m_InputDirection == 1 && m_Flipped && m_Vel.x > 0.f)) &&
 		m_Strafing)
 		m_Flipped = !m_Flipped;
+}
+
+void CHelicopter::HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar)
+{
+	if (Seat.m_Type == SEATTYPE_DRIVER)
+	{
+		if (!pChar->m_FreezeTime)
+		{
+			SSeat::SInputs& Inputs = Seat.m_Inputs;
+			m_Strafing = Inputs.m_Fire % 2 == 0;
+			m_InputDirection = Inputs.m_HeldWalkDirection;
+			m_Accel.x = (float)Inputs.m_WalkDirection;
+
+			bool Rise = Inputs.m_Jump;
+			bool Sink = Inputs.m_Hook;
+			if (Rise == Sink)
+				m_Accel.y = 0.f;
+			else
+				m_Accel.y = Rise ? -1 : 1;
+		}
+		else
+		{
+			m_Accel = vec2(0.f, 0.f);
+		}
+	}
+
+	IVehicle::HandleSeat(Seat, PassengerCID, pChar);
 }
 
 void CHelicopter::DriversDismounted()

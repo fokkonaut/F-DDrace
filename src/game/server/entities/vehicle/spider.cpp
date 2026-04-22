@@ -30,6 +30,31 @@ void CSpider::HandleRotation()
 	SetRotation(NewAngle);
 }
 
+void CSpider::HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar)
+{
+	// Movement controls
+	if (Seat.m_Type == SEATTYPE_DRIVER)
+	{
+		m_Accel = vec2(0.f, 0.f);
+		if (!pChar->m_FreezeTime)
+		{
+			SSeat::SInputs& Inputs = Seat.m_Inputs;;
+			bool Drive = Inputs.m_Hook % 2 == 1;
+			bool Boost = Inputs.m_Fire % 2 == 1;
+			if (Drive && Inputs.m_MouseX && Inputs.m_MouseY)
+			{
+				vec2 Direction = normalize(vec2((float)Inputs.m_MouseX, (float)Inputs.m_MouseY));
+				m_Accel = Direction * (Boost ? 2.0f : 1.0f);
+
+				float targetAngle = atan2(Direction.y, Direction.x);
+				m_VisualAngle = targetAngle;
+			}
+		}
+	}
+
+	IVehicle::HandleSeat(Seat, PassengerCID, pChar);
+}
+
 void CSpider::DriversDismounted()
 {
 	IVehicle::DriversDismounted();
@@ -114,8 +139,8 @@ void CSpider::TickLegs()
 			// limp mode
 			CTuningParams *pTuning = m_TuneZone ? &GameServer()->TuningList()[m_TuneZone] : GameServer()->Tuning();
 
-			Leg.m_JointVel.y += pTuning->m_Gravity;
-			Leg.m_ToesVel.y += pTuning->m_Gravity;
+			Leg.m_JointVel.y += pTuning->m_Gravity * 0.3f;
+			Leg.m_ToesVel.y += pTuning->m_Gravity * 0.3f;
 
 			Leg.m_JointVel -= m_Vel * 0.01f;
 			Leg.m_ToesVel -= m_Vel * 0.01f;
@@ -136,7 +161,7 @@ void CSpider::TickLegs()
 }
 
 CSpider::CSpider(CGameWorld *pGameWorld, int Spawner, int Team, vec2 Pos, float Scale, int BuildTime, int Number)
-	: IVehicle(pGameWorld, VEHICLETYPE_SPIDER, CGameWorld::ENTTYPE_SPIDER, Pos, SPIDER_PHYSSIZE, Spawner, Team, Number, BuildTime, 0)
+	: IVehicle(pGameWorld, VEHICLETYPE_SPIDER, CGameWorld::ENTTYPE_SPIDER, Pos, SPIDER_PHYSSIZE, Spawner, Team, Number, BuildTime)
 {
 	SetFlags(EFlags::APPLY_GRAVITY, false);
 
@@ -284,23 +309,23 @@ bool CSpider::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController)
 	SSeat& Seat = m_pModel->Seats()[CharSeat];
 
 	// Movement controls
-	if (Seat.m_Type == SEATTYPE_DRIVER)
-	{
-		m_Accel = vec2(0.f, 0.f);
-		if (!pController->m_FreezeTime)
-		{
-			bool Drive = pNewInput->m_Hook % 2 == 1;
-			bool Boost = pNewInput->m_Fire % 2 == 1;
-			if (Drive && pNewInput->m_TargetX && pNewInput->m_TargetY)
-			{
-				vec2 Direction = normalize(vec2((float)pNewInput->m_TargetX, (float)pNewInput->m_TargetY));
-				m_Accel = Direction * (Boost ? 2.0f : 1.0f);
-
-				float targetAngle = atan2(Direction.y, Direction.x);
-				m_VisualAngle = targetAngle;
-			}
-		}
-	}
+	// if (Seat.m_Type == SEATTYPE_DRIVER)
+	// {
+	// 	m_Accel = vec2(0.f, 0.f);
+	// 	if (!pController->m_FreezeTime)
+	// 	{
+	// 		bool Drive = pNewInput->m_Hook % 2 == 1;
+	// 		bool Boost = pNewInput->m_Fire % 2 == 1;
+	// 		if (Drive && pNewInput->m_TargetX && pNewInput->m_TargetY)
+	// 		{
+	// 			vec2 Direction = normalize(vec2((float)pNewInput->m_TargetX, (float)pNewInput->m_TargetY));
+	// 			m_Accel = Direction * (Boost ? 2.0f : 1.0f);
+	//
+	// 			float targetAngle = atan2(Direction.y, Direction.x);
+	// 			m_VisualAngle = targetAngle;
+	// 		}
+	// 	}
+	// }
 
 	return true;
 }

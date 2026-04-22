@@ -32,9 +32,8 @@ struct SSeat
 	{
 		int m_WalkDirection;
 		int m_Fire;
-		int m_PrevFire;
 		int m_Hook;
-		int m_PrevHook;
+		int m_Jump;
 		int m_MouseX;
 		int m_MouseY;
 
@@ -42,6 +41,15 @@ struct SSeat
 		int m_HeldWalkDirection;
 		bool m_HeldFire;
 		bool m_HeldHook;
+		bool m_HeldJump;
+
+		void Dismounted()
+		{
+			m_WalkDirection = 0;
+			m_Fire = 0;
+			m_Hook = 0;
+			m_Jump = 0;
+		}
 	} m_Inputs;
 
 public:
@@ -60,6 +68,7 @@ public:
 		m_AttachmentID = ControllingAttachmentIdx;
 	}
 
+	// Manipulating
 	void Flip();
 	void Rotate(float Angle)
 	{
@@ -70,6 +79,11 @@ public:
 		m_InitSeat *= Scale;
 		m_Seat *= Scale;
 		m_Interpolated *= Scale;
+	}
+	void Dismounted()
+	{
+		m_SeatedCID = -1;
+		m_Inputs.Dismounted();
 	}
 };
 
@@ -146,7 +160,7 @@ public:
 		m_pBoneA->m_From = m_pBoneA->m_To + twoDim;
 		m_pBoneB->m_From = m_pBoneB->m_To - twoDim;
 	}
-	void FlingTee(CCharacter *pChar, IVehicle* pVehicle);
+	void FlingTee(CCharacter *pChar, IVehicle *pVehicle);
 
 	// Ticking
 	void Tick()
@@ -346,7 +360,6 @@ public:
 	void Snap(int SnappingClient, const SBoneModelSnapping& Options) override;
 };
 
-
 // Propeller function
 
 bool MovingCircleHitsMovingSegment_Analytical(
@@ -357,4 +370,4 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	vec2 lineNowA,
 	vec2 lineLastB,
 	vec2 lineNowB
-	);
+);

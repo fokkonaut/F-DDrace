@@ -8389,15 +8389,19 @@ bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int Helicopt
 		return false;
 
 	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number, TurretType);
-	IVehicleTurret *pTurret = nullptr;
-	if (TurretType == TURRETTYPE_MINIGUN)
-		pTurret = new CMinigunTurret();
-	else if (TurretType == TURRETTYPE_LAUNCHER)
-		pTurret = new CLauncherTurret();
+	if (TurretType > TURRETTYPE_NONE && TurretType < NUM_TURRET_TYPES)
+	{
+		pHelicopter->AllocateNumAttachments(1);
 
-	// if (!pHelicopter->TryAttachTurret(pTurret))
-	// 	delete pTurret; // Failed to assign ownership
-	delete pTurret;
+		IVehicleTurret *pTurret = nullptr;
+		if (TurretType == TURRETTYPE_MINIGUN)
+			pTurret = new CMinigunTurret();
+		else if (TurretType == TURRETTYPE_LAUNCHER)
+			pTurret = new CLauncherTurret();
+
+		if (!pHelicopter->TryAttach(pTurret))
+			delete pTurret; // Failed to assign ownership
+	}
 
 	return true;
 }

@@ -56,6 +56,7 @@ protected:
 	IVehicleModel *m_pModel;
 
 	IVehicleTurret **m_apAttachments;
+	int m_AttachmentsCap;
 	int m_NumAttachments;
 	void TickAttachments();
 
@@ -86,6 +87,7 @@ protected:
 	void HandleExplosions();
 
 	int m_DriverFreezeTime;
+	virtual void HandleSeat(SSeat& Seat, int PassengerCID, CCharacter* pChar);
 	void HandleSeats();
 	virtual void DriversDismounted();
 	virtual void DriversFrozen();
@@ -138,7 +140,7 @@ public:
 	static vec2 MinimumVehicleHitbox(vec2 Hitbox);
 
 public:
-	IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Pos, vec2 BaseSize, int Owner, int Team, int Number, int BuildTime, int NumAttachments);
+	IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Pos, vec2 BaseSize, int Owner, int Team, int Number, int BuildTime);
 	~IVehicle();
 
 	// Getting
@@ -164,8 +166,8 @@ public:
 	int NumAttachments() { return m_NumAttachments; }
 
 	// Manipulating
-	// bool TryAttachTurret(IVehicleTurret *pNewTurret);
-	// void DestroyTurrets();
+	bool TryAttach(IVehicleTurret *pNewTurret);
+	void AllocateNumAttachments(int NumAttachments);
 	void SetVehicleMetadata(const SVehicleMeta& metadata, bool HealFullyToo);
 	virtual void ApplyScale(float VehicleScale);
 	void Explode();

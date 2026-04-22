@@ -27,6 +27,7 @@ private:
 
 	void ApplyAcceleration() override;
 	void HandleRotation();
+	void HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar) override;
 	void DriversDismounted() override;
 	void DriversFrozen() override;
 	void SetRotation(float NewRotation) override;

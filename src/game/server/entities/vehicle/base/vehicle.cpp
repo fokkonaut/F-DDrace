@@ -7,13 +7,14 @@
 #include "game/server/gamecontext.h"
 #include "generated/server_data.h"
 #include "engine/server.h"
+#include "game/server/entities/atom.h"
 
 vec2 IVehicle::MinimumVehicleHitbox(vec2 Hitbox)
 {
 	return { maximum(Hitbox.x, 28.0f), maximum(Hitbox.y, 28.0f) };
 }
 
-IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Pos, vec2 BaseSize, int Owner, int Team, int Number, int BuildTime, int NumAttachments)
+IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Pos, vec2 BaseSize, int Owner, int Team, int Number, int BuildTime)
 	: CAdvancedEntity(pGameWorld, Objtype, Pos, BaseSize, Owner), m_HealthBar(this)
 {
 	SetFlags(EFlags::ALLOW_VIP_PLUS, false);
@@ -36,8 +37,8 @@ IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Po
 	m_Scale = 1.f;
 	m_EngineOn = false;
 	m_pModel = nullptr;
-	m_apAttachments = new IVehicleTurret *[NumAttachments];
-	m_NumAttachments = NumAttachments;
+	m_apAttachments = nullptr;
+	m_NumAttachments = 0;
 	m_Flipped = false;
 	m_Angle = 0.0f;
 	m_VisualAngle = 0.0f;
@@ -48,15 +49,15 @@ IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Po
 	// 	m_Layer = LAYER_SWITCH; // unused rn, but for completeness
 	// }
 
-	for (int i = 0; i < NumAttachments; i++)
-		m_apAttachments[i] = nullptr;
-
-	for (int i = 0; i < NumAttachments; i++)
-	{
-		IVehicleTurret *pNewTurret = new CLauncherTurret();
-		pNewTurret->TryBindVehicle(this);
-		m_apAttachments[i] = pNewTurret;
-	}
+	// for (int i = 0; i < NumAttachments; i++)
+	// 	m_apAttachments[i] = nullptr;
+	//
+	// for (int i = 0; i < NumAttachments; i++)
+	// {
+	// 	IVehicleTurret *pNewTurret = new CLauncherTurret();
+	// 	pNewTurret->TryBindVehicle(this);
+	// 	m_apAttachments[i] = pNewTurret;
+	// }
 
 	m_ExplosionsOnDeath = 1;
 	m_ExplosionsLeft = 0;
@@ -129,6 +130,34 @@ int IVehicle::GetNextAvailableSeat(int CheckFromIndex)
 	}
 
 	return -1; // Full
+}
+
+bool IVehicle::TryAttach(IVehicleTurret *pNewTurret)
+{
+	if (!pNewTurret || m_NumAttachments >= m_AttachmentsCap)
+		return false;
+
+	if (pNewTurret->TryBindVehicle(this)) // Attempt to pass ownership
+	{
+		m_apAttachments[m_NumAttachments] = pNewTurret;
+		m_NumAttachments++;
+
+		SortBones();
+		return true;
+	}
+
+	return false;
+}
+
+void IVehicle::AllocateNumAttachments(int NumAttachments)
+{
+	for (int i = 0; i < m_NumAttachments; i++)
+		delete m_apAttachments[i];
+
+	delete[] m_apAttachments;
+	m_apAttachments = new IVehicleTurret *[NumAttachments]();
+	m_AttachmentsCap = NumAttachments;
+	m_NumAttachments = 0;
 }
 
 void IVehicle::SetVehicleMetadata(const SVehicleMeta& metadata, bool HealFullyToo)
@@ -274,12 +303,15 @@ bool IVehicle::OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pControllerCh
 	SeatInputs.m_WalkDirection = pNewInput->m_Direction;
 	SeatInputs.m_Fire = pNewInput->m_Fire;
 	SeatInputs.m_Hook = pNewInput->m_Hook;
+	SeatInputs.m_Jump = pNewInput->m_Jump;
 	SeatInputs.m_MouseX = pNewInput->m_TargetX;
 	SeatInputs.m_MouseY = pNewInput->m_TargetY;
 
 	SeatInputs.m_HeldWalkDirection = SeatInputs.m_WalkDirection;
 	SeatInputs.m_HeldFire = SeatInputs.m_Fire % 2 == 1;
 	SeatInputs.m_HeldHook = SeatInputs.m_Hook % 2 == 1;
+	SeatInputs.m_HeldJump = SeatInputs.m_Jump % 2 == 1;
+
 	return true;
 }
 
@@ -540,6 +572,20 @@ void IVehicle::SendBroadcastToPassengers(const char *pMsg)
 	}
 }
 
+void IVehicle::HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar)
+{
+	if (Seat.m_Type == SEATTYPE_DRIVER)
+	{
+		if (!m_DriverFreezeTime)
+			m_DriverFreezeTime = pChar->m_FreezeTime;
+		else
+			m_DriverFreezeTime = minimum(m_DriverFreezeTime, pChar->m_FreezeTime);
+	}
+
+	if (pChar->m_DeepFreeze || (pChar->m_FreezeTime && m_Armor <= 0.0f))
+		Dismount(PassengerCID);
+}
+
 void IVehicle::HandleSeats()
 {
 	for (int i = 0; i < m_pModel->NumSeats(); i++)
@@ -561,16 +607,7 @@ void IVehicle::HandleSeats()
 		pCharacter->ForceSetPos(resultSeatPos);
 		pCharacter->Core()->m_Vel = vec2(0, 0);
 
-		if (Seat.m_Type == SEATTYPE_DRIVER)
-		{
-			if (!m_DriverFreezeTime)
-				m_DriverFreezeTime = pCharacter->m_FreezeTime;
-			else
-				m_DriverFreezeTime = minimum(m_DriverFreezeTime, pCharacter->m_FreezeTime);
-		}
-
-		if (pCharacter->m_DeepFreeze || (pCharacter->m_FreezeTime && m_Armor <= 0.0f))
-			Dismount(passengerCID);
+		HandleSeat(Seat, passengerCID, pCharacter);
 	}
 }
 
@@ -710,7 +747,7 @@ void IVehicle::Dismount(int ClientID, bool ForceDismountAtHelicopter)
 				pCharacter->SendBroadcastHud("");
 			}
 
-			Seat.m_SeatedCID = -1;
+			Seat.Dismounted();
 			m_pModel->SetNumSeated(m_pModel->NumSeated() - 1);
 
 			// Dismount only one player

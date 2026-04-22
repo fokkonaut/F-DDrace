@@ -45,6 +45,7 @@ private:
 	void HandleRotationBasedOnVelocity();
 	void ApplyAcceleration() override;
 	void HandleFlipping();
+	void HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar) override;
 	void DriversDismounted() override;
 	void DriversFrozen() override;
 
