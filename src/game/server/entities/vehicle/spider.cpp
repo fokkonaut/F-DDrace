@@ -39,8 +39,8 @@ void CSpider::HandleSeat(SSeat& Seat, int PassengerCID, CCharacter *pChar)
 		if (!pChar->m_FreezeTime)
 		{
 			SSeat::SInputs& Inputs = Seat.m_Inputs;;
-			bool Drive = Inputs.m_Jump % 2 == 1;
-			bool Boost = Inputs.m_Fire % 2 == 1;
+			bool Drive = Inputs.m_Fire % 2 == 1;
+			bool Boost = Inputs.m_Jump % 2 == 1;
 			if (Drive && Inputs.m_MouseX && Inputs.m_MouseY)
 			{
 				vec2 Direction = normalize(vec2((float)Inputs.m_MouseX, (float)Inputs.m_MouseY));
