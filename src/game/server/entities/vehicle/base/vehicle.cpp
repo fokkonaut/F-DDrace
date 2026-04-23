@@ -556,7 +556,7 @@ void IVehicle::SendBroadcastIndicator()
 
 	char aMsg[128];
 	const char* pSwitchSeatMsg = m_pModel->NumSeats() > 1 ? "F3 - Switch seat\n" : "";
-	str_format(aMsg, sizeof(aMsg), "> %s <\nHealth [%i]%s\n\n%sF4 - Dismount", m_pName, (int)m_Health, pArmorText,pSwitchSeatMsg);
+	str_format(aMsg, sizeof(aMsg), "> %s <\nHealth [%i]%s\n\n%sF4 - Dismount", m_pName, (int)m_Health, pArmorText, pSwitchSeatMsg);
 	SendBroadcastToPassengers(aMsg);
 }
 
