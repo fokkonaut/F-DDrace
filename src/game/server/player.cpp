@@ -2860,7 +2860,7 @@ void CPlayer::SetLanguage(int Language, bool Silent, bool UpdateDummy)
 	if (UpdateDummy)
 	{
 		int DummyID = Server()->GetDummy(m_ClientID);
-		if (DummyID != -1)
+		if (DummyID != -1 && GameServer()->m_apPlayers[DummyID])
 		{
 			// Always keep track of dummy language
 			GameServer()->m_apPlayers[DummyID]->m_Language = Language;
