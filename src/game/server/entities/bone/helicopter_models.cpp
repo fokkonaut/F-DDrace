@@ -110,7 +110,7 @@ void CHelicopterApacheModel::InitBody()
 		CBone(Entity(), Server()->SnapNewID(), 95, 40, 105, 20, 4, LASERTYPE_FREEZE), // nose
 		CBone(Entity(), Server()->SnapNewID(), -195, 30, 95, 40, 3, LASERTYPE_FREEZE), // floor
 		// Tail
-		CBone(Entity(), Server()->SnapNewID(), -215, -35, -195, 30, 4), // tail longer segment
+		CBone(Entity(), Server()->SnapNewID(), -215, -35, -195, 30, 4, LASERTYPE_FREEZE), // tail longer segment
 	};
 	mem_copy(Body(), aBones, sizeof(CBone) * NUM_BONES_BODY);
 }

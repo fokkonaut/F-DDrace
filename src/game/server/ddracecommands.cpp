@@ -1342,6 +1342,17 @@ void CGameContext::ConSpider(IConsole::IResult *pResult, void *pUserData)
 	if (!pChr)
 		return;
 
+	int NumSpiders = 0;
+	CSpider *pSpider = (CSpider *)pSelf->m_World.FindFirst(CGameWorld::ENTTYPE_SPIDER);
+	for (; pSpider; pSpider = (CSpider *)pSpider->TypeNext())
+		NumSpiders++;
+
+	if (NumSpiders >= MAX_CLIENTS)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Too many spiders");
+		return;
+	}
+
 	float Scale = pResult->NumArguments() > 1 ? pResult->GetFloat(1) : 1.f;
 	if (!pSelf->SpawnSpider(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), Scale))
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn spider here");
@@ -1368,7 +1379,7 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	for (; pHelicopter; pHelicopter = (CHelicopter *)pHelicopter->TypeNext())
 		NumHelicopters++;
 
-	if (NumHelicopters >= 64)
+	if (NumHelicopters >= MAX_CLIENTS)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Too many helicopters");
 		return;
