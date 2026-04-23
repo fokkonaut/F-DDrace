@@ -166,7 +166,7 @@ CONSOLE_COMMAND("set_permille", "v[id] f[permille]", CFGFLAG_SERVER|CMDFLAG_TEST
 CONSOLE_COMMAND("sound", "i[sound]", CFGFLAG_SERVER, ConSound, this, "Plays the sound with id i", AUTHED_ADMIN)
 CONSOLE_COMMAND("lasertext", "v[id] r[text]", CFGFLAG_SERVER, ConLaserText, this, "Sends a laser text", AUTHED_ADMIN)
 CONSOLE_COMMAND("sendmotd", "v[id] i[footer] r[text]", CFGFLAG_SERVER, ConSendMotd, this, "Sends a motd containing text r to player v (i=1 with footer)", AUTHED_ADMIN)
-CONSOLE_COMMAND("spider", "?v[id] ?f[scale]", CFGFLAG_SERVER|CMDFLAG_TEST, ConSpider, this, "Spawns spider at v, scale(f=1-5)", AUTHED_ADMIN)
+CONSOLE_COMMAND("spider", "?v[id] ?f[scale]", CFGFLAG_SERVER|CMDFLAG_TEST, ConSpider, this, "Spawns spider at v, scale(f=0.5-5)", AUTHED_ADMIN)
 CONSOLE_COMMAND("remove_spiders", "", CFGFLAG_SERVER, ConRemoveSpiders, this, "Removes all spiders", AUTHED_ADMIN)
 CONSOLE_COMMAND("helicopter", "?v[id] ?i[type] ?i[turret] ?f[scale]", CFGFLAG_SERVER|CMDFLAG_TEST, ConHelicopter, this, "Spawns helicopter at v, type(i=0-2), turret(i=0, i=1 minigun, i=2 missile), scale(f=1-5)", AUTHED_ADMIN)
 CONSOLE_COMMAND("remove_helicopters", "", CFGFLAG_SERVER, ConRemoveHelicopters, this, "Removes all helicopters", AUTHED_ADMIN)
