@@ -125,7 +125,6 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_default_dummies` |
 | `sv_v3_offset_x` |
 | `sv_v3_offset_y` |
-| `sv_dummy_bot_skin` (0.7) |
 | `sv_dummy_blocking` |
 | `sv_weapon_indicator_default` |
 | `sv_allow_empty_inventory` |

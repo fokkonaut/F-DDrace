@@ -103,7 +103,7 @@ MACRO_CONFIG_INT(SvDefaultDummies, sv_default_dummies, 1, 0, 1, CFGFLAG_SERVER|C
 MACRO_CONFIG_INT(SvFakeDummyPing, sv_fake_dummy_ping, 0, 0, 1, CFGFLAG_SERVER, "Whether ping of server-side dummies are more natural or 0", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvV3OffsetX, sv_v3_offset_x, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset X for the blmapV3 dummy", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvV3OffsetY, sv_v3_offset_y, 0, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Offset Y for the blmapV3 dummy", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvDummyBotSkin, sv_dummy_bot_skin, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether dummies should have the bot skin applied (0.7 only)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDummyBotSkin, sv_dummy_bot_skin, 0, 0, 1, CFGFLAG_SERVER, "Whether dummies should have the bot skin applied (0.7 only)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDummyBlocking, sv_dummy_blocking, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether blocking dummies increases killstreak and gives block points", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHideBotsStatus, sv_hide_dummies_status, 1, 0, 1, CFGFLAG_SERVER, "Whether to hide server-side dummies from status command", AUTHED_ADMIN)
 
