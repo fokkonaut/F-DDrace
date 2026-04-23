@@ -48,6 +48,6 @@ void CTeamsCore::Reset()
 		m_Team[i] = TEAM_FLOCK;
 		m_IsSolo[i] = false;
 		m_IsPassive[i] = false;
-		m_InGame[i] = false;
+		m_InGame[i] = true;
 	}
 }
