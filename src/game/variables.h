@@ -271,6 +271,8 @@ MACRO_CONFIG_STR(SvDnsblKey, sv_dnsbl_key, 128, "", CFGFLAG_SERVER | CFGFLAG_NON
 MACRO_CONFIG_INT(SvDnsblVote, sv_dnsbl_vote, 0, 0, 1, CFGFLAG_SERVER, "Block votes by blacklisted addresses", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDnsblBan, sv_dnsbl_ban, 0, 0, 1, CFGFLAG_SERVER, "Automatically ban blacklisted addresses", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvDnsblBanReason, sv_dnsbl_ban_reason, 128, "VPN detected, try connecting without. Contact admin if mistaken", CFGFLAG_SERVER, "Ban/jail reason for 'sv_dnsbl_ban/sv_dnsbl_jail'", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblBanTime, sv_dnsbl_ban_time, 10, 0, 99999, CFGFLAG_SERVER, "Time for sv_dnsbl_ban in minutes", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvDnsblJailTime, sv_dnsbl_jail_time, 720, 0, 99999, CFGFLAG_SERVER, "Time for sv_dnsbl_jail in minutes", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDnsblChat, sv_dnsbl_chat, 0, 0, 1, CFGFLAG_SERVER, "Don't allow chat from blacklisted addresses", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDnsblJail, sv_dnsbl_jail, 0, 0, 1, CFGFLAG_SERVER, "Automatically jail blacklisted addresses", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDnsblCache, sv_dnsbl_cache, 0, 0, 1, CFGFLAG_SERVER, "Whether black and whitelisted address results are cached for 36 hours", AUTHED_ADMIN)

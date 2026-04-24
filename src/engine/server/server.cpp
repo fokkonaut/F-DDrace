@@ -3113,7 +3113,7 @@ int CServer::Run()
 					}
 					else if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
 					{
-						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, Config()->m_SvDnsblBanReason);
+						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * Config()->m_SvDnsblBanTime, Config()->m_SvDnsblBanReason);
 					}
 				}
 

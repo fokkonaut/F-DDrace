@@ -1477,7 +1477,7 @@ void CGameContext::OnTick()
 
 			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i) && !pPlayer->m_ProcessedDnsblJail)
 			{
-				int Seconds = 60 * 60 * 24; // Jail a day, basically infinite
+				int Seconds = 60 * Config()->m_SvDnsblJailTime;
 				if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
 				{
 					char aBuf[256];
