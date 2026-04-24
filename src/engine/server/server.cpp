@@ -3100,11 +3100,6 @@ int CServer::Run()
 							char aBuf[256];
 							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> blacklisted", i, aAddrStr);
 							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
-
-							if (Config()->m_SvDnsblBan)
-							{
-								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, Config()->m_SvDnsblBanReason);
-							}
 						}
 						else
 						{
@@ -3115,6 +3110,10 @@ int CServer::Run()
 								m_DnsblCache.m_vWhitelist.push_back(*m_NetServer.ClientAddr(i));
 							}
 						}
+					}
+					else if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
+					{
+						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(i), 60 * 10, Config()->m_SvDnsblBanReason);
 					}
 				}
 
