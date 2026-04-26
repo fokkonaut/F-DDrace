@@ -166,6 +166,7 @@ private:
 		void AddToNumReserved(int Summand);
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);
+	//int m_aTeamSizes[MAX_CLIENTS];
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -206,6 +207,7 @@ public:
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 	void AddToNumReserved(int ClientID, int Summand) { m_aMap[ClientID].AddToNumReserved(Summand); }
+	bool ReserveTeamSlots(int DDTeam);
 
 	enum
 	{

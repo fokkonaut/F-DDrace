@@ -251,6 +251,22 @@ void CGameWorld::UpdatePlayerMap(int ClientID)
 	if (ClientID == -1)
 	{
 		bool Update = Server()->Tick() % Config()->m_SvMapUpdateRate == 0;
+
+		// We use m_Teams.Count in ReserveTeamSlots
+		/*if (Update && !Config()->m_SvSoloServer)
+		{
+			// Cache team sizes to avoid more loops
+			std::fill(std::begin(m_aTeamSizes), std::end(m_aTeamSizes), 0);
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
+				if(!pPlayer)
+					continue;
+				int DDTeam = GameServer()->GetDDRaceTeam(i);
+				m_aTeamSizes[DDTeam]++;
+			}
+		}*/
+
 		for (int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if (!GameServer()->m_apPlayers[i])
@@ -630,6 +646,12 @@ void CGameWorld::PlayerMap::Update()
 			continue;
 		}
 
+		// If a team (not 0) has more than 10 players, do not reserve their slots because it can get messy quickly if a few huge teams form.
+		// To keep teams state the same on main and dummy big teams do not get highlighted at all.
+		int DDTeam = m_pGameWorld->GameServer()->GetDDRaceTeam(i);
+		bool ReserveTeamSlots = m_pGameWorld->ReserveTeamSlots(DDTeam);
+		bool IsInSafeArea = pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsInSafeArea();
+
 		if (m_aReserved[i])
 		{
 			NETADDR OwnAddr, Addr;
@@ -637,8 +659,15 @@ void CGameWorld::PlayerMap::Update()
 			m_pGameWorld->Server()->GetClientAddr(i, &Addr);
 			if (net_addr_comp(&OwnAddr, &Addr, false) != 0)
 			{
-				if (ResortReserved || !m_pGameWorld->GameServer()->GetDDRaceTeam(i)) // condition to unset reserved slot
+				bool UnsetReservedSlot = !ReserveTeamSlots && !IsInSafeArea; // condition to unset reserved slot
+				if (ResortReserved || UnsetReservedSlot)
+				{
 					m_aReserved[i] = false;
+
+					// reset our team to 0 when we are in a big team for example
+					if(DDTeam != TEAM_FLOCK)
+						m_UpdateTeamsState = true;
+				}
 			}
 			continue;
 		}
@@ -646,7 +675,7 @@ void CGameWorld::PlayerMap::Update()
 			continue;
 
 		int Insert = -1;
-		if (m_pGameWorld->GameServer()->GetDDRaceTeam(i))
+		if ((DDTeam != TEAM_FLOCK && ReserveTeamSlots) || IsInSafeArea)
 		{
 			for (int j = 0; j < GetMapSize()-m_NumSeeOthers; j++)
 			{
@@ -707,6 +736,14 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 			break;
 		}
 	}
+}
+
+bool CGameWorld::ReserveTeamSlots(int DDTeam)
+{
+	//int TeamSize = m_aTeamSizes[DDTeam];
+	CGameControllerDDRace *pController = (CGameControllerDDRace*)GameServer()->m_pController;
+	int TeamSize = pController->m_Teams.Count(DDTeam);
+	return !Config()->m_SvSoloServer && DDTeam != TEAM_FLOCK && TeamSize <= Config()->m_SvPlayerMapMaxTeamSize;
 }
 
 int CGameWorld::PlayerMap::GetMapSize()

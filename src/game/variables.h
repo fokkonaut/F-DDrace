@@ -325,6 +325,10 @@ MACRO_CONFIG_INT(SvMinigameAfkAutoLeave, sv_minigame_afk_auto_leave, 120, 0, 600
 MACRO_CONFIG_INT(SvAlwaysTeleWeapon, sv_always_tele_weapon, 1, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used on any block or only on marked ones (1=red/evil, 2=blue/keep velocity)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleWeaponThroughRoomVip, sv_tele_weapon_through_room_vip, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether tele weapons can be used through room and vip door if player can pass it", AUTHED_ADMIN)
 
+// player map
+MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 15, 1, 100, CFGFLAG_SERVER, "Player map update rate", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPlayerMapMaxTeamSize, sv_player_map_max_team_size, 10, 0, 128, CFGFLAG_SERVER, "Max team size to display due to playermap, otherwise show team 0", AUTHED_ADMIN)
+
 // other
 MACRO_CONFIG_INT(SvResetProjLifetimeAfterHit, sv_reset_proj_lifetime_after_hit, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Wheter projectile lifetime is reset after being hit and redirected with hammer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowXSkins, sv_allow_x_skins, 1, 0, 1, CFGFLAG_SERVER, "Whether special skins are allowed (x_ninja, x_spec, ...)", AUTHED_ADMIN)
@@ -335,7 +339,6 @@ MACRO_CONFIG_INT(SvOldJetpackSound, sv_old_jetpack_sound, 0, 0, 1, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvBlockPointsDelay, sv_block_points_delay, 20, 0, 600, CFGFLAG_SERVER|CFGFLAG_GAME, "Seconds a tee has to be alive in order to give block points to the killer", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClanProtection, sv_clan_protection, 1, 0, 1, CFGFLAG_SERVER, "Whether players have to use greensward skin for Chilli.* clantag", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 1, 0, 1, CFGFLAG_SERVER, "Whether your tee bounces while moving in freeze", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 15, 1, 100, CFGFLAG_SERVER, "Player map update rate", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
