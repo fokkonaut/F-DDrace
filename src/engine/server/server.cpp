@@ -5179,7 +5179,16 @@ void CServer::SaveWhitelist(const char *pFilename)
 	for (unsigned int i = 0; i < m_vWhitelist.size(); i++)
 	{
 		net_addr_str(&m_vWhitelist[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
-		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\" \"%s\"", aAddrStr, m_vWhitelist[i].m_aReason);
+
+		char aSanitizedReason[128];
+		str_copy(aSanitizedReason, m_vWhitelist[i].m_aReason, sizeof(aSanitizedReason));
+		str_sanitize_cc(aSanitizedReason);
+
+		char aEscapedReason[256];
+		char *pDst = aEscapedReason;
+		str_escape(&pDst, aSanitizedReason, aEscapedReason + sizeof(aEscapedReason));
+
+		str_format(aBuf, sizeof(aBuf), "whitelist_add \"%s\" \"%s\"", aAddrStr, aEscapedReason);
 		io_write(File, aBuf, str_length(aBuf));
 		io_write_newline(File);
 	}

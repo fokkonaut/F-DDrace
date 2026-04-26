@@ -3051,6 +3051,22 @@ char str_uppercase(char c)
 	return c;
 }
 
+void str_escape(char **dst, const char *src, const char *end)
+{
+	while(*src && *dst + 1 < end)
+	{
+		if(*src == '"' || *src == '\\') // escape \ and "
+		{
+			if(*dst + 2 < end)
+				*(*dst)++ = '\\';
+			else
+				break;
+		}
+		*(*dst)++ = *src++;
+	}
+	**dst = 0;
+}
+
 int str_toint(const char *str) { return atoi(str); }
 float str_tofloat(const char *str) { return atof(str); }
 

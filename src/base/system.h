@@ -1883,6 +1883,15 @@ typedef struct
 
 void net_stats(NETSTATS *stats);
 
+/**
+ * Escapes \ and " characters in a string.
+ *
+ * @param dst Destination array pointer, gets increased, will point to the terminating null.
+ * @param src Source array.
+ * @param end End of destination array.
+ */
+void str_escape(char **dst, const char *src, const char *end);
+
 int str_toint(const char *str);
 float str_tofloat(const char *str);
 int str_isspace(char c);
