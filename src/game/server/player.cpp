@@ -3072,7 +3072,7 @@ void CPlayer::StartPlotEdit()
 		return;
 	}
 
-	if (GameServer()->Arenas()->FightStarted(m_ClientID))
+	if (GameServer()->Arenas()->FightStarted(m_ClientID) || (m_pCharacter && m_pCharacter->m_InSnake))
 		return;
 
 	GameServer()->SendChatTarget(m_ClientID, Localize("You are now editing your plot, switch to another weapon to exit the editor"));
