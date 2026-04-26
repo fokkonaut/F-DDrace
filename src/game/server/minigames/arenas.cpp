@@ -791,8 +791,10 @@ void CArenas::Tick()
 		{
 			int ClientID = pFight->m_aParticipants[i].m_ClientID;
 			CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
+			if (!pChr) // PARTICIPANT_GLOBAL
+				continue;
 
-			if (HasJoined(f, i) && FightStarted(ClientID) && pChr)
+			if (HasJoined(f, i) && FightStarted(ClientID))
 			{
 				int Other = i == 0 ? 1 : 0;
 				if (!pChr->m_Super && !IsInArena(f, pChr->GetPos()))
