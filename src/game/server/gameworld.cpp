@@ -649,7 +649,7 @@ void CGameWorld::PlayerMap::Update()
 		// If a team (not 0) has more than 10 players, do not reserve their slots because it can get messy quickly if a few huge teams form.
 		// To keep teams state the same on main and dummy big teams do not get highlighted at all.
 		int DDTeam = m_pGameWorld->GameServer()->GetDDRaceTeam(i);
-		bool ReserveTeamSlots = m_pGameWorld->ReserveTeamSlots(DDTeam);
+		bool ReserveTeamSlots = m_pGameWorld->ReserveTeamSlots(DDTeam, i);
 		bool IsInSafeArea = pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsInSafeArea();
 
 		if (m_aReserved[i])
@@ -738,8 +738,11 @@ void CGameWorld::PlayerMap::InsertNextEmpty(int ClientID)
 	}
 }
 
-bool CGameWorld::ReserveTeamSlots(int DDTeam)
+bool CGameWorld::ReserveTeamSlots(int DDTeam, int AskerID)
 {
+	if (GameServer()->GetClientDDNetVersion(AskerID) >= VERSION_DDNET_128)
+		return true;
+
 	//int TeamSize = m_aTeamSizes[DDTeam];
 	CGameControllerDDRace *pController = (CGameControllerDDRace*)GameServer()->m_pController;
 	int TeamSize = pController->m_Teams.Count(DDTeam);

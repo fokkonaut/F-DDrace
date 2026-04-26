@@ -546,7 +546,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		{
 			Team = m_Core.Team(ID);
 			// If player is not reserved, dont highlight his team. Causes mismatch between dummy and main when playermapping is active.
-			bool DontHighlightTeam = !GameServer()->m_World.ReserveTeamSlots(Team);
+			bool DontHighlightTeam = !GameServer()->m_World.ReserveTeamSlots(Team, ClientID);
 			if(DontHighlightTeam)
 				Team = 0;
 			else if (Team == TEAM_SUPER)

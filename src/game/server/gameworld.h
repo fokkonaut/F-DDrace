@@ -207,7 +207,7 @@ public:
 	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
 	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
 	void AddToNumReserved(int ClientID, int Summand) { m_aMap[ClientID].AddToNumReserved(Summand); }
-	bool ReserveTeamSlots(int DDTeam);
+	bool ReserveTeamSlots(int DDTeam, int AskerID);
 
 	enum
 	{

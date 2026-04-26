@@ -327,7 +327,7 @@ MACRO_CONFIG_INT(SvTeleWeaponThroughRoomVip, sv_tele_weapon_through_room_vip, 1,
 
 // player map
 MACRO_CONFIG_INT(SvMapUpdateRate, sv_mapupdaterate, 15, 1, 100, CFGFLAG_SERVER, "Player map update rate", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPlayerMapMaxTeamSize, sv_player_map_max_team_size, 10, 0, 128, CFGFLAG_SERVER, "Max team size to display due to playermap, otherwise show team 0", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPlayerMapMaxTeamSize, sv_player_map_max_team_size, 10, 0, 128, CFGFLAG_SERVER, "Max team size to display due to playermap, otherwise show team 0 (only for non-128p-clients)", AUTHED_ADMIN)
 
 // other
 MACRO_CONFIG_INT(SvResetProjLifetimeAfterHit, sv_reset_proj_lifetime_after_hit, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Wheter projectile lifetime is reset after being hit and redirected with hammer", AUTHED_ADMIN)
