@@ -3831,6 +3831,17 @@ void CServer::ConMapReload(IConsole::IResult *pResult, void *pUser)
 	((CServer *)pUser)->m_MapReload = true;
 }
 
+void CServer::ConClearConsole(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+	if(pServer->m_RconClientID >= 0 && pServer->m_RconClientID < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientID].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		for (int i = 0; i < 28; i++)
+			pServer->SendRconLine(pServer->m_RconClientID, " ");
+	}
+}
+
 void CServer::ConLogout(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pServer = (CServer *)pUser;
@@ -4085,6 +4096,7 @@ void CServer::RegisterCommands()
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording", AUTHED_ADMIN);
 
 	Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "Reload the map", AUTHED_ADMIN);
+	Console()->Register("clearconsole", "", CFGFLAG_SERVER, ConClearConsole, this, "Clears console for player", AUTHED_HELPER);
 
 	// Auth Manager
 	// TODO: Maybe move these into CAuthManager?
