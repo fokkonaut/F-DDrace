@@ -309,7 +309,6 @@ class IGameServer : public IInterface
 protected:
 public:
 	virtual void OnInit() = 0;
-	virtual void OnMapChange(char* pNewMapName, int MapNameSize) = 0;
 	virtual void OnConsoleInit() = 0;
 	virtual void OnShutdown(bool FullShutdown = false) = 0;
 	virtual void OnPreShutdown() = 0;

@@ -291,9 +291,6 @@ public:
 	char m_aaZoneLeaveMsg[TuneZone::NUM][256];
 	char m_aaTuneLockMsg[TuneZone::NUM][256];
 
-	char m_aDeleteTempfile[128];
-	void DeleteTempfile();
-
 	enum
 	{
 		VOTE_ENFORCE_UNKNOWN=0,
@@ -397,7 +394,6 @@ public:
 	// engine events
 	void OnInit() override;
 	void OnConsoleInit() override;
-	void OnMapChange(char* pNewMapName, int MapNameSize) override;
 	void OnShutdown(bool FullShutdown = false) override;
 	void OnPreShutdown() override;
 

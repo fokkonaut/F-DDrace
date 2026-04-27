@@ -72,7 +72,7 @@ class CDataFileWriter
 
 	enum
 	{
-		MAX_ITEM_TYPES=0xffff + 1,
+		MAX_ITEM_TYPES=0xffff,
 		MAX_ITEMS=1024,
 		MAX_DATAS=1024,
 	};

@@ -2852,7 +2852,6 @@ int CServer::LoadMap(const char *pMapName)
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
 
 	// check for valid standard map
 	if(!m_MapChecker.ReadAndValidateMap(Storage(), aBuf, IStorage::TYPE_ALL))

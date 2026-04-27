@@ -97,7 +97,6 @@ void CGameContext::Construct(int Resetting)
 		m_NumAccountSystemBans = 0;
 	}
 
-	m_aDeleteTempfile[0] = 0;
 	m_ChatResponseTargetID = -1;
 	m_TeeHistorianActive = false;
 
@@ -4449,8 +4448,6 @@ void CGameContext::OnInit()
 	Console()->SetIsDummyCallback(ConsoleIsDummyCallback, this);
 	Console()->SetIsInViewCallback(ConsoleIsInViewCallback, this);
 
-	DeleteTempfile();
-
 	// HACK: only set static size for items, which were available in the first 0.7 release
 	// so new items don't break the snapshot delta
 	static const int OLD_NUM_NETOBJTYPES = 23;
@@ -4889,143 +4886,6 @@ void CGameContext::FDDraceInit()
 	SendPlayerCountUpdate();
 }
 
-void CGameContext::DeleteTempfile()
-{
-	if (m_aDeleteTempfile[0] != 0)
-	{
-		Storage()->RemoveFile(m_aDeleteTempfile, IStorage::TYPE_SAVE);
-		m_aDeleteTempfile[0] = 0;
-	}
-}
-
-void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
-{
-	char aConfig[128];
-	char aTemp[128];
-	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", Config()->m_SvMap);
-	str_format(aTemp, sizeof(aTemp), "%s.temp.%d", pNewMapName, pid());
-
-	CLineReader LineReader;
-	if (!LineReader.OpenFile(Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL)))
-	{
-		// No map-specific config, just return.
-		return;
-	}
-
-	std::vector<const char *> vpLines;
-	int TotalLength = 0;
-	while(const char *pLine = LineReader.Get())
-	{
-		vpLines.push_back(pLine);
-		TotalLength += str_length(pLine) + 1;
-	}
-
-	char* pSettings = (char*)malloc(maximum(1, TotalLength));
-	int Offset = 0;
-	for(const char *pLine : vpLines)
-	{
-		int Length = str_length(pLine) + 1;
-		mem_copy(pSettings + Offset, pLine, Length);
-		Offset += Length;
-	}
-
-	CDataFileReader Reader;
-	Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL);
-
-	CDataFileWriter Writer;
-	Writer.Init();
-
-	if (!Writer.OpenFile(Storage(), aTemp))
-	{
-		dbg_msg("mapchange", "Failed to import settings from '%s': failed to open map '%s' for writing", aConfig, aTemp);
-		free(pSettings);
-		Reader.Close();
-		return;
-	}
-
-	int SettingsIndex = Reader.NumData();
-	bool FoundInfo = false;
-	for (int i = 0; i < Reader.NumItems(); i++)
-	{
-		int TypeID;
-		int ItemID;
-		int* pData = (int*)Reader.GetItem(i, &TypeID, &ItemID);
-		int Size = Reader.GetItemSize(i);
-		CMapItemInfoSettings MapInfo;
-		if (TypeID == MAPITEMTYPE_INFO && ItemID == 0)
-		{
-			FoundInfo = true;
-			CMapItemInfoSettings* pInfo = (CMapItemInfoSettings*)pData;
-			if (Size >= (int)sizeof(CMapItemInfoSettings))
-			{
-				if (pInfo->m_Settings > -1)
-				{
-					SettingsIndex = pInfo->m_Settings;
-					char* pMapSettings = (char*)Reader.GetData(SettingsIndex);
-					int DataSize = Reader.GetDataSize(SettingsIndex);
-					if (DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
-					{
-						// Configs coincide, no need to update map.
-						free(pSettings);
-						Reader.Close();
-						Writer.Finish();
-						return;
-					}
-					Reader.UnloadData(pInfo->m_Settings);
-				}
-				else
-				{
-					MapInfo = *pInfo;
-					MapInfo.m_Settings = SettingsIndex;
-					pData = (int*)& MapInfo;
-					Size = sizeof(MapInfo);
-				}
-			}
-			else
-			{
-				*(CMapItemInfo*)& MapInfo = *(CMapItemInfo*)pInfo;
-				MapInfo.m_Settings = SettingsIndex;
-				pData = (int*)& MapInfo;
-				Size = sizeof(MapInfo);
-			}
-		}
-		Writer.AddItem(TypeID, ItemID, Size, pData);
-	}
-
-	if (!FoundInfo)
-	{
-		CMapItemInfoSettings Info;
-		Info.m_Version = 1;
-		Info.m_Author = -1;
-		Info.m_MapVersion = -1;
-		Info.m_Credits = -1;
-		Info.m_License = -1;
-		Info.m_Settings = SettingsIndex;
-		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Info), &Info);
-	}
-
-	for (int i = 0; i < Reader.NumData() || i == SettingsIndex; i++)
-	{
-		if (i == SettingsIndex)
-		{
-			Writer.AddData(TotalLength, pSettings);
-			continue;
-		}
-		unsigned char* pData = (unsigned char*)Reader.GetData(i);
-		int Size = Reader.GetDataSize(i);
-		Writer.AddData(Size, pData);
-		Reader.UnloadData(i);
-	}
-
-	dbg_msg("mapchange", "imported settings");
-	free(pSettings);
-	Reader.Close();
-	Writer.Finish();
-
-	str_copy(pNewMapName, aTemp, MapNameSize);
-	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
-}
-
 void CGameContext::OnPreShutdown()
 {
 	bool ServerIsStopping = ((CServer *)Server())->m_RunServer == CServer::STOPPING;
@@ -5116,7 +4976,6 @@ void CGameContext::OnShutdown(bool FullShutdown)
 		io_close(m_TeeHistorianFile);
 	}
 
-	DeleteTempfile();
 	Console()->ResetServerGameSettings();
 	Collision()->Dest();
 	delete m_pController;

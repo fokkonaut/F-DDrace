@@ -551,7 +551,7 @@ int CDataFileWriter::AddItem(int Type, int ID, int Size, const void *pData)
 {
 	if(!m_File) return 0;
 
-	dbg_assert(Type >= 0 && Type <= 0xFFFF, "incorrect type");
+	dbg_assert(Type >= 0 && Type < 0xFFFF, "incorrect type");
 	dbg_assert(m_NumItems < 1024, "too many items");
 	dbg_assert(Size%sizeof(int) == 0, "incorrect boundary");
 
@@ -689,7 +689,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write types
-	for(int i = 0, Count = 0; i <= 0xffff; i++)
+	for(int i = 0, Count = 0; i < 0xffff; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
@@ -709,7 +709,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write item offsets
-	for(int i = 0, Offset = 0; i <= 0xffff; i++)
+	for(int i = 0, Offset = 0; i < 0xffff; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
@@ -758,7 +758,7 @@ int CDataFileWriter::Finish()
 	}
 
 	// write m_pItems
-	for(int i = 0; i <= 0xffff; i++)
+	for(int i = 0; i < 0xffff; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
