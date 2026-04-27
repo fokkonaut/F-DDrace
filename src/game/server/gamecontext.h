@@ -802,7 +802,7 @@ public:
 	{
 		MODLOG_ID_SERVER = -2,
 	};
-	void SendModLogMessage(int ClientID, const char *pMsg) override;
+	void SendModLogMessage(int ClientID, const char *pMsg, bool IsAuth = false) override;
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;

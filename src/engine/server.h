@@ -339,7 +339,7 @@ public:
 	virtual bool IsClientSpectator(int ClientID) const = 0;
 
 	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) = 0;
-	virtual void SendModLogMessage(int ClientID, const char *pMsg) = 0;
+	virtual void SendModLogMessage(int ClientID, const char *pMsg, bool IsAuth = false) = 0;
 
 	virtual void OnRedirectSaveTeeAdd(const char *pHash) = 0;
 	virtual void OnRedirectSaveTeeRemove(const char *pHash) = 0;

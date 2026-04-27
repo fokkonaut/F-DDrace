@@ -550,7 +550,7 @@ void CGameContext::SendChatTeam(int Team, const char *pText, CFormatArg *pArgs, 
 	}
 }
 
-void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
+void CGameContext::SendModLogMessage(int ClientID, const char *pMsg, bool IsAuth)
 {
 	if (ClientID < 0 && ClientID != MODLOG_ID_SERVER)
 		return;
@@ -567,7 +567,7 @@ void CGameContext::SendModLogMessage(int ClientID, const char *pMsg)
 		str_copy(aName, "[Server]", sizeof(aName));
 		str_copy(aAvatarURL, Config()->m_SvWebhookChatAvatarURL, sizeof(aAvatarURL));
 	}
-	Server()->SendWebhookMessage(Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(aAvatarURL));
+	Server()->SendWebhookMessage(IsAuth ? Config()->m_SvWebhookAuthLogURL : Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(aAvatarURL));
 }
 
 const char *CGameContext::GetAvatarURL(int ClientID)

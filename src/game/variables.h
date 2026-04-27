@@ -221,6 +221,7 @@ MACRO_CONFIG_STR(SvWebhookAntibotURL, sv_webhook_antibot_url, 128, "", CFGFLAG_S
 MACRO_CONFIG_STR(SvWebhookAntibotName, sv_webhook_antibot_name, 128, "", CFGFLAG_SERVER, "Webhook name for antibot reports", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvWebhookModLogURL, sv_webhook_mod_log_url, 128, "", CFGFLAG_SERVER, "Webhook URL for moderator logging", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWebhookAuthLogURL, sv_webhook_auth_log_url, 128, "", CFGFLAG_SERVER, "Webhook URL for rcon auth logging", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvWebhookChatURL, sv_webhook_chat_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvWebhookChatAvatarURL, sv_webhook_chat_avatar_url, 128, "", CFGFLAG_SERVER, "Webhook URL for chat bridge avatar", AUTHED_ADMIN)

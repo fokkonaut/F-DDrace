@@ -2019,28 +2019,35 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
 						char aAddrStr[NETADDR_MAXSTRSIZE];
 						net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+						const char *pLevelStr = 0;
 						switch (AuthLevel)
 						{
 							case AUTHED_ADMIN:
 							{
 								SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (admin)", ClientID, aAddrStr, pIdent);
+								pLevelStr = "admin";
 								break;
 							}
 							case AUTHED_MOD:
 							{
 								SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (moderator)", ClientID, aAddrStr, pIdent);
+								pLevelStr = "moderator";
 								break;
 							}
 							case AUTHED_HELPER:
 							{
 								SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
 								str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> authed with key=%s (helper)", ClientID, aAddrStr, pIdent);
+								pLevelStr = "helper";
 								break;
 							}
 						}
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+						char aAuthLog[256];
+						str_format(aAuthLog, sizeof(aAuthLog), "ClientID=%d authed as %s", ClientID, pLevelStr);
+						GameServer()->SendModLogMessage(ClientID, aAuthLog, true);
 
 						// Call this after printing auth message, so that other prints get below it
 						GameServer()->OnClientAuth(ClientID, AuthLevel);
