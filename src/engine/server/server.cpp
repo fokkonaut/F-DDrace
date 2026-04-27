@@ -252,6 +252,9 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	int Minutes = pResult->NumArguments()>1 ? clamp(pResult->GetInteger(1), 0, 44640) : 30;
 	const char *pReason = pResult->NumArguments()>2 ? pResult->GetString(2) : "No reason given";
 
+	char aBannedNameOrIp[256];
+	bool BanSuccess = false;
+
 	if(!str_is_number(pStr))
 	{
 		int ClientID = str_toint(pStr);
@@ -261,21 +264,47 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (can't ban dummies)");
 		else
 		{
-			char aName[32];
-			str_copy(aName, pThis->Server()->ClientName(ClientID), sizeof(aName));
-			if (pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0)
-			{
-				char aBuf[128];
-				if (Minutes == 0)
-					str_format(aBuf, sizeof(aBuf), "'%s' has been banned for life (%s)", aName, pReason);
-				else
-					str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", aName, Minutes, pReason);
-				pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
-			}
+			str_copy(aBannedNameOrIp, pThis->Server()->ClientName(ClientID), sizeof(aBannedNameOrIp));
+			BanSuccess = pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0;
 		}
 	}
 	else
-		ConBan(pResult, pUser);
+	{
+		char aBuf[256];
+		str_copy(aBuf, pStr, sizeof(aBuf));
+		const char *pSeparator = str_find(aBuf, "-");
+
+		str_copy(aBannedNameOrIp, pStr, sizeof(aBannedNameOrIp));
+
+		if(pSeparator == NULL || pSeparator[1] == '\0')
+		{
+			NETADDR Addr;
+			if(net_addr_from_str(&Addr, aBuf) == 0)
+				BanSuccess = pThis->BanAddr(&Addr, Minutes*60, pReason) == 0;
+			else
+				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
+		}
+		else
+		{
+			aBuf[pSeparator-&aBuf[0]] = '\0';
+
+			CNetRange Range;
+			if(net_addr_from_str(&Range.m_LB, aBuf) == 0 && net_addr_from_str(&Range.m_UB, pSeparator+1) == 0)
+				BanSuccess = pThis->BanRange(&Range, Minutes*60, pReason) == 0;
+			else
+				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid range)");
+		}
+	}
+
+	if(BanSuccess)
+	{
+		char aBuf[256];
+		if (Minutes == 0)
+			str_format(aBuf, sizeof(aBuf), "'%s' has been banned for life (%s)", aBannedNameOrIp, pReason);
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", aBannedNameOrIp, Minutes, pReason);
+		pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
+	}
 }
 
 

@@ -355,7 +355,6 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage, CConfig *pConfig)
 	net_host_lookup("localhost", &m_LocalhostIPV4, NETTYPE_IPV4);
 	net_host_lookup("localhost", &m_LocalhostIPV6, NETTYPE_IPV6);
 
-	Console()->Register("ban", "s[ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBan, this, "Ban IP (or IP range) for x minutes for any reason", AUTHED_ADMIN);
 	Console()->Register("unban", "s[ip|range]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnban, this, "Unban IP/IP range/banlist entry", AUTHED_ADMIN);
 	Console()->Register("unban_all", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries", AUTHED_ADMIN);
 	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBans, this, "Show banlist", AUTHED_ADMIN);
@@ -485,37 +484,6 @@ bool CNetBan::IsBanned(const NETADDR *pAddr, char *pBuf, unsigned BufferSize, in
 	}
 
 	return false;
-}
-
-void CNetBan::ConBan(IConsole::IResult *pResult, void *pUser)
-{
-	CNetBan *pThis = static_cast<CNetBan *>(pUser);
-
-	char aBuf[256];
-	str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
-	const char *pSeparator = str_find(aBuf, "-");
-
-	const int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 31*24*60) : 30;
-	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "No reason given";
-
-	if(pSeparator == NULL || pSeparator[1] == '\0')
-	{
-		NETADDR Addr;
-		if(net_addr_from_str(&Addr, aBuf) == 0)
-			pThis->BanAddr(&Addr, Minutes*60, pReason);
-		else
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
-	}
-	else
-	{
-		aBuf[pSeparator-&aBuf[0]] = '\0';
-
-		CNetRange Range;
-		if(net_addr_from_str(&Range.m_LB, aBuf) == 0 && net_addr_from_str(&Range.m_UB, pSeparator+1) == 0)
-			pThis->BanRange(&Range, Minutes*60, pReason);
-		else
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid range)");
-	}
 }
 
 void CNetBan::ConUnban(IConsole::IResult *pResult, void *pUser)
