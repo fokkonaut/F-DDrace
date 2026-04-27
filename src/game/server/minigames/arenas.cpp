@@ -548,6 +548,7 @@ void CArenas::StartFight(int Fight)
 		if (GameServer()->m_apPlayers[aID[i]])
 			GameServer()->m_apPlayers[aID[i]]->SetPlaying();
 	}
+	((CGameControllerDDRace *)GameServer()->m_pController)->m_Teams.SetTeamLock(FirstFreeTeam, true);
 }
 
 const char *CArenas::StartGlobalArenaFight(int ClientID1, int ClientID2)

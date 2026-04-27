@@ -768,6 +768,7 @@ bool CDurak::StartGame(int Game)
 			}
 		}
 	}
+	pTeams->SetTeamLock(FirstFreeTeam, true);
 
 	// Attack previous durak in new round
 	if (LastDurakIndex != -1)

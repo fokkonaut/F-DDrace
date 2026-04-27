@@ -131,6 +131,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 			str_format(aBuf, sizeof(aBuf), "%s %s",
 				pSelf->Config()->m_SvTeam == 1 ?
 							"Teams are available on this server" :
+							pSelf->Config()->m_SvTeam == 4 ? "Teams are only available in '/block' minigame on this server" :
 							(pSelf->Config()->m_SvTeam == 0 || pSelf->Config()->m_SvTeam == 3) ?
 									"Teams are not available on this server" :
 									"You have to be in a team to play on this server", /*pSelf->Config()->m_SvTeamStrict ? "and if you die in a team all of you die" : */
@@ -711,6 +712,10 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	if (!pPlayer)
 		return;
 
+	// disallow unlocking durak or 1vs1 team
+	if (pSelf->Arenas()->FightStarted(pResult->m_ClientID) || pSelf->Durak()->InDurakGame(pResult->m_ClientID))
+		return;
+
 	if(pSelf->Config()->m_SvTeam == 0 || pSelf->Config()->m_SvTeam == 3)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "lock",
@@ -761,6 +766,10 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pResult->GetString(0);
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
+		return;
+
+	// disallow inviting to durak or 1vs1 team
+	if (pSelf->Arenas()->FightStarted(pResult->m_ClientID) || pSelf->Durak()->InDurakGame(pResult->m_ClientID))
 		return;
 
 	if(pSelf->Config()->m_SvTeam == 0 || pSelf->Config()->m_SvTeam == 3)
@@ -885,7 +894,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				str_format(aBuf, sizeof(aBuf), pPlayer->Localize("This team already has the maximum allowed size of %d players"), pSelf->Config()->m_SvTeamMaxSize);
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "join", aBuf);
 			}
-			else if (pSelf->Config()->m_SvTeam == 0 || pSelf->Config()->m_SvTeam == 3)
+			else if (pSelf->Config()->m_SvTeam == 0 || pSelf->Config()->m_SvTeam == 3 || (pSelf->Config()->m_SvTeam == 4 && pPlayer->m_Minigame != MINIGAME_BLOCK))
 			{
 				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "join", pPlayer->Localize("Teams are disabled"));
 			}
