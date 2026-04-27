@@ -1874,12 +1874,32 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				const char *pAuthLevel = 0;
+				int AccessLevel = 0;
+				switch (m_aClients[ClientID].m_Authed)
+				{
+				case AUTHED_ADMIN:
+					pAuthLevel = "admin";
+					AccessLevel = IConsole::ACCESS_LEVEL_ADMIN;
+					break;
+				case AUTHED_MOD:
+					pAuthLevel = "moderator";
+					AccessLevel = IConsole::ACCESS_LEVEL_MOD;
+					break;
+				case AUTHED_HELPER:
+					pAuthLevel = "helper";
+					AccessLevel = IConsole::ACCESS_LEVEL_HELPER;
+					break;
+				}
+				if (pAuthLevel)
+				{
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "ClientID=%d level=%s rcon='%s'", ClientID, pAuthLevel, pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
 				m_RconClientID = ClientID;
 				m_RconAuthLevel = m_aClients[ClientID].m_Authed;
-				Console()->SetAccessLevel(m_aClients[ClientID].m_Authed >= AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientID].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientID].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
+				Console()->SetAccessLevel(AccessLevel);
 				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER, ClientID);
 				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
 				m_RconClientID = IServer::RCON_CID_SERV;
