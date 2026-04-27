@@ -7,16 +7,16 @@
 // TODO: remove this
 #include "././game/variables.h"
 
-MACRO_CONFIG_STR(Password, password, 32, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, "Password to the server", AUTHED_ADMIN)
+MACRO_CONFIG_STR(Password, password, 256, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER|CFGFLAG_NONTEEHISTORIC, "Password to the server", AUTHED_ADMIN)
 MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Filename to log all output to", AUTHED_ADMIN)
-MACRO_CONFIG_INT(LogfileTimestamp, logfile_timestamp, 0, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Add a time stamp to the log file's name", AUTHED_ADMIN)
+MACRO_CONFIG_INT(LogfileTimestamp, logfile_timestamp, 1, 0, 1, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Add a time stamp to the log file's name", AUTHED_ADMIN)
 MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, 0, 2, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Adjusts the amount of information in the console", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(SvName, sv_name, 128, "Unnamed F-DDrace Server", CFGFLAG_SAVE|CFGFLAG_SERVER, "Server name", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvHostname, sv_hostname, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Server hostname", AUTHED_ADMIN)
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER|CFGFLAG_MASTER, "Address to bind the client/server to", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvPort, sv_port, 8303, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the server", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvExternalPort, sv_external_port, 69, 0, 0, CFGFLAG_SAVE|CFGFLAG_SERVER, "External port to report to the master servers", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvPort, sv_port, 8303, 0, 65535, CFGFLAG_SAVE|CFGFLAG_SERVER, "Port to use for the server", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvExternalPort, sv_external_port, 0, 0, 65535, CFGFLAG_SAVE|CFGFLAG_SERVER, "External port to report to the master servers", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvMap, sv_map, 128, "BlmapChill", CFGFLAG_SAVE|CFGFLAG_SERVER, "Map to use on the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, 128, 1, MAX_CLIENTS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Maximum number of clients that are allowed on a server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMaxClientsPerIP, sv_max_clients_per_ip, 4, 1, MAX_CLIENTS, CFGFLAG_SAVE|CFGFLAG_SERVER, "Maximum number of clients with the same IP that can connect to the server", AUTHED_ADMIN)
@@ -32,8 +32,8 @@ MACRO_CONFIG_INT(SvAutoDemoMax, sv_auto_demo_max, 10, 0, 1000, CFGFLAG_SAVE|CFGF
 MACRO_CONFIG_INT(SvTeeHistorian, sv_tee_historian, 0, 0, 1, CFGFLAG_SERVER, "Activate the tee historian that writes complete gameplay data to disk (WARNING: This will use a lot of disk space)", AUTHED_ADMIN)
 
 MACRO_CONFIG_STR(EcBindaddr, ec_bindaddr, 128, "localhost", CFGFLAG_SAVE|CFGFLAG_ECON, "Address to bind the external console to. Anything but 'localhost' is dangerous", AUTHED_ADMIN)
-MACRO_CONFIG_INT(EcPort, ec_port, 0, 0, 0, CFGFLAG_SAVE|CFGFLAG_ECON, "Port to use for the external console", AUTHED_ADMIN)
-MACRO_CONFIG_STR(EcPassword, ec_password, 32, "", CFGFLAG_SAVE|CFGFLAG_ECON, "External console password", AUTHED_ADMIN)
+MACRO_CONFIG_INT(EcPort, ec_port, 0, 0, 65535, CFGFLAG_SAVE|CFGFLAG_ECON, "Port to use for the external console", AUTHED_ADMIN)
+MACRO_CONFIG_STR(EcPassword, ec_password, 128, "", CFGFLAG_SAVE|CFGFLAG_ECON, "External console password", AUTHED_ADMIN)
 MACRO_CONFIG_INT(EcBantime, ec_bantime, 0, 0, 1440, CFGFLAG_SAVE|CFGFLAG_ECON, "The time a client gets banned if econ authentication fails. 0 just closes the connection", AUTHED_ADMIN)
 MACRO_CONFIG_INT(EcAuthTimeout, ec_auth_timeout, 30, 1, 120, CFGFLAG_SAVE|CFGFLAG_ECON, "Time in seconds before the the econ authentification times out", AUTHED_ADMIN)
 MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 1, 0, 2, CFGFLAG_SAVE|CFGFLAG_ECON, "Adjusts the amount of information in the external console", AUTHED_ADMIN)
@@ -64,7 +64,7 @@ MACRO_CONFIG_STR(SvSqlFailureFile, sv_sql_failure_file, 64, "failed_sql.sql", CF
 MACRO_CONFIG_INT(SvSqlQueriesDelay, sv_sql_queries_delay, 1, 0, 20, CFGFLAG_SERVER, "Delay in seconds between SQL queries of a single player", AUTHED_ADMIN)
 #endif
 
-MACRO_CONFIG_STR(SvWelcome, sv_welcome, 64, "Welcome to this F-DDrace server! For more info, type /info.", CFGFLAG_SERVER, "Message that will be displayed to players who join the server", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvWelcome, sv_welcome, 256, "Welcome to this F-DDrace server! For more info, type /info.", CFGFLAG_SERVER, "Message that will be displayed to players who join the server", AUTHED_ADMIN)
 MACRO_CONFIG_INT(ConnTimeout, conn_timeout, 100, 5, 1000, CFGFLAG_SAVE|CFGFLAG_CLIENT|CFGFLAG_SERVER, "Network timeout", AUTHED_ADMIN)
 MACRO_CONFIG_INT(ConnTimeoutProtection, conn_timeout_protection, 1000, 5, 10000, CFGFLAG_SERVER, "Network timeout protection", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvVoteDelay, sv_vote_delay, 3, 0, 9999, CFGFLAG_SERVER, "The time in seconds between any vote", AUTHED_ADMIN)
@@ -136,6 +136,6 @@ MACRO_CONFIG_INT(SvNetlimit, sv_netlimit, 0, 0, 10000, CFGFLAG_SERVER, "Netlimit
 MACRO_CONFIG_INT(SvNetlimitAlpha, sv_netlimit_alpha, 50, 1, 100, CFGFLAG_SERVER, "Netlimit: Alpha of Exponention moving average", AUTHED_ADMIN)
 
 // conn limit
-MACRO_CONFIG_INT(SvConnlimit, sv_connlimit, 4, 0, 100, CFGFLAG_SERVER, "Connlimit: Number of connections an IP is allowed to do in a timespan", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvConnlimit, sv_connlimit, 5, 0, 100, CFGFLAG_SERVER, "Connlimit: Number of connections an IP is allowed to do in a timespan", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvConnlimitTime, sv_connlimit_time, 20, 0, 1000, CFGFLAG_SERVER, "Connlimit: Time in which IP's connections are counted", AUTHED_ADMIN)
 #endif
