@@ -5022,6 +5022,12 @@ void CGameContext::LoadMapSettings()
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map.cfg", Config()->m_SvMap);
 	Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_NO_GAME);
+
+	if (Config()->m_SvLoadMapConfigFile)
+	{
+		// Execute as id game, (map settings) anyways, removed OnMapChange settings import logic. Use cfg file for overrides
+		Console()->ExecuteFile(aBuf, IConsole::CLIENT_ID_GAME);
+	}
 }
 
 void CGameContext::OnSnap(int ClientID)
