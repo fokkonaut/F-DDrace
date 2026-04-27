@@ -1980,7 +1980,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 							SendMsg(&MsgEnd, MSGFLAG_VITAL, ClientID);
 						}
 
-						// TODO: Check if we want to send all maps to all rcon clients
 						if(m_aClients[ClientID].m_Version >= MIN_MAPLIST_CLIENTVERSION || m_aClients[ClientID].m_Sevendown)
 						{
 							SendMaplistGroupStart(ClientID);
