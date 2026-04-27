@@ -357,7 +357,7 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage, CConfig *pConfig)
 
 	Console()->Register("unban", "s[ip|range]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnban, this, "Unban IP/IP range/banlist entry", AUTHED_ADMIN);
 	Console()->Register("unban_all", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries", AUTHED_ADMIN);
-	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBans, this, "Show banlist", AUTHED_ADMIN);
+	Console()->Register("bans", "?i[page]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBans, this, "Show banlist (page 0 by default, 20 entries per page)", AUTHED_ADMIN);
 	Console()->Register("bans_save", "s[file]", CFGFLAG_SERVER|CFGFLAG_MASTER|CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file", AUTHED_ADMIN);
 }
 
@@ -530,16 +530,28 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 {
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
+	int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0;
+	static const int EntriesPerPage = 20;
+
 	int Count = 0;
 	char aBuf[256], aMsg[256];
-	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext)
+	int i = 0;
+	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext, i++)
 	{
+		if(i < Page * EntriesPerPage || i >= (Page + 1) * EntriesPerPage)
+		{
+			continue;
+		}
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count++, aBuf);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "net_ban", aMsg);
 	}
-	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext)
+	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext, i++)
 	{
+		if(i < Page * EntriesPerPage || i >= (Page + 1) * EntriesPerPage)
+		{
+			continue;
+		}
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count++, aBuf);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "net_ban", aMsg);
