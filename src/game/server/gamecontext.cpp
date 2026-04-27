@@ -4920,7 +4920,7 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 		TotalLength += str_length(pLine) + 1;
 	}
 
-	char* pSettings = (char*)malloc(TotalLength);
+	char* pSettings = (char*)malloc(maximum(1, TotalLength));
 	int Offset = 0;
 	for(const char *pLine : vpLines)
 	{
@@ -4934,6 +4934,14 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 
 	CDataFileWriter Writer;
 	Writer.Init();
+
+	if (!Writer.OpenFile(Storage(), aTemp))
+	{
+		dbg_msg("mapchange", "Failed to import settings from '%s': failed to open map '%s' for writing", aConfig, aTemp);
+		free(pSettings);
+		Reader.Close();
+		return;
+	}
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
@@ -4958,6 +4966,9 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 					if (DataSize == TotalLength && mem_comp(pSettings, pMapSettings, DataSize) == 0)
 					{
 						// Configs coincide, no need to update map.
+						free(pSettings);
+						Reader.Close();
+						Writer.Finish();
 						return;
 					}
 					Reader.UnloadData(pInfo->m_Settings);
@@ -5007,8 +5018,8 @@ void CGameContext::OnMapChange(char* pNewMapName, int MapNameSize)
 	}
 
 	dbg_msg("mapchange", "imported settings");
+	free(pSettings);
 	Reader.Close();
-	Writer.OpenFile(Storage(), aTemp);
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
