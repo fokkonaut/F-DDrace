@@ -976,7 +976,7 @@ void CGameContext::SendModeratorAlert(const char *pMessage, int ToClientId)
 		SendBroadcast(aBroadcastText, ToClientId, true);
 		char aLogMsg[128];
 		str_format(aLogMsg, sizeof(aLogMsg), "Notice: player uses an old client version and may not see moderator alerts: %s (ID %d)", Server()->ClientName(ToClientId), ToClientId);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "moderator_alert", aLogMsg);
+		Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "moderator_alert", aLogMsg);
 	}
 }
 
@@ -3642,7 +3642,7 @@ void CGameContext::ConTunes(IConsole::IResult* pResult, void* pUserData)
 		float Value;
 		pSelf->Tuning()->Get(i, &Value);
 		str_format(aBuf, sizeof(aBuf), "%s %.2f", pSelf->Tuning()->ms_apNames[i], Value);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 	}
 }
 
@@ -3685,7 +3685,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult* pResult, void* pUserData)
 			float v;
 			pSelf->TuningList()[List].Get(i, &v);
 			str_format(aBuf, sizeof(aBuf), "zone %d: %s %.2f", List, pSelf->TuningList()[List].ms_apNames[i], v);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 		}
 	}
 }
@@ -3824,7 +3824,7 @@ void CGameContext::ConTuneLockDump(IConsole::IResult *pResult, void *pUserData)
 		for(unsigned int i = 0; i < pSelf->LockedTuning()[List].size(); i++)
 		{
 			str_format(aBuf, sizeof(aBuf), "lock %d: %s %.2f", List, pSelf->LockedTuning()[List][i].m_aParam, (float)pSelf->LockedTuning()[List][i].m_Value);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 		}
 	}
 }
@@ -3907,7 +3907,7 @@ void CGameContext::ConModAlert(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aLogMsg[128];
 		str_format(aLogMsg, sizeof(aLogMsg), "Client ID not found: %d", Victim);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "moderator_alert", aLogMsg);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "moderator_alert", aLogMsg);
 		return;
 	}
 
@@ -3978,7 +3978,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		if(!pOption)
 		{
 			str_format(aBuf, sizeof(aBuf), "'%s' isn't an option on this server", pValue);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 			return;
 		}
 	}
@@ -3989,7 +3989,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			return;
 		if(KickID < 0 || KickID >= MAX_CLIENTS || !pSelf->m_apPlayers[KickID])
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", "Invalid client id to kick");
 			return;
 		}
 
@@ -4013,7 +4013,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			return;
 		if(SpectateID < 0 || SpectateID >= MAX_CLIENTS || !pSelf->m_apPlayers[SpectateID] || pSelf->m_apPlayers[SpectateID]->GetTeam() == TEAM_SPECTATORS)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", "Invalid client id to move");
 			return;
 		}
 
@@ -4111,7 +4111,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "option '%s' does not exist", pDescription);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 		return;
 	}
 
@@ -5368,7 +5368,7 @@ void CGameContext::List(int ClientID, const char* pFilter)
 		do \
 		{ \
 			if (ClientID == -1) \
-				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", str); \
+				Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", str); \
 			else \
 				SendChatTarget(ClientID, m_apPlayers[ClientID]->Localize(str)); \
 		} while(0)
@@ -7660,7 +7660,7 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds, int ModLogID)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' was arrested for %d seconds", Server()->ClientName(ClientID), Seconds);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		SendModLogMessage(ModLogID, aBuf);
 	}
 	return true;

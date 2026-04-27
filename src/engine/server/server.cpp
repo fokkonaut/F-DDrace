@@ -3389,28 +3389,28 @@ void CServer::ConPort(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvPort);
-	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CServer::ConEuroMode(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvEuroMode);
-	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CServer::ConTestingCommands(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvTestingCommands);
-	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CServer::ConRescue(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Value: %d", ((CServer *)pUser)->Config()->m_SvRescue);
-	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	((CServer *)pUser)->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
@@ -3462,7 +3462,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		{
 			str_format(aBuf, sizeof(aBuf), "id=%d name='%s' score=%d dummy=yes", i, pThis->m_aClients[i].m_aName, pThis->m_aClients[i].m_Score);
 			if (!pThis->Config()->m_SvHideBotsStatus || pName[0] != 0)
-				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+				pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 		}
 		else if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
@@ -3491,7 +3491,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 			}
 			else
 				str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 		}
 	}
 }
@@ -3519,7 +3519,7 @@ void CServer::ConStatusRecentlyLeft(IConsole::IResult *pResult, void *pUser)
 		if (!pEntry->m_RemoveTick)
 			continue;
 		str_format(aBuf, sizeof(aBuf), "prev-id=%d addr=<{%s}> client=%s name='%s'", pEntry->m_PrevClientID, pEntry->m_aAddress, pEntry->m_aVersion, pEntry->m_aName);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 	}
 }
 
@@ -4029,9 +4029,9 @@ void CServer::ConchainDefaultLanguage(IConsole::IResult *pResult, void *pUserDat
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Current default language: %s", pThis->Config()->m_SvDefaultLanguage);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Available languages:");
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", g_Localization.ListAvailable());
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Available languages:");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", g_Localization.ListAvailable());
 		return;
 	}
 	char aBuf[128];
@@ -4040,7 +4040,7 @@ void CServer::ConchainDefaultLanguage(IConsole::IResult *pResult, void *pUserDat
 	{
 		pfnCallback(pResult, pCallbackUserData);
 		str_format(aBuf, sizeof(aBuf), "Successfully changed default language to '%s'", pNewLang);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
 	{
@@ -4050,7 +4050,7 @@ void CServer::ConchainDefaultLanguage(IConsole::IResult *pResult, void *pUserDat
 			g_Localization.Load(pThis->Config()->m_SvDefaultLanguage);
 		}
 		str_format(aBuf, sizeof(aBuf), "Couldn't load language, falling back to default '%s'", pThis->Config()->m_SvDefaultLanguage);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -5161,7 +5161,7 @@ void CServer::PrintWhitelist()
 
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "#%d '%s' %s", i, aAddrStr, aReason);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whitelist", aBuf);
+		Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whitelist", aBuf);
 	}
 }
 
@@ -5332,7 +5332,7 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 		ReadOnly = true;
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
 
@@ -5343,7 +5343,7 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "SQL-%s %d: DB: '%s' Prefix: '%s' User: '%s' Pass: '%s' IP: <{'%s'}> Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetPass(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "server", aBuf);
 		}
 }
 

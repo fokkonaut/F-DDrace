@@ -568,16 +568,16 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 	{
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count++, aBuf);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "net_ban", aMsg);
 	}
 	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext)
 	{
 		pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count++, aBuf);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "net_ban", aMsg);
 	}
 	str_format(aMsg, sizeof(aMsg), "%d %s", Count, Count==1?"ban":"bans");
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "net_ban", aMsg);
 }
 
 void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)

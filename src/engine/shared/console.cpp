@@ -304,7 +304,10 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, bool Highlighted)
 {
-	dbg_msg(pFrom, "%s", pStr);
+	if(Level != OUTPUT_LEVEL_RESPONSE)
+		dbg_msg(pFrom, "%s", pStr);
+	else // Treat individual chat/rcon responses as OUTPUT_LEVEL_STANDARD: rcon users still see shared console
+		Level = OUTPUT_LEVEL_STANDARD;
 	char aBuf[1024];
 	Format(aBuf, sizeof(aBuf), pFrom, pStr);
 	for(int i = 0; i < m_NumPrintCB; ++i)
@@ -442,7 +445,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 				{
 					char aBuf[128];
 					str_format(aBuf, sizeof(aBuf), "Command '%s' is a testing command and can only be executed when 'sv_test_cmds' is set to '1'.", Result.m_pCommand);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+					Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 				}
 			}
 			else if (ClientID == IConsole::CLIENT_ID_GAME
@@ -483,7 +486,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 					{
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
-						Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+						Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 					}
 					else if (m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
 					{
@@ -659,7 +662,7 @@ bool CConsole::ExecuteFile(const char* pFilename, int ClientID, bool LogFailure,
 
 void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 {
-	((CConsole*)pUserData)->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pResult->GetString(0));
+	((CConsole*)pUserData)->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", pResult->GetString(0));
 }
 
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
@@ -722,7 +725,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 			}
 			else
 			{
-				pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 				mem_zero(aBuf, sizeof(aBuf));
 				str_copy(aBuf, pCommand->m_pName, sizeof(aBuf));
 				Used = Length;
@@ -730,7 +733,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 		}
 	}
 	if(Used > 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CConsole::ConUserCommandStatus(IResult* pResult, void* pUser)
@@ -788,7 +791,7 @@ static void IntVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "Value: %d", *(pData->m_pVariable));
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		pResult->m_Value = *(pData->m_pVariable);
 	}
 }
@@ -827,7 +830,7 @@ static void StrVariableCommand(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "Value: %s", pData->m_pStr);
-		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		str_copy(pResult->m_aValue, pData->m_pStr, sizeof(pResult->m_aValue));
 	}
 }
@@ -840,7 +843,7 @@ void CConsole::Con_EvalIf(IResult *pResult, void *pUserData)
 	if(!pCommand)
 	{
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		return;
 	}
 	CResult Result;
@@ -853,7 +856,7 @@ void CConsole::Con_EvalIf(IResult *pResult, void *pUserData)
 	if(!str_comp(pResult->GetString(1), "!="))
 		Condition = !Condition;
 	else if(str_comp(pResult->GetString(1), "==") && pCommand->m_pfnCallback == StrVariableCommand)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", "Error: invalid comperator for type string");
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", "Error: invalid comperator for type string");
 	else if(!str_comp(pResult->GetString(1), ">"))
 		Condition = Result.m_Value > atoi(pResult->GetString(2));
 	else if(!str_comp(pResult->GetString(1), "<"))
@@ -863,10 +866,10 @@ void CConsole::Con_EvalIf(IResult *pResult, void *pUserData)
 	else if(!str_comp(pResult->GetString(1), ">="))
 		Condition = Result.m_Value >= atoi(pResult->GetString(2));
 	else if(str_comp(pResult->GetString(1), "=="))
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", "Error: invalid comperator for type integer");
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", "Error: invalid comperator for type integer");
 
 	if(pResult->NumArguments() > 4 && str_comp(pResult->GetString(4), "else"))
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", "Error: expected else");
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", "Error: expected else");
 
 	if(Condition)
 		pConsole->ExecuteLine(pResult->GetString(3));
@@ -907,7 +910,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
 
 	if(aBuf[0] != 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
@@ -940,7 +943,7 @@ void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(1));
 
 	if(aBuf[0] != 0)
-		pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pConsole->Print(OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 CConsole::CConsole(int FlagMask)

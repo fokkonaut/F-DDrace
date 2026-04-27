@@ -221,7 +221,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult* pResult, void* pUserData, in
 	int NumWeapons = NUM_WEAPONS;
 	if (clamp(Weapon, -3, NumWeapons) != Weapon)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "info",
 				"invalid weapon id");
 		return;
 	}
@@ -491,7 +491,7 @@ void CGameContext::ConVoteMute(IConsole::IResult* pResult, void* pUserData)
 
 	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client ID not found");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "votemute", "Client ID not found");
 		return;
 	}
 
@@ -515,7 +515,7 @@ void CGameContext::ConVoteUnmute(IConsole::IResult* pResult, void* pUserData)
 
 	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "voteunmute", "Client ID not found");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "voteunmute", "Client ID not found");
 		return;
 	}
 
@@ -538,21 +538,21 @@ void CGameContext::ConVoteMutes(IConsole::IResult* pResult, void* pUserData)
 	{
 		// Just to make sure.
 		pSelf->m_NumVoteMutes = 0;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "votemutes",
 			"There are no active vote mutes.");
 		return;
 	}
 
 	char aIpBuf[64];
 	char aBuf[128];
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "votemutes",
 		"Active vote mutes:");
 	for (int i = 0; i < pSelf->m_NumVoteMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i,
 			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "votemutes", aBuf);
 	}
 }
 
@@ -560,7 +560,7 @@ void CGameContext::ConMute(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;
 	pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
+			IConsole::OUTPUT_LEVEL_RESPONSE,
 			"mutes",
 			"Use either 'muteid <client_id> <seconds> <reason>' or 'muteip <ip> <seconds> <reason>'");
 }
@@ -573,7 +573,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 
 	if (Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "muteid", "Client id not found.");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "muteid", "Client id not found.");
 		return;
 	}
 
@@ -591,7 +591,7 @@ void CGameContext::ConMuteIP(IConsole::IResult *pResult, void *pUserData)
 	NETADDR Addr;
 	if (net_addr_from_str(&Addr, pResult->GetString(0)))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "mutes",
 				"Invalid network address to mute");
 	}
 
@@ -627,14 +627,14 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 	{
 		// Just to make sure.
 		pSelf->m_NumMutes = 0;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "mutes",
 			"There are no active mutes.");
 		return;
 	}
 
 	char aIpBuf[64];
 	char aBuf[128];
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "mutes",
 			"Active mutes:");
 	for (int i = 0; i < pSelf->m_NumMutes; i++)
 	{
@@ -662,7 +662,7 @@ void CGameContext::ConMutes(IConsole::IResult *pResult, void *pUserData)
 		net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 		str_format(aBuf, sizeof aBuf, "%d: \"<{%s}>\", %d seconds left (%s)%s", i, aIpBuf,
 				(pSelf->m_aMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aMutes[i].m_aReason, aCurrentlyOnline);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mutes", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "mutes", aBuf);
 	}
 }
 
@@ -949,13 +949,13 @@ void CGameContext::ConRainbowSpeed(IConsole::IResult *pResult, void *pUserData)
 	if (pResult->NumArguments() < 2)
 	{
 		str_format(aBuf, sizeof(aBuf), "Value: %d", pPlayer->m_RainbowSpeed);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
 	{
 		int Speed = clamp(pResult->GetInteger(1), 1, 20);
 		str_format(aBuf, sizeof(aBuf), "Rainbow speed for '%s' changed to %d", pSelf->Server()->ClientName(Victim), Speed);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		pPlayer->m_RainbowSpeed = Speed;
 	}
 }
@@ -1115,11 +1115,11 @@ void CGameContext::ConHookPower(IConsole::IResult *pResult, void *pUserData)
 	}
 	if (!pResult->NumArguments() || ShowInfo)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "~~~ Hook Powers ~~~");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "~~~ Hook Powers ~~~");
 		for (int i = 0; i < NUM_EXTRAS; i++)
 		{
 			if (pSelf->IsValidHookPower(i))
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pSelf->GetExtraName(i));
+				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", pSelf->GetExtraName(i));
 		}
 	}
 }
@@ -1161,14 +1161,14 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "==== [PLAYER INFO] '%s' ====", pSelf->Server()->ClientName(ID));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	if (pSelf->Server()->GetAuthedState(ID))
 	{
 		str_format(aBuf, sizeof(aBuf), "Authed: %d", pSelf->Server()->GetAuthedState(ID));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "ClientID: %d", ID);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
 	IServer::CClientInfo Info;
 	pSelf->Server()->GetClientInfo(ID, &Info);
@@ -1177,63 +1177,63 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		char aConnectionID[UUID_MAXSTRSIZE];
 		FormatUuid(*Info.m_pConnectionID, aConnectionID, sizeof(aConnectionID));
 		str_format(aBuf, sizeof(aBuf), "ConnectionID: %s", aConnectionID);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pPlayer->m_SentShowDistance)
 	{
 		str_format(aBuf, sizeof(aBuf), "Zoom level/dimensions: %.2f / (%d/%d)", pPlayer->GetZoomLevel(), (int)pPlayer->m_ShowDistance.x, (int)pPlayer->m_ShowDistance.y);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "Design: %s", pSelf->Server()->GetMapDesign(ID));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Language: %s", g_Localization.GetLanguageString(pPlayer->m_Language));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	if (pChr)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Ingame");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Status: Ingame");
 	else if (pPlayer->GetTeam() == TEAM_SPECTATORS)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Spectator");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Status: Spectator");
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Status: Dead");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Status: Dead");
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
 		str_format(aBuf, sizeof(aBuf), "Account Name: %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Account: Not logged in");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Account: Not logged in");
 	if (pPlayer->m_InfRainbow)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Infinite Rainbow: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Infinite Rainbow: True");
 	if (pPlayer->m_InfMeteors > 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "Infinite Meteors: %d", pPlayer->m_InfMeteors);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pPlayer->m_Gamemode == GAMEMODE_DDRACE)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Mode: DDrace");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Mode: DDrace");
 	else if (pPlayer->m_Gamemode == GAMEMODE_VANILLA)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Mode: Vanilla");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Mode: Vanilla");
 	if (pPlayer->m_SpookyGhost)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Spooky Ghost: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Spooky Ghost: True");
 	if (pPlayer->m_pControlledTee)
 	{
 		str_format(aBuf, sizeof(aBuf), "Tee Control: %s", pSelf->Server()->ClientName(pPlayer->m_pControlledTee->GetCID()));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else if (pPlayer->m_HasTeeControl)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Tee Control: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Tee Control: True");
 
 	int Dummy = pSelf->Server()->GetDummy(ID);
 	if (Dummy != -1)
 	{
 		if (pSelf->Server()->IsIdleDummy(ID))
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Idle Dummy: True");
 		else
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Idle Dummy: False");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Idle Dummy: False");
 
 		if (pSelf->Server()->IsDummyHammer(ID))
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Dummy Hammer: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Dummy Hammer: True");
 		if (pSelf->Server()->DummyControlOrCopyMoves(ID))
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Copy moves/dummy control: True");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Copy moves/dummy control: True");
 	}
 
 	// then character vars
@@ -1241,67 +1241,67 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	if (pChr->HasFlag() == TEAM_RED)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Red");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Flag: Red");
 	if (pChr->HasFlag() == TEAM_BLUE)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Flag: Blue");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Flag: Blue");
 	if (pChr->m_DeepFreeze)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: Deep");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Frozen: Deep");
 	else if (pChr->m_IsFrozen)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Frozen: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Frozen: True");
 	else if (pChr->m_FreezeTime)
 	{
 		str_format(aBuf, sizeof(aBuf), "Frozen: Freezetime: %d", pChr->m_FreezeTime);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pChr->m_SuperJump)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "SuperJump: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "SuperJump: True");
 	if (pChr->m_EndlessHook)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Endless: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Endless: True");
 	if (pChr->m_Jetpack)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Jetpack: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Jetpack: True");
 	if (pChr->m_Rainbow)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Rainbow: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Rainbow: True");
 	if (pChr->m_Atom)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Atom: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Atom: True");
 	if (pChr->m_Trail)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Trail: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Trail: True");
 	if (pChr->m_Bloody)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Bloody: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Bloody: True");
 	if (pChr->m_StrongBloody)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Strong Bloody: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Strong Bloody: True");
 	if (pChr->m_Meteors > 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "Meteors: %d", pChr->m_Meteors);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pChr->m_Passive)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Passive Mode: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Passive Mode: True");
 	if (pChr->m_PoliceHelper)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Police Helper: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Police Helper: True");
 	for (int i = 0; i < NUM_WEAPONS; i++)
 	{
 		if (pChr->m_aSpreadWeapon[i])
 		{
 			str_format(aBuf, sizeof(aBuf), "Spread %s: True", pSelf->GetWeaponName(i));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		}
 	}
 	if (pChr->m_Invisible)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invisibility: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invisibility: True");
 	if (pChr->m_HookPower != HOOK_NORMAL)
 	{
 		str_format(aBuf, sizeof(aBuf), "Hook Power: %s", pSelf->GetExtraName(pChr->m_HookPower));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pChr->m_Item != -3)
 	{
 		str_format(aBuf, sizeof(aBuf), "Item: %s", pSelf->GetWeaponName(pChr->m_Item));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	if (pChr->m_DoorHammer)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Door Hammer: True");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Door Hammer: True");
 	str_format(aBuf, sizeof(aBuf), "Position: (%.2f/%.2f)", pChr->GetPos().x / 32, pChr->GetPos().y / 32);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CGameContext::ConListRcon(IConsole::IResult *pResult, void *pUserData)
@@ -1349,13 +1349,13 @@ void CGameContext::ConSpider(IConsole::IResult *pResult, void *pUserData)
 
 	if (NumSpiders >= MAX_CLIENTS)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Too many spiders");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Too many spiders");
 		return;
 	}
 
 	float Scale = pResult->NumArguments() > 1 ? pResult->GetFloat(1) : 1.f;
 	if (!pSelf->SpawnSpider(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), Scale))
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn spider here");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Cannot spawn spider here");
 }
 
 void CGameContext::ConRemoveSpiders(IConsole::IResult *pResult, void *pUserData)
@@ -1381,7 +1381,7 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 
 	if (NumHelicopters >= MAX_CLIENTS)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Too many helicopters");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Too many helicopters");
 		return;
 	}
 
@@ -1389,7 +1389,7 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	int TurretType = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
 	float Scale = pResult->NumArguments() > 3 ? pResult->GetFloat(3) : 1.f;
 	if (!pSelf->SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), HelicopterType, TurretType, Scale))
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Cannot spawn helicopter here or invalid type");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Cannot spawn helicopter here or invalid type");
 }
 
 void CGameContext::ConRemoveHelicopters(IConsole::IResult *pResult, void *pUserData)
@@ -1473,7 +1473,7 @@ void CGameContext::ConHideFromSpecCount(IConsole::IResult *pResult, void *pUserD
 		pPlayer->m_HideFromSpecCount = pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->m_HideFromSpecCount;
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "'%s' is now %s in spec counter", pSelf->Server()->ClientName(pResult->m_ClientID), pPlayer->m_HideFromSpecCount ? "hidden" : "shown");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1486,7 +1486,7 @@ void CGameContext::ConForceTransformZombie(IConsole::IResult *pResult, void *pUs
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Transformed '%s' to zombie", pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1499,7 +1499,7 @@ void CGameContext::ConForceTransformHuman(IConsole::IResult *pResult, void *pUse
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Transformed '%s' to human", pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1526,7 +1526,7 @@ void CGameContext::ConSetDoubleXpLifes(IConsole::IResult *pResult, void *pUserDa
 			str_format(aBuf, sizeof(aBuf), "Set double xp lifes of '%s' to %d", pSelf->Server()->ClientName(Victim), NewLifes);
 		}
 
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1544,7 +1544,7 @@ void CGameContext::ConSetTaserShield(IConsole::IResult *pResult, void *pUserData
 		pSelf->SendChatTarget(Victim, aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "Set taser shield percentage of '%s' to %d%%", pSelf->Server()->ClientName(Victim), pPlayer->m_TaserShield);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1582,22 +1582,22 @@ void CGameContext::ConDummymode(IConsole::IResult *pResult, void *pUserData)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "Dummymode of '%s': [%d]", pSelf->Server()->ClientName(Victim), pPlayer->GetDummyMode());
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		}
 	}
 	else
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "~~~ Dummymodes ~~~");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[0] Idle");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[-6] BlmapV3 1o1");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[23] ChillBlock5 Racer");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[29] ChillBlock5 Blocker");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[31] ChillBlock5 Police");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[32] BlmapChill Police");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[99] Shop Bot");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[98] Plot Shop Bot");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[97] Bank Bot");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "[96] Tavern Bot");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "~~~ Dummymodes ~~~");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[0] Idle");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[-6] BlmapV3 1o1");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[23] ChillBlock5 Racer");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[29] ChillBlock5 Blocker");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[31] ChillBlock5 Police");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[32] BlmapChill Police");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[99] Shop Bot");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[98] Plot Shop Bot");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[97] Bank Bot");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "[96] Tavern Bot");
 	}
 }
 
@@ -1623,11 +1623,11 @@ void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "Value: %.2f", Value);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 		}
 		else
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", "No such tuning parameter");
 		}
 		return;
 	}
@@ -1643,15 +1643,15 @@ void CGameContext::ConTuneLockPlayer(IConsole::IResult *pResult, void *pUserData
 	if(Result == 3)
 	{
 		str_format(aBuf, sizeof(aBuf), "Reset '%s' for '%s'", pParam, pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 	}
 	else if(Result)
 	{
 		str_format(aBuf, sizeof(aBuf), "Set '%s' to %.2f for '%s'", pParam, Value, pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 	}
 	else
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "No such tuning parameter");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", "No such tuning parameter");
 
 	if (Result)
 	{
@@ -1678,11 +1678,11 @@ void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUse
 			pSelf->SetLockedTune(&pChr->m_LockedTunings, LockedTune);
 			pChr->ApplyLockedTunings();
 			str_format(aBuf, sizeof(aBuf), "Reset '%s' for '%s'", pParam, pSelf->Server()->ClientName(Victim));
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 		}
 		else
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", "Invalid tuning parameter");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", "Invalid tuning parameter");
 		}
 	}
 	else if (pChr->m_LockedTunings.size())
@@ -1690,7 +1690,7 @@ void CGameContext::ConTuneLockPlayerReset(IConsole::IResult *pResult, void *pUse
 		pChr->m_LockedTunings.clear();
 		pChr->ApplyLockedTunings();
 		str_format(aBuf, sizeof(aBuf), "Reset all locked tunings for '%s'", pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 	}
 }
 
@@ -1707,7 +1707,7 @@ void CGameContext::ConTuneLockPlayerDump(IConsole::IResult *pResult, void *pUser
 	for(unsigned int i = 0; i < pChr->m_LockedTunings.size(); i++)
 	{
 		str_format(aBuf, sizeof(aBuf), "lock '%s': %s %.2f", pName, pChr->m_LockedTunings[i].m_aParam, (float)pChr->m_LockedTunings[i].m_Value);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "tuning", aBuf);
 	}
 }
 
@@ -1726,7 +1726,7 @@ void CGameContext::ConAddGrog(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Added a grog to '%s'", pSelf->Server()->ClientName(Victim));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1753,7 +1753,7 @@ void CGameContext::ConSetPermille(IConsole::IResult *pResult, void *pUserData)
 		{
 			str_format(aBuf, sizeof(aBuf), "Reset permille for '%s' to '0.0'", pSelf->Server()->ClientName(Victim));
 		}
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -1818,13 +1818,13 @@ void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
 	if (!pSelf->IsAccLoggedInThisPort(ID))
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account is not marked as logged in on this port");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "This account is not marked as logged in on this port");
 		pSelf->FreeAccount(ID);
 		return;
 	}
@@ -1835,7 +1835,7 @@ void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts[ID].m_Username, ClientID >= 0 ? pSelf->Server()->ClientName(ClientID) : "player not online");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
 	pSelf->Logout(ID);
 }
@@ -1847,7 +1847,7 @@ void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
@@ -1871,13 +1871,13 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "==== [ACCOUNT INFO] '%s' ====", pResult->GetString(0));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
@@ -1891,7 +1891,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 		}
 
 		str_format(aBuf, sizeof(aBuf), "%s: %s%s", pSelf->GetAccVarName(i), pValue, aDate);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 
 	if (!pSelf->IsAccLoggedInThisPort(ID))
@@ -1905,13 +1905,13 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
 	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, logged in on another port");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Unable to edit account, logged in on another port");
 		pSelf->FreeAccount(ID);
 		return;
 	}
@@ -1927,7 +1927,7 @@ void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	str_format(aBuf, sizeof(aBuf), "%.2f EUR given to account '%s'", Euros, pSelf->m_Accounts[ID].m_Username);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
 	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID, "");
 
@@ -1943,13 +1943,13 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	int ID = pSelf->GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
 	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Unable to edit account, logged in on another port");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Unable to edit account, logged in on another port");
 		pSelf->FreeAccount(ID);
 		return;
 	}
@@ -1967,7 +1967,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 
 	if (VariableID == -1)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid variable");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid variable");
 		if (!pSelf->IsAccLoggedInThisPort(ID))
 			pSelf->FreeAccount(ID);
 		return;
@@ -1977,7 +1977,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
 	{
 		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
 	{
@@ -2018,7 +2018,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		}
 
 		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, pSelf->GetAccVarValue(ID, VariableID), pValue);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		pSelf->SetAccVar(ID, VariableID, pValue);
 	}
 
@@ -2033,13 +2033,13 @@ void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserDa
 	int Level = pResult->GetInteger(0);
 	if (Level <= 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid level");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid level");
 		return;
 	}
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Required XP to reach level %d: %lld", Level, pSelf->GetNeededXP(Level - 1));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
 void CGameContext::ConAlwaysTeleWeapon(IConsole::IResult* pResult, void* pUserData)
@@ -2194,14 +2194,14 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConListSavedTees(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Listing all saved identities:");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "----------------------------------");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Listing all saved identities:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "----------------------------------");
 	for (int i = 0; i < (int)pSelf->m_vSavedIdentities.size(); i++)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s | %d |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate),
 			pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername[0] ? pSelf->m_vSavedIdentities[i].m_aAccUsername : "<no_acc>", pSelf->m_vSavedIdentities[i].m_RedirectTilePort);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 }
 
@@ -2229,7 +2229,7 @@ void CGameContext::Con1VS1GlobalStart(IConsole::IResult *pResult, void *pUserDat
 	const char *pError = pSelf->Arenas()->StartGlobalArenaFight(pResult->GetInteger(0), pResult->GetInteger(1));
 	if (pError[0])
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", pError);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", pError);
 		return;
 	}
 }
@@ -2256,7 +2256,7 @@ void CGameContext::ConJailRelease(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' was released from jail", pSelf->Server()->ClientName(Victim));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	pSelf->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
@@ -2404,11 +2404,11 @@ void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
 
 		int Seconds = (pSelf->m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
 		str_format(aBuf, sizeof(aBuf), "#%d '%s', %d seconds left", i, aAddrStr, Seconds);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "accban", aBuf);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "%d active account system bans", Num);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "accban", aBuf);
 }
 
 void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
@@ -2454,7 +2454,7 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 
 	if (PlotID == 0 && pSelf->Server()->GetAuthedState(pResult->m_ClientID) < pSelf->Config()->m_SvClearFreeDrawLevel)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", "No permission to clear free draw area");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", "No permission to clear free draw area");
 		return;
 	}
 
@@ -2472,20 +2472,20 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 	int NewID = pSelf->GetAccount(pResult->GetString(0));
 	if (NewID < ACC_START)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid account");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
 	int PlotID = pResult->GetInteger(1);
 	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Invalid plot id");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid plot id");
 		return;
 	}
 
 	if (pSelf->GetPlotID(NewID) != 0)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "This account owns a plot already");
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "This account owns a plot already");
 		return;
 	}
 
@@ -2519,17 +2519,17 @@ void CGameContext::ConPlotInfo(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "Owner account: %s", pSelf->m_aPlots[PlotID].m_aOwner);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Size: %s", pSelf->GetPlotSizeString(PlotID));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Expire date: %s", pSelf->m_aPlots[PlotID].m_ExpireDate == 0 ? "" : pSelf->GetDate(pSelf->m_aPlots[PlotID].m_ExpireDate));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Door status: %d", pSelf->Collision()->m_pSwitchers ? pSelf->Collision()->m_pSwitchers[pSelf->Collision()->GetSwitchByPlot(PlotID)].m_Status[0] : 0);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Destroy Seconds: %lld", pSelf->m_aPlots[PlotID].m_DestroyEndTick ? (pSelf->m_aPlots[PlotID].m_DestroyEndTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed() : 0);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Door Health: %d", pSelf->m_aPlots[PlotID].m_DoorHealth);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
 }
 
 void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
@@ -2539,14 +2539,14 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 	int Bufcnt = 0;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Listing all draw editor presets:");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "presets", aBuf);
 
 	for (unsigned int i = 0; i < pSelf->m_vPresetList.size(); i++)
 	{
 		const char *pName = pSelf->m_vPresetList[i].c_str();
 		if (Bufcnt + str_length(pName) + 4 > 128)
 		{
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "presets", aBuf);
 			Bufcnt = 0;
 		}
 		if (Bufcnt != 0)
@@ -2561,7 +2561,7 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 	if (Bufcnt != 0)
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "presets", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "presets", aBuf);
 }
 
 void CGameContext::ConReloadDesigns(IConsole::IResult *pResult, void *pUserData)
@@ -2583,7 +2583,7 @@ void CGameContext::ConReloadLanguages(IConsole::IResult *pResult, void *pUserDat
 void CGameContext::ConListLoadedLanguages(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "localization", "Currently loaded languages:");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "localization", "Currently loaded languages:");
 	char aBuf[128];
 	for (int i = 0; i < (int)g_Localization.Languages().size(); i++)
 	{
@@ -2594,6 +2594,6 @@ void CGameContext::ConListLoadedLanguages(IConsole::IResult *pResult, void *pUse
 			if (pSelf->m_apPlayers[c] && !pSelf->m_apPlayers[c]->m_IsDummy && pSelf->m_apPlayers[c]->m_Language == i)
 				NumUsed++;
 		str_format(aBuf, sizeof(aBuf), "%s (%d players)", g_Localization.GetLanguageFileName(i), NumUsed);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "localization", aBuf);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "localization", aBuf);
 	}
 }

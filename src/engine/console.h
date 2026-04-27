@@ -14,6 +14,7 @@ public:
 	//	TODO: rework/cleanup
 	enum
 	{
+		OUTPUT_LEVEL_RESPONSE=-1,
 		OUTPUT_LEVEL_STANDARD=0,
 		OUTPUT_LEVEL_ADDINFO,
 		OUTPUT_LEVEL_DEBUG,

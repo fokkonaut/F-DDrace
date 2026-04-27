@@ -101,7 +101,7 @@ void CWhoIs::Run(const char *name, int mode, int cutoff)
 	int numi = (mode) ? num_nms : num_ips;
 
 	if (!numi || !lenc) {
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", "invalid");
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whois", "invalid");
 		return;
 	}
 	strncpy(nname, name, sizeof(nname));
@@ -115,7 +115,7 @@ void CWhoIs::Run(const char *name, int mode, int cutoff)
 	}
 
 	if (!(lenc = (int)strlen(nname))) {
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", "invalid");
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whois", "invalid");
 		return;
 	}
 
@@ -129,7 +129,7 @@ void CWhoIs::Run(const char *name, int mode, int cutoff)
 				snprintf(buf2, sizeof(buf2), "%s (%d)", 
 					p[i].names[j].addr, p[i].names[j].count);
 				if (strlen(buf) >= 200) {
-					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", buf);
+					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whois", buf);
 					memset(buf, 0, sizeof(buf));
 				} else {
 					if (j > 0)
@@ -137,14 +137,14 @@ void CWhoIs::Run(const char *name, int mode, int cutoff)
 				}
 				strcat(buf, buf2);
 			}
-			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", buf);
+			GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whois", buf);
 			found = 1;
 		}
 	}
 	
 	if (!found) {
 		str_format(buf, sizeof(buf), "could not find %s %s", mode ? "name" : "ip", nname);
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "whois", buf);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whois", buf);
 	}
 }
 
