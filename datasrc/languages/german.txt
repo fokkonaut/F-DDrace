@@ -1515,7 +1515,7 @@ This mod is based on Teeworlds 0.7 and also incorporates features, ideas, and pa
 == Diese Mod basiert auf Teeworlds 0.7 und enthält auch Funktionen, Ideen und Teil-Implementierungen
 
 from DDNet++ by ChillerDragon, DDNet, and other community projects, aswell as many custom features!
-== von DDNet++ von ChillerDragon, DDNet und anderen Community-Projekten, sowie eine eigener Funktionen!
+== von DDNet++ von ChillerDragon, DDNet und anderen Community-Projekten, sowie eine Reihe eigener Funktionen!
 
 If you want to check out the code or contribute, feel free to check out F-DDrace on GitHub:
 == Wenn du den Quellcode ansehen oder dazu beitragen möchtest, schau gerne bei F-DDrace auf GitHub vorbei:
