@@ -466,7 +466,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char* pStr, int ClientID, bo
 					char aBuf[96];
 					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", m_pConfig->m_SvMap, m_pConfig->m_SvMap);
+					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.map.cfg' and enable 'sv_load_map_config_file'", m_pConfig->m_SvMap);
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
