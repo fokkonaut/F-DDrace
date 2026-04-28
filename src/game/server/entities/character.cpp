@@ -1477,14 +1477,12 @@ void CCharacter::SetEmote(int Emote, int Tick)
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 {
 	int ResetInput = 0;
-	if (GameServer()->Arenas()->IsConfiguring(m_pPlayer->GetCID()))
+	if (GameServer()->Arenas()->OnInput(this, pNewInput))
 	{
-		GameServer()->Arenas()->OnInput(m_pPlayer->GetCID(), pNewInput);
 		ResetInput |= 2;
 	}
-	else if (GameServer()->Durak()->ActivelyPlaying(m_pPlayer->GetCID()))
+	else if (GameServer()->Durak()->OnInput(this, pNewInput))
 	{
-		GameServer()->Durak()->OnInput(this, pNewInput);
 		ResetInput |= 1;
 		ResetInput |= 4;
 	}
@@ -1813,7 +1811,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		GameServer()->UnsetKiller(m_pPlayer->GetCID());
 
 	if (OnArenaDie)
-		GameServer()->Arenas()->OnPlayerDie(m_pPlayer->GetCID());
+		GameServer()->Arenas()->OnCharacterDie(this);
 
 	m_DrawEditor.OnPlayerDeath();
 	m_Snake.OnPlayerDeath();
@@ -1909,7 +1907,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 			if (pKillerChar && pKillerChar->m_KillStreak > pKillerAccount->m_KillingSpreeRecord)
 				pKillerAccount->m_KillingSpreeRecord = pKillerChar->m_KillStreak;
 
-			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && pKiller->m_SurvivalState > SURVIVAL_LOBBY)
+			if (pKiller->m_Minigame == MINIGAME_SURVIVAL && GameServer()->Survival()->IsPlaying(Killer))
 			{
 				pKillerAccount->m_SurvivalKills++;
 			}
@@ -1931,7 +1929,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		{
 			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
 
-			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
+			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->Survival()->IsPlaying(m_pPlayer->GetCID()))
 			{
 				pAccount->m_SurvivalDeaths++;
 			}
@@ -1981,38 +1979,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
 	}
 
-	// character doesnt exist, print some messages and set states
-	// if the player is in deathmatch mode, or simply playing
-	if (GameServer()->m_SurvivalGameState > SURVIVAL_LOBBY && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY && Killer != WEAPON_GAME)
-	{
-		// check for players in the current game state
-		if (m_pPlayer->GetCID() != GameServer()->m_SurvivalWinner)
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You lost, you can wait for another round or leave the lobby using '/leave'"));
-		if (GameServer()->CountSurvivalPlayers(GameServer()->m_SurvivalGameState) > 2)
-		{
-			// if there are more than just two players left, you will watch your killer or a random player
-			m_pPlayer->Pause(CPlayer::PAUSE_PAUSED, true);
-			m_pPlayer->SetSpectatorID(SPEC_PLAYER, pKiller ? Killer : GameServer()->GetRandomSurvivalPlayer(GameServer()->m_SurvivalGameState, m_pPlayer->GetCID()));
-
-			// update the ones that are watching you
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-				if (i == m_pPlayer->GetCID() || !pPlayer || pPlayer->m_Minigame != MINIGAME_SURVIVAL || pPlayer->GetSpectatorID() != m_pPlayer->GetCID())
-					continue;
-				pPlayer->SetSpectatorID(SPEC_PLAYER, m_pPlayer->GetSpectatorID());
-			}
-
-			// printing a message that you died and informing about remaining players
-			char aKillMsg[128];
-			str_format(aKillMsg, sizeof(aKillMsg), "'%s' died\nAlive players: %d", Server()->ClientName(m_pPlayer->GetCID()), GameServer()->CountSurvivalPlayers(GameServer()->m_SurvivalGameState) -1 /* -1 because we have to exclude the currently dying*/);
-			GameServer()->SendSurvivalBroadcast(aKillMsg, true);
-		}
-		// sending you back to lobby
-		m_pPlayer->m_SurvivalState = SURVIVAL_LOBBY;
-		m_pPlayer->m_ShowName = true;
-		m_pPlayer->m_SurvivalDieTick = Server()->Tick();
-	}
+	GameServer()->Survival()->OnCharacterDie(this, Killer);
 	
 	if (!m_IsZombie)
 	{
@@ -5389,7 +5356,7 @@ void CCharacter::DropLoot(int Weapon)
 	if (Weapon == WEAPON_GAME || Weapon == WEAPON_MINIGAME_CHANGE)
 		return;
 
-	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && m_pPlayer->m_SurvivalState > SURVIVAL_LOBBY)
+	if ((m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->Survival()->IsPlaying(m_pPlayer->GetCID()))
 		|| (m_pPlayer->m_Minigame != MINIGAME_SURVIVAL && m_pPlayer->m_Gamemode == GAMEMODE_VANILLA))
 	{
 		// drop 0 to 5 armor and hearts
@@ -5608,8 +5575,7 @@ int CCharacter::GetSpawnWeaponIndex(int Weapon)
 
 void CCharacter::UpdateWeaponIndicator()
 {
-	if (!m_pPlayer->m_WeaponIndicator
-		|| (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->m_SurvivalBackgroundState < BACKGROUND_DEATHMATCH_COUNTDOWN))
+	if (!m_pPlayer->m_WeaponIndicator || (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->Survival()->HideWeaponIndicator()))
 		return;
 	for (int i = 0; i < NUM_HOUSES; i++)
 		if (GameServer()->m_pHouses[i]->IsInside(m_pPlayer->GetCID()))

@@ -484,8 +484,6 @@ public:
 
 	bool IsMinigame();
 	int m_Minigame;
-	int m_SurvivalState;
-	int m_SurvivalDieTick;
 
 	// minigame join/leave request
 	bool MinigameRequestTick();

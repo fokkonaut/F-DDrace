@@ -6,7 +6,7 @@
 #include <engine/shared/config.h>
 #include <game/server/gamemodes/DDRace.h>
 
-CArenas::CArenas(CGameContext *pGameServer, int Type) : CMinigame(pGameServer, Type)
+CArenas::CArenas(CGameContext *pGameServer) : CMinigame(pGameServer, MINIGAME_1VS1)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		Reset(i);
@@ -273,8 +273,12 @@ void CArenas::FinishConfiguration(int Fight, int ClientID)
 	}
 }
 
-void CArenas::OnInput(int ClientID, CNetObj_PlayerInput *pNewInput)
+bool CArenas::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 {
+	int ClientID = pChr->GetPlayer()->GetCID();
+	if (!IsConfiguring(ClientID))
+		return false;
+
 	if (pNewInput->m_Jump && m_aLastJump[ClientID] == 0)
 	{
 		switch (m_aState[ClientID])
@@ -300,6 +304,7 @@ void CArenas::OnInput(int ClientID, CNetObj_PlayerInput *pNewInput)
 
 	m_aLastJump[ClientID] = pNewInput->m_Jump;
 	m_aLastDirection[ClientID] = pNewInput->m_Direction;
+	return true;
 }
 
 bool CArenas::ValidSpawnPos(vec2 Pos)
@@ -692,14 +697,11 @@ void CArenas::ProcessPlayerWin(int ClientID, int64 Stake)
 	GameServer()->SendChatTarget(ClientID, aBuf);
 }
 
-bool CArenas::OnCharacterSpawn(int ClientID)
+bool CArenas::OnCharacterSpawn(CCharacter *pChr)
 {
+	int ClientID = pChr->GetPlayer()->GetCID();
 	int Fight = GetClientFight(ClientID);
 	if (Fight < 0 || !FightStarted(ClientID))
-		return false;
-
-	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
-	if (!pChr)
 		return false;
 
 	pChr->GiveWeapon(WEAPON_GUN);
@@ -711,6 +713,13 @@ bool CArenas::OnCharacterSpawn(int ClientID)
 
 	pChr->Freeze(m_aFights[Fight].m_LongFreezeStart ? 10 : 3);
 	return true;
+}
+
+void CArenas::OnPlayerJoin(int ClientID)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	GameServer()->SendChatTarget(ClientID, pPlayer->Localize("Type '/1vs1 <playername>' to start a fight with someone"));
+	GameServer()->SendChatTarget(ClientID, pPlayer->Localize("For a stake, custom scorelimits or a kill-border use '/1vs1 <playername> <stake> <scorelimit> <killborder>'"));
 }
 
 void CArenas::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
@@ -760,8 +769,9 @@ void CArenas::OnPlayerLeave(int ClientID, bool Disconnect, bool Shutdown)
 	}
 }
 
-void CArenas::OnPlayerDie(int ClientID)
+void CArenas::OnCharacterDie(CCharacter *pChr, int Killer)
 {
+	int ClientID = pChr->GetPlayer()->GetCID();
 	int Fight = GetClientFight(ClientID);
 	if (Fight < 0)
 		return;
@@ -772,11 +782,11 @@ void CArenas::OnPlayerDie(int ClientID)
 
 	IncreaseScore(Fight, Other);
 
-	CCharacter *pChr = GameServer()->GetPlayerChar(m_aFights[Fight].m_aParticipants[Other].m_ClientID);
-	if (pChr)
+	CCharacter *pOther = GameServer()->GetPlayerChar(m_aFights[Fight].m_aParticipants[Other].m_ClientID);
+	if (pOther)
 	{
-		pChr->Die(WEAPON_GAME, true, false);
-		pChr->GetPlayer()->Respawn();
+		pOther->Die(WEAPON_GAME, true, false);
+		pOther->GetPlayer()->Respawn();
 	}
 }
 

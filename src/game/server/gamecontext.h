@@ -21,6 +21,7 @@
 #include "minigames/minigame.h"
 #include "minigames/arenas.h"
 #include "minigames/durak.h"
+#include "minigames/survival.h"
 
 #include "eventhandler.h"
 #include "gameworld.h"
@@ -63,19 +64,6 @@ typedef unsigned __int64 uint64_t;
 			All players (CPlayer::snap)
 
 */
-
-enum Survival
-{
-	SURVIVAL_OFFLINE = 0,
-	SURVIVAL_LOBBY,
-	SURVIVAL_PLAYING,
-	SURVIVAL_DEATHMATCH,
-
-	BACKGROUND_IDLE = -1,
-	BACKGROUND_LOBBY_WAITING,
-	BACKGROUND_LOBBY_COUNTDOWN,
-	BACKGROUND_DEATHMATCH_COUNTDOWN,
-};
 
 enum Top5
 {
@@ -765,6 +753,7 @@ public:
 	class CMinigame *m_pMinigames[NUM_MINIGAMES];
 	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
 	CDurak *Durak() { return ((CDurak *)m_pMinigames[MINIGAME_DURAK]); }
+	CSurvival *Survival() { return ((CSurvival *)m_pMinigames[MINIGAME_SURVIVAL]); }
 	CWhoIs m_WhoIs;
 	CRainbowName m_RainbowName;
 	CVotingMenu m_VotingMenu;
@@ -816,23 +805,6 @@ public:
 	bool m_aMinigameDisabled[NUM_MINIGAMES];
 
 	void SetMinigame(int ClientID, int Minigame, bool Force = false, bool DoChatMsg = true);
-
-	//survival
-	void SurvivalTick();
-	void SetPlayerSurvivalState(int State);
-	template<typename... Args>
-	void SendSurvivalBroadcastFormat(bool Sound, bool IsImportant, const char *pFormat, Args&&... args)
-	{
-		CFormatArg aArgs[] = { CFormatArg(std::forward<Args>(args))... };
-		SendSurvivalBroadcast(pFormat, Sound, IsImportant, aArgs, std::size(aArgs));
-	}
-	void SendSurvivalBroadcast(const char* pMsg, bool Sound = false, bool IsImportant = true, CFormatArg *pArgs = 0, int NumArgs = 0);
-	int CountSurvivalPlayers(int State);
-	int GetRandomSurvivalPlayer(int State, int NotThis = -1);
-	int m_SurvivalBackgroundState;
-	int m_SurvivalGameState;
-	int64 m_SurvivalTick;
-	int m_SurvivalWinner;
 
 	//instagib
 	void InstagibTick(int Type);

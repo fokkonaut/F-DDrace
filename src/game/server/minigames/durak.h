@@ -817,12 +817,16 @@ class CDurak : public CMinigame
 	CDurakGame *GetOrAddGame(int Number);
 
 public:
-	CDurak(CGameContext *pGameServer, int Type);
+	CDurak(CGameContext *pGameServer);
 	virtual ~CDurak();
 
-	virtual void Tick();
-	virtual void Snap(int SnappingClient);
+	void Tick() override;
+	void Snap(int SnappingClient) override;
 	void PostSnap();
+
+	bool OnCharacterSpawn(class CCharacter *pChr) override;
+	bool OnInput(class CCharacter *pChr, CNetObj_PlayerInput *pNewInput) override;
+	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false) override;
 
 	void AddMapTableTile(int Number, vec2 Pos);
 	void AddMapSeatTile(int Number, int MapIndex, int SeatIndex);
@@ -836,10 +840,7 @@ public:
 	bool OnDropMoney(int ClientID, int Amount, bool OnDeath);
 	bool OnRainbowName(int ClientID, int MapID);
 	void OnCharacterSeat(int ClientID, int Number, int SeatIndex);
-	void OnCharacterSpawn(class CCharacter *pChr);
 	bool TryEnterBetStake(int ClientID, const char *pMessage);
-	void OnInput(class CCharacter *pChr, CNetObj_PlayerInput *pNewInput);
-	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false);
 	bool OnSetSpectator(int ClientID, int SpectatorID);
 	bool IsPlayerOnSeat(int ClientID);
 };

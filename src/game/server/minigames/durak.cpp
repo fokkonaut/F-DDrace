@@ -13,7 +13,7 @@ const vec2 CCard::ms_TableSizeRadius = vec2(4.9f * 32.f, 3.8f * 32.f); // 11*9 b
 const vec2 CCard::ms_AttackAreaRadius = vec2(4.f * 32.f, 1.5f * 32.f); // 8x3
 const vec2 CCard::ms_AttackAreaCenterOffset = vec2(-32.f, 16.f);
 
-CDurak::CDurak(CGameContext *pGameServer, int Type) : CMinigame(pGameServer, Type)
+CDurak::CDurak(CGameContext *pGameServer) : CMinigame(pGameServer, MINIGAME_DURAK)
 {
 	m_vLastDuraks.clear();
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -122,11 +122,11 @@ void CDurak::CreateFlyingPoint(int FromClientID, int Game, CCard *pToCard)
 	new CFlyingPoint(&GameServer()->m_World, From, -1, FromClientID, normalize(To - From) * 15.f, To);
 }
 
-void CDurak::OnCharacterSpawn(CCharacter *pChr)
+bool CDurak::OnCharacterSpawn(CCharacter *pChr)
 {
 	int ClientID = pChr->GetPlayer()->GetCID();
 	if (!InDurakGame(ClientID))
-		return;
+		return false;
 
 	int Game = GetGameByClient(ClientID);
 	CDurakGame *pGame = m_vpGames[Game];
@@ -145,6 +145,7 @@ void CDurak::OnCharacterSpawn(CCharacter *pChr)
 	CLockedTune TuneHookLength("hook_length", 540.f);
 	GameServer()->SetLockedTune(&pChr->m_LockedTunings, TuneHookLength);
 	pChr->ApplyLockedTunings();
+	return true;
 }
 
 void CDurak::OnCharacterSeat(int ClientID, int Number, int SeatIndex)
@@ -421,12 +422,15 @@ bool CDurak::OnRainbowName(int ClientID, int MapID)
 	return m_aSnappedSeatIndex[ClientID] == -1 && !::NetworkClipped(GameServer(), ClientID, m_vpGames[0]->m_TablePos);
 }
 
-void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
+bool CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 {
 	int ClientID = pChr->GetPlayer()->GetCID();
+	if (!ActivelyPlaying(ClientID))
+		return false;
+
 	int Game = GetGameByClient(ClientID);
 	if (Game < 0)
-		return;
+		return false;
 
 	CDurakGame *pGame = m_vpGames[Game];
 	CDurakGame::SSeat *pSeat = pGame->GetSeatByClient(ClientID);
@@ -636,6 +640,7 @@ void CDurak::OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput)
 	{
 		m_aCardUpdate[ClientID][&m_aStaticCards[DURAK_TEXT_KEYBOARD_CONTROL]] = true;
 	}
+	return true;
 }
 
 template<typename... Args>

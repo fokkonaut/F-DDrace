@@ -3,11 +3,13 @@
 #ifndef GAME_SERVER_MINIGAMES_MINIGAME_H
 #define GAME_SERVER_MINIGAMES_MINIGAME_H
 
-#include <engine/shared/protocol.h>
 #include <base/vmath.h>
+#include <engine/shared/protocol.h>
+#include <game/mapitems.h>
 
 class CGameContext;
 class IServer;
+class CCharacter;
 
 enum Minigames
 {
@@ -39,5 +41,12 @@ public:
 
 	int GetType() { return m_Type; }
 	bool IsType(int Type) { return m_Type == Type; }
+
+	virtual bool OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput) { return false; }
+	virtual bool OnCharacterSpawn(CCharacter *pChr) { return false; }
+	virtual void OnCharacterDie(CCharacter *pChr, int Killer) {}
+	virtual void OnPlayerJoin(int ClientID) {}
+	virtual void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false) {}
+	virtual int SpawnIndex(int ClientID) const { return ENTITY_SPAWN; }
 };
 #endif // GAME_SERVER_MINIGAMES_MINIGAME_H

@@ -5,8 +5,8 @@
 
 #include "minigame.h"
 #include <vector>
+#include <game/server/player.h>
 
-class CPlayer;
 class CCharacter;
 
 class CFight
@@ -125,11 +125,17 @@ public:
 		PARTICIPANT_GLOBAL = -2,
 	};
 
-	CArenas(CGameContext *pGameServer, int Type);
+	CArenas(CGameContext *pGameServer);
 	virtual ~CArenas();
 
-	virtual void Tick();
-	virtual void Snap(int SnappingClient);
+	void Tick() override;
+	void Snap(int SnappingClient) override;
+
+	bool OnCharacterSpawn(CCharacter *pChr) override;
+	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false) override;
+	bool OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput) override;
+	void OnCharacterDie(CCharacter *pChr, int Killer = WEAPON_GAME) override;
+	void OnPlayerJoin(int ClientID) override;
 
 	void Reset(int ClientID);
 	int GetClientFight(int ClientID, bool HasToBeJoined = true);
@@ -142,11 +148,6 @@ public:
 
 	bool IsConfiguring(int ClientID) { return m_aState[ClientID] != STATE_1VS1_NONE && m_aState[ClientID] != STATE_1VS1_DONE; }
 	bool HasJoined(int Fight, int Index) { return m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_OWNER || m_aFights[Fight].m_aParticipants[Index].m_Status == PARTICIPANT_ACCEPTED; }
-
-	bool OnCharacterSpawn(int ClientID);
-	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false);
-	void OnPlayerDie(int ClientID);
-	void OnInput(int ClientID, CNetObj_PlayerInput *pNewInput);
 	bool ClampViewPos(int ClientID);
 
 	void StartConfiguration(int ClientID, int Participant, int64 Stake, int ScoreLimit, bool KillBorder);

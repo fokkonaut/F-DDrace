@@ -165,7 +165,6 @@ void CPlayer::Reset()
 
 	m_SavedMinigameTee = false;
 	m_Minigame = MINIGAME_NONE;
-	m_SurvivalState = SURVIVAL_OFFLINE;
 
 	m_SpookyGhost = false;
 	m_HasSpookyGhost = false;
@@ -1116,6 +1115,7 @@ void CPlayer::OnDisconnect()
 
 	GameServer()->Arenas()->OnPlayerLeave(m_ClientID, true);
 	GameServer()->Durak()->OnPlayerLeave(m_ClientID, true);
+	GameServer()->Survival()->OnPlayerLeave(m_ClientID, true);
 	GameServer()->Logout(GetAccID());
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
@@ -1281,7 +1281,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput, bool TeeControlled)
 
 	if(((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && (NewInput->m_Fire&1)
 		// to prevent clicking after you got killed and immediately unspectate your killer on accident
-		&& (m_SurvivalState == SURVIVAL_OFFLINE || m_SurvivalDieTick < Server()->Tick() - Server()->TickSpeed() * 2))
+		&& GameServer()->Survival()->AllowClickToSpectate(m_ClientID))
 	{
 		if(!m_ActiveSpecSwitch)
 		{
@@ -1459,6 +1459,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	{
 		GameServer()->Arenas()->OnPlayerLeave(m_ClientID);
 		GameServer()->Durak()->OnPlayerLeave(m_ClientID);
+		GameServer()->Survival()->OnPlayerLeave(m_ClientID);
 
 		CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 		Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
@@ -1544,12 +1545,7 @@ void CPlayer::TryRespawn()
 	}
 	else if (m_Minigame == MINIGAME_SURVIVAL)
 	{
-		if (m_SurvivalState == SURVIVAL_LOBBY)
-			Index = TILE_SURVIVAL_LOBBY;
-		else if (m_SurvivalState == SURVIVAL_PLAYING)
-			Index = TILE_SURVIVAL_SPAWN;
-		else if (m_SurvivalState == SURVIVAL_DEATHMATCH)
-			Index = TILE_SURVIVAL_DEATHMATCH;
+		Index = GameServer()->Survival()->SpawnIndex(m_ClientID);
 	}
 	else if (m_Minigame == MINIGAME_INSTAGIB_BOOMFNG)
 	{

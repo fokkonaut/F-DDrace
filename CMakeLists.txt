@@ -1634,6 +1634,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   minigames/durak.h
   minigames/minigame.cpp
   minigames/minigame.h
+  minigames/survival.cpp
+  minigames/survival.h
   player.cpp
   player.h
   rainbowname.cpp
