@@ -1418,6 +1418,11 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 			else
 				SetWeapon(WEAPON_GUN);
 		}
+
+		if (Weapon == WEAPON_DRAW_EDITOR)
+		{
+			m_aWeaponsBackupGot[Weapon][BACKUP_INGAME] = !Remove;
+		}
 	}
 	else
 	{
