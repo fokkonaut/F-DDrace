@@ -158,6 +158,7 @@ MACRO_CONFIG_STR(SvPlotEditorCategories, sv_plot_editor_categories, 128, "pickup
 MACRO_CONFIG_INT(SvEditorPresetLevel, sv_editor_preset_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to use the draw editor preset save/load feature", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvClearFreeDrawLevel, sv_clear_free_draw_level, AUTHED_ADMIN, AUTHED_NO, NUM_AUTHEDS-1, CFGFLAG_SERVER, "Required auth level to clear free draw area (clearplot 0)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvEditorMaxDistance, sv_editor_max_distance, 750, 0, 99999, CFGFLAG_SERVER, "Maximum distance to place something with draw editor", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvForceRemoveDrawEditor, sv_force_remove_draw_editor, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether draw editor should be forcefully removed when bugging out of plot", AUTHED_ADMIN)
 
 MACRO_CONFIG_INT(SvHideTileWarnings, sv_hide_tile_warnings, 0, 0, 1, CFGFLAG_SERVER, "Whether tile warnings are shown (invalid toggle mask, wrongly placed switch tiles...)", AUTHED_ADMIN)
 

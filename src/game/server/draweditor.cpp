@@ -339,6 +339,10 @@ void CDrawEditor::Tick()
 			m_Laser.m_Number = 0;
 		else if (m_Category == CAT_TELEPORTER && m_Teleporter.m_Number >= GetNumMaxTeleporters())
 			m_Teleporter.m_Number = 0;
+
+		// Prevent bugging draw editor out aggressively
+		if (GameServer()->Config()->m_SvForceRemoveDrawEditor)
+			m_pCharacter->GetPlayer()->StopPlotEditing();
 	}
 
 	m_PrevInput = m_Input;
