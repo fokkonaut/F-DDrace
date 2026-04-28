@@ -1491,6 +1491,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
+	if (Sys && Msg == NETMSG_RCON_CMD)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
+		if(Config()->m_SvRconExclusive[0] && ((m_aClients[ClientID].m_Authed <= AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) || (m_aClients[ClientID].m_Authed > AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr))))
+			return;
+	}
+
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
 		int64 Now = time_get();
