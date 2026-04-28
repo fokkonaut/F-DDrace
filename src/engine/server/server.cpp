@@ -1496,7 +1496,16 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
 		if(Config()->m_SvRconExclusive[0] && ((m_aClients[ClientID].m_Authed <= AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) || (m_aClients[ClientID].m_Authed > AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr))))
+		{
+			const char *pCmd;
+			if (Config()->m_Debug && str_utf8_check((pCmd = Unpacker.GetString())))
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d: %s", ClientID, pCmd);
+				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
+			}
 			return;
+		}
 	}
 
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
@@ -1909,7 +1918,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				return;
 			}
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
+			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed > AUTHED_NO)
 			{
 				const char *pAuthLevel = 0;
 				int AccessLevel = 0;
