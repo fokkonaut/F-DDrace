@@ -255,6 +255,8 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	char aBannedNameOrIp[256];
 	bool BanSuccess = false;
 
+	bool HasBanIpAccess = pResult->m_ClientID < 0 || pThis->Server()->m_aClients[pResult->m_ClientID].m_Authed >= pThis->Config()->m_SvBanIpLevel;
+
 	if(!str_is_number(pStr))
 	{
 		int ClientID = str_toint(pStr);
@@ -262,13 +264,15 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid client id)");
 		else if (pThis->Server()->m_aClients[ClientID].m_State == CServer::CClient::STATE_DUMMY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (can't ban dummies)");
+		else if (!HasBanIpAccess && Minutes == 0)
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (not allowed to ban for life)");
 		else
 		{
 			str_copy(aBannedNameOrIp, pThis->Server()->ClientName(ClientID), sizeof(aBannedNameOrIp));
 			BanSuccess = pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0;
 		}
 	}
-	else if (pResult->m_ClientID < 0 || pThis->Server()->m_aClients[pResult->m_ClientID].m_Authed >= pThis->Config()->m_SvBanIpLevel)
+	else if (HasBanIpAccess)
 	{
 		char aBuf[256];
 		str_copy(aBuf, pStr, sizeof(aBuf));
@@ -1495,23 +1499,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
-	if (Sys && Msg == NETMSG_RCON_CMD)
-	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
-		if(Config()->m_SvRconExclusive[0] && ((m_aClients[ClientID].m_Authed <= AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) || (m_aClients[ClientID].m_Authed > AUTHED_MOD && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr))))
-		{
-			const char *pCmd;
-			if (Config()->m_Debug && str_utf8_check((pCmd = Unpacker.GetString())))
-			{
-				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d addr=<{%s}>: %s", ClientID, aAddrStr, pCmd);
-				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
-			}
-			return;
-		}
-	}
-
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
 		int64 Now = time_get();
@@ -1922,6 +1909,20 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				return;
 			}
+
+			char aAddrStr[NETADDR_MAXSTRSIZE];
+			net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
+			if((Config()->m_SvRconExclusive[0] && (m_aClients[ClientID].m_Authed > AUTHED_MOD || !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr)) || m_aClients[ClientID].m_Authed > NUM_AUTHEDS)
+			{
+				if (Config()->m_Debug)
+				{
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d addr=<{%s}>: %s", ClientID, aAddrStr, pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
+				return;
+			}
+
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed > AUTHED_NO)
 			{
 				const char *pAuthLevel = 0;
