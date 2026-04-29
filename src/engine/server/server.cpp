@@ -2449,7 +2449,7 @@ void CServer::UpdateRegisterServerInfo()
 	char aFlag[64] = "";
 	if (Config()->m_SvRegisterExtra[0] && Config()->m_SvRegisterFlag != -1)
 	{
-		str_format(aFlag, sizeof(aFlag), "\"country\":\"%d\",", Config()->m_SvRegisterFlag);
+		str_format(aFlag, sizeof(aFlag), "\"country\":%d,", Config()->m_SvRegisterFlag);
 	}
 
 	char aInfo[32768];
