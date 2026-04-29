@@ -665,7 +665,7 @@ public:
 
 	struct SRecentlyLeft
 	{
-		int m_RemoveTick;
+		int m_RemoveTick = 0;
 		int m_PrevClientID;
 		char m_aVersion[64];
 		char m_aName[MAX_NAME_LENGTH];

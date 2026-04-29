@@ -65,7 +65,7 @@ static Skin s_Skins[NUM_SKINS] = {
 {"ninja",{"kitty","uppy","","standard","standard","negative"},{1,1,0,0,0,0},{0,-16777152,65408,0,0,0},"x_ninja"},
 };
 
-CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet) : CTeeInfo()
 {
 	str_copy(m_Sevendown.m_SkinName, pSkinName, sizeof(m_Sevendown.m_SkinName));
 	m_Sevendown.m_UseCustomColor = UseCustomColor;
@@ -73,7 +73,7 @@ CTeeInfo::CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int
 	m_Sevendown.m_ColorFeet = ColorFeet;
 }
 
-CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors)
+CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors) : CTeeInfo()
 {
 	for(int i = 0; i < 6; i++)
 	{
@@ -83,7 +83,7 @@ CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pS
 	}
 }
 
-CTeeInfo::CTeeInfo(int SkinID)
+CTeeInfo::CTeeInfo(int SkinID) : CTeeInfo()
 {
 	for(int i = 0; i < 6; i++)
 	{
@@ -96,7 +96,7 @@ CTeeInfo::CTeeInfo(int SkinID)
 	ToSevendown();
 }
 
-CTeeInfo::CTeeInfo(const char *pSkin)
+CTeeInfo::CTeeInfo(const char *pSkin) : CTeeInfo()
 {
 	for (int i = 0; i < NUM_SKINS; i++)
 	{
