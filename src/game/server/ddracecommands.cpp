@@ -1894,7 +1894,8 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 				str_format(aDate, sizeof(aDate), " (%s)", pSelf->GetDate(str_toint(pValue)));
 		}
 
-		str_format(aBuf, sizeof(aBuf), "%s: %s%s", pSelf->GetAccVarName(i), pValue, aDate);
+		bool IsIp = i == ACC_ADDR || i == ACC_LAST_ADDR || i == ACC_SECURITY_PIN || i == ACC_PASSWORD;
+		str_format(aBuf, sizeof(aBuf), "%s: %s%s%s%s", pSelf->GetAccVarName(i), IsIp ? "<{" : "", pValue, IsIp ? "}>" : "", aDate);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 
@@ -1978,9 +1979,10 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	}
 
 	char aBuf[256];
+	bool IsIp = VariableID == ACC_ADDR || VariableID == ACC_LAST_ADDR || VariableID == ACC_SECURITY_PIN || VariableID == ACC_PASSWORD;
 	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
 	{
-		str_format(aBuf, sizeof(aBuf), "Value: %s", pSelf->GetAccVarValue(ID, VariableID));
+		str_format(aBuf, sizeof(aBuf), "Value: %s%s%s", IsIp ? "<{" : "", pSelf->GetAccVarValue(ID, VariableID), IsIp ? "}>" : "");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
@@ -2020,8 +2022,8 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 			sha256_str(pSelf->HashPassword(pResult->GetString(2)), aPassword, sizeof(aPassword));
 			pValue = aPassword;
 		}
-
-		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, pSelf->GetAccVarValue(ID, VariableID), pValue);
+		
+		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s%s%s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, IsIp ? "<{" : "", pSelf->GetAccVarValue(ID, VariableID), IsIp ? "}>" : "", pValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 		pSelf->SetAccVar(ID, VariableID, pValue);
 	}
@@ -2407,7 +2409,7 @@ void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
 		net_addr_str(&pSelf->m_aAccountSystemBans[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
 		int Seconds = (pSelf->m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
-		str_format(aBuf, sizeof(aBuf), "#%d '%s', %d seconds left", i, aAddrStr, Seconds);
+		str_format(aBuf, sizeof(aBuf), "#%d '<{%s}>', %d seconds left", i, aAddrStr, Seconds);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "accban", aBuf);
 	}
 
@@ -2426,7 +2428,7 @@ void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
 	net_addr_str(&pSelf->m_aAccountSystemBans[Index].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "Removed '%s' from account system bans", aAddrStr);
+	str_format(aBuf, sizeof(aBuf), "Removed '<{%s}>' from account system bans", aAddrStr);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
 
 	pSelf->m_NumAccountSystemBans--;

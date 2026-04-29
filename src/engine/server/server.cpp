@@ -1505,7 +1505,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if (Config()->m_Debug && str_utf8_check((pCmd = Unpacker.GetString())))
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d: %s", ClientID, pCmd);
+				str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d addr=<{%s}>: %s", ClientID, aAddrStr, pCmd);
 				Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "server", aBuf);
 			}
 			return;
@@ -5246,7 +5246,7 @@ void CServer::PrintWhitelist()
 			str_format(aReason, sizeof(aReason), "(%s)", m_vWhitelist[i].m_aReason);
 
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "#%d '%s' %s", i, aAddrStr, aReason);
+		str_format(aBuf, sizeof(aBuf), "#%d '<{%s}>' %s", i, aAddrStr, aReason);
 		Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "whitelist", aBuf);
 	}
 }
