@@ -155,6 +155,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_max_objects_plot_small` |
 | `sv_max_objects_plot_big` |
 | `sv_max_objects_free_draw` |
+| `sv_force_remove_draw_editor` |
 | `sv_police_taser_plot_raid` |
 | `sv_plot_door_health` |
 | `sv_taser_battery_respawn_time` |
