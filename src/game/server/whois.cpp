@@ -18,6 +18,14 @@
 
 IServer *CWhoIs::Server() const { return GameServer()->Server(); }
 
+CWhoIs::~CWhoIs()
+{
+	free(ipplayers);
+	free(nmplayers);
+	ipplayers = nullptr;
+	nmplayers = nullptr;
+}
+
 void CWhoIs::Init(CGameContext *pGameServer)
 {
 	m_pGameServer = pGameServer;

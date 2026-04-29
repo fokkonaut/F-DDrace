@@ -36,6 +36,7 @@ class CWhoIs
 	int AddEntry(const char *name, const char *addr);
 
 public:
+	~CWhoIs();
 	void Init(CGameContext *pGameServer);
 	void Run(const char *pName, int Mode, int Cutoff);
 	void AddEntry(int ClientID);
