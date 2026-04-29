@@ -1320,7 +1320,7 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i))
+		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i) && pThis->m_aClients[i].m_Authed <= NUM_AUTHEDS)
 			pThis->SendRconLine(i, pThis->m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
 	}
 
@@ -2063,7 +2063,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						}
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 						char aAuthLog[256];
-						str_format(aAuthLog, sizeof(aAuthLog), "ClientID=%d authed as %s", ClientID, pLevelStr);
+						str_format(aAuthLog, sizeof(aAuthLog), "ClientID=%d authed as %s on port %d (%s)", ClientID, pLevelStr, Config()->m_SvPort, Config()->m_SvMap);
 						GameServer()->SendModLogMessage(ClientID, aAuthLog, true);
 
 						// Call this after printing auth message, so that other prints get below it
