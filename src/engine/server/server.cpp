@@ -4957,6 +4957,9 @@ void CServer::CTranslateChat::Run()
 
 void CServer::TranslateChat(int ClientID, const char *pMsg, int Mode)
 {
+	if (!Config()->m_SvLibreTranslateURL[0])
+		return;
+
 	std::vector<const char *> vLanguages;
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
