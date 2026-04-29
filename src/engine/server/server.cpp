@@ -2445,6 +2445,12 @@ void CServer::UpdateRegisterServerInfo()
 
 	sha256_str(m_CurrentMapSha256, aMapSha256, sizeof(aMapSha256));
 
+	char aFlag[64] = "";
+	if (Config()->m_SvRegisterExtra[0] && Config()->m_SvRegisterFlag != -1)
+	{
+		str_format(aFlag, sizeof(aFlag), "\"country\":\"%d\",", Config()->m_SvRegisterFlag);
+	}
+
 	char aInfo[32768];
 	str_format(aInfo, sizeof(aInfo),
 		"{"
@@ -2452,6 +2458,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"max_players\":%d,"
 		"\"passworded\":%s,"
 		"\"game_type\":\"%s\","
+		"%s"
 		"\"name\":\"%s\","
 		"\"map\":{"
 		"\"name\":\"%s\","
@@ -2465,6 +2472,7 @@ void CServer::UpdateRegisterServerInfo()
 		MaxPlayers,
 		JsonBool(Config()->m_Password[0]),
 		EscapeJson(aGameType, sizeof(aGameType), GetGameTypeServerInfo()),
+		aFlag,
 		EscapeJson(aName, sizeof(aName), Config()->m_SvName),
 		EscapeJson(aMapName, sizeof(aMapName), GetMapName()),
 		aMapSha256,
