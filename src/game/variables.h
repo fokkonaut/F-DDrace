@@ -344,7 +344,9 @@ MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 1, 0, 1, CFGFLAG_SERV
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
-MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "bans.cfg", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
+
+MACRO_CONFIG_INT(SvBanIpLevel, sv_ban_ip_level, AUTHED_ADMIN, AUTHED_HELPER, AUTHED_ADMIN, CFGFLAG_SERVER, "Required auth level to ban ip or range", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "bans.cfg", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvLoadMapConfigFile, sv_load_map_config_file, 0, 0, 1, CFGFLAG_SERVER, "Whether to execute 'maps/<sv_map>.map.cfg' as map settings aswell", AUTHED_ADMIN)
 #endif

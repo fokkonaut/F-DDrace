@@ -268,13 +268,16 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			BanSuccess = pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientID), Minutes*60, pReason) == 0;
 		}
 	}
-	else
+	else if (pResult->m_ClientID < 0 || pThis->Server()->m_aClients[pResult->m_ClientID].m_Authed >= pThis->Config()->m_SvBanIpLevel)
 	{
 		char aBuf[256];
 		str_copy(aBuf, pStr, sizeof(aBuf));
 		const char *pSeparator = str_find(aBuf, "-");
 
-		str_copy(aBannedNameOrIp, pStr, sizeof(aBannedNameOrIp));
+		if (pThis->Config()->m_SvBanIpLevel < AUTHED_ADMIN)
+			str_copy(aBannedNameOrIp, pStr, sizeof(aBannedNameOrIp));
+		else
+			str_copy(aBannedNameOrIp, "[REDACTED-IP-ADDRESS]", sizeof(aBannedNameOrIp));
 
 		if(pSeparator == NULL || pSeparator[1] == '\0')
 		{
