@@ -1,6 +1,6 @@
 // originally made by ChillerDragon, updated by fokkonaut
 
-#include "character.h"
+#include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>

@@ -18,6 +18,7 @@ CDummyBlmapChillPolice::CDummyBlmapChillPolice(CCharacter *pChr)
 	m_FailedAttempts = 0;
 	m_Confused = 0;
 	m_Sad = 0;
+	m_GetSpeed = false;
 
 	m_IsHelpHook = false;
 	m_IsClosestPolice = false;

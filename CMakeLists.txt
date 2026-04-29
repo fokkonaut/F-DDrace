@@ -1528,11 +1528,11 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   entities/dragger.h
   entities/drawtile.cpp
   entities/drawtile.h
-  entities/dummy.cpp
   entities/dummy/blmapchill_police.cpp
   entities/dummy/blmapchill_police.h
   entities/dummy/chillblock5_police.cpp
   entities/dummy/chillblock5_police.h
+  entities/dummy/dummy_legacy.cpp
   entities/dummy/dummybase.cpp
   entities/dummy/dummybase.h
   entities/dummy/house.cpp
