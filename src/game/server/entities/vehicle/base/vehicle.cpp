@@ -80,12 +80,18 @@ IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Po
 
 IVehicle::~IVehicle()
 {
-	for (int i = 0; i < m_NumAttachments; i++)
-		delete m_apAttachments[i];
-	delete[] m_apAttachments;
-	delete m_pModel;
-
 	m_HealthBar.SetIndicator(0, 0); // aka SnapFreeID()
+
+	for (int i = 0; i < m_NumAttachments; i++)
+	{
+		delete m_apAttachments[i];
+		m_apAttachments[i] = nullptr;
+	}
+	delete[] m_apAttachments;
+	m_apAttachments = nullptr;
+	delete m_pModel;
+	m_pModel = nullptr;
+
 	for (int i = 0; i < NUM_BUILD_IDS; i++)
 		if (m_Build.m_aBuildIDs[i] != -1) // should only pass if deleted while crafting a vehicle
 			Server()->SnapFreeID(m_Build.m_aBuildIDs[i]);
