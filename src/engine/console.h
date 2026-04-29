@@ -32,6 +32,7 @@ public:
 
 		MAX_PRINT_CB=4,
 
+		CLIENT_ID_UNSPECIFIED=-1,
 		CLIENT_ID_GAME=-2,
 		CLIENT_ID_NO_GAME=-3,
 	};
