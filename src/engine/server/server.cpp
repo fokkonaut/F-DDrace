@@ -2068,7 +2068,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						}
 						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 						char aAuthLog[256];
-						str_format(aAuthLog, sizeof(aAuthLog), "ClientID=%d authed as %s on port %d (%s)", ClientID, pLevelStr, Config()->m_SvPort, Config()->m_SvMap);
+						str_format(aAuthLog, sizeof(aAuthLog), "ClientID=%d authed as %s", ClientID, pLevelStr);
 						GameServer()->SendModLogMessage(ClientID, aAuthLog, true);
 
 						// Call this after printing auth message, so that other prints get below it

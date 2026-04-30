@@ -566,7 +566,10 @@ void CGameContext::SendModLogMessage(int ClientID, const char *pMsg, bool IsAuth
 		str_copy(aName, "[Server]", sizeof(aName));
 		str_copy(aAvatarURL, Config()->m_SvWebhookChatAvatarURL, sizeof(aAvatarURL));
 	}
-	Server()->SendWebhookMessage(IsAuth ? Config()->m_SvWebhookAuthLogURL : Config()->m_SvWebhookModLogURL, pMsg, aName, FormatURL(aAvatarURL));
+
+	char aMsg[512];
+	str_format(aMsg, sizeof(aMsg), "%s on port %d (%s)", pMsg, Config()->m_SvPort, Config()->m_SvMap);
+	Server()->SendWebhookMessage(IsAuth ? Config()->m_SvWebhookAuthLogURL : Config()->m_SvWebhookModLogURL, aMsg, aName, FormatURL(aAvatarURL));
 }
 
 const char *CGameContext::GetAvatarURL(int ClientID)
