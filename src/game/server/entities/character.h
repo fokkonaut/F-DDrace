@@ -13,12 +13,12 @@
 #include <game/server/draweditor.h>
 #include <game/server/snake.h>
 
-#include "pickup.h"
-#include "lightsaber.h"
-#include "stable_projectile.h"
-#include "vehicle/helicopter.h"
-#include "portalblocker.h"
-#include "grog.h"
+#include "map/pickup.h"
+#include "misc/stable_projectile.h"
+#include "weapons/lightsaber.h"
+#include "weapons/portalblocker.h"
+#include "interactive/vehicle/helicopter.h"
+#include "interactive/grog.h"
 
 #include "dummy/dummybase.h"
 

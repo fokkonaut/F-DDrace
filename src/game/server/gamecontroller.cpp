@@ -5,19 +5,19 @@
 #include <game/mapitems.h>
 
 #include "entities/character.h"
-#include "entities/pickup.h"
-#include "entities/playercounter.h"
+#include "entities/map/pickup.h"
+#include "entities/map/playercounter.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "player.h"
 
-#include "entities/light.h"
-#include "entities/dragger.h"
-#include "entities/gun.h"
-#include "entities/projectile.h"
-#include "entities/plasma.h"
-#include "entities/door.h"
-#include "entities/clock.h"
+#include "entities/weapons/projectile.h"
+#include "entities/map/light.h"
+#include "entities/map/dragger.h"
+#include "entities/map/gun.h"
+#include "entities/map/plasma.h"
+#include "entities/map/door.h"
+#include "entities/map/clock.h"
 #include <game/layers.h>
 
 

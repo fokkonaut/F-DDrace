@@ -19,14 +19,14 @@
 #include <game/version.h>
 
 #include "entities/character.h"
-#include "entities/money.h"
-#include "entities/vehicle/spider.h"
-#include "entities/vehicle/helicopter.h"
-#include "entities/speedup.h"
-#include "entities/button.h"
-#include "entities/teleporter.h"
-#include "entities/playercounter.h"
-#include "entities/drawtile.h"
+#include "entities/interactive/money.h"
+#include "entities/interactive/vehicle/spider.h"
+#include "entities/interactive/vehicle/helicopter.h"
+#include "entities/map/draweditor/speedup.h"
+#include "entities/map/draweditor/button.h"
+#include "entities/map/draweditor/teleporter.h"
+#include "entities/map/draweditor/drawtile.h"
+#include "entities/map/playercounter.h"
 #include "gamemodes/DDRace.h"
 #include "teeinfo.h"
 #include "gamecontext.h"
@@ -35,8 +35,8 @@
 #include "houses/bank.h"
 #include "houses/tavern.h"
 
-#include "entities/flag.h"
-#include "entities/lasertext.h"
+#include "entities/interactive/flag.h"
+#include "entities/misc/lasertext.h"
 #include <fstream>
 #include <limits>
 #include <string>

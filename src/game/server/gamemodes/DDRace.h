@@ -2,12 +2,12 @@
 #define GAME_SERVER_GAMEMODES_DDRACE_H
 #include <game/server/gamecontroller.h>
 #include <game/server/teams.h>
-#include <game/server/entities/door.h>
+#include <game/server/entities/map/door.h>
 
 #include <vector>
 #include <map>
 
-#include <game/server/entities/flag.h>
+#include <game/server/entities/interactive/flag.h>
 
 class CGameControllerDDRace : public IGameController
 {

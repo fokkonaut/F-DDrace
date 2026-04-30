@@ -2,8 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include "entities/character.h"
-#include "entities/flag.h"
-#include "entities/flyingpoint.h"
+#include "entities/interactive/flag.h"
+#include "entities/effects/flyingpoint.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
 #include "player.h"

@@ -5,8 +5,8 @@
 
 #include "alloc.h"
 
-#include "entities/pickup_drop.h"
-#include "entities/portal.h"
+#include "entities/interactive/pickup_drop.h"
+#include "entities/weapons/portal.h"
 #include <vector>
 
 #include "teeinfo.h"

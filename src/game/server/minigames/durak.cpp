@@ -6,7 +6,7 @@
 #include <game/server/teams.h>
 #include <engine/shared/config.h>
 #include <game/server/gamemodes/DDRace.h>
-#include <game/server/entities/flyingpoint.h>
+#include <game/server/entities/effects/flyingpoint.h>
 
 const vec2 CCard::ms_CardSizeRadius = vec2(14.f, 16.f);
 const vec2 CCard::ms_TableSizeRadius = vec2(4.9f * 32.f, 3.8f * 32.f); // 11*9 blocks around table center tile (all 4 corner tiles can be cut-out)

@@ -1,10 +1,10 @@
 #include "draweditor.h"
 #include <game/server/entities/character.h>
-#include <game/server/entities/door.h>
-#include <game/server/entities/button.h>
-#include <game/server/entities/speedup.h>
-#include <game/server/entities/teleporter.h>
-#include <game/server/entities/drawtile.h>
+#include <game/server/entities/map/door.h>
+#include <game/server/entities/map/draweditor/button.h>
+#include <game/server/entities/map/draweditor/speedup.h>
+#include <game/server/entities/map/draweditor/teleporter.h>
+#include <game/server/entities/map/draweditor/drawtile.h>
 #include <game/server/gamecontext.h>
 #include <game/server/teams.h>
 #include <engine/shared/config.h>

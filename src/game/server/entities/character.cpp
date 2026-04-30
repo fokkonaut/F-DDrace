@@ -8,25 +8,28 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
-#include "character.h"
-#include "laser.h"
-#include "projectile.h"
-
 // F-DDrace
-#include "flag.h"
-#include "custom_projectile.h"
-#include "meteor.h"
-#include "pickup_drop.h"
-#include "atom.h"
-#include "trail.h"
-#include "portal.h"
-#include "money.h"
-#include "lovely.h"
-#include "rotating_ball.h"
-#include "epic_circle.h"
-#include "staff_ind.h"
-#include "flyingpoint.h"
-#include "lightninglaser.h"
+#include "character.h"
+
+#include "weapons/custom_projectile.h"
+#include "weapons/laser.h"
+#include "weapons/lightninglaser.h"
+#include "weapons/portal.h"
+#include "weapons/projectile.h"
+#include "weapons/missile.h"
+
+#include "interactive/flag.h"
+#include "interactive/pickup_drop.h"
+#include "interactive/money.h"
+
+#include "effects/meteor.h"
+#include "effects/atom.h"
+#include "effects/trail.h"
+#include "effects/lovely.h"
+#include "effects/rotating_ball.h"
+#include "effects/epic_circle.h"
+#include "effects/staff_ind.h"
+#include "effects/flyingpoint.h"
 
 #include "dummy/blmapchill_police.h"
 #include "dummy/house.h"
@@ -36,8 +39,6 @@
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/score.h>
 #include <generated/protocol.h>
-
-#include "missile.h"
 
 //input count
 struct CInputCount

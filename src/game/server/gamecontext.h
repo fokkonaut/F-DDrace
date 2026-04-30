@@ -13,10 +13,10 @@
 
 #include <vector>
 #include <string>
-#include "entities/pickup_drop.h"
-#include "entities/money.h"
-#include "entities/lasertext.h"
-#include "entities/drawtile.h"
+#include "entities/interactive/pickup_drop.h"
+#include "entities/interactive/money.h"
+#include "entities/misc/lasertext.h"
+#include "entities/map/draweditor/drawtile.h"
 #include "houses/house.h"
 #include "minigames/minigame.h"
 #include "minigames/arenas.h"

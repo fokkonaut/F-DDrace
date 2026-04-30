@@ -11,9 +11,9 @@
 #include <utility>
 #include <engine/shared/config.h>
 #include "gamemodes/DDRace.h"
-#include "entities/projectile.h"
-#include "entities/custom_projectile.h"
-#include "entities/missile.h"
+#include "entities/weapons/projectile.h"
+#include "entities/weapons/custom_projectile.h"
+#include "entities/weapons/missile.h"
 
 void CSelectedArea::Init(CGameContext *pGameServer)
 {

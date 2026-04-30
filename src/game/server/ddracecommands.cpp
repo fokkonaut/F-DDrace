@@ -7,7 +7,7 @@
 #include <game/server/entities/character.h>
 #include <stdio.h>
 
-#include "entities/vehicle/spider.h"
+#include <game/server/entities/interactive/vehicle/spider.h>
 
 bool CheckClientID(int ClientID);
 
