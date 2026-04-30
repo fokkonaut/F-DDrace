@@ -131,6 +131,7 @@ public:
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 
+	int SpawnIndex(int ClientID) const override;
 	bool OnCharacterSpawn(CCharacter *pChr) override;
 	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false) override;
 	bool OnInput(CCharacter *pChr, CNetObj_PlayerInput *pNewInput) override;

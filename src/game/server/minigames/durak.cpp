@@ -694,6 +694,12 @@ void CDurak::SendChatToParticipants(int Game, const char *pFormat, Args&&... arg
 	}
 }
 
+int CDurak::SpawnIndex(int ClientID) const
+{
+	// overriden by m_ForceSpawnPos while in an active game
+	return TILE_DURAK_LOBBY;
+}
+
 bool CDurak::StartGame(int Game)
 {
 	if (Game < 0 || Game >= (int)m_vpGames.size())

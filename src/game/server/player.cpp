@@ -1541,7 +1541,7 @@ void CPlayer::TryRespawn()
 	}
 	else if (m_Minigame == MINIGAME_BLOCK || m_DummyMode == DUMMYMODE_V3_BLOCKER)
 	{
-		Index = TILE_MINIGAME_BLOCK;
+		Index = GameServer()->BlockMg()->SpawnIndex(m_ClientID);
 	}
 	else if (m_Minigame == MINIGAME_SURVIVAL)
 	{
@@ -1560,12 +1560,12 @@ void CPlayer::TryRespawn()
 		if (GameServer()->Arenas()->FightStarted(m_ClientID))
 			SpawnPos = GameServer()->Arenas()->GetSpawnPos(m_ClientID);
 		else
-			Index = TILE_1VS1_LOBBY;
+			Index = GameServer()->Arenas()->SpawnIndex(m_ClientID);
 	}
 	else if (m_Minigame == MINIGAME_DURAK)
 	{
 		// overriden by m_ForceSpawnPos while in an active game
-		Index = TILE_DURAK_LOBBY;
+		Index = GameServer()->Durak()->SpawnIndex(m_ClientID);
 	}
 	else if (m_JailTime == 1)
 	{

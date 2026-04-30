@@ -824,6 +824,7 @@ public:
 	void Snap(int SnappingClient) override;
 	void PostSnap();
 
+	int SpawnIndex(int ClientID) const override;
 	bool OnCharacterSpawn(class CCharacter *pChr) override;
 	bool OnInput(class CCharacter *pChr, CNetObj_PlayerInput *pNewInput) override;
 	void OnPlayerLeave(int ClientID, bool Disconnect = false, bool Shutdown = false) override;

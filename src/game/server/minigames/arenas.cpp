@@ -112,6 +112,12 @@ int CArenas::GetClientScore(int ClientID)
 	return m_aFights[Fight].m_aParticipants[Index].m_Score;
 }
 
+int CArenas::SpawnIndex(int ClientID) const
+{
+	// using GetSpawnPos during round
+	return TILE_1VS1_LOBBY;
+}
+
 vec2 CArenas::GetSpawnPos(int ClientID)
 {
 	int Fight = GetClientFight(ClientID);

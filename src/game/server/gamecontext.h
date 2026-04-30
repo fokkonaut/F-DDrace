@@ -754,6 +754,7 @@ public:
 	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
 	CDurak *Durak() { return ((CDurak *)m_pMinigames[MINIGAME_DURAK]); }
 	CSurvival *Survival() { return ((CSurvival *)m_pMinigames[MINIGAME_SURVIVAL]); }
+	CMinigame *BlockMg() { return m_pMinigames[MINIGAME_BLOCK]; }
 	CWhoIs m_WhoIs;
 	CRainbowName m_RainbowName;
 	CVotingMenu m_VotingMenu;

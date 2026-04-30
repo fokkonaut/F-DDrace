@@ -12,3 +12,13 @@ CMinigame::CMinigame(CGameContext *pGameServer, int Type)
 	m_pGameServer = pGameServer;
 	m_Type = Type;
 }
+
+int CMinigame::SpawnIndex(int ClientID) const
+{
+	if (IsType(MINIGAME_BLOCK))
+	{
+		return TILE_MINIGAME_BLOCK;
+	}
+	// safe fallback
+	return ENTITY_SPAWN;
+}
