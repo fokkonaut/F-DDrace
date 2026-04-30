@@ -1498,8 +1498,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   ddracechat.cpp
   ddracechat.h
   ddracecommands.cpp
-  draweditor.cpp
-  draweditor.h
   entities/character.cpp
   entities/character.h
   entities/dummy/blmapchill_police.cpp
@@ -1627,7 +1625,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   houses/shop.h
   houses/tavern.cpp
   houses/tavern.h
-  mask128.h
   minigames/arenas.cpp
   minigames/arenas.h
   minigames/durak.cpp
@@ -1636,10 +1633,19 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   minigames/minigame.h
   minigames/survival.cpp
   minigames/survival.h
+  misc/draweditor.cpp
+  misc/draweditor.h
+  misc/mask128.h
+  misc/rainbowname.cpp
+  misc/rainbowname.h
+  misc/snake.cpp
+  misc/snake.h
+  misc/votingmenu.cpp
+  misc/votingmenu.h
+  misc/whois.cpp
+  misc/whois.h
   player.cpp
   player.h
-  rainbowname.cpp
-  rainbowname.h
   save.cpp
   save.h
   score.h
@@ -1647,18 +1653,12 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   score/file_score.h
   score/sql_score.cpp
   score/sql_score.h
-  snake.cpp
-  snake.h
   teams.cpp
   teams.h
   teehistorian.cpp
   teehistorian.h
   teeinfo.cpp
   teeinfo.h
-  votingmenu.cpp
-  votingmenu.h
-  whois.cpp
-  whois.h
 )
 set(GAME_GENERATED_SERVER
   src/generated/server_data.cpp

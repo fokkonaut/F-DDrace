@@ -12,7 +12,7 @@ typedef __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 #endif
 
-#include "mask128.h"
+#include "misc/mask128.h"
 
 //
 class CEventHandler

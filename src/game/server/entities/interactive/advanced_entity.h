@@ -4,7 +4,6 @@
 #define GAME_SERVER_ENTITIES_ADVANCED_ENTITY_H
 
 #include <game/server/entity.h>
-#include <game/server/mask128.h>
 
 class CAdvancedEntity : public CEntity
 {

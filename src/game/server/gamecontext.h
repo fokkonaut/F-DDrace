@@ -25,9 +25,9 @@
 
 #include "eventhandler.h"
 #include "gameworld.h"
-#include "whois.h"
-#include "rainbowname.h"
-#include "votingmenu.h"
+#include "misc/whois.h"
+#include "misc/rainbowname.h"
+#include "misc/votingmenu.h"
 
 #include "teehistorian.h"
 
@@ -41,7 +41,7 @@ typedef unsigned __int64 uint64_t;
 #include <stdint.h>
 #endif
 
-#include "mask128.h"
+#include "misc/mask128.h"
 
 /*
 	Tick

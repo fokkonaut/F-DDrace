@@ -4,7 +4,7 @@
 #define GAME_SERVER_DRAWEDITOR_H
 
 #include <generated/protocol.h>
-#include "entity.h"
+#include <game/server/entity.h>
 
 class CCharacter;
 

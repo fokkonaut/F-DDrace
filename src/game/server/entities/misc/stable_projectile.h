@@ -4,7 +4,7 @@
 #define GAME_SERVER_ENTITIES_STABLE_PROJECTILE_H
 
 #include <game/server/entity.h>
-#include <game/server/mask128.h>
+#include <game/server/misc/mask128.h>
 
 class CStableProjectile : public CEntity
 {

@@ -7,7 +7,7 @@
 
 #include "alloc.h"
 #include "gameworld.h"
-#include "mask128.h"
+#include "misc/mask128.h"
 
 /*
 	Class: Entity
