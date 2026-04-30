@@ -2262,7 +2262,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 	int Price = pResult->NumArguments() > 1 ? maximum(1, str_toint(pResult->GetString(1))) : 0; // clamp price to 0
 	int OwnAccID = pSelf->m_apPlayers[pResult->m_ClientID]->GetAccID();
-	int OwnPlotID = pSelf->GetPlotID(OwnAccID);
+	int OwnPlotID = pSelf->m_Plots.GetPlotID(OwnAccID);
 
 	if (!str_comp_nocase(pCommand, "buy"))
 	{
@@ -2311,14 +2311,14 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pSelf->HasPlotByIP(pResult->m_ClientID))
+		if (pSelf->m_Plots.HasPlotByIP(pResult->m_ClientID))
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("Your IP address already owns one plot"));
 			return;
 		}
 
 		// success
-		int PlotID = pSelf->GetPlotID(pSeller->GetAccID());
+		int PlotID = pSelf->m_Plots.GetPlotID(pSeller->GetAccID());
 
 		pSelf->SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("Plot %d has been bought by '%s'"), PlotID, pSelf->Server()->ClientName(pResult->m_ClientID));
 
@@ -2340,7 +2340,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 
 		pSeller->StopPlotEditing();
 
-		pSelf->SetPlotInfo(PlotID, pPlayer->GetAccID());
+		pSelf->m_Plots.SetPlotInfo(PlotID, pPlayer->GetAccID());
 	}
 	else if (!str_comp_nocase(pCommand, "list"))
 	{
@@ -2387,7 +2387,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pSelf->PlotCanBeRaided(OwnPlotID))
+		if (pSelf->m_Plots.PlotCanBeRaided(OwnPlotID))
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("You can't sell your plot when being wanted"));
 			return;
@@ -2416,7 +2416,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		pPlayer->m_LastPlotAuction = pSelf->Server()->Tick();
 
 		pSelf->SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("'%s' started an auction on plot %d for %d money (plot expires on %s)"),
-			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->GetDate(pSelf->m_aPlots[OwnPlotID].m_ExpireDate));
+			pSelf->Server()->ClientName(pResult->m_ClientID), OwnPlotID, Price, pSelf->m_Plots.GetPlotExpireDate(OwnPlotID));
 
 		pSelf->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("Use '/plot buy %d %s' to buy the plot"),
 			Price, pSelf->Server()->ClientName(pResult->m_ClientID));
@@ -2442,7 +2442,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 			return;
 		}
 
-		if (pSelf->PlotCanBeRaided(OwnPlotID))
+		if (pSelf->m_Plots.PlotCanBeRaided(OwnPlotID))
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("You can't swap plots when being wanted"));
 			return;
@@ -2464,7 +2464,7 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		}
 
 		int SwapAccID = pSwap->GetAccID();
-		int SwapPlotID = pSelf->GetPlotID(SwapAccID);
+		int SwapPlotID = pSelf->m_Plots.GetPlotID(SwapAccID);
 		if (SwapPlotID == 0)
 		{
 			pSelf->SendChatTarget(pResult->m_ClientID, pPlayer->Localize("This player doesn't own a plot"));
@@ -2485,8 +2485,8 @@ void CGameContext::ConPlot(IConsole::IResult* pResult, void* pUserData)
 		if (str_comp(pPlayer->m_aPlotSwapUsername, pSelf->m_Accounts[SwapAccID].m_Username) == 0
 			&& str_comp(pSwap->m_aPlotSwapUsername, pSelf->m_Accounts[OwnAccID].m_Username) == 0)
 		{
-			pSelf->SetPlotInfo(OwnPlotID, SwapAccID);
-			pSelf->SetPlotInfo(SwapPlotID, OwnAccID);
+			pSelf->m_Plots.SetPlotInfo(OwnPlotID, SwapAccID);
+			pSelf->m_Plots.SetPlotInfo(SwapPlotID, OwnAccID);
 			pPlayer->m_aPlotSwapUsername[0] = 0;
 			pSwap->m_aPlotSwapUsername[0] = 0;
 			pPlayer->StopPlotEditing();

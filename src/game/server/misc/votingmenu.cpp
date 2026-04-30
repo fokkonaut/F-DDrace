@@ -673,7 +673,7 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 		DoLineSeperator(Page, pNumOptions);
 	}
 
-	int PlotID = GameServer()->GetPlotID(AccID);
+	int PlotID = GameServer()->m_Plots.GetPlotID(AccID);
 	bool BankEnabled = GameServer()->Config()->m_SvMoneyBankMode != 0;
 	if (DoLineCollapse(Page, pNumOptions, pPlayer->Localize(COLLAPSE_HEADER_ACC_STATS, "vote-header"), m_aClients[ClientID].m_ShowAccountStats, 11 + (int)BankEnabled))
 	{
@@ -738,17 +738,17 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 	{
 		char aPlotHeader[32];
 		str_format(aPlotHeader, sizeof(aPlotHeader), "%s %d", pPlayer->Localize(COLLAPSE_HEADER_PLOT_INFO, "vote-header"), PlotID);
-		bool IsPlotDestroy = GameServer()->m_aPlots[PlotID].m_DestroyEndTick;
+		bool IsPlotDestroy = GameServer()->m_Plots.GetDestroyEndTick(PlotID);
 		if (DoLineCollapse(Page, pNumOptions, aPlotHeader, m_aClients[ClientID].m_ShowPlotInfo, 4 + (int)IsPlotDestroy*2))
 		{
-			str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Rented until"), GameServer()->GetDate(GameServer()->m_aPlots[PlotID].m_ExpireDate));
+			str_format(aBuf, sizeof(aBuf), "%s: %s", pPlayer->Localize("Rented until"), GameServer()->m_Plots.GetPlotExpireDate(PlotID));
 			DoLineText(Page, pNumOptions, aBuf, BULLET_POINT);
 
 			if (IsPlotDestroy)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s: %d/%d", pPlayer->Localize("Door Health"), GameServer()->m_aPlots[PlotID].m_DoorHealth, GameServer()->Config()->m_SvPlotDoorHealth);
+				str_format(aBuf, sizeof(aBuf), "%s: %d/%d", pPlayer->Localize("Door Health"), GameServer()->m_Plots.GetDoorHealth(PlotID), GameServer()->Config()->m_SvPlotDoorHealth);
 				DoLineText(Page, pNumOptions, aBuf, BULLET_POINT);
-				str_format(aBuf, sizeof(aBuf), "%s: %lld", pPlayer->Localize("Destroy Seconds"), (GameServer()->m_aPlots[PlotID].m_DestroyEndTick - Server()->Tick()) / Server()->TickSpeed());
+				str_format(aBuf, sizeof(aBuf), "%s: %lld", pPlayer->Localize("Destroy Seconds"), (GameServer()->m_Plots.GetDestroyEndTick(PlotID) - Server()->Tick()) / Server()->TickSpeed());
 				DoLineText(Page, pNumOptions, aBuf, BULLET_POINT);
 			}
 
@@ -994,12 +994,12 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 		if (pAccount->m_Ninjajetpack && pPlayer->m_NinjaJetpack)
 			Flags |= PREVFLAG_ACC_NINJAJETPACK;
 		// Plot
-		int PlotID = GameServer()->GetPlotID(AccID);
+		int PlotID = GameServer()->m_Plots.GetPlotID(AccID);
 		if (m_aClients[ClientID].m_ShowPlotInfo && PlotID >= PLOT_START)
 		{
 			if (pPlayer->m_PlotSpawn)
 				Flags |= PREVFLAG_PLOT_SPAWN;
-			pStats->m_DestroyEndTick = GameServer()->m_aPlots[PlotID].m_DestroyEndTick;
+			pStats->m_DestroyEndTick = GameServer()->m_Plots.GetDestroyEndTick(PlotID);
 		}
 
 		if (m_aClients[ClientID].m_ShowAccountStats)

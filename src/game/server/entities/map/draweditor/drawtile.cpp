@@ -128,7 +128,7 @@ bool CDrawTile::HasSameIndexNeighborAt(vec2 Pos)
 	}
 
 	// dont try to connect to map tiles, only connect to already placed tiles or when moving an area together
-	return GameServer()->HasDrawTile(MapIndex, this);
+	return GameServer()->m_Plots.HasDrawTile(MapIndex, this);
 }
 
 static vec2 s_aNeighborOffsets[CDrawTile::NUM_SIDES] = {

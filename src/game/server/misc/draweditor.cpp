@@ -79,7 +79,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	if (pEntity)
 	{
 		Pos = pEntity->GetPos();
-		CursorPlotID = GameServer()->GetTilePlotID(Pos);
+		CursorPlotID = GameServer()->m_Plots.GetTilePlotID(Pos);
 		Type = pEntity->GetObjType();
 		Number = pEntity->m_Number;
 		CheckBorders = CheckBorders || Type == CGameWorld::ENTTYPE_DOOR || Type == CGameWorld::ENTTYPE_BUTTON || Type == CGameWorld::ENTTYPE_SPEEDUP || Type == CGameWorld::ENTTYPE_TELEPORTER || Type == CGameWorld::ENTTYPE_DRAWTILE;
@@ -105,7 +105,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	if (Type == CGameWorld::ENTTYPE_DRAWTILE)
 	{
 		// check if its a drawtile, can be moved/replaced
-		if (Remove || GameServer()->HasDrawTile(MapIndex))
+		if (Remove || GameServer()->m_Plots.HasDrawTile(MapIndex))
 		{
 			// TilePlace can place and remove solid blocks so we can check for an entity while on a solid block
 			ValidTile = true;
@@ -116,7 +116,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 	{
 		if (Type == CGameWorld::ENTTYPE_SPEEDUP)
 		{
-			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->GetMaxPlotSpeedups(CursorPlotID))
+			if (CursorPlotID >= PLOT_START && GetNumSpeedups(CursorPlotID) >= GameServer()->m_Plots.GetMaxPlotSpeedups(CursorPlotID))
 				return false;
 
 			if (!TransformPreview)
@@ -130,7 +130,7 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		}
 		else if (Type == CGameWorld::ENTTYPE_TELEPORTER)
 		{
-			if (CursorPlotID >= PLOT_START && GetNumTeleporters(CursorPlotID) >= GameServer()->GetMaxPlotTeleporters(CursorPlotID))
+			if (CursorPlotID >= PLOT_START && GetNumTeleporters(CursorPlotID) >= GameServer()->m_Plots.GetMaxPlotTeleporters(CursorPlotID))
 				return false;
 
 			if (!TransformPreview)
@@ -184,7 +184,7 @@ bool CDrawEditor::RemoveEntity(CEntity *pEntity)
 
 int CDrawEditor::GetPlotID()
 {
-	return GameServer()->GetPlotID(m_pCharacter->GetPlayer()->GetAccID());
+	return GameServer()->m_Plots.GetPlotID(m_pCharacter->GetPlayer()->GetAccID());
 }
 
 int CDrawEditor::CurrentPlotID()
@@ -194,7 +194,7 @@ int CDrawEditor::CurrentPlotID()
 
 int CDrawEditor::GetCursorPlotID()
 {
-	return GameServer()->GetTilePlotID(m_Pos);
+	return GameServer()->m_Plots.GetTilePlotID(m_Pos);
 }
 
 int CDrawEditor::GetNumMaxDoors()
@@ -217,9 +217,9 @@ int CDrawEditor::GetFirstFreeNumber()
 	int PlotID = CurrentPlotID();
 	std::vector<int> vNumbers;
 
-	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	for (unsigned int i = 0; i < GameServer()->m_Plots.NumPlotObjects(PlotID); i++)
 	{
-		CEntity *pEnt = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		CEntity *pEnt = GameServer()->m_Plots.GetPlotObject(PlotID, i);
 		if (IsDoor && pEnt->GetObjType() != CGameWorld::ENTTYPE_BUTTON && (pEnt->GetObjType() != CGameWorld::ENTTYPE_DOOR || pEnt->m_Number == 0))
 			continue;
 		if (IsTeleporter && pEnt->GetObjType() != CGameWorld::ENTTYPE_TELEPORTER)
@@ -264,9 +264,9 @@ int CDrawEditor::GetNumSpeedups(int PlotID)
 		return 0; // doesnt matter on free draw, has unlimited anyways
 
 	int Num = 0;
-	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	for (unsigned int i = 0; i < GameServer()->m_Plots.NumPlotObjects(PlotID); i++)
 	{
-		CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		CEntity *pEntity = GameServer()->m_Plots.GetPlotObject(PlotID, i);
 		if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP && pEntity->m_TransformCID == -1)
 			Num++;
 	}
@@ -280,9 +280,9 @@ int CDrawEditor::GetNumTeleporters(int PlotID)
 		return 0; // doesnt matter on free draw, has unlimited anyways
 
 	int Num = 0;
-	for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+	for (unsigned int i = 0; i < GameServer()->m_Plots.NumPlotObjects(PlotID); i++)
 	{
-		CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+		CEntity *pEntity = GameServer()->m_Plots.GetPlotObject(PlotID, i);
 		if (pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER && pEntity->m_TransformCID == -1)
 			Num++;
 	}
@@ -355,7 +355,7 @@ void CDrawEditor::Tick()
 			PlotID = GetCursorPlotID();
 
 		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", m_pCharacter->GetPlayer()->Localize("Objects"), (int)GameServer()->m_aPlots[PlotID].m_vObjects.size(), GameServer()->GetMaxPlotObjects(PlotID));
+		str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", m_pCharacter->GetPlayer()->Localize("Objects"), (int)GameServer()->m_Plots.NumPlotObjects(PlotID), GameServer()->m_Plots.GetMaxPlotObjects(PlotID));
 		GameServer()->SendBroadcast(aBuf, GetCID(), false);
 	}
 }
@@ -405,9 +405,9 @@ void CDrawEditor::OnPlayerFire()
 		int PlotID = CurrentPlotID();
 		if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
 		{
-			for (unsigned int i = 0; i < GameServer()->m_aPlots[PlotID].m_vObjects.size(); i++)
+			for (unsigned int i = 0; i < GameServer()->m_Plots.NumPlotObjects(PlotID); i++)
 			{
-				CEntity *pEntity = GameServer()->m_aPlots[PlotID].m_vObjects[i];
+				CEntity *pEntity = GameServer()->m_Plots.GetPlotObject(PlotID, i);
 				if (m_Transform.m_Area.Includes(pEntity->GetPos()))
 				{
 					if (m_Setting == TRANSFORM_MOVE)
@@ -473,12 +473,12 @@ void CDrawEditor::OnPlayerFire()
 				{
 					if (CanPlace(false, m_Transform.m_vPreview[i].m_pEnt))
 					{
-						if (m_Setting == TRANSFORM_COPY && GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+						if (m_Setting == TRANSFORM_COPY && !GameServer()->m_Plots.CanInsertNewEntity(PlotID))
 							break;
 
 						CEntity *pEntity = CreateTransformEntity(m_Transform.m_vPreview[i].m_pEnt, false);
 						pEntity->m_PlotID = PlotID;
-						GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+						GameServer()->m_Plots.InsertPlotDrawEntity(pEntity);
 					}
 				}
 
@@ -507,13 +507,12 @@ void CDrawEditor::OnPlayerFire()
 		return;
 
 	int PlotID = GetCursorPlotID();
-	if (GameServer()->m_aPlots[PlotID].m_vObjects.size() >= GameServer()->GetMaxPlotObjects(PlotID))
+	if (!GameServer()->m_Plots.CanInsertNewEntity(PlotID))
 		return;
 
 	CEntity *pEntity = CreateEntity();
 	pEntity->m_PlotID = PlotID;
-
-	GameServer()->m_aPlots[PlotID].m_vObjects.push_back(pEntity);
+	GameServer()->m_Plots.InsertPlotDrawEntity(pEntity);
 
 	m_pCharacter->SetAttackTick(Server()->Tick());
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, CmaskAll());
@@ -1361,11 +1360,11 @@ void CDrawEditor::OnWeaponSwitch()
 		int PlotID = GetPlotID();
 		if (CurrentPlotID() == PlotID)
 		{
-			GameServer()->SetPlotDoorStatus(PlotID, true);
-			GameServer()->RemovePortalsFromPlot(PlotID);
+			GameServer()->m_Plots.SetPlotDoorStatus(PlotID, true);
+			GameServer()->m_Plots.RemovePortalsFromPlot(PlotID);
 
 			for (int i = 0; i < GetNumMaxDoors(); i++)
-				GameServer()->SetPlotDrawDoorStatus(PlotID, i, true);
+				GameServer()->m_Plots.SetPlotDrawDoorStatus(PlotID, i, true);
 
 			for (int i = 0; i < MAX_CLIENTS; i++)
 				if (GameServer()->GetPlayerChar(i) && i != GetCID())
@@ -1461,9 +1460,9 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 	{
 		if (m_Setting == TRANSFORM_SAVE_PRESET)
 		{
-			for (unsigned int i = 0; i < GameServer()->m_vPresetList.size(); i++)
+			for (unsigned int i = 0; i < GameServer()->m_Plots.m_vPresetList.size(); i++)
 			{
-				if (str_comp_nocase(GameServer()->m_vPresetList[i].c_str(), pName) == 0)
+				if (str_comp_nocase(GameServer()->m_Plots.m_vPresetList[i].c_str(), pName) == 0)
 				{
 					char aBuf[128];
 					str_format(aBuf, sizeof(aBuf), m_pCharacter->GetPlayer()->Localize("Couldn't save preset '%s', a preset with that name already exists"), pName);
@@ -1480,10 +1479,10 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 			for (unsigned int i = 0; i < m_Transform.m_vSelected.size(); i++)
 			{
 				vec2 Pos = m_Transform.m_vSelected[i]->GetPos() - m_Transform.m_Area.BottomRight();
-				GameServer()->WritePlotObject(m_Transform.m_vSelected[i], &PresetFile, &Pos);
+				GameServer()->m_Plots.WritePlotObject(m_Transform.m_vSelected[i], &PresetFile, &Pos);
 			}
 
-			GameServer()->m_vPresetList.push_back(pName);
+			GameServer()->m_Plots.m_vPresetList.push_back(pName);
 			str_format(aBuf, sizeof(aBuf), m_pCharacter->GetPlayer()->Localize("Successfully saved preset '%s'"), pName);
 			GameServer()->SendChatTarget(GetCID(), aBuf);
 			StopTransform(true);
@@ -1506,7 +1505,7 @@ bool CDrawEditor::TryEnterPresetName(const char *pName)
 			getline(PresetFile, data);
 			const char *pData = data.c_str();
 
-			std::vector<CEntity *> vEntities = GameServer()->ReadPlotObjects(pData, CurrentPlotID());
+			std::vector<CEntity *> vEntities = GameServer()->m_Plots.ReadPlotObjects(pData, CurrentPlotID());
 			while(vEntities.size())
 			{
 				SSelectedEnt Entity;
@@ -1552,12 +1551,7 @@ void CDrawEditor::StopTransform(bool Silent)
 
 bool CDrawEditor::SafelyDestroyDrawEntity(CEntity *pEntity)
 {
-	for (unsigned i = 0; i < GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.size(); i++)
-		if (GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects[i] == pEntity)
-		{
-			GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.erase(GameServer()->m_aPlots[pEntity->m_PlotID].m_vObjects.begin() + i);
-			break;
-		}
+	GameServer()->m_Plots.ErasePlotDrawEntity(pEntity);
 
 	// We want to remove the collision instantly so that transform move can place objects on the same posititon
 	// we dont need to do it for plot draw doors, because they are handled as doors and can have multiple on the same position anyways

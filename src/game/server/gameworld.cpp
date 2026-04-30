@@ -1321,7 +1321,7 @@ CEntity *CGameWorld::IntersectEntityTypes(vec2 Pos0, vec2 Pos1, float Radius, ve
 			else
 			{
 				int PlotID = p->m_PlotID;
-				if (!GameServer()->PlotCanBeRaided(PlotID))
+				if (!GameServer()->m_Plots.PlotCanBeRaided(PlotID))
 					continue;
 
 				if (i == ENTTYPE_DOOR)

@@ -277,9 +277,9 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 			// taser destroy
 			if (pIntersected->IsPlotDoor())
 			{
-				if (GameServer()->OnPlotDoorTaser(pIntersected->m_PlotID, m_TaserStrength, m_Owner, At))
+				if (GameServer()->m_Plots.OnPlotDoorTaser(pIntersected->m_PlotID, m_TaserStrength, m_Owner, At))
 				{
-					GameServer()->SetPlotDoorStatus(pIntersected->m_PlotID, false);
+					GameServer()->m_Plots.SetPlotDoorStatus(pIntersected->m_PlotID, false);
 				}
 				m_Energy = -1;
 			}

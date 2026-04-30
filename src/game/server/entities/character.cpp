@@ -233,8 +233,8 @@ bool CCharacter::IsGrounded(bool CheckDoor, bool SetDrawTilePred)
 	{
 		if (SetDrawTilePred)
 		{
-			if (GameServer()->HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX1, PosY))) ||
-				GameServer()->HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX2, PosY))))
+			if (GameServer()->m_Plots.HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX1, PosY))) ||
+				GameServer()->m_Plots.HasDrawTile(GameServer()->Collision()->GetPureMapIndex(vec2(PosX2, PosY))))
 				m_MoveRestrictions |= CANTMOVE_DOWN_SOLID_DRAWTILE;
 		}
 		return true;
@@ -659,7 +659,7 @@ void CCharacter::FireWeapon()
 					break;
 				}
 
-				int OwnPlotID = GameServer()->GetPlotID(m_pPlayer->GetAccID());
+				int OwnPlotID = GameServer()->m_Plots.GetPlotID(m_pPlayer->GetAccID());
 				if (OwnPlotID >= PLOT_START || m_DoorHammer)
 				{
 					// 4 x 3 = 12 (reachable tiles x (game layer, front layer, switch layer))
@@ -682,13 +682,13 @@ void CCharacter::FireWeapon()
 							bool Status = GameServer()->Collision()->m_pSwitchers[pDoor->m_Number].m_Status[Team()];
 							if (pDoor->m_PlotID > 0 && !IsPlotDrawDoor)
 							{
-								if (!Status && GameServer()->PlotDoorDestroyed(pDoor->m_PlotID))
+								if (!Status && GameServer()->m_Plots.PlotDoorDestroyed(pDoor->m_PlotID))
 								{
 									GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You can't close your door because the police destroyed it"));
 								}
 								else
 								{
-									GameServer()->SetPlotDoorStatus(pDoor->m_PlotID, !Status);
+									GameServer()->m_Plots.SetPlotDoorStatus(pDoor->m_PlotID, !Status);
 								}
 							}
 							else
@@ -1094,7 +1094,7 @@ void CCharacter::FireWeapon()
 				if (GameServer()->Collision()->TestBox(PortalPos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 					Found = GetNearestAirPos(PortalPos, m_Pos, &PortalPos);
 
-				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->GetTilePlotID(PortalPos) < PLOT_START && Config()->m_SvPortalThroughDoor;
+				bool PlotDoorOnly = GetCurrentTilePlotID() < PLOT_START && GameServer()->m_Plots.GetTilePlotID(PortalPos) < PLOT_START && Config()->m_SvPortalThroughDoor;
 				bool BatteryRequired = Config()->m_SvPortalRifleAmmo && !pAccount->m_PortalRifle;
 
 				int Flags = CGameWorld::EFindEntFlag::WALL | CGameWorld::EFindEntFlag::IN_HELICOPTER;
@@ -5008,7 +5008,7 @@ int CCharacter::GetPowerHooked()
 
 int CCharacter::GetCurrentTilePlotID(bool CheckDoor)
 {
-	return GameServer()->GetTilePlotID(m_Pos, CheckDoor);
+	return GameServer()->m_Plots.GetTilePlotID(m_Pos, CheckDoor);
 }
 
 void CCharacter::TeleOutOfPlot(int PlotID)
@@ -5019,15 +5019,15 @@ void CCharacter::TeleOutOfPlot(int PlotID)
 	if (m_pPlayer->IsMinigame() && m_pPlayer->m_SavedMinigameTee)
 	{
 		vec2 SavedPos = m_pPlayer->m_MinigameTee.GetPos();
-		int SavedTilePlotID = GameServer()->GetTilePlotID(SavedPos, true);
+		int SavedTilePlotID = GameServer()->m_Plots.GetTilePlotID(SavedPos, true);
 
 		if (SavedTilePlotID == PlotID)
-			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_aPlots[PlotID].m_ToTele);
+			m_pPlayer->m_MinigameTee.TeleOutOfPlot(GameServer()->m_Plots.GetToTele(PlotID));
 	}
 
 	if (GetCurrentTilePlotID(true) == PlotID)
 	{
-		ForceSetPos(GameServer()->m_aPlots[PlotID].m_ToTele);
+		ForceSetPos(GameServer()->m_Plots.GetToTele(PlotID));
 		GiveWeapon(WEAPON_DRAW_EDITOR, true);
 
 		// in case there is a safearea tile on the plot and owner starts editing, we dont want people being outside with safe area
@@ -5685,7 +5685,7 @@ void CCharacter::CheckMoved()
 void CCharacter::ForceSetPos(vec2 Pos)
 {
 	int CurrentPlotID = GetCurrentTilePlotID(true);
-	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->GetTilePlotID(Pos))
+	if (CurrentPlotID >= PLOT_START && CurrentPlotID != GameServer()->m_Plots.GetTilePlotID(Pos))
 		m_pPlayer->StopPlotEditing();
 
 	m_Core.m_Pos = m_Pos = m_PrevPos = Pos;

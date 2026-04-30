@@ -1636,6 +1636,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   misc/draweditor.cpp
   misc/draweditor.h
   misc/mask128.h
+  misc/plots.cpp
+  misc/plots.h
   misc/rainbowname.cpp
   misc/rainbowname.h
   misc/snake.cpp

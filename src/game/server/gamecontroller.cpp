@@ -237,8 +237,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_PLOT_TOTELE && Number > 0)
 	{
 		int PlotID = GameServer()->Collision()->GetPlotBySwitch(Number);
-		GameServer()->m_aPlots[PlotID].m_ToTele = Pos;
-		GameServer()->m_aPlots[PlotID].m_Size = GameServer()->Collision()->m_apPlotSize[PlotID];
+		GameServer()->m_Plots.InitPlot(PlotID, Pos, GameServer()->Collision()->m_apPlotSize[PlotID]);
 	}
 	else if (Layer == LAYER_SWITCH && Index == TILE_SWITCH_REDIRECT_SERVER_TO && Number > 0)
 	{

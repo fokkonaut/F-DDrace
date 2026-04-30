@@ -28,6 +28,7 @@
 #include "misc/whois.h"
 #include "misc/rainbowname.h"
 #include "misc/votingmenu.h"
+#include "misc/plots.h"
 
 #include "teehistorian.h"
 
@@ -452,73 +453,16 @@ public:
 
 	void UpdateHidePlayers(int UpdateID = -1);
 
-	// draweditor preset list
-	static int LoadPresetListCallback(const char *pName, int IsDir, int StorageType, void *pUser);
-	std::vector<std::string> m_vPresetList;
-
-	// plots
-	void ReadPlotStats(int ID);
-	void WritePlotStats(int ID);
-	std::vector<CEntity *> ReadPlotObjects(const char *pLine, int PlotID);
-	void WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 *pPos = 0);
-
-	void SetPlotInfo(int PlotID, int AccID);
-	void SetPlotExpire(int PlotID);
-
-	int GetMaxPlotSpeedups(int PlotID);
-	int GetMaxPlotTeleporters(int PlotID);
-	unsigned int GetMaxPlotObjects(int PlotID);
-	const char *GetPlotSizeString(int PlotID);
+	CPlots m_Plots;
 
 	void SetExpireDateDays(time_t *pDate, float Days);
 	void SetExpireDate(time_t *pDate, float Hours, bool SetMinutesZero = false);
 	bool IsExpired(time_t Date);
 	float MonthsPassedSinceRegister(int AccID);
 
-	struct SPlot
-	{
-		char m_aOwner[32];
-		char m_aDisplayName[32];
-		time_t m_ExpireDate;
-
-		int m_Size;
-		vec2 m_ToTele;
-		std::vector<CEntity *> m_vObjects;
-		int64 m_DestroyEndTick;
-		int m_DoorHealth;
-	} m_aPlots[MAX_PLOTS];
-
-	enum PlotVariables
-	{
-		PLOT_OWNER_ACC_USERNAME,
-		PLOT_DISPLAY_NAME,
-		PLOT_EXPIRE_DATE,
-		PLOT_DOOR_STATUS,
-		PLOT_OBJECTS,
-		NUM_PLOT_VARIABLES
-	};
-
-	void SetPlotDoorStatus(int PlotID, bool Close);
-	void SetPlotDrawDoorStatus(int PlotID, int Door, bool Close);
-	void SetPlotDrawDoorStatus(int Number, bool Close);
-	void ClearPlot(int PlotID);
-	int GetPlotID(int AccID);
-	void ExpirePlots();
-	int GetTilePlotID(vec2 Pos, bool CheckDoor = false);
-
 	int m_FullHourOffsetTicks;
 	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
-	bool HasPlotByIP(int ClientID);
-
 	int IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
-	void RemovePortalsFromPlot(int PlotID);
-	bool IsPlotEmpty(int PlotID);
-
-	bool PlotCanBeRaided(int PlotID);
-	bool PlotDoorDestroyed(int PlotID);
-	bool OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, vec2 Pos);
-
-	CDrawTile *HasDrawTile(int MapIndex, CDrawTile *pMatch = 0);
 
 	//account
 	int GetAccIDByUsername(const char *pUsername);

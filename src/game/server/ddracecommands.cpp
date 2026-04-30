@@ -2447,7 +2447,7 @@ void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
 	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
 		return;
 
-	pChr->ForceSetPos(pSelf->m_aPlots[PlotID].m_ToTele);
+	pChr->ForceSetPos(pSelf->m_Plots.GetToTele(PlotID));
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
@@ -2467,7 +2467,7 @@ void CGameContext::ConClearPlot(IConsole::IResult* pResult, void* pUserData)
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "Cleared plot %d", PlotID);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "plot", aBuf);
-	pSelf->ClearPlot(PlotID);
+	pSelf->m_Plots.ClearPlot(PlotID);
 	pSelf->SendModLogMessage(pResult->m_ClientID, aBuf);
 }
 
@@ -2489,13 +2489,13 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	if (pSelf->GetPlotID(NewID) != 0)
+	if (pSelf->m_Plots.GetPlotID(NewID) != 0)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "This account owns a plot already");
 		return;
 	}
 
-	int OldID = pSelf->GetAccIDByUsername(pSelf->m_aPlots[PlotID].m_aOwner);
+	int OldID = pSelf->GetAccIDByUsername(pSelf->m_Plots.GetOwner(PlotID));
 	int OldClientID = pSelf->m_Accounts[OldID].m_ClientID;
 	if (OldClientID >= 0 && pSelf->m_apPlayers[OldClientID])
 		pSelf->SendChatTarget(OldClientID, pSelf->m_apPlayers[OldClientID]->Localize("You lost your plot"));
@@ -2508,9 +2508,9 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 		pSelf->SendChatTarget(NewClientID, aBuf);
 	}
 
-	if (pSelf->m_aPlots[PlotID].m_ExpireDate == 0)
-		pSelf->SetPlotExpire(PlotID);
-	pSelf->SetPlotInfo(PlotID, NewID);
+	if (!pSelf->m_Plots.GetPlotExpireDate(PlotID)[0])
+		pSelf->m_Plots.SetPlotExpire(PlotID);
+	pSelf->m_Plots.SetPlotInfo(PlotID, NewID);
 
 	str_format(aBuf, sizeof(aBuf), "Changed owner of plot %d from '%s' to '%s'", PlotID, pSelf->m_Accounts[OldID].m_Username, pSelf->m_Accounts[NewID].m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
@@ -2519,23 +2519,7 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConPlotInfo(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	int PlotID = pResult->GetInteger(0);
-	if (PlotID <= 0 || PlotID > pSelf->Collision()->m_NumPlots)
-		return;
-
-	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "Owner account: %s", pSelf->m_aPlots[PlotID].m_aOwner);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Size: %s", pSelf->GetPlotSizeString(PlotID));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Expire date: %s", pSelf->m_aPlots[PlotID].m_ExpireDate == 0 ? "" : pSelf->GetDate(pSelf->m_aPlots[PlotID].m_ExpireDate));
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Door status: %d", pSelf->Collision()->m_pSwitchers ? pSelf->Collision()->m_pSwitchers[pSelf->Collision()->GetSwitchByPlot(PlotID)].m_Status[0] : 0);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Destroy Seconds: %lld", pSelf->m_aPlots[PlotID].m_DestroyEndTick ? (pSelf->m_aPlots[PlotID].m_DestroyEndTick - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed() : 0);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
-	str_format(aBuf, sizeof(aBuf), "Door Health: %d", pSelf->m_aPlots[PlotID].m_DoorHealth);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "plot", aBuf);
+	pSelf->m_Plots.PrintPlotInfo(pResult->GetInteger(0));
 }
 
 void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
@@ -2547,9 +2531,9 @@ void CGameContext::ConPresetList(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "Listing all draw editor presets:");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "presets", aBuf);
 
-	for (unsigned int i = 0; i < pSelf->m_vPresetList.size(); i++)
+	for (unsigned int i = 0; i < pSelf->m_Plots.m_vPresetList.size(); i++)
 	{
-		const char *pName = pSelf->m_vPresetList[i].c_str();
+		const char *pName = pSelf->m_Plots.m_vPresetList[i].c_str();
 		if (Bufcnt + str_length(pName) + 4 > 128)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "presets", aBuf);

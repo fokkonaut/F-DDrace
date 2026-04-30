@@ -461,11 +461,8 @@ void CPlayer::Tick()
 	{
 		CancelPlotAuction();
 		CancelPlotSwap();
-		int PlotID = GameServer()->GetPlotID(AccID);
-		if (PlotID >= PLOT_START)
-		{
-			GameServer()->m_aPlots[PlotID].m_DestroyEndTick = Server()->Tick() + m_EscapeTime;
-		}
+		int PlotID = GameServer()->m_Plots.GetPlotID(AccID);
+		GameServer()->m_Plots.SetPlotDestroyEndTick(PlotID, Server()->Tick() + m_EscapeTime);
 	}
 	m_PrevEscapeTime = m_EscapeTime;
 
@@ -1579,9 +1576,9 @@ void CPlayer::TryRespawn()
 	}
 	else if ((m_PlotSpawn && !m_ToggleSpawn) || (!m_PlotSpawn && m_ToggleSpawn))
 	{
-		int PlotID = GameServer()->GetPlotID(GetAccID());
+		int PlotID = GameServer()->m_Plots.GetPlotID(GetAccID());
 		if (PlotID > 0)
-			SpawnPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+			SpawnPos = GameServer()->m_Plots.GetToTele(PlotID);
 	}
 
 	// its gonna be loaded in CCharacter::Spawn()
@@ -3033,20 +3030,20 @@ void CPlayer::SetResumeMoved(bool Set)
 
 void CPlayer::ClearPlot()
 {
-	int PlotID = GameServer()->GetPlotID(GetAccID());
+	int PlotID = GameServer()->m_Plots.GetPlotID(GetAccID());
 	if (PlotID < PLOT_START)
 	{
 		GameServer()->SendChatTarget(m_ClientID, Localize("You need a plot to use this command"));
 		return;
 	}
-	GameServer()->ClearPlot(PlotID);
+	GameServer()->m_Plots.ClearPlot(PlotID);
 	GameServer()->SendChatTarget(m_ClientID, Localize("All objects of your plot have been removed"));
 }
 
 void CPlayer::StartPlotEdit()
 {
 	CCharacter *pChr = GetCharacter();
-	int PlotID = GameServer()->GetPlotID(GetAccID());
+	int PlotID = GameServer()->m_Plots.GetPlotID(GetAccID());
 	if (PlotID < PLOT_START)
 	{
 		GameServer()->SendChatTarget(m_ClientID, Localize("You need a plot to use this command"));
@@ -3062,13 +3059,13 @@ void CPlayer::StartPlotEdit()
 		GameServer()->SendChatTarget(m_ClientID, Localize("You have to be inside your plot to edit your plot"));
 		return;
 	}
-	else if (GameServer()->PlotCanBeRaided(PlotID))
+	else if (GameServer()->m_Plots.PlotCanBeRaided(PlotID))
 	{
 		GameServer()->SendChatTarget(m_ClientID, Localize("You can't edit your plot while living the life of a gangster."));
 		return;
 	}
 
-	if (GameServer()->Arenas()->FightStarted(m_ClientID) || (m_pCharacter && m_pCharacter->m_InSnake))
+	if (GameServer()->Arenas()->FightStarted(m_ClientID) || pChr->m_InSnake)
 		return;
 
 	GameServer()->SendChatTarget(m_ClientID, Localize("You are now editing your plot, switch to another weapon to exit the editor"));

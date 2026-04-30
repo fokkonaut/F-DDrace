@@ -314,7 +314,7 @@ enum
 
 	// F-DDrace
 	NUM_INDICES = 256,
-	MAX_PLOTS = 256-1,
+	MAX_PLOTS = 48, // need to take care of doors and teleporters to not go oob
 };
 
 struct CPoint

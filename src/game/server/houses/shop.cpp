@@ -62,7 +62,7 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		int Time;
 		for (int i = PLOT_START; i < m_NumItems; i++)
 		{
-			Size = GameServer()->m_aPlots[i].m_Size;
+			Size = GameServer()->m_Plots.GetSize(i);
 			str_format(aaName[i], sizeof(aaName[i]), "Plot %d", i);
 			Level = (Size + 1) * 20;
 			Price = (Size + 1) * 50000;
@@ -193,12 +193,12 @@ void CShop::OnPageChange(int ClientID)
 		{
 			char aOwner[32];
 			char aRented[64];
-			bool Owned = GameServer()->m_aPlots[Item].m_aOwner[0] != 0;
+			bool Owned = GameServer()->m_Plots.GetOwner(Item)[0] != 0;
 
 			if (Owned)
 			{
-				str_format(aOwner, sizeof(aOwner), "'%s'", GameServer()->m_aPlots[Item].m_aDisplayName);
-				str_format(aRented, sizeof(aRented), "%s: %s", GameServer()->m_apPlayers[ClientID]->Localize("Rented until"), GameServer()->GetDate(GameServer()->m_aPlots[Item].m_ExpireDate));
+				str_format(aOwner, sizeof(aOwner), "'%s'", GameServer()->m_Plots.GetDisplayName(Item));
+				str_format(aRented, sizeof(aRented), "%s: %s", GameServer()->m_apPlayers[ClientID]->Localize("Rented until"), GameServer()->m_Plots.GetPlotExpireDate(Item));
 			}
 			else
 			{
@@ -211,8 +211,8 @@ void CShop::OnPageChange(int ClientID)
 				"Max. objects: %d\n"
 				"Owner: %s\n"
 				"%s",
-				GameServer()->GetPlotSizeString(Item),
-				GameServer()->GetMaxPlotObjects(Item),
+				GameServer()->m_Plots.GetPlotSizeString(Item),
+				GameServer()->m_Plots.GetMaxPlotObjects(Item),
 				aOwner, aRented);
 		}
 
@@ -347,8 +347,8 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
-		int OwnPlotID = GameServer()->GetPlotID(pPlayer->GetAccID());
-		if (GameServer()->m_aPlots[Item].m_aOwner[0] != 0)
+		int OwnPlotID = GameServer()->m_Plots.GetPlotID(pPlayer->GetAccID());
+		if (GameServer()->m_Plots.GetOwner(Item)[0] != 0)
 		{
 			GameServer()->SendChatTarget(ClientID, pPlayer->Localize("This plot is already sold to someone else"));
 			return;
@@ -363,7 +363,7 @@ void CShop::BuyItem(int ClientID, int Item)
 			GameServer()->SendChatTarget(ClientID, pPlayer->Localize("You already own another plot"));
 			return;
 		}
-		else if (GameServer()->HasPlotByIP(ClientID))
+		else if (GameServer()->m_Plots.HasPlotByIP(ClientID))
 		{
 			GameServer()->SendChatTarget(ClientID, pPlayer->Localize("Your IP address already owns one plot"));
 			return;
@@ -448,10 +448,10 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
 	{
-		GameServer()->SetPlotExpire(Item);
+		GameServer()->m_Plots.SetPlotExpire(Item);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), pPlayer->Localize("The plot will expire on %s"), GameServer()->GetDate(GameServer()->m_aPlots[Item].m_ExpireDate));
+		str_format(aBuf, sizeof(aBuf), pPlayer->Localize("The plot will expire on %s"), GameServer()->m_Plots.GetPlotExpireDate(Item));
 		GameServer()->SendChatTarget(ClientID, aBuf);
-		GameServer()->SetPlotInfo(Item, pPlayer->GetAccID());
+		GameServer()->m_Plots.SetPlotInfo(Item, pPlayer->GetAccID());
 	}
 }

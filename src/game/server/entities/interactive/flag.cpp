@@ -193,7 +193,7 @@ void CFlag::TeleToPlot(int PlotID)
 	GameServer()->CreateDeath(m_Pos, GetCarrier() ? m_Carrier : GetLastCarrier() ? m_LastCarrier : -1);
 	Drop();
 	m_Vel = vec2(0, 0);
-	m_Pos = m_PrevPos = GameServer()->m_aPlots[PlotID].m_ToTele;
+	m_Pos = m_PrevPos = GameServer()->m_Plots.GetToTele(PlotID);
 }
 
 void CFlag::ResetPrevPos()
@@ -266,7 +266,7 @@ void CFlag::Tick()
 		vec2 Pos = mix(m_Pos, m_PrevPos, i*InverseEnd);
 
 		// plots
-		int PlotID = GameServer()->GetTilePlotID(Pos, true);
+		int PlotID = GameServer()->m_Plots.GetTilePlotID(Pos, true);
 		if (PlotID >= PLOT_START)
 			TeleToPlot(PlotID);
 
