@@ -591,9 +591,20 @@ void CGameWorld::PlayerMap::Add(int MapID, int ClientID)
 	Remove(m_pReverseMap[ClientID]);
 
 	int OldClientID = Remove(MapID);
-	if ((OldClientID == -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
-		|| (OldClientID != -1 && m_pGameWorld->GameServer()->GetDDRaceTeam(OldClientID) != m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID)))
-		m_UpdateTeamsState = true;
+	// update teams state for teams and safe area (not a real team, as it's still individual per team actually)
+	CTeamsCore *pTeamsCore = &((CGameControllerDDRace *)m_pGameWorld->GameServer()->m_pController)->m_Teams.m_Core;
+	if (OldClientID == -1)
+	{
+		if (m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0 || !pTeamsCore->GetInGame(ClientID))
+			m_UpdateTeamsState = true;
+	}
+	else
+	{
+		if (m_pGameWorld->GameServer()->GetDDRaceTeam(OldClientID) != m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID))
+			m_UpdateTeamsState = true;
+		if (pTeamsCore->GetInGame(OldClientID) != pTeamsCore->GetInGame(ClientID))
+			m_UpdateTeamsState = true;
+	}
 
 	if (m_aReserved[ClientID])
 		m_ResortReserved = true;
@@ -611,7 +622,8 @@ int CGameWorld::PlayerMap::Remove(int MapID)
 	int ClientID = m_pMap[MapID];
 	if (ClientID != -1)
 	{
-		if (m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0)
+		CTeamsCore *pTeamsCore = &((CGameControllerDDRace *)m_pGameWorld->GameServer()->m_pController)->m_Teams.m_Core;
+		if (m_pGameWorld->GameServer()->GetDDRaceTeam(ClientID) > 0 || !pTeamsCore->GetInGame(ClientID))
 			m_UpdateTeamsState = true;
 
 		if (m_aReserved[ClientID])
