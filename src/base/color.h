@@ -177,4 +177,141 @@ inline float LabDistance(vec3 labA, vec3 labB)
 	return sqrtf(ld*ld + ad*ad + bd*bd);
 }
 
+// Curiously Recurring Template Pattern for type safety
+template<typename DerivedT>
+class color4_base
+{
+public:
+	union
+	{
+		float x, r, h;
+	};
+	union
+	{
+		float y, g, s;
+	};
+	union
+	{
+		float z, b, l, v;
+	};
+	union
+	{
+		float w, a;
+	};
+
+	constexpr color4_base() :
+		x(), y(), z(), a()
+	{
+	}
+
+	constexpr color4_base(float nx, float ny, float nz, float na) :
+		x(nx), y(ny), z(nz), a(na)
+	{
+	}
+
+	constexpr color4_base(float nx, float ny, float nz) :
+		x(nx), y(ny), z(nz), a(1.0f)
+	{
+	}
+
+	constexpr color4_base(unsigned col, bool alpha = false)
+	{
+		a = alpha ? ((col >> 24) & 0xFF) / 255.0f : 1.0f;
+		x = ((col >> 16) & 0xFF) / 255.0f;
+		y = ((col >> 8) & 0xFF) / 255.0f;
+		z = ((col >> 0) & 0xFF) / 255.0f;
+	}
+
+	// Disallow casting between different instantiations of the color4_base template.
+	// The color_cast functions below should be used to convert between colors.
+	template<typename OtherDerivedT>
+		requires(!std::is_same_v<DerivedT, OtherDerivedT>)
+	color4_base(const color4_base<OtherDerivedT> &Other) = delete;
+
+	constexpr float &operator[](int index)
+	{
+		return ((float *)this)[index];
+	}
+
+	constexpr bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
+	constexpr bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
+
+	constexpr unsigned Pack(bool Alpha = true) const
+	{
+		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
+	}
+
+	constexpr unsigned PackAlphaLast(bool Alpha = true) const
+	{
+		if(Alpha)
+			return ((unsigned)round_to_int(x * 255.0f) << 24) + ((unsigned)round_to_int(y * 255.0f) << 16) + ((unsigned)round_to_int(z * 255.0f) << 8) + (unsigned)round_to_int(a * 255.0f);
+		return ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
+	}
+
+	constexpr DerivedT WithAlpha(float alpha) const
+	{
+		DerivedT col(static_cast<const DerivedT &>(*this));
+		col.a = alpha;
+		return col;
+	}
+
+	constexpr DerivedT WithMultipliedAlpha(float alpha) const
+	{
+		DerivedT col(static_cast<const DerivedT &>(*this));
+		col.a *= alpha;
+		return col;
+	}
+
+	template<typename UnpackT>
+	constexpr static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
+	{
+		UnpackT Result;
+		if(Alpha)
+		{
+			Result.x = ((Color >> 24) & 0xFF) / 255.0f;
+			Result.y = ((Color >> 16) & 0xFF) / 255.0f;
+			Result.z = ((Color >> 8) & 0xFF) / 255.0f;
+			Result.a = ((Color >> 0) & 0xFF) / 255.0f;
+		}
+		else
+		{
+			Result.x = ((Color >> 16) & 0xFF) / 255.0f;
+			Result.y = ((Color >> 8) & 0xFF) / 255.0f;
+			Result.z = ((Color >> 0) & 0xFF) / 255.0f;
+			Result.a = 1.0f;
+		}
+		return Result;
+	}
+};
+
+class ColorHSLA : public color4_base<ColorHSLA>
+{
+public:
+	using color4_base::color4_base;
+	constexpr ColorHSLA() = default;
+
+	constexpr static const float DARKEST_LGT = 0.5f;
+	constexpr static const float DARKEST_LGT7 = 61.0f / 255.0f;
+
+	constexpr ColorHSLA UnclampLighting(float Darkest) const
+	{
+		ColorHSLA col = *this;
+		col.l = Darkest + col.l * (1.0f - Darkest);
+		return col;
+	}
+
+	constexpr unsigned Pack(bool Alpha = true) const
+	{
+		return color4_base::Pack(Alpha);
+	}
+
+	constexpr unsigned Pack(float Darkest, bool Alpha = false) const
+	{
+		ColorHSLA col = *this;
+		col.l = (l - Darkest) / (1 - Darkest);
+		col.l = std::clamp(col.l, 0.0f, 1.0f);
+		return col.Pack(Alpha);
+	}
+};
+
 #endif

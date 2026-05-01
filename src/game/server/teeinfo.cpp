@@ -1,4 +1,5 @@
 #include "teeinfo.h"
+#include <base/color.h>
 #define NO_TRANSLATE "<{no-translate}>"
 
 struct Skin
@@ -15,14 +16,14 @@ struct Skin
 
 static Skin s_Skins[NUM_SKINS] = {
 /* standard 0.6 + 0.7 */
-{"bluekitty",{"kitty","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{8681144,-8229413,65408,7885547,7885547,65408},""},
+{"bluekitty",{"kitty","whisker","","standard","standard","negative"},{1,1,0,1,1,1},{8681144,-8229413,65408,7885547,7885547,9043712},""},
 {"bluestripe",{"standard","stripes","","standard","standard","standard"},{1,0,0,1,1,0},{10187898,-16711808,65408,750848,1944919,65408},""},
 {"brownbear",{"bear","bear","hair","standard","standard","standard"},{1,1,0,1,1,0},{1082745,-15634776,65408,1082745,1147174,65408},""},
 {"cammo",{"standard","cammo2","","standard","standard","standard"},{1,1,0,1,1,0},{5334342,-11771603,65408,750848,1944919,65408},""},
 {"cammostripes",{"standard","cammostripes","","standard","standard","standard"},{1,1,0,1,1,0},{5334342,-14840320,65408,750848,1944919,65408},""},
-{"koala",{"koala","twinbelly","","standard","standard","standard"},{1,1,0,1,1,0},{184,-15397662,65408,184,9765959,65408},""},
+{"koala",{"koala","twinbelly","","standard","standard","standard"},{1,1,0,1,1,0},{184,-15397662,65408,184,9765959,65408},"coala"},
 {"default",{"standard","","","standard","standard","standard"},{1,0,0,1,1,0},{1798004,-16711808,65408,1799582,1869630,65408},""},
-{"limekitty",{"kitty","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{4612803,-12229920,65408,3827951,3827951,65408},""},
+{"limekitty",{"kitty","whisker","","standard","standard","negative"},{1,1,0,1,1,1},{4612803,-12229920,65408,3827951,3827951,8256000},""},
 {"pinky",{"standard","whisker","","standard","standard","standard"},{1,1,0,1,1,0},{15911355,-801066,65408,15043034,15043034,65408},""},
 {"redbopp",{"standard","donny","unibop","standard","standard","standard"},{1,1,1,1,1,1},{16177260,-16590390,16177260,16177260,7624169,65408},""},
 {"redstripe",{"standard","stripe","","standard","standard","standard"},{1,0,0,1,1,0},{16307835,-16711808,65408,184,9765959,65408},""},
@@ -35,14 +36,14 @@ static Skin s_Skins[NUM_SKINS] = {
 {"beaver",{"beaver","twinbelly","","standard","standard","colorable"},{1,1,0,1,1,1},{1272149,-970966063,65408,1082745,1147174,1559085},""},
 {"bumbler",{"raccoon","setisu","","standard","standard","colorable"},{1,1,0,1,1,1},{9834525,1612888028,65408,1804958,1861519,1862454},""},
 {"cavebat",{"bat","belly2","","standard","standard","colorable"},{1,1,0,1,1,1},{1091513,-1744165075,65408,666952,949148,553007},"Bat"},
-{"force",{"force","wildpaint","","standard","standard","standard"},{1,1,0,1,1,1},{1577780,907949571,65408,1769535,1835008,0},""},
+{"force",{"force","wildpaint","","standard","standard","standard"},{1,1,0,1,1,1},{1577780,907949571,65408,1769535,1835008,0},"darkforce"},
 {"fox",{"fox","fox","","standard","standard","colorable"},{1,1,0,1,1,1},{1102443,-485425166,65408,1094755,1102450,1441632},"foxi"},
 {"greycoon",{"raccoon","coonfluff","","standard","standard","standard"},{1,1,0,1,1,1},{917651,-15269783,65408,1769643,1245336,1085234},""},
 {"greyfox",{"fox","cammostripes","","standard","standard","colorable"},{1,1,0,1,1,1},{1051203,538383807,65408,10230803,2100280,1858113},NO_TRANSLATE},
 {"hippo",{"hippo","hipbel","hair","standard","standard","standard"},{1,1,0,1,1,1},{11448503,-1296105217,65408,12404896,13709860,13026349},""},
 {"limedog",{"dog","whisker","","standard","standard","negative"},{1,1,0,1,1,1},{2406825,-16737793,65408,832136,970096,1310489},""},
 {"monkey",{"monkey","monkey","hair","standard","standard","standard"},{1,1,1,1,1,0},{1421252,-15301582,2352795,1659536,1274287,65408},""},
-{"paintgre",{"standard","lowpaint","","standard","standard","standard"},{1,1,0,1,1,0},{2398826,-13303809,65408,2599819,2131003,65408},""},
+{"paintgre",{"standard","lowpaint","","standard","standard","standard"},{1,1,0,1,1,0},{2398826,-13303809,65408,2599819,2131003,65408},"paintgree"},
 {"pandabear",{"bear","panda1","hair","standard","standard","standard"},{1,1,0,1,1,1},{9834574,-6411543,65408,1769630,1835070,41215},""},
 {"panther",{"kitty","wildpaint","","standard","standard","negative"},{1,1,0,1,1,1},{10813440,721485823,65408,1769488,1835062,2162491},""},
 {"pento",{"standard","","unipento","standard","standard","standard"},{1,1,1,1,1,0},{10400379,-788463617,10400379,184,9996701,65408},""},
@@ -50,8 +51,8 @@ static Skin s_Skins[NUM_SKINS] = {
 {"raccoon",{"raccoon","coonfluff","","standard","standard","standard"},{1,1,0,1,1,1},{1082745,-15634890,65408,1082745,1147174,1557549},""},
 {"setisu",{"standard","setisu","hair","standard","standard","standard"},{1,1,1,1,1,0},{851764,-1306329146,1656361,2003775,1677900,65408},""},
 {"snowti",{"kitty","tiger2","","standard","standard","colorable"},{1,1,0,1,1,1},{1507583,-870552832,65408,1441965,1441984,1872682},""},
-{"spiky",{"spiky","warstripes","","standard","standard","colorable"},{1,1,0,1,1,1},{1835263,-16777216,65408,1769727,1869823,28},""},
-{"swardy",{"spiky","duodonny","","standard","standard","standard"},{1,1,0,1,1,1},{4959008,1616196797,65408,5599232,5592988,1880670},""},
+{"spiky",{"spiky","warstripes","","standard","standard","colorable"},{1,1,0,1,1,1},{1835263,-16777216,65408,1769727,1869823,28},"stripespiky"},
+{"swardy",{"spiky","duodonny","","standard","standard","standard"},{1,1,0,1,1,1},{4959008,1616196797,65408,5599232,5592988,1880670},"greensward"},
 {"tiger",{"kitty","tiger1","","standard","standard","colorable"},{1,1,0,1,1,1},{1495659,-602669093,65408,1487971,1495666,1900288},""},
 {"tooxy",{"standard","wildpaint","unimelo","standard","standard","standard"},{1,1,1,1,1,0},{4773499,-633274240,15990924,184,9765959,65408},""},
 {"warmouse",{"mouse","mice","","standard","standard","negative"},{1,1,0,1,1,1},{1835221,-16776961,65408,1769727,1869823,51228},"mouse"},
@@ -186,7 +187,7 @@ void CTeeInfo::ToSevendown()
 		int matches = 0;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 			if(str_comp(GetSkinPartName(p), s_Skins[s].m_apSkinPartNames[p]) == 0)
-				matches++;
+				matches += 2*(int)(p == SKINPART_BODY) + (int)(p == SKINPART_MARKING || p == SKINPART_DECORATION); // ignore feet, hands, eyes
 
 		if(matches > best_matches)
 		{
@@ -195,9 +196,20 @@ void CTeeInfo::ToSevendown()
 		}
 	}
 
+	if (best_skin == SKIN_BLUEKITTY && m_aUseCustomColors[SKINPART_BODY] && m_aSkinPartColors[SKINPART_BODY] == s_Skins[SKIN_LIMEKITTY].m_aSkinPartColors[SKINPART_BODY])
+	{
+		// limekitty and bluekitty are identical on 0.7, only colors are different
+		// so we take limekitty when it matches perfectly
+		best_skin = SKIN_LIMEKITTY;
+	}
+
 	str_copy(m_Sevendown.m_SkinName, s_Skins[best_skin].SkinNameSevendown(), sizeof(m_Sevendown.m_SkinName));
-	m_Sevendown.m_ColorBody = m_aUseCustomColors[SKINPART_BODY] ? m_aSkinPartColors[SKINPART_BODY] : 255;
-	m_Sevendown.m_ColorFeet = m_aUseCustomColors[SKINPART_FEET] ? m_aSkinPartColors[SKINPART_FEET] : 255;
+	m_Sevendown.m_ColorBody = ColorHSLA(m_aUseCustomColors[SKINPART_BODY] ? m_aSkinPartColors[SKINPART_BODY] : 255)
+			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
+			      .Pack(ColorHSLA::DARKEST_LGT);
+	m_Sevendown.m_ColorFeet = ColorHSLA(m_aUseCustomColors[SKINPART_FEET] ? m_aSkinPartColors[SKINPART_FEET] : 255)
+			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
+			      .Pack(ColorHSLA::DARKEST_LGT);
 
 	int CustomColors = m_aUseCustomColors[SKINPART_BODY];
 	if (m_aSkinPartColors[SKINPART_BODY] == s_Skins[best_skin].m_aSkinPartColors[SKINPART_BODY])
