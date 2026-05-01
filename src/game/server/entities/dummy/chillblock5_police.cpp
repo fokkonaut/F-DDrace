@@ -33,7 +33,7 @@ void CDummyChillBlock5Police::OnTick()
 	CCharacter *pChr = GameWorld()->ClosestCharacterMode(GetPos(), m_pCharacter, m_pPlayer->GetCID());
 	if (pChr && pChr->IsAlive())
 	{
-		if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel) //police
+		if (pChr->m_PoliceHelper || GameServer()->m_Accounts.Get(pChr->GetPlayer()->GetAccID()).m_PoliceLevel) //police
 		{
 			if (pChr->m_FreezeTime > 0 && X < 477)
 				m_PoliceMode = 2; // LOCAL: POLICE HELP

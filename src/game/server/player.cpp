@@ -286,8 +286,8 @@ void CPlayer::Tick()
 	int AccID = GetAccID();
 	int DefScoreMode = GameServer()->Config()->m_SvDefaultScoreMode;
 	Server()->SetClientScore(m_ClientID, DefScoreMode == SCORE_TIME ? m_Score
-		: DefScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts[AccID].m_Level
-		: DefScoreMode == SCORE_BLOCK_POINTS ? GameServer()->m_Accounts[AccID].m_BlockPoints
+		: DefScoreMode == SCORE_LEVEL ? GameServer()->m_Accounts.Get(AccID).m_Level
+		: DefScoreMode == SCORE_BLOCK_POINTS ? GameServer()->m_Accounts.Get(AccID).m_BlockPoints
 		: DefScoreMode == SCORE_BONUS && m_pCharacter ? m_pCharacter->m_NoBonusContext.m_Score
 		: 0);
 
@@ -605,14 +605,15 @@ void CPlayer::Snap(int SnappingClient)
 	int Score = 0;
 	{
 		bool AccUsed = true;
+		CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 
 		// check for minigames first, then normal score modes, as minigames of course overwrite the wanted scoremodes
 		if (pSnapping->m_Minigame == MINIGAME_BLOCK)
-			Score = GameServer()->m_Accounts[GetAccID()].m_Kills;
+			Score = pAccount->m_Kills;
 		else if (pSnapping->m_Minigame == MINIGAME_SURVIVAL)
-			Score = GameServer()->m_Accounts[GetAccID()].m_SurvivalKills;
+			Score = pAccount->m_SurvivalKills;
 		else if (pSnapping->m_Minigame == MINIGAME_DURAK || GameServer()->Durak()->IsPlayerOnSeat(SnappingClient))
-			Score = GameServer()->m_Accounts[GetAccID()].m_DurakWins;
+			Score = pAccount->m_DurakWins;
 		else if (pSnapping->m_Minigame == MINIGAME_INSTAGIB_BOOMFNG || pSnapping->m_Minigame == MINIGAME_INSTAGIB_FNG)
 		{
 			Score = m_InstagibScore;
@@ -641,9 +642,9 @@ void CPlayer::Snap(int SnappingClient)
 			}
 		}
 		else if (pSnapping->m_ScoreMode == SCORE_LEVEL)
-			Score = GameServer()->m_Accounts[GetAccID()].m_Level;
+			Score = pAccount->m_Level;
 		else if (pSnapping->m_ScoreMode == SCORE_BLOCK_POINTS)
-			Score = GameServer()->m_Accounts[GetAccID()].m_BlockPoints;
+			Score = pAccount->m_BlockPoints;
 		else if (pSnapping->m_ScoreMode == SCORE_BONUS)
 		{
 			Score = m_pCharacter ? m_pCharacter->m_NoBonusContext.m_Score : 0;
@@ -1113,7 +1114,7 @@ void CPlayer::OnDisconnect()
 	GameServer()->Arenas()->OnPlayerLeave(m_ClientID, true);
 	GameServer()->Durak()->OnPlayerLeave(m_ClientID, true);
 	GameServer()->Survival()->OnPlayerLeave(m_ClientID, true);
-	GameServer()->Logout(GetAccID());
+	GameServer()->m_Accounts.Logout(GetAccID());
 
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	Controller->m_Teams.SetForceCharacterTeam(m_ClientID, 0);
@@ -1921,10 +1922,7 @@ void CPlayer::ShowNameShort()
 
 int CPlayer::GetAccID()
 {
-	for (unsigned int i = ACC_START; i < GameServer()->m_Accounts.size(); i++)
-		if (GameServer()->m_Accounts[i].m_ClientID == m_ClientID)
-			return i;
-	return 0;
+	return GameServer()->m_Accounts.GetAccIdByClientId(m_ClientID);
 }
 
 void CPlayer::BankCurrTransaction(float Amount, const char *pDescription)
@@ -1932,12 +1930,12 @@ void CPlayer::BankCurrTransaction(float Amount, const char *pDescription)
 	if (GetAccID() < ACC_START || Amount == 0)
 		return;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	pAccount->m_Euros += Amount;
 
 	char aDescription[256];
 	str_format(aDescription, sizeof(aDescription), "%.2f %s", Amount, pDescription);
-	GameServer()->WriteDonationFile(TYPE_PURCHASE, Amount, GetAccID(), aDescription);
+	GameServer()->m_Accounts.WriteDonationFile(CAccounts::TYPE_PURCHASE, Amount, GetAccID(), aDescription);
 	ApplyMoneyHistoryMsg(TRANSACTION_BANK, Amount, pDescription);
 }
 
@@ -1946,7 +1944,7 @@ bool CPlayer::BankTransaction(int Amount, const char *pDescription)
 	if (GetAccID() < ACC_START || Amount == 0)
 		return false;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	pAccount->m_Money += Amount;
 	ApplyMoneyHistoryMsg(TRANSACTION_BANK, Amount, pDescription);
 	return true;
@@ -1954,12 +1952,12 @@ bool CPlayer::BankTransaction(int Amount, const char *pDescription)
 
 int64 CPlayer::GetUsableMoney()
 {
-	return GameServer()->Config()->m_SvMoneyBankMode == 0 && GetAccID() >= ACC_START ? GameServer()->m_Accounts[GetAccID()].m_Money : GetWalletMoney();
+	return GameServer()->Config()->m_SvMoneyBankMode == 0 && GetAccID() >= ACC_START ? GameServer()->m_Accounts.Get(GetAccID()).m_Money : GetWalletMoney();
 }
 
 int64 CPlayer::GetWalletOrBankDisplay()
 {
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	if (GetAccID() >= ACC_START || GameServer()->Config()->m_SvMoneyBankMode != 0)
 		return pAccount->m_Money;
 	return GetWalletMoney();
@@ -1994,7 +1992,7 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, float Amount, const char *pDescript
 	char aDescription[256];
 	str_format(aDescription, sizeof(aDescription), "[%s] %s%.2f %s", pType, Amount > 0 ? "+" : "", Amount, pDescription);
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	str_copy(pAccount->m_aLastMoneyTransaction[4], pAccount->m_aLastMoneyTransaction[3], sizeof(pAccount->m_aLastMoneyTransaction[4]));
 	str_copy(pAccount->m_aLastMoneyTransaction[3], pAccount->m_aLastMoneyTransaction[2], sizeof(pAccount->m_aLastMoneyTransaction[3]));
 	str_copy(pAccount->m_aLastMoneyTransaction[2], pAccount->m_aLastMoneyTransaction[1], sizeof(pAccount->m_aLastMoneyTransaction[2]));
@@ -2010,7 +2008,7 @@ void CPlayer::ApplyMoneyHistoryMsg(int Type, float Amount, const char *pDescript
 	str_format(aBuf, sizeof(aBuf),
 		"[%s][%s] account='%s' msg='%s%.2f %s' name='%s'",
 		aTimestamp, pType,
-		GameServer()->m_Accounts[GetAccID()].m_Username,
+		GameServer()->m_Accounts.Get(GetAccID()).m_Username,
 		Amount > 0 ? "+" : "", Amount, pDescription,
 		Server()->ClientName(m_ClientID)
 	);
@@ -2032,7 +2030,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	bool IsDoubleXp = m_pCharacter && m_pCharacter->m_IsDoubleXp;
 	if (IsDoubleXp)
 		Amount *= 2;
@@ -2046,7 +2044,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 		GameServer()->SendChatTarget(m_ClientID, aBuf);
 	}
 
-	if (pAccount->m_XP >= GameServer()->GetNeededXP(pAccount->m_Level))
+	if (pAccount->m_XP >= GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level))
 	{
 		pAccount->m_Level++;
 
@@ -2062,7 +2060,7 @@ void CPlayer::GiveBlockPoints(int Amount, int Victim)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 
 	if (m_pCharacter && m_pCharacter->HasFlag() != -1)
 		Amount += 1;
@@ -2080,7 +2078,7 @@ bool CPlayer::GiveTaserBattery(int Amount)
 	if (GetAccID() < ACC_START || Amount == 0)
 		return false;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	if (pAccount->m_TaserLevel <= 0)
 		return false;
 
@@ -2119,7 +2117,7 @@ bool CPlayer::GivePortalBattery(int Amount)
 	if (GetAccID() < ACC_START || Amount == 0)
 		return false;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	if (pAccount->m_PortalRifle) // disallow people who have bought portal rifle to pickup or drop any portal battery
 		return false;
 
@@ -2148,7 +2146,7 @@ bool CPlayer::GivePortalBattery(int Amount)
 void CPlayer::OnLogin(bool ForceDesignLoad)
 {
 	int AccID = GetAccID();
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	// Load language at start, so that login messages get translated aswell
 	if (pAccount->m_aLanguage[0] != '\0')
 	{
@@ -2191,29 +2189,29 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		GameServer()->SendChatTarget(m_ClientID, Localize("[WARNING] You did not set security pin yet. Check '/pin' for more information."));
 	}
 
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_ZOOMCURSOR)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_ZOOMCURSOR)
 		m_ZoomCursor = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_PLOTSPAWN)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_PLOTSPAWN)
 		m_PlotSpawn = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_SILENTFARM)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_SILENTFARM)
 		m_SilentFarm = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEDRAWINGS)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_HIDEDRAWINGS)
 		m_HideDrawings = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_RESUMEMOVED)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_RESUMEMOVED)
 		m_ResumeMoved = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIDEBROADCASTS)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_HIDEBROADCASTS)
 		m_HideBroadcasts = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_ANTIPING)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_ANTIPING)
 		m_AntiPing = true;
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_HIGHBANDWIDTH)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_HIGHBANDWIDTH)
 		Server()->SetHighBandwidth(m_ClientID, true);
-	if (pAccount->m_Flags&CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT)
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_SAVEPLAYERDISCONNECT)
 		m_SavePlayerDisconnect = true;
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
 
 	if (ForceDesignLoad)
-		Server()->ChangeMapDesign(m_ClientID, GameServer()->GetCurrentDesignFromList(AccID));
+		Server()->ChangeMapDesign(m_ClientID, GameServer()->m_Accounts.GetCurrentDesignFromList(AccID));
 	else
 		StartVoteQuestion(CPlayer::VOTE_QUESTION_DESIGN);
 
@@ -2232,7 +2230,7 @@ void CPlayer::OnLogout()
 	GameServer()->SendChatTarget(m_ClientID, Localize("Successfully logged out"));
 
 	int AccID = GetAccID();
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(AccID);
 	if (m_pCharacter)
 	{
 		if (pAccount->m_VIP == VIP_PLUS)
@@ -2255,26 +2253,26 @@ void CPlayer::OnLogout()
 
 	pAccount->m_Flags = 0;
 	if (m_ZoomCursor)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_ZOOMCURSOR;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_ZOOMCURSOR;
 	if (m_PlotSpawn)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_PLOTSPAWN;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_PLOTSPAWN;
 	if (m_SilentFarm)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_SILENTFARM;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_SILENTFARM;
 	if (m_HideDrawings)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEDRAWINGS;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_HIDEDRAWINGS;
 	if (m_ResumeMoved)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_RESUMEMOVED;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_RESUMEMOVED;
 	if (m_HideBroadcasts)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_HIDEBROADCASTS;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_HIDEBROADCASTS;
 	if (m_AntiPing)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_ANTIPING;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_ANTIPING;
 	if (Server()->GetHighBandwidth(m_ClientID))
-		pAccount->m_Flags |= CGameContext::ACCFLAG_HIGHBANDWIDTH;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_HIGHBANDWIDTH;
 	if (m_SavePlayerDisconnect)
-		pAccount->m_Flags |= CGameContext::ACCFLAG_SAVEPLAYERDISCONNECT;
+		pAccount->m_Flags |= CAccounts::ACCFLAG_SAVEPLAYERDISCONNECT;
 	pAccount->m_VoteMenuFlags = GameServer()->m_VotingMenu.GetFlags(m_ClientID);
 
-	GameServer()->UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
+	GameServer()->m_Accounts.UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
 	str_copy(pAccount->m_aLanguage, g_Localization.GetLanguageFileName(m_Language), sizeof(pAccount->m_aLanguage));
 
 	if (m_VoteQuestionType == CPlayer::VOTE_QUESTION_DESIGN)
@@ -2292,7 +2290,7 @@ void CPlayer::StartVoteQuestion(VoteQuestionType Type)
 	{
 	case CPlayer::VOTE_QUESTION_DESIGN:
 	{
-		const char *pDesign = GameServer()->GetCurrentDesignFromList(GetAccID());
+		const char *pDesign = GameServer()->m_Accounts.GetCurrentDesignFromList(GetAccID());
 		if (!pDesign[0] || !str_comp(pDesign, Server()->GetMapDesign(m_ClientID)))
 			return;
 
@@ -2361,7 +2359,7 @@ void CPlayer::OnEndVoteQuestion(int Result)
 	{
 		if (Result == 1)
 		{
-			Server()->ChangeMapDesign(m_ClientID, GameServer()->GetCurrentDesignFromList(GetAccID()));
+			Server()->ChangeMapDesign(m_ClientID, GameServer()->m_Accounts.GetCurrentDesignFromList(GetAccID()));
 		}
 		break;
 	}
@@ -2454,7 +2452,7 @@ void CPlayer::SetExpireDate(int Item)
 	if (GetAccID() < ACC_START)
 		return;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 
 	switch (Item)
 	{
@@ -2473,7 +2471,7 @@ bool CPlayer::IsExpiredItem(int Item)
 	if (GetAccID() < ACC_START)
 		return false;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	if ((Item == ITEM_VIP && pAccount->m_VIP == VIP_PLUS) || (Item == ITEM_VIP_PLUS && pAccount->m_VIP == VIP_CLASSIC))
 		return false;
 
@@ -2994,7 +2992,7 @@ void CPlayer::SetZoomCursor(bool Set)
 
 void CPlayer::SetNinjaJetpack(bool Set)
 {
-	if (!GameServer()->m_Accounts[GetAccID()].m_Ninjajetpack)
+	if (!GameServer()->m_Accounts.Get(GetAccID()).m_Ninjajetpack)
 	{
 		GameServer()->SendChatTarget(m_ClientID, Localize("You don't have ninjajetpack, buy it in the shop"));
 		return;
@@ -3092,7 +3090,7 @@ void CPlayer::ChangeScoreMode(int ScoreMode)
 
 void CPlayer::SetRainbowSpeedVIP(int Value)
 {
-	if (GameServer()->m_Accounts[GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_ClientID, Localize("You are not VIP+"));
 		return;

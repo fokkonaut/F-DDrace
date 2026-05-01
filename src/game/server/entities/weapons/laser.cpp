@@ -92,7 +92,7 @@ bool CLaser::HitEntity(vec2 From, vec2 To)
 		CPlayer *pOwner = m_Owner >= 0 ? GameServer()->m_apPlayers[m_Owner] : 0;
 		if (pOwner)
 		{
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pOwner->GetAccID()];
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(pOwner->GetAccID());
 			if (pAccount->m_PoliceLevel >= 4)
 			{
 				Types |= (1ULL<<CGameWorld::ENTTYPE_DOOR);

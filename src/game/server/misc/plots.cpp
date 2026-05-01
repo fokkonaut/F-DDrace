@@ -68,10 +68,10 @@ void CPlots::Tick()
 			// Reset door health
 			m_aPlots[i].m_DestroyEndTick = 0;
 			m_aPlots[i].m_DoorHealth = Config()->m_SvPlotDoorHealth;
-			int AccID = GameServer()->GetAccIDByUsername(m_aPlots[i].m_aOwner);
+			int AccID = GameServer()->m_Accounts.GetAccIDByUsername(m_aPlots[i].m_aOwner);
 			if (AccID >= ACC_START)
 			{
-				int ClientID = GameServer()->m_Accounts[AccID].m_ClientID;
+				int ClientID = GameServer()->m_Accounts.Get(AccID).m_ClientID;
 				if (ClientID >= 0 && GameServer()->m_apPlayers[ClientID])
 				{
 					GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("Your plot is no longer subject to a search warrant and can no longer be destroyed"));
@@ -367,7 +367,7 @@ int CPlots::GetPlotID(int AccID)
 		return 0;
 
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
-		if (str_comp(GameServer()->m_Accounts[AccID].m_Username, m_aPlots[i].m_aOwner) == 0)
+		if (str_comp(GameServer()->m_Accounts.Get(AccID).m_Username, m_aPlots[i].m_aOwner) == 0)
 			return i;
 	return 0;
 }
@@ -383,8 +383,8 @@ void CPlots::SetPlotInfo(int PlotID, int AccID)
 	if (PlotID <= 0 || PlotID > Collision()->m_NumPlots || AccID < ACC_START)
 		return;
 
-	str_copy(m_aPlots[PlotID].m_aOwner, GameServer()->m_Accounts[AccID].m_Username, sizeof(m_aPlots[PlotID].m_aOwner));
-	str_copy(m_aPlots[PlotID].m_aDisplayName, GameServer()->m_Accounts[AccID].m_aLastPlayerName, sizeof(m_aPlots[PlotID].m_aDisplayName));
+	str_copy(m_aPlots[PlotID].m_aOwner, GameServer()->m_Accounts.Get(AccID).m_Username, sizeof(m_aPlots[PlotID].m_aOwner));
+	str_copy(m_aPlots[PlotID].m_aDisplayName, GameServer()->m_Accounts.Get(AccID).m_aLastPlayerName, sizeof(m_aPlots[PlotID].m_aDisplayName));
 	WritePlotStats(PlotID);
 }
 
@@ -405,15 +405,15 @@ bool CPlots::HasPlotByIP(int ClientID)
 
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 	{
-		int ID = GameServer()->GetAccount(m_aPlots[i].m_aOwner);
+		int ID = GameServer()->m_Accounts.GetAccount(m_aPlots[i].m_aOwner);
 		if (ID < ACC_START)
 			continue;
 
-		if (GameServer()->SameIP(ID, &Addr))
+		if (GameServer()->m_Accounts.SameIP(ID, &Addr))
 			HasPlot = true;
 
-		if (!GameServer()->IsAccLoggedInThisPort(ID))
-			GameServer()->FreeAccount(ID);
+		if (!GameServer()->m_Accounts.IsAccLoggedInThisPort(ID))
+			GameServer()->m_Accounts.FreeAccount(ID);
 
 		if (HasPlot)
 			break;
@@ -485,10 +485,10 @@ void CPlots::ExpirePlots()
 	{
 		if (GameServer()->IsExpired(m_aPlots[i].m_ExpireDate))
 		{
-			int AccID = GameServer()->GetAccIDByUsername(m_aPlots[i].m_aOwner);
+			int AccID = GameServer()->m_Accounts.GetAccIDByUsername(m_aPlots[i].m_aOwner);
 			if (AccID >= ACC_START)
 			{
-				int ClientID = GameServer()->m_Accounts[AccID].m_ClientID;
+				int ClientID = GameServer()->m_Accounts.Get(AccID).m_ClientID;
 				if (ClientID >= 0 && GameServer()->m_apPlayers[ClientID])
 				{
 					GameServer()->SendChatTarget(ClientID, GameServer()->m_apPlayers[ClientID]->Localize("Your plot expired"));
@@ -630,10 +630,10 @@ bool CPlots::OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, vec2 P
 		m_aPlots[PlotID].m_DoorHealth = 0;
 		GameServer()->SendBroadcast("", ClientID, false);
 		GameServer()->CreateDeath(Pos, ClientID);
-		int AccID = GameServer()->GetAccIDByUsername(m_aPlots[PlotID].m_aOwner);
+		int AccID = GameServer()->m_Accounts.GetAccIDByUsername(m_aPlots[PlotID].m_aOwner);
 		if (AccID >= ACC_START)
 		{
-			int PlotOwner = GameServer()->m_Accounts[AccID].m_ClientID;
+			int PlotOwner = GameServer()->m_Accounts.Get(AccID).m_ClientID;
 			if (PlotOwner >= 0 && GameServer()->m_apPlayers[PlotOwner])
 			{
 				GameServer()->SendChatTarget(PlotOwner, GameServer()->m_apPlayers[PlotOwner]->Localize("The police have gained access to your plot in hopes of finding you"));

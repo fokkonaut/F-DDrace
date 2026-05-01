@@ -53,7 +53,7 @@ void CBank::OnSuccess(int ClientID)
 		return;
 
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(pPlayer->GetAccID());
 	int Amount = GetAmount(m_aClients[ClientID].m_Page, ClientID);
 	if (Amount <= 0)
 	{
@@ -133,7 +133,7 @@ void CBank::OnPageChange(int ClientID)
 		pFooter = pPlayer->Localize("Press F3 to confirm your assignment.");
 		const char *pAssignment = m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT ? pPlayer->Localize("D E P O S I T") :
 			m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW ? pPlayer->Localize("W I T H D R A W") : "";
-		str_format(aMsg, sizeof(aMsg), "%s: %lld\n%s: %lld\n\n%s\n\n", pPlayer->Localize("Bank"), GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money,
+		str_format(aMsg, sizeof(aMsg), "%s: %lld\n%s: %lld\n\n%s\n\n", pPlayer->Localize("Bank"), GameServer()->m_Accounts.Get(pPlayer->GetAccID()).m_Money,
 			pPlayer->Localize("Wallet"), pPlayer->GetWalletMoney(), pAssignment);
 
 		char aAmount[64];
@@ -165,7 +165,7 @@ int CBank::GetAmount(int Type, int ClientID)
 			if (m_aAssignmentMode[ClientID] == ASSIGNMENT_DEPOSIT)
 				return pPlayer->GetWalletMoney();
 			else if (m_aAssignmentMode[ClientID] == ASSIGNMENT_WITHDRAW)
-				return GameServer()->m_Accounts[pPlayer->GetAccID()].m_Money;
+				return GameServer()->m_Accounts.Get(pPlayer->GetAccID()).m_Money;
 		}
 		return 0;
 	}

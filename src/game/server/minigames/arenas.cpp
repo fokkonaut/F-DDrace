@@ -131,7 +131,7 @@ vec2 CArenas::GetSpawnPos(int ClientID)
 bool CArenas::CanPayStake(int ClientID, int64 Stake)
 {
 	int AccID = GameServer()->m_apPlayers[ClientID]->GetAccID();
-	int64 Money = AccID >= ACC_START ? GameServer()->m_Accounts[AccID].m_Money : GameServer()->m_apPlayers[ClientID]->GetWalletMoney();
+	int64 Money = AccID >= ACC_START ? GameServer()->m_Accounts.Get(AccID).m_Money : GameServer()->m_apPlayers[ClientID]->GetWalletMoney();
 	return Money >= Stake;
 }
 

@@ -100,7 +100,7 @@ bool CDummyBase::IsPolice(CCharacter *pChr)
 {
 	if (!pChr)
 		return false;
-	return GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel || pChr->m_PoliceHelper;
+	return GameServer()->m_Accounts.Get(pChr->GetPlayer()->GetAccID()).m_PoliceLevel || pChr->m_PoliceHelper;
 }
 
 int CDummyBase::GetTile(int PosX, int PosY)
@@ -410,13 +410,13 @@ void CDummyBase::DebugColor(int DebugColor)
 bool CDummyBase::Login(const char *pName)
 {
 	// Try to read into that account
-	int ID = GameServer()->AddAccount();
-	GameServer()->ReadAccountStats(ID, pName);
+	int ID = GameServer()->m_Accounts.AddAccount();
+	GameServer()->m_Accounts.ReadAccountStats(ID, pName);
 	// copy it's username field
 	char aFoundUsername[32];
-	str_copy(aFoundUsername, GameServer()->m_Accounts[ID].m_Username, sizeof(aFoundUsername));
+	str_copy(aFoundUsername, GameServer()->m_Accounts.Get(ID).m_Username, sizeof(aFoundUsername));
 	// free temporary
-	GameServer()->FreeAccount(ID);
+	GameServer()->m_Accounts.FreeAccount(ID);
 
 	// Register if username does not exist
 	if (str_comp_nocase(aFoundUsername, pName) != 0)
@@ -424,15 +424,15 @@ bool CDummyBase::Login(const char *pName)
 		char aRandomPassword[32];
 		secure_random_password(aRandomPassword, sizeof(aRandomPassword), 30);
 
-		ID = GameServer()->AddAccount();
-		GameServer()->SetPassword(ID, aRandomPassword);
-		str_copy(GameServer()->m_Accounts[ID].m_Username, pName, sizeof(GameServer()->m_Accounts[ID].m_Username));
-		str_copy(GameServer()->m_Accounts[ID].m_aLastPlayerName, Server()->ClientName(m_pPlayer->GetCID()), sizeof(GameServer()->m_Accounts[ID].m_aLastPlayerName));
+		ID = GameServer()->m_Accounts.AddAccount();
+		GameServer()->m_Accounts.SetPassword(ID, aRandomPassword);
+		str_copy(GameServer()->m_Accounts.Get(ID).m_Username, pName, sizeof(GameServer()->m_Accounts.Get(ID).m_Username));
+		str_copy(GameServer()->m_Accounts.Get(ID).m_aLastPlayerName, Server()->ClientName(m_pPlayer->GetCID()), sizeof(GameServer()->m_Accounts.Get(ID).m_aLastPlayerName));
 		time_t Now;
 		time(&Now);
-		GameServer()->m_Accounts[ID].m_RegisterDate = Now;
-		GameServer()->Logout(ID); // write
+		GameServer()->m_Accounts.Get(ID).m_RegisterDate = Now;
+		GameServer()->m_Accounts.Logout(ID); // write
 	}
 	
-	return GameServer()->Login(m_pPlayer->GetCID(), pName, "", false);
+	return GameServer()->m_Accounts.Login(m_pPlayer->GetCID(), pName, "", false);
 }

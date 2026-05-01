@@ -175,7 +175,7 @@ int CPickupDrop::IsCharacterNear()
 			if (
 				(pChr->GetPlayer()->m_SpookyGhost && GameServer()->GetWeaponType(m_Weapon) != WEAPON_GUN)
 				|| (pChr->m_IsZombie && m_Weapon != WEAPON_HAMMER)
-				|| (m_Weapon == WEAPON_TASER && GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_TaserLevel < 1)
+				|| (m_Weapon == WEAPON_TASER && GameServer()->m_Accounts.Get(pChr->GetPlayer()->GetAccID()).m_TaserLevel < 1)
 				|| (pChr->GetWeaponGot(m_Weapon) && m_Special == 0 && (pChr->GetWeaponAmmo(m_Weapon) == -1 || (pChr->GetWeaponAmmo(m_Weapon) >= m_Bullets && m_Bullets >= 0)))
 				|| (m_Special != 0 && !AcceptSpecial)
 				)

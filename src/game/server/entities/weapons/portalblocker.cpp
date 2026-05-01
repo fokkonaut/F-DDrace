@@ -116,8 +116,8 @@ bool CPortalBlocker::OnPlace()
 		int AccID = pOwner->GetPlayer()->GetAccID();
 		if (AccID >= ACC_START)
 		{
-			GameServer()->m_Accounts[AccID].m_PortalBlocker--;
-			if (!GameServer()->m_Accounts[AccID].m_PortalBlocker)
+			GameServer()->m_Accounts.Get(AccID).m_PortalBlocker--;
+			if (!GameServer()->m_Accounts.Get(AccID).m_PortalBlocker)
 				pOwner->m_IsPortalBlocker = false;
 		}
 

@@ -42,14 +42,14 @@ CShop::CShop(CGameContext *pGameServer, int Type) : CHouse(pGameServer, Type)
 		for (int i = 0; i < NUM_POLICE_LEVELS; i++)
 		{
 			str_format(aaBuf[i], sizeof(aaBuf[i]), "Police Rank %d", i+1);
-			AddItem(aaBuf[i], GameServer()->m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
+			AddItem(aaBuf[i], GameServer()->m_Accounts.m_aPoliceLevel[i], m_aItems[ITEM_POLICE].m_Price, m_aItems[ITEM_POLICE].m_Time, m_aItems[ITEM_POLICE].m_pDescription);
 		}
 
 		static char aaBuf2[NUM_TASER_LEVELS][32];
 		for (int i = 0; i < NUM_TASER_LEVELS; i++)
 		{
 			str_format(aaBuf2[i], sizeof(aaBuf2[i]), "Taser Level %d", i+1);
-			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, GameServer()->m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
+			AddItem(aaBuf2[i], m_aItems[ITEM_TASER].m_Level, GameServer()->m_Accounts.m_aTaserPrice[i], m_aItems[ITEM_TASER].m_Time, m_aItems[ITEM_TASER].m_pDescription);
 		}
 	}
 	else if (IsType(HOUSE_PLOT_SHOP))
@@ -167,12 +167,12 @@ void CShop::OnPageChange(int ClientID)
 	{
 		if (m_aClients[ClientID].m_Page == ITEM_POLICE)
 		{
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()];
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GameServer()->m_apPlayers[ClientID]->GetAccID());
 			m_aBackgroundItem[ClientID] = clamp(POLICE_RANK_1 + pAccount->m_PoliceLevel, (int)POLICE_RANK_1, (int)POLICE_RANK_5);
 		}
 		else if (m_aClients[ClientID].m_Page == ITEM_TASER)
 		{
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[GameServer()->m_apPlayers[ClientID]->GetAccID()];
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GameServer()->m_apPlayers[ClientID]->GetAccID());
 			m_aBackgroundItem[ClientID] = clamp(TASER_LEVEL_1 + pAccount->m_TaserLevel, (int)TASER_LEVEL_1, (int)TASER_LEVEL_10);
 		}
 	}
@@ -265,7 +265,7 @@ void CShop::BuyItem(int ClientID, int Item)
 	}
 
 	CCharacter *pChr = GameServer()->GetPlayerChar(ClientID);
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(pPlayer->GetAccID());
 
 	char aMsg[128];
 	int ItemID = Item;

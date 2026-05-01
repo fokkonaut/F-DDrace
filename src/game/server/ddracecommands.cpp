@@ -1200,7 +1200,7 @@ void CGameContext::ConPlayerInfo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Status: Dead");
 	if (pPlayer->GetAccID() >= ACC_START)
 	{
-		str_format(aBuf, sizeof(aBuf), "Account Name: %s", pSelf->m_Accounts[pPlayer->GetAccID()].m_Username);
+		str_format(aBuf, sizeof(aBuf), "Account Name: %s", pSelf->m_Accounts.Get(pPlayer->GetAccID()).m_Username);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
@@ -1811,68 +1811,67 @@ void CGameContext::ConPlayerSkin(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConAccLogoutPort(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	pSelf->m_LogoutAccountsPort = pResult->GetInteger(0);
-	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, pSelf->Config()->m_SvAccFilePath, InitAccounts, pSelf);
+	pSelf->m_Accounts.LogoutAllAccountsPort(pResult->GetInteger(0));
 }
 
 void CGameContext::ConAccLogout(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 
-	int ID = pSelf->GetAccount(pResult->GetString(0));
+	int ID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
-	if (!pSelf->IsAccLoggedInThisPort(ID))
+	if (!pSelf->m_Accounts.IsAccLoggedInThisPort(ID))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "This account is not marked as logged in on this port");
-		pSelf->FreeAccount(ID);
+		pSelf->m_Accounts.FreeAccount(ID);
 		return;
 	}
 
-	int ClientID = pSelf->m_Accounts[ID].m_ClientID;
+	int ClientID = pSelf->m_Accounts.Get(ID).m_ClientID;
 	if (ClientID >= 0 && pSelf->m_apPlayers[ClientID])
 		pSelf->SendChatTarget(ClientID, pSelf->m_apPlayers[ClientID]->Localize("You have been logged out by an admin"));
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts[ID].m_Username, ClientID >= 0 ? pSelf->Server()->ClientName(ClientID) : "player not online");
+	str_format(aBuf, sizeof(aBuf), "Logged out account '%s' (%s)", pSelf->m_Accounts.Get(ID).m_Username, ClientID >= 0 ? pSelf->Server()->ClientName(ClientID) : "player not online");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
-	pSelf->Logout(ID);
+	pSelf->m_Accounts.Logout(ID);
 }
 
 void CGameContext::ConAccDisable(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 
-	int ID = pSelf->GetAccount(pResult->GetString(0));
+	int ID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
-	int ClientID = pSelf->m_Accounts[ID].m_ClientID;
+	int ClientID = pSelf->m_Accounts.Get(ID).m_ClientID;
 	if (ClientID >= 0 && pSelf->m_apPlayers[ClientID])
-		pSelf->SendChatTarget(pSelf->m_Accounts[ID].m_ClientID, pSelf->m_apPlayers[ClientID]->Localize("You have been logged out due to account deactivation by an admin"));
+		pSelf->SendChatTarget(pSelf->m_Accounts.Get(ID).m_ClientID, pSelf->m_apPlayers[ClientID]->Localize("You have been logged out due to account deactivation by an admin"));
 
-	pSelf->m_Accounts[ID].m_Disabled = !pSelf->m_Accounts[ID].m_Disabled;
+	pSelf->m_Accounts.Get(ID).m_Disabled = !pSelf->m_Accounts.Get(ID).m_Disabled;
 
 	char aBuf[64];
-	str_format(aBuf, sizeof(aBuf), "%s account '%s'", pSelf->m_Accounts[ID].m_Disabled ? "Disabled" : "Enabled", pSelf->m_Accounts[ID].m_Username);
+	str_format(aBuf, sizeof(aBuf), "%s account '%s'", pSelf->m_Accounts.Get(ID).m_Disabled ? "Disabled" : "Enabled", pSelf->m_Accounts.Get(ID).m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-	pSelf->Logout(ID);
+	pSelf->m_Accounts.Logout(ID);
 }
 
 void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int ID = pSelf->GetAccount(pResult->GetString(0));
+	int ID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
@@ -1885,7 +1884,7 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
-		const char *pValue = pSelf->GetAccVarValue(ID, i);
+		const char *pValue = pSelf->m_Accounts.GetAccVarValue(ID, i);
 		char aDate[64] = "";
 
 		if (i == ACC_EXPIRE_DATE_VIP || i == ACC_EXPIRE_DATE_PORTAL_RIFLE || i == ACC_REGISTER_DATE || i == ACC_LAST_LOGIN_DATE)
@@ -1895,67 +1894,67 @@ void CGameContext::ConAccInfo(IConsole::IResult *pResult, void *pUserData)
 		}
 
 		bool IsIp = i == ACC_ADDR || i == ACC_LAST_ADDR || i == ACC_SECURITY_PIN || i == ACC_PASSWORD;
-		str_format(aBuf, sizeof(aBuf), "%s: %s%s%s%s", pSelf->GetAccVarName(i), IsIp ? "<{" : "", pValue, IsIp ? "}>" : "", aDate);
+		str_format(aBuf, sizeof(aBuf), "%s: %s%s%s%s", pSelf->m_Accounts.GetAccVarName(i), IsIp ? "<{" : "", pValue, IsIp ? "}>" : "", aDate);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 
-	if (!pSelf->IsAccLoggedInThisPort(ID))
-		pSelf->FreeAccount(ID);
+	if (!pSelf->m_Accounts.IsAccLoggedInThisPort(ID))
+		pSelf->m_Accounts.FreeAccount(ID);
 }
 
 void CGameContext::ConAccAddEuros(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	
-	int ID = pSelf->GetAccount(pResult->GetString(0));
+	int ID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
-	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
+	if (pSelf->m_Accounts.Get(ID).m_LoggedIn && pSelf->m_Accounts.Get(ID).m_Port != pSelf->Config()->m_SvPort)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Unable to edit account, logged in on another port");
-		pSelf->FreeAccount(ID);
+		pSelf->m_Accounts.FreeAccount(ID);
 		return;
 	}
 
 	float Euros = pResult->GetFloat(1);
 	char aBuf[256];
-	pSelf->m_Accounts[ID].m_Euros += Euros;
+	pSelf->m_Accounts.Get(ID).m_Euros += Euros;
 
-	if (pSelf->m_Accounts[ID].m_ClientID >= 0)
+	if (pSelf->m_Accounts.Get(ID).m_ClientID >= 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "You %s %.2f EUR", Euros >= 0 ? "got" : "lost", Euros);
-		pSelf->SendChatTarget(pSelf->m_Accounts[ID].m_ClientID, aBuf);
+		pSelf->SendChatTarget(pSelf->m_Accounts.Get(ID).m_ClientID, aBuf);
 	}
 
-	str_format(aBuf, sizeof(aBuf), "%.2f EUR given to account '%s'", Euros, pSelf->m_Accounts[ID].m_Username);
+	str_format(aBuf, sizeof(aBuf), "%.2f EUR given to account '%s'", Euros, pSelf->m_Accounts.Get(ID).m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 
-	pSelf->WriteDonationFile(TYPE_DONATION, Euros, ID, "");
+	pSelf->m_Accounts.WriteDonationFile(CAccounts::TYPE_DONATION, Euros, ID, "");
 
-	pSelf->WriteAccountStats(ID);
-	if (!pSelf->IsAccLoggedInThisPort(ID))
-		pSelf->FreeAccount(ID);
+	pSelf->m_Accounts.WriteAccountStats(ID);
+	if (!pSelf->m_Accounts.IsAccLoggedInThisPort(ID))
+		pSelf->m_Accounts.FreeAccount(ID);
 }
 
 void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 	
-	int ID = pSelf->GetAccount(pResult->GetString(0));
+	int ID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (ID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
 		return;
 	}
 
-	if (pSelf->m_Accounts[ID].m_LoggedIn && pSelf->m_Accounts[ID].m_Port != pSelf->Config()->m_SvPort)
+	if (pSelf->m_Accounts.Get(ID).m_LoggedIn && pSelf->m_Accounts.Get(ID).m_Port != pSelf->Config()->m_SvPort)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Unable to edit account, logged in on another port");
-		pSelf->FreeAccount(ID);
+		pSelf->m_Accounts.FreeAccount(ID);
 		return;
 	}
 
@@ -1963,7 +1962,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	int VariableID = -1;
 	for (int i = 0; i < NUM_ACCOUNT_VARIABLES; i++)
 	{
-		if (!str_comp_nocase(pVariable, pSelf->GetAccVarName(i)))
+		if (!str_comp_nocase(pVariable, pSelf->m_Accounts.GetAccVarName(i)))
 		{
 			VariableID = i;
 			break;
@@ -1973,8 +1972,8 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	if (VariableID == -1)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid variable");
-		if (!pSelf->IsAccLoggedInThisPort(ID))
-			pSelf->FreeAccount(ID);
+		if (!pSelf->m_Accounts.IsAccLoggedInThisPort(ID))
+			pSelf->m_Accounts.FreeAccount(ID);
 		return;
 	}
 
@@ -1982,7 +1981,7 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 	bool IsIp = VariableID == ACC_ADDR || VariableID == ACC_LAST_ADDR || VariableID == ACC_SECURITY_PIN || VariableID == ACC_PASSWORD;
 	if (pResult->NumArguments() <= 2 || VariableID == ACC_USERNAME)
 	{
-		str_format(aBuf, sizeof(aBuf), "Value: %s%s%s", IsIp ? "<{" : "", pSelf->GetAccVarValue(ID, VariableID), IsIp ? "}>" : "");
+		str_format(aBuf, sizeof(aBuf), "Value: %s%s%s", IsIp ? "<{" : "", pSelf->m_Accounts.GetAccVarValue(ID, VariableID), IsIp ? "}>" : "");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 	}
 	else
@@ -2019,18 +2018,18 @@ void CGameContext::ConAccEdit(IConsole::IResult* pResult, void* pUserData)
 		else if (VariableID == ACC_PASSWORD)
 		{
 			char aPassword[SHA256_MAXSTRSIZE];
-			sha256_str(pSelf->HashPassword(pResult->GetString(2)), aPassword, sizeof(aPassword));
+			sha256_str(pSelf->m_Accounts.HashPassword(pResult->GetString(2)), aPassword, sizeof(aPassword));
 			pValue = aPassword;
 		}
 		
-		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s%s%s to %s", pSelf->GetAccVarName(VariableID), pSelf->m_Accounts[ID].m_Username, IsIp ? "<{" : "", pSelf->GetAccVarValue(ID, VariableID), IsIp ? "}>" : "", pValue);
+		str_format(aBuf, sizeof(aBuf), "Changed %s for %s from %s%s%s to %s", pSelf->m_Accounts.GetAccVarName(VariableID), pSelf->m_Accounts.Get(ID).m_Username, IsIp ? "<{" : "", pSelf->m_Accounts.GetAccVarValue(ID, VariableID), IsIp ? "}>" : "", pValue);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
-		pSelf->SetAccVar(ID, VariableID, pValue);
+		pSelf->m_Accounts.SetAccVar(ID, VariableID, pValue);
 	}
 
-	pSelf->WriteAccountStats(ID);
-	if (!pSelf->IsAccLoggedInThisPort(ID))
-		pSelf->FreeAccount(ID);
+	pSelf->m_Accounts.WriteAccountStats(ID);
+	if (!pSelf->m_Accounts.IsAccLoggedInThisPort(ID))
+		pSelf->m_Accounts.FreeAccount(ID);
 }
 
 void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserData)
@@ -2044,7 +2043,7 @@ void CGameContext::ConAccLevelNeededXP(IConsole::IResult* pResult, void* pUserDa
 	}
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Required XP to reach level %d: %lld", Level, pSelf->GetNeededXP(Level - 1));
+	str_format(aBuf, sizeof(aBuf), "Required XP to reach level %d: %lld", Level, pSelf->m_Accounts.GetNeededXP(Level - 1));
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
 }
 
@@ -2399,16 +2398,16 @@ void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
 
 	char aBuf[256];
 	int Num = 0;
-	for (int i = 0; i < pSelf->m_NumAccountSystemBans; i++)
+	for (int i = 0; i < pSelf->m_Accounts.m_NumAccountSystemBans; i++)
 	{
-		if (pSelf->m_aAccountSystemBans[i].m_Expire <= 0)
+		if (pSelf->m_Accounts.m_aAccountSystemBans[i].m_Expire <= 0)
 			continue;
 
 		Num++;
 		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&pSelf->m_aAccountSystemBans[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+		net_addr_str(&pSelf->m_Accounts.m_aAccountSystemBans[i].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
-		int Seconds = (pSelf->m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
+		int Seconds = (pSelf->m_Accounts.m_aAccountSystemBans[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed();
 		str_format(aBuf, sizeof(aBuf), "#%d '<{%s}>', %d seconds left", i, aAddrStr, Seconds);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "accban", aBuf);
 	}
@@ -2421,18 +2420,18 @@ void CGameContext::ConAccSysUnban(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Index = pResult->GetInteger(0);
-	if (Index < 0 || Index >= pSelf->m_NumAccountSystemBans)
+	if (Index < 0 || Index >= pSelf->m_Accounts.m_NumAccountSystemBans)
 		return;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&pSelf->m_aAccountSystemBans[Index].m_Addr, aAddrStr, sizeof(aAddrStr), false);
+	net_addr_str(&pSelf->m_Accounts.m_aAccountSystemBans[Index].m_Addr, aAddrStr, sizeof(aAddrStr), false);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Removed '<{%s}>' from account system bans", aAddrStr);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "accban", aBuf);
 
-	pSelf->m_NumAccountSystemBans--;
-	pSelf->m_aAccountSystemBans[Index] = pSelf->m_aAccountSystemBans[pSelf->m_NumAccountSystemBans];
+	pSelf->m_Accounts.m_NumAccountSystemBans--;
+	pSelf->m_Accounts.m_aAccountSystemBans[Index] = pSelf->m_Accounts.m_aAccountSystemBans[pSelf->m_Accounts.m_NumAccountSystemBans];
 }
 
 void CGameContext::ConToTelePlot(IConsole::IResult* pResult, void* pUserData)
@@ -2475,7 +2474,7 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
 
-	int NewID = pSelf->GetAccount(pResult->GetString(0));
+	int NewID = pSelf->m_Accounts.GetAccount(pResult->GetString(0));
 	if (NewID < ACC_START)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Invalid account");
@@ -2495,13 +2494,13 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 		return;
 	}
 
-	int OldID = pSelf->GetAccIDByUsername(pSelf->m_Plots.GetOwner(PlotID));
-	int OldClientID = pSelf->m_Accounts[OldID].m_ClientID;
+	int OldID = pSelf->m_Accounts.GetAccIDByUsername(pSelf->m_Plots.GetOwner(PlotID));
+	int OldClientID = pSelf->m_Accounts.Get(OldID).m_ClientID;
 	if (OldClientID >= 0 && pSelf->m_apPlayers[OldClientID])
 		pSelf->SendChatTarget(OldClientID, pSelf->m_apPlayers[OldClientID]->Localize("You lost your plot"));
 
 	char aBuf[128];
-	int NewClientID = pSelf->m_Accounts[NewID].m_ClientID;
+	int NewClientID = pSelf->m_Accounts.Get(NewID).m_ClientID;
 	if (NewClientID >= 0 && pSelf->m_apPlayers[NewClientID])
 	{
 		str_format(aBuf, sizeof(aBuf), pSelf->m_apPlayers[NewClientID]->Localize("You are now owner of plot %d"), PlotID);
@@ -2512,7 +2511,7 @@ void CGameContext::ConPlotOwner(IConsole::IResult* pResult, void* pUserData)
 		pSelf->m_Plots.SetPlotExpire(PlotID);
 	pSelf->m_Plots.SetPlotInfo(PlotID, NewID);
 
-	str_format(aBuf, sizeof(aBuf), "Changed owner of plot %d from '%s' to '%s'", PlotID, pSelf->m_Accounts[OldID].m_Username, pSelf->m_Accounts[NewID].m_Username);
+	str_format(aBuf, sizeof(aBuf), "Changed owner of plot %d from '%s' to '%s'", PlotID, pSelf->m_Accounts.Get(OldID).m_Username, pSelf->m_Accounts.Get(NewID).m_Username);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 

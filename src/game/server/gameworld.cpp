@@ -1069,7 +1069,7 @@ CCharacter* CGameWorld::ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int
 
 		if (Mode == 1) // BlmapChill police freeze hole right side
 		{
-			if ((!GameServer()->m_Accounts[p->GetPlayer()->GetAccID()].m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
+			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
 				continue;
 		}
 		if (Mode == 2) // for dummy 29
@@ -1114,7 +1114,7 @@ CCharacter* CGameWorld::ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int
 		}
 		if (Mode == 10) // BlmapChill police freeze pit left side
 		{
-			if ((!GameServer()->m_Accounts[p->GetPlayer()->GetAccID()].m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 436 * 32 || p->m_Pos.x < 363 * 32 || p->m_Pos.x > 381 * 32 || p->m_Pos.y < 420 * 32)
+			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 436 * 32 || p->m_Pos.x < 363 * 32 || p->m_Pos.x > 381 * 32 || p->m_Pos.y < 420 * 32)
 				continue;
 		}
 

@@ -821,7 +821,7 @@ bool CDurak::HandleMoneyTransaction(int ClientID, int Amount, const char *pMsg)
 		int AccID = pPlayer->GetAccID();
 		if (AccID >= ACC_START)
 		{
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(AccID);
 			pAccount->m_DurakProfit += Amount;
 		}
 		return true;
@@ -1687,7 +1687,7 @@ void CDurak::ProcessPlayerWin(int Game, CDurakGame::SSeat *pSeat, int WinPos)
 	// Update acc stats
 	if (WinPos >= 0 && pPlayer->GetAccID() >= ACC_START)
 	{
-		GameServer()->m_Accounts[pPlayer->GetAccID()].m_DurakWins++;
+		GameServer()->m_Accounts.Get(pPlayer->GetAccID()).m_DurakWins++;
 	}
 
 	EndMove(Game, pSeat, true);

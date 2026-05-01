@@ -572,7 +572,7 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 	// check for ammo
 	bool NoTaserAmmo = (GetActiveWeapon() == WEAPON_TASER && m_pPlayer->GetAccID() >= ACC_START && pAccount->m_TaserBattery <= 0);
@@ -1378,7 +1378,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 			m_aSpawnWeaponActive[W] = false;
 	}
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && pAccount->m_PortalRifle)
 		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
@@ -1840,7 +1840,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 	}
 	if (m_LastTouchedPortalBy == m_Core.m_Killer.m_ClientID)
 		CountKill = false;
-	if (GameServer()->SameIP(m_pPlayer->GetCID(), m_Core.m_Killer.m_ClientID))
+	if (GameServer()->m_Accounts.SameIP(m_pPlayer->GetCID(), m_Core.m_Killer.m_ClientID))
 		CountKill = false;
 
 	// if no killer exists its a selfkill
@@ -1907,7 +1907,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 		if (CountKill && pKiller->GetAccID() >= ACC_START && (!m_pPlayer->m_IsDummy || Config()->m_SvDummyBlocking))
 		{
-			CGameContext::AccountInfo *pKillerAccount = &GameServer()->m_Accounts[pKiller->GetAccID()];
+			CAccounts::AccountInfo *pKillerAccount = &GameServer()->m_Accounts.Get(pKiller->GetAccID());
 
 			// kill streak;
 			if (pKillerChar && pKillerChar->m_KillStreak > pKillerAccount->m_KillingSpreeRecord)
@@ -1933,7 +1933,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 
 		if (m_pPlayer->GetAccID() >= ACC_START)
 		{
-			CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 			if (m_pPlayer->m_Minigame == MINIGAME_SURVIVAL && GameServer()->Survival()->IsPlaying(m_pPlayer->GetCID()))
 			{
@@ -2704,7 +2704,7 @@ bool CCharacter::TryInitializeSpawnWeapons(bool Spawn)
 	if (m_pPlayer->IsMinigame() || m_pPlayer->m_JailTime)
 		return false;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 	if (Config()->m_SvSpawnWeapons)
 	{
 		for (int i = 0; i < 3; i++)
@@ -3087,7 +3087,7 @@ void CCharacter::HandleTiles(int Index)
 					return;
 				}
 
-				CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+				CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 				int TileXP = 1;
 				int TileMoney = 1;
@@ -3156,7 +3156,7 @@ void CCharacter::HandleTiles(int Index)
 					AliveState ? aSurvival : "",
 					m_GrogSpirit ? aSpirit : "",
 					m_IsDoubleXp ? " (x2)" : "");
-				str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld]%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level), aPlusXP);
+				str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld]%s", pAccount->m_XP, GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level), aPlusXP);
 
 				str_format(aPolice, sizeof(aPolice), " +%dpolice", pAccount->m_PoliceLevel);
 				str_format(m_aLineMoney, sizeof(m_aLineMoney), "%s [%lld] +%d%s%s%s", BankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"), BankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
@@ -4557,7 +4557,7 @@ void CCharacter::FDDraceInit()
 
 	int64 Now = Server()->Tick();
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 	if (pAccount->m_VIP == VIP_PLUS)
 		m_Core.m_MoveRestrictionExtra.m_VipPlus = true;
 	m_VipPlusAntiSpamTick = Now;
@@ -4796,7 +4796,7 @@ void CCharacter::FDDraceTick()
 			{
 				// Reset here for voting menu
 				m_aLineMoney[0] = '\0';
-				CGameContext::AccountInfo* pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+				CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 				int AliveState = GetAliveState();
 				int XP = 0;
@@ -4811,7 +4811,7 @@ void CCharacter::FDDraceTick()
 				char aSpirit[32];
 				str_format(aSurvival, sizeof(aSurvival), " +%dsurvival", AliveState);
 				str_format(aSpirit, sizeof(aSpirit), " +%dspirit", m_GrogSpirit);
-				str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld] +1flag%s%s%s%s", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level),
+				str_format(m_aLineExp, sizeof(m_aLineExp), "XP [%lld/%lld] +1flag%s%s%s%s", pAccount->m_XP, GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
 					pAccount->m_VIP ? " +2vip" : "",
 					AliveState ? aSurvival : "",
 					m_GrogSpirit ? aSpirit : "",
@@ -5150,7 +5150,7 @@ void CCharacter::IncreasePermille(int Permille)
 int CCharacter::GetPermilleLimit()
 {
 	// 3.9 permille at most. As soon as reaching 4.0 ur wanted. 3.9/0.3 per grog = 13 grogs, if acc is older than 4 months
-	float MonthsSinceReg = GameServer()->MonthsPassedSinceRegister(m_pPlayer->GetAccID());
+	float MonthsSinceReg = GameServer()->m_Accounts.MonthsPassedSinceRegister(m_pPlayer->GetAccID());
 	return clamp((int)(MonthsSinceReg * 10), Config()->m_SvGrogMinPermilleLimit, 39);
 }
 
@@ -5508,7 +5508,7 @@ int CCharacter::GetTaserStrength()
 {
 	// If player isnt logged in set his taserlevel to 10, so that he can use taser when given via rcon. he is not able to pick a taser pickup up, so he doesnt have level 10 to abuse
 	int AccID = m_pPlayer->GetAccID();
-	int TaserLevel = AccID >= ACC_START ? GameServer()->m_Accounts[AccID].m_TaserLevel : Config()->m_SvTaserStrengthDefault;
+	int TaserLevel = AccID >= ACC_START ? GameServer()->m_Accounts.Get(AccID).m_TaserLevel : Config()->m_SvTaserStrengthDefault;
 	return clamp((int)((Server()->Tick() - m_LastTaserUse) * 2 / Server()->TickSpeed()), 0, TaserLevel);
 }
 
@@ -5587,7 +5587,7 @@ void CCharacter::UpdateWeaponIndicator()
 		if (GameServer()->m_pHouses[i]->IsInside(m_pPlayer->GetCID()))
 			return;
 
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 	char aAmmo[32] = "";
 	const char *pName = GameServer()->GetWeaponName(GetActiveWeapon());
@@ -6162,7 +6162,7 @@ int CCharacter::GetCorruptionScore()
 
 bool CCharacter::TryCatchingWanted(int TargetCID, vec2 EffectPos)
 {
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[m_pPlayer->GetAccID()];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 	CCharacter *pTarget = GameServer()->GetPlayerChar(TargetCID);
 	// police catch gangster // disallow catching while being wanted yourself
 	if (!pTarget->GetPlayer()->m_EscapeTime || pTarget->GetPlayer()->IsMinigame() || !pTarget->m_FreezeTime || !pAccount->m_PoliceLevel || m_pPlayer->m_EscapeTime)
@@ -6172,7 +6172,7 @@ bool CCharacter::TryCatchingWanted(int TargetCID, vec2 EffectPos)
 	int Minutes = clamp((int)(pTarget->GetPlayer()->m_EscapeTime / Server()->TickSpeed()) / 100, 10, 20);
 	int Corrupt = clamp(pTarget->GetCorruptionScore() * 500, 500, 10000);
 
-	if (pTarget->GetPlayer()->GetAccID() >= ACC_START && GameServer()->m_Accounts[pTarget->GetPlayer()->GetAccID()].m_Money >= Corrupt)
+	if (pTarget->GetPlayer()->GetAccID() >= ACC_START && GameServer()->m_Accounts.Get(pTarget->GetPlayer()->GetAccID()).m_Money >= Corrupt)
 	{
 		str_format(aBuf, sizeof(aBuf), "corrupted officer '%s'", Server()->ClientName(m_pPlayer->GetCID()));
 		pTarget->GetPlayer()->BankTransaction(-Corrupt, aBuf);
@@ -6826,7 +6826,7 @@ void CCharacter::SetJumps(int NewJumps, bool Silent)
 
 void CCharacter::OnRainbowVIP()
 {
-	if (!GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP)
+	if (!GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP"));
 		return;
@@ -6837,7 +6837,7 @@ void CCharacter::OnRainbowVIP()
 
 void CCharacter::OnBloodyVIP()
 {
-	if (!GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP)
+	if (!GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP"));
 		return;
@@ -6852,7 +6852,7 @@ void CCharacter::OnBloodyVIP()
 
 void CCharacter::OnAtomVIP()
 {
-	if (!GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP)
+	if (!GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP"));
 		return;
@@ -6867,7 +6867,7 @@ void CCharacter::OnAtomVIP()
 
 void CCharacter::OnTrailVIP()
 {
-	if (!GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP)
+	if (!GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP"));
 		return;
@@ -6881,7 +6881,7 @@ void CCharacter::OnTrailVIP()
 
 void CCharacter::OnSpreadGunVIP()
 {
-	if (!GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP)
+	if (!GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP"));
 		return;
@@ -6892,7 +6892,7 @@ void CCharacter::OnSpreadGunVIP()
 
 void CCharacter::OnRainbowHookVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;
@@ -6903,7 +6903,7 @@ void CCharacter::OnRainbowHookVIP()
 
 void CCharacter::OnRotatingBallVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;
@@ -6916,7 +6916,7 @@ void CCharacter::OnRotatingBallVIP()
 
 void CCharacter::OnEpicCircleVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;
@@ -6930,7 +6930,7 @@ void CCharacter::OnEpicCircleVIP()
 
 void CCharacter::OnLovelyVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;
@@ -6941,7 +6941,7 @@ void CCharacter::OnLovelyVIP()
 
 void CCharacter::OnRainbowNameVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;
@@ -6952,7 +6952,7 @@ void CCharacter::OnRainbowNameVIP()
 
 void CCharacter::OnSparkleVIP()
 {
-	if (GameServer()->m_Accounts[m_pPlayer->GetAccID()].m_VIP != VIP_PLUS)
+	if (GameServer()->m_Accounts.Get(m_pPlayer->GetAccID()).m_VIP != VIP_PLUS)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), m_pPlayer->Localize("You are not VIP+"));
 		return;

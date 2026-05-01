@@ -569,7 +569,7 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 	char aBuf[128];
 	time_t tmp;
 	int AccID = pPlayer->GetAccID();
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(AccID);
 
 	if (AccID < ACC_START)
 	{
@@ -685,7 +685,7 @@ void CVotingMenu::DoPageAccount(int ClientID, int *pNumOptions)
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "XP [%lld/%lld]", pAccount->m_XP, GameServer()->GetNeededXP(pAccount->m_Level));
+			str_format(aBuf, sizeof(aBuf), "XP [%lld/%lld]", pAccount->m_XP, GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level));
 			DoLineText(Page, pNumOptions, aBuf);
 		}
 
@@ -922,7 +922,7 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 	const int Page = GetPage(ClientID);
 
 	int AccID = pPlayer->GetAccID();
-	CGameContext::AccountInfo *pAccount = &GameServer()->m_Accounts[AccID];
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(AccID);
 	int Flags = 0;
 
 	// Misc

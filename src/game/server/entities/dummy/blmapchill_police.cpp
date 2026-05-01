@@ -190,7 +190,7 @@ void CDummyBlmapChillPolice::OldPoliceMoves()
 
 			m_IsClosestPolice = false;
 
-			if (pChr->m_PoliceHelper || GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_PoliceLevel)
+			if (pChr->m_PoliceHelper || GameServer()->m_Accounts.Get(pChr->GetPlayer()->GetAccID()).m_PoliceLevel)
 				m_IsClosestPolice = true;
 
 			if (pChr->Core()->m_Pos.x > RAW(444) - 10) // police dude failed too far --> to be reached by hook (set too help mode extream to leave save area)

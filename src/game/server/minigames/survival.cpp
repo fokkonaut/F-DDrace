@@ -126,7 +126,7 @@ void CSurvival::Tick()
 
 			// add a win to the winners' accounts
 			if (GameServer()->m_apPlayers[m_Winner]->GetAccID() >= ACC_START)
-				GameServer()->m_Accounts[GameServer()->m_apPlayers[m_Winner]->GetAccID()].m_SurvivalWins++;
+				GameServer()->m_Accounts.Get(GameServer()->m_apPlayers[m_Winner]->GetAccID()).m_SurvivalWins++;
 			GameServer()->m_apPlayers[m_Winner]->GiveXP(250, "for winning a survival round");
 		}
 

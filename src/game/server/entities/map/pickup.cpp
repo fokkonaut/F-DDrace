@@ -237,7 +237,7 @@ void CPickup::Tick()
 						bool FightStarted = GameServer()->Arenas()->FightStarted(pChr->GetPlayer()->GetCID());
 						if (m_Subtype == WEAPON_PORTAL_RIFLE && Config()->m_SvPortalRifleAmmo && FightStarted)
 							break;
-						if (m_Subtype == WEAPON_TASER && (GameServer()->m_Accounts[pChr->GetPlayer()->GetAccID()].m_TaserLevel < 1 || FightStarted))
+						if (m_Subtype == WEAPON_TASER && (GameServer()->m_Accounts.Get(pChr->GetPlayer()->GetAccID()).m_TaserLevel < 1 || FightStarted))
 							break;
 
 						pChr->WeaponMoneyReward(m_Subtype);
