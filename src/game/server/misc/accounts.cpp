@@ -360,7 +360,8 @@ void CAccounts::SetTopAccStats(int FromID)
 
 void CAccounts::SendTop5AccMessage(IConsole::IResult* pResult, void* pUserData, int Type)
 {
-	CAccounts *pSelf = (CAccounts*)pUserData;
+	CGameContext *pUser = (CGameContext*)pUserData;
+	CAccounts *pSelf = (CAccounts *)&pUser->m_Accounts;
 	CPlayer *pPlayer = pSelf->GameServer()->m_apPlayers[pResult->m_ClientID];
 	if (!pPlayer)
 		return;
