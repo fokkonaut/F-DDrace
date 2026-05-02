@@ -1635,8 +1635,10 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   minigames/survival.h
   misc/accounts.cpp
   misc/accounts.h
-  misc/draweditor.cpp
-  misc/draweditor.h
+  misc/character/draweditor.cpp
+  misc/character/draweditor.h
+  misc/character/snake.cpp
+  misc/character/snake.h
   misc/mask128.h
   misc/playermapping.cpp
   misc/playermapping.h
@@ -1644,8 +1646,6 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   misc/plots.h
   misc/rainbowname.cpp
   misc/rainbowname.h
-  misc/snake.cpp
-  misc/snake.h
   misc/votingmenu.cpp
   misc/votingmenu.h
   misc/whois.cpp

@@ -10,8 +10,8 @@
 #include <game/server/entity.h>
 #include <game/server/eventhandler.h>
 #include <game/server/player.h>
-#include <game/server/misc/draweditor.h>
-#include <game/server/misc/snake.h>
+#include <game/server/misc/character/draweditor.h>
+#include <game/server/misc/character/snake.h>
 
 #include "map/pickup.h"
 #include "misc/stable_projectile.h"
