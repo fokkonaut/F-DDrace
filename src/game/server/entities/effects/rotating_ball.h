@@ -1,7 +1,7 @@
 // original version has been created by ReiTw
 
-#ifndef GAME_SERVER_ENTITIES_ROTATING_BALL_H
-#define GAME_SERVER_ENTITIES_ROTATING_BALL_H
+#ifndef GAME_SERVER_ENTITIES_EFFECTS_ROTATING_BALL_H
+#define GAME_SERVER_ENTITIES_EFFECTS_ROTATING_BALL_H
 
 #include <game/server/entity.h>
 
@@ -29,4 +29,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_ROTATING_BALL_H
+#endif // GAME_SERVER_ENTITIES_EFFECTS_ROTATING_BALL_H

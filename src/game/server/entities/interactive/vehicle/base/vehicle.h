@@ -2,8 +2,8 @@
 // Created by Matq on 02/04/2026.
 //
 
-#ifndef GAME_SERVER_ENTITIES_VEHICLE_BASE_VEHICLE_H
-#define GAME_SERVER_ENTITIES_VEHICLE_BASE_VEHICLE_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_VEHICLE_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_VEHICLE_H
 
 #include "healthbar.h"
 #include "../helicopter_turret.h"
@@ -187,4 +187,4 @@ public:
 	virtual bool OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pControllerChar);
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_VEHICLE_H

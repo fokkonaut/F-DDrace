@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_PLAYERCOUNTER_H
-#define GAME_SERVER_ENTITIES_PLAYERCOUNTER_H
+#ifndef GAME_SERVER_ENTITIES_MAP_PLAYERCOUNTER_H
+#define GAME_SERVER_ENTITIES_MAP_PLAYERCOUNTER_H
 
 #include <game/server/entity.h>
 #include <game/server/entities/misc/lasertext.h>
@@ -24,4 +24,4 @@ public:
 	void OnUpdate(int Port, int PlayerCount);
 };
 
-#endif // GAME_SERVER_ENTITIES_PLAYERCOUNTER_H
+#endif // GAME_SERVER_ENTITIES_MAP_PLAYERCOUNTER_H

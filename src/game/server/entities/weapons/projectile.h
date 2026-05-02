@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_SERVER_ENTITIES_PROJECTILE_H
-#define GAME_SERVER_ENTITIES_PROJECTILE_H
+#ifndef GAME_SERVER_ENTITIES_WEAPONS_PROJECTILE_H
+#define GAME_SERVER_ENTITIES_WEAPONS_PROJECTILE_H
 
 class CProjectile : public CEntity
 {
@@ -99,4 +99,4 @@ private:
 	} m_aSnap[NUM_SNAPINFO];
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_WEAPONS_PROJECTILE_H

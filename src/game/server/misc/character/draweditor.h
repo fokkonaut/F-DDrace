@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_DRAWEDITOR_H
-#define GAME_SERVER_DRAWEDITOR_H
+#ifndef GAME_SERVER_MISC_CHARACTER_DRAWEDITOR_H
+#define GAME_SERVER_MISC_CHARACTER_DRAWEDITOR_H
 
 #include <generated/protocol.h>
 #include <game/server/entity.h>
@@ -249,4 +249,4 @@ public:
 
 	bool SafelyDestroyDrawEntity(CEntity *pEntity);
 };
-#endif //GAME_SERVER_DRAWEDITOR_H
+#endif //GAME_SERVER_MISC_CHARACTER_DRAWEDITOR_H

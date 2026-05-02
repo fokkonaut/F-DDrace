@@ -1,7 +1,7 @@
 // original version has been created by ReiTw
 
-#ifndef GAME_SERVER_ENTITIES_LOVELY_H
-#define GAME_SERVER_ENTITIES_LOVELY_H
+#ifndef GAME_SERVER_ENTITIES_EFFECTS_LOVELY_H
+#define GAME_SERVER_ENTITIES_EFFECTS_LOVELY_H
 
 #include <game/server/entity.h>
 
@@ -33,4 +33,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif
+#endif //GAME_SERVER_ENTITIES_EFFECTS_LOVELY_H

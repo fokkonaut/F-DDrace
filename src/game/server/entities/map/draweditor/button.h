@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_BUTTON_H
-#define GAME_SERVER_ENTITIES_BUTTON_H
+#ifndef GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_BUTTON_H
+#define GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_BUTTON_H
 
 #include <game/server/entity.h>
 
@@ -29,4 +29,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_BUTTON_H
+#endif // GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_BUTTON_H

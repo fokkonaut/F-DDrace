@@ -2,8 +2,8 @@
 // Created by Matq on 14/04/2026.
 //
 
-#ifndef GAME_SERVER_ENTITIES_BONE_VEHICLE_MODEL_H
-#define GAME_SERVER_ENTITIES_BONE_VEHICLE_MODEL_H
+#ifndef GAME_SERVER_ENTITIES_MISC_BONE_VEHICLE_MODEL_H
+#define GAME_SERVER_ENTITIES_MISC_BONE_VEHICLE_MODEL_H
 
 #include "base/bone_model.h"
 
@@ -373,4 +373,4 @@ bool MovingCircleHitsMovingSegment_Analytical(
 	vec2 lineNowB
 );
 
-#endif
+#endif // GAME_SERVER_ENTITIES_MISC_BONE_VEHICLE_MODEL_H

@@ -1,7 +1,7 @@
 // made by fstd, improved by jupeyy
 
-#ifndef GAME_SERVER_ENTITIES_LASERTEXT_H
-#define GAME_SERVER_ENTITIES_LASERTEXT_H
+#ifndef GAME_SERVER_ENTITIES_MISC_LASERTEXT_H
+#define GAME_SERVER_ENTITIES_MISC_LASERTEXT_H
 
 #include <game/server/entity.h>
 
@@ -52,4 +52,4 @@ private:
 	int m_CharNum;
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_MISC_LASERTEXT_H

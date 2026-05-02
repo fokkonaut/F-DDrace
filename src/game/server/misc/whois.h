@@ -1,7 +1,7 @@
 // original version has been created by noby
 
-#ifndef GAME_SERVER_WHOIS_H
-#define GAME_SERVER_WHOIS_H
+#ifndef GAME_SERVER_MISC_WHOIS_H
+#define GAME_SERVER_MISC_WHOIS_H
 
 #include <generated/protocol.h>
 #include <engine/server.h>
@@ -41,4 +41,4 @@ public:
 	void Run(const char *pName, int Mode, int Cutoff);
 	void AddEntry(int ClientID);
 };
-#endif //GAME_SERVER_WHOIS_H
+#endif //GAME_SERVER_MISC_WHOIS_H

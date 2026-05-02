@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_RAINBOW_NAME_H
-#define GAME_SERVER_RAINBOW_NAME_H
+#ifndef GAME_SERVER_MISC_RAINBOW_NAME_H
+#define GAME_SERVER_MISC_RAINBOW_NAME_H
 
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
@@ -35,4 +35,4 @@ public:
 	bool IsAffected(int ClientID);
 	int GetColor(int ClientID, int OtherID) { return m_aInfo[ClientID].m_aTeam[OtherID]; }
 };
-#endif //GAME_SERVER_RAINBOW_NAME_H
+#endif //GAME_SERVER_MISC_RAINBOW_NAME_H

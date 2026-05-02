@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_SNAKE_H
-#define GAME_SERVER_SNAKE_H
+#ifndef GAME_SERVER_MISC_CHARACTER_SNAKE_H
+#define GAME_SERVER_MISC_CHARACTER_SNAKE_H
 
 #include <generated/protocol.h>
 #include <game/server/entity.h>
@@ -51,4 +51,4 @@ public:
 	void OnPlayerDeath();
 	void OnInput(CNetObj_PlayerInput *pNewInput);
 };
-#endif //GAME_SERVER_SNAKE_H
+#endif //GAME_SERVER_MISC_CHARACTER_SNAKE_H

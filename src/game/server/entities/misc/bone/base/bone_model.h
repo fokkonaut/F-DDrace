@@ -2,8 +2,8 @@
 // Created by Matq on 11/04/2025.
 //
 
-#ifndef GAME_SERVER_ENTITIES_HELICOPTER_BONE_H
-#define GAME_SERVER_ENTITIES_HELICOPTER_BONE_H
+#ifndef GAME_SERVER_ENTITIES_MISC_BONE_BASE_BONE_MODEL_H
+#define GAME_SERVER_ENTITIES_MISC_BONE_BASE_BONE_MODEL_H
 
 #include "bone.h"
 
@@ -50,4 +50,4 @@ public:
 	virtual void Snap(int SnappingClient, const SBoneModelSnapping& Options);
 };
 
-#endif // GAME_SERVER_ENTITIES_HELICOPTER_BONE_H
+#endif // GAME_SERVER_ENTITIES_MISC_BONE_BASE_BONE_MODEL_H

@@ -1,7 +1,7 @@
 // made by timakro originally
 
-#ifndef GAME_SERVER_ENTITIES_STABLE_PROJECTILE_H
-#define GAME_SERVER_ENTITIES_STABLE_PROJECTILE_H
+#ifndef GAME_SERVER_ENTITIES_MISC_STABLE_PROJECTILE_H
+#define GAME_SERVER_ENTITIES_MISC_STABLE_PROJECTILE_H
 
 #include <game/server/entity.h>
 #include <game/server/misc/mask128.h>
@@ -52,4 +52,4 @@ public:
 	void SetPos(vec2 Pos) { m_Pos = Pos; };
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_MISC_STABLE_PROJECTILE_H

@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_PORTAL_BLOCKER_H
-#define GAME_SERVER_ENTITIES_PORTAL_BLOCKER_H
+#ifndef GAME_SERVER_ENTITIES_WEAPONS_PORTAL_BLOCKER_H
+#define GAME_SERVER_ENTITIES_WEAPONS_PORTAL_BLOCKER_H
 
 #include <game/server/entity.h>
 
@@ -29,4 +29,4 @@ public:
 	vec2 GetStartPos() { return m_StartPos; }
 };
 
-#endif // GAME_SERVER_ENTITIES_PORTAL_BLOCKER_H
+#endif // GAME_SERVER_ENTITIES_WEAPONS_PORTAL_BLOCKER_H

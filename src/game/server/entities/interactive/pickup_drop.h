@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_PICKUP_DROP_H
-#define GAME_SERVER_ENTITIES_PICKUP_DROP_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_PICKUP_DROP_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_PICKUP_DROP_H
 
 #include "advanced_entity.h"
 
@@ -42,4 +42,4 @@ private:
 	} m_Snap;
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_PICKUP_DROP_H

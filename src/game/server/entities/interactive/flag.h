@@ -1,8 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#ifndef GAME_SERVER_ENTITIES_FLAG_H
-#define GAME_SERVER_ENTITIES_FLAG_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_FLAG_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_FLAG_H
 
 #include "advanced_entity.h"
 
@@ -59,4 +59,4 @@ public:
 	virtual void Tick();
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_FLAG_H

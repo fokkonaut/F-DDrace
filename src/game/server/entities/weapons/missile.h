@@ -2,8 +2,8 @@
 // Created by Matq on 14/04/2025.
 //
 
-#ifndef GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
-#define GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
+#ifndef GAME_SERVER_ENTITIES_WEAPONS_MISSILE_H
+#define GAME_SERVER_ENTITIES_WEAPONS_MISSILE_H
 
 #include <game/server/entities/misc/stable_projectile.h>
 #include "game/server/gamecontext.h"
@@ -86,4 +86,4 @@ public:
 	void Snap(int SnappingClient) override;
 };
 
-#endif // GAME_SERVER_ENTITIES_HELICOPTER_MISSILE_H
+#endif // GAME_SERVER_ENTITIES_WEAPONS_MISSILE_H

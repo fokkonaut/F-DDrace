@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_DRAWTILE_H
-#define GAME_SERVER_ENTITIES_DRAWTILE_H
+#ifndef GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_DRAWTILE_H
+#define GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_DRAWTILE_H
 
 #include <game/server/entity.h>
 
@@ -57,4 +57,4 @@ public:
 	void SetPos(vec2 Pos) override;
 };
 
-#endif // GAME_SERVER_ENTITIES_DRAWTILE_H
+#endif // GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_DRAWTILE_H

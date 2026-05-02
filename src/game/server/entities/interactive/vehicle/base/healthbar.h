@@ -2,8 +2,8 @@
 // Created by Matq on 18/04/2026.
 //
 
-#ifndef GAME_SERVER_ENTITIES_VEHICLE_BASE_HEALTHBAR_H
-#define GAME_SERVER_ENTITIES_VEHICLE_BASE_HEALTHBAR_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_HEALTHBAR_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_HEALTHBAR_H
 
 #include <game/server/entities/misc/bone/base/bone.h>
 
@@ -35,4 +35,4 @@ public:
 	void Snap(int SnappingClient);
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_BASE_HEALTHBAR_H

@@ -2,8 +2,8 @@
 // Created by Matq on 12/05/2025.
 //
 
-#ifndef GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
-#define GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
+#ifndef GAME_SERVER_ENTITIES_MISC_BONE_HELICOPTER_MODELS_H
+#define GAME_SERVER_ENTITIES_MISC_BONE_HELICOPTER_MODELS_H
 
 #include "vehicle_model.h"
 #include <game/server/entities/misc/bone/base/bone_model.h>
@@ -105,4 +105,4 @@ public:
 	CHelicopterChinookModel(CEntity *pEntity);
 };
 
-#endif // GAME_SERVER_ENTITIES_HELICOPTER_HELICOPTER_MODELS_H
+#endif // GAME_SERVER_ENTITIES_MISC_BONE_HELICOPTER_MODELS_H

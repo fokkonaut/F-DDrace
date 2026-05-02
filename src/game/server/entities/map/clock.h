@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_CLOCK_H
-#define GAME_SERVER_ENTITIES_CLOCK_H
+#ifndef GAME_SERVER_ENTITIES_MAP_CLOCK_H
+#define GAME_SERVER_ENTITIES_MAP_CLOCK_H
 
 #include <game/server/entity.h>
 
@@ -34,4 +34,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_CLOCK_H
+#endif // GAME_SERVER_ENTITIES_MAP_CLOCK_H

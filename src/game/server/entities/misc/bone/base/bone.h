@@ -132,4 +132,4 @@ public:
 	void Snap(int SnappingClient);
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_BONE_BASE_BONE_H

@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_MONEY_H
-#define GAME_SERVER_ENTITIES_MONEY_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_MONEY_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_MONEY_H
 
 #include "advanced_entity.h"
 
@@ -48,4 +48,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_MONEY_H
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_MONEY_H

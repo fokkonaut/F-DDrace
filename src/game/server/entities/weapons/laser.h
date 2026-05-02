@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_SERVER_ENTITIES_LASER_H
-#define GAME_SERVER_ENTITIES_LASER_H
+#ifndef GAME_SERVER_ENTITIES_WEAPONS_LASER_H
+#define GAME_SERVER_ENTITIES_WEAPONS_LASER_H
 
 #include <game/server/entity.h>
 
@@ -55,4 +55,4 @@ private:
 	float m_BounceDelay;
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_WEAPONS_LASER_H

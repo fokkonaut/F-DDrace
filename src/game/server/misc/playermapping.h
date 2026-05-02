@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_PLAYERMAPPING_H
-#define GAME_SERVER_PLAYERMAPPING_H
+#ifndef GAME_SERVER_MISC_PLAYERMAPPING_H
+#define GAME_SERVER_MISC_PLAYERMAPPING_H
 
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
@@ -92,4 +92,4 @@ public:
 	int GetSpecSelectFlag(int ClientID, int SpecFlag) { return m_aMap[ClientID].GetSpecSelectFlag(SpecFlag); }
 };
 
-#endif // GAME_SERVER_PLAYERMAPPING_H
+#endif // GAME_SERVER_MISC_PLAYERMAPPING_H

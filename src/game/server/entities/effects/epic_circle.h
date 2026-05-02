@@ -1,7 +1,7 @@
 // originally made by Loic KASSEL (Rei/ReiTw)
 
-#ifndef GAME_SERVER_ENTITIES_SPECIAL_EPIC_CIRCLE_H
-#define GAME_SERVER_ENTITIES_SPECIAL_EPIC_CIRCLE_H
+#ifndef GAME_SERVER_ENTITIES_EFFECTS_EPIC_CIRCLE_H
+#define GAME_SERVER_ENTITIES_EFFECTS_EPIC_CIRCLE_H
 
 class CEpicCircle : public CEntity
 {
@@ -23,4 +23,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_SPECIAL_EPICCIRCLE_H
+#endif // GAME_SERVER_ENTITIES_EFFECTS_EPIC_CIRCLE_H

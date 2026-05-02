@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_VOTING_MENU_H
-#define GAME_SERVER_VOTING_MENU_H
+#ifndef GAME_SERVER_MISC_VOTING_MENU_H
+#define GAME_SERVER_MISC_VOTING_MENU_H
 
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
@@ -185,4 +185,4 @@ public:
 		MAX_VOTES_PER_PACKET = 15,
 	};
 };
-#endif //GAME_SERVER_VOTING_MENU_H
+#endif //GAME_SERVER_MISC_VOTING_MENU_H

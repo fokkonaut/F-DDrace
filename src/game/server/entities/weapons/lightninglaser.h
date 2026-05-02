@@ -1,7 +1,7 @@
 // originally made by Loic KASSEL (Rei/ReiTw), updated by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_SPECIAL_LIGHTNINGLASER_H
-#define GAME_SERVER_ENTITIES_SPECIAL_LIGHTNINGLASER_H
+#ifndef GAME_SERVER_ENTITIES_WEAPONS_LIGHTNINGLASER_H
+#define GAME_SERVER_ENTITIES_WEAPONS_LIGHTNINGLASER_H
 
 #include <game/server/entity.h>
 
@@ -64,4 +64,4 @@ public:
 	bool TargetAlive() { return (m_Target.m_ID != -1 && GameServer()->GetPlayerChar(m_Target.m_ID)) ? true : false; }
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_WEAPONS_LIGHTNINGLASER_H

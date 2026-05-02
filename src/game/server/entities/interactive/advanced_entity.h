@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_ADVANCED_ENTITY_H
-#define GAME_SERVER_ENTITIES_ADVANCED_ENTITY_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_ADVANCED_ENTITY_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_ADVANCED_ENTITY_H
 
 #include <game/server/entity.h>
 
@@ -81,4 +81,4 @@ protected:
 	CCollision::SMoveRestrictionExtra GetMoveRestrictionExtra();
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_ADVANCED_ENTITY_H

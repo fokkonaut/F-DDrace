@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_GROG_H
-#define GAME_SERVER_ENTITIES_GROG_H
+#ifndef GAME_SERVER_ENTITIES_INTERACTIVE_GROG_H
+#define GAME_SERVER_ENTITIES_INTERACTIVE_GROG_H
 
 #include <game/server/entities/interactive/advanced_entity.h>
 
@@ -51,4 +51,4 @@ public:
 	vec2 m_LastNudgePos;
 };
 
-#endif // GAME_SERVER_ENTITIES_GROG_H
+#endif // GAME_SERVER_ENTITIES_INTERACTIVE_GROG_H

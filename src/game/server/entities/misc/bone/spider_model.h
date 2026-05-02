@@ -2,8 +2,8 @@
 // Created by Matq on 02/04/2026.
 //
 
-#ifndef GAME_SERVER_ENTITIES_BONE_SPIDER_MODEL_H
-#define GAME_SERVER_ENTITIES_BONE_SPIDER_MODEL_H
+#ifndef GAME_SERVER_ENTITIES_MISC_BONE_SPIDER_MODEL_H
+#define GAME_SERVER_ENTITIES_MISC_BONE_SPIDER_MODEL_H
 
 #include "vehicle_model.h"
 #include <game/server/entities/interactive/advanced_entity.h>
@@ -168,4 +168,4 @@ public:
 	CSpiderModel(CEntity *pEntity);
 };
 
-#endif
+#endif // GAME_SERVER_ENTITIES_MISC_BONE_SPIDER_MODEL_H

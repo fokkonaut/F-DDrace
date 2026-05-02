@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ENTITIES_SPEEDUP_H
-#define GAME_SERVER_ENTITIES_SPEEDUP_H
+#ifndef GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_SPEEDUP_H
+#define GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_SPEEDUP_H
 
 #include <game/server/entity.h>
 
@@ -49,4 +49,4 @@ public:
 	bool IsModeOld() { return m_ModeOld; }
 };
 
-#endif // GAME_SERVER_ENTITIES_SPEEDUP_H
+#endif // GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_SPEEDUP_H

@@ -1,7 +1,7 @@
 /* copyright (c) 2007 magnus auvinen, see licence.txt for more info */
 
-#ifndef GAME_SERVER_ENTITIES_GUN_H
-#define GAME_SERVER_ENTITIES_GUN_H
+#ifndef GAME_SERVER_ENTITIES_MAP_GUN_H
+#define GAME_SERVER_ENTITIES_MAP_GUN_H
 
 #include <game/server/entity.h>
 #include <game/gamecore.h>
@@ -27,4 +27,4 @@ public:
 	virtual void Snap(int SnappingClient);
 };
 
-#endif // GAME_SERVER_ENTITIES_GUN_H
+#endif // GAME_SERVER_ENTITIES_MAP_GUN_H

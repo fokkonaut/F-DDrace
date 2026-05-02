@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_ACCOUNTS_H
-#define GAME_SERVER_ACCOUNTS_H
+#ifndef GAME_SERVER_MISC_ACCOUNTS_H
+#define GAME_SERVER_MISC_ACCOUNTS_H
 
 #include <base/hash_ctxt.h>
 #include <generated/protocol.h>
@@ -309,4 +309,4 @@ public:
 	void ReadMoneyListFile();
 };
 
-#endif //GAME_SERVER_ACCOUNTS_H
+#endif //GAME_SERVER_MISC_ACCOUNTS_H

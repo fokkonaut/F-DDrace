@@ -1,7 +1,7 @@
 // made by fokkonaut
 
-#ifndef GAME_SERVER_PLOTS_H
-#define GAME_SERVER_PLOTS_H
+#ifndef GAME_SERVER_MISC_PLOTS_H
+#define GAME_SERVER_MISC_PLOTS_H
 
 #include <engine/shared/protocol.h>
 #include <generated/protocol.h>
@@ -111,4 +111,4 @@ public:
 	// draweditor preset list
 	std::vector<std::string> m_vPresetList;
 };
-#endif //GAME_SERVER_PLOTS_H
+#endif //GAME_SERVER_MISC_PLOTS_H

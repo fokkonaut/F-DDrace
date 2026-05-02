@@ -1,7 +1,7 @@
 // originally made by timakro
 
-#ifndef GAME_SERVER_ENTITIES_ATOM_H
-#define GAME_SERVER_ENTITIES_ATOM_H
+#ifndef GAME_SERVER_ENTITIES_EFFECTS_ATOM_H
+#define GAME_SERVER_ENTITIES_EFFECTS_ATOM_H
 
 #include <game/server/entity.h>
 #include <game/server/entities/misc/stable_projectile.h>
@@ -23,4 +23,4 @@ public:
 	virtual void Tick();
 };
 
-#endif
+#endif //GAME_SERVER_ENTITIES_EFFECTS_ATOM_H

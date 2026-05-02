@@ -1,7 +1,7 @@
 // original version has been created by timakro
 
-#ifndef GAME_SERVER_ENTITIES_METEOR_H
-#define GAME_SERVER_ENTITIES_METEOR_H
+#ifndef GAME_SERVER_ENTITIES_EFFECTS_METEOR_H
+#define GAME_SERVER_ENTITIES_EFFECTS_METEOR_H
 
 #include <game/server/entities/misc/stable_projectile.h>
 
@@ -19,4 +19,4 @@ public:
 	virtual void Tick();
 };
 
-#endif
+#endif //GAME_SERVER_ENTITIES_EFFECTS_METEOR_H
