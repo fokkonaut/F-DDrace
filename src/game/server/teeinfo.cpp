@@ -187,7 +187,16 @@ void CTeeInfo::ToSevendown()
 		int matches = 0;
 		for(int p = 0; p < NUM_SKINPARTS; p++)
 			if(str_comp(GetSkinPartName(p), s_Skins[s].m_apSkinPartNames[p]) == 0)
-				matches += 2*(int)(p == SKINPART_BODY) + (int)(p == SKINPART_MARKING || p == SKINPART_DECORATION); // ignore feet, hands, eyes
+			{
+				// ignore feet, hands, eyes
+				if (p == SKINPART_BODY)
+					matches += 2;
+				if (p == SKINPART_MARKING || p == SKINPART_DECORATION)
+					matches++;
+				// twinbop and redbopp are based on decoration not body, so weight them more too
+				if (p == SKINPART_DECORATION && (str_comp(GetSkinPartName(p), "twinbopp") == 0 || str_comp(GetSkinPartName(p), "unibop") == 0))
+					matches++;
+			}
 
 		if(matches > best_matches)
 		{
