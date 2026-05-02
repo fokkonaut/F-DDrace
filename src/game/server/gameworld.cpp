@@ -14,6 +14,9 @@
 #include "entities/weapons/projectile.h"
 #include "entities/weapons/custom_projectile.h"
 #include "entities/weapons/missile.h"
+#include "entities/misc/lasertext.h"
+#include "entities/interactive/vehicle/spider.h"
+#include "entities/interactive/vehicle/helicopter.h"
 
 void CSelectedArea::Init(CGameContext *pGameServer)
 {
@@ -265,28 +268,8 @@ void CGameWorld::Tick()
 			}
 		}
 
-		int NumCharacters = 0;
-		m_PoliceFarm.m_NumPoliceTilePlayers = 0;
-		// we need to do this between core tick and Move of all the players, because otherwise its getting jiggly for those whose coretick didnt happen yet
-		for (CCharacter *pChr = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
-		{
-			pChr->m_Snake.Tick();
-
-			if (pChr->GetPlayer()->m_IsDummy)
-				continue;
-
-			NumCharacters++;
-			if (pChr->m_MoneyTile == CCharacter::MONEYTILE_POLICE && !pChr->m_Passive && !pChr->GetPlayer()->IsMinigame())
-			{
-				m_PoliceFarm.m_NumPoliceTilePlayers++;
-			}
-		}
-
-		const int Limit = Config()->m_SvPoliceFarmLimit;
-		if (Limit == 0)
-			m_PoliceFarm.m_MaxPoliceTilePlayers = 0;
-		else
-			m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
+		// process between tick and tick deferred
+		IntraTick();
 
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
@@ -311,6 +294,147 @@ void CGameWorld::Tick()
 		StrongWeakID++;
 	}
 }
+
+void CGameWorld::IntraTick()
+{
+	int NumCharacters = 0;
+	m_PoliceFarm.m_NumPoliceTilePlayers = 0;
+	
+	// we need to do this between core tick and Move of all the players, because otherwise its getting jiggly for those whose coretick didnt happen yet
+	for (CCharacter *pChr = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
+	{
+		pChr->m_Snake.Tick();
+
+		if (pChr->GetPlayer()->m_IsDummy)
+			continue;
+
+		NumCharacters++;
+		if (pChr->m_MoneyTile == CCharacter::MONEYTILE_POLICE && !pChr->m_Passive && !pChr->GetPlayer()->IsMinigame())
+		{
+			m_PoliceFarm.m_NumPoliceTilePlayers++;
+		}
+	}
+
+	const int Limit = Config()->m_SvPoliceFarmLimit;
+	m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
+}
+
+bool CGameWorld::FlagsUsed()
+{
+	return (GameServer()->m_pController->GetGameFlags()&GAMEFLAG_FLAGS);
+}
+
+void CGameWorld::ReleaseHooked(int ClientID)
+{
+	CCharacter* pChr = (CCharacter*)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
+	{
+		CCharacterCore* Core = pChr->Core();
+		if (Core->HookedPlayer() == ClientID && !pChr->m_Super)
+		{
+			Core->SetHookedPlayer(-1);
+			Core->m_HookState = HOOK_RETRACTED;
+		}
+	}
+}
+
+void CGameWorld::UnsetTelekinesis(CEntity *pEntity)
+{
+	CCharacter* pChr = (CCharacter*)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
+	{
+		if (pChr->m_pTelekinesisEntity == pEntity)
+		{
+			pChr->m_pTelekinesisEntity = 0;
+			break; // can break here, every entity can only be picked by one player using telekinesis at the time
+		}
+	}
+}
+
+void CGameWorld::UnsetKiller(int ClientID)
+{
+	CCharacter* pChr = (CCharacter*)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
+	{
+		if (ClientID != pChr->GetPlayer()->GetCID() && pChr->Core()->m_Killer.m_ClientID == ClientID)
+		{
+			pChr->Core()->m_Killer.m_ClientID = -1;
+			pChr->Core()->m_Killer.m_Weapon = -1;
+		}
+	}
+}
+
+int CGameWorld::MoneyLaserTextTime(int64 Amount)
+{
+	return Amount < SMALL_MONEY_AMOUNT ? 1 : 3;
+}
+
+CLaserText *CGameWorld::CreateLaserText(vec2 Pos, int Owner, const char *pText, int Seconds, bool AboveTee)
+{
+	if (AboveTee)
+	{
+		Pos.y -= 70.f;
+	}
+	Pos.y -= 32.f;
+	Pos.x -= 16.f;
+	return new CLaserText(this, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
+}
+
+bool CGameWorld::SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale, bool SpawnOnFloor, int Number)
+{
+	Scale = clamp(Scale, SPIDER_MIN_SCALE, SPIDER_MAX_SCALE);
+	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(SPIDER_PHYSSIZE * Scale);
+	ResultingHitbox = vec2(maximum(ResultingHitbox.x, 28.0f), maximum(ResultingHitbox.y, 28.0f));
+	if (SpawnOnFloor)
+		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
+
+	if (GameServer()->Collision()->TestBoxBig(Pos, ResultingHitbox))
+		return false;
+
+	new CSpider(this, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number);
+
+	return true;
+}
+
+bool CGameWorld::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale, bool SpawnOnFloor, int Number)
+{
+	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
+	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(HELICOPTER_PHYSSIZE * Scale);
+	if (SpawnOnFloor)
+		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
+
+	if (GameServer()->Collision()->TestBoxBig(Pos, ResultingHitbox))
+		return false;
+
+	if (HelicopterType < 0 || HelicopterType >= NUM_HELICOPTER_TYPES)
+		return false;
+
+	CHelicopter *pHelicopter = new CHelicopter(this, HelicopterType, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number, TurretType);
+	if (TurretType > TURRETTYPE_NONE && TurretType < NUM_TURRET_TYPES)
+	{
+		pHelicopter->AllocateNumAttachments(1);
+
+		IVehicleTurret *pTurret = nullptr;
+		if (TurretType == TURRETTYPE_MINIGUN)
+			pTurret = new CMinigunTurret();
+		else if (TurretType == TURRETTYPE_LAUNCHER)
+			pTurret = new CLauncherTurret();
+
+		if (!pHelicopter->TryAttach(pTurret))
+			delete pTurret; // Failed to assign ownership
+	}
+
+	return true;
+}
+
+int CGameWorld::GetHelicopterTileType()
+{
+	if (Config()->m_SvHeliTileType == NUM_HELICOPTER_TYPES)
+		return random_int(HELICOPTER_DEFAULT, NUM_HELICOPTER_TYPES - 1);
+	return Config()->m_SvHeliTileType;
+}
+
+// Find functions
 
 // TODO: should be more general
 CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CCharacter* pNotThis, int CollideWith, class CCharacter* pThisOnly)
@@ -350,7 +474,6 @@ CCharacter* CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 
 	return pClosest;
 }
-
 
 CEntity *CGameWorld::ClosestEntity(vec2 Pos, float Radius, int Type, CEntity *pNotThis, int Team, bool CheckWall)
 {
@@ -467,99 +590,7 @@ std::list<class CCharacter*> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 P
 	return listOfChars;
 }
 
-void CGameWorld::ReleaseHooked(int ClientID)
-{
-	CCharacter* pChr = (CCharacter*)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-	for (; pChr; pChr = (CCharacter*)pChr->TypeNext())
-	{
-		CCharacterCore* Core = pChr->Core();
-		if (Core->HookedPlayer() == ClientID && !pChr->m_Super)
-		{
-			Core->SetHookedPlayer(-1);
-			Core->m_HookState = HOOK_RETRACTED;
-		}
-	}
-}
-
 // F-DDrace
-
-CCharacter* CGameWorld::ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int CollideWith, int Mode)
-{
-	// Find other players
-	float ClosestRange = 0.f;
-	CCharacter* pClosest = 0;
-
-	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
-	for (; p; p = (CCharacter*)p->TypeNext())
-	{
-		if (p == pNotThis)
-			continue;
-
-		bool CheckPassive = !GameServer()->IsHouseDummy(CollideWith);
-		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
-			continue;
-
-		if (Mode == 1) // BlmapChill police freeze hole right side
-		{
-			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
-				continue;
-		}
-		if (Mode == 2) // for dummy 29
-		{
-			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 446 * 32 || p->m_Pos.y < 198 * 32)
-				continue;
-		}
-		if (Mode == 3) // for dummy 29
-		{
-			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 434 * 32 || p->m_Pos.x > 441 * 32 || p->m_Pos.y < 198 * 32)
-				continue;
-		}
-		if (Mode == 4) // for dummy 29
-		{
-			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 417 * 32 || p->m_Pos.x > 444 * 32 || p->m_Pos.y < 198 * 32)
-				continue;
-		}
-		if (Mode == 5) // for dummy 29
-		{
-			if (p->m_Pos.y < 213 * 32 || p->m_Pos.x > 429 * 32 || p->m_Pos.x < 419 * 32 || p->m_Pos.y > 218 * 32 + 60)
-				continue;
-		}
-		if (Mode == 6) // for dummy 29
-		{
-			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 417 * 32 - 10 || p->m_Pos.y < 198 * 32)
-				continue;
-		}
-		if (Mode == 7) // for dummy 23
-		{
-			if (p->m_Pos.y > 200 * 32 || p->m_Pos.x < 466 * 32)
-				continue;
-		}
-		if (Mode == 8) // for dummy 23
-		{
-			if (p->m_FreezeTime == 0)
-				continue;
-		}
-		if (Mode == 9) // for shopbot
-		{
-			if (GameServer()->IsHouseDummy(p->GetPlayer()->GetCID()))
-				continue;
-		}
-		if (Mode == 10) // BlmapChill police freeze pit left side
-		{
-			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 436 * 32 || p->m_Pos.x < 363 * 32 || p->m_Pos.x > 381 * 32 || p->m_Pos.y < 420 * 32)
-				continue;
-		}
-
-		float Len = distance(Pos, p->m_Pos);
-		if (Len < ClosestRange || !ClosestRange)
-		{
-			ClosestRange = Len;
-			pClosest = p;
-		}
-	}
-
-	return pClosest;
-}
 
 int CGameWorld::GetClosestHouseDummy(vec2 Pos, CCharacter* pNotThis, int Type, int CollideWith)
 {
@@ -875,4 +906,83 @@ int CGameWorld::IntersectDoorsUniqueNumbers(vec2 Pos, float Radius, CDoor **ppDo
 	}
 
 	return Num;
+}
+
+// only used for dummymodes
+CCharacter* CGameWorld::ClosestCharacterMode(vec2 Pos, CCharacter* pNotThis, int CollideWith, int Mode)
+{
+	// Find other players
+	float ClosestRange = 0.f;
+	CCharacter* pClosest = 0;
+
+	CCharacter* p = (CCharacter*)FindFirst(ENTTYPE_CHARACTER);
+	for (; p; p = (CCharacter*)p->TypeNext())
+	{
+		if (p == pNotThis)
+			continue;
+
+		bool CheckPassive = !GameServer()->IsHouseDummy(CollideWith);
+		if (CollideWith != -1 && !p->CanCollide(CollideWith, CheckPassive))
+			continue;
+
+		if (Mode == 1) // BlmapChill police freeze hole right side
+		{
+			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 438 * 32 || p->m_Pos.x < 430 * 32 || p->m_Pos.x > 445 * 32 || p->m_Pos.y < 423 * 32)
+				continue;
+		}
+		else if (Mode == 2) // for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 446 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		else if (Mode == 3) // for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 434 * 32 || p->m_Pos.x > 441 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		else if (Mode == 4) // for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 417 * 32 || p->m_Pos.x > 444 * 32 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		else if (Mode == 5) // for dummy 29
+		{
+			if (p->m_Pos.y < 213 * 32 || p->m_Pos.x > 429 * 32 || p->m_Pos.x < 419 * 32 || p->m_Pos.y > 218 * 32 + 60)
+				continue;
+		}
+		else if (Mode == 6) // for dummy 29
+		{
+			if (p->m_Pos.y > 213 * 32 || p->m_Pos.x < 416 * 32 || p->m_Pos.x > 417 * 32 - 10 || p->m_Pos.y < 198 * 32)
+				continue;
+		}
+		else if (Mode == 7) // for dummy 23
+		{
+			if (p->m_Pos.y > 200 * 32 || p->m_Pos.x < 466 * 32)
+				continue;
+		}
+		else if (Mode == 8) // for dummy 23
+		{
+			if (p->m_FreezeTime == 0)
+				continue;
+		}
+		else if (Mode == 9) // for shopbot
+		{
+			if (GameServer()->IsHouseDummy(p->GetPlayer()->GetCID()))
+				continue;
+		}
+		else if (Mode == 10) // BlmapChill police freeze pit left side
+		{
+			if ((!GameServer()->m_Accounts.Get(p->GetPlayer()->GetAccID()).m_PoliceLevel && !p->m_PoliceHelper) || p->GetPlayer()->m_EscapeTime || p->m_FreezeTime == 0 || p->m_Pos.y > 436 * 32 || p->m_Pos.x < 363 * 32 || p->m_Pos.x > 381 * 32 || p->m_Pos.y < 420 * 32)
+				continue;
+		}
+
+		float Len = distance(Pos, p->m_Pos);
+		if (Len < ClosestRange || !ClosestRange)
+		{
+			ClosestRange = Len;
+			pClosest = p;
+		}
+	}
+
+	return pClosest;
 }

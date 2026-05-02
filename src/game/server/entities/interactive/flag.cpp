@@ -184,7 +184,7 @@ void CFlag::Grab(int NewCarrier, bool PreventTeleport)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
 	GetCarrier()->m_FirstFreezeTick = 0;
-	GameServer()->UnsetTelekinesis(this);
+	GameWorld()->UnsetTelekinesis(this);
 	UpdateSpectators(m_Carrier);
 }
 

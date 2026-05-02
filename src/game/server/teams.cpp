@@ -457,7 +457,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 
 	for(int i = 0; i < Server()->GetMaxClients(ClientID); i++)
 	{
-		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
+		if (Server()->IsSevendown(ClientID) && GameServer()->m_World.FlagsUsed())
 		{
 			int Team = -1;
 			if (i == GameServer()->m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGRED))

@@ -15,7 +15,6 @@
 #include <string>
 #include "entities/interactive/pickup_drop.h"
 #include "entities/interactive/money.h"
-#include "entities/misc/lasertext.h"
 #include "entities/map/draweditor/drawtile.h"
 #include "houses/house.h"
 #include "minigames/minigame.h"
@@ -460,9 +459,6 @@ public:
 
 	int CountConnectedPlayers(bool CountSpectators = true, bool ExcludeBots = false);
 
-	CLaserText *CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3, bool AboveTee = true);
-	int MoneyLaserTextTime(int64 Amount) { return Amount < SMALL_MONEY_AMOUNT ? 1 : 3; }
-
 	class CHouse *m_pHouses[NUM_HOUSES];
 	class CMinigame *m_pMinigames[NUM_MINIGAMES];
 	CArenas *Arenas() { return ((CArenas *)m_pMinigames[MINIGAME_1VS1]); }
@@ -477,10 +473,6 @@ public:
 	void CreateSoundPlayer(int Sound, int ClientID);
 	void CreateSoundPlayerAt(vec2 Pos, int Sound, int ClientID);
 
-	void UnsetTelekinesis(CEntity *pEntity);
-	void UnsetKiller(int ClientID);
-
-	bool FlagsUsed();
 	void CreateFolders();
 
 	bool IsLocal(int CientID1, int ClientID2);
@@ -506,11 +498,6 @@ public:
 
 	//pickup drops
 	std::vector<CPickupDrop*> m_vPickupDropLimit;
-
-	// helicopter
-	bool SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
-	bool SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
-	int GetHelicopterTileType() { return Config()->m_SvHeliTileType == NUM_HELICOPTER_TYPES ? random_int(HELICOPTER_DEFAULT, NUM_HELICOPTER_TYPES - 1) : Config()->m_SvHeliTileType; }
 
 	//minigames disabled
 	bool m_aMinigameDisabled[NUM_MINIGAMES];

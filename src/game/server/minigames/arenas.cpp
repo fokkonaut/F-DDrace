@@ -664,7 +664,7 @@ void CArenas::IncreaseScore(int Fight, int Index)
 	std::swap(m_aFights[Fight].m_aSpawns[0], m_aFights[Fight].m_aSpawns[1]); // swap spawn positions when we score
 
 	if (GameServer()->GetPlayerChar(ClientID))
-		GameServer()->CreateLaserText(m_aFights[Fight].m_aSpawns[Index], ClientID, "+1", 3);
+		GameServer()->m_World.CreateLaserText(m_aFights[Fight].m_aSpawns[Index], ClientID, "+1", 3);
 
 	m_aFights[Fight].m_LongFreezeStart = false; // we only want the long freeze start on the initial round
 

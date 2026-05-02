@@ -976,7 +976,7 @@ void CPlayer::FakeSnap()
 
 	// flags
 	// Don't send flags when 0.6 client is in menu, so they don't show up in friends tab or voting menu
-	if (!GameServer()->FlagsUsed() || (m_PlayerFlags&PLAYERFLAG_IN_MENU))
+	if (!GameServer()->m_World.FlagsUsed() || (m_PlayerFlags&PLAYERFLAG_IN_MENU))
 		return;
 
 	for (int i = 0; i < 2; i++)
@@ -2102,7 +2102,7 @@ bool CPlayer::GiveTaserBattery(int Amount)
 	{
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, absolute(Amount));
-		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+		GameServer()->m_World.CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
 
 		if (m_pCharacter->GetActiveWeapon() == WEAPON_TASER)
 			m_pCharacter->UpdateWeaponIndicator();
@@ -2133,7 +2133,7 @@ bool CPlayer::GivePortalBattery(int Amount)
 	{
 		char aBuf[16];
 		str_format(aBuf, sizeof(aBuf), "%c%d", Symbol, absolute(Amount));
-		GameServer()->CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
+		GameServer()->m_World.CreateLaserText(m_pCharacter->GetPos(), m_ClientID, aBuf, 3);
 
 		if (m_pCharacter->GetActiveWeapon() == WEAPON_PORTAL_RIFLE)
 			m_pCharacter->UpdateWeaponIndicator();
@@ -2800,7 +2800,7 @@ bool CPlayer::MinigameRequestTick()
 		int Remaining = ((m_LastMinigameRequest + Server()->TickSpeed() * 5) - Server()->Tick()) / Server()->TickSpeed();
 		char aBuf[4];
 		str_format(aBuf, sizeof(aBuf), "%d", Remaining+1);
-		GameServer()->CreateLaserText(GetCharacter()->GetPos(), m_ClientID, aBuf, 1);
+		GameServer()->m_World.CreateLaserText(GetCharacter()->GetPos(), m_ClientID, aBuf, 1);
 	}
 
 	return false;

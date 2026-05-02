@@ -256,7 +256,7 @@ bool CHelicopter::TryRespawnNewVehicle()
 	if (!PlacedByTile())
 		return false;
 
-	return GameServer()->SpawnHelicopter(-1, 0, m_InitialPosition, m_HelicopterType, m_SwitchDelay, 1.f, false, m_Number);
+	return GameWorld()->SpawnHelicopter(-1, 0, m_InitialPosition, m_HelicopterType, m_SwitchDelay, 1.f, false, m_Number);
 }
 
 void CHelicopter::HandleRotationBasedOnVelocity()

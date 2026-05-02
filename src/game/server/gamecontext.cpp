@@ -20,8 +20,6 @@
 
 #include "entities/character.h"
 #include "entities/interactive/money.h"
-#include "entities/interactive/vehicle/spider.h"
-#include "entities/interactive/vehicle/helicopter.h"
 #include "entities/map/draweditor/speedup.h"
 #include "entities/map/draweditor/button.h"
 #include "entities/map/draweditor/teleporter.h"
@@ -36,7 +34,6 @@
 #include "houses/tavern.h"
 
 #include "entities/interactive/flag.h"
-#include "entities/misc/lasertext.h"
 #include <limits>
 #include <string>
 #include <stdio.h>
@@ -1428,6 +1425,11 @@ void CGameContext::OnTick()
 	m_Accounts.Tick();
 	m_SavedTees.Tick();
 
+	if (m_LastPlayerCountUpdate + Server()->TickSpeed() * 60 < Server()->Tick())
+	{
+		SendPlayerCountUpdate();
+	}
+
 	if(m_TeeHistorianActive)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1669,11 +1671,6 @@ void CGameContext::OnTick()
 		CallVote(m_pMapVoteResult->m_ClientID, m_pMapVoteResult->m_aMap, aCmd, "/map", Localizable("'%s' called vote to change server option '%s' (%s)"), 0, aArgs, 3);
 
 		m_pMapVoteResult = nullptr;
-	}
-
-	if (m_LastPlayerCountUpdate + Server()->TickSpeed() * 60 < Server()->Tick())
-	{
-		SendPlayerCountUpdate();
 	}
 
 
@@ -2402,7 +2399,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
 			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
 
-			if (FlagsUsed() && (pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGRED) || pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE)))
+			if (m_World.FlagsUsed() && (pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGRED) || pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE)))
 			{
 				pMsg->m_SpecMode = Server()->GetMaxClients(ClientID) - pMsg->m_SpectatorID;
 				pMsg->m_SpectatorID = -1;
@@ -5677,7 +5674,7 @@ bool CGameContext::JailPlayer(int ClientID, int Seconds, int ModLogID)
 		return false;
 
 	// make sure we are not saved as killer for someone else after we got arrested, so we cant take the flag to the jail
-	UnsetKiller(ClientID);
+	m_World.UnsetKiller(ClientID);
 
 	pPlayer->m_JailTime = Server()->TickSpeed() * Seconds;
 	pPlayer->m_EscapeTime = 0;
@@ -6254,64 +6251,6 @@ void CGameContext::SetMapSpecificOptions()
 	}
 }
 
-CLaserText *CGameContext::CreateLaserText(vec2 Pos, int Owner, const char *pText, int Seconds, bool AboveTee)
-{
-	if (AboveTee)
-	{
-		Pos.y -= 70.f;
-	}
-	Pos.y -= 32.f;
-	Pos.x -= 16.f;
-	return new CLaserText(&m_World, Pos, Owner, Seconds > 0 ? Server()->TickSpeed() * Seconds : -1, pText, (int)(strlen(pText)));
-}
-
-bool CGameContext::SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale, bool SpawnOnFloor, int Number)
-{
-	Scale = clamp(Scale, SPIDER_MIN_SCALE, SPIDER_MAX_SCALE);
-	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(SPIDER_PHYSSIZE * Scale);
-	ResultingHitbox = vec2(maximum(ResultingHitbox.x, 28.0f), maximum(ResultingHitbox.y, 28.0f));
-	if (SpawnOnFloor)
-		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
-
-	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
-		return false;
-
-	new CSpider(&m_World, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number);
-
-	return true;
-}
-
-bool CGameContext::SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale, bool SpawnOnFloor, int Number)
-{
-	Scale = clamp(Scale, HELICOPTER_MIN_SCALE, HELICOPTER_MAX_SCALE);
-	vec2 ResultingHitbox = IVehicle::MinimumVehicleHitbox(HELICOPTER_PHYSSIZE * Scale);
-	if (SpawnOnFloor)
-		Pos.y -= ResultingHitbox.y / 2.f - CCharacterCore::PHYS_SIZE / 2.f;
-
-	if (Collision()->TestBoxBig(Pos, ResultingHitbox))
-		return false;
-
-	if (HelicopterType < 0 || HelicopterType >= NUM_HELICOPTER_TYPES)
-		return false;
-
-	CHelicopter *pHelicopter = new CHelicopter(&m_World, HelicopterType, Spawner, Team, Pos, Scale, Server()->TickSpeed() * 1, Number, TurretType);
-	if (TurretType > TURRETTYPE_NONE && TurretType < NUM_TURRET_TYPES)
-	{
-		pHelicopter->AllocateNumAttachments(1);
-
-		IVehicleTurret *pTurret = nullptr;
-		if (TurretType == TURRETTYPE_MINIGUN)
-			pTurret = new CMinigunTurret();
-		else if (TurretType == TURRETTYPE_LAUNCHER)
-			pTurret = new CLauncherTurret();
-
-		if (!pHelicopter->TryAttach(pTurret))
-			delete pTurret; // Failed to assign ownership
-	}
-
-	return true;
-}
-
 void CGameContext::UpdateHidePlayers(int UpdateID)
 {
 	if (UpdateID == -1)
@@ -6341,40 +6280,9 @@ void CGameContext::UpdateHidePlayers(int UpdateID)
 	}
 }
 
-void CGameContext::UnsetTelekinesis(CEntity *pEntity)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CCharacter *pChr = GetPlayerChar(i);
-		if (pChr && pChr->m_pTelekinesisEntity == pEntity)
-		{
-			pChr->m_pTelekinesisEntity = 0;
-			break; // can break here, every entity can only be picked by one player using telekinesis at the time
-		}
-	}
-}
-
-void CGameContext::UnsetKiller(int ClientID)
-{
-	for (int i = 0; i < MAX_CLIENTS; i++)
-	{
-		CCharacter *pChr = GetPlayerChar(i);
-		if (ClientID != i && pChr && pChr->Core()->m_Killer.m_ClientID == ClientID)
-		{
-			pChr->Core()->m_Killer.m_ClientID = -1;
-			pChr->Core()->m_Killer.m_Weapon = -1;
-		}
-	}
-}
-
 void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
 	m_PlayerMapping.InitPlayerMap(ClientID, true, true);
-}
-
-bool CGameContext::FlagsUsed()
-{
-	return (m_pController->GetGameFlags()&GAMEFLAG_FLAGS);
 }
 
 void CGameContext::SendMotd(const char *pMsg, int ClientID)

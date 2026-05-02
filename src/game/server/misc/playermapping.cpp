@@ -48,7 +48,7 @@ void CPlayerMapping::Tick()
 int CPlayerMapping::GetSeeOthersID(int ClientID)
 {
 	// 0.7 or if no flags been used on the map
-	if (!Server()->IsSevendown(ClientID) || !GameServer()->FlagsUsed())
+	if (!Server()->IsSevendown(ClientID) || !GameServer()->m_World.FlagsUsed())
 		return Server()->GetMaxClients(ClientID) - 2;
 	// 0.6 AND flags
 	return GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE) - 1;
@@ -372,7 +372,7 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin, bool Timeout)
 	}
 	else
 	{
-		if (m_pPlayerMapping->GameServer()->FlagsUsed())
+		if (m_pPlayerMapping->GameServer()->m_World.FlagsUsed())
 		{
 			m_NumReserved += 2;
 			m_pMap[GetSpecSelectFlag(SPEC_FLAGRED)] = -1;

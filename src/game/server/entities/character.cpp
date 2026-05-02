@@ -1814,7 +1814,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 {
 	// make sure we are not saved as killer for someone else after we joined a minigame, so we cant take the flag to a minigame
 	if (Weapon == WEAPON_MINIGAME_CHANGE)
-		GameServer()->UnsetKiller(m_pPlayer->GetCID());
+		GameWorld()->UnsetKiller(m_pPlayer->GetCID());
 
 	if (OnArenaDie)
 		GameServer()->Arenas()->OnCharacterDie(this);
@@ -1855,7 +1855,7 @@ void CCharacter::Die(int Weapon, bool UpdateTeeControl, bool OnArenaDie)
 		Weapon = WEAPON_GAME; // don't send weird stuff to the clients
 
 	// unset anyones telekinesis on us
-	GameServer()->UnsetTelekinesis(this);
+	GameWorld()->UnsetTelekinesis(this);
 
 	// update tee controlling
 	if (UpdateTeeControl)
@@ -5217,7 +5217,7 @@ void CCharacter::DropMoney(int64 Amount, int Dir, bool GlobalPickupDelay, bool O
 
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "-%lld", Amount);
-	GameServer()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf, GameServer()->MoneyLaserTextTime(Amount));
+	GameWorld()->CreateLaserText(m_Pos, m_pPlayer->GetCID(), aBuf, GameWorld()->MoneyLaserTextTime(Amount));
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, TeamMask());
 }
 

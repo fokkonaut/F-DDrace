@@ -13,6 +13,7 @@ class CPlayer;
 class CGameContext;
 class CDoor;
 class CDrawTile;
+class CLaserText;
 
 // Needs to be here because we need it in gamecontext.h but also in draweditor.h
 class CSelectedArea
@@ -135,7 +136,22 @@ public:
 	bool m_Paused;
 	CWorldCore m_Core;
 
+	CGameWorld();
+	~CGameWorld();
+	void SetGameServer(CGameContext *pGameServer);
+
+	void InsertEntity(CEntity *pEntity);
+	void RemoveEntity(CEntity *pEntity);
+	void DestroyEntity(CEntity *pEntity);
+
+	void Snap(int SnappingClient);
+	void PostSnap();
+
+	void Tick();
+
 	// F-DDrace
+	void IntraTick();
+
 	struct
 	{
 		int m_NumPoliceTilePlayers = 0;
@@ -161,10 +177,21 @@ public:
 	};
 	CDrawTileContext m_DrawTiles;
 
-	CGameWorld();
-	~CGameWorld();
+	void ReleaseHooked(int ClientID);
+	void UnsetTelekinesis(CEntity *pEntity);
+	void UnsetKiller(int ClientID);
 
-	void SetGameServer(CGameContext *pGameServer);
+	bool FlagsUsed();
+
+	CLaserText *CreateLaserText(vec2 Pos, int Owner, const char* pText, int Seconds = 3, bool AboveTee = true);
+	int MoneyLaserTextTime(int64 Amount);
+
+	bool SpawnSpider(int Spawner, int Team, vec2 Pos, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
+	bool SpawnHelicopter(int Spawner, int Team, vec2 Pos, int HelicopterType, int TurretType, float Scale = 1.f, bool SpawnOnFloor = true, int Number = -1);
+	int GetHelicopterTileType();
+
+
+	// Find functions
 
 	CEntity *FindFirst(int Type);
 
@@ -240,58 +267,7 @@ public:
 	*/
 	class CCharacter* ClosestCharacter(vec2 Pos, float Radius, CEntity* ppNotThis, int CollideWith = -1, int Team = -1, int Flags = -1);
 
-	/*
-		Function: insert_entity
-			Adds an entity to the world.
-
-		Arguments:
-			entity - Entity to add
-	*/
-	void InsertEntity(CEntity *pEntity);
-
-	/*
-		Function: remove_entity
-			Removes an entity from the world.
-
-		Arguments:
-			entity - Entity to remove
-	*/
-	void RemoveEntity(CEntity *pEntity);
-
-	/*
-		Function: destroy_entity
-			Destroys an entity in the world.
-
-		Arguments:
-			entity - Entity to destroy
-	*/
-	void DestroyEntity(CEntity *pEntity);
-
-	/*
-		Function: snap
-			Calls snap on all the entities in the world to create
-			the snapshot.
-
-		Arguments:
-			snapping_client - ID of the client which snapshot
-			is being created.
-	*/
-	void Snap(int SnappingClient);
-
-	void PostSnap();
-
-	/*
-		Function: tick
-			Calls tick on all the entities in the world to progress
-			the world to the next tick.
-
-	*/
-	void Tick();
-
 	// F-DDrace
-
-	void ReleaseHooked(int ClientID);
-
 
 	/*
 		Function: interserct_CCharacters

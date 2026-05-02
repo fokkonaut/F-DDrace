@@ -55,7 +55,7 @@ void CPlayerCounter::Update(int PlayerCount)
 		Pos.x -= 26.f;
 	if (Len >= 3)
 		Pos.x -= 26.f;
-	m_pLaserText = GameServer()->CreateLaserText(Pos, -1, aBuf, -1, false);
+	m_pLaserText = GameWorld()->CreateLaserText(Pos, -1, aBuf, -1, false);
 }
 
 void CPlayerCounter::Tick()

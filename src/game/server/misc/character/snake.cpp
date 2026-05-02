@@ -44,7 +44,7 @@ bool CSnake::SetActive(bool Active)
 		m_pCharacter->GetPlayer()->m_ShowName = false;
 		m_pCharacter->m_InSnake = true;
 		GameServer()->SendTuningParams(m_pCharacter->GetPlayer()->GetCID(), m_pCharacter->m_TuneZone);
-		GameServer()->UnsetTelekinesis(m_pCharacter);
+		GameServer()->m_World.UnsetTelekinesis(m_pCharacter);
 		m_pCharacter->GetPlayer()->StopPlotEditing();
 		if (m_pCharacter->m_pVehicle)
 			m_pCharacter->m_pVehicle->Dismount(m_pCharacter->GetPlayer()->GetCID());
@@ -156,7 +156,7 @@ void CSnake::AddNewTees()
 			pChr->GetPlayer()->m_ShowName = false;
 			pChr->m_InSnake = true;
 			GameServer()->SendTuningParams(i, pChr->m_TuneZone);
-			GameServer()->UnsetTelekinesis(pChr);
+			GameServer()->m_World.UnsetTelekinesis(pChr);
 			pChr->GetPlayer()->StopPlotEditing();
 			if (pChr->m_pVehicle)
 				pChr->m_pVehicle->Dismount(i);

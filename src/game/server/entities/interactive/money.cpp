@@ -68,7 +68,7 @@ void CMoney::Tick()
 				pClosest->GetPlayer()->WalletTransaction(m_Amount, "collected");
 
 				str_format(aBuf, sizeof(aBuf), "+%lld", m_Amount);
-				GameServer()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf, GameServer()->MoneyLaserTextTime(m_Amount));
+				GameWorld()->CreateLaserText(m_Pos, pClosest->GetPlayer()->GetCID(), aBuf, GameWorld()->MoneyLaserTextTime(m_Amount));
 				GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, pClosest->TeamMask());
 
 				Reset();

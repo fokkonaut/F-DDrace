@@ -1323,7 +1323,7 @@ void CGameContext::ConLaserText(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->NumArguments() ? pResult->GetVictim() : pResult->m_ClientID;
 	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-	if (pChr) pSelf->CreateLaserText(pChr->GetPos(), Victim, pResult->GetString(1));
+	if (pChr) pSelf->m_World.CreateLaserText(pChr->GetPos(), Victim, pResult->GetString(1));
 }
 
 void CGameContext::ConSendMotd(IConsole::IResult *pResult, void *pUserData)
@@ -1358,7 +1358,7 @@ void CGameContext::ConSpider(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	float Scale = pResult->NumArguments() > 1 ? pResult->GetFloat(1) : 1.f;
-	if (!pSelf->SpawnSpider(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), Scale))
+	if (!pSelf->m_World.SpawnSpider(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), Scale))
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Cannot spawn spider here");
 }
 
@@ -1392,7 +1392,7 @@ void CGameContext::ConHelicopter(IConsole::IResult *pResult, void *pUserData)
 	int HelicopterType = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : HELICOPTER_DEFAULT;
 	int TurretType = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
 	float Scale = pResult->NumArguments() > 3 ? pResult->GetFloat(3) : 1.f;
-	if (!pSelf->SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), HelicopterType, TurretType, Scale))
+	if (!pSelf->m_World.SpawnHelicopter(pChr->GetPlayer()->GetCID(), pChr->Team(), pChr->GetPos(), HelicopterType, TurretType, Scale))
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Cannot spawn helicopter here or invalid type");
 }
 
