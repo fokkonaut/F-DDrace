@@ -460,6 +460,7 @@ void CPlayer::Tick()
 	{
 		CancelPlotAuction();
 		CancelPlotSwap();
+		StopPlotEditing(); // wanteds are not allowed to use editor, so disable it
 		int PlotID = GameServer()->m_Plots.GetPlotID(AccID);
 		GameServer()->m_Plots.SetPlotDestroyEndTick(PlotID, Server()->Tick() + m_EscapeTime);
 	}

@@ -642,6 +642,8 @@ bool CPlots::OnPlotDoorTaser(int PlotID, int TaserStrength, int ClientID, vec2 P
 			if (PlotOwner >= 0 && GameServer()->m_apPlayers[PlotOwner])
 			{
 				GameServer()->SendChatTarget(PlotOwner, GameServer()->m_apPlayers[PlotOwner]->Localize("The police have gained access to your plot in hopes of finding you"));
+				// prevent taking editor through open door out
+				GameServer()->m_apPlayers[PlotOwner]->StopPlotEditing();
 			}
 		}
 		return true;
