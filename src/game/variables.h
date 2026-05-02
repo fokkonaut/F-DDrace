@@ -241,7 +241,7 @@ MACRO_CONFIG_STR(SvPgscString, sv_pgsc_string, 128, "", CFGFLAG_SERVER, "String 
 MACRO_CONFIG_STR(SvBotLookupURL, sv_bot_lookup_url, 128, "", CFGFLAG_SERVER, "Bot lookup URL", AUTHED_ADMIN)
 
 // translate
-MACRO_CONFIG_STR(SvLibreTranslateURL, sv_libretranslate_url, 128, "https://translate.argosopentech.com/translate", CFGFLAG_SERVER, "LibreTranslate URL for chat messages", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvLibreTranslateURL, sv_libretranslate_url, 128, "", CFGFLAG_SERVER, "LibreTranslate URL for chat messages", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvLibreTranslateKey, sv_libretranslate_key, 128, "", CFGFLAG_SERVER, "LibreTranslate API Key", AUTHED_ADMIN)
 
 // sockets
