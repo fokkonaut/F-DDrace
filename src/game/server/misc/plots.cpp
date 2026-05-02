@@ -534,14 +534,14 @@ void CPlots::SetPlotDrawDoorStatus(int PlotID, int Door, bool Close)
 		Collision()->m_pSwitchers[Switch].m_Status[i] = Close;
 }
 
-void CPlots::SetPlotDrawDoorStatus(int Number, bool Close)
+/*void CPlots::SetPlotDrawDoorStatus(int Number, bool Close)
 {
 	if (!Collision()->IsPlotDrawDoor(Number) || !Collision()->m_pSwitchers)
 		return;
 
 	for (int i = 0; i < VANILLA_MAX_CLIENTS; i++)
 		Collision()->m_pSwitchers[Number].m_Status[i] = Close;
-}
+}*/
 
 void CPlots::ClearPlot(int PlotID)
 {
@@ -603,13 +603,13 @@ CDrawTile *CPlots::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 	return 0;
 }
 
-bool CPlots::IsPlotEmpty(int PlotID)
+/*bool CPlots::IsPlotEmpty(int PlotID)
 {
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		if (GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->GetCurrentTilePlotID(true) == PlotID)
 			return false;
 	return true;
-}
+}*/
 
 bool CPlots::PlotCanBeRaided(int PlotID)
 {

@@ -25,6 +25,16 @@ class CPlots
 	CCollision *Collision() const;
 	CGameWorld *GameWorld() const;
 
+	enum PlotVariables
+	{
+		PLOT_OWNER_ACC_USERNAME,
+		PLOT_DISPLAY_NAME,
+		PLOT_EXPIRE_DATE,
+		PLOT_DOOR_STATUS,
+		PLOT_OBJECTS,
+		NUM_PLOT_VARIABLES
+	};
+
 	struct SPlot
 	{
 		char m_aOwner[32];
@@ -38,17 +48,14 @@ class CPlots
 		int m_DoorHealth;
 	} m_aPlots[MAX_PLOTS];
 
-	enum PlotVariables
-	{
-		PLOT_OWNER_ACC_USERNAME,
-		PLOT_DISPLAY_NAME,
-		PLOT_EXPIRE_DATE,
-		PLOT_DOOR_STATUS,
-		PLOT_OBJECTS,
-		NUM_PLOT_VARIABLES
-	};
-
 	static int LoadPresetListCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+
+	void ReadPlotStats(int ID);
+	void WritePlotStats(int ID);
+	void ExpirePlots();
+
+	//void SetPlotDrawDoorStatus(int Number, bool Close);
+	//bool IsPlotEmpty(int PlotID);
 
 public:
 	void Init(CGameContext *pGameServer);
@@ -58,8 +65,6 @@ public:
 
 	void InitPlot(int PlotID, vec2 ToTele, int Size);
 
-	void ReadPlotStats(int ID);
-	void WritePlotStats(int ID);
 	std::vector<CEntity *> ReadPlotObjects(const char *pLine, int PlotID);
 	void WritePlotObject(CEntity *pEntity, std::ofstream *pFile, vec2 *pPos = 0);
 
@@ -73,16 +78,13 @@ public:
 
 	void SetPlotDoorStatus(int PlotID, bool Close);
 	void SetPlotDrawDoorStatus(int PlotID, int Door, bool Close);
-	void SetPlotDrawDoorStatus(int Number, bool Close);
 	void ClearPlot(int PlotID);
 	int GetPlotID(int AccID);
-	void ExpirePlots();
 	int GetTilePlotID(vec2 Pos, bool CheckDoor = false);
 
 	bool HasPlotByIP(int ClientID);
 
 	void RemovePortalsFromPlot(int PlotID);
-	bool IsPlotEmpty(int PlotID);
 
 	bool PlotCanBeRaided(int PlotID);
 	bool PlotDoorDestroyed(int PlotID);

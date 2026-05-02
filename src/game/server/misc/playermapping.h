@@ -9,12 +9,14 @@
 
 class CGameContext;
 class CPlayer;
+class CConfig;
+class IServer;
 
 class CPlayerMapping
 {
-	class CGameContext *m_pGameServer;
-	class CConfig *m_pConfig;
-	class IServer *m_pServer;
+	CGameContext *m_pGameServer;
+	CConfig *m_pConfig;
+	IServer *m_pServer;
 
 	struct PlayerMap
 	{
@@ -60,9 +62,9 @@ class CPlayerMapping
 	//int m_aTeamSizes[MAX_CLIENTS];
 
 public:
-	class CGameContext *GameServer() { return m_pGameServer; }
-	class CConfig *Config() { return m_pConfig; }
-	class IServer *Server() { return m_pServer; }
+	CGameContext *GameServer() { return m_pGameServer; }
+	CConfig *Config() { return m_pConfig; }
+	IServer *Server() { return m_pServer; }
 
 	void Init(CGameContext *pGameServer);
 	void Tick();

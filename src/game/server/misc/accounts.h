@@ -104,6 +104,12 @@ class CConfig;
 class CAccounts
 {
 public:
+	struct SSavedDesignEntry
+	{
+		char m_aMapName[128];
+		char m_aDesign[64];
+	};
+
 	struct AccountInfo
 	{
 		int m_Port;
@@ -158,7 +164,6 @@ public:
 	};
 
 private:
-
 	CGameContext *m_pGameServer;
 	CGameContext *GameServer() const;
 	IServer *Server() const;
@@ -191,6 +196,13 @@ private:
 	int m_LastDataSaveTick;
 	std::vector<AccountInfo> m_Accounts;
 
+	std::vector<SSavedDesignEntry> GetDesignList(int ID);
+	bool TryAccountSystemBan(const NETADDR *pAddr, int Type, int Secs);
+
+	// money drops
+	void WriteMoneyListFile();
+	void ReadMoneyListFile();
+
 public:
 	void Init(CGameContext *pGameServer);
 	void Tick();
@@ -209,12 +221,6 @@ public:
 	// acc saved design
 	void UpdateDesignList(int ID, const char *pMapDesign);
 	const char *GetCurrentDesignFromList(int ID);
-	struct SSavedDesignEntry
-	{
-		char m_aMapName[128];
-		char m_aDesign[64];
-	};
-	std::vector<SSavedDesignEntry> GetDesignList(int ID);
 
 	const char *GetAccVarName(int VariableID);
 	const char *GetAccVarValue(int ID, int VariableID);
@@ -301,12 +307,7 @@ public:
 	CAccountSystemBan m_aAccountSystemBans[MAX_ACC_SYS_BANS];
 	int m_NumAccountSystemBans;
 	int ProcessAccountSystemBan(int ClientID, int Type);
-	bool TryAccountSystemBan(const NETADDR *pAddr, int Type, int Secs);
 	bool IsAccountSystemBanned(int ClientID, bool ChatMsg = false);
-
-	// money drops
-	void WriteMoneyListFile();
-	void ReadMoneyListFile();
 };
 
 #endif //GAME_SERVER_MISC_ACCOUNTS_H

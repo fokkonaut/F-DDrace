@@ -23,6 +23,11 @@ class CSavedTees
 	std::vector<std::string> m_vSavedIdentitiesFiles; // only for init, to read all saved identities structs to m_vSavedIdentities
 	static int LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser);
 
+	bool TryLoadPlayer(int ClientID, SSavedIdentity *pSavedIdentity, bool RedirectTile);
+	void ReadSavedPlayersFile();
+	void ExpireSavedIdentities();
+	void RemoveSavedIdentityFile(SSavedIdentity SavedIdentity);
+
 public:
 	void Init(CGameContext *pGameServer);
 	void Tick();
@@ -30,12 +35,7 @@ public:
 	SSavedIdentity *SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
 	SSavedIdentity *FindSavedPlayer(int ClientID);
 	bool CheckLoadPlayer(int ClientID, bool Force = false);
-	bool TryLoadPlayer(int ClientID, SSavedIdentity *pSavedIdentity, bool RedirectTile);
 	const char *GetSavedIdentityHash(SSavedIdentity Info);
-
-	void ReadSavedPlayersFile();
-	void ExpireSavedIdentities();
-	void RemoveSavedIdentityFile(SSavedIdentity SavedIdentity);
 
 	int GetIdentityIndexByHash(const char *pHash);
 	void OnRedirectSaveTeeAdd(const char *pHash);
