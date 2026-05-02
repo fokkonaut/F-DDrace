@@ -94,6 +94,8 @@ CTeeInfo::CTeeInfo(int SkinID) : CTeeInfo()
 	}
 
 	m_SkinID = SkinID;
+	if (m_SkinID == SKIN_DUMMY) // skin gets too dark on 0.6
+		m_RemapLightness = false;
 	ToSevendown();
 }
 
@@ -213,12 +215,20 @@ void CTeeInfo::ToSevendown()
 	}
 
 	str_copy(m_Sevendown.m_SkinName, s_Skins[best_skin].SkinNameSevendown(), sizeof(m_Sevendown.m_SkinName));
-	m_Sevendown.m_ColorBody = ColorHSLA(m_aUseCustomColors[SKINPART_BODY] ? m_aSkinPartColors[SKINPART_BODY] : 255)
-			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
-			      .Pack(ColorHSLA::DARKEST_LGT);
-	m_Sevendown.m_ColorFeet = ColorHSLA(m_aUseCustomColors[SKINPART_FEET] ? m_aSkinPartColors[SKINPART_FEET] : 255)
-			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
-			      .Pack(ColorHSLA::DARKEST_LGT);
+	if (m_RemapLightness)
+	{
+		m_Sevendown.m_ColorBody = ColorHSLA(m_aUseCustomColors[SKINPART_BODY] ? m_aSkinPartColors[SKINPART_BODY] : 255)
+			.UnclampLighting(ColorHSLA::DARKEST_LGT7)
+			.Pack(ColorHSLA::DARKEST_LGT);
+		m_Sevendown.m_ColorFeet = ColorHSLA(m_aUseCustomColors[SKINPART_FEET] ? m_aSkinPartColors[SKINPART_FEET] : 255)
+			.UnclampLighting(ColorHSLA::DARKEST_LGT7)
+			.Pack(ColorHSLA::DARKEST_LGT);
+	}
+	else
+	{
+		m_Sevendown.m_ColorBody = m_aUseCustomColors[SKINPART_BODY] ? m_aSkinPartColors[SKINPART_BODY] : 255;
+		m_Sevendown.m_ColorFeet = m_aUseCustomColors[SKINPART_FEET] ? m_aSkinPartColors[SKINPART_FEET] : 255;
+	}
 
 	int CustomColors = m_aUseCustomColors[SKINPART_BODY];
 	if (m_aSkinPartColors[SKINPART_BODY] == s_Skins[best_skin].m_aSkinPartColors[SKINPART_BODY])

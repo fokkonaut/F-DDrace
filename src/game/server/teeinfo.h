@@ -81,6 +81,8 @@ public:
 	// skin id for when skin got set by rcon
 	int m_SkinID = SKIN_NONE;
 
+	bool m_RemapLightness = true;
+
 	CTeeInfo() = default;
 
 	// This constructor will assume all arrays are of length 6
