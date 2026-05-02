@@ -1101,11 +1101,11 @@ void CPlayer::OnDisconnect()
 	
 	if ((m_JailTime && !Server()->DnsblBlack(m_ClientID)) || m_EscapeTime)
 	{
-		GameServer()->SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
+		GameServer()->m_SavedTees.SaveCharacter(m_ClientID, SAVE_JAIL, GameServer()->Config()->m_SvJailSaveTeeExpire);
 	}
 	else if (m_SavePlayerDisconnect && GameServer()->Config()->m_SvDisconnectSaveTees)
 	{
-		GameServer()->SaveCharacter(m_ClientID, SAVE_DISCONNECT, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
+		GameServer()->m_SavedTees.SaveCharacter(m_ClientID, SAVE_DISCONNECT, GameServer()->Config()->m_SvDisconnectSaveTeeExpire);
 	}
 
 	KillCharacter();
@@ -1606,7 +1606,7 @@ void CPlayer::TryRespawn()
 	if (!m_CheckedSavePlayer)
 	{
 		m_CheckedSavePlayer = true;
-		if (GameServer()->CheckLoadPlayer(m_ClientID))
+		if (GameServer()->m_SavedTees.CheckLoadPlayer(m_ClientID))
 		{
 			if (!GetCharacter())
 			{

@@ -5813,12 +5813,12 @@ bool CCharacter::TrySafelyRedirectClientImpl(int Port)
 
 	// We need the port here so it gets saved aswell. If saving didn't work, we reset it
 	m_RedirectTilePort = Port;
-	int IdentityIndex = GameServer()->SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
-	if (IdentityIndex != -1)
+	SSavedIdentity *pSavedIdentity = GameServer()->m_SavedTees.SaveCharacter(m_pPlayer->GetCID(), SAVE_REDIRECT|SAVE_WALLET, Config()->m_SvShutdownSaveTeeExpire);
+	if (pSavedIdentity)
 	{
 		// Send msg
 		GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("'%s' has been moved to another map"), Server()->ClientName(m_pPlayer->GetCID()));
-		Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->GetSavedIdentityHash(GameServer()->m_vSavedIdentities[IdentityIndex]));
+		Server()->SendRedirectSaveTeeAdd(m_RedirectTilePort, GameServer()->m_SavedTees.GetSavedIdentityHash(*pSavedIdentity));
 		Server()->RedirectClient(m_pPlayer->GetCID(), m_RedirectTilePort);
 		return true;
 	}

@@ -2192,22 +2192,14 @@ void CGameContext::ConSaveDrop(IConsole::IResult* pResult, void* pUserData)
 	const char *pReason = pResult->NumArguments() == 3 ? pResult->GetString(2) : "automatic kick due to save drop";
 	int Dummy = pSelf->Server()->GetDummy(Victim);
 	if (Dummy != -1)
-		pSelf->SaveDrop(Dummy, Hours, pReason);
-	pSelf->SaveDrop(Victim, Hours, pReason);
+		pSelf->m_SavedTees.SaveDrop(Dummy, Hours, pReason);
+	pSelf->m_SavedTees.SaveDrop(Victim, Hours, pReason);
 }
 
 void CGameContext::ConListSavedTees(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "Listing all saved identities:");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", "----------------------------------");
-	for (int i = 0; i < (int)pSelf->m_vSavedIdentities.size(); i++)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "| %s | %s | '%s' | %s | %d |", pSelf->GetSavedIdentityHash(pSelf->m_vSavedIdentities[i]), pSelf->GetDate(pSelf->m_vSavedIdentities[i].m_ExpireDate),
-			pSelf->m_vSavedIdentities[i].m_aName, pSelf->m_vSavedIdentities[i].m_aAccUsername[0] ? pSelf->m_vSavedIdentities[i].m_aAccUsername : "<no_acc>", pSelf->m_vSavedIdentities[i].m_RedirectTilePort);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_RESPONSE, "console", aBuf);
-	}
+	pSelf->m_SavedTees.PrintSavedTeesList();
 }
 
 void CGameContext::Con1VS1GlobalCreate(IConsole::IResult *pResult, void *pUserData)

@@ -246,9 +246,11 @@ void CSaveTee::Save(CCharacter *pChr)
 
 	if (m_Flags&SAVE_IDENTITY)
 	{
-		int Index = pChr->GameServer()->FindSavedPlayer(pChr->GetPlayer()->GetCID());
-		if (Index != -1)
-			m_Identity = pChr->GameServer()->m_vSavedIdentities[Index];
+		SSavedIdentity *pSavedIdentity = pChr->GameServer()->m_SavedTees.FindSavedPlayer(pChr->GetPlayer()->GetCID());
+		if (pSavedIdentity)
+		{
+			m_Identity = *pSavedIdentity;
+		}
 	}
 
 	// '$' is not a valid username character, thats why we use it here (str_check_special_chars)

@@ -31,6 +31,7 @@
 #include "misc/plots.h"
 #include "misc/accounts.h"
 #include "misc/playermapping.h"
+#include "misc/savedtees.h"
 
 #include "teehistorian.h"
 
@@ -417,6 +418,7 @@ public:
 	CPlayerMapping m_PlayerMapping;
 	CPlots m_Plots;
 	CAccounts m_Accounts;
+	CSavedTees m_SavedTees;
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
 	void SetExpireDateDays(time_t *pDate, float Days);
@@ -542,27 +544,10 @@ public:
 	// gangster
 	void ProcessSpawnBlockProtection(int ClientID);
 	bool IsSpawnArea(vec2 Pos);
-
-	// saved
-	int SaveCharacter(int ClientID, int Flags = 0, float Hours = -1);
-	int FindSavedPlayer(int ClientID);
-	bool CheckLoadPlayer(int ClientID, bool Force = false);
-	bool TryLoadPlayer(int ClientID, int Index, bool RedirectTile);
-	const char *GetSavedIdentityHash(SSavedIdentity Info);
-	std::vector<SSavedIdentity> m_vSavedIdentities;
-	std::vector<std::string> m_vSavedIdentitiesFiles; // only for init, to read all saved identities structs to m_vSavedIdentities
-
-	void ReadSavedPlayersFile();
-	static int LoadSavedPlayersCallback(const char *pName, int IsDir, int StorageType, void *pUser);
-	void ExpireSavedIdentities();
-	void RemoveSavedIdentityFile(SSavedIdentity SavedIdentity);
 	
-	void SaveDrop(int ClientID, float Hours, const char *pReason);
-
 	// Redirect tile
 	void OnRedirectSaveTeeAdd(const char *pHash) override;
 	void OnRedirectSaveTeeRemove(const char *pHash) override;
-	int GetIdentityIndexByHash(const char *pHash);
 	int GetRedirectListPort(int WantedSwitchNumber);
 	int GetRedirectListSwitch(int WantedPort);
 

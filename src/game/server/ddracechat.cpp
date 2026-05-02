@@ -544,7 +544,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 
 	pSelf->Server()->SetTimeoutProtected(pResult->m_ClientID);
 	str_copy(pPlayer->m_TimeoutCode, pResult->GetString(0), sizeof(pPlayer->m_TimeoutCode));
-	pSelf->CheckLoadPlayer(pResult->m_ClientID);
+	pSelf->m_SavedTees.CheckLoadPlayer(pResult->m_ClientID);
 }
 
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
@@ -1639,7 +1639,7 @@ void CGameContext::ConLogin(IConsole::IResult * pResult, void * pUserData)
 	}
 
 	if (pSelf->m_Accounts.Login(pResult->m_ClientID, pResult->GetString(0), pResult->GetString(1)))
-		pSelf->CheckLoadPlayer(pResult->m_ClientID, pSelf->Config()->m_SvSaveTeeForceAccMatch);
+		pSelf->m_SavedTees.CheckLoadPlayer(pResult->m_ClientID, pSelf->Config()->m_SvSaveTeeForceAccMatch);
 }
 
 void CGameContext::ConLogout(IConsole::IResult * pResult, void * pUserData)

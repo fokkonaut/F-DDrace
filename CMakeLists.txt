@@ -1646,6 +1646,8 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   misc/plots.h
   misc/rainbowname.cpp
   misc/rainbowname.h
+  misc/savedtees.cpp
+  misc/savedtees.h
   misc/votingmenu.cpp
   misc/votingmenu.h
   misc/whois.cpp

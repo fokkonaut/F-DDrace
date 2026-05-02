@@ -60,6 +60,11 @@ void CPlots::WriteData()
 
 void CPlots::Tick()
 {
+	if (GameServer()->IsFullHour())
+	{
+		ExpirePlots();
+	}
+
 	// Check if plot destroy is over, player is not wanted anymore as it seems
 	for (int i = PLOT_START; i < Collision()->m_NumPlots + 1; i++)
 	{
