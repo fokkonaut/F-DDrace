@@ -245,7 +245,6 @@ void CPlayer::Reset()
 	m_LastVoteStatusUpdateTick = 0;
 	m_LastRedirectTryTick = 0;
 	m_LastMoneyPay = 0;
-	m_DoSeeOthersByVote = false;
 	m_HideBroadcasts = false;
 
 	m_IsBirthdayGift = false;
@@ -921,11 +920,11 @@ void CPlayer::Snap(int SnappingClient)
 void CPlayer::FakeSnap()
 {
 	// see others in spec
-	int SeeOthersID = GameServer()->m_World.GetSeeOthersID(m_ClientID);
+	int SeeOthersID = GameServer()->m_PlayerMapping.GetSeeOthersID(m_ClientID);
 
 	if (!Server()->IsSevendown(m_ClientID))
 	{
-		if (GameServer()->m_World.GetTotalOverhang(m_ClientID))
+		if (GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientID))
 		{
 			CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, SeeOthersID, sizeof(CNetObj_PlayerInfo)));
 			if(!pPlayerInfo)
@@ -941,13 +940,13 @@ void CPlayer::FakeSnap()
 	}
 
 	// see others
-	if (GameServer()->m_World.GetTotalOverhang(m_ClientID))
+	if (GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientID))
 	{
 		int *pClientInfo = (int*)Server()->SnapNewItem(11 + NUM_NETOBJTYPES, SeeOthersID, 17*4); // NETOBJTYPE_CLIENTINFO
 		if(!pClientInfo)
 			return;
 
-		StrToInts(&pClientInfo[0], 4, GameServer()->m_World.GetSeeOthersName(m_ClientID));
+		StrToInts(&pClientInfo[0], 4, GameServer()->m_PlayerMapping.GetSeeOthersName(m_ClientID));
 		StrToInts(&pClientInfo[4], 3, "");
 		StrToInts(&pClientInfo[8], 6, "default");
 		pClientInfo[14] = 1;
@@ -1433,13 +1432,13 @@ bool CPlayer::SetSpectatorID(int SpecMode, int SpectatorID)
 				if (!m_pSpecFlag)
 					return false;
 				m_SpecMode = SpecMode;
-				GameServer()->m_World.ResetSeeOthers(m_ClientID);
+				GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientID);
 				return true;
 			}
 			m_pSpecFlag = 0;
 			m_SpecMode = SpecMode;
 			m_SpectatorID = SpectatorID;
-			GameServer()->m_World.ResetSeeOthers(m_ClientID);
+			GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientID);
 			return true;
 		}
 	}
@@ -1818,7 +1817,7 @@ int CPlayer::Pause(int State, bool Force)
 
 		if (m_Paused == PAUSE_NONE)
 		{
-			GameServer()->m_World.ResetSeeOthers(m_ClientID);
+			GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientID);
 		}
 	}
 

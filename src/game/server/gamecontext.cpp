@@ -1199,7 +1199,7 @@ void CGameContext::SendVoteSet(int Type, int ClientID)
 
 			if (!Server()->IsSevendown(i))
 			{
-				m_World.ForceInsertPlayer(m_VoteCreator, i); // 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
+				m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, i); // 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
 				int id = m_VoteCreator;
 				Server()->Translate(id, i);
 				Msg.m_ClientID = id;
@@ -1216,7 +1216,7 @@ void CGameContext::SendVoteSet(int Type, int ClientID)
 	{
 		if (!Server()->IsSevendown(ClientID))
 		{
-			m_World.ForceInsertPlayer(m_VoteCreator, ClientID);
+			m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, ClientID);
 			int id = m_VoteCreator;
 			Server()->Translate(id, ClientID);
 			Msg.m_ClientID = id;
@@ -1409,6 +1409,7 @@ void CGameContext::OnTick()
 	// copy tuning
 	m_World.m_Core.m_Tuning = m_Tuning;
 	m_World.Tick();
+	m_PlayerMapping.Tick();
 
 	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
@@ -1955,7 +1956,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		}
 	}
 
-	m_World.InitPlayerMap(ClientID);
+	m_PlayerMapping.InitPlayerMap(ClientID);
 
 	if (m_apPlayers[ClientID]->m_IsDummy) // dummies dont need these information
 		return;
@@ -2033,7 +2034,7 @@ void CGameContext::OnClientRejoin(int ClientID)
 	StartResendingVotes(ClientID);
 
 	SendStartMessages(ClientID);
-	m_World.InitPlayerMap(ClientID, true);
+	m_PlayerMapping.InitPlayerMap(ClientID, true);
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);
@@ -2051,7 +2052,7 @@ void CGameContext::MapDesignChangeDone(int ClientID)
 	StartResendingVotes(ClientID);
 
 	SendStartMessages(ClientID);
-	m_World.InitPlayerMap(ClientID, true);
+	m_PlayerMapping.InitPlayerMap(ClientID, true);
 
 	int Zone = GetPlayerChar(ClientID) ? GetPlayerChar(ClientID)->m_TuneZone : 0;
 	SendTuningParams(ClientID, Zone);
@@ -2297,7 +2298,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		return true;
 	}
 
-	m_World.UpdateTeamsState(ClientID);
+	m_PlayerMapping.UpdateTeamsState(ClientID);
 	if (ClientVersion >= VERSION_DDNET_PLAYERFLAG_SPEC_CAM)
 	{
 		m_apPlayers[ClientID]->m_ZoomCursor = true;
@@ -2407,7 +2408,7 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMsg->m_SpectatorID = clamp(pUnpacker->GetInt(), -1, MAX_CLIENTS - 1);
 			pMsg->m_SpecMode = pMsg->m_SpectatorID == -1 ? SPEC_FREEVIEW : SPEC_PLAYER;
 
-			if (FlagsUsed() && (pMsg->m_SpectatorID == m_World.GetSpecSelectFlag(ClientID, SPEC_FLAGRED) || pMsg->m_SpectatorID == m_World.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE)))
+			if (FlagsUsed() && (pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGRED) || pMsg->m_SpectatorID == m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE)))
 			{
 				pMsg->m_SpecMode = Server()->GetMaxClients(ClientID) - pMsg->m_SpectatorID;
 				pMsg->m_SpectatorID = -1;
@@ -2707,16 +2708,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 		{
 			CNetMsg_Cl_CallVote *pMsg = (CNetMsg_Cl_CallVote *)pRawMsg;
-			if (str_comp_nocase(pMsg->m_Type, "option") != 0 && str_toint(pMsg->m_Value) == m_World.GetSeeOthersID(ClientID))
-			{
-				pPlayer->m_DoSeeOthersByVote = true;
-				m_World.DoSeeOthers(ClientID);
+			if(str_comp_nocase(pMsg->m_Type, "option") != 0 && m_PlayerMapping.DoSeeOthers(ClientID, str_toint(pMsg->m_Value), true))
 				return;
-			}
 			if (m_VotingMenu.OnMessage(ClientID, pMsg))
-			{
 				return;
-			}
 
 			if(pMsg->m_Force)
 			{
@@ -3220,15 +3215,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
 			pPlayer->UpdatePlaytime();
 
-			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID == m_World.GetSeeOthersID(ClientID))
+			if(pMsg->m_SpecMode == SPEC_PLAYER)
 			{
-				m_World.DoSeeOthers(ClientID);
-				return;
-			}
-
-			if (pMsg->m_SpecMode == SPEC_PLAYER && Durak()->OnSetSpectator(ClientID, pMsg->m_SpectatorID))
-			{
-				return;
+				if (m_PlayerMapping.DoSeeOthers(ClientID, pMsg->m_SpectatorID))
+					return;
+				if (Durak()->OnSetSpectator(ClientID, pMsg->m_SpectatorID))
+					return;
 			}
 
 			if (pMsg->m_SpecMode == SPEC_PLAYER && pMsg->m_SpectatorID >= 0)
@@ -4396,6 +4388,7 @@ void CGameContext::OnInit()
 	m_pAntibot->RoundStart(this);
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
+	m_PlayerMapping.Init(this);
 	m_CommandManager.Init(m_pConsole, this, NewCommandHook, RemoveCommandHook);
 
 	m_GameUuid = RandomUuid();
@@ -6716,7 +6709,7 @@ void CGameContext::UnsetKiller(int ClientID)
 
 void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
-	m_World.InitPlayerMap(ClientID, true, true);
+	m_PlayerMapping.InitPlayerMap(ClientID, true, true);
 }
 
 bool CGameContext::FlagsUsed()

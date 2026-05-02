@@ -4906,12 +4906,6 @@ void CCharacter::FDDraceTick()
 		m_HookExceededTick = 0;
 	}
 
-	if (m_pPlayer->m_DoSeeOthersByVote && !IsIdle())
-	{
-		GameWorld()->ResetSeeOthers(m_pPlayer->GetCID());
-		m_pPlayer->m_DoSeeOthersByVote = false;
-	}
-
 	if (m_BirthdayGiftEndTick && m_BirthdayGiftEndTick <= Server()->Tick())
 	{
 		SetBirthdayJetpack(false);

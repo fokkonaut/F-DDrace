@@ -369,7 +369,7 @@ int CDurak::GetTeam(int ClientID, int MapID)
 	if (Team == TEAM_SUPER && GameServer()->GetPlayerChar(ProcessedID))
 		Team = GameServer()->GetPlayerChar(ProcessedID)->m_TeamBeforeSuper;
 
-	int HighestDurakID = GameServer()->m_World.GetFirstDurakID(ClientID);
+	int HighestDurakID = GameServer()->m_PlayerMapping.GetFirstDurakID(ClientID);
 	if (MapID > HighestDurakID - m_aDurakNumReserved[ClientID] && MapID <= HighestDurakID)
 	{
 		// Card team
@@ -416,7 +416,7 @@ bool CDurak::OnDropMoney(int ClientID, int Amount, bool OnDeath)
 
 bool CDurak::OnRainbowName(int ClientID, int MapID)
 {
-	int TableMapID = GameServer()->m_World.GetFirstDurakID(ClientID);
+	int TableMapID = GameServer()->m_PlayerMapping.GetFirstDurakID(ClientID);
 	if (MapID != TableMapID || GameServer()->m_aMinigameDisabled[MINIGAME_DURAK])
 		return false;
 	return m_aSnappedSeatIndex[ClientID] == -1 && !::NetworkClipped(GameServer(), ClientID, m_vpGames[0]->m_TablePos);
@@ -1917,12 +1917,12 @@ void CDurak::PrepareDurakSnap(int SnappingClient, CDurakGame *pGame, CDurakGame:
 	const int Diff = NumNeeded - m_aDurakNumReserved[SnappingClient];
 	if (Diff != 0)
 	{
-		GameServer()->m_World.AddToNumReserved(SnappingClient, Diff);
+		GameServer()->m_PlayerMapping.AddToNumReserved(SnappingClient, Diff);
 		m_aDurakNumReserved[SnappingClient] += Diff;
 	}
 
 	std::map<CCard *, int> NewSnapMap;
-	int SnapID = GameServer()->m_World.GetFirstDurakID(SnappingClient);
+	int SnapID = GameServer()->m_PlayerMapping.GetFirstDurakID(SnappingClient);
 
 	// Static cards
 	for (int i = 0; i < NUM_DURAK_STATIC_CARDS; i++)

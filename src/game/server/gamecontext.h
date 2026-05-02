@@ -30,6 +30,7 @@
 #include "misc/votingmenu.h"
 #include "misc/plots.h"
 #include "misc/accounts.h"
+#include "misc/playermapping.h"
 
 #include "teehistorian.h"
 
@@ -413,6 +414,7 @@ public:
 
 	void UpdateHidePlayers(int UpdateID = -1);
 
+	CPlayerMapping m_PlayerMapping;
 	CPlots m_Plots;
 	CAccounts m_Accounts;
 

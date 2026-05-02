@@ -460,9 +460,9 @@ void CGameTeams::SendTeamsState(int ClientID)
 		if (Server()->IsSevendown(ClientID) && GameServer()->FlagsUsed())
 		{
 			int Team = -1;
-			if (i == GameServer()->m_World.GetSpecSelectFlag(ClientID, SPEC_FLAGRED))
+			if (i == GameServer()->m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGRED))
 				Team = LegacyTeams ? 56 : 63; // red colored team, used 1 before but that is the most common team for 1vs1
-			else if (i == GameServer()->m_World.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE))
+			else if (i == GameServer()->m_PlayerMapping.GetSpecSelectFlag(ClientID, SPEC_FLAGBLUE))
 				Team = LegacyTeams ? 60 : 36; // blue colored team
 			// try to make hook visible in most cases, i dont want to use TEAM_SUPER cause that would make names red when NONAME e.g. spookyghost
 			// but this right now means, that if u r in a team and ur dummy isnt, and u swap, and both try to hook the flag, one will have invisible hook
@@ -490,13 +490,13 @@ void CGameTeams::SendTeamsState(int ClientID)
 		}
 
 		// see others selector
-		int Indicator = GameServer()->m_World.GetSeeOthersInd(ClientID, i);
+		int Indicator = GameServer()->m_PlayerMapping.GetSeeOthersInd(ClientID, i);
 		if (Indicator != -1)
 		{
 			int Team = -1;
-			if (Indicator == CGameWorld::SEE_OTHERS_IND_BUTTON)
+			if (Indicator == CPlayerMapping::SEE_OTHERS_IND_BUTTON)
 				Team = LegacyTeams ? 49 : 25;
-			else if (Indicator == CGameWorld::SEE_OTHERS_IND_PLAYER)
+			else if (Indicator == CPlayerMapping::SEE_OTHERS_IND_PLAYER)
 				Team = LegacyTeams ? 28 : 24;
 
 			if (Team != -1)
@@ -546,7 +546,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 		{
 			Team = m_Core.Team(ID);
 			// If player is not reserved, dont highlight his team. Causes mismatch between dummy and main when playermapping is active.
-			bool DontHighlightTeam = !GameServer()->m_World.ReserveTeamSlots(Team, ClientID);
+			bool DontHighlightTeam = !GameServer()->m_PlayerMapping.ReserveTeamSlots(Team, ClientID);
 			if(DontHighlightTeam)
 				Team = 0;
 			else if (Team == TEAM_SUPER)

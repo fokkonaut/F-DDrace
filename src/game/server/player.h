@@ -372,7 +372,6 @@ public:
 	//others
 	void SetPlaying();
 	bool m_ResumeMoved;
-	bool m_DoSeeOthersByVote;
 
 	bool m_HideBroadcasts;
 
