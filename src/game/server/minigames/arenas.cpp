@@ -358,7 +358,7 @@ void CArenas::UpdateSnapPositions(int ClientID)
 		} while (!GameServer()->Collision()->IsSolid(TempPos.x, TempPos.y) && !BorderBelow);
 
 		int Index = m_aState[ClientID] == STATE_1VS1_PLACE_FIRST_SPAWN ? 0 : 1;
-		m_aFights[Fight].m_aSpawns[Index] = GameServer()->RoundPos(Pos);
+		m_aFights[Fight].m_aSpawns[Index] = GameServer()->Collision()->RoundPos(Pos);
 	}
 	else if (m_aState[ClientID] == STATE_1VS1_PLACE_ARENA)
 	{
@@ -368,13 +368,13 @@ void CArenas::UpdateSnapPositions(int ClientID)
 		// TODO: fix floating point
 		vec2 CornerPos;
 		CornerPos = vec2(Pos.x - (ShowDistance.x / 2), Pos.y - (ShowDistance.y / 2));
-		m_aFights[Fight].m_aCorners[POINT_TOP_LEFT] = GameServer()->RoundPos(CornerPos);
+		m_aFights[Fight].m_aCorners[POINT_TOP_LEFT] = GameServer()->Collision()->RoundPos(CornerPos);
 		CornerPos = vec2(Pos.x + (ShowDistance.x / 2), Pos.y - (ShowDistance.y / 2));
-		m_aFights[Fight].m_aCorners[POINT_TOP_RIGHT] = GameServer()->RoundPos(CornerPos);
+		m_aFights[Fight].m_aCorners[POINT_TOP_RIGHT] = GameServer()->Collision()->RoundPos(CornerPos);
 		CornerPos = vec2(Pos.x + (ShowDistance.x / 2), Pos.y + (ShowDistance.y / 2));
-		m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT] = GameServer()->RoundPos(CornerPos);
+		m_aFights[Fight].m_aCorners[POINT_BOTTOM_RIGHT] = GameServer()->Collision()->RoundPos(CornerPos);
 		CornerPos = vec2(Pos.x - (ShowDistance.x / 2), Pos.y + (ShowDistance.y / 2));
-		m_aFights[Fight].m_aCorners[POINT_BOTTOM_LEFT] = GameServer()->RoundPos(CornerPos);
+		m_aFights[Fight].m_aCorners[POINT_BOTTOM_LEFT] = GameServer()->Collision()->RoundPos(CornerPos);
 	}
 }
 
@@ -401,8 +401,8 @@ bool CArenas::ClampViewPos(int ClientID)
 	{
 		vec2 ShowDistance = GetShowDistance(ClientID);
 		ShowDistance = vec2(ShowDistance.x/2+32, ShowDistance.y/2+32);
-		TopLeft = GameServer()->RoundPos(ShowDistance);
-		BottomRight = GameServer()->RoundPos(vec2(GameServer()->Collision()->GetWidth()*32 - ShowDistance.x, GameServer()->Collision()->GetHeight()*32 - ShowDistance.y));
+		TopLeft = GameServer()->Collision()->RoundPos(ShowDistance);
+		BottomRight = GameServer()->Collision()->RoundPos(vec2(GameServer()->Collision()->GetWidth()*32 - ShowDistance.x, GameServer()->Collision()->GetHeight()*32 - ShowDistance.y));
 	}
 	else
 		return false;

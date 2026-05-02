@@ -5409,12 +5409,6 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 
 // F-DDrace
 
-int CGameContext::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly)
-{
-	int Number = Collision()->IntersectLineDoor(Pos0, Pos1, 0, 0, Team, PlotDoorOnly, ClosedOnly);
-	return Number; // can be used as bool, -1 is plot built laser wall which would return true too
-}
-
 void CGameContext::SetExpireDateDays(time_t *pDate, float Days)
 {
 	SetExpireDate(pDate, Days*24.f, true);
@@ -6084,14 +6078,6 @@ bool CGameContext::IsSpawnArea(vec2 Pos)
 		&& Pos.x <= Config()->m_SvSpawnAreaHighX * 32
 		&& Pos.y >= Config()->m_SvSpawnAreaLowY * 32
 		&& Pos.y <= Config()->m_SvSpawnAreaHighY * 32);
-}
-
-vec2 CGameContext::RoundPos(vec2 Pos)
-{
-	Pos = vec2((int)Pos.x, (int)Pos.y);
-	Pos.x -= (int)Pos.x % 32 - 16;
-	Pos.y -= (int)Pos.y % 32 - 16;
-	return Pos;
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)

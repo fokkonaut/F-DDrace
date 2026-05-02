@@ -38,7 +38,7 @@ bool CSnake::SetActive(bool Active)
 	{
 		SSnakeData Data;
 		Data.m_pChr = m_pCharacter;
-		Data.m_Pos = GameServer()->RoundPos(m_pCharacter->Core()->m_Pos);
+		Data.m_Pos = GameServer()->Collision()->RoundPos(m_pCharacter->Core()->m_Pos);
 		m_vSnake.push_back(Data);
 
 		m_pCharacter->GetPlayer()->m_ShowName = false;
@@ -127,7 +127,7 @@ bool CSnake::HandleInput()
 		for (unsigned int i = m_vSnake.size() - 1; i >= 1; i--)
 			m_vSnake[i].m_Pos = m_vSnake[i-1].m_Pos;
 
-	m_vSnake[0].m_Pos = GameServer()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
+	m_vSnake[0].m_Pos = GameServer()->Collision()->RoundPos(m_vSnake[0].m_Pos + m_Dir * 32.f);
 	if (GameServer()->Collision()->TestBox(m_vSnake[0].m_Pos, vec2(CCharacterCore::PHYS_SIZE, CCharacterCore::PHYS_SIZE)))
 	{
 		GameServer()->CreateExplosion(m_vSnake[0].m_Pos, m_pCharacter->GetPlayer()->GetCID(), WEAPON_GRENADE, true, m_pCharacter->Team(), m_pCharacter->TeamMask());

@@ -425,7 +425,6 @@ public:
 
 	int m_FullHourOffsetTicks;
 	bool IsFullHour() { return Server()->Tick() % (Server()->TickSpeed() * 60 * 60) == m_FullHourOffsetTicks; }
-	int IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly = true);
 
 	//motd
 	const char *FormatMotd(const char *pMsg);
@@ -486,8 +485,7 @@ public:
 	bool CanReceiveMessage(int Sender, int Receiver);
 	bool IsMuted(int Sender, int Receiver);
 	bool LineShouldHighlight(const char *pLine, const char *pName);
-
-	vec2 RoundPos(vec2 Pos);
+	
 	void CalcScreenParams(float Aspect, float Zoom, float *w, float *h);
 
 	void MapDesignChangeDone(int ClientID) override;

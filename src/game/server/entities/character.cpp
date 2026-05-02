@@ -1106,7 +1106,7 @@ void CCharacter::FireWeapon()
 					|| (m_LastLinkedPortals + Server()->TickSpeed() * Config()->m_SvPortalRifleDelay > Server()->Tick())
 					|| GameLayerClipped(PortalPos)
 					|| GameServer()->Collision()->IntersectLinePortalRifleStop(m_Pos, PortalPos, 0, 0)
-					|| GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
+					|| GameServer()->Collision()->IntersectedLineDoor(m_Pos, PortalPos, Team(), PlotDoorOnly)
 					|| GameWorld()->ClosestCharacter(PortalPos, Config()->m_SvPortalRadius, 0, m_pPlayer->GetCID(), -1, Flags) // dont allow to place portals too close to other tees
 					)
 				{
@@ -1131,7 +1131,7 @@ void CCharacter::FireWeapon()
 				{
 					if (!m_pPlayer->m_pPortal[i])
 					{
-						int PlotDoorNumber = GameServer()->Collision()->GetPlotBySwitch(GameServer()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false));
+						int PlotDoorNumber = GameServer()->Collision()->GetPlotBySwitch(GameServer()->Collision()->IntersectedLineDoor(m_Pos, PortalPos, Team(), true, false));
 						if (i == PORTAL_SECOND)
 						{
 							if (PlotDoorNumber < PLOT_START)

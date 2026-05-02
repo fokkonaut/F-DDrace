@@ -578,7 +578,7 @@ CDrawTile *CPlots::HasDrawTile(int MapIndex, CDrawTile *pMatch)
 		HasCollision = pMatch->m_Collision;
 	}
 
-	vec2 Pos = GameServer()->RoundPos(Collision()->GetPos(MapIndex));
+	vec2 Pos = GameServer()->Collision()->RoundPos(Collision()->GetPos(MapIndex));
 	int rx = round_to_int(Pos.x) / 32;
 	int ry = round_to_int(Pos.y) / 32;
 	if (rx <= 0 || rx >= Collision()->GetWidth()-1 || ry <= 0 || ry >= Collision()->GetHeight()-1)

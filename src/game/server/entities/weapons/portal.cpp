@@ -164,7 +164,7 @@ void CPortal::EntitiesEnter()
 
 		// disallow using the portal if its placed on the other side of a plot door
 		int Team = pAffectedChr ? pAffectedChr->Team() : 0;
-		if (GameServer()->IntersectedLineDoor(m_Pos, apEnts[i]->GetPos(), Team, true))
+		if (GameServer()->Collision()->IntersectedLineDoor(m_Pos, apEnts[i]->GetPos(), Team, true))
 			continue;
 
 		switch (apEnts[i]->GetObjType())

@@ -305,7 +305,7 @@ void CDrawEditor::Tick()
 	HandleInput();
 	m_Pos = m_pCharacter->GetCursorPos();
 	if (m_RoundPos && !m_Erasing)
-		m_Pos = GameServer()->RoundPos(m_Pos);
+		m_Pos = GameServer()->Collision()->RoundPos(m_Pos);
 
 	if (m_pPreview)
 		m_pPreview->SetPos(m_Pos);
@@ -326,7 +326,7 @@ void CDrawEditor::Tick()
 				CEntity *pEntity = m_Transform.m_vPreview[i].m_pEnt;
 				if (pEntity->GetObjType() == CGameWorld::ENTTYPE_SPEEDUP || pEntity->GetObjType() == CGameWorld::ENTTYPE_TELEPORTER || pEntity->GetObjType() == CGameWorld::ENTTYPE_BUTTON
 					|| (pEntity->GetObjType() == CGameWorld::ENTTYPE_DOOR && GameServer()->Collision()->IsPlotDrawDoor(pEntity->m_Number)) || pEntity->GetObjType() == CGameWorld::ENTTYPE_DRAWTILE)
-					Pos = GameServer()->RoundPos(Pos);
+					Pos = GameServer()->Collision()->RoundPos(Pos);
 				m_Transform.m_vPreview[i].m_pEnt->SetPos(Pos);
 			}
 		}

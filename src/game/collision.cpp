@@ -1762,6 +1762,14 @@ int CCollision::GetFTileRaw(int x, int y)
 	return GetFTileIndex(GetPureMapIndex(x, y));
 }
 
+vec2 CCollision::RoundPos(vec2 Pos)
+{
+	Pos = vec2((int)Pos.x, (int)Pos.y);
+	Pos.x -= (int)Pos.x % 32 - 16;
+	Pos.y -= (int)Pos.y % 32 - 16;
+	return Pos;
+}
+
 void CCollision::SetSpeedup(vec2 Pos, int Angle, int Force, int MaxSpeed, int Type)
 {
 	if (!m_pSpeedup)
@@ -2102,6 +2110,12 @@ int CCollision::IntersectLineSafeArea(vec2 Pos0, vec2 Pos1, vec2* pOutCollision,
 	if (pOutBeforeCollision)
 		* pOutBeforeCollision = Pos1;
 	return 0;
+}
+
+int CCollision::IntersectedLineDoor(vec2 Pos0, vec2 Pos1, int Team, bool PlotDoorOnly, bool ClosedOnly)
+{
+	int Number = IntersectLineDoor(Pos0, Pos1, 0, 0, Team, PlotDoorOnly, ClosedOnly);
+	return Number; // can be used as bool, -1 is plot built laser wall which would return true too
 }
 
 int CCollision::IntersectLineDoor(vec2 Pos0, vec2 Pos1, vec2* pOutCollision, vec2* pOutBeforeCollision, int Team, bool PlotDoorOnly, bool ClosedOnly)
