@@ -73,7 +73,7 @@ CHelicopter::CHelicopter(
 
 	if (PlacedByTile())
 	{
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
+		m_Build.m_Duration = Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
 		m_Layer = LAYER_SWITCH; // unused rn, but for completeness
 	}
 
@@ -103,6 +103,9 @@ void CHelicopter::Reset()
 void CHelicopter::Tick()
 {
 	IVehicle::Tick();
+
+	if (HandleSpawning())
+		return;
 
 	if (!IsInvincible())
 	{
@@ -256,7 +259,7 @@ bool CHelicopter::TryRespawnNewVehicle()
 	if (!PlacedByTile())
 		return false;
 
-	return GameWorld()->SpawnHelicopter(-1, 0, m_InitialPosition, m_HelicopterType, m_SwitchDelay, 1.f, false, m_Number);
+	return GameWorld()->SpawnHelicopter(-1, 0, m_InitialPosition, GameWorld()->GetHelicopterTileType(), m_SwitchDelay, 1.f, false, m_Number);
 }
 
 void CHelicopter::HandleRotationBasedOnVelocity()
@@ -268,7 +271,7 @@ void CHelicopter::HandleRotationBasedOnVelocity()
 
 void CHelicopter::Snap(int SnappingClient)
 {
-	if (IsExploding() || IsSpawning())
+	if (IsExploding())
 		return;
 
 	if (NetworkClipped(SnappingClient) || !CmaskIsSet(m_TeamMask, SnappingClient))

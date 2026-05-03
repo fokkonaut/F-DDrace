@@ -26,7 +26,6 @@ IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Po
 
 	m_VehicleType = VehicleType;
 	m_BaseSize = BaseSize;
-	m_SpawnTick = -1;
 	m_InputDirection = 0;
 	m_MaxHealth = 100;
 	m_Health = m_MaxHealth;
@@ -41,12 +40,6 @@ IVehicle::IVehicle(CGameWorld *pGameWorld, int VehicleType, int Objtype, vec2 Po
 	m_Flipped = false;
 	m_Angle = 0.0f;
 	m_VisualAngle = 0.0f;
-
-	// if (PlacedByTile())
-	// {
-	// 	m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * Config()->m_SvHeliRespawnTime;
-	// 	m_Layer = LAYER_SWITCH; // unused rn, but for completeness
-	// }
 
 	// for (int i = 0; i < NumAttachments; i++)
 	// 	m_apAttachments[i] = nullptr;
@@ -287,9 +280,6 @@ void IVehicle::Tick()
 	if (m_LastKnownOwner >= 0 && !GameServer()->m_apPlayers[m_LastKnownOwner])
 		m_LastKnownOwner = -1;
 
-	if (HandleSpawning())
-		return;
-
 	if (HandleBuilding())
 		return;
 }
@@ -442,19 +432,13 @@ void IVehicle::FlingTeesInPropellersPath() // might be a bug, if propeller pivot
 
 bool IVehicle::HandleSpawning()
 {
-	if (PlacedByTile() && IsSpawning())
+	if (PlacedByTile() && IsBuilding())
 	{
 		CCollision::SSwitchers *pSwitcher = m_Number > 0 ? &GameServer()->Collision()->m_pSwitchers[m_Number] : 0;
-		if (pSwitcher && !pSwitcher->m_Status[0]) // always use team 0, we dont have management for other teams right now for tile-based helis
-			m_SpawnTick++;
-
-		if (Server()->Tick() > m_SpawnTick)
+		if (pSwitcher && !pSwitcher->m_Status[m_DDTeam])
 		{
-			// respawn
-			m_SpawnTick = -1;
-			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN, m_TeamMask);
+			m_Build.m_StartTick++;
 		}
-
 		return true;
 	}
 
@@ -777,7 +761,7 @@ void IVehicle::Dismount(int ClientID, bool ForceDismountAtHelicopter)
 
 void IVehicle::Snap(int SnappingClient)
 {
-	if (IsExploding() || IsSpawning())
+	if (IsExploding())
 		return;
 
 	if (NetworkClipped(SnappingClient) || !CmaskIsSet(m_TeamMask, SnappingClient))
@@ -973,6 +957,11 @@ void IVehicle::SortBones()
 void IVehicle::SnapBuildingParticles(int SnappingClient)
 {
 	if (!IsBuilding())
+		return;
+
+	// only show when constructing, switch is active
+	CCollision::SSwitchers *pSwitcher = m_Number > 0 ? &GameServer()->Collision()->m_pSwitchers[m_Number] : 0;
+	if (PlacedByTile() && (!pSwitcher || !pSwitcher->m_Status[m_DDTeam]))
 		return;
 
 	const SBounds& ModelBounds = m_pModel->GetCachedBounds();

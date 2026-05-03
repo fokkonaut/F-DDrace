@@ -78,7 +78,6 @@ protected:
 	// int m_DelayTurretType;
 	int64 m_NextSpawnTick;
 	vec2 m_InitialPosition;
-	int m_SpawnTick;
 	int m_SwitchDelay;
 	bool HandleSpawning();
 	virtual bool TryRespawnNewVehicle();
@@ -149,9 +148,8 @@ public:
 	int LastKnownOwnerCID() { return m_LastKnownOwner; }
 	bool IsExploding() { return m_ExplosionsLeft; }
 	bool IsBuilding() { return m_Build.m_Building; }
-	bool IsSpawning() { return m_SpawnTick > -1; }
 	bool PlacedByTile() { return m_Number >= 0 && m_SwitchDelay >= 0; }
-	bool IsInvincible() { return IsBuilding() || IsSpawning() || IsExploding(); }
+	bool IsInvincible() { return IsBuilding() || IsExploding(); }
 	float Health() { return m_Health; }
 	float MaxHealth() { return m_MaxHealth; }
 	float MaxArmor() { return m_MaxArmor; }
