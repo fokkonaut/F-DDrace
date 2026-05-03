@@ -74,82 +74,86 @@ void CGameControllerDDRace::Tick()
 		for (int i = 0, j = 0; i < MAX_CLIENTS; i++)
 		{
 			CPlayer *pPlayer = GameServer()->m_apPlayers[i];
-			if (pPlayer && Server()->ClientIngame(pPlayer->GetCID()) && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			if (!pPlayer || !Server()->ClientIngame(pPlayer->GetCID()) || pPlayer->GetTeam() == TEAM_SPECTATORS)
+				continue;
+			if (Server()->Tick() <= pPlayer->m_LastCustomColorsCheckTick + Server()->TickSpeed() * 5)
+				continue;
+
+			pPlayer->m_LastCustomColorsCheckTick = Server()->Tick();
+
+			bool IsZombie = pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_IsZombie;
+			if (IsZombie)
+				continue;
+
+			if (pPlayer->m_DisableCustomColorsTick && pPlayer->m_DisableCustomColorsTick + Server()->TickSpeed() * 11 < Server()->Tick())
 			{
-				if (Server()->Tick() > pPlayer->m_LastCustomColorsCheckTick + Server()->TickSpeed() * 5)
+				pPlayer->m_DisableCustomColorsTick = 0;
+				GameServer()->SendSkinChange(pPlayer->m_TeeInfos, i, -1);
+			}
+
+			bool SetDefaultColors = false;
+			if (!pPlayer->m_TeeInfos.m_Sevendown.m_UseCustomColor)
+				continue;
+				
+			const int & b = pPlayer->m_TeeInfos.m_Sevendown.m_ColorBody;
+			const int & f = pPlayer->m_TeeInfos.m_Sevendown.m_ColorFeet;
+			float bodyHue = ((b >> 16) & 0xff) / 255.f;
+			if (bodyHue < ZombieBodyHSL.h)
+			{
+				bodyHue = mix(bodyHue, ZombieBodyHSL.h, 0.15f);
+			}
+			else if (bodyHue > ZombieBodyHSL.h)
+			{
+				bodyHue = mix(bodyHue, ZombieBodyHSL.h, 0.3f);
+			}
+
+			float bodySaturation = ((b >> 8) & 0xff) / 255.f;
+			if (bodySaturation > 0.15f)
+			{
+				bodySaturation = mix(bodySaturation, ZombieBodyHSL.s, 0.5f);
+			}
+
+			float bodyLight = 0.5f + (b & 0xff) / 255.f*0.5f;
+			if (bodyLight < 0.85f)
+			{
+				bodyLight = mix(bodyLight, ZombieBodyHSL.l, 0.3f);
+			}
+
+			const vec3 bodyColor(HslToRgb(vec3(bodyHue, bodySaturation, bodyLight)));
+			float dist_a = distance(zombieBodyColor, bodyColor);
+			if (dist_a <= 0.501f)
+			{
+				SetDefaultColors = true;
+			}
+			else if (dist_a <= 0.531f)
+			{
+				const vec3 feetColor(HslToRgb(vec3(
+					((f >> 16) & 0xff) / 255.f,
+					((f >> 8) & 0xff) / 255.f,
+					0.5f + (f & 0xff) / 255.f*0.5f)));
+				float dist_b = distance(zombieFeetColor, feetColor);
+				if (dist_b <= 0.561f)
 				{
-					pPlayer->m_LastCustomColorsCheckTick = Server()->Tick();
-
-					if (pPlayer->m_DisableCustomColorsTick && pPlayer->m_DisableCustomColorsTick + Server()->TickSpeed() * 11 < Server()->Tick())
-					{
-						pPlayer->m_DisableCustomColorsTick = 0;
-						GameServer()->SendSkinChange(pPlayer->m_TeeInfos, i, -1);
-					}
-					bool SetDefaultColors = false;
-					if (pPlayer->m_TeeInfos.m_Sevendown.m_UseCustomColor)
-					{
-						const int & b = pPlayer->m_TeeInfos.m_Sevendown.m_ColorBody;
-						const int & f = pPlayer->m_TeeInfos.m_Sevendown.m_ColorFeet;
-						float bodyHue = ((b >> 16) & 0xff) / 255.f;
-						if (bodyHue < ZombieBodyHSL.h)
-						{
-							bodyHue = mix(bodyHue, ZombieBodyHSL.h, 0.15f);
-						}
-						else if (bodyHue > ZombieBodyHSL.h)
-						{
-							bodyHue = mix(bodyHue, ZombieBodyHSL.h, 0.3f);
-						}
-
-						float bodySaturation = ((b >> 8) & 0xff) / 255.f;
-						if (bodySaturation > 0.15f)
-						{
-							bodySaturation = mix(bodySaturation, ZombieBodyHSL.s, 0.5f);
-						}
-
-						float bodyLight = 0.5f + (b & 0xff) / 255.f*0.5f;
-						if (bodyLight < 0.85f)
-						{
-							bodyLight = mix(bodyLight, ZombieBodyHSL.l, 0.3f);
-						}
-
-						const vec3 bodyColor(HslToRgb(vec3(bodyHue, bodySaturation, bodyLight)));
-						float dist_a = distance(zombieBodyColor, bodyColor);
-						if (dist_a <= 0.501f)
-						{
-							SetDefaultColors = true;
-						}
-						else if (dist_a <= 0.531f)
-						{
-							const vec3 feetColor(HslToRgb(vec3(
-								((f >> 16) & 0xff) / 255.f,
-								((f >> 8) & 0xff) / 255.f,
-								0.5f + (f & 0xff) / 255.f*0.5f)));
-							float dist_b = distance(zombieFeetColor, feetColor);
-							if (dist_b <= 0.561f)
-							{
-								SetDefaultColors = true;
-							}
-						}
-
-						if (SetDefaultColors)
-						{
-							pPlayer->m_DisableCustomColorsTick = Server()->Tick();
-							if (!str_comp(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName, "cammo"))
-							{
-								CTeeInfo Info = pPlayer->m_TeeInfos;
-								Info.m_Sevendown.m_UseCustomColor = 1;
-								Info.m_Sevendown.m_ColorBody = 0xffffff;
-								Info.m_Sevendown.m_ColorFeet = 0xffffff;
-								Info.Translate(true);
-								GameServer()->SendSkinChange(Info, i, -1);
-							}
-						}
-
-						if (++j >= 5)
-							break;
-					}
+					SetDefaultColors = true;
 				}
 			}
+
+			if (SetDefaultColors)
+			{
+				pPlayer->m_DisableCustomColorsTick = Server()->Tick();
+				if (!str_comp(pPlayer->m_TeeInfos.m_Sevendown.m_SkinName, "cammo"))
+				{
+					CTeeInfo Info = pPlayer->m_TeeInfos;
+					Info.m_Sevendown.m_UseCustomColor = 1;
+					Info.m_Sevendown.m_ColorBody = 0xffffff;
+					Info.m_Sevendown.m_ColorFeet = 0xffffff;
+					Info.Translate(true);
+					GameServer()->SendSkinChange(Info, i, -1);
+				}
+			}
+
+			if (++j >= 5)
+				break;
 		}
 	}
 }
