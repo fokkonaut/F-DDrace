@@ -426,7 +426,7 @@ Plot %d has been bought by '%s'
 == %d numaralı plot '%s' tarafından satın alındı
 
 You bought plot %d from %s
-== %s oyuncusundan %d numaralı plotunu satın aldınız
+== %d numaralı plotu %s oyuncusundan satın aldınız
 
 %s bought your plot, the money is moved to your bank account
 == %s plotunuzu satın aldı, para banka hesabınıza aktarıldı
