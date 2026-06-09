@@ -293,8 +293,9 @@ MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_G
 MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, SCORE_LEVEL, 0, NUM_SCORE_MODES-1, CFGFLAG_SERVER|CFGFLAG_GAME, "Default score (0=time, 1=level, 2=blockpoints, 3=bonus)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowBonusScoreMode, sv_allow_bonus_score_mode, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether bonus score can be seen using '/score'", AUTHED_ADMIN)
 // no-bonus area
+MACRO_CONFIG_INT(SvNoBonusPunishPortal, sv_no_bonus_punish_portal, 12, 0, 20, CFGFLAG_SERVER|CFGFLAG_GAME, "No-bonus area punish portal rifle score summand (0=off) (remove or increase score when threshold is 0)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvNoBonusMaxJumps, sv_no_bonus_max_jumps, 5, 2, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum number of jumps in no-bonus area (threshold=0: set this amount, else: start score increase at this)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvNoBonusScoreThreshold, sv_bonus_score_threshold, 10, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Threshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvNoBonusScoreThreshold, sv_bonus_score_threshold, 20, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Threshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvNoBonusScoreDecrease, sv_bonus_score_decrease, 10, 0, 60, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds between bonus score decrease", AUTHED_ADMIN)
 
 // grog

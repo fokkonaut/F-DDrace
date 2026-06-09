@@ -537,11 +537,12 @@ public:
 		{
 			bool NonEmpty()
 			{
-				return m_EndlessHook || m_InfiniteJumps || m_Jumps > m_NoBonusMaxJumps;
+				return m_EndlessHook || m_InfiniteJumps || m_Jumps > m_NoBonusMaxJumps || m_PortalRifle;
 			}
 			bool m_EndlessHook = false;
 			bool m_InfiniteJumps = false;
 			int m_Jumps = 0;
+			bool m_PortalRifle = false;
 			// Config()->m_SvNoBonusMaxJumps
 			int m_NoBonusMaxJumps = 0;
 		} m_SavedBonus;

@@ -1165,6 +1165,11 @@ void CCharacter::FireWeapon()
 								pAccount->m_PortalBattery--;
 								UpdateWeaponIndicator();
 							}
+
+							if (Config()->m_SvNoBonusPunishPortal)
+							{
+								IncreaseNoBonusScore(Config()->m_SvNoBonusPunishPortal);
+							}
 						}
 						break;
 					}
@@ -4880,7 +4885,7 @@ void CCharacter::FDDraceTick()
 		{
 			// add 2 when doing the first illegal air jump
 			bool FirstlyExceeded = m_Core.m_JumpedTotal == Config()->m_SvNoBonusMaxJumps;
-			IncreaseNoBonusScore(FirstlyExceeded ? 2 : 1);
+			IncreaseNoBonusScore(FirstlyExceeded ? 4 : 2);
 		}
 	}
 	m_LastJumpedTotal = m_Core.m_JumpedTotal;
@@ -4899,7 +4904,7 @@ void CCharacter::FDDraceTick()
 		if ((Server()->Tick() - m_HookExceededTick) % (Server()->TickSpeed() / 2) == 0)
 		{
 			// Add a score every .5 seconds when duration exceeded, endless is op
-			IncreaseNoBonusScore(FirstlyExceeded ? 2 : 1);
+			IncreaseNoBonusScore(FirstlyExceeded ? 4 : 2);
 		}
 	}
 	else
@@ -5746,6 +5751,8 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 	if (Config()->m_SvNoBonusScoreThreshold > 0)
 		return true;
 
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
+
 	// Save or load previous bonuses
 	if (Enter)
 	{
@@ -5755,15 +5762,25 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 		EndlessHook(false, -1, Silent);
 		InfiniteJumps(false, -1, Silent);
 		SetJumps(minimum(m_Core.m_Jumps, Config()->m_SvNoBonusMaxJumps), Silent);
+		if (Config()->m_SvNoBonusPunishPortal)
+		{
+			m_NoBonusContext.m_SavedBonus.m_PortalRifle = GetWeaponGot(WEAPON_PORTAL_RIFLE);
+			GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, pAccount->m_PortalRifle);
+		}
 	}
 	else
 	{
 		EndlessHook(m_NoBonusContext.m_SavedBonus.m_EndlessHook, -1, Silent);
 		InfiniteJumps(m_NoBonusContext.m_SavedBonus.m_InfiniteJumps, -1, Silent);
 		SetJumps(m_NoBonusContext.m_SavedBonus.m_Jumps, Silent);
+		if (m_NoBonusContext.m_SavedBonus.m_PortalRifle)
+		{
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, pAccount->m_PortalRifle);
+		}
 		m_NoBonusContext.m_SavedBonus.m_EndlessHook = false;
 		m_NoBonusContext.m_SavedBonus.m_InfiniteJumps = false;
 		m_NoBonusContext.m_SavedBonus.m_Jumps = 0;
+		m_NoBonusContext.m_SavedBonus.m_PortalRifle = false;
 	}
 
 	return true;

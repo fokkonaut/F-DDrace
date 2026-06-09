@@ -2238,6 +2238,8 @@ void CPlayer::OnLogout()
 
 		m_pCharacter->UnsetSpookyGhost();
 		m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, true);
+		if (pAccount->m_PortalRifle && m_pCharacter->m_NoBonusContext.m_InArea)
+			m_pCharacter->m_NoBonusContext.m_SavedBonus.m_PortalRifle = false;
 	}
 
 	if (pAccount->m_VIP == VIP_PLUS)
