@@ -88,7 +88,7 @@ struct CSnapContext
 
 	int GetClientVersion() const { return m_ClientVersion; }
 	bool IsSevendown() const { return m_Sevendown; }
-	bool ClientId() const { return m_ClientId; }
+	int ClientId() const { return m_ClientId; }
 
 private:
 	int m_ClientVersion;
