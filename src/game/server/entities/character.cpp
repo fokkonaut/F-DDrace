@@ -2526,6 +2526,12 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		pCharacter->m_Weapon = -1; // or WEAPON_GUN maybe?
 	}
 
+	// https://github.com/ddnet/ddnet/pull/11963, https://github.com/TaterClient/TClient/issues/195
+	if (Local && pCharacter->m_Weapon == -1 && m_pPlayer->m_NoWeaponFix)
+	{
+		pCharacter->m_Weapon = WEAPON_GUN;
+	}
+
 	pCharacter->m_AttackTick = m_AttackTick;
 
 	// change eyes and use ninja graphic if player is freeze

@@ -95,6 +95,7 @@ CHAT_COMMAND("hidebroadcasts", "?i['0'|'1']", CFGFLAG_CHAT, ConHideBroadcasts, t
 CHAT_COMMAND("antiping", "?i['0'|'1']", CFGFLAG_CHAT, ConAntiPing, this, "Whether the server will try aggressively to predict custom features such as weapons (may cause unwanted side-effects)", AUTHED_NO)
 CHAT_COMMAND("highbandwidth", "?i['0'|'1']", CFGFLAG_CHAT, ConHighBandwidth, this, "Whether the bandwidth will be doubled (50 instead of 25 snapshots per second)", AUTHED_NO)
 CHAT_COMMAND("savesession", "?i['0'|'1']", CFGFLAG_CHAT, ConSaveSession, this, "Whether the current player session will be saved on disconnect to load it again", AUTHED_NO)
+CHAT_COMMAND("noweaponfix", "?i['0'|'1']", CFGFLAG_CHAT, ConNoWeaponFix, this, "Whether no weapon will be displayed as gun to avoid crash on some older clients", AUTHED_NO)
 
 //minigames
 CHAT_COMMAND("minigames", "", CFGFLAG_CHAT, ConMinigames, this, "Shows a list of all available minigames", AUTHED_NO)

@@ -2549,6 +2549,13 @@ void CGameContext::ConSaveSession(IConsole::IResult *pResult, void *pUserData)
 	if (pPlayer) pPlayer->SetSavePlayerDisconnect(pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->m_SavePlayerDisconnect);
 }
 
+void CGameContext::ConNoWeaponFix(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if (pPlayer) pPlayer->SetNoWeaponFix(pResult->NumArguments() ? pResult->GetInteger(0) : !pPlayer->m_NoWeaponFix);
+}
+
 void CGameContext::ConSilentFarm(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

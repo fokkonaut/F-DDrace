@@ -28,7 +28,7 @@ enum
 	MAX_USERNAME_LENGTH = 20,
 
 	// update this one with every acc change you do
-	ACC_CURRENT_VERSION = 18,
+	ACC_CURRENT_VERSION = 19,
 
 	// vip
 	VIP_CLASSIC = 1,
@@ -273,6 +273,7 @@ public:
 		ACCFLAG_ANTIPING = 1<<6,
 		ACCFLAG_HIGHBANDWIDTH = 1<<7,
 		ACCFLAG_SAVEPLAYERDISCONNECT = 1<<8,
+		ACCFLAG_NOWEAPONFIX = 1<<9,
 	};
 
 	float MonthsPassedSinceRegister(int AccID);

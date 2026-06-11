@@ -426,6 +426,9 @@ public:
 	void ClearPlot();
 	void StartPlotEdit();
 	void ChangeScoreMode(int ScoreMode);
+	void SetNoWeaponFix(bool Set);
+
+	bool m_NoWeaponFix;
 
 	// zoom cursor
 	bool m_ZoomCursor;

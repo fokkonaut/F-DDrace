@@ -53,6 +53,7 @@ static const char *MISC_LOCALCHAT = Localizable("Local Chat");
 static const char *MISC_ANTIPING = Localizable("AntiPing weapons (only for 'cl_antiping 1')");
 static const char *MISC_HIGHBANDWIDTH = Localizable("High Bandwidth mode");
 static const char *MISC_SAVEPLAYERSESSION = Localizable("Save player session");
+static const char *MISC_NOWEAPONFIX = Localizable("No weapon fix (only for clients without patch)");
 
 void CVotingMenu::Init(CGameContext *pGameServer)
 {
@@ -455,6 +456,11 @@ bool CVotingMenu::OnMessageSuccess(int ClientID, const char *pDesc, const char *
 		if (IsOption(pDesc, MISC_SAVEPLAYERSESSION))
 		{
 			pPlayer->SetSavePlayerDisconnect(!pPlayer->m_SavePlayerDisconnect);
+			return true;
+		}
+		if (IsOption(pDesc, MISC_NOWEAPONFIX))
+		{
+			pPlayer->SetNoWeaponFix(!pPlayer->m_NoWeaponFix);
 			return true;
 		}
 
@@ -862,6 +868,7 @@ void CVotingMenu::DoPageMiscellaneous(int ClientID, int *pNumOptions)
 	{
 		DoLineToggleOption(Page, pNumOptions, MISC_SAVEPLAYERSESSION, pPlayer->m_SavePlayerDisconnect);
 	}
+	DoLineToggleOption(Page, pNumOptions, MISC_NOWEAPONFIX, pPlayer->m_NoWeaponFix);
 }
 
 void CVotingMenu::DoPageLanguages(int ClientID, int *pNumOptions)
@@ -944,6 +951,8 @@ bool CVotingMenu::FillStats(int ClientID, CVotingMenu::SClientVoteInfo::SPrevSta
 			Flags |= PREVFLAG_MISC_HIGHBANDWIDTH;
 		if (pPlayer->m_SavePlayerDisconnect)
 			Flags |= PREVFLAG_MISC_SAVEPLAYERSESSION;
+		if (pPlayer->m_NoWeaponFix)
+			Flags |= PREVFLAG_MISC_NOWEAPONFIX;
 		pStats->m_Minigame = pPlayer->m_Minigame;
 		pStats->m_ScoreMode = pPlayer->m_ScoreMode;
 	}

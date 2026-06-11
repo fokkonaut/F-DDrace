@@ -205,6 +205,7 @@ private:
 	int m_HighBandwidth;
 	int m_AntiPing;
 	int m_HasProjectileHammer;
+	int m_NoWeaponFix;
 
 	SSavedIdentity m_Identity;
 };

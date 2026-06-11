@@ -265,6 +265,7 @@ void CPlayer::Reset()
 
 	Server()->SetHighBandwidth(m_ClientID, GameServer()->Config()->m_SvHighBandwidth);
 	m_SavePlayerDisconnect = false;
+	m_NoWeaponFix = false;
 }
 
 void CPlayer::Tick()
@@ -2207,6 +2208,8 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 		Server()->SetHighBandwidth(m_ClientID, true);
 	if (pAccount->m_Flags&CAccounts::ACCFLAG_SAVEPLAYERDISCONNECT)
 		m_SavePlayerDisconnect = true;
+	if (pAccount->m_Flags&CAccounts::ACCFLAG_NOWEAPONFIX)
+		m_NoWeaponFix = true;
 
 	GameServer()->m_VotingMenu.ApplyFlags(m_ClientID, pAccount->m_VoteMenuFlags);
 
@@ -2272,6 +2275,8 @@ void CPlayer::OnLogout()
 		pAccount->m_Flags |= CAccounts::ACCFLAG_HIGHBANDWIDTH;
 	if (m_SavePlayerDisconnect)
 		pAccount->m_Flags |= CAccounts::ACCFLAG_SAVEPLAYERDISCONNECT;
+	if (m_NoWeaponFix)
+		pAccount->m_Flags |= CAccounts::ACCFLAG_NOWEAPONFIX;
 	pAccount->m_VoteMenuFlags = GameServer()->m_VotingMenu.GetFlags(m_ClientID);
 
 	GameServer()->m_Accounts.UpdateDesignList(AccID, Server()->GetMapDesign(m_ClientID));
@@ -2968,6 +2973,18 @@ void CPlayer::SetSavePlayerDisconnect(bool Set)
 		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player session on disconnect enabled"));
 	else
 		GameServer()->SendChatTarget(m_ClientID, Localize("Saving player session on disconnect disabled"));
+}
+
+void CPlayer::SetNoWeaponFix(bool Set)
+{
+	if (m_NoWeaponFix == Set)
+		return;
+
+	m_NoWeaponFix = Set;
+	if (Set)
+		GameServer()->SendChatTarget(m_ClientID, Localize("No weapon fix enabled (only for clients without patch)"));
+	else
+		GameServer()->SendChatTarget(m_ClientID, Localize("No weapon fix disabled"));
 }
 
 void CPlayer::SetWeaponIndicator(bool Set)
