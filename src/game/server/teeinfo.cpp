@@ -136,6 +136,9 @@ void CTeeInfo::FromSevendown()
 		// skip spooky ghost skin for comparison
 		if (i == SKIN_SPOOKY_GHOST)
 			continue;
+		// skip swardy, do not match 0.6 greensward as 0.7 swardy.
+		if (i == SKIN_SWARDY)
+			continue;
 
 		if(!str_comp(m_Sevendown.m_SkinName, s_Skins[i].SkinNameSevendown()))
 		{
