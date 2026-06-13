@@ -5197,6 +5197,9 @@ bool CCharacter::AddGrog()
 	if (!m_pGrog)
 		m_pGrog = new CGrog(GameWorld(), m_Pos, m_pPlayer->GetCID());
 
+	if (!m_ScrollNinja)
+		RemoveNinja();
+
 	if (Config()->m_SvGrogForceHammer)
 	{
 		// Force hammer while holding grog
