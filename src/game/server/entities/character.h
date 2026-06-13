@@ -526,7 +526,7 @@ public:
 	int m_LastInOutTeleporter;
 
 	// no bonus area
-	void IncreaseNoBonusScore(int Summand = 1);
+	void IncreaseNoBonusScore(int Summand = 1, bool IsPortalShot = false);
 	bool OnNoBonusArea(bool Enter, bool Silent = false);
 	struct SNoBonusContext
 	{

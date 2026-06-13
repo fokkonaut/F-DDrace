@@ -1168,7 +1168,7 @@ void CCharacter::FireWeapon()
 
 							if (Config()->m_SvNoBonusPunishPortal)
 							{
-								IncreaseNoBonusScore(Config()->m_SvNoBonusPunishPortal);
+								IncreaseNoBonusScore(Config()->m_SvNoBonusPunishPortal, true);
 							}
 						}
 						break;
@@ -5714,7 +5714,7 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	}
 }
 
-void CCharacter::IncreaseNoBonusScore(int Summand)
+void CCharacter::IncreaseNoBonusScore(int Summand, bool IsPortalShot)
 {
 	if (!m_NoBonusContext.m_InArea || Config()->m_SvNoBonusScoreThreshold == 0 || m_pPlayer->m_IsDummy)
 		return;
@@ -5727,6 +5727,14 @@ void CCharacter::IncreaseNoBonusScore(int Summand)
 	{
 		// +2 minutes escape time initially, add 30 seconds for each extra score
 		m_pPlayer->m_EscapeTime += Server()->TickSpeed() * (m_pPlayer->m_EscapeTime ? 30 : 120);
+	}
+
+	// Force passive removal on portal, so abusers dont stay below threshold to abuse
+	if (Wanted || IsPortalShot)
+	{
+		// Remove passive to make portal abusers catchable. If they drink grog again, passive stays until their score increases again
+		m_PassiveEndTick = 0;
+		Passive(false, -1, true);
 	}
 
 	// threshold to span: [1] = warn when we got fucked up already, [2,4] = warn one before reaching threshold, [5...] = warn on every 4th
