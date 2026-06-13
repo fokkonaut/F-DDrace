@@ -1387,7 +1387,8 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && pAccount->m_PortalRifle)
-		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
+		if (CanCollectPortalRifle())
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
@@ -5650,6 +5651,11 @@ void CCharacter::ResetOnlyFirstPortal()
 {
 	if (m_pPlayer->m_pPortal[PORTAL_FIRST] && !m_pPlayer->m_pPortal[PORTAL_SECOND])
 		m_pPlayer->m_pPortal[PORTAL_FIRST]->Reset();
+}
+
+bool CCharacter::CanCollectPortalRifle()
+{
+	return Config()->m_SvNoBonusScoreThreshold || !Config()->m_SvNoBonusPunishPortal || !m_NoBonusContext.m_InArea;
 }
 
 int CCharacter::HasFlag()

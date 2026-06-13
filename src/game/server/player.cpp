@@ -2174,7 +2174,7 @@ void CPlayer::OnLogin(bool ForceDesignLoad)
 
 		if (!IsMinigame() && !m_JailTime)
 		{
-			if (pAccount->m_PortalRifle)
+			if (pAccount->m_PortalRifle && m_pCharacter->CanCollectPortalRifle())
 				m_pCharacter->GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 		}
 	}

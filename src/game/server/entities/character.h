@@ -495,6 +495,7 @@ public:
 	void PreventEventPrediction();
 	bool IsPreventEventPredict();
 
+	bool CanCollectPortalRifle();
 	void ResetOnlyFirstPortal();
 	int64 m_LastLinkedPortals;
 	bool m_CollectedPortalRifle;

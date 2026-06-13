@@ -181,7 +181,7 @@ int CPickupDrop::IsCharacterNear()
 				)
 				continue;
 
-			if (m_Weapon == WEAPON_PORTAL_RIFLE && pChr->m_NoBonusContext.m_InArea && Config()->m_SvNoBonusScoreThreshold == 0 && Config()->m_SvNoBonusPunishPortal)
+			if (m_Weapon == WEAPON_PORTAL_RIFLE && !pChr->CanCollectPortalRifle())
 				continue;
 		}
 		else if (m_Type == POWERUP_BATTERY && m_Weapon == WEAPON_TASER && !pChr->GetPlayer()->GiveTaserBattery(m_Bullets))
