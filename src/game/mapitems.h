@@ -343,6 +343,14 @@ struct CQuad
 class CTile
 {
 public:
+	CTile() :
+		m_Index(0),
+		m_Flags(0),
+		m_Skip(0),
+		m_Reserved(0)
+	{
+	}
+
 	unsigned char m_Index;
 	unsigned char m_Flags;
 	unsigned char m_Skip;
@@ -577,6 +585,12 @@ public:
 class CTuneTile
 {
 public:
+	CTuneTile() :
+		m_Number(0),
+		m_Type(0)
+	{
+	}
+
 	unsigned char m_Number;
 	unsigned char m_Type;
 };
