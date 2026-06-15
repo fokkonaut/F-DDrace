@@ -186,7 +186,8 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_always_tele_weapon` |
 | `sv_tele_weapon_through_room_vip` |
 | `sv_touched_kills` |
-| `sv_tele_rifle_allow_blocks` |
+| `sv_telerifle_allow_blocks` |
+| `sv_telekinesis_allow_blocks` |
 | `sv_minigame_afk_auto_leave` |
 | `sv_reset_proj_lifetime_after_hit` |
 

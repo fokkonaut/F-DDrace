@@ -1034,6 +1034,9 @@ void CCharacter::FireWeapon()
 					CFlag *pFlag = 0;
 					if (pEntity)
 					{
+						if (!Config()->m_SvTelekinesisAllowBlocks && GameServer()->Collision()->IntersectLine(m_Pos, pEntity->GetPos(), 0, 0))
+							break;
+
 						switch (pEntity->GetObjType())
 						{
 						case CGameWorld::ENTTYPE_CHARACTER: pChr = (CCharacter *)pEntity; break;
@@ -1232,7 +1235,14 @@ void CCharacter::FireWeapon()
 			case WEAPON_TELE_RIFLE:
 			{
 				vec2 NewPos = GetCursorPos();
-				if (!Config()->m_SvTeleRifleAllowBlocks && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
+				if (Config()->m_SvTeleRifleAllowBlocks == 0)
+				{
+					vec2 ColPos;
+					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0))
+						NewPos = ColPos;
+				}
+
+				if (Config()->m_SvTeleRifleAllowBlocks != 1 && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
 					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 					if (!Found)
@@ -4778,18 +4788,30 @@ void CCharacter::FDDraceTick()
 		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
 		{
 			vec2 Vel = vec2(0.f, 0.f);
-
-			if (m_pTelekinesisEntity->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+			vec2 NewPos = GetCursorPos();
+			bool Found = true;
+			if (!Config()->m_SvTelekinesisAllowBlocks)
 			{
-				CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
-				pChr->Core()->m_Pos = GetCursorPos();
-				pChr->Core()->m_Vel = Vel;
+				vec2 BeforeColPos;
+				if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, 0, &BeforeColPos))
+					NewPos = BeforeColPos;
+				Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 			}
-			else if (m_pTelekinesisEntity->IsAdvancedEntity())
+
+			if (Found)
 			{
-				CAdvancedEntity* pEntity = (CAdvancedEntity*)m_pTelekinesisEntity;
-				pEntity->SetPos(GetCursorPos());
-				pEntity->SetVel(Vel);
+				if (m_pTelekinesisEntity->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+				{
+					CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
+					pChr->Core()->m_Pos = NewPos;
+					pChr->Core()->m_Vel = Vel;
+				}
+				else if (m_pTelekinesisEntity->IsAdvancedEntity())
+				{
+					CAdvancedEntity* pEntity = (CAdvancedEntity*)m_pTelekinesisEntity;
+					pEntity->SetPos(NewPos);
+					pEntity->SetVel(Vel);
+				}
 			}
 		}
 		else
