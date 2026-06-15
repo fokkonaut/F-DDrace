@@ -6309,6 +6309,10 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 	if (Config()->m_SvImmunityFlag && pTarget->HasFlag() == TEAM_BLUE)
 		return false;
 
+	// Disallow transforming to not bug bonus inside and confuse m_NoBonusContext.m_SavedBonus
+	if (Config()->m_SvNoBonusScoreThreshold == 0 && m_NoBonusContext.m_InArea != pTarget->m_NoBonusContext.m_InArea)
+		return false;
+
 	int HitHumanID = pTarget->GetPlayer()->GetCID();
 	SetZombieHuman(false, HitHumanID);
 	for (int i = 0; i < NUM_WEAPONS; i++)
