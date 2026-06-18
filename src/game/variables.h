@@ -72,6 +72,8 @@ MACRO_CONFIG_INT(SvMoneyBankMode, sv_money_bank_mode, 1, 0, 2, CFGFLAG_SERVER|CF
 MACRO_CONFIG_INT(SvMoneyFarmTeam, sv_money_farm_team, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether a player can farm money on a money tile while being in a ddrace team", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMoneyDropDelay, sv_money_drop_delay, 1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a player has to wait to drop money again", AUTHED_ADMIN)
 
+MACRO_CONFIG_INT(SvXpForRace, sv_xp_for_race, 500, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a race", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvXpForSpecialRace, sv_xp_for_special_race, 750, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a special race", AUTHED_ADMIN)
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 3, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 6 hours", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 5, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 6 hours", AUTHED_ADMIN)

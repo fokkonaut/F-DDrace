@@ -3029,7 +3029,7 @@ void CCharacter::HandleTiles(int Index)
 		if (((m_TileIndex == TILE_END) || (m_TileFIndex == TILE_END) || FTile1 == TILE_END || FTile2 == TILE_END || FTile3 == TILE_END || FTile4 == TILE_END || Tile1 == TILE_END || Tile2 == TILE_END || Tile3 == TILE_END || Tile4 == TILE_END) && m_DDRaceState == DDRACE_STARTED)
 		{
 			Controller->m_Teams.OnCharacterFinish(m_pPlayer->GetCID());
-			m_pPlayer->GiveXP(500, "for finishing the race");
+			m_pPlayer->GiveXP(Config()->m_SvXpForRace, "for finishing the race");
 		}
 
 		//shop
@@ -3254,7 +3254,7 @@ void CCharacter::HandleTiles(int Index)
 		if (!m_HasFinishedSpecialRace && m_DDRaceState != DDRACE_NONE && m_DDRaceState != DDRACE_CHEAT && (m_TileIndex == TILE_SPECIAL_FINISH || m_TileFIndex == TILE_SPECIAL_FINISH || FTile1 == TILE_SPECIAL_FINISH || FTile2 == TILE_SPECIAL_FINISH || FTile3 == TILE_SPECIAL_FINISH || FTile4 == TILE_SPECIAL_FINISH || Tile1 == TILE_SPECIAL_FINISH || Tile2 == TILE_SPECIAL_FINISH || Tile3 == TILE_SPECIAL_FINISH || Tile4 == TILE_SPECIAL_FINISH))
 		{
 			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("'%s' finished the special race!"), Server()->ClientName(m_pPlayer->GetCID()));
-			m_pPlayer->GiveXP(750, "for finishing the special race");
+			m_pPlayer->GiveXP(Config()->m_SvXpForSpecialRace, "for finishing the special race");
 
 			m_HasFinishedSpecialRace = true;
 			GameServer()->CreateFinishConfetti(m_Pos, TeamMask());
