@@ -188,6 +188,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_touched_kills` |
 | `sv_telerifle_allow_blocks` |
 | `sv_telekinesis_allow_blocks` |
+| `sv_telerifle_telekinesis_nerf` |
 | `sv_minigame_afk_auto_leave` |
 | `sv_reset_proj_lifetime_after_hit` |
 

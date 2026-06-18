@@ -1035,8 +1035,16 @@ void CCharacter::FireWeapon()
 					CFlag *pFlag = 0;
 					if (pEntity)
 					{
-						if (!Config()->m_SvTelekinesisAllowBlocks && GameServer()->Collision()->IntersectLine(m_Pos, pEntity->GetPos(), 0, 0))
-							break;
+						if (!Config()->m_SvTelekinesisAllowBlocks)
+						{
+							CCollision::CTeleWeaponInfo TeleWeaponInfo;
+							TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf;
+							TeleWeaponInfo.m_Team = Team();
+							if (Config()->m_SvTeleWeaponThroughRoomVip)
+								TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
+							if (GameServer()->Collision()->IntersectLine(m_Pos, pEntity->GetPos(), 0, 0, TeleWeaponInfo))
+								break;
+						}
 
 						switch (pEntity->GetObjType())
 						{
@@ -1239,7 +1247,12 @@ void CCharacter::FireWeapon()
 				if (Config()->m_SvTeleRifleAllowBlocks == 0)
 				{
 					vec2 ColPos;
-					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0))
+					CCollision::CTeleWeaponInfo TeleWeaponInfo;
+					TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf;
+					TeleWeaponInfo.m_Team = Team();
+					if (Config()->m_SvTeleWeaponThroughRoomVip)
+						TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
+					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0, TeleWeaponInfo))
 						NewPos = ColPos;
 				}
 
@@ -4798,7 +4811,12 @@ void CCharacter::FDDraceTick()
 			if (!Config()->m_SvTelekinesisAllowBlocks)
 			{
 				vec2 BeforeColPos;
-				if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, 0, &BeforeColPos))
+				CCollision::CTeleWeaponInfo TeleWeaponInfo;
+				TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf;
+				TeleWeaponInfo.m_Team = Team();
+				if (Config()->m_SvTeleWeaponThroughRoomVip)
+					TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
+				if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, 0, &BeforeColPos, TeleWeaponInfo))
 					NewPos = BeforeColPos;
 				Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 			}
