@@ -191,6 +191,8 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_telerifle_telekinesis_nerf` |
 | `sv_minigame_afk_auto_leave` |
 | `sv_reset_proj_lifetime_after_hit` |
+| `sv_xp_for_race` |
+| `sv_xp_for_special_race` |
 
 ## Credits
 
