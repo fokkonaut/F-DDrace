@@ -3950,6 +3950,28 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
+	if (HandleTeleporter(MapIndex))
+	{
+		GameWorld()->UnsetTelekinesis(this);
+	}
+}
+
+int CCharacter::CheckMaskableTile(int TileIndex, bool CurrentState)
+{
+	bool MaskOn = m_TileIndex == TILE_TOGGLE_MASK_ON || m_TileFIndex == TILE_TOGGLE_MASK_ON;
+	bool MaskOff = m_TileIndex == TILE_TOGGLE_MASK_OFF || m_TileFIndex == TILE_TOGGLE_MASK_OFF;
+	bool LastMaskOn = m_LastIndexTile == TILE_TOGGLE_MASK_ON || m_LastIndexFrontTile == TILE_TOGGLE_MASK_ON;
+	bool LastMaskOff = m_LastIndexTile == TILE_TOGGLE_MASK_OFF || m_LastIndexFrontTile == TILE_TOGGLE_MASK_OFF;
+	bool LastMaskChanged = MaskOn != LastMaskOn || MaskOff != LastMaskOff;
+	bool IsTile = m_TileIndex == TileIndex || m_TileFIndex == TileIndex;
+	bool IsNotLastTile = m_LastIndexTile != TileIndex && m_LastIndexFrontTile != TileIndex;
+	if (IsTile && (IsNotLastTile || LastMaskChanged))
+		return MaskOn ? true : MaskOff ? false : !CurrentState;
+	return CurrentState;
+}
+
+bool CCharacter::HandleTeleporter(int MapIndex)
+{
 	int z = GameServer()->Collision()->IsTeleport(MapIndex);
 	int evilz = GameServer()->Collision()->IsEvilTeleport(MapIndex);
 	// Reset inout teleporter if we aint on one
@@ -3958,23 +3980,25 @@ void CCharacter::HandleTiles(int Index)
 		m_LastInOutTeleporter = 0;
 	}
 
+	if (m_Super)
+		return false;
+
+	bool FightStarted = GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID());
+	if (FightStarted)
+	{
+		Die(WEAPON_SELF);
+		return false;
+	}
+
+	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z - 1].size())
 	{
-		if (m_Super)
-			return;
-
-		if (FightStarted)
-		{
-			Die(WEAPON_SELF);
-			return;
-		}
-
 		int Num = Controller->m_TeleOuts[z - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
 		{
 			if (m_LastInOutTeleporter == z || Num <= 1) // dont teleport when only 1 is there, bcs its our current tile then
-				return;
+				return false;
 			m_LastInOutTeleporter = z;
 
 			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
@@ -3994,25 +4018,16 @@ void CCharacter::HandleTiles(int Index)
 				if (i != WEAPON_NINJA)
 					SetWeaponGot(i, false);
 		}
-		return;
+		return true;
 	}
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
-		if (m_Super)
-			return;
-
-		if (FightStarted)
-		{
-			Die(WEAPON_SELF);
-			return;
-		}
-
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
 		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
 		{
 			if (m_LastInOutTeleporter == evilz || Num <= 1) // dont teleport when only 1 is there, bcs its our current tile then
-				return;
+				return false;
 			m_LastInOutTeleporter = evilz;
 
 			while (GameServer()->Collision()->GetPureMapIndex(NewPos) == MapIndex)
@@ -4035,23 +4050,15 @@ void CCharacter::HandleTiles(int Index)
 						SetWeaponGot(i, false);
 			}
 		}
-		return;
+		return true;
 	}
 	if (GameServer()->Collision()->IsCheckEvilTeleport(MapIndex))
 	{
-		if (m_Super)
-			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
-				if (FightStarted)
-				{
-					Die(WEAPON_SELF);
-					return;
-				}
-
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 				m_Core.m_Vel = vec2(0, 0);
@@ -4060,19 +4067,13 @@ void CCharacter::HandleTiles(int Index)
 				{
 					ReleaseHook();
 				}
-				return;
+				return true;
 			}
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN, Team()))
 		{
-			if (FightStarted)
-			{
-				Die(WEAPON_SELF);
-				return;
-			}
-
 			ForceSetPos(SpawnPos);
 			m_Core.m_Vel = vec2(0, 0);
 
@@ -4081,23 +4082,15 @@ void CCharacter::HandleTiles(int Index)
 				ReleaseHook();
 			}
 		}
-		return;
+		return true;
 	}
 	if (GameServer()->Collision()->IsCheckTeleport(MapIndex))
 	{
-		if (m_Super)
-			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for (int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
-				if (FightStarted)
-				{
-					Die(WEAPON_SELF);
-					return;
-				}
-
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 
@@ -4107,19 +4100,13 @@ void CCharacter::HandleTiles(int Index)
 					m_Core.m_HookState = HOOK_RETRACTED;
 					m_Core.m_HookPos = m_Core.m_Pos;
 				}
-				return;
+				return true;
 			}
 		}
 		// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN, Team()))
 		{
-			if (FightStarted)
-			{
-				Die(WEAPON_SELF);
-				return;
-			}
-
 			ForceSetPos(SpawnPos);
 
 			if (!Config()->m_SvTeleportHoldHook)
@@ -4129,22 +4116,9 @@ void CCharacter::HandleTiles(int Index)
 				m_Core.m_HookPos = m_Core.m_Pos;
 			}
 		}
-		return;
+		return true;
 	}
-}
-
-int CCharacter::CheckMaskableTile(int TileIndex, bool CurrentState)
-{
-	bool MaskOn = m_TileIndex == TILE_TOGGLE_MASK_ON || m_TileFIndex == TILE_TOGGLE_MASK_ON;
-	bool MaskOff = m_TileIndex == TILE_TOGGLE_MASK_OFF || m_TileFIndex == TILE_TOGGLE_MASK_OFF;
-	bool LastMaskOn = m_LastIndexTile == TILE_TOGGLE_MASK_ON || m_LastIndexFrontTile == TILE_TOGGLE_MASK_ON;
-	bool LastMaskOff = m_LastIndexTile == TILE_TOGGLE_MASK_OFF || m_LastIndexFrontTile == TILE_TOGGLE_MASK_OFF;
-	bool LastMaskChanged = MaskOn != LastMaskOn || MaskOff != LastMaskOff;
-	bool IsTile = m_TileIndex == TileIndex || m_TileFIndex == TileIndex;
-	bool IsNotLastTile = m_LastIndexTile != TileIndex && m_LastIndexFrontTile != TileIndex;
-	if (IsTile && (IsNotLastTile || LastMaskChanged))
-		return MaskOn ? true : MaskOff ? false : !CurrentState;
-	return CurrentState;
+	return false;
 }
 
 void CCharacter::HandleTuneLayer()

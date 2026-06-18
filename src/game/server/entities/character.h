@@ -294,6 +294,7 @@ private:
 	void DDracePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
+	bool HandleTeleporter(int MapIndex);
 	void SendTuneMsg(const char *pMessage);
 	IAntibot *Antibot();
 
