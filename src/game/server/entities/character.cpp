@@ -3985,15 +3985,15 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 		return false;
 
 	bool FightStarted = GameServer()->Arenas()->FightStarted(m_pPlayer->GetCID());
-	if (FightStarted)
-	{
-		Die(WEAPON_SELF);
-		return false;
-	}
-
 	CGameControllerDDRace* Controller = (CGameControllerDDRace*)GameServer()->m_pController;
 	if (!Config()->m_SvOldTeleportHook && !Config()->m_SvOldTeleportWeapons && z && Controller->m_TeleOuts[z - 1].size())
 	{
+		if (FightStarted)
+		{
+			Die(WEAPON_SELF);
+			return false;
+		}
+
 		int Num = Controller->m_TeleOuts[z - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[z - 1][(!Num) ? Num : rand() % Num];
 		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
@@ -4023,6 +4023,12 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 	}
 	if (evilz && Controller->m_TeleOuts[evilz - 1].size())
 	{
+		if (FightStarted)
+		{
+			Die(WEAPON_SELF);
+			return false;
+		}
+		
 		int Num = Controller->m_TeleOuts[evilz - 1].size();
 		vec2 NewPos = Controller->m_TeleOuts[evilz - 1][(!Num) ? Num : rand() % Num];
 		if (GameServer()->Collision()->IsTeleportInOut(MapIndex))
@@ -4060,6 +4066,12 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
+				if (FightStarted)
+				{
+					Die(WEAPON_SELF);
+					return false;
+				}
+
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 				m_Core.m_Vel = vec2(0, 0);
@@ -4075,6 +4087,12 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN, Team()))
 		{
+			if (FightStarted)
+			{
+				Die(WEAPON_SELF);
+				return false;
+			}
+			
 			ForceSetPos(SpawnPos);
 			m_Core.m_Vel = vec2(0, 0);
 
@@ -4092,6 +4110,12 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 		{
 			if (Controller->m_TeleCheckOuts[k].size())
 			{
+				if (FightStarted)
+				{
+					Die(WEAPON_SELF);
+					return false;
+				}
+
 				int Num = Controller->m_TeleCheckOuts[k].size();
 				ForceSetPos(Controller->m_TeleCheckOuts[k][(!Num) ? Num : rand() % Num]);
 
@@ -4108,6 +4132,12 @@ bool CCharacter::HandleTeleporter(int MapIndex)
 		vec2 SpawnPos;
 		if (GameServer()->m_pController->CanSpawn(&SpawnPos, ENTITY_SPAWN, Team()))
 		{
+			if (FightStarted)
+			{
+				Die(WEAPON_SELF);
+				return false;
+			}
+
 			ForceSetPos(SpawnPos);
 
 			if (!Config()->m_SvTeleportHoldHook)
