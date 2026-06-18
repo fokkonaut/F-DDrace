@@ -115,6 +115,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_police_farm_limit` |
 | `sv_money_bank_mode` |
 | `sv_money_farm_team` |
+| `sv_money_farm_solo` |
 | `sv_money_drop_delay` |
 | `sv_flag_sounds` |
 | `sv_flag_hooking` |

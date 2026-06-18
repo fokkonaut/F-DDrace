@@ -3076,6 +3076,10 @@ void CCharacter::HandleTiles(int Index)
 			if (Config()->m_SvMoneyFarmTeam == 0 && Team() != TEAM_FLOCK)
 				return;
 
+			// Disallow money farm in solo mode
+			if (Config()->m_SvSoloFarm == 0 && Teams()->m_Core.GetSolo(m_pPlayer->GetCID()))
+				return;
+
 			if (MoneyTile)
 			{
 				m_MoneyTile = MONEYTILE_NORMAL;
