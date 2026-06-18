@@ -221,6 +221,7 @@ void CCharacter::SetSolo(bool Solo)
 		{
 			ReleaseHook(false);
 		}
+		GameWorld()->UnsetTelekinesis(this);
 	}
 }
 
