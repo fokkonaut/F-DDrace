@@ -72,6 +72,9 @@ MACRO_CONFIG_INT(SvMoneyBankMode, sv_money_bank_mode, 1, 0, 2, CFGFLAG_SERVER|CF
 MACRO_CONFIG_INT(SvMoneyFarmTeam, sv_money_farm_team, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether a player can farm money on a money tile while being in a ddrace team", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMoneyDropDelay, sv_money_drop_delay, 1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a player has to wait to drop money again", AUTHED_ADMIN)
 
+MACRO_CONFIG_INT(SvXpForRace, sv_xp_for_race, 500, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a race", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvXpForSpecialRace, sv_xp_for_special_race, 750, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a special race", AUTHED_ADMIN)
+
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 3, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 6 hours", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 5, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 6 hours", AUTHED_ADMIN)
@@ -293,14 +296,13 @@ MACRO_CONFIG_INT(SvShotgunBug, sv_shotgun_bug, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_G
 MACRO_CONFIG_INT(SvDefaultScoreMode, sv_default_score_mode, SCORE_LEVEL, 0, NUM_SCORE_MODES-1, CFGFLAG_SERVER|CFGFLAG_GAME, "Default score (0=time, 1=level, 2=blockpoints, 3=bonus)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAllowBonusScoreMode, sv_allow_bonus_score_mode, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether bonus score can be seen using '/score'", AUTHED_ADMIN)
 // no-bonus area
-MACRO_CONFIG_INT(SvNoBonusPunishPortal, sv_no_bonus_punish_portal, 12, 0, 20, CFGFLAG_SERVER|CFGFLAG_GAME, "No-bonus area punish portal rifle score summand (0=off) (remove or increase score when threshold is 0)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvNoBonusMaxJumps, sv_no_bonus_max_jumps, 5, 2, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum number of jumps in no-bonus area (threshold=0: set this amount, else: start score increase at this)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvNoBonusScoreThreshold, sv_bonus_score_threshold, 20, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Threshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvNoBonusScoreThreshold, sv_bonus_score_threshold, 10, 0, 100, CFGFLAG_SERVER|CFGFLAG_GAME, "Threshold value for bonus score in no-bonus area (0=bonus removal)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvNoBonusScoreDecrease, sv_bonus_score_decrease, 10, 0, 60, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds between bonus score decrease", AUTHED_ADMIN)
 
 // grog
 MACRO_CONFIG_INT(SvGrogPrice, sv_grog_price, 500, 1, 50000, CFGFLAG_SERVER, "Price per grog", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvGrogHoldLimit, sv_grog_hold_limit, 3, 1, 10, CFGFLAG_SERVER, "Amount of grogs a player can carry", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvGrogHoldLimit, sv_grog_hold_limit, 3, 1, 512, CFGFLAG_SERVER, "Amount of grogs a player can carry", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvGrogMinPermilleLimit, sv_grog_min_permille_limit, 12, 0, 39, CFGFLAG_SERVER, "Divided by 10: Minimum legal permille limit, if exceeded=wanted", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvGrogPermillePassiveLimit, sv_grog_permille_passive_limit, 6, 0, 39, CFGFLAG_SERVER, "Divided by 10: Permille limit, if exceeded=passive off", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvGrogForceHammer, sv_grog_force_hammer, 0, 0, 1, CFGFLAG_SERVER, "Whether holding grog forces to hold hammer, or can have no weapon (new DDNet can render tee without weapon)", AUTHED_ADMIN)
@@ -345,8 +347,7 @@ MACRO_CONFIG_INT(SvFreezePrediction, sv_freeze_prediction, 1, 0, 1, CFGFLAG_SERV
 MACRO_CONFIG_INT(SvHelperVictimMe, sv_helper_victim_me, 0, 0, 1, CFGFLAG_SERVER, "Victim for commands is always yourself when executing as helper", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWalletKillProtection, sv_wallet_kill_protection, 10000, 0, 100000, CFGFLAG_SERVER, "Minimum wallet amount to trigger the kill protection (0 = disabled)", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvTouchedKills, sv_touched_kills, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether touching a tee without hooking or hammering can count as kill", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_telerifle_allow_blocks, 0, 0, 2, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether teleport through blocks is allowed (0=off, 1=allowed, 2=only block inside blocks)", AUTHED_ADMIN)
-MACRO_CONFIG_INT(SvTelekinesisAllowBlocks, sv_telekinesis_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether telekinesis through and on blocks is allowed (0=off, 1=allowed)", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvTeleRifleAllowBlocks, sv_tele_rifle_allow_blocks, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether you can teleport inside of blocks using tele rifle", AUTHED_ADMIN)
 
 MACRO_CONFIG_INT(SvBanIpLevel, sv_ban_ip_level, AUTHED_ADMIN, AUTHED_HELPER, AUTHED_ADMIN, CFGFLAG_SERVER, "Required auth level to ban ip or range", AUTHED_ADMIN)
 MACRO_CONFIG_STR(SvBansFile, sv_bans_file, 128, "bans.cfg", CFGFLAG_SERVER, "Ban file to load on server start", AUTHED_ADMIN)
