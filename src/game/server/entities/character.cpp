@@ -1034,6 +1034,9 @@ void CCharacter::FireWeapon()
 					CFlag *pFlag = 0;
 					if (pEntity)
 					{
+						if (!Config()->m_SvTelekinesisAllowBlocks && GameServer()->Collision()->IntersectLine(m_Pos, pEntity->GetPos(), 0, 0))
+							break;
+
 						switch (pEntity->GetObjType())
 						{
 						case CGameWorld::ENTTYPE_CHARACTER: pChr = (CCharacter *)pEntity; break;
@@ -1165,6 +1168,11 @@ void CCharacter::FireWeapon()
 								pAccount->m_PortalBattery--;
 								UpdateWeaponIndicator();
 							}
+
+							if (Config()->m_SvNoBonusPunishPortal)
+							{
+								IncreaseNoBonusScore(Config()->m_SvNoBonusPunishPortal, true);
+							}
 						}
 						break;
 					}
@@ -1227,7 +1235,14 @@ void CCharacter::FireWeapon()
 			case WEAPON_TELE_RIFLE:
 			{
 				vec2 NewPos = GetCursorPos();
-				if (!Config()->m_SvTeleRifleAllowBlocks && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
+				if (Config()->m_SvTeleRifleAllowBlocks == 0)
+				{
+					vec2 ColPos;
+					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0))
+						NewPos = ColPos;
+				}
+
+				if (Config()->m_SvTeleRifleAllowBlocks != 1 && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
 					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 					if (!Found)
@@ -1382,7 +1397,8 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo, bool PortalRifleB
 	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
 
 	if (Weapon == WEAPON_LASER && !Remove && !m_aWeapons[WEAPON_PORTAL_RIFLE].m_Got && !m_pPlayer->IsMinigame() && pAccount->m_PortalRifle)
-		GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
+		if (CanCollectPortalRifle())
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, true);
 
 	if (m_pPlayer->m_SpookyGhost && GameServer()->GetWeaponType(Weapon) != WEAPON_GUN)
 		return;
@@ -2519,6 +2535,12 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	if (Local && m_pPlayer->AntiPing() && pCharacter->m_Weapon == WEAPON_HAMMER && m_AntiPingHideHammerTicks)
 	{
 		pCharacter->m_Weapon = -1; // or WEAPON_GUN maybe?
+	}
+
+	// https://github.com/ddnet/ddnet/pull/11963, https://github.com/TaterClient/TClient/issues/195
+	if (Local && pCharacter->m_Weapon == -1 && m_pPlayer->m_NoWeaponFix)
+	{
+		pCharacter->m_Weapon = WEAPON_GUN;
 	}
 
 	pCharacter->m_AttackTick = m_AttackTick;
@@ -4766,18 +4788,30 @@ void CCharacter::FDDraceTick()
 		if (GetActiveWeapon() == WEAPON_TELEKINESIS && !m_FreezeTime && !m_pPlayer->IsPaused())
 		{
 			vec2 Vel = vec2(0.f, 0.f);
-
-			if (m_pTelekinesisEntity->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+			vec2 NewPos = GetCursorPos();
+			bool Found = true;
+			if (!Config()->m_SvTelekinesisAllowBlocks)
 			{
-				CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
-				pChr->Core()->m_Pos = GetCursorPos();
-				pChr->Core()->m_Vel = Vel;
+				vec2 BeforeColPos;
+				if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, 0, &BeforeColPos))
+					NewPos = BeforeColPos;
+				Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
 			}
-			else if (m_pTelekinesisEntity->IsAdvancedEntity())
+
+			if (Found)
 			{
-				CAdvancedEntity* pEntity = (CAdvancedEntity*)m_pTelekinesisEntity;
-				pEntity->SetPos(GetCursorPos());
-				pEntity->SetVel(Vel);
+				if (m_pTelekinesisEntity->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)
+				{
+					CCharacter *pChr = (CCharacter *)m_pTelekinesisEntity;
+					pChr->Core()->m_Pos = NewPos;
+					pChr->Core()->m_Vel = Vel;
+				}
+				else if (m_pTelekinesisEntity->IsAdvancedEntity())
+				{
+					CAdvancedEntity* pEntity = (CAdvancedEntity*)m_pTelekinesisEntity;
+					pEntity->SetPos(NewPos);
+					pEntity->SetVel(Vel);
+				}
 			}
 		}
 		else
@@ -4880,7 +4914,7 @@ void CCharacter::FDDraceTick()
 		{
 			// add 2 when doing the first illegal air jump
 			bool FirstlyExceeded = m_Core.m_JumpedTotal == Config()->m_SvNoBonusMaxJumps;
-			IncreaseNoBonusScore(FirstlyExceeded ? 2 : 1);
+			IncreaseNoBonusScore(FirstlyExceeded ? 4 : 2);
 		}
 	}
 	m_LastJumpedTotal = m_Core.m_JumpedTotal;
@@ -4899,7 +4933,7 @@ void CCharacter::FDDraceTick()
 		if ((Server()->Tick() - m_HookExceededTick) % (Server()->TickSpeed() / 2) == 0)
 		{
 			// Add a score every .5 seconds when duration exceeded, endless is op
-			IncreaseNoBonusScore(FirstlyExceeded ? 2 : 1);
+			IncreaseNoBonusScore(FirstlyExceeded ? 4 : 2);
 		}
 	}
 	else
@@ -5184,6 +5218,9 @@ bool CCharacter::AddGrog()
 	UpdateWeaponIndicator();
 	if (!m_pGrog)
 		m_pGrog = new CGrog(GameWorld(), m_Pos, m_pPlayer->GetCID());
+
+	if (!m_ScrollNinja)
+		RemoveNinja();
 
 	if (Config()->m_SvGrogForceHammer)
 	{
@@ -5641,6 +5678,11 @@ void CCharacter::ResetOnlyFirstPortal()
 		m_pPlayer->m_pPortal[PORTAL_FIRST]->Reset();
 }
 
+bool CCharacter::CanCollectPortalRifle()
+{
+	return Config()->m_SvNoBonusScoreThreshold || !Config()->m_SvNoBonusPunishPortal || !m_NoBonusContext.m_InArea;
+}
+
 int CCharacter::HasFlag()
 {
 	return ((CGameControllerDDRace*)GameServer()->m_pController)->HasFlag(this);
@@ -5694,7 +5736,7 @@ void CCharacter::ForceSetPos(vec2 Pos)
 	}
 }
 
-void CCharacter::IncreaseNoBonusScore(int Summand)
+void CCharacter::IncreaseNoBonusScore(int Summand, bool IsPortalShot)
 {
 	if (!m_NoBonusContext.m_InArea || Config()->m_SvNoBonusScoreThreshold == 0 || m_pPlayer->m_IsDummy)
 		return;
@@ -5707,6 +5749,14 @@ void CCharacter::IncreaseNoBonusScore(int Summand)
 	{
 		// +2 minutes escape time initially, add 30 seconds for each extra score
 		m_pPlayer->m_EscapeTime += Server()->TickSpeed() * (m_pPlayer->m_EscapeTime ? 30 : 120);
+	}
+
+	// Force passive removal on portal, so abusers dont stay below threshold to abuse
+	if (Wanted || IsPortalShot)
+	{
+		// Remove passive to make portal abusers catchable. If they drink grog again, passive stays until their score increases again
+		m_PassiveEndTick = 0;
+		Passive(false, -1, true);
 	}
 
 	// threshold to span: [1] = warn when we got fucked up already, [2,4] = warn one before reaching threshold, [5...] = warn on every 4th
@@ -5746,6 +5796,8 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 	if (Config()->m_SvNoBonusScoreThreshold > 0)
 		return true;
 
+	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
+
 	// Save or load previous bonuses
 	if (Enter)
 	{
@@ -5755,15 +5807,25 @@ bool CCharacter::OnNoBonusArea(bool Enter, bool Silent)
 		EndlessHook(false, -1, Silent);
 		InfiniteJumps(false, -1, Silent);
 		SetJumps(minimum(m_Core.m_Jumps, Config()->m_SvNoBonusMaxJumps), Silent);
+		if (Config()->m_SvNoBonusPunishPortal)
+		{
+			m_NoBonusContext.m_SavedBonus.m_PortalRifle = GetWeaponGot(WEAPON_PORTAL_RIFLE);
+			GiveWeapon(WEAPON_PORTAL_RIFLE, true, -1, pAccount->m_PortalRifle);
+		}
 	}
 	else
 	{
 		EndlessHook(m_NoBonusContext.m_SavedBonus.m_EndlessHook, -1, Silent);
 		InfiniteJumps(m_NoBonusContext.m_SavedBonus.m_InfiniteJumps, -1, Silent);
 		SetJumps(m_NoBonusContext.m_SavedBonus.m_Jumps, Silent);
+		if (m_NoBonusContext.m_SavedBonus.m_PortalRifle)
+		{
+			GiveWeapon(WEAPON_PORTAL_RIFLE, false, -1, pAccount->m_PortalRifle);
+		}
 		m_NoBonusContext.m_SavedBonus.m_EndlessHook = false;
 		m_NoBonusContext.m_SavedBonus.m_InfiniteJumps = false;
 		m_NoBonusContext.m_SavedBonus.m_Jumps = 0;
+		m_NoBonusContext.m_SavedBonus.m_PortalRifle = false;
 	}
 
 	return true;
@@ -6267,6 +6329,10 @@ bool CCharacter::TryHumanTransformation(CCharacter *pTarget)
 		return false;
 
 	if (Config()->m_SvImmunityFlag && pTarget->HasFlag() == TEAM_BLUE)
+		return false;
+
+	// Disallow transforming to not bug bonus inside and confuse m_NoBonusContext.m_SavedBonus
+	if (Config()->m_SvNoBonusScoreThreshold == 0 && m_NoBonusContext.m_InArea != pTarget->m_NoBonusContext.m_InArea)
 		return false;
 
 	int HitHumanID = pTarget->GetPlayer()->GetCID();
