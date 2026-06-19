@@ -1243,25 +1243,23 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_TELE_RIFLE:
 			{
-				CCollision::CTeleWeaponInfo TeleWeaponInfo;
-				TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf && Config()->m_SvTeleRifleAllowBlocks == 0;
-				TeleWeaponInfo.m_Team = Team();
-				if (Config()->m_SvTeleWeaponThroughRoomVip)
-					TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
-
 				vec2 NewPos = GetCursorPos();
-				vec2 ColPos = NewPos;
 				if (Config()->m_SvTeleRifleAllowBlocks == 0)
 				{
-					vec2 BeforeColPos;
-					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, &BeforeColPos, TeleWeaponInfo))
-						NewPos = vec2(round_to_int(BeforeColPos.x), round_to_int(BeforeColPos.y));
+					vec2 ColPos;
+					CCollision::CTeleWeaponInfo TeleWeaponInfo;
+					TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf;
+					TeleWeaponInfo.m_Team = Team();
+					if (Config()->m_SvTeleWeaponThroughRoomVip)
+						TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
+					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0, TeleWeaponInfo))
+						NewPos = ColPos;
 				}
 
 				if (Config()->m_SvTeleRifleAllowBlocks != 1 && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
-					bool Found = GetNearestAirPos(ColPos, m_Pos, &NewPos);
-					if (!Found || GameServer()->Collision()->IntersectTeleProjLaser(NewPos, TeleWeaponInfo))
+					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
+					if (!Found)
 					{
 						if (ClickedFire)
 							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
@@ -3066,6 +3064,114 @@ void CCharacter::HandleTiles(int Index)
 					GameServer()->m_pHouses[i]->OnEnter(m_pPlayer->GetCID());
 			}
 		}
+
+
+		//HOTZONE
+		if (m_TileIndex == TILE_HOTZONE || m_TileFIndex == TILE_HOTZONE)
+		{
+			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
+			m_HotzoneTile = 1;
+			int Players = 0;
+			int Dummies = 0;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i])
+					Players++;
+					if(!Config()->m_SvHotzoneDummies){
+						if (Server()->GetDummy(i) != -1)
+							Dummies++;
+					}
+			}
+			if(!Config()->m_SvHotzoneDummies){
+				Players = Players - Dummies;
+			}
+			int Money = 0;
+			int XP = 0;
+			//calculate money&xp
+			if(GameWorld()->m_Hotzone.m_PlayersInHotzone > 0)
+			{
+				Money = round_to_int(Config()->m_SvHotzoneMoneyMax / GameWorld()->m_Hotzone.m_PlayersInHotzone);
+				XP = round_to_int(Config()->m_SvHotzoneXPMax / GameWorld()->m_Hotzone.m_PlayersInHotzone);
+			}
+
+
+			//configs
+			if(XP < Config()->m_SvHotzoneXPMin)
+				XP = Config()->m_SvHotzoneXPMin;
+			if(Money < Config()->m_SvHotzoneMoneyMin)
+				Money = Config()->m_SvHotzoneMoneyMin;
+			if(Config()->m_SvHotzoneSurvival) 
+				XP = XP + GetAliveState();
+			//farm
+			if (Server()->Tick() % Server()->TickSpeed() == 0){
+				if (Players < Config()->m_SvHotzoneMinimumPlayers){
+					GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Not enough players on server for hotzone to work. [%d/%d]"), Players, Config()->m_SvHotzoneMinimumPlayers);
+					return;
+				}
+				if (Config()->m_SvHotzonePlayersAllowed != 0 && GameWorld()->m_Hotzone.m_PlayersInHotzone > Config()->m_SvHotzonePlayersAllowed){
+					GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Too much people in the Hotzone! [%d/%d]"), GameWorld()->m_Hotzone.m_PlayersInHotzone, Config()->m_SvHotzonePlayersAllowed);
+					return;
+				}
+				if (m_pPlayer->GetAccID() < ACC_START)
+				{
+					if (!IsWeaponIndicator())
+						GameServer()->SendBroadcast(Localizable("You need to be logged in to use moneytiles.\nGet an account with '/register <name> <pw> <pw>'"), m_pPlayer->GetCID(), false);
+					return;
+				}
+				if (Config()->m_SvMoneyBankMode == 2)
+				{
+					m_pPlayer->BankTransaction(Money);
+				}
+				else
+				{
+					m_pPlayer->WalletTransaction(Money);
+				}
+				m_pPlayer->GiveXP(XP);
+				char aMsg[512];
+				//add something like that
+				if (GameWorld()->m_Hotzone.m_PlayersInHotzone == 1){
+					str_format(aMsg, sizeof(aMsg), 
+						//Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d (x2)\nLevel [%d]" : "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d\nLevel [%d]",
+						"%s\n%s [%lld] +%d\nXP [%d/%d] +%d %s\nLevel [%d]",
+						m_pPlayer->Localize("You are the king of the Hotzone!"),
+						Config()->m_SvMoneyBankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"),
+						Config()->m_SvMoneyBankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
+						Money,
+						pAccount->m_XP,
+						GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
+						XP,
+						Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "(x2)" : "",
+						pAccount->m_Level);
+
+					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
+					return;
+				}
+					str_format(aMsg, sizeof(aMsg), 
+						//Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d (x2)\nLevel [%d]" : "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d\nLevel [%d]",
+						"%s [%d/%d] \n%s [%lld] +%d\nXP [%d/%d] +%d %s\nLevel [%d]",
+						m_pPlayer->Localize("Players in the Hotzone:"),
+						GameWorld()->m_Hotzone.m_PlayersInHotzone,
+						Config()->m_SvHotzonePlayersAllowed ? Config()->m_SvHotzonePlayersAllowed : Config()->m_SvMaxClients,
+						Config()->m_SvMoneyBankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"),
+						Config()->m_SvMoneyBankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
+						Money,
+						pAccount->m_XP,
+						GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
+						XP,
+						Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? " (x2)" : "",
+						pAccount->m_Level);
+
+					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
+					return;
+			}
+			
+			//char aMsg[512];
+			//str_format(aMsg, sizeof(aMsg), "%s\n%s\nLevel [%d]", m_aLineMoney, m_aLineExp, pAccount->m_Level);
+			//SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
+		}
+
+
+
 
 		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
 		bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;

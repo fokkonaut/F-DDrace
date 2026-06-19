@@ -478,6 +478,7 @@ public:
 		MONEYTILE_EXTRA,
 	};
 	int m_MoneyTile;
+	int m_HotzoneTile = 0;
 	bool m_LastPoliceFarmActive;
 	bool m_ProcessedMoneyTile;
 	bool m_ProcessedDurakSeatTile;
