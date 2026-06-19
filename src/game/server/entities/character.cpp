@@ -3067,6 +3067,7 @@ void CCharacter::HandleTiles(int Index)
 			}
 		}
 
+		//HOTZONE
 		if (m_TileIndex == TILE_HOTZONE || m_TileFIndex == TILE_HOTZONE)
 		{
 			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
@@ -3085,6 +3086,22 @@ void CCharacter::HandleTiles(int Index)
 			if(!Config()->m_SvHotzoneDummies){
 				Players = Players - Dummies;
 			}
+			bool IsHotzoneActive = GameWorld()->m_Hotzone.IsActive();
+			if (IsHotzoneActive && !m_LastHotzoneActive)
+				GameServer()->SendBroadcast("", m_pPlayer->GetCID(), false);
+
+			if (!GameWorld()->m_Hotzone.IsActive() && (m_LastHotzoneActive || Server()->Tick() % Server()->TickSpeed() == 0))
+			{
+				GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Too many players in the Hotzone! [%d/%d]"),
+					GameWorld()->m_Hotzone.m_PlayersInHotzone, GameWorld()->m_Hotzone.m_MaxHotzoneTilePlayers);
+					m_LastHotzoneActive = IsHotzoneActive;
+				return;
+			}
+			m_LastHotzoneActive = IsHotzoneActive;
+			if (Config()->m_SvHotzonePlayersAllowed && m_Passive)
+			{
+				return;
+			}
 			int Money = 0;
 			int XP = 0;
 			//calculate money&xp
@@ -3100,16 +3117,12 @@ void CCharacter::HandleTiles(int Index)
 				XP = Config()->m_SvHotzoneXPMin;
 			if(Money < Config()->m_SvHotzoneMoneyMin)
 				Money = Config()->m_SvHotzoneMoneyMin;
-			if(Config()->m_SvHotzoneSurvival) 
+			if(Config()->m_SvHotzoneSurvival && GetAliveState()) 
 				XP = XP + GetAliveState();
 			//farm
 			if (Server()->Tick() % Server()->TickSpeed() == 0){
 				if (Players < Config()->m_SvHotzoneMinimumPlayers){
 					GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Not enough players on server for hotzone to work. [%d/%d]"), Players, Config()->m_SvHotzoneMinimumPlayers);
-					return;
-				}
-				if (Config()->m_SvHotzonePlayersAllowed != 0 && GameWorld()->m_Hotzone.m_PlayersInHotzone > Config()->m_SvHotzonePlayersAllowed){
-					GameServer()->SendBroadcastFormat(m_pPlayer->GetCID(), false, Localizable("Too much people in the Hotzone! [%d/%d]"), GameWorld()->m_Hotzone.m_PlayersInHotzone, Config()->m_SvHotzonePlayersAllowed);
 					return;
 				}
 				if (m_pPlayer->GetAccID() < ACC_START)
@@ -3156,7 +3169,6 @@ void CCharacter::HandleTiles(int Index)
 			//str_format(aMsg, sizeof(aMsg), "%s\n%s\nLevel [%d]", m_aLineMoney, m_aLineExp, pAccount->m_Level);
 			//SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
 		}
-
 
 		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
 		bool PoliceMoneyTile = m_TileIndex == TILE_MONEY_POLICE || m_TileFIndex == TILE_MONEY_POLICE;
@@ -4709,8 +4721,10 @@ void CCharacter::FDDraceInit()
 	m_SpawnTick = Now;
 	m_WeaponChangeTick = Now;
 	m_MoneyTile = MONEYTILE_NONE;
+	m_HotzoneTile = false;
 	m_ProcessedMoneyTile = false;
 	m_LastPoliceFarmActive = true;
+	m_LastHotzoneActive = true;
 	m_GotLasered = false;
 	m_KillStreak = 0;
 	m_pTeeControlCursor = 0;
