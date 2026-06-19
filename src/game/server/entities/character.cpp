@@ -1243,23 +1243,25 @@ void CCharacter::FireWeapon()
 
 			case WEAPON_TELE_RIFLE:
 			{
+				CCollision::CTeleWeaponInfo TeleWeaponInfo;
+				TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf && Config()->m_SvTeleRifleAllowBlocks == 0;
+				TeleWeaponInfo.m_Team = Team();
+				if (Config()->m_SvTeleWeaponThroughRoomVip)
+					TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
+
 				vec2 NewPos = GetCursorPos();
+				vec2 ColPos = NewPos;
 				if (Config()->m_SvTeleRifleAllowBlocks == 0)
 				{
-					vec2 ColPos;
-					CCollision::CTeleWeaponInfo TeleWeaponInfo;
-					TeleWeaponInfo.m_IsTeleWeapon = Config()->m_SvTelerifleTelekinesisNerf;
-					TeleWeaponInfo.m_Team = Team();
-					if (Config()->m_SvTeleWeaponThroughRoomVip)
-						TeleWeaponInfo.m_MoveRestrictionExtra = Core()->m_MoveRestrictionExtra;
-					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, 0, TeleWeaponInfo))
-						NewPos = ColPos;
+					vec2 BeforeColPos;
+					if (GameServer()->Collision()->IntersectLine(m_Pos, NewPos, &ColPos, &BeforeColPos, TeleWeaponInfo))
+						NewPos = vec2(round_to_int(BeforeColPos.x), round_to_int(BeforeColPos.y));
 				}
 
 				if (Config()->m_SvTeleRifleAllowBlocks != 1 && GameServer()->Collision()->TestBox(NewPos, vec2(GetProximityRadius(), GetProximityRadius())))
 				{
-					bool Found = GetNearestAirPos(NewPos, m_Pos, &NewPos);
-					if (!Found)
+					bool Found = GetNearestAirPos(ColPos, m_Pos, &NewPos);
+					if (!Found || GameServer()->Collision()->IntersectTeleProjLaser(NewPos, TeleWeaponInfo))
 					{
 						if (ClickedFire)
 							GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO, TeamMask());
@@ -3065,7 +3067,6 @@ void CCharacter::HandleTiles(int Index)
 			}
 		}
 
-
 		//HOTZONE
 		if (m_TileIndex == TILE_HOTZONE || m_TileFIndex == TILE_HOTZONE)
 		{
@@ -3169,8 +3170,6 @@ void CCharacter::HandleTiles(int Index)
 			//str_format(aMsg, sizeof(aMsg), "%s\n%s\nLevel [%d]", m_aLineMoney, m_aLineExp, pAccount->m_Level);
 			//SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
 		}
-
-
 
 
 		bool MoneyTile = m_TileIndex == TILE_MONEY || m_TileFIndex == TILE_MONEY;
