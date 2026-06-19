@@ -198,7 +198,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_hotzone_dummies` |
 | `sv_hotzone_x2_xp` |
 | `sv_hotzone_survival` |
-| `sv_hotzone_xp_max`
+| `sv_hotzone_xp_max` |
 | `sv_hotzone_money_max` |
 | `sv_hotzone_xp_min` |
 | `sv_hotzone_money_min` |
