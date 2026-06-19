@@ -75,6 +75,19 @@ MACRO_CONFIG_INT(SvMoneyDropDelay, sv_money_drop_delay, 1, 0, 9999, CFGFLAG_SERV
 
 MACRO_CONFIG_INT(SvXpForRace, sv_xp_for_race, 500, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a race", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvXpForSpecialRace, sv_xp_for_special_race, 750, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a special race", AUTHED_ADMIN)
+
+//hotzone
+MACRO_CONFIG_INT(SvHotzoneMinimumPlayers, sv_hotzone_min_players, 1, 16, 96, CFGFLAG_SERVER|CFGFLAG_GAME, "How much players are needed on the server for the hotzone money farm to work", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneDummies, sv_hotzone_dummies, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Should a dummy be counted as a unique player for the hotzone farm", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneX2XP, sv_hotzone_x2_xp, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Should X2 xp work in hotzone farm", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneSurvival, sv_hotzone_survival, 0, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Should survival work in hotzone farm", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneXPMax, sv_hotzone_xp_max, 20, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum XP on hotzone", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneMoneyMax, sv_hotzone_money_max, 20, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Maximum money on hotzone", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneXPMin, sv_hotzone_xp_min, 5, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Minimum XP on hotzone", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzoneMoneyMin, sv_hotzone_money_min, 5, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Minimum money on hotzone", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvHotzonePlayersAllowed, sv_hotzone_players_allowed, 0, 0, 128, CFGFLAG_SERVER|CFGFLAG_GAME, "How much players are allowed in hotzone farm, players > value = farm disabled (0=disable)", AUTHED_ADMIN)
+
+
 // account system ban
 MACRO_CONFIG_INT(SvAccSysBanRegistrations, sv_acc_sys_ban_registrations, 3, 0, 10, CFGFLAG_SERVER, "Max registrations per IP within 6 hours", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvAccSysBanPwFails, sv_acc_sys_ban_pw_fails, 5, 0, 10, CFGFLAG_SERVER, "Max passwords fails per IP within 6 hours", AUTHED_ADMIN)
