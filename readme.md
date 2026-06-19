@@ -194,6 +194,15 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_reset_proj_lifetime_after_hit` |
 | `sv_xp_for_race` |
 | `sv_xp_for_special_race` |
+| `sv_hotzone_min_players` |
+| `sv_hotzone_dummies` |
+| `sv_hotzone_x2_xp` |
+| `sv_hotzone_survival` |
+| `sv_hotzone_xp_max`
+| `sv_hotzone_money_max` |
+| `sv_hotzone_xp_min` |
+| `sv_hotzone_money_min` |
+| `sv_hotzone_players_allowed` |
 
 ## Credits
 
