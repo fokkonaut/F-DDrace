@@ -3067,11 +3067,10 @@ void CCharacter::HandleTiles(int Index)
 			}
 		}
 
-		//HOTZONE
 		if (m_TileIndex == TILE_HOTZONE || m_TileFIndex == TILE_HOTZONE)
 		{
 			CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(m_pPlayer->GetAccID());
-			m_HotzoneTile = 1;
+			m_HotzoneTile = true;
 			int Players = 0;
 			int Dummies = 0;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3129,41 +3128,28 @@ void CCharacter::HandleTiles(int Index)
 				}
 				m_pPlayer->GiveXP(XP);
 				char aMsg[512];
-				//add something like that
-				if (GameWorld()->m_Hotzone.m_PlayersInHotzone == 1){
-					str_format(aMsg, sizeof(aMsg), 
-						//Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d (x2)\nLevel [%d]" : "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d\nLevel [%d]",
-						"%s\n%s [%lld] +%d\nXP [%d/%d] +%d %s\nLevel [%d]",
-						m_pPlayer->Localize("You are the king of the Hotzone!"),
-						Config()->m_SvMoneyBankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"),
-						Config()->m_SvMoneyBankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
-						Money,
-						pAccount->m_XP,
-						GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
-						XP,
-						Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "(x2)" : "",
-						pAccount->m_Level);
+				char aSurvival[32];
+				char aPlayers[32];
 
-					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
-					return;
-				}
-					str_format(aMsg, sizeof(aMsg), 
-						//Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d (x2)\nLevel [%d]" : "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d\nLevel [%d]",
-						"%s [%d/%d] \n%s [%lld] +%d\nXP [%d/%d] +%d %s\nLevel [%d]",
-						m_pPlayer->Localize("Players in the Hotzone:"),
-						GameWorld()->m_Hotzone.m_PlayersInHotzone,
-						Config()->m_SvHotzonePlayersAllowed ? Config()->m_SvHotzonePlayersAllowed : Config()->m_SvMaxClients,
-						Config()->m_SvMoneyBankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"),
-						Config()->m_SvMoneyBankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
-						Money,
-						pAccount->m_XP,
-						GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
-						XP,
-						Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? " (x2)" : "",
-						pAccount->m_Level);
+				str_format(aSurvival, sizeof(aSurvival), " +%dsurvival", GetAliveState());
+				str_format(aPlayers, sizeof(aPlayers), "[%d/%d]", GameWorld()->m_Hotzone.m_PlayersInHotzone, Config()->m_SvHotzonePlayersAllowed ? Config()->m_SvHotzonePlayersAllowed : Config()->m_SvMaxClients);
+				str_format(aMsg, sizeof(aMsg), 
+					//Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d (x2)\nLevel [%d]" : "You are the king of the Hotzone!\n%s [%lld] +%d\nXP [%d/%d] +%d\nLevel [%d]",
+					"%s %s \n%s [%lld] +%d\nXP [%d/%d] +%d %s %s\nLevel [%d]",
+					GameWorld()->m_Hotzone.m_PlayersInHotzone == 1 ? m_pPlayer->Localize("You are the king of the Hotzone!") : m_pPlayer->Localize("Players in the Hotzone:"),
+					GameWorld()->m_Hotzone.m_PlayersInHotzone == 1 ? "" : aPlayers,
+					Config()->m_SvMoneyBankMode == 2 ? m_pPlayer->Localize("Bank") : m_pPlayer->Localize("Wallet"),
+					Config()->m_SvMoneyBankMode == 1 ? m_pPlayer->GetWalletMoney() : pAccount->m_Money,
+					Money,
+					pAccount->m_XP,
+					GameServer()->m_Accounts.GetNeededXP(pAccount->m_Level),
+					XP,
+					GetAliveState() && Config()->m_SvHotzoneSurvival ? aSurvival : "",
+					Config()->m_SvHotzoneX2XP && m_IsDoubleXp ? " (x2)" : "",
+					pAccount->m_Level);
 
-					SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
-					return;
+				SendBroadcastHud(GameServer()->FormatExperienceBroadcast(aMsg, m_pPlayer->GetCID()));
+				return;
 			}
 			
 			//char aMsg[512];
