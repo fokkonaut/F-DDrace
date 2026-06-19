@@ -73,6 +73,8 @@ MACRO_CONFIG_INT(SvMoneyFarmTeam, sv_money_farm_team, 1, 0, 1, CFGFLAG_SERVER|CF
 MACRO_CONFIG_INT(SvSoloFarm, sv_money_farm_solo, 1, 0, 1, CFGFLAG_SERVER|CFGFLAG_GAME, "Whether a player can farm money on a money tile while being in solo mode", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvMoneyDropDelay, sv_money_drop_delay, 1, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a player has to wait to drop money again", AUTHED_ADMIN)
 
+MACRO_CONFIG_INT(SvMoneyXpBombDelay, sv_money_xp_bomb_delay, 60, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "Time in seconds a player has to wait to collect money-xp bomb again", AUTHED_ADMIN)
+
 MACRO_CONFIG_INT(SvXpForRace, sv_xp_for_race, 500, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a race", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvXpForSpecialRace, sv_xp_for_special_race, 750, 0, 9999, CFGFLAG_SERVER|CFGFLAG_GAME, "How much xp to give a player for finishing a special race", AUTHED_ADMIN)
 // account system ban

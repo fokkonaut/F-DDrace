@@ -117,6 +117,7 @@ Following config options can be used from "Server settings" field in the editor.
 | `sv_money_farm_team` |
 | `sv_money_farm_solo` |
 | `sv_money_drop_delay` |
+| `sv_money_xp_bomb_delay` |
 | `sv_flag_sounds` |
 | `sv_flag_hooking` |
 | `sv_flag_respawn_dropped` |
