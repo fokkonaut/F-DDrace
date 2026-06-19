@@ -2033,7 +2033,7 @@ void CPlayer::GiveXP(int64 Amount, const char *pMessage)
 
 	CAccounts::AccountInfo *pAccount = &GameServer()->m_Accounts.Get(GetAccID());
 	bool IsDoubleXp = m_pCharacter && m_pCharacter->m_IsDoubleXp;
-	if (IsDoubleXp)
+	if (IsDoubleXp && !GameServer()->Config()->m_SvHotzoneX2XP && !m_pCharacter->m_HotzoneTile)
 		Amount *= 2;
 	pAccount->m_XP += Amount;
 

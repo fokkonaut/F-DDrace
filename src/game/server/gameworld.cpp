@@ -297,26 +297,29 @@ void CGameWorld::Tick()
 
 void CGameWorld::IntraTick()
 {
-	int NumCharacters = 0;
-	m_PoliceFarm.m_NumPoliceTilePlayers = 0;
-	
-	// we need to do this between core tick and Move of all the players, because otherwise its getting jiggly for those whose coretick didnt happen yet
-	for (CCharacter *pChr = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
-	{
-		pChr->m_Snake.Tick();
+    int NumCharacters = 0;
+    m_PoliceFarm.m_NumPoliceTilePlayers = 0;
+    m_Hotzone.m_PlayersInHotzone = 0;
+    
+    for (CCharacter *pChr = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChr; pChr = (CCharacter *)pChr->TypeNext())
+    {
+        pChr->m_Snake.Tick();
+        if (pChr->GetPlayer()->m_IsDummy)
+            continue;
+        NumCharacters++;
+        if (pChr->m_MoneyTile == CCharacter::MONEYTILE_POLICE && !pChr->m_Passive && !pChr->GetPlayer()->IsMinigame())
+        {
+            m_PoliceFarm.m_NumPoliceTilePlayers++;
+        }
+        
+        if (pChr->m_HotzoneTile && !pChr->m_Passive && !pChr->GetPlayer()->IsMinigame())
+        {
+            m_Hotzone.m_PlayersInHotzone++;
+        }
+    }
 
-		if (pChr->GetPlayer()->m_IsDummy)
-			continue;
-
-		NumCharacters++;
-		if (pChr->m_MoneyTile == CCharacter::MONEYTILE_POLICE && !pChr->m_Passive && !pChr->GetPlayer()->IsMinigame())
-		{
-			m_PoliceFarm.m_NumPoliceTilePlayers++;
-		}
-	}
-
-	const int Limit = Config()->m_SvPoliceFarmLimit;
-	m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
+    const int Limit = Config()->m_SvPoliceFarmLimit;
+    m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
 }
 
 bool CGameWorld::FlagsUsed()
