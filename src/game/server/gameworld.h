@@ -158,7 +158,12 @@ public:
 		int m_MaxPoliceTilePlayers = 0;
 		bool IsActive() { return m_MaxPoliceTilePlayers <= 0 || m_NumPoliceTilePlayers <= m_MaxPoliceTilePlayers; }
 	} m_PoliceFarm;
-
+	struct
+	{
+		int m_PlayersInHotzone = 0;
+		int m_MaxHotzoneTilePlayers = 0;
+		bool IsActive() { return m_MaxHotzoneTilePlayers <= 0 || m_PlayersInHotzone <= m_MaxHotzoneTilePlayers; }
+	} m_Hotzone;
 	class CDrawTileContext
 	{
 		std::set<CDrawTile *> m_vpResponsibleTiles;

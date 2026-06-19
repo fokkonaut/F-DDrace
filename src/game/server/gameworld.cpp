@@ -320,6 +320,7 @@ void CGameWorld::IntraTick()
 
     const int Limit = Config()->m_SvPoliceFarmLimit;
     m_PoliceFarm.m_MaxPoliceTilePlayers = Limit != -1 ? Limit : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
+    m_Hotzone.m_MaxHotzoneTilePlayers = Config()->m_SvHotzonePlayersAllowed != -1 ? Config()->m_SvHotzonePlayersAllowed : clamp((int)floor(NumCharacters * 0.125f + 3), 3, 16);
 }
 
 bool CGameWorld::FlagsUsed()
