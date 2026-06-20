@@ -4015,7 +4015,7 @@ void CGameContext::AddVote(const char *pDescription, const char *pCommand)
 	++m_NumVoteOptions;
 	int Len = str_length(pCommand);
 
-	CVoteOptionServer *pOption = (CVoteOptionServer *)m_pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len);
+	CVoteOptionServer *pOption = (CVoteOptionServer *)m_pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len, alignof(CVoteOptionServer));
 	pOption->m_pNext = 0;
 	pOption->m_pPrev = m_pVoteOptionLast;
 	if(pOption->m_pPrev)
@@ -4075,7 +4075,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 
 		// copy option
 		int Len = str_length(pSrc->m_aCommand);
-		CVoteOptionServer *pDst = (CVoteOptionServer *)pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len);
+		CVoteOptionServer *pDst = (CVoteOptionServer *)pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len, alignof(CVoteOptionServer));
 		pDst->m_pNext = 0;
 		pDst->m_pPrev = pVoteOptionLast;
 		if(pDst->m_pPrev)

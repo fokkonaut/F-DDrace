@@ -1,38 +1,41 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/math.h>
 #include <base/system.h>
 #include "memheap.h"
 
 
 // allocates a new chunk to be used
-void CHeap::NewChunk()
+void CHeap::NewChunk(size_t ChunkSize)
 {
-	// allocate memory
-	char *pMem = (char*)mem_alloc(sizeof(CChunk)+CHUNK_SIZE, 1);
-	if(!pMem)
-		return;
-
-	// the chunk structure is located in the begining of the chunk
+	// the chunk structure is located in the beginning of the chunk
 	// init it and return the chunk
-	CChunk *pChunk = (CChunk*)pMem;
-	pChunk->m_pMemory = (char*)(pChunk+1);
+	CChunk *pChunk = static_cast<CChunk *>(malloc(sizeof(CChunk) + ChunkSize));
+	if(!pChunk)
+		return;
+	pChunk->m_pMemory = static_cast<char *>(static_cast<void *>(pChunk + 1));
 	pChunk->m_pCurrent = pChunk->m_pMemory;
-	pChunk->m_pEnd = pChunk->m_pMemory + CHUNK_SIZE;
-	pChunk->m_pNext = m_pCurrent;
+	pChunk->m_pEnd = pChunk->m_pMemory + ChunkSize;
+	pChunk->m_pNext = nullptr;
 
+	pChunk->m_pNext = m_pCurrent;
 	m_pCurrent = pChunk;
 }
 
 //****************
-void *CHeap::AllocateFromChunk(unsigned int Size)
+void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
 {
+	size_t Offset = reinterpret_cast<uintptr_t>(m_pCurrent->m_pCurrent) % Alignment;
+	if(Offset)
+		Offset = Alignment - Offset;
+
 	// check if we need can fit the allocation
-	if(m_pCurrent->m_pCurrent + Size > m_pCurrent->m_pEnd)
-		return (void*)0x0;
+	if(m_pCurrent->m_pCurrent + Offset + Size > m_pCurrent->m_pEnd)
+		return nullptr;
 
 	// get memory and move the pointer forward
-	char *pMem = m_pCurrent->m_pCurrent;
-	m_pCurrent->m_pCurrent += Size;
+	char *pMem = m_pCurrent->m_pCurrent + Offset;
+	m_pCurrent->m_pCurrent += Offset + Size;
 	return pMem;
 }
 
@@ -40,7 +43,7 @@ void *CHeap::AllocateFromChunk(unsigned int Size)
 CHeap::CHeap()
 {
 	m_pCurrent = 0x0;
-	NewChunk();
+	Reset();
 }
 
 CHeap::~CHeap()
@@ -51,7 +54,7 @@ CHeap::~CHeap()
 void CHeap::Reset()
 {
 	Clear();
-	NewChunk();
+	NewChunk(CHUNK_SIZE);
 }
 
 // destroys the heap
@@ -70,17 +73,17 @@ void CHeap::Clear()
 }
 
 //
-void *CHeap::Allocate(unsigned int Size)
+void *CHeap::Allocate(unsigned Size, unsigned Alignment)
 {
 	// try to allocate from current chunk
-	char *pMem = (char *)AllocateFromChunk(Size);
+	void *pMem = AllocateFromChunk(Size, Alignment);
 	if(!pMem)
 	{
 		// allocate new chunk and add it to the heap
-		NewChunk();
+		NewChunk(maximum<size_t>(CHUNK_SIZE, Size + Alignment));
 
 		// try to allocate again
-		pMem = (char *)AllocateFromChunk(Size);
+		pMem = AllocateFromChunk(Size, Alignment);
 	}
 
 	return pMem;
