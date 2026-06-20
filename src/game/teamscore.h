@@ -29,11 +29,15 @@ public:
 	void Reset();
 	void SetSolo(int ClientID, bool Value)
 	{
+		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+			return;
 		m_IsSolo[ClientID] = Value;
 	}
 
 	bool GetSolo(int ClientID)
 	{
+		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+			return false;
 		return m_IsSolo[ClientID];
 	}
 
