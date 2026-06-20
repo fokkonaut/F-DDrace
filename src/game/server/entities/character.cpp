@@ -433,7 +433,7 @@ void CCharacter::DoWeaponSwitch()
 void CCharacter::HandleWeaponSwitch()
 {
 	int WantedWeapon = GetActiveWeapon();
-	if(m_QueuedWeapon != -1)
+	if(m_QueuedWeapon >= 0)
 		WantedWeapon = m_QueuedWeapon;
 
 	bool Anything = false;
