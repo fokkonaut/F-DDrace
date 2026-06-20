@@ -29,8 +29,6 @@ public:
 	void Reset();
 	void SetSolo(int ClientID, bool Value)
 	{
-		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-			return;
 		m_IsSolo[ClientID] = Value;
 	}
 
