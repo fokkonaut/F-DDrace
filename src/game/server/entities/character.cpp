@@ -1686,7 +1686,8 @@ void CCharacter::Tick()
 
 	// handle Weapons
 	HandleWeapons();
-	DDracePostCoreTick();
+	if (DDracePostCoreTick())
+		return;
 
 	if(m_Core.m_TriggeredEvents & COREEVENTFLAG_HOOK_ATTACH_PLAYER)
 	{
@@ -4267,7 +4268,7 @@ void CCharacter::DDraceTick()
 	m_Core.m_Id = GetPlayer()->GetCID();
 }
 
-void CCharacter::DDracePostCoreTick()
+bool CCharacter::DDracePostCoreTick()
 {
 	m_IsFrozen = false;
 
@@ -4321,7 +4322,7 @@ void CCharacter::DDracePostCoreTick()
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
 	if (!m_Alive)
-		return;
+		return true;
 
 	// handle Anti-Skip tiles
 	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
@@ -4331,7 +4332,7 @@ void CCharacter::DDracePostCoreTick()
 		{
 			HandleTiles(*i);
 			if (!m_Alive)
-				return;
+				return true;
 		}
 	}
 	else
@@ -4345,7 +4346,7 @@ void CCharacter::DDracePostCoreTick()
 		m_LastInOutTeleporter = 0;
 
 		if (!m_Alive)
-			return;
+			return true;
 	}
 
 	m_ProcessedMoneyTile = false;
@@ -4374,6 +4375,9 @@ void CCharacter::DDracePostCoreTick()
 		m_FirstFreezeTick = 0;
 
 	m_IsGrounded = IsGrounded();
+	
+	// charcter is still alive
+	return false;
 }
 
 bool CCharacter::Freeze(float Seconds)

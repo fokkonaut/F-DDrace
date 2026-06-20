@@ -291,7 +291,7 @@ private:
 	void DDraceInit();
 	void HandleSkippableTiles(int Index);
 	void DDraceTick();
-	void DDracePostCoreTick();
+	bool DDracePostCoreTick();
 	void HandleBroadcast();
 	void HandleTuneLayer();
 	bool HandleTeleporter(int MapIndex);
