@@ -78,7 +78,7 @@ CTeeInfo::CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pS
 {
 	for(int i = 0; i < 6; i++)
 	{
-		str_copy(m_aaSkinPartNames[i], pSkinPartNames[i], sizeof(m_aaSkinPartNames[i]));
+		str_utf8_copy_num(m_aaSkinPartNames[i], pSkinPartNames[i], sizeof(m_aaSkinPartNames[i]), MAX_SKIN_LENGTH);
 		m_aUseCustomColors[i] = pUseCustomColors[i];
 		m_aSkinPartColors[i] = pSkinPartColors[i];
 	}
@@ -88,7 +88,7 @@ CTeeInfo::CTeeInfo(int SkinID) : CTeeInfo()
 {
 	for(int i = 0; i < 6; i++)
 	{
-		str_copy(m_aaSkinPartNames[i], s_Skins[SkinID].m_apSkinPartNames[i], sizeof(m_aaSkinPartNames[i]));
+		str_utf8_copy_num(m_aaSkinPartNames[i], s_Skins[SkinID].m_apSkinPartNames[i], sizeof(m_aaSkinPartNames[i]), MAX_SKIN_LENGTH);
 		m_aUseCustomColors[i] = s_Skins[SkinID].m_aUseCustomColors[i];
 		m_aSkinPartColors[i] = s_Skins[SkinID].m_aSkinPartColors[i];
 	}
@@ -125,7 +125,7 @@ void CTeeInfo::FromSevendown()
 	int Match = SKIN_DEFAULT;
 	for(int p = 0; p < NUM_SKINPARTS; p++)
 	{
-		str_copy(m_aaSkinPartNames[p], s_Skins[SKIN_DEFAULT].m_apSkinPartNames[p], 24);
+		str_utf8_copy_num(m_aaSkinPartNames[p], s_Skins[SKIN_DEFAULT].m_apSkinPartNames[p], sizeof(m_aaSkinPartNames[p]), MAX_SKIN_LENGTH);
 		m_aUseCustomColors[p] = s_Skins[SKIN_DEFAULT].m_aUseCustomColors[p];
 		m_aSkinPartColors[p] = s_Skins[SKIN_DEFAULT].m_aSkinPartColors[p];
 	}
@@ -144,7 +144,7 @@ void CTeeInfo::FromSevendown()
 		{
 			for(int p = 0; p < NUM_SKINPARTS; p++)
 			{
-				str_copy(m_aaSkinPartNames[p], s_Skins[i].m_apSkinPartNames[p], 24);
+				str_utf8_copy_num(m_aaSkinPartNames[p], s_Skins[i].m_apSkinPartNames[p], sizeof(m_aaSkinPartNames[p]), MAX_SKIN_LENGTH);
 				m_aUseCustomColors[p] = s_Skins[i].m_aUseCustomColors[p];
 				m_aSkinPartColors[p] = s_Skins[i].m_aSkinPartColors[p];
 			}
