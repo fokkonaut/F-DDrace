@@ -3417,7 +3417,7 @@ int CServer::Run()
 	for (int i = 0; i < NUM_MAP_DESIGNS; i++)
 		if (m_aMapDesign[i].m_pData)
 		{
-			delete m_aMapDesign[i].m_pData;
+			mem_free(m_aMapDesign[i].m_pData);
 			m_aMapDesign[i].m_pData = 0;
 		}
 	return 0;
