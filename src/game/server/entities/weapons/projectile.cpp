@@ -156,7 +156,7 @@ void CProjectile::Tick()
 			}
 			else if (pEnt->IsAdvancedEntity())
 			{
-				pTargetEntity = (IVehicle *)pEnt;
+				pTargetEntity = (CAdvancedEntity *)pEnt;
 				pTargetChr = pTargetEntity->GetOwner();
 				// Only teleport to players
 				m_TeleportCancelled = true;
