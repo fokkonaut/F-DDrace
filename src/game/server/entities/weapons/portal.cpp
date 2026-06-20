@@ -95,7 +95,7 @@ void CPortal::EntitiesEnter()
 	{
 		CEntity *pEnt = m_vTeleported[i];
 		vec2 Pos;
-		if (pEnt)
+		if (pEnt) // TODO: Validate entity exists
 		{
 			Pos = pEnt->GetPos();
 			if (pEnt->GetObjType() == CGameWorld::ENTTYPE_CHARACTER)

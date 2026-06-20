@@ -41,11 +41,16 @@ void CPickupDrop::Reset(bool Picked)
 {
 	if (m_Type == POWERUP_WEAPON || m_Type == POWERUP_BATTERY)
 	{
-		CPlayer *pOwner = GameServer()->m_apPlayers[m_Owner];
-		if (m_Owner >= 0 && pOwner)
-			for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
-				if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
-					pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
+		if (m_Owner >= 0)
+		{
+			CPlayer *pOwner = GameServer()->m_apPlayers[m_Owner];
+			if (pOwner)
+			{
+				for (unsigned i = 0; i < pOwner->m_vWeaponLimit[m_Weapon].size(); i++)
+					if (pOwner->m_vWeaponLimit[m_Weapon][i] == this)
+						pOwner->m_vWeaponLimit[m_Weapon].erase(pOwner->m_vWeaponLimit[m_Weapon].begin() + i);
+			}
+		}
 	}
 	else
 	{
