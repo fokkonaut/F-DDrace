@@ -143,7 +143,7 @@ int CSnapshot::Serialize(char *pDstData)
 
 int CSnapshot::Crc() const
 {
-	int Crc = 0;
+	unsigned int Crc = 0;
 
 	for(int i = 0; i < m_NumItems; i++)
 	{
