@@ -617,7 +617,7 @@ int CSaveTee::LoadString(const char *pString)
 {
 	char aSavedAddress[NETADDR_MAXSTRSIZE];
 	int64 ExpireDate = 0;
-	char aCheckpointList[128];
+	char aCheckpointList[128] = "";
 	int Num;
 	Num = sscanf(pString,
 		"%[^\t]\t%d\t%d\t%d\t%d\t"
