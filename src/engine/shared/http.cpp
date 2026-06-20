@@ -553,6 +553,8 @@ json_value *CHttpRequest::ResultJson() const
 	unsigned char *pResult;
 	size_t ResultLength;
 	Result(&pResult, &ResultLength);
+	if(!pResult || ResultLength == 0)
+		return nullptr;
 	return json_parse((char *)pResult, ResultLength);
 }
 
