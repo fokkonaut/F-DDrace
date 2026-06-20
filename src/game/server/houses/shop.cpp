@@ -373,6 +373,9 @@ void CShop::BuyItem(int ClientID, int Item)
 	if (Amount <= 0)
 		return;
 
+	// Re fetch account, HasPlotByIP invalidated vector allocation through GetAccount()
+	pAccount = &GameServer()->m_Accounts.Get(pPlayer->GetAccID());
+
 	float Price = Amount * (m_aItems[ItemID].m_Price/m_aItems[ItemID].m_Amount);
 
 	// check for the correct price
