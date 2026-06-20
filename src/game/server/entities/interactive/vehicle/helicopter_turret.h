@@ -130,7 +130,7 @@ public:
 	~CMinigunTurret();
 
 	// Manipulating
-	virtual void ApplyScale(float TurretScale);
+	virtual void ApplyScale(float TurretScale) override;
 
 	// Ticking
 	void Tick() override;
@@ -172,7 +172,7 @@ public:
 	virtual ~CLauncherTurret();
 
 	// Manipulating
-	virtual void ApplyScale(float TurretScale);
+	virtual void ApplyScale(float TurretScale) override;
 
 	// Ticking
 	void Tick() override;

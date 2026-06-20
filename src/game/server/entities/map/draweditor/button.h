@@ -25,8 +25,8 @@ class CButton : public CEntity
 public:
 	CButton(CGameWorld *pGameWorld, vec2 Pos, int Number, bool Collision = true);
 	virtual ~CButton();
-	virtual void ResetCollision(bool Remove = false);
-	virtual void Snap(int SnappingClient);
+	void ResetCollision(bool Remove = false) override;
+	void Snap(int SnappingClient) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_MAP_DRAWEDITOR_BUTTON_H

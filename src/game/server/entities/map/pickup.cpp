@@ -453,7 +453,7 @@ void CPickup::Snap(int SnappingClient)
 		PickupFlags = PICKUPFLAG_NO_PREDICT;
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		SnapPos, m_Type, m_Subtype, m_Number, m_Flags|PickupFlags, m_Special, m_aID);
+		SnapPos, m_Type, m_Subtype, m_Number, m_Flags|PickupFlags, m_Special, &m_aID[0]);
 }
 
 void CPickup::Move()

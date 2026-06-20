@@ -5997,7 +5997,7 @@ bool CGameContext::SnapPickupObject(const CSnapContext &Context, int SnapId, con
 	return true;
 }
 
-bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags, int Special, int aExtraIds[4]) const
+bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType, int SwitchNumber, int Flags, int Special, int *apExtraIds) const
 {
 	if (Type == POWERUP_BATTERY)
 	{
@@ -6033,7 +6033,7 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 	{
 		for (int i = 1; i < 4; i++)
 		{
-			CNetObj_Projectile* pSpreadIndicator = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[i], sizeof(CNetObj_Projectile)));
+			CNetObj_Projectile* pSpreadIndicator = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, apExtraIds[i], sizeof(CNetObj_Projectile)));
 			if (!pSpreadIndicator)
 				return false;
 
@@ -6048,7 +6048,7 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 
 	if (Gun)
 	{
-		CNetObj_Projectile* pShotgunBullet = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[0], sizeof(CNetObj_Projectile)));
+		CNetObj_Projectile* pShotgunBullet = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, apExtraIds[0], sizeof(CNetObj_Projectile)));
 		if (!pShotgunBullet)
 			return false;
 
@@ -6061,16 +6061,16 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 	{
 		vec2 LaserPos = vec2(Pos.x, Pos.y - ExtraBulletOffset);
 		int LaserType = (SubType == WEAPON_TASER || SubType == WEAPON_LIGHTNING_LASER) ? LASERTYPE_FREEZE : LASERTYPE_RIFLE;
-		SnapLaserObject(Context, aExtraIds[0], LaserPos, LaserPos, Server()->Tick(), -1, LaserType, -1, -1, LASERFLAG_NO_PREDICT);
+		SnapLaserObject(Context, apExtraIds[0], LaserPos, LaserPos, Server()->Tick(), -1, LaserType, -1, -1, LASERFLAG_NO_PREDICT);
 	}
 	else if (Heart)
 	{
 		vec2 HeartPos = vec2(Pos.x, Pos.y - ExtraBulletOffset);
-		SnapPickupObject(Context, aExtraIds[0], HeartPos, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
+		SnapPickupObject(Context, apExtraIds[0], HeartPos, POWERUP_HEALTH, 0, -1, PICKUPFLAG_NO_PREDICT);
 	}
 	else if (Grenade)
 	{
-		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, aExtraIds[0], sizeof(CNetObj_Projectile)));
+		CNetObj_Projectile* pProj = static_cast<CNetObj_Projectile*>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, apExtraIds[0], sizeof(CNetObj_Projectile)));
 		if (!pProj)
 			return false;
 

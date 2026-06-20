@@ -268,7 +268,7 @@ public:
 	void CreateSound(vec2 Pos, int Sound, Mask128 Mask = Mask128());
 
 	bool SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1, int Flags = 0) const;
-	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType = 0, int SwitchNumber = -1, int Flags = 0, int Special = 0, int aExtraIds[4] = { 0 }) const;
+	bool SnapPickup(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType = 0, int SwitchNumber = -1, int Flags = 0, int Special = 0, int *apExtraIds = nullptr) const;
 	bool SnapPickupObject(const CSnapContext &Context, int SnapId, const vec2 &Pos, int Type, int SubType = 0, int SwitchNumber = -1, int Flags = 0) const;
 
 	enum

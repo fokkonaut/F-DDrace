@@ -45,8 +45,8 @@ private:
 public:
 	CDrawTile(CGameWorld *pGameWorld, vec2 Pos, int Index, int Color, int TuneNumber = -1, bool Collision = true);
 	virtual ~CDrawTile();
-	virtual void ResetCollision(bool Remove = false);
-	virtual void Snap(int SnappingClient);
+	void ResetCollision(bool Remove = false) override;
+	void Snap(int SnappingClient) override;
 	void SetIndex(int Index) { m_Index = Index; }
 	int GetIndex() { return m_Index; }
 	void SetColor(int Lasertype) { m_Color = Lasertype; }

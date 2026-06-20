@@ -3,7 +3,7 @@
 //
 
 #ifndef GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_SPIDER_H
-#define GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_SPIDER_Hs
+#define GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_SPIDER_H
 
 #include "base/vehicle.h"
 #include <game/server/entities/interactive/advanced_entity.h>
@@ -57,7 +57,7 @@ public:
 	// void Snap(int SnappingClient) override;
 	void Reset() override;
 
-	bool OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController);
+	bool OnInput(CNetObj_PlayerInput *pNewInput, CCharacter *pController) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_INTERACTIVE_VEHICLE_SPIDER_H

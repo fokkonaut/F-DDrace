@@ -246,5 +246,5 @@ void CPickupDrop::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientDDNetVersion(SnappingClient);
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Server()->IsSevendown(SnappingClient), SnappingClient), GetID(),
-		SnapPos, m_Type, m_Weapon, m_Number, PickupFlags, m_Special, m_aID);
+		SnapPos, m_Type, m_Weapon, m_Number, PickupFlags, m_Special, &m_aID[0]);
 }

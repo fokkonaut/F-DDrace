@@ -10,7 +10,7 @@ class CDoor: public CEntity
 {
 	vec2 m_To;
 	int m_EvalTick;
-	void ResetCollision(bool Remove = false);
+	void ResetCollision(bool Remove = false) override;
 	int m_Length;
 	vec2 m_Direction;
 
@@ -41,9 +41,9 @@ public:
 
 	bool GetIntersectPos(vec2 Pos0, vec2 Pos1, float Radius, vec2 *pOutPosIntersected);
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void Snap(int SnappingClient);
+	void Reset() override;
+	void Tick() override;
+	void Snap(int SnappingClient) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_MAP_DOOR_H

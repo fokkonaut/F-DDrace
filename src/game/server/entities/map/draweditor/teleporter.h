@@ -29,9 +29,9 @@ class CTeleporter : public CEntity
 public:
 	CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number, bool Collision = true);
 	virtual ~CTeleporter();
-	virtual void ResetCollision(bool Remove = false);
-	virtual void Snap(int SnappingClient);
-	virtual void Tick();
+	void ResetCollision(bool Remove = false) override;
+	void Snap(int SnappingClient) override;
+	void Tick() override;
 	int GetType() { return m_Type; }
 };
 
