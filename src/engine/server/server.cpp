@@ -4410,7 +4410,9 @@ const char* CServer::GetAnnouncementLine(char const* pFileName)
 		m_AnnouncementLastLine = Rand;
 	}
 
-	return v[m_AnnouncementLastLine];
+	static char aLine[256];
+	str_copy(aLine, v[m_AnnouncementLastLine], sizeof(aLine));
+	return aLine;
 }
 
 bool CServer::SetTimedOut(int ClientID, int OrigID)
