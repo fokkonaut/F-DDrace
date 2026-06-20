@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef ENGINE_SHARED_MEMHEAP_H
 #define ENGINE_SHARED_MEMHEAP_H
+
+#include <cstddef>
 class CHeap
 {
 	struct CChunk
