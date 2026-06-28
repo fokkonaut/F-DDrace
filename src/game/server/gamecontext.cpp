@@ -1484,7 +1484,7 @@ void CGameContext::OnTick()
 				continue;
 			}
 
-			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i) && !pPlayer->m_ProcessedDnsblJail)
+			if (Config()->m_SvDnsblJail && Server()->DnsblBlack(i) && !pPlayer->m_ProcessedDnsblJail && !Config()->m_SvDnsblBan)
 			{
 				int Seconds = 60 * Config()->m_SvDnsblJailTime;
 				if (JailPlayer(i, Seconds, MODLOG_ID_SERVER))
@@ -2114,8 +2114,9 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 
 		if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
 		{
+			bool DnsblWhiteOrNotSilent = !Server()->DnsblBlack(ClientID) || (Config()->m_SvDnsblBan && !Config()->m_SvDnsblBanSilent);
 			bool HasReason = pReason && *pReason;
-			if (HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0')
+			if ((HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0') && DnsblWhiteOrNotSilent)
 			{
 				int Flags = CHATFLAG_ALL;
 				if (m_apPlayers[ClientID]->m_IsDummy)
