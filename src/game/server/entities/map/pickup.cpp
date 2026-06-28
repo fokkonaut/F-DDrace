@@ -24,9 +24,8 @@ CPickup::CPickup(CGameWorld* pGameWorld, vec2 Pos, int Type, int SubType, int La
 
 	m_Owner = Owner;
 	
-	m_Snap.m_Pos = m_Pos;
-	m_Snap.m_Time = 0.f;
-	m_Snap.m_LastTime = Server()->Tick();
+	m_StartTick = Server()->Tick();
+	m_Offset = m_Pos.y / 32.0f + m_Pos.x / 32.0f;
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 		m_aLastRespawnMsg[i] = 0;
@@ -432,17 +431,11 @@ void CPickup::Snap(int SnappingClient)
 	}
 
 	vec2 SnapPos = m_Pos;
-
 	if (m_Type == POWERUP_BATTERY)
 	{
-		m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
-		m_Snap.m_LastTime = Server()->Tick();
-
-		float Offset = m_Snap.m_Pos.y / 32.0f + m_Snap.m_Pos.x / 32.0f;
-		m_Snap.m_Pos.x = m_Pos.x + cosf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
-		m_Snap.m_Pos.y = m_Pos.y + sinf(m_Snap.m_Time * 2.0f + Offset) * 2.5f;
-
-		SnapPos = m_Snap.m_Pos;
+		float Time = (float)(Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
+		SnapPos.x = m_Pos.x + cosf(Time * 2.0f + m_Offset) * 2.5f;
+		SnapPos.y = m_Pos.y + sinf(Time * 2.0f + m_Offset) * 2.5f;
 	}
 
 	int PickupFlags = 0;

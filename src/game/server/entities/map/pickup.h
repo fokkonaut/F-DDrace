@@ -41,12 +41,8 @@ private:
 	int m_aID[4];
 	int64 m_aLastRespawnMsg[MAX_CLIENTS];
 
-	struct
-	{
-		vec2 m_Pos;
-		float m_Time;
-		float m_LastTime;
-	} m_Snap;
+	int m_StartTick;
+	float m_Offset;
 
 	void SetRespawnTime(bool Init = false);
 

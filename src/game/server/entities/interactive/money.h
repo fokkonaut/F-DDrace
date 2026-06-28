@@ -21,13 +21,6 @@ enum
 class CMoney : public CAdvancedEntity
 {
 private:
-	struct
-	{
-		vec2 m_Pos;
-		float m_Time;
-		float m_LastTime;
-	} m_Snap;
-
 	bool m_GlobalPickupDelay;
 	int64 m_Amount;
 	int64 m_StartTick;

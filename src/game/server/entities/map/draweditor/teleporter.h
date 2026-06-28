@@ -16,13 +16,7 @@ class CTeleporter : public CEntity
 		NUM_TELEPORTER_IDS = NUM_CIRCLE + NUM_PARTICLES,
 	};
 
-	struct
-	{
-		vec2 m_Pos;
-		float m_Time;
-		float m_LastTime;
-	} m_Snap;
-
+	int m_StartTick;
 	int m_aID[NUM_TELEPORTER_IDS];
 	int m_Type;
 

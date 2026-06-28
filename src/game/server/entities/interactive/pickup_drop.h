@@ -34,12 +34,8 @@ private:
 	// have to define a new ID variable for the bullet
 	int m_aID[4];
 
-	struct
-	{
-		vec2 m_Pos;
-		float m_Time;
-		float m_LastTime;
-	} m_Snap;
+	int m_StartTick;
+	float m_Offset;
 };
 
 #endif // GAME_SERVER_ENTITIES_INTERACTIVE_PICKUP_DROP_H

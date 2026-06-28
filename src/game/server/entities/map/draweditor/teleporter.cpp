@@ -15,9 +15,7 @@ CTeleporter::CTeleporter(CGameWorld *pGameWorld, vec2 Pos, int Type, int Number,
 	m_Type = Type;
 	m_Number = Number;
 
-	m_Snap.m_Pos = m_Pos;
-	m_Snap.m_Time = 0.f;
-	m_Snap.m_LastTime = Server()->Tick();
+	m_StartTick = Server()->Tick();
 
 	for (int i = 0; i < NUM_TELEPORTER_IDS; i++)
 		m_aID[i] = Server()->SnapNewID();
@@ -135,14 +133,13 @@ void CTeleporter::Snap(int SnappingClient)
 	else
 	{
 		float AngleStep = 2.0f * pi / NUM_CIRCLE;
-		m_Snap.m_Time += (Server()->Tick() - m_Snap.m_LastTime) / Server()->TickSpeed();
-		m_Snap.m_LastTime = Server()->Tick();
+		float Time = (float)(Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
 
 		for (int i = 0; i < NUM_CIRCLE; i++)
 		{
 			vec2 Pos = m_Pos;
-			Pos.x += TELE_RADIUS * cosf(m_Snap.m_Time * 2.5f + AngleStep * i);
-			Pos.y += TELE_RADIUS * sinf(m_Snap.m_Time * 2.5f + AngleStep * i);
+			Pos.x += TELE_RADIUS * cosf(Time * 2.5f + AngleStep * i);
+			Pos.y += TELE_RADIUS * sinf(Time * 2.5f + AngleStep * i);
 
 			CNetObj_Projectile *pObj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, m_aID[i], sizeof(CNetObj_Projectile)));
 			if(!pObj)
