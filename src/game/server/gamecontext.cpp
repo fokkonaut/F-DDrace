@@ -1430,6 +1430,13 @@ void CGameContext::OnTick()
 		SendPlayerCountUpdate();
 	}
 
+	bool WasFlood = m_FloodDetector.IsFlooded();
+	m_FloodDetector.Tick();
+	if (WasFlood != m_FloodDetector.IsFlooded())
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Flood ENDED");
+	}
+
 	if(m_TeeHistorianActive)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1926,7 +1933,17 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	UpdateHidePlayers();
 
-	if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
+	if (Config()->m_SvFloodDetector && Server()->Tick() > Server()->TickSpeed() * 15)
+	{
+		bool WasFlood = m_FloodDetector.IsFlooded();
+		m_FloodDetector.RecordEvent();
+		if (WasFlood != m_FloodDetector.IsFlooded())
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Flood STARTED");
+		}
+	}
+
+	if ((!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS))
 	{
 		char aBuf[128];
 		if (m_apPlayers[ClientID]->GetTeam() == TEAM_RED)
@@ -1937,11 +1954,12 @@ void CGameContext::OnClientEnter(int ClientID)
 		if (m_apPlayers[ClientID]->m_IsDummy)
 			Flags |= CHAT_NO_WEBHOOK;
 
-		if (Config()->m_SvJoinMsgDelay && !m_apPlayers[ClientID]->m_IsDummy)
+		bool AddPendingDelayedJoinMsg = m_FloodDetector.GetScore() * 1000.f < Config()->m_SvFloodScoreDiscardJoin;
+		if (Config()->m_SvJoinMsgDelay && !m_apPlayers[ClientID]->m_IsDummy && AddPendingDelayedJoinMsg)
 		{
 			str_copy(m_apPlayers[ClientID]->m_aDelayedJoinMsg, aBuf, sizeof(m_apPlayers[ClientID]->m_aDelayedJoinMsg));
 		}
-		else
+		else if (!m_FloodDetector.IsFlooded())
 		{
 			SendChatFormat(-1, CHAT_ALL, -1, Flags, aBuf, Server()->ClientName(ClientID));
 		}
@@ -2114,9 +2132,9 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 
 		if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
 		{
-			bool DnsblWhiteOrNotSilent = !Server()->DnsblBlack(ClientID) || (Config()->m_SvDnsblBan && !Config()->m_SvDnsblBanSilent);
+			bool ShowLeaveMsg = !(Server()->DnsblBlack(ClientID) && ((Config()->m_SvDnsblBan && Config()->m_SvDnsblBanSilent) || m_FloodDetector.IsFlooded()));
 			bool HasReason = pReason && *pReason;
-			if ((HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0') && DnsblWhiteOrNotSilent)
+			if ((HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0') && ShowLeaveMsg)
 			{
 				int Flags = CHATFLAG_ALL;
 				if (m_apPlayers[ClientID]->m_IsDummy)
@@ -4186,6 +4204,16 @@ void CGameContext::ConchainUpdateBankMode(IConsole::IResult* pResult, void* pUse
 	}
 }
 
+void CGameContext::ConchainUpdateFloodThreshold(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if (pResult->NumArguments())
+	{
+		CGameContext *pSelf = (CGameContext*)pUserData;
+		pSelf->m_FloodDetector.SetThresholds(pSelf->Config()->m_SvFloodThresholdShort, pSelf->Config()->m_SvFloodThresholdMedium, pSelf->Config()->m_SvFloodThresholdLong);
+	}
+}
+
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -4280,6 +4308,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_hide_dummies", ConchainUpdateHidePlayers, this);
 	Console()->Chain("sv_local_chat", ConchainUpdateLocalChat, this);
 	Console()->Chain("sv_money_bank_mode", ConchainUpdateBankMode, this);
+
+	Console()->Chain("sv_flood_threshold_short", ConchainUpdateFloodThreshold, this);
+	Console()->Chain("sv_flood_threshold_med", ConchainUpdateFloodThreshold, this);
+	Console()->Chain("sv_flood_threshold_long", ConchainUpdateFloodThreshold, this);
 
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help, accesslevel) m_pConsole->Register(name, params, flags, callback, userdata, help, accesslevel);
 	#include <game/ddracecommands.h>
@@ -4778,6 +4810,8 @@ void CGameContext::FDDraceInit()
 
 	m_LastPlayerCountUpdate = 0;
 	SendPlayerCountUpdate();
+
+	m_FloodDetector.Init();
 }
 
 void CGameContext::OnPreShutdown()

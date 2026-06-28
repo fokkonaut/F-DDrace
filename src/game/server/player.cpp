@@ -497,7 +497,7 @@ void CPlayer::Tick()
 		}
 	}
 
-	if (m_aDelayedJoinMsg[0] != '\0' && m_JoinTick + Server()->TickSpeed() * GameServer()->Config()->m_SvJoinMsgDelay < Server()->Tick())
+	if (m_aDelayedJoinMsg[0] != '\0' && m_JoinTick + Server()->TickSpeed() * GameServer()->Config()->m_SvJoinMsgDelay < Server()->Tick() && !GameServer()->m_FloodDetector.IsFlooded())
 	{
 		GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, m_aDelayedJoinMsg, Server()->ClientName(m_ClientID));
 		m_aDelayedJoinMsg[0] = '\0';

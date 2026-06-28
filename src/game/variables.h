@@ -285,6 +285,13 @@ MACRO_CONFIG_INT(SvDnsblChat, sv_dnsbl_chat, 0, 0, 1, CFGFLAG_SERVER, "Don't all
 MACRO_CONFIG_INT(SvDnsblJail, sv_dnsbl_jail, 0, 0, 1, CFGFLAG_SERVER, "Automatically jail blacklisted addresses", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvDnsblCache, sv_dnsbl_cache, 0, 0, 1, CFGFLAG_SERVER, "Whether black and whitelisted address results are cached for 36 hours", AUTHED_ADMIN)
 
+// flood
+MACRO_CONFIG_INT(SvFloodDetector, sv_flood_detector, 0, 0, 1, CFGFLAG_SERVER, "Whether floods are detected and join messages are hidden", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFloodThresholdShort, sv_flood_threshold_short, 0, 200, 10000, CFGFLAG_SERVER, "Flood detection threshold short", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFloodThresholdMedium, sv_flood_threshold_med, 0, 50, 5000, CFGFLAG_SERVER, "Flood detection threshold medium", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFloodThresholdLong, sv_flood_threshold_long, 0, 5, 1000, CFGFLAG_SERVER, "Flood detection threshold long", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFloodScoreDiscardJoin, sv_flood_score_discard_join, 0, 1000, 10000, CFGFLAG_SERVER, "Score at which delayed join messages are discarded", AUTHED_ADMIN)
+
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWhoIs, sv_whois, 0, 0, 1, CFGFLAG_SERVER, "Whether WhoIs is enabled", AUTHED_ADMIN)

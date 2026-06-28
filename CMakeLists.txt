@@ -1640,6 +1640,7 @@ set_src(GAME_SERVER GLOB_RECURSE src/game/server
   misc/character/draweditor.h
   misc/character/snake.cpp
   misc/character/snake.h
+  misc/flood_detector.h
   misc/mask128.h
   misc/playermapping.cpp
   misc/playermapping.h

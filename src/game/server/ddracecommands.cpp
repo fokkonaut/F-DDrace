@@ -2378,6 +2378,16 @@ void CGameContext::ConBansUpdateServers(IConsole::IResult* pResult, void* pUserD
 	}
 }
 
+void CGameContext::ConFloodStatus(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Flood detector: %s", pSelf->Config()->m_SvFloodDetector ? "ON" : "OFF");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Current score: %.3f (%s)", pSelf->m_FloodDetector.GetScore(), pSelf->m_FloodDetector.IsFlooded() ? "FLOOD" : "OK");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", aBuf);
+}
+
 void CGameContext::ConBotLookup(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

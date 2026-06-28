@@ -31,6 +31,7 @@
 #include "misc/accounts.h"
 #include "misc/playermapping.h"
 #include "misc/savedtees.h"
+#include "misc/flood_detector.h"
 
 #include "teehistorian.h"
 
@@ -156,6 +157,8 @@ class CGameContext : public IGameServer
 	static void ConchainUpdateHidePlayers(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 	static void ConchainUpdateLocalChat(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 	static void ConchainUpdateBankMode(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
+
+	static void ConchainUpdateFloodThreshold(IConsole::IResult* pResult, void* pUserData, IConsole::FCommandCallback pfnCallback, void* pCallbackUserData);
 
 	static void NewCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
 	static void RemoveCommandHook(const CCommandManager::CCommand *pCommand, void *pContext);
@@ -418,6 +421,8 @@ public:
 	CPlots m_Plots;
 	CAccounts m_Accounts;
 	CSavedTees m_SavedTees;
+
+	CFloodDetector m_FloodDetector;
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
 	void SetExpireDateDays(time_t *pDate, float Days);
@@ -866,6 +871,7 @@ private:
 	static void ConWhitelistUpdateServers(IConsole::IResult* pResult, void* pUserData);
 	static void ConBansUpdateServers(IConsole::IResult* pResult, void* pUserData);
 
+	static void ConFloodStatus(IConsole::IResult* pResult, void* pUserData);
 	static void ConBotLookup(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccSysBans(IConsole::IResult* pResult, void* pUserData);

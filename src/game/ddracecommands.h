@@ -139,6 +139,9 @@ CONSOLE_COMMAND("whitelist_save", "s[file]", CFGFLAG_SERVER, ConWhitelistSave, t
 CONSOLE_COMMAND("whitelist_update_servers", "", CFGFLAG_SERVER, ConWhitelistUpdateServers, this, "Notifies servers in sv_redirect_server_tile_ports and reloads whitelist (save before!)", AUTHED_ADMIN)
 CONSOLE_COMMAND("bans_update_servers", "", CFGFLAG_SERVER, ConBansUpdateServers, this, "Notifies servers in sv_redirect_server_tile_ports and reloads bans (save before!)", AUTHED_ADMIN)
 
+// flood
+CONSOLE_COMMAND("flood_status", "", CFGFLAG_SERVER, ConFloodStatus, this, "Flood status", AUTHED_ADMIN)
+
 // bot lookup
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)
 
