@@ -2845,6 +2845,11 @@ bool CPlayer::ShowDDraceHud()
 	return !pPlayer->IsMinigame() || pPlayer->m_Minigame == MINIGAME_BLOCK || pPlayer->m_Minigame == MINIGAME_1VS1 || pPlayer->m_Minigame == MINIGAME_DURAK;
 }
 
+bool CPlayer::PassedFloodChatDelay()
+{
+	return m_JoinTick + Server()->TickSpeed() * GameServer()->Config()->m_SvFloodChatDelay < Server()->Tick();
+}
+
 const char *CPlayer::Localize(const char *pText, const char *pContext)
 {
 	if (m_IsDummy) return pText;

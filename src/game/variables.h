@@ -291,6 +291,7 @@ MACRO_CONFIG_INT(SvFloodThresholdShort, sv_flood_threshold_short, 0, 200, 10000,
 MACRO_CONFIG_INT(SvFloodThresholdMedium, sv_flood_threshold_med, 0, 50, 5000, CFGFLAG_SERVER, "Flood detection threshold medium", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFloodThresholdLong, sv_flood_threshold_long, 0, 5, 1000, CFGFLAG_SERVER, "Flood detection threshold long", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFloodScoreDiscardJoin, sv_flood_score_discard_join, 0, 1000, 10000, CFGFLAG_SERVER, "Score at which delayed join messages are discarded", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvFloodChatDelay, sv_flood_chat_delay, 0, 0, 99999, CFGFLAG_SERVER, "Delay for sending chat messages during flood", AUTHED_ADMIN)
 
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)

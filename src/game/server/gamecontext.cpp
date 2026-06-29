@@ -658,6 +658,13 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 	}
 
+	if (m_FloodDetector.IsFlooded() && MuteChecked >= 0 && m_apPlayers[MuteChecked] && !m_apPlayers[MuteChecked]->PassedFloodChatDelay())
+	{
+		SendChatTarget(MuteChecked, m_apPlayers[MuteChecked]->Localize("You can't currently send chat messages because the server is being flooded"));
+		m_FloodDetector.RecordEvent();
+		return false;
+	}
+
 	const char *pModeStr;
 	if (Mode == CHAT_WHISPER)
 		pModeStr = Config()->m_SvWhisperLog ? "whisper" : 0;
@@ -2132,9 +2139,11 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 
 		if (!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS)
 		{
-			bool ShowLeaveMsg = !(Server()->DnsblBlack(ClientID) && ((Config()->m_SvDnsblBan && Config()->m_SvDnsblBanSilent) || m_FloodDetector.IsFlooded()));
 			bool HasReason = pReason && *pReason;
-			if ((HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0') && ShowLeaveMsg)
+			bool DnsblBl = Server()->DnsblBlack(ClientID) && ((Config()->m_SvDnsblBan && Config()->m_SvDnsblBanSilent) || m_FloodDetector.IsFlooded());
+			bool PassedFloodChatDelay = m_apPlayers[ClientID]->PassedFloodChatDelay() || !m_FloodDetector.IsFlooded();
+			bool Show = HasReason || m_apPlayers[ClientID]->m_aDelayedJoinMsg[0] == '\0';
+			if (Show && !DnsblBl && PassedFloodChatDelay)
 			{
 				int Flags = CHATFLAG_ALL;
 				if (m_apPlayers[ClientID]->m_IsDummy)

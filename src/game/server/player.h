@@ -534,6 +534,8 @@ public:
 
 	void SetHighBandwidth(bool Value, bool Silent = false);
 
+	bool PassedFloodChatDelay();
+
 private:
 	int64 m_WalletMoney;
 	bool m_AntiPing;
