@@ -1940,14 +1940,9 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	UpdateHidePlayers();
 
-	if (Config()->m_SvFloodDetector && Server()->Tick() > Server()->TickSpeed() * 15)
+	if (Server()->Tick() > Server()->TickSpeed() * 15)
 	{
-		bool WasFlood = m_FloodDetector.IsFlooded();
-		m_FloodDetector.RecordEvent();
-		if (WasFlood != m_FloodDetector.IsFlooded())
-		{
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Flood STARTED");
-		}
+		RecordFloodEvent();
 	}
 
 	if ((!Config()->m_SvSilentSpectatorMode || m_apPlayers[ClientID]->GetTeam() != TEAM_SPECTATORS))
@@ -2471,7 +2466,10 @@ void *CGameContext::PreProcessMsg(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					str_copy(aOldName, Server()->ClientName(ClientID), sizeof(aOldName));
 					Server()->SetClientName(ClientID, pName);
 
-					SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("'%s' changed name to '%s'"), aOldName, Server()->ClientName(ClientID));
+					if (RecordFloodEvent())
+					{
+						SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("'%s' changed name to '%s'"), aOldName, Server()->ClientName(ClientID));
+					}
 					pPlayer->SetName(Server()->ClientName(ClientID));
 
 					// reload scores
@@ -4821,6 +4819,7 @@ void CGameContext::FDDraceInit()
 	SendPlayerCountUpdate();
 
 	m_FloodDetector.Init();
+	m_FloodDetector.SetThresholds(Config()->m_SvFloodThresholdShort, Config()->m_SvFloodThresholdMedium, Config()->m_SvFloodThresholdLong);
 }
 
 void CGameContext::OnPreShutdown()
@@ -5793,6 +5792,22 @@ bool CGameContext::IsSpawnArea(vec2 Pos)
 		&& Pos.x <= Config()->m_SvSpawnAreaHighX * 32
 		&& Pos.y >= Config()->m_SvSpawnAreaLowY * 32
 		&& Pos.y <= Config()->m_SvSpawnAreaHighY * 32);
+}
+
+bool CGameContext::RecordFloodEvent()
+{
+	bool IsFlood = false;
+	if (Config()->m_SvFloodDetector)
+	{
+		bool WasFlood = m_FloodDetector.IsFlooded();
+		m_FloodDetector.RecordEvent();
+		IsFlood = m_FloodDetector.IsFlooded();
+		if (WasFlood != IsFlood)
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Flood STARTED");
+		}
+	}
+	return !IsFlood;
 }
 
 const char *CGameContext::AppendMotdFooter(const char *pMsg, const char *pFooter)

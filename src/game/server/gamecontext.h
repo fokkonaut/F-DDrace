@@ -423,6 +423,7 @@ public:
 	CSavedTees m_SavedTees;
 
 	CFloodDetector m_FloodDetector;
+	bool RecordFloodEvent();
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
 	void SetExpireDateDays(time_t *pDate, float Days);

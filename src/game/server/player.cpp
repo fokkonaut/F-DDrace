@@ -1499,7 +1499,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	GameServer()->SendTeamChange(m_ClientID, Team, true, m_TeamChangeTick, -1);
 	GameServer()->UpdateHidePlayers(m_ClientID);
 
-	if (DoChatMsg)
+	if (DoChatMsg && GameServer()->RecordFloodEvent())
 	{
 		if (Team == TEAM_RED)
 			GameServer()->SendChatFormat(-1, CHAT_ALL, -1, CGameContext::CHATFLAG_ALL, Localizable("'%s' joined the game"), Server()->ClientName(m_ClientID));
