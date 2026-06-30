@@ -162,9 +162,15 @@ bool CDrawEditor::CanPlace(bool Remove, CEntity *pEntity, bool TransformPreview)
 		}
 	}
 
+	int Authed = Server()->GetAuthedState(GetCID());
+	if (Type == CGameWorld::ENTTYPE_DRAWTILE && (Authed < GameServer()->Config()->m_SvEditorTilePlaceLevel || Authed > NUM_AUTHEDS))
+		return false;
+
 	bool InRange = (distance(Pos, m_pCharacter->GetPos()) < GameServer()->Config()->m_SvEditorMaxDistance) || Server()->GetAuthedState(GetCID()) >= AUTHED_ADMIN;
 	int OwnPlotID = GetPlotID();
 	bool FreeDraw = InRange && (OwnPlotID < PLOT_START || CurrentPlotID() != OwnPlotID);
+	if (FreeDraw && (Authed < GameServer()->Config()->m_SvFreeDrawLevel || Authed > NUM_AUTHEDS))
+		return false;
 	return (ValidTile && ((CursorPlotID >= PLOT_START && CursorPlotID == OwnPlotID) || FreeDraw));
 }
 
@@ -294,6 +300,9 @@ bool CDrawEditor::IsCategoryAllowed(int Category)
 {
 	if (CurrentPlotID() < PLOT_START || !GameServer()->Config()->m_SvPlotEditorCategories[0])
 		return true;
+	int Authed = Server()->GetAuthedState(GetCID());
+	if (Category == CAT_TILEPLACE && (Authed < GameServer()->Config()->m_SvEditorTilePlaceLevel || Authed > NUM_AUTHEDS))
+		return false;
 	return str_in_list(GameServer()->Config()->m_SvPlotEditorCategories, ",", GetCategoryListName(Category));
 }
 
