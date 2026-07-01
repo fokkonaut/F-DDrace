@@ -658,11 +658,25 @@ bool CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *p
 		str_format(aBuf, sizeof(aBuf), "*** %s", aText);
 	}
 
-	if (m_FloodDetector.IsFlooded() && MuteChecked >= 0 && m_apPlayers[MuteChecked] && !m_apPlayers[MuteChecked]->PassedFloodChatDelay())
+	if (Config()->m_SvFloodDetector && MuteChecked >= 0 && m_apPlayers[MuteChecked])
 	{
-		SendChatTarget(MuteChecked, m_apPlayers[MuteChecked]->Localize("You can't currently send chat messages because the server is being flooded"));
-		m_FloodDetector.RecordEvent();
-		return false;
+		if (m_FloodDetector.IsFlooded() && !m_apPlayers[MuteChecked]->PassedFloodChatDelay())
+		{
+			m_FloodDetector.RecordEvent();
+		}
+
+		bool WasFlood = m_ChatFloodDetector.IsFlooded();
+		m_ChatFloodDetector.RecordEvent();
+		bool IsFlood = m_ChatFloodDetector.IsFlooded();
+		if (WasFlood != IsFlood)
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Chat Flood STARTED");
+		}
+		if (IsFlood && !m_Accounts.IsTrustWorthy(m_apPlayers[MuteChecked]->GetAccID()))
+		{
+			SendChatTarget(MuteChecked, m_apPlayers[MuteChecked]->Localize("You can't currently send chat messages because the server is being flooded"));
+			return false;
+		}
 	}
 
 	const char *pModeStr;
@@ -1443,6 +1457,14 @@ void CGameContext::OnTick()
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Flood ENDED");
 	}
+
+	WasFlood = m_ChatFloodDetector.IsFlooded();
+	m_ChatFloodDetector.Tick();
+	if (WasFlood != m_ChatFloodDetector.IsFlooded())
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", "Chat Flood ENDED");
+	}
+
 
 	if(m_TeeHistorianActive)
 	{
@@ -4820,6 +4842,8 @@ void CGameContext::FDDraceInit()
 
 	m_FloodDetector.Init();
 	m_FloodDetector.SetThresholds(Config()->m_SvFloodThresholdShort, Config()->m_SvFloodThresholdMedium, Config()->m_SvFloodThresholdLong);
+	m_ChatFloodDetector.Init();
+	m_ChatFloodDetector.SetThresholds(Config()->m_SvChatFloodThreshShort, Config()->m_SvChatFloodThreshMedium, Config()->m_SvChatFloodThreshLong);
 }
 
 void CGameContext::OnPreShutdown()
@@ -6790,7 +6814,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force, bool DoCh
 	// leave minigame
 	if (Minigame == MINIGAME_NONE)
 	{
-		if (DoChatMsg)
+		if (DoChatMsg && RecordFloodEvent())
 		{
 			SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("'%s' left the minigame '%s'"), Server()->ClientName(ClientID), GetMinigameName(pPlayer->m_Minigame));
 		}
@@ -6812,7 +6836,7 @@ void CGameContext::SetMinigame(int ClientID, int Minigame, bool Force, bool DoCh
 	// join minigame
 	else if (!pPlayer->IsMinigame())
 	{
-		if (DoChatMsg)
+		if (DoChatMsg && RecordFloodEvent())
 		{
 			SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, Localizable("'%s' joined the minigame '%s', use '/%s' to join aswell"),
 				Server()->ClientName(ClientID), GetMinigameName(Minigame), GetMinigameCommand(Minigame));

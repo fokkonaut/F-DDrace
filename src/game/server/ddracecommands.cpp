@@ -476,8 +476,11 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 	}
 	else
 	{
-		str_copy(aFormat, Localizable("'%s' has been muted for %d seconds"), sizeof(aFormat));
-		SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, aFormat, pDisplayName, Secs);
+		if (RecordFloodEvent())
+		{
+			str_copy(aFormat, Localizable("'%s' has been muted for %d seconds"), sizeof(aFormat));
+			SendChatFormat(-1, CHAT_ALL, -1, CHATFLAG_ALL, aFormat, pDisplayName, Secs);
+		}
 
 		str_format(aBuf, sizeof(aBuf), aFormat, pDisplayName, Secs);
 		SendModLogMessage(ExecutorID, aBuf);
@@ -2385,6 +2388,8 @@ void CGameContext::ConFloodStatus(IConsole::IResult* pResult, void* pUserData)
 	str_format(aBuf, sizeof(aBuf), "Flood detector: %s", pSelf->Config()->m_SvFloodDetector ? "ON" : "OFF");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", aBuf);
 	str_format(aBuf, sizeof(aBuf), "Current score: %.3f (%s)", pSelf->m_FloodDetector.GetScore(), pSelf->m_FloodDetector.IsFlooded() ? "FLOOD" : "OK");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", aBuf);
+	str_format(aBuf, sizeof(aBuf), "Current chat score: %.3f (%s)", pSelf->m_ChatFloodDetector.GetScore(), pSelf->m_ChatFloodDetector.IsFlooded() ? "FLOOD" : "OK");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "flood", aBuf);
 }
 

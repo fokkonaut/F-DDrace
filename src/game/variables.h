@@ -295,6 +295,11 @@ MACRO_CONFIG_INT(SvFloodThresholdLong, sv_flood_threshold_long, 0, 5, 1000, CFGF
 MACRO_CONFIG_INT(SvFloodScoreDiscardJoin, sv_flood_score_discard_join, 0, 1000, 10000, CFGFLAG_SERVER, "Score at which delayed join messages are discarded", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvFloodChatDelay, sv_flood_chat_delay, 0, 0, 99999, CFGFLAG_SERVER, "Delay for sending chat messages during flood", AUTHED_ADMIN)
 
+MACRO_CONFIG_INT(SvChatFloodTrustLevel, sv_chat_flood_trust_level, 0, 0, 9999, CFGFLAG_SERVER, "Minimum level for trustworthy accounts to chat during flood", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvChatFloodThreshShort, sv_chat_flood_thresh_short, 0, 200, 100000, CFGFLAG_SERVER, "Flood detection chat threshold short", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvChatFloodThreshMedium, sv_chat_flood_thresh_med, 0, 50, 50000, CFGFLAG_SERVER, "Flood detection chat threshold medium", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvChatFloodThreshLong, sv_chat_flood_thresh_long, 0, 5, 10000, CFGFLAG_SERVER, "Flood detection chat threshold long", AUTHED_ADMIN)
+
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWhoIs, sv_whois, 0, 0, 1, CFGFLAG_SERVER, "Whether WhoIs is enabled", AUTHED_ADMIN)

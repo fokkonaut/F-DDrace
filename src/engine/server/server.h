@@ -637,6 +637,8 @@ public:
 	void PrintWhitelist() override;
 	bool IsWhitelisted(int ClientID) override;
 
+	bool IsFlooded() override;
+
 	class CWebhook : public IJob
 	{
 		void Run() override;

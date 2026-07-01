@@ -5297,6 +5297,11 @@ bool CServer::IsWhitelisted(int ClientID)
 	return false;
 }
 
+bool CServer::IsFlooded()
+{
+	return GameServer()->IsFlooded();
+}
+
 int *CServer::GetIdMap(int ClientID)
 {
 	return m_aClients[ClientID].m_aIdMap;

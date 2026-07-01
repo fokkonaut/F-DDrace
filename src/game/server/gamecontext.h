@@ -424,6 +424,9 @@ public:
 
 	CFloodDetector m_FloodDetector;
 	bool RecordFloodEvent();
+	CFloodDetector m_ChatFloodDetector;
+
+	bool IsFlooded() const override { return m_FloodDetector.IsFlooded(); }
 
 	const char *GetDate(time_t Time, bool ShowTime = true);
 	void SetExpireDateDays(time_t *pDate, float Days);

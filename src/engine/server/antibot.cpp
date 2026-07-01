@@ -87,7 +87,7 @@ void CAntibot::Report(int ClientID, const char *pMessage, /*int Count,*/ void *p
 	Log(aBuf, pUser);
 	pAntibot->Server()->SendWebhookMessage(pAntibot->Config()->m_SvWebhookAntibotURL, aBuf, pAntibot->Config()->m_SvWebhookAntibotName);
 
-	if (IsPending || pAntibot->Server()->IsWhitelisted(ClientID))
+	if ((IsPending && !pAntibot->Server()->IsFlooded()) || pAntibot->Server()->IsWhitelisted(ClientID))
 		return;
 
 	int Action = pAntibot->Config()->m_SvAntibotAutoAction;

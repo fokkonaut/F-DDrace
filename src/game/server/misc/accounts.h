@@ -309,6 +309,8 @@ public:
 	int m_NumAccountSystemBans;
 	int ProcessAccountSystemBan(int ClientID, int Type);
 	bool IsAccountSystemBanned(int ClientID, bool ChatMsg = false);
+
+	bool IsTrustWorthy(int AccID);
 };
 
 #endif //GAME_SERVER_MISC_ACCOUNTS_H

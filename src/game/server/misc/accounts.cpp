@@ -206,6 +206,11 @@ bool CAccounts::IsAccountSystemBanned(int ClientID, bool ChatMsg)
 	return false;
 }
 
+bool CAccounts::IsTrustWorthy(int AccID)
+{
+	return m_Accounts[AccID].m_Level >= Config()->m_SvChatFloodTrustLevel;
+}
+
 float CAccounts::MonthsPassedSinceRegister(int AccID)
 {
 	if (AccID < ACC_START)

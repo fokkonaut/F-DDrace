@@ -98,6 +98,8 @@ public:
 	virtual void PrintWhitelist() = 0;
 	virtual bool IsWhitelisted(int ClientID) = 0;
 
+	virtual bool IsFlooded() = 0;
+
 	virtual bool IsUniqueAddress(int ClientID) = 0;
 	virtual int GetDummy(int ClientID) = 0;
 	virtual bool IsDummy(int ClientID1, int ClientID2) = 0;
@@ -337,6 +339,8 @@ public:
 	virtual bool IsClientReady(int ClientID) const = 0;
 	virtual bool IsClientPlayer(int ClientID) const = 0;
 	virtual bool IsClientSpectator(int ClientID) const = 0;
+
+	virtual bool IsFlooded() const = 0;
 
 	virtual void SendChatMessage(int ChatterClientID, int Mode, int To, const char *pText) = 0;
 	virtual void SendModLogMessage(int ClientID, const char *pMsg, bool IsAuth = false) = 0;
