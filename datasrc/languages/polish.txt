@@ -2143,13 +2143,7 @@ You are now in a safe area
 You are no longer in a safe area
 == 
 
-Please enter the tile index into the chat (0-255)
-== 
-
-Entering index aborted
-== 
-
-The entered value is not a valid number
+You can't currently send chat messages because the server is being flooded
 == 
 
 '%s' has been arrested for using a suspicious client (%d seconds arrest)
@@ -2168,6 +2162,12 @@ You are not allowed to vote because we're currently checking for VPNs. Try again
 == 
 
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
+== 
+
+You are now using the ban picker
+== 
+
+You are no longer using the ban picker
 == 
 
 AntiPing enabled (only for 'cl_antiping 1', may cause unwanted side-effects)
@@ -2191,17 +2191,10 @@ Saving player session on disconnect enabled
 Saving player session on disconnect disabled
 == 
 
-AntiPing weapons (only for 'cl_antiping 1')
+No weapon fix enabled (only for clients without patch)
 == 
 
-High Bandwidth mode
-== 
-
-Save player session
-== 
-
-{vote-header}
-Tᴇᴄʜɴɪᴄᴀʟ
+No weapon fix disabled
 == 
 
 [WARNING] Place this tile from switch layer
@@ -2222,7 +2215,7 @@ The blue flag defends against infection.
 You can drop it by pressing F3.
 == 
 
-Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
+Using this item you can redirect projectiles by hitting them with your hammer.
 == 
 
 Invalid stake, please enter a value between 0 and 10.000.000
@@ -2235,4 +2228,29 @@ Fight cancelled, someone couldn't pay the stake.
 == 
 
 You won this 1vs1 round! Your earnings: +%lld money.
+== 
+
+AntiPing weapons (only for 'cl_antiping 1')
+== 
+
+High Bandwidth mode
+== 
+
+Save player session
+== 
+
+No weapon fix (only for clients without patch)
+== 
+
+{vote-header}
+Tᴇᴄʜɴɪᴄᴀʟ
+== 
+
+Please enter the tile index into the chat (0-255)
+== 
+
+Entering index aborted
+== 
+
+The entered value is not a valid number
 == 

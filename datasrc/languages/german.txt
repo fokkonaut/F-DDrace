@@ -2189,3 +2189,21 @@ You are not allowed to vote because you appear to be using a VPN. Try connecting
 
 Using this item you can redirect projectiles by hitting them with your hammer.
 == Mit diesem Item kannst du Projektile umlenken, indem du sie mit dem Hammer triffst.
+
+You can't currently send chat messages because the server is being flooded
+== 
+
+You are now using the ban picker
+== 
+
+You are no longer using the ban picker
+== 
+
+No weapon fix enabled (only for clients without patch)
+== 
+
+No weapon fix disabled
+== 
+
+No weapon fix (only for clients without patch)
+== 

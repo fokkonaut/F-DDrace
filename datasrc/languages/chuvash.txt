@@ -684,18 +684,6 @@ To leave a minigame, just type '/leave'
 Here is a list of all minigames:
 == 
 
-Money
-== 
-
-Spree
-== 
-
-Durák Wins
-== 
-
-Durák Profit
-== 
-
 You need to be police level 2 to use this command
 == 
 
@@ -813,40 +801,7 @@ You lost your plot
 You are now owner of plot %d
 == 
 
-Objects
-== 
-
-Please enter the name for this preset into the chat
-== 
-
-Please enter the name of the wanted preset into the chat
-== 
-
-Please enter the tile index into the chat (0-255)
-== 
-
-Entering index aborted
-== 
-
-The entered value is not a valid number
-== 
-
-Couldn't save preset '%s', a preset with that name already exists
-== 
-
-Successfully saved preset '%s'
-== 
-
-Couldn't load preset '%s'
-== 
-
-Successfully loaded preset '%s'
-== 
-
-Preset saving aborted
-== 
-
-Preset loading aborted
+You can't currently send chat messages because the server is being flooded
 == 
 
 '%s' has been arrested for using a suspicious client (%d seconds arrest)
@@ -868,9 +823,6 @@ Vote failed
 == 
 
 '%s' called vote to change server option '%s' (%s)
-== 
-
-Your plot is no longer subject to a search warrant and can no longer be destroyed
 == 
 
 '%s' entered and joined the game
@@ -1044,30 +996,6 @@ You are not permitted to vote for the next %d seconds.
 There's a %d second delay between map-votes, please wait %d seconds.
 == 
 
-Your plot expired
-== 
-
-The police have gained access to your plot in hopes of finding you
-== 
-
-Plot %d Door Health [%d/%d]
-== 
-
-You are already logged in
-== 
-
-That account doesn't exist, please register first
-== 
-
-This account is already logged in
-== 
-
-This account is already logged in on another server
-== 
-
-This account is disabled
-== 
-
 You were released from jail
 == 
 
@@ -1078,21 +1006,6 @@ Police is searching you because of spawnblocking
 == 
 
 [WARNING] Spawnblocking is illegal
-== 
-
-Registration spam
-== 
-
-Too many login fails
-== 
-
-Too many pin fails
-== 
-
-You have been banned from the account system for %d seconds (%s)
-== 
-
-You are banned from the account system for the next %d seconds.
 == 
 
 This minigame is disabled
@@ -1116,19 +1029,7 @@ This map has no Durák lobby, you have to find your way to the table yourself
 Say '/leave' to join the normal area again
 == 
 
-Type '/1vs1 <playername>' to start a fight with someone
-== 
-
-For a stake, custom scorelimits or a kill-border use '/1vs1 <playername> <stake> <scorelimit> <killborder>'
-== 
-
 You have to leave first in order to join another minigame
-== 
-
-The winner is '%s'
-== 
-
-You are the winner
 == 
 
 '%s' would have timed out, but can use timeout protection now
@@ -1242,6 +1143,12 @@ Your minigame request was cancelled because you moved
 Please move within %d seconds or you will leave the minigame
 == 
 
+You are now using the ban picker
+== 
+
+You are no longer using the ban picker
+== 
+
 Successfully changed language to %s
 == 
 
@@ -1288,6 +1195,12 @@ Saving player session on disconnect enabled
 == 
 
 Saving player session on disconnect disabled
+== 
+
+No weapon fix enabled (only for clients without patch)
+== 
+
+No weapon fix disabled
 == 
 
 Weapon indicator enabled
@@ -1386,174 +1299,6 @@ Everyone in your locked team was killed because '%s' killed.
 Everyone in your locked team was killed because '%s' died.
 == 
 
-{vote-header}
-Wᴀɴᴛᴇᴅ Pʟᴀʏᴇʀs
-== 
-
-{vote-header}
-Aᴄᴄᴏᴜɴᴛ Iɴғᴏ
-== 
-
-{vote-header}
-Aᴄᴄᴏᴜɴᴛ Sᴛᴀᴛs
-== 
-
-{vote-header}
-Pʟᴏᴛ
-== 
-
-Silent Farm
-== 
-
-Ninjajetpack
-== 
-
-Plot Spawn
-== 
-
-Edit Plot
-== 
-
-Clear Plot
-== 
-
-Rainbow
-== 
-
-Bloody
-== 
-
-Atom
-== 
-
-Trail
-== 
-
-Spread Gun
-== 
-
-Rainbow Hook
-== 
-
-Rotating Ball
-== 
-
-Epic Circle
-== 
-
-Lovely
-== 
-
-Rainbow Name
-== 
-
-Rainbow Speed
-== 
-
-Sparkle
-== 
-
-Hide Drawings
-== 
-
-Weapon Indicator
-== 
-
-Zoom Cursor
-== 
-
-Resume Moved
-== 
-
-Hide Broadcasts
-== 
-
-Local Chat
-== 
-
-AntiPing weapons (only for 'cl_antiping 1')
-== 
-
-High Bandwidth mode
-== 
-
-Save player session
-== 
-
-{vote-header}
-Vᴏᴛᴇs
-== 
-
-{vote-header}
-Aᴄᴄᴏᴜɴᴛ
-== 
-
-{vote-header}
-Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs
-== 
-
-{vote-header}
-Lᴀɴɢᴜᴀɢᴇs
-== 
-
-Please specify the page using the reason field
-== 
-
-Please specify the rainbow speed using the reason field
-== 
-
-No minigame
-== 
-
-You are wanted by the police for %lld seconds
-== 
-
-Grog permille: %.1f‰ / %.1f‰
-== 
-
-You're not logged in.
-== 
-
-Use '/login' to see more information about your account.
-== 
-
-{vote-header}
-Cᴏʟʟᴇᴄᴛᴀʙʟᴇs
-== 
-
-Rented until
-== 
-
-Door Health
-== 
-
-Destroy Seconds
-== 
-
-{vote-header}
-Oᴘᴛɪᴏɴs
-== 
-
-{vote-header}
-Dᴇsɪɢɴs
-== 
-
-{vote-header}
-Mɪɴɪɢᴀᴍᴇs
-== 
-
-{vote-header}
-Sᴄᴏʀᴇ Mᴏᴅᴇ
-== 
-
-{vote-header}
-Tᴇᴄʜɴɪᴄᴀʟ
-== 
-
-{vote-header}
-Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
-== 
-
 You can't close your door because the police destroyed it
 == 
 
@@ -1567,9 +1312,6 @@ You can't close your door because the police destroyed it
 == 
 
 %s's blocking spree was ended by %s (%d kills)
-== 
-
-You lost, you can wait for another round or leave the lobby using '/leave'
 == 
 
 You have to be in a team with other tees to start
@@ -1779,9 +1521,6 @@ The blue flag defends against infection.
 You can drop it by pressing F3.
 == 
 
-Taser shield has been used, -5%%, new current: %d%%
-== 
-
 Collected %lld money
 == 
 
@@ -1801,6 +1540,9 @@ This %s will respawn in %d %s
 == 
 
 This %s got picked up %d %s ago
+== 
+
+Taser shield has been used, -5%%, new current: %d%%
 == 
 
 Welcome to the bank, %s! Press F4 to manage your bank account.
@@ -1911,7 +1653,7 @@ With Portal Rifle you can create two portals where your cursor is, then teleport
 Create portal blockers hammer and this ammo with your cursor. See '/portal' for your current amount. How it works: '/helptoggle'
 == 
 
-Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
+Using this item you can redirect projectiles by hitting them with your hammer.
 == 
 
 Welcome to the shop, %s! Press F4 to start shopping.
@@ -1945,6 +1687,9 @@ You own this item for 5 days.
 == 
 
 Welcome to the shop!\n\nBy shooting to the right you go one site forward, and by shooting left you go one site back.
+== 
+
+Rented until
 == 
 
 for sale
@@ -2076,6 +1821,12 @@ You have accepted the invite by '%s'
 You won this 1vs1 round! Your earnings: +%lld money.
 == 
 
+Type '/1vs1 <playername>' to start a fight with someone
+== 
+
+For a stake, custom scorelimits or a kill-border use '/1vs1 <playername> <stake> <scorelimit> <killborder>'
+== 
+
 '%s' left a 1vs1 round against '%s'! Current scores: %d - %d
 == 
 
@@ -2192,4 +1943,271 @@ Your stake got returned: +%lld money.
 == 
 
 You got +%lld money from others leaving the game.
+== 
+
+You lost, you can wait for another round or leave the lobby using '/leave'
+== 
+
+The winner is '%s'
+== 
+
+You are the winner
+== 
+
+Registration spam
+== 
+
+Too many login fails
+== 
+
+Too many pin fails
+== 
+
+You have been banned from the account system for %d seconds (%s)
+== 
+
+You are banned from the account system for the next %d seconds.
+== 
+
+Money
+== 
+
+Spree
+== 
+
+Durák Wins
+== 
+
+Durák Profit
+== 
+
+You are already logged in
+== 
+
+That account doesn't exist, please register first
+== 
+
+This account is already logged in
+== 
+
+This account is already logged in on another server
+== 
+
+This account is disabled
+== 
+
+Your plot is no longer subject to a search warrant and can no longer be destroyed
+== 
+
+Your plot expired
+== 
+
+The police have gained access to your plot in hopes of finding you
+== 
+
+Plot %d Door Health [%d/%d]
+== 
+
+{vote-header}
+Wᴀɴᴛᴇᴅ Pʟᴀʏᴇʀs
+== 
+
+{vote-header}
+Aᴄᴄᴏᴜɴᴛ Iɴғᴏ
+== 
+
+{vote-header}
+Aᴄᴄᴏᴜɴᴛ Sᴛᴀᴛs
+== 
+
+{vote-header}
+Pʟᴏᴛ
+== 
+
+Silent Farm
+== 
+
+Ninjajetpack
+== 
+
+Plot Spawn
+== 
+
+Edit Plot
+== 
+
+Clear Plot
+== 
+
+Rainbow
+== 
+
+Bloody
+== 
+
+Atom
+== 
+
+Trail
+== 
+
+Spread Gun
+== 
+
+Rainbow Hook
+== 
+
+Rotating Ball
+== 
+
+Epic Circle
+== 
+
+Lovely
+== 
+
+Rainbow Name
+== 
+
+Rainbow Speed
+== 
+
+Sparkle
+== 
+
+Hide Drawings
+== 
+
+Weapon Indicator
+== 
+
+Zoom Cursor
+== 
+
+Resume Moved
+== 
+
+Hide Broadcasts
+== 
+
+Local Chat
+== 
+
+AntiPing weapons (only for 'cl_antiping 1')
+== 
+
+High Bandwidth mode
+== 
+
+Save player session
+== 
+
+No weapon fix (only for clients without patch)
+== 
+
+{vote-header}
+Vᴏᴛᴇs
+== 
+
+{vote-header}
+Aᴄᴄᴏᴜɴᴛ
+== 
+
+{vote-header}
+Mɪsᴄᴇʟʟᴀɴᴇᴏᴜs
+== 
+
+{vote-header}
+Lᴀɴɢᴜᴀɢᴇs
+== 
+
+Please specify the page using the reason field
+== 
+
+Please specify the rainbow speed using the reason field
+== 
+
+No minigame
+== 
+
+You are wanted by the police for %lld seconds
+== 
+
+Grog permille: %.1f‰ / %.1f‰
+== 
+
+You're not logged in.
+== 
+
+Use '/login' to see more information about your account.
+== 
+
+{vote-header}
+Cᴏʟʟᴇᴄᴛᴀʙʟᴇs
+== 
+
+Door Health
+== 
+
+Destroy Seconds
+== 
+
+{vote-header}
+Oᴘᴛɪᴏɴs
+== 
+
+{vote-header}
+Dᴇsɪɢɴs
+== 
+
+{vote-header}
+Mɪɴɪɢᴀᴍᴇs
+== 
+
+{vote-header}
+Sᴄᴏʀᴇ Mᴏᴅᴇ
+== 
+
+{vote-header}
+Tᴇᴄʜɴɪᴄᴀʟ
+== 
+
+{vote-header}
+Aᴠᴀɪʟᴀʙʟᴇ Lᴀɴɢᴜᴀɢᴇs
+== 
+
+Objects
+== 
+
+Please enter the name for this preset into the chat
+== 
+
+Please enter the name of the wanted preset into the chat
+== 
+
+Please enter the tile index into the chat (0-255)
+== 
+
+Entering index aborted
+== 
+
+The entered value is not a valid number
+== 
+
+Couldn't save preset '%s', a preset with that name already exists
+== 
+
+Successfully saved preset '%s'
+== 
+
+Couldn't load preset '%s'
+== 
+
+Successfully loaded preset '%s'
+== 
+
+Preset saving aborted
+== 
+
+Preset loading aborted
 == 
