@@ -5360,7 +5360,7 @@ void CCharacter::DropWeapon(int WeaponID, bool OnDeath, float Dir)
 	if (Special&SPECIAL_DOORHAMMER)
 		DoorHammer(false, -1, OnDeath);
 	if (Special&SPECIAL_PPROJECTILEHAMMER)
-		ProjectileHammer(false, -1, OnDeath && !m_pPlayer->m_HasProjectileHammer); // notify player if he bought and dropped on death
+		ProjectileHammer(false, -1, OnDeath);
 	if (Special&SPECIAL_SCROLLNINJA)
 		ScrollNinja(false, -1, OnDeath);
 }
@@ -5450,7 +5450,12 @@ void CCharacter::DropLoot(int Weapon)
 			for (int i = 0; i < 2; i++)
 			{
 				int Weapon = rand() % NUM_VANILLA_WEAPONS;
-				if ((Weapon == WEAPON_GUN || Weapon == WEAPON_HAMMER) && GetWeaponSpecial(Weapon) == 0)
+				int Special = GetWeaponSpecial(Weapon);
+				// dont drop projectile hammer if its bought from shop
+				if (Weapon == WEAPON_HAMMER && m_pPlayer->m_HasProjectileHammer)
+					Special &= ~SPECIAL_PPROJECTILEHAMMER;
+
+				if ((Weapon == WEAPON_GUN || Weapon == WEAPON_HAMMER) && Special == 0)
 					continue;
 
 				float Dir = ((rand() % 50 - 25 + 1) * 0.1); // in a range of -2.5 to +2.5

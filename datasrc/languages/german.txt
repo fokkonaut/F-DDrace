@@ -2187,5 +2187,5 @@ You are not allowed to vote because we're currently checking for VPNs. Try again
 You are not allowed to vote because you appear to be using a VPN. Try connecting without a VPN or contacting an admin if you think this is a mistake.
 == Du kannst nicht abstimmen, da du anscheinend ein VPN verwendest. Verbinde dich ohne VPN oder kontaktiere einen Admin, falls du denkst, dass dies ein Fehler ist.
 
-Using this item you can redirect projectiles by hitting them with your hammer. There is a chance of losing it on death.
-== Mit diesem Item kannst du Projektile umlenken, indem du sie mit dem Hammer triffst. Es besteht die Möglichkeit, es beim Tod zu verlieren.
+Using this item you can redirect projectiles by hitting them with your hammer.
+== Mit diesem Item kannst du Projektile umlenken, indem du sie mit dem Hammer triffst.
