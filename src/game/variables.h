@@ -300,6 +300,11 @@ MACRO_CONFIG_INT(SvChatFloodThreshShort, sv_chat_flood_thresh_short, 0, 200, 100
 MACRO_CONFIG_INT(SvChatFloodThreshMedium, sv_chat_flood_thresh_med, 0, 50, 50000, CFGFLAG_SERVER, "Flood detection chat threshold medium", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvChatFloodThreshLong, sv_chat_flood_thresh_long, 0, 5, 10000, CFGFLAG_SERVER, "Flood detection chat threshold long", AUTHED_ADMIN)
 
+// ban picker
+MACRO_CONFIG_INT(SvBanPickerBanTime, sv_ban_picker_ban_time, 60, -1, 44640, CFGFLAG_SERVER, "Time for ban picker in minutes (-1 = life)", AUTHED_ADMIN)
+MACRO_CONFIG_STR(SvBanPickerBanReason, sv_ban_picker_ban_reason, 128, "No reason given", CFGFLAG_SERVER, "Ban reason for ban picker", AUTHED_ADMIN)
+MACRO_CONFIG_INT(SvBanPickerSubnetSize, sv_ban_picker_subnet_size, 32, 8, 32, CFGFLAG_SERVER, "Subnet size to ban using ban picker (32 = direct ip)", AUTHED_ADMIN)
+
 // whois
 MACRO_CONFIG_INT(SvWhoIsIPEntries, sv_whois_ip_entries, 120000, 0, 1999999, CFGFLAG_SERVER, "WhoIs IP entries", AUTHED_ADMIN)
 MACRO_CONFIG_INT(SvWhoIs, sv_whois, 0, 0, 1, CFGFLAG_SERVER, "Whether WhoIs is enabled", AUTHED_ADMIN)

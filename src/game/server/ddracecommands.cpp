@@ -2399,6 +2399,16 @@ void CGameContext::ConBotLookup(IConsole::IResult* pResult, void* pUserData)
 	pSelf->Server()->PrintBotLookup();
 }
 
+void CGameContext::ConBanPicker(IConsole::IResult* pResult, void* pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int ClientID = pResult->m_ClientID;
+	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	if (!pPlayer)
+		return;
+	pPlayer->SetBanPicker(!pPlayer->m_BanPicker);
+}
+
 void CGameContext::ConAccSysBans(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

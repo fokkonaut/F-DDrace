@@ -141,6 +141,7 @@ CONSOLE_COMMAND("bans_update_servers", "", CFGFLAG_SERVER, ConBansUpdateServers,
 
 // flood
 CONSOLE_COMMAND("flood_status", "", CFGFLAG_SERVER, ConFloodStatus, this, "Flood status", AUTHED_ADMIN)
+CONSOLE_COMMAND("ban_picker", "", CFGFLAG_SERVER, ConBanPicker, this, "Enable ban picker (+spectate)", AUTHED_ADMIN)
 
 // bot lookup
 CONSOLE_COMMAND("bot_lookup", "", CFGFLAG_SERVER, ConBotLookup, this, "Bot lookup list", AUTHED_ADMIN)

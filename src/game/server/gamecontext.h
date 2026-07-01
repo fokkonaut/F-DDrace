@@ -877,6 +877,7 @@ private:
 
 	static void ConFloodStatus(IConsole::IResult* pResult, void* pUserData);
 	static void ConBotLookup(IConsole::IResult* pResult, void* pUserData);
+	static void ConBanPicker(IConsole::IResult* pResult, void* pUserData);
 
 	static void ConAccSysBans(IConsole::IResult* pResult, void* pUserData);
 	static void ConAccSysUnban(IConsole::IResult* pResult, void* pUserData);

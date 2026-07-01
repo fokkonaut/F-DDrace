@@ -536,6 +536,9 @@ public:
 
 	bool PassedFloodChatDelay();
 
+	bool m_BanPicker;
+	void SetBanPicker(bool Set);
+
 private:
 	int64 m_WalletMoney;
 	bool m_AntiPing;

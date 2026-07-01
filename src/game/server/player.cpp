@@ -266,6 +266,7 @@ void CPlayer::Reset()
 	Server()->SetHighBandwidth(m_ClientID, GameServer()->Config()->m_SvHighBandwidth);
 	m_SavePlayerDisconnect = false;
 	m_NoWeaponFix = false;
+	m_BanPicker = false;
 }
 
 void CPlayer::Tick()
@@ -656,7 +657,7 @@ void CPlayer::Snap(int SnappingClient)
 			Score = 0;
 	}
 
-	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode || GameServer()->Arenas()->IsConfiguring(m_ClientID)))
+	if (m_ClientID == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused || m_TeeControlMode || m_BanPicker || GameServer()->Arenas()->IsConfiguring(m_ClientID)))
 	{
 		int Size = Server()->IsSevendown(SnappingClient) ? 3*4 : sizeof(CNetObj_SpectatorInfo);
 		CNetObj_SpectatorInfo* pSpectatorInfo = static_cast<CNetObj_SpectatorInfo*>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, Size));
@@ -679,7 +680,7 @@ void CPlayer::Snap(int SnappingClient)
 				if (ClampViewPos)
 					SkipSetViewPos();
 
-				if (m_TeeControlMode || ClampViewPos)
+				if (m_TeeControlMode || m_BanPicker || ClampViewPos)
 				{
 					SpecMode = SPEC_PLAYER;
 					SpectatorID = m_ClientID;
@@ -788,10 +789,10 @@ void CPlayer::Snap(int SnappingClient)
 
 		((int*)pPlayerInfo)[0] = (int)((m_ClientID == SnappingClient && (!m_pControlledTee || m_Paused)) || (m_TeeControllerID == SnappingClient && !pSnapping->m_Paused));
 		((int*)pPlayerInfo)[1] = ID;
-		((int*)pPlayerInfo)[2] = (!m_TeeControlMode || m_pControlledTee) ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+		((int*)pPlayerInfo)[2] = ((!m_TeeControlMode || m_pControlledTee) && !m_BanPicker) ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		if (GameServer()->GetClientDDNetVersion(SnappingClient) < VERSION_DDNET_INDEPENDENT_SPECTATORS_TEAM)
 		{
-			((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
+			((int*)pPlayerInfo)[2] = ((m_Paused != PAUSE_PAUSED && (!m_TeeControlMode || m_pControlledTee) && !m_BanPicker && !GameServer()->Arenas()->IsConfiguring(m_ClientID)) || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? GetHidePlayerTeam(SnappingClient) : TEAM_SPECTATORS;
 		}
 		((int*)pPlayerInfo)[3] = Score;
 		((int*)pPlayerInfo)[4] = Latency;
@@ -1202,7 +1203,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput, bool TeeControlled
 
 	AfkVoteTimer(NewInput);
 
-	if(m_pCharacter && !m_Paused && (!m_TeeControlMode || TeeControlled) && !(NewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+	if(m_pCharacter && !m_Paused && (!m_TeeControlMode || TeeControlled) && !m_BanPicker && !(NewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
 		m_pCharacter->OnPredictedInput(NewInput);
 }
 
@@ -1359,7 +1360,7 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput, bool TeeContr
 
 bool CPlayer::ApplyDirectInput(bool TeeControlled)
 {
-	return !m_Paused && (!m_TeeControlMode || TeeControlled) && !GameServer()->Arenas()->IsConfiguring(m_ClientID);
+	return !m_Paused && (!m_TeeControlMode || TeeControlled) && !m_BanPicker && !GameServer()->Arenas()->IsConfiguring(m_ClientID);
 }
 
 CCharacter *CPlayer::GetCharacter()
@@ -1772,7 +1773,7 @@ int CPlayer::Pause(int State, bool Force)
 		GameServer()->SendChatTarget(m_ClientID, Localize("You can't pause while you are selecting a tee to control"));
 		return 0;
 	}
-	if (GameServer()->Arenas()->IsConfiguring(m_ClientID))
+	if (GameServer()->Arenas()->IsConfiguring(m_ClientID) || m_BanPicker)
 		return 0;
 
 	char aBuf[128];
@@ -2848,6 +2849,15 @@ bool CPlayer::ShowDDraceHud()
 bool CPlayer::PassedFloodChatDelay()
 {
 	return m_JoinTick + Server()->TickSpeed() * GameServer()->Config()->m_SvFloodChatDelay < Server()->Tick();
+}
+
+void CPlayer::SetBanPicker(bool Set)
+{
+	Pause(CPlayer::PAUSE_NONE, true);
+	m_BanPicker = Set;
+	GameServer()->SendChatTarget(m_ClientID, m_BanPicker ? Localize("You are now using the ban picker") : Localize("You are no longer using the ban picker"));
+	if (!Server()->IsSevendown(m_ClientID))
+		GameServer()->SendTeamChange(m_ClientID, m_BanPicker ? TEAM_SPECTATORS : GetTeam(), true, Server()->Tick(), m_ClientID);
 }
 
 const char *CPlayer::Localize(const char *pText, const char *pContext)

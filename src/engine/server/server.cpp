@@ -164,7 +164,8 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* 
 	m_pServer = pServer;
 
 	// overwrites base command, todo: improve this
-	Console()->Register("ban", "s[id|ip|range] ?i[minutes] r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with IP/IP range/client id for x minutes for any reason", AUTHED_ADMIN);
+	Console()->Register("ban", "s[id|ip|range] ?i[minutes] ?r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanExt, this, "Ban player with IP/IP range/client id for x minutes for any reason", AUTHED_ADMIN);
+	Console()->Register("ban_subnet", "s[ip] i[size] ?i[minutes] ?r[reason]", CFGFLAG_SERVER|CFGFLAG_STORE, ConBanSubnet, this, "Ban an IP's subnet (e.g. /24) for x minutes", AUTHED_ADMIN);
 }
 
 template<class T>
@@ -312,6 +313,83 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 			str_format(aBuf, sizeof(aBuf), "'%s' has been banned for %d minutes (%s)", aBannedNameOrIp, Minutes, pReason);
 		pThis->Server()->GameServer()->SendModLogMessage(pResult->m_ClientID, aBuf);
 	}
+}
+
+bool CServerBan::GetSubnetRange(const NETADDR *pAddr, int SubnetBits, CNetRange *pRange)
+{
+	if(pAddr->type != NETTYPE_IPV4)
+		return false;
+
+	if(SubnetBits < 8 || SubnetBits > 32)
+		return false;
+
+	// 32 bit mask from prefix length, /24 -> 0xFFFFFF00
+	unsigned int Mask = SubnetBits == 0 ? 0u : (0xFFFFFFFFu << (32 - SubnetBits));
+
+	unsigned int Ip = ((unsigned int)pAddr->ip[0] << 24) |
+					((unsigned int)pAddr->ip[1] << 16) |
+					((unsigned int)pAddr->ip[2] << 8) |
+					(unsigned int)pAddr->ip[3];
+
+	unsigned int NetworkIp = Ip & Mask;  // first ip in subnet
+	unsigned int BroadcastIp = Ip | ~Mask; // last ip in subnet
+
+	pRange->m_LB = *pAddr;
+	pRange->m_UB = *pAddr;
+
+	pRange->m_LB.ip[0] = (NetworkIp >> 24) & 0xFF;
+	pRange->m_LB.ip[1] = (NetworkIp >> 16) & 0xFF;
+	pRange->m_LB.ip[2] = (NetworkIp >> 8) & 0xFF;
+	pRange->m_LB.ip[3] = NetworkIp & 0xFF;
+
+	pRange->m_UB.ip[0] = (BroadcastIp >> 24) & 0xFF;
+	pRange->m_UB.ip[1] = (BroadcastIp >> 16) & 0xFF;
+	pRange->m_UB.ip[2] = (BroadcastIp >> 8) & 0xFF;
+	pRange->m_UB.ip[3] = BroadcastIp & 0xFF;
+
+	return true;
+}
+
+bool CServerBan::GetSubnetRangeStr(const NETADDR *pAddr, int SubnetBits, char *pBuf, int BufSize)
+{
+	CNetRange Range;
+	if(!GetSubnetRange(pAddr, SubnetBits, &Range))
+		return false;
+
+	char aStr1[NETADDR_MAXSTRSIZE];
+	char aStr2[NETADDR_MAXSTRSIZE];
+	net_addr_str(&Range.m_LB, aStr1, sizeof(aStr1), false);
+	net_addr_str(&Range.m_UB, aStr2, sizeof(aStr2), false);
+
+	str_format(pBuf, BufSize, "%s-%s", aStr1, aStr2);
+	return true;
+}
+
+void CServerBan::ConBanSubnet(IConsole::IResult *pResult, void *pUser)
+{
+	CServerBan *pThis = static_cast<CServerBan *>(pUser);
+
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid ip address");
+		return;
+	}
+
+	int SubnetBits = pResult->GetInteger(1);
+	int Minutes = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 30;
+	const char *pReason = pResult->NumArguments() > 3 ? pResult->GetString(3) : "No reason given";
+
+	char aRange[128];
+	if(!pThis->GetSubnetRangeStr(&Addr, SubnetBits, aRange, sizeof(aRange)))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid subnet size");
+		return;
+	}
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "ban %s %d %s", aRange, Minutes, pReason);
+	pThis->Server()->Console()->ExecuteLine(aBuf, pResult->m_ClientID, false);
 }
 
 

@@ -3176,6 +3176,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_SetTeam *pMsg = (CNetMsg_Cl_SetTeam *)pRawMsg;
 
+			if (pPlayer->m_BanPicker)
+			{
+				pPlayer->SetBanPicker(false);
+				return;
+			}
+
 			if (pPlayer->m_HasTeeControl && !pPlayer->IsPaused())
 			{
 				bool SetTeeControl = pMsg->m_Team == TEAM_SPECTATORS;
@@ -3292,8 +3298,30 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					}
 				}
 			}
+			else if (pPlayer->m_BanPicker)
+			{
+				int BanID = pMsg->m_SpectatorID;
+				if (pMsg->m_SpecMode == SPEC_PLAYER && BanID >= 0 && m_apPlayers[BanID])
+				{
+					char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
+					Server()->GetClientAddr(BanID, aAddrStr, sizeof(aAddrStr));
+					char aBuf[256];
+					int SubnetSize = Config()->m_SvBanPickerSubnetSize;
+					if (SubnetSize == 32)
+						str_format(aBuf, sizeof(aBuf), "ban %s %d %s", aAddrStr, Config()->m_SvBanPickerBanTime, Config()->m_SvBanPickerBanReason);
+					else
+						str_format(aBuf, sizeof(aBuf), "ban_subnet %s %d %d %s", aAddrStr, SubnetSize, Config()->m_SvBanPickerBanTime, Config()->m_SvBanPickerBanReason);				
+					Console()->ExecuteLine(aBuf, ClientID, false);
+				}
+				else if (pMsg->m_SpecMode == SPEC_FREEVIEW)
+				{
+					pPlayer->SetBanPicker(false);
+				}
+			}
 			else
+			{
 				pPlayer->SetSpectatorID(pMsg->m_SpecMode, pMsg->m_SpectatorID);
+			}
 		}
 		else if (MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
 		{

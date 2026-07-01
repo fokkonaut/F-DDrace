@@ -79,6 +79,10 @@ public:
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
 
 	static void ConBanExt(class IConsole::IResult *pResult, void *pUser);
+	static void ConBanSubnet(class IConsole::IResult *pResult, void *pUser);
+
+	bool GetSubnetRange(const NETADDR *pAddr, int SubnetBits, CNetRange *pRange);
+	bool GetSubnetRangeStr(const NETADDR *pAddr, int SubnetBits, char *pBuf, int BufSize);
 };
 
 
