@@ -412,6 +412,11 @@ void CDrawEditor::OnPlayerFire()
 	if (m_Category == CAT_TRANSFORM)
 	{
 		int PlotID = CurrentPlotID();
+
+		int Authed = Server()->GetAuthedState(GetCID());
+		if (PlotID < PLOT_START && (Authed < GameServer()->Config()->m_SvFreeDrawTransformLevel || Authed > NUM_AUTHEDS))
+			return;
+
 		if (m_Transform.m_State == TRANSFORM_STATE_CONFIRM)
 		{
 			for (unsigned int i = 0; i < GameServer()->m_Plots.NumPlotObjects(PlotID); i++)
