@@ -6,11 +6,6 @@
 
 class CEcon
 {
-	enum
-	{
-		MAX_AUTH_TRIES=3,
-	};
-
 	class CClient
 	{
 	public:

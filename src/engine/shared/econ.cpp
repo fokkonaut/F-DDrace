@@ -165,9 +165,9 @@ void CEcon::Update()
 			{
 				m_aClients[ClientID].m_AuthTries++;
 				char aMsg[128];
-				str_format(aMsg, sizeof(aMsg), "Wrong password %d/%d.", m_aClients[ClientID].m_AuthTries, MAX_AUTH_TRIES);
+				str_format(aMsg, sizeof(aMsg), "Wrong password %d/%d.", m_aClients[ClientID].m_AuthTries, m_pConfig->m_EcMaxTries);
 				m_NetConsole.Send(ClientID, aMsg);
-				if(m_aClients[ClientID].m_AuthTries >= MAX_AUTH_TRIES)
+				if(m_aClients[ClientID].m_AuthTries >= m_pConfig->m_EcMaxTries)
 				{
 					if(m_pConfig->m_EcBantime)
 						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientID), m_pConfig->m_EcBantime*60, "Too many authentication tries");
