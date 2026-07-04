@@ -1408,7 +1408,7 @@ void CServer::SendRconLineAuthed(const char *pLine, void *pUser, bool Highlighte
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i) && pThis->m_aClients[i].m_Authed <= NUM_AUTHEDS)
+		if(pThis->m_aClients[i].m_State != CClient::STATE_EMPTY && pThis->m_aClients[i].m_Authed >= pThis->m_RconAuthLevel && (pThis->m_RconRestrict == -1 || pThis->m_RconRestrict == i) && pThis->m_aClients[i].m_Authed < NUM_AUTHEDS)
 			pThis->SendRconLine(i, pThis->m_aClients[i].m_ShowIps ? pLine : pLineWithoutIps);
 	}
 
@@ -1992,21 +1992,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			char aAddrStr[NETADDR_MAXSTRSIZE];
 			net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), false);
-			if((Config()->m_SvRconExclusive[0] && (m_aClients[ClientID].m_Authed > AUTHED_MOD || !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr)) || m_aClients[ClientID].m_Authed > NUM_AUTHEDS)
+			if((Config()->m_SvRconExclusive[0] && (m_aClients[ClientID].m_Authed > AUTHED_MOD || !str_in_list(Config()->m_SvRconExclusive, ",", "mods")) && !str_in_list(Config()->m_SvRconExclusive, ",", aAddrStr)) || m_aClients[ClientID].m_Authed >= NUM_AUTHEDS)
 			{
-				if (Config()->m_Debug)
-				{
-					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d addr=<{%s}>: %s", ClientID, aAddrStr, pCmd);
-					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-				}
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Dropped unauthorized rcon cmd by cid=%d addr=<{%s}>: %s", ClientID, aAddrStr, pCmd);
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				return;
 			}
 
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed > AUTHED_NO)
 			{
 				const char *pAuthLevel = 0;
-				int AccessLevel = 0;
+				int AccessLevel = IConsole::ACCESS_LEVEL_USER;
 				switch (m_aClients[ClientID].m_Authed)
 				{
 				case AUTHED_ADMIN:
@@ -2022,12 +2019,14 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					AccessLevel = IConsole::ACCESS_LEVEL_HELPER;
 					break;
 				}
-				if (pAuthLevel)
-				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d level=%s rcon='%s'", ClientID, pAuthLevel, pCmd);
-					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-				}
+
+				if (!pAuthLevel)
+					return;
+
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "ClientID=%d level=%s rcon='%s'", ClientID, pAuthLevel, pCmd);
+				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+
 				m_RconClientID = ClientID;
 				m_RconAuthLevel = m_aClients[ClientID].m_Authed;
 				Console()->SetAccessLevel(AccessLevel);

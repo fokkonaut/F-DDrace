@@ -2755,6 +2755,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pMsg->m_Force)
 			{
 				int Authed = Server()->GetAuthedState(ClientID);
+				if (!Authed)
+					return;
 				char aCmd[1024];
 				str_format(aCmd, sizeof(aCmd), "force_vote \"%s\" \"%s\" \"%s\"", pMsg->m_Type, pMsg->m_Value, pMsg->m_Reason);
 				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
