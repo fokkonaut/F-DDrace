@@ -1910,7 +1910,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientID].m_Latency = maximum(0, m_aClients[ClientID].m_Latency - PingCorrection);
 			}
 
-			if(Config()->m_SvPreInput)
+			if(Config()->m_SvPreInput && IntendedTick <= Tick() + 4 * TickSpeed() + 1)
 			{
 				// send preinputs of ClientId to valid clients
 				bool aPreInputClients[MAX_CLIENTS] = {};
@@ -1942,6 +1942,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					for(int Id = 0; Id < MAX_CLIENTS; Id++)
 					{
 						if(!aPreInputClients[Id])
+							continue;
+						if(m_aClients[Id].m_SnapRate != CClient::SNAPRATE_FULL)
 							continue;
 
 						if (!Translate(PreInput.m_Owner, Id))
