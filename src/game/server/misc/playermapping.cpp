@@ -579,6 +579,7 @@ void CPlayerMapping::PlayerMap::InsertNextEmpty(int ClientID)
 	if (ClientID == -1 || m_pReverseMap[ClientID] != -1)
 		return;
 
+	// Fast path: find an empty slot or a slot occupied by a character-less player.
 	for (int i = 0; i < GetMapSize()-m_NumSeeOthers; i++)
 	{
 		int CID = m_pMap[i];
@@ -588,8 +589,43 @@ void CPlayerMapping::PlayerMap::InsertNextEmpty(int ClientID)
 		if (CID == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(CID) || m_pPlayerMapping->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID)))
 		{
 			Add(i, ClientID);
-			break;
+			return;
 		}
+	}
+
+	// Overflow fallback: all visible non-reserved slots are occupied.
+	// Replace the farthest non-reserved player if the new player is closer.
+	CCharacter *pNewChar = m_pPlayerMapping->GameServer()->GetPlayerChar(ClientID);
+	if(!pNewChar || !GetPlayer())
+		return;
+
+	vec2 ViewPos = GetPlayer()->m_ViewPos;
+	float NewDist = distance_squared(ViewPos, pNewChar->GetPos());
+
+	int ReplaceIndex = -1;
+	float MaxDist = NewDist;
+
+	for(int i = 0; i < GetMapSize() - m_NumSeeOthers; i++)
+	{
+		int MappedClientId = m_pMap[i];
+		if(MappedClientId == -1 || m_aReserved[MappedClientId])
+			continue;
+
+		CCharacter *pMappedChar = m_pPlayerMapping->GameServer()->GetPlayerChar(MappedClientId);
+		if(!pMappedChar)
+			continue;
+
+		float Dist = distance_squared(ViewPos, pMappedChar->GetPos());
+		if(Dist > MaxDist)
+		{
+			MaxDist = Dist;
+			ReplaceIndex = i;
+		}
+	}
+
+	if(ReplaceIndex != -1)
+	{
+		Add(ReplaceIndex, ClientID);
 	}
 }
 
