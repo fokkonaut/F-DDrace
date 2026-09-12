@@ -330,10 +330,10 @@ public:
 	bool IsExpiredItem(int Item);
 	void ExpireItems();
 
-	bool BankOrWalletTransaction(int Amount, const char *pDescription);
+	bool BankOrWalletTransaction(int64 Amount, const char *pDescription);
 	void BankCurrTransaction(float Amount, const char* pDescription);
-	bool BankTransaction(int Amount, const char *pDescription = "");
-	bool WalletTransaction(int Amount, const char *pDescription = "");
+	bool BankTransaction(int64 Amount, const char *pDescription = "");
+	bool WalletTransaction(int64 Amount, const char *pDescription = "");
 	void ApplyMoneyHistoryMsg(int Type, float Amount, const char *pDescription);
 	int64 GetWalletMoney() { return m_WalletMoney; }
 	int64 GetUsableMoney();

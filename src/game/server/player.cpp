@@ -1941,7 +1941,7 @@ void CPlayer::BankCurrTransaction(float Amount, const char *pDescription)
 	ApplyMoneyHistoryMsg(TRANSACTION_BANK, Amount, pDescription);
 }
 
-bool CPlayer::BankTransaction(int Amount, const char *pDescription)
+bool CPlayer::BankTransaction(int64 Amount, const char *pDescription)
 {
 	if (GetAccID() < ACC_START || Amount == 0)
 		return false;
@@ -1965,7 +1965,7 @@ int64 CPlayer::GetWalletOrBankDisplay()
 	return GetWalletMoney();
 }
 
-bool CPlayer::WalletTransaction(int Amount, const char *pDescription)
+bool CPlayer::WalletTransaction(int64 Amount, const char *pDescription)
 {
 	if (GameServer()->Config()->m_SvMoneyBankMode == 0 && GetAccID() >= ACC_START)
 	{
@@ -1979,7 +1979,7 @@ bool CPlayer::WalletTransaction(int Amount, const char *pDescription)
 	return true;
 }
 
-bool CPlayer::BankOrWalletTransaction(int Amount, const char *pDescription)
+bool CPlayer::BankOrWalletTransaction(int64 Amount, const char *pDescription)
 {
 	// if logged in, use bank money, otherwise try wallet
 	return BankTransaction(Amount, pDescription) || WalletTransaction(Amount, pDescription);
