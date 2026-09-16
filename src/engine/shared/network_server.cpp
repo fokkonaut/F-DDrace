@@ -285,6 +285,13 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 
 					if (AcceptConnect)
 					{
+						if (Connlimit(Addr))
+						{
+							const char LimitMsg[] = "Too many connections in a short time";
+							SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
+							continue; // failed to add client
+						}
+
 						if (Slot != -1)
 						{
 							// reset netconn and process rejoin
@@ -293,13 +300,6 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 						}
 						else
 						{
-							if (Connlimit(Addr))
-							{
-								const char LimitMsg[] = "Too many connections in a short time";
-								SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
-								continue; // failed to add client
-							}
-
 							// check if there are free slots
 							if(m_NumClients >= m_MaxClients)
 							{
