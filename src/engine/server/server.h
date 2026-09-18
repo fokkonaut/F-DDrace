@@ -268,6 +268,8 @@ public:
 			char m_aCommand[512];
 		};
 		int m_DnsblState;
+		int64_t m_DnsblRetryTime;
+		int m_DnsblRetryDelay;
 		std::shared_ptr<IJob> m_pDnsblLookup; // CDnsblLookup or CHostLookup
 
 		class CPgscLookup : public IJob

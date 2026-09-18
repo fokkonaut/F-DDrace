@@ -285,14 +285,18 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken, bool *pSevendown,
 
 					if (AcceptConnect)
 					{
+						const bool Reconnect = Slot != -1;
 						if (Connlimit(Addr))
 						{
-							const char LimitMsg[] = "Too many connections in a short time";
-							SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
+							if(!Reconnect)
+							{
+								const char LimitMsg[] = "Too many connections in a short time";
+								SendControlMsg(&Addr, m_RecvUnpacker.m_Data.m_ResponseToken, 0, NET_CTRLMSG_CLOSE, LimitMsg, sizeof(LimitMsg), *pSevendown, Socket, SecurityToken);
+							}
 							continue; // failed to add client
 						}
 
-						if (Slot != -1)
+						if (Reconnect)
 						{
 							// reset netconn and process rejoin
 							m_aSlots[Slot].m_Connection.DirectInit(&Addr, &m_RecvUnpacker.m_Data, SecurityToken, *pSevendown, Socket);

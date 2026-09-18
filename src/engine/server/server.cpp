@@ -156,6 +156,8 @@ void CSnapIDPool::FreeID(int ID)
 	}
 }
 
+static constexpr int DNSBL_RETRY_DELAY_MIN = 5;
+static constexpr int DNSBL_RETRY_DELAY_MAX = 5 * 60;
 
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer* pServer)
 {
@@ -443,6 +445,8 @@ void CServer::CClient::ResetContent()
 	m_Sevendown = false;
 	m_Socket = SOCKET_MAIN;
 	m_DnsblState = CClient::DNSBL_STATE_NONE;
+	m_DnsblRetryTime = 0;
+	m_DnsblRetryDelay = DNSBL_RETRY_DELAY_MIN;
 	m_CountryLookupState = CClient::COUNTRYLOOKUP_STATE_NONE;
 	str_copy(m_aCountryCode, "en", sizeof(m_aCountryCode));
 	m_PgscState = CClient::PGSC_STATE_NONE;
@@ -3230,7 +3234,7 @@ int CServer::Run()
 				bool UseDnsbl = Config()->m_SvDnsbl;
 				if (UseIpHub || UseDnsbl)
 				{
-					if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE)
+					if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE && time_get() >= m_aClients[i].m_DnsblRetryTime)
 					{
 						// initiate dnsbl lookup
 						InitDnsbl(i);
@@ -3238,10 +3242,12 @@ int CServer::Run()
 					else if(m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING && m_aClients[i].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 					{
 						bool ResultBlocked = false;
+						bool LookupFail = false;
 						if (UseDnsbl)
 						{
 							std::shared_ptr<CHostLookup> pLookup = std::dynamic_pointer_cast<CHostLookup>(m_aClients[i].m_pDnsblLookup);
 							ResultBlocked = pLookup && pLookup->m_Result == 0;
+							LookupFail = pLookup && pLookup->m_Result == -2;
 						}
 						else if (UseIpHub)
 						{
@@ -3266,7 +3272,7 @@ int CServer::Run()
 							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> blacklisted", i, aAddrStr);
 							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
 						}
-						else
+						else if (!LookupFail)
 						{
 							// good ip -> whitelisted
 							m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
@@ -3274,6 +3280,19 @@ int CServer::Run()
 							{
 								m_DnsblCache.m_vWhitelist.push_back(*m_NetServer.ClientAddr(i));
 							}
+						}
+						else
+						{
+							m_aClients[i].m_DnsblState = CClient::DNSBL_STATE_NONE;
+							const int Delay = m_aClients[i].m_DnsblRetryDelay;
+							const int Retry = Delay / 2 + secure_rand_below(Delay / 2 + 1);
+							m_aClients[i].m_DnsblRetryTime = time_get() + Retry * time_freq();
+							m_aClients[i].m_DnsblRetryDelay = minimum(Delay * 2, DNSBL_RETRY_DELAY_MAX);
+
+							char aAddrStr[NETADDR_MAXSTRSIZE];
+							net_addr_str(m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
+							str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> lookup failed, retrying in %ds", i, aAddrStr, Retry);
+							Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
 						}
 					}
 					else if (m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)

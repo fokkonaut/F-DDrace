@@ -985,7 +985,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 
 	e = getaddrinfo(host, NULL, &hints, &result);
 	if(e != 0 || !result)
-		return -1;
+		return e == EAI_NONAME ? -1 : -2;
 
 	sockaddr_to_netaddr(result->ai_addr, addr);
 	freeaddrinfo(result);
@@ -3639,6 +3639,34 @@ void secure_random_fill(void *bytes, unsigned length)
 		dbg_break();
 	}
 #endif
+}
+
+// From https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2.
+static unsigned int find_next_power_of_two_minus_one(unsigned int n)
+{
+	n--;
+	n |= n >> 1;
+	n |= n >> 2;
+	n |= n >> 4;
+	n |= n >> 8;
+	n |= n >> 16;
+	return n;
+}
+
+int secure_rand_below(int below)
+{
+	unsigned int mask = find_next_power_of_two_minus_one(below);
+	dbg_assert(below > 0, "below must be positive");
+	while(true)
+	{
+		unsigned int n;
+		secure_random_fill(&n, sizeof(n));
+		n &= mask;
+		if((int)n < below)
+		{
+			return n;
+		}
+	}
 }
 
 void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length)

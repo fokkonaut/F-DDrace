@@ -767,7 +767,8 @@ int net_init();
 		NETADDR struct with the recieved details.
 
 	Returns:
-		0 on success.
+		* @return `0` on success, `-1` if the hostname does not exist, `-2` if the
+ 		* lookup failed.
 */
 int net_host_lookup(const char *hostname, NETADDR *addr, int types);
 
@@ -2196,6 +2197,18 @@ int secure_random_init();
 		length - Length of the buffer.
 */
 void secure_random_fill(void *bytes, unsigned length);
+
+/**
+ * Returns a random nonnegative integer below the given number,
+ * with a uniform distribution.
+ *
+ * @ingroup Secure-Random
+ *
+ * @param below Upper limit (exclusive) of integers to return.
+ *
+ * @return Random nonnegative below the given number.
+ */
+int secure_rand_below(int below);
 
 /*
 	Function: str_next_token
