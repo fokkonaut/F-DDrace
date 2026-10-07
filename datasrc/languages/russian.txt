@@ -546,7 +546,7 @@ Map Designs
 == Дизайны карты
 
 If you have your dummy connected, you need to reconnect it after the design change so it can get back it's state.
-== Если у вас подключен манекен, вам нужно переподключить его после изменения дизайна, чтобы он вернулся в свое состояние.
+== Если у вас подключен дамми, вам нужно переподключить его после изменения дизайна, чтобы он вернулся в свое состояние.
 
 You can set one of the following designs by using '/design <name>':
 == Вы можете установить один из следующих дизайнов, используя '/design <имя>':
@@ -759,7 +759,7 @@ This server has an initial chat delay, you will need to wait %d seconds before t
 == '%s' повторно присоединился к текущей сессии
 
 [WARNING] You need to reconnect your dummy after the design change is done, so it can get back it's old state.
-== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно переподключить ваш манекен после завершения изменения дизайна, чтобы он вернулся в свое прежнее состояние.
+== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно переподключить ваш дамми после завершения изменения дизайна, чтобы он вернулся в свое прежнее состояние.
 
 '%s' has left the game (%s)
 == '%s' покинул игру (%s)
@@ -801,7 +801,7 @@ You can't kick yourself
 == Вы не можете выгнать себя
 
 You can't kick dummies
-== Вы не можете выгнать манекены
+== Вы не можете выгнать дамми
 
 You can't kick authorized players
 == Вы не можете выгнать авторизованных игроков
@@ -822,7 +822,7 @@ You can't move yourself
 == Вы не можете переместить себя
 
 You can't set dummies to spectator
-== Вы не можете установить манекены как зрители
+== Вы не можете перевести дамми в режим наблюдения
 
 You can only move your team member to spectators
 == Вы можете переместить только члена своей команды в зрители
@@ -1254,10 +1254,10 @@ Police is searching you because of illegal bonus use
 == [ПРЕДУПРЕЖДЕНИЕ] Использование бонуса в зоне без бонусов незаконно
 
 [WARNING] You need to enter this teleporter with your dummy within 30 seconds in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим манекеном в течение 30 секунд, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Вам нужно войти в этот телепорт с вашим дамми в течение 30 секунд, чтобы безопасно переместиться
 
 [WARNING] Your dummy has to be alive in order to get moved safely
-== [ПРЕДУПРЕЖДЕНИЕ] Ваш манекен должен быть жив, чтобы безопасно переместиться
+== [ПРЕДУПРЕЖДЕНИЕ] Ваш дамми должен быть жив, чтобы безопасно переместиться
 
 '%s' has been moved to another map
 == '%s' был перемещен на другую карту
@@ -2191,19 +2191,19 @@ Using this item you can redirect projectiles by hitting them with your hammer.
 == Используя этот предмет, вы можете отражать снаряды ударом молота.
 
 You can't currently send chat messages because the server is being flooded
-== 
+== Сейчас вы не можете отправлять сообщения в чат, поскольку сервер подвергается флуду
 
 You are now using the ban picker
-== 
+== Выбор игрока для бана включён
 
 You are no longer using the ban picker
-== 
+== Выбор игрока для бана выключен
 
 No weapon fix enabled (only for clients without patch)
-== 
+== Фикс вылета без оружия включён (для клиентов без патча)
 
 No weapon fix disabled
-== 
+== Фикс вылета без оружия выключен
 
 No weapon fix (only for clients without patch)
-== 
+== Фикс вылета без оружия (для клиентов без патча)
